@@ -1,0 +1,13 @@
+= Zen
+
+The reference compositor implementation of Zigen protocol
+
+== Build & Install
+
+[source, shell]
+----
+$ git clone https://github.com/zigen-project/zen.git
+$ cd zen
+$ meson build
+$ ninja -C build install
+----
