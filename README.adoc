@@ -11,3 +11,7 @@ $ cd zen
 $ meson build
 $ ninja -C build install
 ----
+
+== Contributing
+
+See link:./docs/CONTRIBUTING.adoc[contributing doc].
