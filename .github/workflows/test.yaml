@@ -1,29 +1,62 @@
 name: meson_test
 
 on:
-  - push
-  - pull_request
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          sudo apt-get update &&
+          sudo apt-get install libwayland-dev libglew-dev libglfw3-dev
 
       - uses: actions/setup-python@v1
         with:
           python-version: "3.x"
 
-      - run: pip install meson ninja
+      - name: Install meson & ninja
+        run: pip install meson ninja
 
-      - run: meson build
+      - uses: actions/checkout@v2
+        with:
+          repository: zigen-project/zigen
+          path: zigen
+
+      - uses: actions/checkout@v2
+        with:
+          path: main
+
+      - name: Build Zigen
+        run: meson --prefix=$(pwd)/target build && ninja -C build install
+        working-directory: ./zigen
         env:
           CC: clang
-
-      - run: ninja -C build test
 
       - uses: actions/upload-artifact@v1
         if: failure()
         with:
-          name: Test_Log
+          name: zigen-build-log
+          path: zigen/build/meson-logs/meson-log.txt
+
+      - name: Update PKG_CONFIG_PATH
+        run: |
+          echo "PKG_CONFIG_PATH=$GITHUB_WORKSPACE/zigen/target/lib/x86_64-linux-gnu/pkgconfig" >> $GITHUB_ENV
+
+      - name: Test Zen
+        run: meson build && ninja -C build test
+        working-directory: ./main
+        env:
+          CC: clang
+
+      - uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: zen-test-log
           path: main/build/meson-logs/testlog.txt
