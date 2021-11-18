@@ -9,9 +9,7 @@ extern "C" {
 #include <time.h>
 
 struct zen_output {
-  struct zen_compositor *compositor;
-
-  uint32_t refresh;
+  void (*repaint)(struct zen_output *output);
 };
 
 struct zen_output *zen_output_create(struct zen_compositor *compositor);

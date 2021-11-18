@@ -1,4 +1,5 @@
 deps_glfw_backend = [
+  dep_oepngl_renderer_public,
   dep_libzen_private,
   dep_glfw3,
   dep_glew,

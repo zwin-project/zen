@@ -25,4 +25,5 @@ dep_libzen_private = declare_dependency(
   include_directories: [ include_directories('.'), public_inc ],
 )
 
+subdir('opengl-renderer')
 subdir('backend-glfw')
