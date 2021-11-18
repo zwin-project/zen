@@ -12,6 +12,13 @@ $ meson build
 $ ninja -C build install
 ----
 
+== Run
+
+----
+$ mkdir /tmp/.xdg
+$ XDG_RUNTIME_DIR=/tmp/.xdg zen
+----
+
 == Contributing
 
 See link:./docs/CONTRIBUTING.adoc[contributing doc].
