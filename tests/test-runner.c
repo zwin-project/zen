@@ -18,24 +18,28 @@ static int is_atty = 0;
 #define RED "\033[31m"
 #define GREEN "\033[32m"
 
-static void stderr_set_color(const char *color)
+static void
+stderr_set_color(const char *color)
 {
   if (is_atty) fprintf(stderr, "%s", color);
 }
 
-static void stderr_reset_color(void)
+static void
+stderr_reset_color(void)
 {
   if (is_atty) fprintf(stderr, "\033[0m");
 }
 
-static void run_test(const struct test *t)
+static void
+run_test(const struct test *t)
 {
   t->run();
 
   exit(EXIT_SUCCESS);
 }
 
-int main()
+int
+main()
 {
   const struct test *t;
   pid_t pid;
