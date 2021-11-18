@@ -5,7 +5,6 @@
 
 #include "compositor.h"
 #include "output.h"
-#include "stdio.h"
 
 struct glfw_backend {
   struct zen_backend base;
