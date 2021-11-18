@@ -13,7 +13,7 @@ on_term_signal(int signal_number, void *data)
 int
 main()
 {
-  const char *socket = "z11-0";
+  const char *socket = "zigen-0";
   struct wl_display *display;
   struct wl_event_loop *loop;
   struct wl_event_source *signals[3];

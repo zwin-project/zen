@@ -1,0 +1,6 @@
+option(
+  'clients',
+  type: 'boolean',
+  value: true,
+  description: 'Sample clients',
+)

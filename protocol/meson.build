@@ -23,6 +23,6 @@ foreach proto : protocols
       output: output_file,
     )
 
-    set_variable(var_name, taregt)
+    set_variable(var_name, target)
   endforeach
 endforeach
