@@ -73,8 +73,8 @@ main()
           success = t->must_fail;
 
         stderr_set_color(success ? GREEN : RED);
-        fprintf(stderr, "test \"%s\": \texit status %d", t->name,
-                info.si_status);
+        fprintf(
+            stderr, "test \"%s\": \texit status %d", t->name, info.si_status);
         break;
 
       case CLD_KILLED:

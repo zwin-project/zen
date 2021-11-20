@@ -57,6 +57,6 @@ zen_opengl_renderer_render(struct zen_opengl_renderer* renderer)
   b += b_del;
 
   glClearColor((float)r / UINT8_MAX, ((float)g / UINT8_MAX),
-               ((float)b / UINT8_MAX), 0.0f);
+      ((float)b / UINT8_MAX), 0.0f);
   glClear(GL_COLOR_BUFFER_BIT);
 }

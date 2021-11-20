@@ -40,14 +40,15 @@ swap_timer_loop(void* data)
   if (glfwWindowShouldClose(output->window))
     wl_display_terminate(output->compositor->display);
 
-  refresh_msec = millihz_to_nsec(output->refresh) / 1000000;
-  if (timespec_get(&next_repaint, TIME_UTC) < 0)
+  if (timespec_get(&output->base.frame_time, TIME_UTC) < 0)
     zen_log("glfw output: [WARNING] failed to get current time\n");
-  timespec_add_msec(&next_repaint, &next_repaint, refresh_msec);
+
+  refresh_msec = millihz_to_nsec(output->refresh) / 1000000;
+  timespec_add_msec(&next_repaint, &output->base.frame_time, refresh_msec);
 
   wl_event_source_timer_update(output->swap_timer, refresh_msec);
 
-  zen_compositor_complete_frame(output->compositor, next_repaint);
+  zen_compositor_finish_frame(output->compositor, next_repaint);
 
   return 0;
 }
@@ -116,6 +117,7 @@ zen_output_create(struct zen_compositor* compositor)
   loop = wl_display_get_event_loop(compositor->display);
   swap_timer = wl_event_loop_add_timer(loop, swap_timer_loop, output);
 
+  timespec_get(&output->base.frame_time, TIME_UTC);
   output->base.repaint = glfw_output_repaint;
   output->compositor = compositor;
   output->renderer = renderer;

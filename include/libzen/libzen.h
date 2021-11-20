@@ -19,8 +19,8 @@ void zen_compositor_destroy(struct zen_compositor* compositor);
 
 int zen_compositor_load_backend(struct zen_compositor* compositor);
 
-void zen_compositor_complete_frame(struct zen_compositor* compositor,
-                                   struct timespec next_repaint);
+void zen_compositor_finish_frame(
+    struct zen_compositor* compositor, struct timespec next_repaint);
 
 #ifdef __cplusplus
 }

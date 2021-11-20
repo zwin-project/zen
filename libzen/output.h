@@ -9,6 +9,8 @@ extern "C" {
 #include <time.h>
 
 struct zen_output {
+  struct timespec frame_time;
+
   void (*repaint)(struct zen_output *output);
 };
 
