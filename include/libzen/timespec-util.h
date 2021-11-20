@@ -40,8 +40,8 @@
  * \param b[in] operand
  */
 static inline void
-timespec_sub(struct timespec *r, const struct timespec *a,
-             const struct timespec *b)
+timespec_sub(
+    struct timespec *r, const struct timespec *a, const struct timespec *b)
 {
   r->tv_sec = a->tv_sec - b->tv_sec;
   r->tv_nsec = a->tv_nsec - b->tv_nsec;
@@ -159,7 +159,7 @@ timespec_to_usec(const struct timespec *a)
  */
 static inline void
 timespec_to_proto(const struct timespec *a, uint32_t *tv_sec_hi,
-                  uint32_t *tv_sec_lo, uint32_t *tv_nsec)
+    uint32_t *tv_sec_lo, uint32_t *tv_nsec)
 {
   assert(a->tv_sec >= 0);
   assert(a->tv_nsec >= 0 && a->tv_nsec < NSEC_PER_SEC);
@@ -214,7 +214,7 @@ timespec_from_msec(struct timespec *a, int64_t b)
  */
 static inline void
 timespec_from_proto(struct timespec *a, uint32_t tv_sec_hi, uint32_t tv_sec_lo,
-                    uint32_t tv_nsec)
+    uint32_t tv_nsec)
 {
   a->tv_sec = ((uint64_t)tv_sec_hi << 32) + tv_sec_lo;
   a->tv_nsec = tv_nsec;

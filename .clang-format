@@ -7,3 +7,4 @@ BraceWrapping:
   AfterClass: true
   SplitEmptyRecord: false
 AlwaysBreakAfterReturnType: TopLevelDefinitions
+AlignAfterOpenBracket: DontAlign

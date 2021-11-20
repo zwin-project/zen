@@ -3,16 +3,57 @@
 #include <libzen/libzen.h>
 #include <stdio.h>
 #include <wayland-server.h>
+#include <zigen-server-protocol.h>
 
 #include "backend.h"
+#include "virtual-object.h"
+
+static void
+zgn_compositor_protocol_create_virtual_object(
+    struct wl_client *client, struct wl_resource *resource, uint32_t id)
+{
+  struct zen_compositor *compositor = wl_resource_get_user_data(resource);
+  struct zen_virtual_object *virtual_object;
+
+  virtual_object = zen_virtual_object_create(client, id, compositor);
+  if (virtual_object == NULL) {
+    zen_log("compositor: failed to create virtual object\n");
+  }
+}
+
+static const struct zgn_compositor_interface compositor_interface = {
+    .create_virtual_object = zgn_compositor_protocol_create_virtual_object,
+};
+
+static void
+zgn_compositor_bind(
+    struct wl_client *client, void *data, uint32_t version, uint32_t id)
+{
+  struct zgn_compositor *compositor = data;
+  struct wl_resource *resource;
+
+  resource = wl_resource_create(client, &zgn_compositor_interface, version, id);
+  if (resource == NULL) {
+    wl_client_post_no_memory(client);
+    zen_log("compositor: failed to create a resource\n");
+    return;
+  }
+
+  wl_resource_set_implementation(
+      resource, &compositor_interface, compositor, NULL);
+}
 
 static int
 repaint_timer_handler(void *data)
 {
+  uint32_t frame_time_msec;
   struct zen_compositor *compositor = data;
   struct zen_output *output = compositor->backend->output;
+
+  frame_time_msec = timespec_to_msec(&output->frame_time);
+
   output->repaint(output);
-  // TODO: send frame callback_done here
+  wl_signal_emit(&compositor->frame_signal, &frame_time_msec);
   return 0;
 }
 
@@ -47,21 +88,40 @@ zen_compositor_create(struct wl_display *display)
   compositor = zalloc(sizeof *compositor);
   if (compositor == NULL) {
     zen_log("compositor: failed to allcate memory\n");
-    goto out;
+    goto err;
   }
 
   loop = wl_display_get_event_loop(display);
   repaint_timer =
       wl_event_loop_add_timer(loop, repaint_timer_handler, compositor);
 
+  global = wl_global_create(
+      display, &zgn_compositor_interface, 1, compositor, zgn_compositor_bind);
+  if (global == NULL) {
+    zen_log("compositor: failed to create a compositor global\n");
+    goto err_global;
+  }
+
+  if (wl_display_init_shm(display) != 0) {
+    zen_log("compositor: failed to init shm\n");
+    goto err_shm;
+  }
+
   compositor->display = display;
+  wl_signal_init(&compositor->frame_signal);
   compositor->backend = NULL;
   compositor->repaint_timer = repaint_timer;
   compositor->repaint_window_msec = DEFAULT_REPAINT_WINDOW;
 
   return compositor;
 
-out:
+err_shm:
+  wl_global_destroy(global);
+
+err_global:
+  free(compositor);
+
+err:
   return NULL;
 }
 
@@ -74,8 +134,8 @@ zen_compositor_destroy(struct zen_compositor *compositor)
 }
 
 WL_EXPORT void
-zen_compositor_complete_frame(struct zen_compositor *compositor,
-                              struct timespec next_repaint)
+zen_compositor_finish_frame(
+    struct zen_compositor *compositor, struct timespec next_repaint)
 {
   struct timespec now;
   int64_t next_msec;
