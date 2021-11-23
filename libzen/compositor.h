@@ -9,6 +9,7 @@
 
 struct zen_compositor {
   struct wl_display *display;
+  struct wl_global *global;
 
   struct wl_signal frame_signal;
 

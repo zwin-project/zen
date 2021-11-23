@@ -5,8 +5,11 @@
 #include <string.h>
 #include <wayland-server.h>
 
+#include "opengl.h"
+
 struct zen_opengl_renderer {
   struct zen_compositor* compositor;
+  struct zen_opengl* opengl;
 
   struct zen_opengl_renderer_camera* cameras;
   uint32_t camera_count;
@@ -17,6 +20,7 @@ WL_EXPORT struct zen_opengl_renderer*
 zen_opengl_renderer_create(struct zen_compositor* compositor)
 {
   struct zen_opengl_renderer* renderer;
+  struct zen_opengl* opengl;
 
   renderer = zalloc(sizeof *renderer);
   if (renderer == NULL) {
@@ -24,12 +28,22 @@ zen_opengl_renderer_create(struct zen_compositor* compositor)
     goto err;
   }
 
+  opengl = zen_opengl_create(compositor);
+  if (opengl == NULL) {
+    zen_log("opengl renderer: failed to create zen opengl\n");
+    goto err_opengl;
+  }
+
   renderer->compositor = compositor;
+  renderer->opengl = opengl;
   renderer->cameras = NULL;
   renderer->camera_count = 0;
   renderer->camera_allocate = 0;
 
   return renderer;
+
+err_opengl:
+  free(renderer);
 
 err:
   return NULL;
@@ -39,6 +53,7 @@ WL_EXPORT void
 zen_opengl_renderer_destroy(struct zen_opengl_renderer* renderer)
 {
   if (renderer->camera_allocate > 0) free(renderer->cameras);
+  zen_opengl_destroy(renderer->opengl);
   free(renderer);
 }
 
