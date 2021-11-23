@@ -2,10 +2,15 @@
 
 #include <GL/glew.h>
 #include <libzen/libzen.h>
+#include <string.h>
 #include <wayland-server.h>
 
 struct zen_opengl_renderer {
   struct zen_compositor* compositor;
+
+  struct zen_opengl_renderer_camera* cameras;
+  uint32_t camera_count;
+  uint32_t camera_allocate;
 };
 
 WL_EXPORT struct zen_opengl_renderer*
@@ -20,6 +25,9 @@ zen_opengl_renderer_create(struct zen_compositor* compositor)
   }
 
   renderer->compositor = compositor;
+  renderer->cameras = NULL;
+  renderer->camera_count = 0;
+  renderer->camera_allocate = 0;
 
   return renderer;
 
@@ -30,33 +38,48 @@ err:
 WL_EXPORT void
 zen_opengl_renderer_destroy(struct zen_opengl_renderer* renderer)
 {
+  if (renderer->camera_allocate > 0) free(renderer->cameras);
   free(renderer);
 }
 
 WL_EXPORT void
-zen_opengl_renderer_set_target()
-{}
+zen_opengl_renderer_set_cameras(struct zen_opengl_renderer* renderer,
+    struct zen_opengl_renderer_camera* cameras, uint32_t count)
+{
+  size_t size = sizeof(struct zen_opengl_renderer_camera) * count;
+  if (count > renderer->camera_allocate) {
+    free(renderer->cameras);
+    renderer->cameras = malloc(size);
+    renderer->camera_allocate = count;
+  }
+  memcpy(renderer->cameras, cameras, size);
+  renderer->camera_count = count;
+}
 
 WL_EXPORT void
 zen_opengl_renderer_render(struct zen_opengl_renderer* renderer)
 {
-  UNUSED(renderer);
-  static uint8_t r = 0;
-  static uint8_t g = 0;
-  static uint8_t b = 0;
-  static uint8_t r_del = 1;
-  static uint8_t g_del = 5;
-  static uint8_t b_del = 7;
+  struct zen_opengl_renderer_camera* camera = renderer->cameras;
 
-  r_del = r == UINT8_MAX ? -1 : r == 0 ? 1 : r_del;
-  g_del = g == 250 ? -5 : g == 0 ? 5 : g_del;
-  b_del = b == 252 ? -7 : b == 0 ? 7 : b_del;
+  if (renderer->camera_count == 0) {
+    static bool warned = false;
+    if (!warned)
+      zen_log(
+          "opengl renderer: [WARNING] tried to render without any camera\n");
+    warned = true;
+    return;
+  }
 
-  r += r_del;
-  g += g_del;
-  b += b_del;
-
-  glClearColor((float)r / UINT8_MAX, ((float)g / UINT8_MAX),
-      ((float)b / UINT8_MAX), 0.0f);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT);
+  for (; camera < renderer->cameras + renderer->camera_count; camera++) {
+    glBindFramebuffer(GL_FRAMEBUFFER, camera->framebuffer_id);
+    glViewport(camera->viewport.x, camera->viewport.y, camera->viewport.width,
+        camera->viewport.height);
+    // TODO: rendering
+  }
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  renderer->camera_count = 0;
 }

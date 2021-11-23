@@ -1,6 +1,6 @@
 = Zen
 
-The reference compositor implementation of Zigen protocol
+The reference compositor implementation of zigen protocol
 
 == Build & Install
 
@@ -11,6 +11,14 @@ $ cd zen
 $ meson build
 $ ninja -C build install
 ----
+
+=== How to install `cglm`
+
+Please refer to https://github.com/recp/cglm
+
+=== How to install `zigen`
+
+Please refer to https://github.com/zigen-project/zigen
 
 == Run
 

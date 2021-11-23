@@ -1,5 +1,6 @@
 #include "output.h"
 
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <libzen/libzen.h>
 #include <time.h>
@@ -8,21 +9,74 @@
 #include "compositor.h"
 #include "opengl-renderer/opengl-renderer.h"
 
+// clang-format off
+
+// Distance unit: meter
+// IPD 62 mm
+// eye height: 1500 mm
+#define LEFT_EYE_VIEW {           \
+  {   1.0f,  0.0f, 0.0f, 0.0f},   \
+  {   0.0f,  1.0f, 0.0f, 0.0f},   \
+  {   0.0f,  0.0f, 1.0f, 0.0f},   \
+  { 0.031f, -1.5f, 0.0f, 1.0f}}
+
+#define RIGHT_EYE_VIEW {          \
+  {   1.0f,  0.0f, 0.0f, 0.0f},   \
+  {   0.0f,  1.0f, 0.0f, 0.0f},   \
+  {   0.0f,  0.0f, 1.0f, 0.0f},   \
+  {-0.031f, -1.5f, 0.0f, 1.0f}}
+
+// far clip: 1000, near clip: 0.001, field of view: 120° (60° each side), right handed
+#define EYE_PROJECTION {                          \
+  {0.577f,   0.0f, 0.0f,                 0.0f},   \
+  {  0.0f, 0.577f, 0.0f,                 0.0f},   \
+  {  0.0f,   0.0f, -1.000002000002f,    -1.0f},   \
+  {  0.0f,   0.0f, -0.002000002000002f,  0.0f}}
+// clang-format on
+
 struct glfw_output {
   struct zen_output base;
   struct zen_compositor* compositor;
   struct zen_opengl_renderer* renderer;
 
   GLFWwindow* window;
+  uint32_t width;
+  uint32_t height;
 
   uint32_t refresh;  // milli hz
   struct wl_event_source* swap_timer;
+
+  struct zen_opengl_renderer_camera eyes[2];  // [left, right]
 };
+
+static void
+glfw_output_set_window_size(
+    struct glfw_output* output, uint32_t width, uint32_t height)
+{
+  uint32_t x, y, l;
+  if (output->width == width && output->height == height) return;
+  output->width = width;
+  output->height = height;
+  l = MIN(width / 2, height);
+  x = width / 2 - l;
+  y = (height - l) / 2;
+
+  output->eyes[0].viewport.height = l;
+  output->eyes[0].viewport.width = l;
+  output->eyes[0].viewport.x = x;
+  output->eyes[0].viewport.y = y;
+  output->eyes[1].viewport.height = l;
+  output->eyes[1].viewport.width = l;
+  output->eyes[1].viewport.x = x + l;
+  output->eyes[1].viewport.y = y;
+}
 
 static void
 glfw_output_repaint(struct zen_output* zen_output)
 {
   struct glfw_output* output = (struct glfw_output*)zen_output;
+  zen_opengl_renderer_set_cameras(
+      output->renderer, output->eyes, ARRAY_LENGTH(output->eyes));
   zen_opengl_renderer_render(output->renderer);
   // TODO: check if the rendering is in time.
 }
@@ -33,15 +87,19 @@ swap_timer_loop(void* data)
   struct glfw_output* output = data;
   struct timespec next_repaint;
   int64_t refresh_msec;
+  int width, height;
 
   glfwSwapBuffers(output->window);
+
+  if (timespec_get(&output->base.frame_time, TIME_UTC) < 0)
+    zen_log("glfw output: [WARNING] failed to get current time\n");
 
   glfwPollEvents();
   if (glfwWindowShouldClose(output->window))
     wl_display_terminate(output->compositor->display);
 
-  if (timespec_get(&output->base.frame_time, TIME_UTC) < 0)
-    zen_log("glfw output: [WARNING] failed to get current time\n");
+  glfwGetWindowSize(output->window, &width, &height);
+  glfw_output_set_window_size(output, width, height);
 
   refresh_msec = millihz_to_nsec(output->refresh) / 1000000;
   timespec_add_msec(&next_repaint, &output->base.frame_time, refresh_msec);
@@ -82,11 +140,17 @@ zen_output_create(struct zen_compositor* compositor)
   struct glfw_output* output;
   GLFWwindow* window;
   uint32_t refresh;
+  uint32_t initial_width = 640;
+  uint32_t initial_height = 320;
   struct wl_event_loop* loop;
   struct wl_event_source* swap_timer;
   struct zen_opengl_renderer* renderer;
+  mat4 right_eye_view = RIGHT_EYE_VIEW;
+  mat4 left_eye_view = LEFT_EYE_VIEW;
+  mat4 eye_projection = EYE_PROJECTION;
 
-  window = glfwCreateWindow(640, 480, "Zen Compositor", NULL, NULL);
+  window = glfwCreateWindow(
+      initial_width, initial_height, "Zen Compositor", NULL, NULL);
   if (window == NULL) {
     zen_log("glfw output: failed to create a window\n");
     goto err;
@@ -94,9 +158,16 @@ zen_output_create(struct zen_compositor* compositor)
 
   glfwMakeContextCurrent(window);
 
+  GLenum glewError = glewInit();
+  if (glewError != GLEW_OK) {
+    zen_log("glfw output: failed to initialize glew: %s\n",
+        glewGetErrorString(glewError));
+    goto err_glew;
+  }
+
   renderer = zen_opengl_renderer_create(compositor);
   if (renderer == NULL) {
-    zen_log("glfw backend: failed to create renderer\n");
+    zen_log("glfw output: failed to create renderer\n");
     goto err_renderer;
   }
 
@@ -122,8 +193,13 @@ zen_output_create(struct zen_compositor* compositor)
   output->compositor = compositor;
   output->renderer = renderer;
   output->window = window;
+  glfw_output_set_window_size(output, initial_width, initial_height);
   output->refresh = refresh;
   output->swap_timer = swap_timer;
+  glm_mat4_copy(left_eye_view, output->eyes[0].view_matrix);
+  glm_mat4_copy(eye_projection, output->eyes[0].projection_matrix);
+  glm_mat4_copy(right_eye_view, output->eyes[1].view_matrix);
+  glm_mat4_copy(eye_projection, output->eyes[1].projection_matrix);
 
   // start swap loop
   swap_timer_loop(output);
@@ -134,6 +210,7 @@ err_output:
   zen_opengl_renderer_destroy(renderer);
 
 err_renderer:
+err_glew:
   glfwDestroyWindow(window);
 
 err:
