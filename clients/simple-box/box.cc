@@ -7,6 +7,7 @@ Box::Box(App *app)
 {
   virtual_object_ =
       new ZgnVirtualObject<Box>(this, app->zgn_window()->compositor());
+  opengl_ = new ZgnOpenGL(app->zgn_window()->opengl());
 }
 
 Box::~Box() { delete virtual_object_; }

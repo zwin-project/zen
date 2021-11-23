@@ -9,7 +9,7 @@
 #include "virtual-object.h"
 
 static void
-zgn_compositor_protocol_create_virtual_object(
+zen_compositor_protocol_create_virtual_object(
     struct wl_client *client, struct wl_resource *resource, uint32_t id)
 {
   struct zen_compositor *compositor = wl_resource_get_user_data(resource);
@@ -22,14 +22,14 @@ zgn_compositor_protocol_create_virtual_object(
 }
 
 static const struct zgn_compositor_interface compositor_interface = {
-    .create_virtual_object = zgn_compositor_protocol_create_virtual_object,
+    .create_virtual_object = zen_compositor_protocol_create_virtual_object,
 };
 
 static void
-zgn_compositor_bind(
+zen_compositor_bind(
     struct wl_client *client, void *data, uint32_t version, uint32_t id)
 {
-  struct zgn_compositor *compositor = data;
+  struct zen_compositor *compositor = data;
   struct wl_resource *resource;
 
   resource = wl_resource_create(client, &zgn_compositor_interface, version, id);
@@ -96,7 +96,7 @@ zen_compositor_create(struct wl_display *display)
       wl_event_loop_add_timer(loop, repaint_timer_handler, compositor);
 
   global = wl_global_create(
-      display, &zgn_compositor_interface, 1, compositor, zgn_compositor_bind);
+      display, &zgn_compositor_interface, 1, compositor, zen_compositor_bind);
   if (global == NULL) {
     zen_log("compositor: failed to create a compositor global\n");
     goto err_global;
@@ -108,6 +108,7 @@ zen_compositor_create(struct wl_display *display)
   }
 
   compositor->display = display;
+  compositor->global = global;
   wl_signal_init(&compositor->frame_signal);
   compositor->backend = NULL;
   compositor->repaint_timer = repaint_timer;
@@ -130,6 +131,7 @@ zen_compositor_destroy(struct zen_compositor *compositor)
 {
   if (compositor->backend) zen_backend_destroy(compositor->backend);
   wl_event_source_remove(compositor->repaint_timer);
+  wl_global_destroy(compositor->global);
   free(compositor);
 }
 

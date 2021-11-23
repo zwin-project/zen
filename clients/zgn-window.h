@@ -5,6 +5,7 @@
 #include <string.h>
 #include <wayland-client.h>
 #include <zigen-client-protocol.h>
+#include <zigen-opengl-client-protocol.h>
 
 template <class T>
 class ZgnWindow
@@ -22,6 +23,7 @@ class ZgnWindow
   inline struct wl_registry *registry();
   inline struct zgn_compositor *compositor();
   inline struct wl_shm *shm();
+  inline struct zgn_opengl *opengl();
 
  private:
   T *delegate_;
@@ -29,6 +31,7 @@ class ZgnWindow
   struct wl_registry *registry_;
   struct zgn_compositor *compositor_;
   struct wl_shm *shm_;
+  struct zgn_opengl *opengl_;
 };
 
 template <class T>
@@ -95,7 +98,8 @@ ZgnWindow<T>::Connect(const char *socket)
   wl_display_dispatch(display_);
   wl_display_roundtrip(display_);
 
-  if (compositor_ == nullptr || shm_ == nullptr) goto err_globals;
+  if (compositor_ == nullptr || shm_ == nullptr || opengl_ == nullptr)
+    goto err_globals;
 
   return true;
 
@@ -119,6 +123,9 @@ ZgnWindow<T>::GlobalRegistryHandler(struct wl_registry *registry, uint32_t id,
         registry, id, &zgn_compositor_interface, version);
   } else if (strcmp(interface, "wl_shm") == 0) {
     shm_ = (wl_shm *)wl_registry_bind(registry, id, &wl_shm_interface, version);
+  } else if (strcmp(interface, "zgn_opengl") == 0) {
+    opengl_ = (zgn_opengl *)wl_registry_bind(
+        registry, id, &zgn_opengl_interface, version);
   }
 }
 
@@ -181,6 +188,13 @@ inline struct wl_shm *
 ZgnWindow<T>::shm()
 {
   return shm_;
+}
+
+template <class T>
+inline struct zgn_opengl *
+ZgnWindow<T>::opengl()
+{
+  return opengl_;
 }
 
 #endif  //  ZGN_CLIENT_WINDOW_H
