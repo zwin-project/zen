@@ -1,25 +1,20 @@
 #include "box.h"
 
-#include <stdio.h>
-#include <time.h>
+#include <zukou.h>
 
-Box::Box(App *app)
+Box::Box(zukou::App *app) : VirtualObject(app)
 {
-  virtual_object_ =
-      new ZgnVirtualObject<Box>(this, app->zgn_window()->compositor());
-  opengl_ = new ZgnOpenGL(app->zgn_window()->opengl());
+  component_ = new zukou::OpenGLComponent(app, this);
 }
-
-Box::~Box() { delete virtual_object_; }
 
 void
 Box::Frame(uint32_t time)
 {
   (void)time;
   static int c = 0;
-
-  // Run loop for 300 frames
-  if (c < 300) virtual_object()->NextFrame();
-
+  if (c < 300)
+    this->NextFrame();
+  else
+    this->Commit();
   c++;
 }

@@ -1,11 +1,17 @@
-#include "app.h"
+#include "box.h"
+#include "zukou.h"
 
 int
 main()
 {
-  App *app = new App();
+  zukou::App *app = new zukou::App();
 
-  if (app->Start())
+  app->Connect("zigen-0");
+
+  Box *box = new Box(app);
+  box->NextFrame();
+
+  if (app->Run())
     return EXIT_SUCCESS;
   else
     return EXIT_FAILURE;

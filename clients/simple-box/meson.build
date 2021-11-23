@@ -1,5 +1,4 @@
 srcs_simple_box = [
-  'app.cc',
   'box.cc',
   'main.cc',
   zigen_protocol_c,
@@ -11,7 +10,7 @@ srcs_simple_box = [
 ]
 
 deps_simple_box = [
-  dep_wayland_client,
+  dep_libzukou_public,
 ]
 
 executable(
@@ -19,5 +18,5 @@ executable(
   srcs_simple_box,
   install: true,
   dependencies: deps_simple_box,
-  include_directories: client_inc,
+  include_directories: public_inc,
 )
