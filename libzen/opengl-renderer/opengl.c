@@ -4,6 +4,8 @@
 #include <zigen-opengl-server-protocol.h>
 
 #include "compositor.h"
+#include "opengl-component.h"
+#include "virtual-object.h"
 
 WL_EXPORT void zen_opengl_destroy(struct zen_opengl* opengl);
 
@@ -18,12 +20,19 @@ zen_opengl_protocol_destroy(
 static void
 zen_opengl_protocol_create_opengl_component(struct wl_client* client,
     struct wl_resource* resource, uint32_t id,
-    struct wl_resource* virtual_object)
+    struct wl_resource* virtual_object_resource)
 {
-  UNUSED(client);
   UNUSED(resource);
-  UNUSED(id);
-  UNUSED(virtual_object);
+  struct zen_virtual_object* virtual_object;
+  struct zen_opengl_component* component;
+
+  virtual_object = wl_resource_get_user_data(virtual_object_resource);
+
+  component = zen_opengl_component_create(client, id, virtual_object);
+  if (component == NULL) {
+    zen_log("zen opengl: failed to create a opengl component\n");
+    return;
+  }
 }
 
 static void
