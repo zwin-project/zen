@@ -31,9 +31,14 @@ jobs:
 
       - uses: actions/checkout@v2
         with:
+          repository: recp/cglm
+          path: cglm
+
+      - uses: actions/checkout@v2
+        with:
           path: main
 
-      - name: Build Zigen
+      - name: Build zigen
         run: meson --prefix=$(pwd)/target build && ninja -C build install
         working-directory: ./zigen
         env:
@@ -45,11 +50,26 @@ jobs:
           name: zigen-build-log
           path: zigen/build/meson-logs/meson-log.txt
 
+      - name: Build cglm
+        run: meson --prefix=$(pwd)/target build && ninja -C build install
+        working-directory: ./cglm
+        env:
+          CC: clang
+
+      - uses: actions/upload-artifact@v1
+        if: failure()
+        with:
+          name: cglm-build-log
+          path: cglm/build/meson-logs/meson-log.txt
+
       - name: Update PKG_CONFIG_PATH
         run: |
-          echo "PKG_CONFIG_PATH=$GITHUB_WORKSPACE/zigen/target/lib/x86_64-linux-gnu/pkgconfig" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=$GITHUB_WORKSPACE/$CGLM_PKGCONFIG:$GITHUB_WORKSPACE/$ZIGEN_PKGCONFIG" >> $GITHUB_ENV
+        env:
+          ZIGEN_PKGCONFIG: zigen/target/lib/x86_64-linux-gnu/pkgconfig
+          CGLM_PKGCONFIG: cglm/target/lib/x86_64-linux-gnu/pkgconfig
 
-      - name: Test Zen
+      - name: Test zen
         run: meson build && ninja -C build test
         working-directory: ./main
         env:

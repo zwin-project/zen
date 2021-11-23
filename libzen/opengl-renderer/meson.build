@@ -1,6 +1,7 @@
 deps_oepngl_renderer = [
-  dep_libzen_private,
+  dep_cglm,
   dep_glew,
+  dep_libzen_private,
 ]
 
 srcs_opengl_renderer = [

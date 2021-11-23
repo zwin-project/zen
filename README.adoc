@@ -1,4 +1,4 @@
-= Zen
+= zen
 
 The reference compositor implementation of zigen protocol
 
