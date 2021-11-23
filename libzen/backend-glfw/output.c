@@ -150,7 +150,7 @@ zen_output_create(struct zen_compositor* compositor)
   mat4 eye_projection = EYE_PROJECTION;
 
   window = glfwCreateWindow(
-      initial_width, initial_height, "Zen Compositor", NULL, NULL);
+      initial_width, initial_height, "zen compositor", NULL, NULL);
   if (window == NULL) {
     zen_log("glfw output: failed to create a window\n");
     goto err;

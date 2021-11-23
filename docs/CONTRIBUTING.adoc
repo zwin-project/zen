@@ -1,4 +1,4 @@
-= Contributing to Zen
+= Contributing to zen
 
 == How to create a Pull Request
 
