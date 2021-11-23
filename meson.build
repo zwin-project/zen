@@ -19,6 +19,7 @@ dep_wayland_scanner = dependency('wayland-scanner', version: '>= 1.14.91')
 dep_glfw3 = dependency('glfw3')
 dep_glew = dependency('glew')
 dep_zgn_protocol = dependency('zigen-protocols')
+dep_cglm = dependency('cglm')
 
 subdir('protocol')
 subdir('libzen')

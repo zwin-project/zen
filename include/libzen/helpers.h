@@ -13,6 +13,14 @@ extern "C" {
 #define ARRAY_LENGTH(a) (sizeof(a) / sizeof(a)[0])
 #endif
 
+#ifndef MAX
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#endif
+
+#ifndef MIN
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#endif
+
 #ifndef container_of
 #define container_of(ptr, type, member)                    \
   ({                                                       \
