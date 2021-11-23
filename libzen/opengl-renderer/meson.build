@@ -6,6 +6,7 @@ deps_oepngl_renderer = [
 
 srcs_opengl_renderer = [
   'opengl.c',
+  'opengl-component.c',
   'opengl-renderer.c',
   zigen_opengl_protocol_c,
   zigen_opengl_server_protocol_h,
