@@ -2,7 +2,7 @@ deps_glfw_backend = [
   dep_cglm,
   dep_glfw3,
   dep_glew,
-  dep_libzen_public,
+  dep_libzen_compositor_public,
   dep_oepngl_renderer_public,
 ]
 
@@ -12,7 +12,7 @@ srcs_glfw_backend = [
 ]
 
 lib_glfw_backend = static_library(
-  'glfw-backend',
+  'zen-glfw-backend',
   srcs_glfw_backend,
   install: false,
   dependencies: deps_glfw_backend,

@@ -1,6 +1,6 @@
 #include "opengl.h"
 
-#include <libzen/libzen.h>
+#include <libzen-compositor/libzen-compositor.h>
 #include <zigen-opengl-server-protocol.h>
 
 #include "opengl-component.h"

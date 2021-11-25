@@ -1,5 +1,5 @@
 #include <assert.h>
-#include <libzen/libzen.h>
+#include <libzen-compositor/libzen-compositor.h>
 #include <wayland-server.h>
 
 #include "test-runner.h"

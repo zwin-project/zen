@@ -1,4 +1,4 @@
-#include <libzen/libzen.h>
+#include <libzen-compositor/libzen-compositor.h>
 
 struct headless_backend {
   struct zen_backend base;

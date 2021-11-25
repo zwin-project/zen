@@ -1,6 +1,6 @@
 #include "virtual-object.h"
 
-#include <libzen/libzen.h>
+#include <libzen-compositor/libzen-compositor.h>
 #include <wayland-client.h>
 #include <zigen-server-protocol.h>
 

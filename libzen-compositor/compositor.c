@@ -1,4 +1,4 @@
-#include <libzen/libzen.h>
+#include <libzen-compositor/libzen-compositor.h>
 #include <stdio.h>
 #include <wayland-server.h>
 #include <zigen-server-protocol.h>

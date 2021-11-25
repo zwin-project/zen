@@ -1,5 +1,5 @@
-#ifndef ZEN_HELPERS_H
-#define ZEN_HELPERS_H
+#ifndef LIBZEN_COMPOSIOR_HELPERS_H
+#define LIBZEN_COMPOSIOR_HELPERS_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,4 +41,4 @@ int zen_log(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 }
 #endif
 
-#endif  //  ZEN_HELPERS_H
+#endif  //  LIBZEN_COMPOSIOR_HELPERS_H

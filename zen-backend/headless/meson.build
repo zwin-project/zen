@@ -1,5 +1,5 @@
 deps_headless_backend = [
-  dep_libzen_public,
+  dep_libzen_compositor_public,
 ]
 
 srcs_headless_backend = [
@@ -8,7 +8,7 @@ srcs_headless_backend = [
 ]
 
 lib_headless_backend = static_library(
-  'headless-backend',
+  'zen-headless-backend',
   srcs_headless_backend,
   install: false,
   dependencies: deps_headless_backend,

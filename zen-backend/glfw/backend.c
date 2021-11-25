@@ -1,5 +1,5 @@
 #include <GLFW/glfw3.h>
-#include <libzen/libzen.h>
+#include <libzen-compositor/libzen-compositor.h>
 #include <sys/time.h>
 
 struct glfw_backend {

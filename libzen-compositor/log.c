@@ -1,4 +1,4 @@
-#include <libzen/libzen.h>
+#include <libzen-compositor/libzen-compositor.h>
 #include <stdio.h>
 
 WL_EXPORT int
