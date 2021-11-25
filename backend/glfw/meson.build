@@ -2,7 +2,7 @@ deps_glfw_backend = [
   dep_cglm,
   dep_glfw3,
   dep_glew,
-  dep_libzen_private,
+  dep_libzen_public,
   dep_oepngl_renderer_public,
 ]
 

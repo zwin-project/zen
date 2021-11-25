@@ -153,8 +153,7 @@ err:
   return NULL;
 }
 
-WL_EXPORT
-void
+WL_EXPORT void
 zen_opengl_component_destroy(struct zen_opengl_component *component)
 {
   free(component);

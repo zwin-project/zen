@@ -1,7 +1,6 @@
-#include "opengl-renderer.h"
-
 #include <GL/glew.h>
 #include <libzen/libzen.h>
+#include <libzen/renderer/opengl.h>
 #include <string.h>
 #include <wayland-server.h>
 

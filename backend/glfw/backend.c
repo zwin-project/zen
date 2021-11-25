@@ -1,10 +1,6 @@
-#include "backend.h"
-
 #include <GLFW/glfw3.h>
+#include <libzen/libzen.h>
 #include <sys/time.h>
-
-#include "compositor.h"
-#include "output.h"
 
 struct glfw_backend {
   struct zen_backend base;

@@ -1,10 +1,6 @@
-#include "output.h"
-
 #include <libzen/libzen.h>
 #include <sys/time.h>
 #include <wayland-server.h>
-
-#include "compositor.h"
 
 struct headless_output {
   struct zen_output base;

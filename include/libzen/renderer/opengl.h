@@ -1,5 +1,5 @@
-#ifndef LIBZEN_OPENGL_RENDERER_H
-#define LIBZEN_OPENGL_RENDERER_H
+#ifndef LIBZEN_RENDERER_OPENGL_H
+#define LIBZEN_RENDERER_OPENGL_H
 
 #include <GL/glew.h>
 #include <cglm/cglm.h>
@@ -29,4 +29,4 @@ void zen_opengl_renderer_set_cameras(struct zen_opengl_renderer* renderer,
 
 void zen_opengl_renderer_render(struct zen_opengl_renderer* renderer);
 
-#endif  //  LIBZEN_OPENGL_RENDERER_H
+#endif  //  LIBZEN_RENDERER_OPENGL_H
