@@ -109,6 +109,7 @@ zen_compositor_create(struct wl_display *display)
   compositor->display = display;
   compositor->global = global;
   wl_signal_init(&compositor->frame_signal);
+  wl_signal_init(&compositor->destroy_signal);
   compositor->backend = NULL;
   compositor->repaint_timer = repaint_timer;
   compositor->repaint_window_msec = DEFAULT_REPAINT_WINDOW;
@@ -128,6 +129,7 @@ err:
 WL_EXPORT void
 zen_compositor_destroy(struct zen_compositor *compositor)
 {
+  wl_signal_emit(&compositor->destroy_signal, NULL);
   if (compositor->backend) zen_backend_destroy(compositor->backend);
   wl_event_source_remove(compositor->repaint_timer);
   wl_global_destroy(compositor->global);

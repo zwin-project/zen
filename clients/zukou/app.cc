@@ -57,7 +57,8 @@ App::Connect(const char *socket)
   wl_display_dispatch(display_);
   wl_display_roundtrip(display_);
 
-  if (compositor_ == nullptr || shm_ == nullptr || opengl_ == nullptr)
+  if (compositor_ == nullptr || shm_ == nullptr || opengl_ == nullptr ||
+      shell_ == nullptr)
     goto err_globals;
 
   return true;
@@ -82,9 +83,13 @@ App::GlobalRegistryHandler(struct wl_registry *registry, uint32_t id,
         registry, id, &zgn_compositor_interface, version);
   } else if (strcmp(interface, "wl_shm") == 0) {
     shm_ = (wl_shm *)wl_registry_bind(registry, id, &wl_shm_interface, version);
+    wl_shm_add_listener(shm_, &shm_listener, this);
   } else if (strcmp(interface, "zgn_opengl") == 0) {
     opengl_ = (zgn_opengl *)wl_registry_bind(
         registry, id, &zgn_opengl_interface, version);
+  } else if (strcmp(interface, "zgn_shell") == 0) {
+    shell_ = (zgn_shell *)wl_registry_bind(
+        registry, id, &zgn_shell_interface, version);
   }
 }
 
