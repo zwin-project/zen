@@ -13,6 +13,7 @@ TEST(load_backend)
   compositor = zen_compositor_create(display);
   assert(compositor->backend == NULL);
 
+  zen_compositor_load_shell(compositor);
   zen_compositor_load_backend(compositor);
   assert(compositor->backend != NULL);
 }

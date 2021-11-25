@@ -1,3 +1,5 @@
+#include "output.h"
+
 #include <libzen-compositor/libzen-compositor.h>
 #include <sys/time.h>
 #include <wayland-server.h>
