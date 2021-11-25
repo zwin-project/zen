@@ -1,8 +1,8 @@
 #include <GL/glew.h>
-#include <libzen/libzen.h>
-#include <libzen/renderer/opengl.h>
+#include <libzen-compositor/libzen-compositor.h>
 #include <string.h>
 #include <wayland-server.h>
+#include <zen-renderer/opengl-renderer.h>
 
 #include "opengl.h"
 

@@ -22,9 +22,9 @@ dep_zgn_protocol = dependency('zigen-protocols')
 dep_cglm = dependency('cglm')
 
 subdir('protocol')
-subdir('libzen')
-subdir('renderer')
-subdir('backend')
+subdir('libzen-compositor')
+subdir('zen-renderer')
+subdir('zen-backend')
 subdir('zen')
 subdir('tests')
 

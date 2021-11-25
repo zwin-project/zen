@@ -1,7 +1,7 @@
 tests = {
   'noop-test': {},
   'load-backend': {
-    'deps': [ dep_libzen_private, dep_headless_backend_public ],
+    'deps': [ dep_libzen_compositor_private, dep_headless_backend_public ],
   },
 }
 

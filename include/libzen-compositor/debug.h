@@ -1,14 +1,15 @@
-#ifndef LIBZEN_DEBUG_H
-#define LIBZEN_DEBUG_H
+#ifndef LIBZEN_COMPOSIOR_DEBUG_H
+#define LIBZEN_COMPOSIOR_DEBUG_H
 #ifdef DEBUG
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <libzen/helpers.h>
-#include <libzen/timespec-util.h>
 #include <time.h>
+
+#include "helpers.h"
+#include "timespec-util.h"
 
 static inline void
 zen_debug_print_fps(int interval_sec)
@@ -52,4 +53,4 @@ zen_debug_end_rec(struct timespec *t, const char *label)
 #endif
 
 #endif
-#endif  //  LIBZEN_DEBUG_H
+#endif  //  LIBZEN_COMPOSIOR_DEBUG_H

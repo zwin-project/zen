@@ -1,4 +1,4 @@
-#include <libzen/libzen.h>
+#include <libzen-compositor/libzen-compositor.h>
 #include <signal.h>
 
 static int

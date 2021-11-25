@@ -1,6 +1,6 @@
 #include "callback.h"
 
-#include <libzen/libzen.h>
+#include <libzen-compositor/libzen-compositor.h>
 #include <wayland-server.h>
 
 static void zen_callback_destroy(struct zen_callback *callback);

@@ -1,7 +1,7 @@
-#ifndef LIBZEN_OPENGL_COMPONENT_H
-#define LIBZEN_OPENGL_COMPONENT_H
+#ifndef ZEN_RENDERER_OPENGL_COMPONENT_H
+#define ZEN_RENDERER_OPENGL_COMPONENT_H
 
-#include <libzen/libzen.h>
+#include <libzen-compositor/libzen-compositor.h>
 #include <wayland-server.h>
 #include <zigen-server-protocol.h>
 
@@ -15,4 +15,4 @@ struct zen_opengl_component *zen_opengl_component_create(
 
 void zen_opengl_component_destroy(struct zen_opengl_component *component);
 
-#endif  //  LIBZEN_OPENGL_COMPONENT_H
+#endif  //  ZEN_RENDERER_OPENGL_COMPONENT_H

@@ -1,9 +1,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <libzen/libzen.h>
-#include <libzen/renderer/opengl.h>
+#include <libzen-compositor/libzen-compositor.h>
 #include <time.h>
 #include <wayland-server.h>
+#include <zen-renderer/opengl-renderer.h>
 
 // clang-format off
 

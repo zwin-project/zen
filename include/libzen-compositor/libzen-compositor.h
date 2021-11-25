@@ -1,11 +1,12 @@
-#ifndef LIBZEN_H
-#define LIBZEN_H
+#ifndef LIBZEN_COMPOSIOR_H
+#define LIBZEN_COMPOSIOR_H
 
-#include <libzen/debug.h>
-#include <libzen/helpers.h>
-#include <libzen/timespec-util.h>
 #include <time.h>
 #include <wayland-server.h>
+
+#include "debug.h"
+#include "helpers.h"
+#include "timespec-util.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -92,4 +93,4 @@ void zen_backend_destroy(struct zen_backend* backend);
 }
 #endif
 
-#endif  //  LIBZEN_H
+#endif  //  LIBZEN_COMPOSIOR_H

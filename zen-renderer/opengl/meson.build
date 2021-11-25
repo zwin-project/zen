@@ -1,7 +1,7 @@
 deps_oepngl_renderer = [
   dep_cglm,
   dep_glew,
-  dep_libzen_public,
+  dep_libzen_compositor_public,
 ]
 
 srcs_opengl_renderer = [
@@ -13,7 +13,7 @@ srcs_opengl_renderer = [
 ]
 
 lib_opengl_renderer = static_library(
-  'opengl-renderer',
+  'zen-opengl-renderer',
   srcs_opengl_renderer,
   install: false,
   dependencies: deps_oepngl_renderer,

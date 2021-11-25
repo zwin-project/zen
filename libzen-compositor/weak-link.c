@@ -1,4 +1,4 @@
-#include <libzen/libzen.h>
+#include <libzen-compositor/libzen-compositor.h>
 
 static void
 zen_weak_link_destroy_listener(struct wl_listener *listener, void *data)
