@@ -2,6 +2,8 @@
 #include <libzen-compositor/libzen-compositor.h>
 #include <sys/time.h>
 
+#include "output.h"
+
 struct glfw_backend {
   struct zen_backend base;
 

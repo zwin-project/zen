@@ -29,8 +29,8 @@ struct zen_compositor {
   struct wl_global* global;
 
   struct wl_signal frame_signal;
-  struct wl_signal destroy_signal;
 
+  struct zen_shell* shell;
   struct zen_backend* backend;
 
   struct wl_event_source* repaint_timer;
@@ -50,6 +50,8 @@ struct zen_virtual_object {
   } pending;
 };
 
+struct zen_shell;
+
 struct zen_output {
   struct timespec frame_time;
 
@@ -64,6 +66,8 @@ struct zen_backend {
 struct zen_compositor* zen_compositor_create(struct wl_display* display);
 
 void zen_compositor_destroy(struct zen_compositor* compositor);
+
+int zen_compositor_load_shell(struct zen_compositor* compositor);
 
 int zen_compositor_load_backend(struct zen_compositor* compositor);
 
@@ -80,10 +84,12 @@ void zen_weak_link_unset(struct zen_weak_link* link);
 
 void* zen_weak_link_get_user_data(struct zen_weak_link* link);
 
-// methods of zen_output
-struct zen_output* zen_output_create(struct zen_compositor* compositor);
+// Interfaces below will be implementaed outside of libzen-compositor
 
-void zen_output_destroy(struct zen_output* output);
+// methods of zen_shell;
+struct zen_shell* zen_shell_create(struct zen_compositor* compositor);
+
+void zen_shell_destroy(struct zen_shell* shell);
 
 // methods of zen_backend
 struct zen_backend* zen_backend_create(struct zen_compositor* compositor);

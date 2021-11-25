@@ -1,5 +1,7 @@
 #include <libzen-compositor/libzen-compositor.h>
 
+#include "output.h"
+
 struct headless_backend {
   struct zen_backend base;
 };
