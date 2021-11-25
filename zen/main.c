@@ -1,5 +1,6 @@
 #include <libzen-compositor/libzen-compositor.h>
 #include <signal.h>
+#include <zen-shell/zen-shell.h>
 
 static int
 on_term_signal(int signal_number, void *data)
@@ -38,6 +39,11 @@ main()
     goto out_backend;
   }
 
+  if (zen_shell_init(compositor) != 0) {
+    zen_log("main: failed to load shell\n");
+    goto out_shell;
+  }
+
   ret = wl_display_add_socket(display, socket);
   if (ret != 0) {
     zen_log("main: failed to add socket\n");
@@ -60,6 +66,7 @@ out_signal:
     if (signals[i]) wl_event_source_remove(signals[i]);
 
 out_socket:
+out_shell:
 out_backend:
   zen_compositor_destroy(compositor);
 

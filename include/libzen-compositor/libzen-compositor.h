@@ -29,6 +29,7 @@ struct zen_compositor {
   struct wl_global* global;
 
   struct wl_signal frame_signal;
+  struct wl_signal destroy_signal;
 
   struct zen_backend* backend;
 

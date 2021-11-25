@@ -23,6 +23,7 @@ dep_cglm = dependency('cglm')
 
 subdir('protocol')
 subdir('libzen-compositor')
+subdir('zen-shell')
 subdir('zen-renderer')
 subdir('zen-backend')
 subdir('zen')

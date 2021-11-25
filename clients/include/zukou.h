@@ -4,6 +4,7 @@
 #include <wayland-client.h>
 #include <zigen-client-protocol.h>
 #include <zigen-opengl-client-protocol.h>
+#include <zigen-shell-client-protocol.h>
 
 namespace zukou {
 class App
@@ -22,6 +23,7 @@ class App
   inline struct wl_display *display();
   inline struct wl_registry *registry();
   inline struct zgn_compositor *compositor();
+  inline struct zgn_shell *shell();
   inline struct wl_shm *shm();
   inline struct zgn_opengl *opengl();
 
@@ -29,6 +31,7 @@ class App
   struct wl_display *display_;
   struct wl_registry *registry_;
   struct zgn_compositor *compositor_;
+  struct zgn_shell *shell_;
   struct wl_shm *shm_;
   struct zgn_opengl *opengl_;
   bool running_ = false;
@@ -50,6 +53,12 @@ inline struct zgn_compositor *
 App::compositor()
 {
   return compositor_;
+}
+
+inline struct zgn_shell *
+App::shell()
+{
+  return shell_;
 }
 
 inline struct wl_shm *
