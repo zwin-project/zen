@@ -1,12 +1,11 @@
-#include "compositor.h"
-
 #include <libzen/libzen.h>
 #include <stdio.h>
 #include <wayland-server.h>
 #include <zigen-server-protocol.h>
 
-#include "backend.h"
 #include "virtual-object.h"
+
+#define DEFAULT_REPAINT_WINDOW 7
 
 static void
 zen_compositor_protocol_create_virtual_object(

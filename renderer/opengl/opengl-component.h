@@ -1,10 +1,9 @@
 #ifndef LIBZEN_OPENGL_COMPONENT_H
 #define LIBZEN_OPENGL_COMPONENT_H
 
+#include <libzen/libzen.h>
 #include <wayland-server.h>
 #include <zigen-server-protocol.h>
-
-#include "virtual-object.h"
 
 struct zen_opengl_component {
   struct zen_virtual_object *virtual_object;

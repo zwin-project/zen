@@ -1,7 +1,7 @@
 #include <assert.h>
+#include <libzen/libzen.h>
 #include <wayland-server.h>
 
-#include "compositor.h"
 #include "test-runner.h"
 
 TEST(load_backend)

@@ -3,9 +3,7 @@
 #include <libzen/libzen.h>
 #include <zigen-opengl-server-protocol.h>
 
-#include "compositor.h"
 #include "opengl-component.h"
-#include "virtual-object.h"
 
 WL_EXPORT void zen_opengl_destroy(struct zen_opengl* opengl);
 

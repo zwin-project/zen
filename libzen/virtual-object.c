@@ -5,7 +5,6 @@
 #include <zigen-server-protocol.h>
 
 #include "callback.h"
-#include "compositor.h"
 
 static void zen_virtual_object_destroy(
     struct zen_virtual_object *virtual_object);

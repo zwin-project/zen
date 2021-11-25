@@ -1,13 +1,9 @@
-#include "output.h"
-
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <libzen/libzen.h>
+#include <libzen/renderer/opengl.h>
 #include <time.h>
 #include <wayland-server.h>
-
-#include "compositor.h"
-#include "opengl-renderer/opengl-renderer.h"
 
 // clang-format off
 
@@ -133,8 +129,7 @@ get_refresh_rate()
   return mode->refreshRate * 1000;
 }
 
-WL_EXPORT
-struct zen_output*
+WL_EXPORT struct zen_output*
 zen_output_create(struct zen_compositor* compositor)
 {
   struct glfw_output* output;

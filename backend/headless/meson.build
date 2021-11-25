@@ -1,5 +1,5 @@
 deps_headless_backend = [
-  dep_libzen_private,
+  dep_libzen_public,
 ]
 
 srcs_headless_backend = [

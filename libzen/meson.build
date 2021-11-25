@@ -7,12 +7,9 @@ srcs_libzen = [
   'compositor.c',
   'log.c',
   'virtual-object.c',
+  'weak-link.c',
   zigen_protocol_c,
   zigen_server_protocol_h,
-  zigen_shell_protocol_c,
-  zigen_shell_server_protocol_h,
-  zigen_opengl_protocol_c,
-  zigen_opengl_server_protocol_h,
 ]
 
 lib_zen = static_library(
@@ -32,7 +29,3 @@ dep_libzen_private = declare_dependency(
   link_with: lib_zen,
   include_directories: [ include_directories('.'), public_inc ],
 )
-
-subdir('opengl-renderer')
-subdir('backend-glfw')
-subdir('backend-headless')
