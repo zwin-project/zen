@@ -2,7 +2,9 @@
 
 #include <zukou.h>
 
-Box::Box(zukou::App *app) : VirtualObject(app)
+#include <glm/glm.hpp>
+
+Box::Box(zukou::App *app, float length) : CuboidWindow(app, glm::vec3(length))
 {
   component_ = new zukou::OpenGLComponent(app, this);
 }

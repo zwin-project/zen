@@ -1,5 +1,4 @@
 deps_glfw_backend = [
-  dep_cglm,
   dep_glfw3,
   dep_glew,
   dep_libzen_compositor_public,

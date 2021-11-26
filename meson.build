@@ -30,5 +30,6 @@ subdir('zen')
 subdir('tests')
 
 if get_option('clients')
+  dep_glm = dependency('glm')
   subdir('clients')
 endif

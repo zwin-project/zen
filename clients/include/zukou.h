@@ -6,6 +6,8 @@
 #include <zigen-opengl-client-protocol.h>
 #include <zigen-shell-client-protocol.h>
 
+#include <glm/glm.hpp>
+
 namespace zukou {
 class App
 {
@@ -85,7 +87,7 @@ class VirtualObject
   inline struct zgn_virtual_object *virtual_object();
   inline struct wl_callback *frame_callback();
 
- private:
+ protected:
   App *app_;
   struct zgn_virtual_object *virtual_object_;
   struct wl_callback *frame_callback_;
@@ -107,6 +109,32 @@ inline struct wl_callback *
 VirtualObject::frame_callback()
 {
   return frame_callback_;
+}
+
+class CuboidWindow : public VirtualObject
+{
+ public:
+  CuboidWindow(App *app, glm::vec3 half_size);
+  virtual ~CuboidWindow();
+  virtual void Configure(uint32_t serial, glm::vec3 half_size);
+  struct zgn_cuboid_window *cuboid_window();
+  glm::vec3 half_size();
+
+ protected:
+  struct zgn_cuboid_window *cuboid_window_;
+  glm::vec3 half_size_;
+};
+
+inline struct zgn_cuboid_window *
+CuboidWindow::cuboid_window()
+{
+  return cuboid_window_;
+}
+
+inline glm::vec3
+CuboidWindow::half_size()
+{
+  return half_size_;
 }
 
 class OpenGLComponent
@@ -132,6 +160,10 @@ OpenGLComponent::component()
 {
   return component_;
 }
+
+glm::vec3 glm_vec3_from_wl_array(struct wl_array *array);
+
+void glm_vec3_to_wl_array(glm::vec3 v, struct wl_array *array);
 
 }  // namespace zukou
 

@@ -3,10 +3,10 @@
 
 #include <zukou.h>
 
-class Box : public zukou::VirtualObject
+class Box : public zukou::CuboidWindow
 {
  public:
-  Box(zukou::App *app);
+  Box(zukou::App *app, float length);
   void Frame(uint32_t time);
   inline zukou::OpenGLComponent *component();
 

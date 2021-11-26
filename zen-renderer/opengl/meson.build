@@ -1,5 +1,4 @@
 deps_oepngl_renderer = [
-  dep_cglm,
   dep_glew,
   dep_libzen_compositor_public,
 ]

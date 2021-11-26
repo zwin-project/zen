@@ -3,6 +3,7 @@
 #include <string.h>
 #include <wayland-server.h>
 #include <zen-renderer/opengl-renderer.h>
+#include <zen-shell/zen-shell.h>
 
 #include "opengl.h"
 
@@ -20,6 +21,12 @@ zen_opengl_renderer_create(struct zen_compositor* compositor)
 {
   struct zen_opengl_renderer* renderer;
   struct zen_opengl* opengl;
+
+  if (compositor->shell_base->type != zen_shell_type) {
+    zen_log("opengl renderer: unsupported shell type: %s\n",
+        compositor->shell_base->type);
+    goto err;
+  }
 
   renderer = zalloc(sizeof *renderer);
   if (renderer == NULL) {
