@@ -59,15 +59,15 @@ repaint_timer_handler(void *data)
 WL_EXPORT int
 zen_compositor_load_shell(struct zen_compositor *compositor)
 {
-  struct zen_shell *shell;
+  struct zen_shell_base *shell_base;
 
-  shell = zen_shell_create(compositor);
-  if (shell == NULL) {
+  shell_base = zen_shell_create(compositor);
+  if (shell_base == NULL) {
     zen_log("compositor: failed to create a shell\n");
     goto err;
   }
 
-  compositor->shell = shell;
+  compositor->shell_base = shell_base;
 
   return 0;
 
@@ -78,7 +78,7 @@ err:
 WL_EXPORT int
 zen_compositor_load_backend(struct zen_compositor *compositor)
 {
-  assert(compositor->shell && "load shell before backend");
+  assert(compositor->shell_base && "load shell before backend");
 
   struct zen_backend *backend;
 
@@ -150,7 +150,7 @@ WL_EXPORT void
 zen_compositor_destroy(struct zen_compositor *compositor)
 {
   if (compositor->backend) zen_backend_destroy(compositor->backend);
-  if (compositor->shell) zen_shell_destroy(compositor->shell);
+  if (compositor->shell_base) zen_shell_destroy(compositor->shell_base);
   wl_event_source_remove(compositor->repaint_timer);
   wl_global_destroy(compositor->global);
   free(compositor);

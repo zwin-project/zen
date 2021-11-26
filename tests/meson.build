@@ -7,6 +7,11 @@ tests = {
       dep_zen_shell_public
     ],
   },
+  'cglm-wl-array-test': {
+    'deps': [
+      dep_libzen_compositor_public,
+    ]
+  }
 }
 
 foreach test_name, args : tests
