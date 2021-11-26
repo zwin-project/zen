@@ -38,6 +38,12 @@ main()
     goto out_shell;
   }
 
+  ret = zen_compositor_load_renderer(compositor);
+  if (ret != 0) {
+    zen_log("main: failed to load renderer\n");
+    goto out_renderer;
+  }
+
   ret = zen_compositor_load_backend(compositor);
   if (ret != 0) {
     zen_log("main: failed to load backend\n");
@@ -67,6 +73,7 @@ out_signal:
 
 out_socket:
 out_backend:
+out_renderer:
 out_shell:
   zen_compositor_destroy(compositor);
 

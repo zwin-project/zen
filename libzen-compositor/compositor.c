@@ -76,9 +76,29 @@ err:
 }
 
 WL_EXPORT int
+zen_compositor_load_renderer(struct zen_compositor *compositor)
+{
+  assert(compositor->shell_base && "load shell before backend");
+
+  struct zen_renderer *renderer;
+
+  renderer = zen_renderer_create(compositor);
+  if (renderer == NULL) {
+    zen_log("compositor: failed to create a renderer\n");
+    goto err;
+  }
+
+  return 0;
+
+err:
+  return -1;
+}
+
+WL_EXPORT int
 zen_compositor_load_backend(struct zen_compositor *compositor)
 {
   assert(compositor->shell_base && "load shell before backend");
+  assert(compositor->renderer && "load renderer before backend");
 
   struct zen_backend *backend;
 
@@ -151,6 +171,7 @@ zen_compositor_destroy(struct zen_compositor *compositor)
 {
   if (compositor->backend) zen_backend_destroy(compositor->backend);
   if (compositor->shell_base) zen_shell_destroy(compositor->shell_base);
+  if (compositor->renderer) zen_renderer_destroy(compositor->renderer);
   wl_event_source_remove(compositor->repaint_timer);
   wl_global_destroy(compositor->global);
   free(compositor);

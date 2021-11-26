@@ -162,9 +162,10 @@ zen_output_create(struct zen_compositor* compositor)
     goto err_glew;
   }
 
-  renderer = zen_opengl_renderer_create(compositor);
+  renderer = zen_opengl_renderer_get(compositor->renderer);
   if (renderer == NULL) {
-    zen_log("glfw output: failed to create renderer\n");
+    zen_log("glfw output: renderer type not supported: %s\n",
+        compositor->renderer->type);
     goto err_renderer;
   }
 
@@ -204,8 +205,6 @@ zen_output_create(struct zen_compositor* compositor)
   return &output->base;
 
 err_output:
-  zen_opengl_renderer_destroy(renderer);
-
 err_renderer:
 err_glew:
   glfwDestroyWindow(window);
@@ -220,7 +219,6 @@ zen_output_destroy(struct zen_output* output)
   struct glfw_output* o = (struct glfw_output*)output;
 
   wl_event_source_remove(o->swap_timer);
-  zen_opengl_renderer_destroy(o->renderer);
   glfwDestroyWindow(o->window);
   free(output);
 }

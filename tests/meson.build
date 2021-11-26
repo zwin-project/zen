@@ -2,8 +2,9 @@ tests = {
   'noop-test': {},
   'load-backend': {
     'deps': [
-      dep_libzen_compositor_private,
       dep_headless_backend_public,
+      dep_libzen_compositor_private,
+      dep_oepngl_renderer_public,
       dep_zen_shell_public
     ],
   },
