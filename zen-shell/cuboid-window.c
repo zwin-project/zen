@@ -79,6 +79,7 @@ zen_cuboid_window_create(struct wl_client *client, uint32_t id,
   cuboid_window->virtual_object = virtual_object;
   glm_vec3_copy(zero, cuboid_window->half_size);
   glm_mat4_copy(identity, cuboid_window->model_matrix);
+  glm_translate_z(cuboid_window->model_matrix, -5);
 
   return cuboid_window;
 

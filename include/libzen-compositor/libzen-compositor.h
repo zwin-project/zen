@@ -31,6 +31,7 @@ struct zen_compositor {
   struct wl_signal frame_signal;
 
   struct zen_shell_base* shell_base;
+  struct zen_renderer* renderer;
   struct zen_backend* backend;
 
   struct wl_event_source* repaint_timer;
@@ -54,6 +55,10 @@ struct zen_shell_base {
   const char* type;
 };
 
+struct zen_renderer {
+  const char* type;
+};
+
 struct zen_output {
   struct timespec frame_time;
 
@@ -70,6 +75,8 @@ struct zen_compositor* zen_compositor_create(struct wl_display* display);
 void zen_compositor_destroy(struct zen_compositor* compositor);
 
 int zen_compositor_load_shell(struct zen_compositor* compositor);
+
+int zen_compositor_load_renderer(struct zen_compositor* compositor);
 
 int zen_compositor_load_backend(struct zen_compositor* compositor);
 
@@ -97,6 +104,11 @@ void zen_shell_destroy(struct zen_shell_base* shell);
 struct zen_backend* zen_backend_create(struct zen_compositor* compositor);
 
 void zen_backend_destroy(struct zen_backend* backend);
+
+// methods of opengl_renderer
+struct zen_renderer* zen_renderer_create(struct zen_compositor* compositor);
+
+void zen_renderer_destroy(struct zen_renderer* renderer);
 
 #ifdef __cplusplus
 }

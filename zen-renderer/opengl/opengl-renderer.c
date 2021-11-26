@@ -7,7 +7,10 @@
 
 #include "opengl.h"
 
+char* zen_opengl_renderer_type = "zen_opengl_renderer";
+
 struct zen_opengl_renderer {
+  struct zen_renderer base;
   struct zen_compositor* compositor;
   struct zen_opengl* opengl;
 
@@ -16,8 +19,8 @@ struct zen_opengl_renderer {
   uint32_t camera_allocate;
 };
 
-WL_EXPORT struct zen_opengl_renderer*
-zen_opengl_renderer_create(struct zen_compositor* compositor)
+WL_EXPORT struct zen_renderer*
+zen_renderer_create(struct zen_compositor* compositor)
 {
   struct zen_opengl_renderer* renderer;
   struct zen_opengl* opengl;
@@ -40,13 +43,14 @@ zen_opengl_renderer_create(struct zen_compositor* compositor)
     goto err_opengl;
   }
 
+  renderer->base.type = zen_opengl_renderer_type;
   renderer->compositor = compositor;
   renderer->opengl = opengl;
   renderer->cameras = NULL;
   renderer->camera_count = 0;
   renderer->camera_allocate = 0;
 
-  return renderer;
+  return &renderer->base;
 
 err_opengl:
   free(renderer);
@@ -55,9 +59,21 @@ err:
   return NULL;
 }
 
-WL_EXPORT void
-zen_opengl_renderer_destroy(struct zen_opengl_renderer* renderer)
+WL_EXPORT struct zen_opengl_renderer*
+zen_opengl_renderer_get(struct zen_renderer* renderer_base)
 {
+  struct zen_opengl_renderer* renderer;
+  if (renderer_base->type != zen_opengl_renderer_type) return NULL;
+
+  renderer = wl_container_of(renderer_base, renderer, base);
+
+  return renderer;
+}
+
+WL_EXPORT void
+zen_renderer_destroy(struct zen_renderer* renderer_base)
+{
+  struct zen_opengl_renderer* renderer = zen_opengl_renderer_get(renderer_base);
   if (renderer->camera_allocate > 0) free(renderer->cameras);
   zen_opengl_destroy(renderer->opengl);
   free(renderer);
