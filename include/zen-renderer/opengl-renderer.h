@@ -7,7 +7,17 @@
 
 extern char* zen_opengl_renderer_type;
 
-struct zen_opengl_renderer;
+struct zen_opengl_renderer {
+  struct zen_renderer base;
+  struct zen_compositor* compositor;
+  struct zen_opengl* opengl;
+
+  struct zen_opengl_renderer_camera* cameras;
+  uint32_t camera_count;
+  uint32_t camera_allocate;
+
+  struct wl_list cuboid_window_render_item_list;
+};
 
 struct zen_opengl_renderer_camera {
   GLuint framebuffer_id;

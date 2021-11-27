@@ -6,14 +6,6 @@
 #include <wayland-server.h>
 #include <zen-shell/zen-shell.h>
 
-struct zen_cuboid_window {
-  struct zen_shell *shell;
-  struct wl_resource *resource;
-  struct zen_virtual_object *virtual_object;
-  vec3 half_size;
-  mat4 model_matrix;
-};
-
 struct zen_cuboid_window *zen_cuboid_window_create(struct wl_client *client,
     uint32_t id, struct zen_shell *shell,
     struct zen_virtual_object *virtual_object);

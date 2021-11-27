@@ -59,6 +59,10 @@ struct zen_renderer {
   const char* type;
 };
 
+struct zen_render_item {
+  void (*commit)(struct zen_render_item* render_item);
+};
+
 struct zen_output {
   struct timespec frame_time;
 

@@ -8,7 +8,7 @@ main()
 
   app->Connect("zigen-0");
 
-  Box *box = new Box(app, 0.5f);
+  Box *box = new Box(app, 0.2f);
   box->NextFrame();
 
   if (app->Run())

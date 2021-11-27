@@ -4,9 +4,11 @@ deps_oepngl_renderer = [
 ]
 
 srcs_opengl_renderer = [
+  'cuboid-window-render-item.c',
   'opengl.c',
   'opengl-component.c',
   'opengl-renderer.c',
+  'shader-program.c',
   zigen_opengl_protocol_c,
   zigen_opengl_server_protocol_h,
 ]

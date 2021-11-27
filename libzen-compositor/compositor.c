@@ -88,6 +88,8 @@ zen_compositor_load_renderer(struct zen_compositor *compositor)
     goto err;
   }
 
+  compositor->renderer = renderer;
+
   return 0;
 
 err:
