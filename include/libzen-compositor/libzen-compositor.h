@@ -41,7 +41,11 @@ struct zen_compositor {
 struct zen_virtual_object {
   struct zen_compositor* compositor;
 
+  char* role;
+  void* role_object;
+
   struct wl_signal commit_signal;
+  struct wl_signal destroy_signal;
 
   struct wl_listener compositor_frame_signal_listener;
   struct wl_list frame_callback_list;

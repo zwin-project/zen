@@ -1,6 +1,9 @@
 #include "cuboid-window.h"
 
+#include <string.h>
 #include <zigen-shell-server-protocol.h>
+
+char *zen_cuboid_window_role = "zen_cuboid_window";
 
 static void zen_cuboid_window_destroy(struct zen_cuboid_window *cuboid_window);
 
@@ -52,15 +55,52 @@ static const struct zgn_cuboid_window_interface cuboid_window_interface = {
     .move = zen_cuboid_window_protocol_move,
 };
 
+static void
+zen_cuboid_window_virtual_object_destroy_handler(
+    struct wl_listener *listener, void *data)
+{
+  // Clients must not destroy a bound virtual object before a cuboid window. But
+  // if it does so, compositor will just destroy the cuboid window as well.
+  // Sending implementation error to clients brings error when terminating the
+  // client
+
+  UNUSED(data);
+  struct zen_cuboid_window *cuboid_window;
+
+  cuboid_window =
+      wl_container_of(listener, cuboid_window, virtual_object_destroy_listener);
+
+  wl_resource_destroy(cuboid_window->resource);
+}
+
 WL_EXPORT struct zen_cuboid_window *
 zen_cuboid_window_create(struct wl_client *client, uint32_t id,
-    struct zen_shell *shell, struct zen_virtual_object *virtual_object)
+    struct wl_resource *shell_resource,
+    struct zen_virtual_object *virtual_object)
 {
   struct zen_cuboid_window *cuboid_window;
   struct wl_resource *resource;
   struct zen_render_item *render_item;
+  struct zen_shell *shell = wl_resource_get_user_data(shell_resource);
   vec3 zero = GLM_VEC3_ZERO_INIT;
   mat4 identity = GLM_MAT4_IDENTITY_INIT;
+
+  if (virtual_object->role_object != NULL) {
+    wl_resource_post_error(shell_resource, ZGN_SHELL_ERROR_ROLE,
+        "given virtual object has another role");
+    zen_log("cuboid window: given virtual object has another role\n");
+    goto err;
+  }
+
+  if (virtual_object->role != NULL &&
+      strcmp(virtual_object->role, zen_cuboid_window_role) != 0) {
+    wl_resource_post_error(shell_resource, ZGN_SHELL_ERROR_ROLE,
+        "given virtual object has been attached another type of role");
+    zen_log(
+        "cuboid window: given virtual object has been attached another type of "
+        "role\n");
+    goto err;
+  }
 
   cuboid_window = zalloc(sizeof *cuboid_window);
   if (cuboid_window == NULL) {
@@ -87,6 +127,10 @@ zen_cuboid_window_create(struct wl_client *client, uint32_t id,
   wl_resource_set_implementation(resource, &cuboid_window_interface,
       cuboid_window, zen_cuboid_window_handle_destroy);
 
+  if (virtual_object->role == NULL)
+    virtual_object->role = strdup(zen_cuboid_window_role);
+  virtual_object->role_object = cuboid_window;
+
   cuboid_window->shell = shell;
   cuboid_window->resource = resource;
   cuboid_window->virtual_object = virtual_object;
@@ -94,6 +138,12 @@ zen_cuboid_window_create(struct wl_client *client, uint32_t id,
   glm_mat4_copy(identity, cuboid_window->model_matrix);
   glm_translate_z(cuboid_window->model_matrix, -1);
   glm_translate_y(cuboid_window->model_matrix, 1.5);
+
+  cuboid_window->virtual_object_destroy_listener.notify =
+      zen_cuboid_window_virtual_object_destroy_handler;
+  wl_signal_add(&virtual_object->destroy_signal,
+      &cuboid_window->virtual_object_destroy_listener);
+
   cuboid_window->render_item = render_item;
 
   return cuboid_window;
@@ -111,6 +161,8 @@ err:
 static void
 zen_cuboid_window_destroy(struct zen_cuboid_window *cuboid_window)
 {
+  cuboid_window->virtual_object->role_object = NULL;
+  wl_list_remove(&cuboid_window->virtual_object_destroy_listener.link);
   zen_cuboid_window_render_item_destroy(cuboid_window->render_item);
   free(cuboid_window);
 }

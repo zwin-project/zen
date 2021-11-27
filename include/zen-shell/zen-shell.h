@@ -4,6 +4,7 @@
 #include <libzen-compositor/libzen-compositor.h>
 
 extern char* zen_shell_type;
+extern char* zen_cuboid_window_role;
 
 struct zen_shell {
   struct zen_shell_base base;
@@ -18,6 +19,8 @@ struct zen_cuboid_window {
   struct zen_virtual_object* virtual_object;
   vec3 half_size;
   mat4 model_matrix;
+
+  struct wl_listener virtual_object_destroy_listener;
 
   struct zen_render_item* render_item;
 };

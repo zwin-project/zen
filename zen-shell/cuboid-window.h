@@ -7,7 +7,7 @@
 #include <zen-shell/zen-shell.h>
 
 struct zen_cuboid_window *zen_cuboid_window_create(struct wl_client *client,
-    uint32_t id, struct zen_shell *shell,
+    uint32_t id, struct wl_resource *shell_resource,
     struct zen_virtual_object *virtual_object);
 
 void zen_cuboid_window_configure(

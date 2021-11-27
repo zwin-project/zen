@@ -22,18 +22,24 @@ zen_shell_protocol_get_cuboid_window(struct wl_client* client,
 {
   vec3 half_size_vec;
   struct zen_virtual_object* virtual_object;
-  struct zen_shell* shell;
   struct zen_cuboid_window* cuboid_window;
 
-  shell = wl_resource_get_user_data(resource);
   virtual_object = wl_resource_get_user_data(virtual_object_resource);
 
   if (glm_vec3_from_wl_array(half_size_vec, half_size) != 0) {
-    wl_client_post_implementation_error(client, "given array is not vec3\n");
+    wl_resource_post_error(resource, ZGN_SHELL_ERROR_INVALID_CUBOID_WINDOW_SIZE,
+        "half_size is not vec3");
     return;
   }
 
-  cuboid_window = zen_cuboid_window_create(client, id, shell, virtual_object);
+  if (half_size_vec[0] <= 0 || half_size_vec[1] <= 0 || half_size_vec[2] <= 0) {
+    wl_resource_post_error(resource, ZGN_SHELL_ERROR_INVALID_CUBOID_WINDOW_SIZE,
+        "given cuboid window size has no volume");
+    return;
+  }
+
+  cuboid_window =
+      zen_cuboid_window_create(client, id, resource, virtual_object);
   if (cuboid_window == NULL) {
     zen_log("shell: failed to create a cuboid window\n");
     return;
