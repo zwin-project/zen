@@ -8,6 +8,7 @@ tests = {
       dep_zen_shell_public
     ],
   },
+  'virtual-object-role-test': {},
   'cglm-wl-array-test': {
     'deps': [
       dep_libzen_compositor_public,

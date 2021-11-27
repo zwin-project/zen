@@ -113,7 +113,12 @@ zen_virtual_object_create(
       virtual_object, zen_virtual_object_handle_destroy);
 
   virtual_object->compositor = compositor;
+
+  virtual_object->role = NULL;
+  virtual_object->role_object = NULL;
+
   wl_signal_init(&virtual_object->commit_signal);
+  wl_signal_init(&virtual_object->destroy_signal);
 
   virtual_object->compositor_frame_signal_listener.notify =
       zen_virtual_object_compositor_frame_signal_handler;
@@ -135,6 +140,8 @@ err:
 static void
 zen_virtual_object_destroy(struct zen_virtual_object *virtual_object)
 {
+  wl_signal_emit(&virtual_object->destroy_signal, NULL);
+  free(virtual_object->role);
   wl_list_remove(&virtual_object->compositor_frame_signal_listener.link);
   free(virtual_object);
 }

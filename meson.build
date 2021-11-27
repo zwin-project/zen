@@ -3,11 +3,11 @@ project(
   version: '0.0.1',
   license: 'Apache-2.0',
   meson_version: '>= 0.52.1',
-  default_options:  [ 'warning_level=3', 'werror=true', 'optimization=2', 'c_std=c11' ],
+  default_options:  [ 'warning_level=3', 'werror=true', 'optimization=2', 'c_std=gnu11' ],
 )
 
 if get_option('debug')
-  add_global_arguments('-DDEBUG', language : [ 'c', 'cpp' ])
+  add_global_arguments('-DDEBUG', language: [ 'c', 'cpp' ])
 endif
 
 public_inc = include_directories('include')
