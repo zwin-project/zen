@@ -5,19 +5,10 @@
 #include <zen-renderer/opengl-renderer.h>
 #include <zen-shell/zen-shell.h>
 
+#include "cuboid-window-render-item.h"
 #include "opengl.h"
 
 char* zen_opengl_renderer_type = "zen_opengl_renderer";
-
-struct zen_opengl_renderer {
-  struct zen_renderer base;
-  struct zen_compositor* compositor;
-  struct zen_opengl* opengl;
-
-  struct zen_opengl_renderer_camera* cameras;
-  uint32_t camera_count;
-  uint32_t camera_allocate;
-};
 
 WL_EXPORT struct zen_renderer*
 zen_renderer_create(struct zen_compositor* compositor)
@@ -49,6 +40,7 @@ zen_renderer_create(struct zen_compositor* compositor)
   renderer->cameras = NULL;
   renderer->camera_count = 0;
   renderer->camera_allocate = 0;
+  wl_list_init(&renderer->cuboid_window_render_item_list);
 
   return &renderer->base;
 
@@ -96,7 +88,7 @@ zen_opengl_renderer_set_cameras(struct zen_opengl_renderer* renderer,
 WL_EXPORT void
 zen_opengl_renderer_render(struct zen_opengl_renderer* renderer)
 {
-  struct zen_opengl_renderer_camera* camera = renderer->cameras;
+  struct zen_opengl_renderer_camera* camera;
 
   if (renderer->camera_count == 0) {
     static bool warned = false;
@@ -107,13 +99,31 @@ zen_opengl_renderer_render(struct zen_opengl_renderer* renderer)
     return;
   }
 
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-  glClear(GL_COLOR_BUFFER_BIT);
-  for (; camera < renderer->cameras + renderer->camera_count; camera++) {
+  for (camera = renderer->cameras;
+       camera < renderer->cameras + renderer->camera_count; camera++) {
+    glBindFramebuffer(GL_FRAMEBUFFER, camera->framebuffer_id);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_DEPTH_BUFFER_BIT);
+  }
+
+  glEnable(GL_MULTISAMPLE);
+  glEnable(GL_DEPTH_TEST);
+  for (camera = renderer->cameras;
+       camera < renderer->cameras + renderer->camera_count; camera++) {
+    struct zen_opengl_cuboid_window_render_item* cuboid_window_render_item;
+
     glBindFramebuffer(GL_FRAMEBUFFER, camera->framebuffer_id);
     glViewport(camera->viewport.x, camera->viewport.y, camera->viewport.width,
         camera->viewport.height);
-    // TODO: rendering
+
+    // render cuboid windows
+    wl_list_for_each(cuboid_window_render_item,
+        &renderer->cuboid_window_render_item_list, link)
+    {
+      zen_opengl_cuboid_window_render_item_render(
+          cuboid_window_render_item, camera);
+    }
   }
 
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
