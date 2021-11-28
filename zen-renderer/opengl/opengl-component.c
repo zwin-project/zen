@@ -7,7 +7,7 @@
 #include <zigen-opengl-server-protocol.h>
 
 #include "opengl-vertex-buffer.h"
-#include "shader-program.h"
+#include "shader-compiler.h"
 
 WL_EXPORT
 void zen_opengl_component_destroy(struct zen_opengl_component *component);
@@ -254,10 +254,10 @@ zen_opengl_component_render(struct zen_opengl_component *component,
 {
   mat4 mvp;
   struct zen_cuboid_window *cuboid_window;
-  struct zen_opengl_shader_program shader;
-  shader.vertex_shader = zen_opengl_default_vertex_shader;
-  shader.fragment_shader = zen_opengl_default_color_fragment_shader;
-  zen_opengl_shader_program_compile(&shader);
+  struct zen_opengl_shader_compiler_input shader_input;
+  shader_input.vertex_shader = zen_opengl_default_vertex_shader;
+  shader_input.fragment_shader = zen_opengl_default_color_fragment_shader;
+  zen_opengl_shader_compiler_compile(&shader_input);
 
   if (strcmp(component->virtual_object->role, zen_cuboid_window_role) != 0)
     return;
@@ -268,12 +268,13 @@ zen_opengl_component_render(struct zen_opengl_component *component,
   glm_mat4_mul(camera->projection_matrix, mvp, mvp);
 
   glBindVertexArray(component->vertex_array_id);
-  glUseProgram(shader.program_id);  // FIXME:
-  GLint mvp_matrix_location = glGetUniformLocation(shader.program_id, "mvp");
+  glUseProgram(shader_input.program_id);  // FIXME:
+  GLint mvp_matrix_location =
+      glGetUniformLocation(shader_input.program_id, "mvp");
   glUniformMatrix4fv(mvp_matrix_location, 1, GL_FALSE, (float *)mvp);
   glDrawArrays(GL_LINES, 0, 24);  // FIXME:
   glUseProgram(0);
   glBindVertexArray(0);
 
-  glDeleteProgram(shader.program_id);
+  glDeleteProgram(shader_input.program_id);
 }

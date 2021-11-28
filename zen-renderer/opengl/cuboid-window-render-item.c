@@ -5,6 +5,8 @@
 #include <zen-renderer/opengl-renderer.h>
 #include <zen-shell/zen-shell.h>
 
+#include "shader-compiler.h"
+
 static void update_vertex_buffer(
     struct zen_opengl_cuboid_window_render_item* render_item);
 
@@ -43,7 +45,7 @@ zen_cuboid_window_render_item_create(
 {
   struct zen_opengl_renderer* renderer;
   struct zen_opengl_cuboid_window_render_item* render_item;
-  struct zen_opengl_shader_program shader_program;
+  struct zen_opengl_shader_compiler_input shader_input;
 
   renderer = zen_opengl_renderer_get(renderer_base);
 
@@ -53,9 +55,9 @@ zen_cuboid_window_render_item_create(
     goto err;
   }
 
-  shader_program.fragment_shader = zen_opengl_default_color_fragment_shader;
-  shader_program.vertex_shader = zen_opengl_default_vertex_shader;
-  if (zen_opengl_shader_program_compile(&shader_program) != 0) {
+  shader_input.fragment_shader = zen_opengl_default_color_fragment_shader;
+  shader_input.vertex_shader = zen_opengl_default_vertex_shader;
+  if (zen_opengl_shader_compiler_compile(&shader_input) != 0) {
     zen_log("opengl cuboid window renderer: failed to compile shaders\n");
     goto err_shader;
   }
@@ -67,7 +69,7 @@ zen_cuboid_window_render_item_create(
 
   glGenVertexArrays(1, &render_item->vertex_array_id);
   glGenBuffers(1, &render_item->vertex_buffer_id);
-  render_item->program_id = shader_program.program_id;
+  render_item->program_id = shader_input.program_id;
   update_vertex_buffer(render_item);
 
   glBindVertexArray(render_item->vertex_array_id);
