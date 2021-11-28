@@ -75,6 +75,20 @@ App::opengl()
   return opengl_;
 }
 
+class Buffer
+{
+ public:
+  Buffer(App *app, size_t size);
+  ~Buffer();
+
+ protected:
+  size_t size_;
+  int fd_;
+  void *data_;
+  struct wl_shm_pool *pool_;
+  struct wl_buffer *wl_buffer_;
+};
+
 class VirtualObject
 {
  public:
@@ -137,10 +151,45 @@ CuboidWindow::half_size()
   return half_size_;
 }
 
+class OpenGLVertexBuffer : public Buffer
+{
+ public:
+  OpenGLVertexBuffer(App *app, size_t size);
+  ~OpenGLVertexBuffer();
+  void BufferUpdated();
+  inline App *app();
+  inline struct zgn_opengl_vertex_buffer *vertex_buffer();
+  inline void *data();
+
+ private:
+  App *app_;
+  struct zgn_opengl_vertex_buffer *vertex_buffer_;
+};
+
+inline App *
+OpenGLVertexBuffer::app()
+{
+  return app_;
+}
+
+inline struct zgn_opengl_vertex_buffer *
+OpenGLVertexBuffer::vertex_buffer()
+{
+  return vertex_buffer_;
+}
+
+inline void *
+OpenGLVertexBuffer::data()
+{
+  return data_;
+}
+
 class OpenGLComponent
 {
  public:
   OpenGLComponent(App *app, VirtualObject *virtual_object);
+  ~OpenGLComponent();
+  void Attach(OpenGLVertexBuffer *vertex_buffer);
   inline App *app();
   inline struct zgn_opengl_component *component();
 

@@ -4,10 +4,12 @@ deps_zukou = [
 
 srcs_zukou = [
   'app.cc',
+  'buffer.cc',
   'cuboid-window.cc',
   'glm-helper.cc',
   'virtual-object.cc',
   'opengl-component.cc',
+  'opengl-vertex-buffer.cc',
   zigen_protocol_c,
   zigen_client_protocol_h,
   zigen_shell_protocol_c,

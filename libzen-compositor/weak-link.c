@@ -22,6 +22,7 @@ zen_weak_link_init(struct zen_weak_link *link)
 WL_EXPORT void
 zen_weak_link_set(struct zen_weak_link *link, struct wl_resource *resource)
 {
+  wl_list_remove(&link->listener.link);
   link->resource = resource;
   link->listener.notify = zen_weak_link_destroy_listener;
   wl_resource_add_destroy_listener(resource, &link->listener);
@@ -32,6 +33,7 @@ zen_weak_link_unset(struct zen_weak_link *link)
 {
   link->resource = NULL;
   wl_list_remove(&link->listener.link);
+  wl_list_init(&link->listener.link);
 }
 
 WL_EXPORT void *

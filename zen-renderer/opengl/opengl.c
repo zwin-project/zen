@@ -4,6 +4,7 @@
 #include <zigen-opengl-server-protocol.h>
 
 #include "opengl-component.h"
+#include "opengl-vertex-buffer.h"
 
 WL_EXPORT void zen_opengl_destroy(struct zen_opengl* opengl);
 
@@ -20,13 +21,15 @@ zen_opengl_protocol_create_opengl_component(struct wl_client* client,
     struct wl_resource* resource, uint32_t id,
     struct wl_resource* virtual_object_resource)
 {
-  UNUSED(resource);
+  struct zen_opengl* opengl;
   struct zen_virtual_object* virtual_object;
   struct zen_opengl_component* component;
 
+  opengl = wl_resource_get_user_data(resource);
   virtual_object = wl_resource_get_user_data(virtual_object_resource);
 
-  component = zen_opengl_component_create(client, id, virtual_object);
+  component =
+      zen_opengl_component_create(client, id, opengl->renderer, virtual_object);
   if (component == NULL) {
     zen_log("zen opengl: failed to create a opengl component\n");
     return;
@@ -37,9 +40,13 @@ static void
 zen_opengl_protocol_create_vertex_buffer(
     struct wl_client* client, struct wl_resource* resource, uint32_t id)
 {
-  UNUSED(client);
   UNUSED(resource);
-  UNUSED(id);
+  struct zen_opengl_vertex_buffer* vertex_buffer;
+
+  vertex_buffer = zen_opengl_vertex_buffer_create(client, id);
+  if (vertex_buffer == NULL) {
+    zen_log("zen opengl: failed to create a vertex buffer\n");
+  }
 }
 
 static void
@@ -90,7 +97,8 @@ zen_opengl_bind(
 }
 
 WL_EXPORT struct zen_opengl*
-zen_opengl_create(struct zen_compositor* compositor)
+zen_opengl_create(
+    struct zen_compositor* compositor, struct zen_opengl_renderer* renderer)
 {
   struct zen_opengl* opengl;
   struct wl_global* global;
@@ -110,6 +118,7 @@ zen_opengl_create(struct zen_compositor* compositor)
 
   opengl->global = global;
   opengl->compositor = compositor;
+  opengl->renderer = renderer;
 
   return opengl;
 
