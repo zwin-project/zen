@@ -11,10 +11,20 @@
 #include <vector>
 
 extern const char *vertex_shader;
-extern const char *fragment_shader;
+extern const char *green_fragment_shader;
+extern const char *texture_fragment_shader;
+
+struct Vertex {
+  glm::vec3 p;
+  float u, v;
+};
 
 struct Line {
-  glm::vec3 s, e;
+  Vertex s, e;
+};
+
+struct Triangle {
+  Vertex a, b, c;
 };
 
 Box::Box(zukou::App *app, float length)
@@ -24,36 +34,85 @@ Box::Box(zukou::App *app, float length)
   length_ = length;
   rx_ = 0;
   ry_ = 0;
-  component_ = new zukou::OpenGLComponent(app, this);
-  vertex_buffer_ = new zukou::OpenGLVertexBuffer(app, sizeof(Line) * 12);
+  frame_component_ = new zukou::OpenGLComponent(app, this);
+  frame_vertex_buffer_ = new zukou::OpenGLVertexBuffer(app, sizeof(Line) * 12);
+  frame_shader_ = new zukou::OpenGLShaderProgram(app);
+  front_component_ = new zukou::OpenGLComponent(app, this);
+  front_vertex_buffer_ =
+      new zukou::OpenGLVertexBuffer(app, sizeof(Triangle) * 2);
+  front_shader_ = new zukou::OpenGLShaderProgram(app);
+  texture_ = new zukou::OpenGLTexture(app, 256, 256);
 
-  shader_ = new zukou::OpenGLShaderProgram(app);
-  shader_->SetVertexShader(vertex_shader, strlen(vertex_shader));
-  shader_->SetFragmentShader(fragment_shader, strlen(fragment_shader));
-  shader_->Link();
-  component_->Attach(shader_);
-  component_->SetCount(24);
-  component_->SetTopology(ZGN_OPENGL_TOPOLOGY_LINES);
-  component_->AddVertexAttribute(
-      0, 3, ZGN_OPENGL_VERTEX_ATTRIBUTE_TYPE_FLOAT, false, 0, 0);
+  frame_shader_->SetVertexShader(vertex_shader, strlen(vertex_shader));
+  frame_shader_->SetFragmentShader(
+      green_fragment_shader, strlen(green_fragment_shader));
+  frame_shader_->Link();
 
-  Line *edges = (Line *)vertex_buffer()->data();
+  frame_component_->Attach(frame_shader_);
+  frame_component_->SetCount(24);
+  frame_component_->SetTopology(ZGN_OPENGL_TOPOLOGY_LINES);
+  frame_component_->AddVertexAttribute(0, 3,
+      ZGN_OPENGL_VERTEX_ATTRIBUTE_TYPE_FLOAT, false, sizeof(Vertex),
+      offsetof(Vertex, p));
+
+  front_shader_->SetVertexShader(vertex_shader, strlen(vertex_shader));
+  front_shader_->SetFragmentShader(
+      texture_fragment_shader, strlen(texture_fragment_shader));
+  front_shader_->Link();
+
+  front_component_->Attach(front_shader_);
+  front_component_->SetCount(6);
+  front_component_->SetTopology(ZGN_OPENGL_TOPOLOGY_TRIANGLES);
+  front_component_->AddVertexAttribute(0, 3,
+      ZGN_OPENGL_VERTEX_ATTRIBUTE_TYPE_FLOAT, false, sizeof(Vertex),
+      offsetof(Vertex, p));
+  front_component_->AddVertexAttribute(1, 2,
+      ZGN_OPENGL_VERTEX_ATTRIBUTE_TYPE_FLOAT, false, sizeof(Vertex),
+      offsetof(Vertex, u));
+
+  Line *edges = (Line *)frame_vertex_buffer_->data();
   for (int i = 0; i < 3; i++) {
     int x = i;
     int y = (i + 1) % 3;
     int z = (i + 2) % 3;
     for (int j = -1; j < 2; j += 2) {
       for (int k = -1; k < 2; k += 2) {
-        edges->s[x] = -length_;
-        edges->s[y] = length_ * j;
-        edges->s[z] = length_ * k;
-        edges->e[x] = length_;
-        edges->e[y] = length_ * j;
-        edges->e[z] = length_ * k;
+        edges->s.p[x] = -length_;
+        edges->s.p[y] = length_ * j;
+        edges->s.p[z] = length_ * k;
+        edges->e.p[x] = length_;
+        edges->e.p[y] = length_ * j;
+        edges->e.p[z] = length_ * k;
         edges++;
       }
     }
   }
+
+  Triangle *triangles = (Triangle *)front_vertex_buffer_->data();
+  Vertex A = {{-length, -length, length}, 0, 0};
+  Vertex B = {{length, -length, length}, 1, 0};
+  Vertex C = {{length, length, length}, 1, 1};
+  Vertex D = {{-length, length, length}, 0, 1};
+  triangles[0].a = A;
+  triangles[0].b = C;
+  triangles[0].c = B;
+  triangles[1].a = A;
+  triangles[1].b = C;
+  triangles[1].c = D;
+
+  zukou::ColorBGRA *pixel = (zukou::ColorBGRA *)texture_->data();
+  for (int x = 0; x < 256; x++) {
+    for (int y = 0; y < 256; y++) {
+      pixel->a = UINT8_MAX;
+      pixel->r = x;
+      pixel->g = y;
+      pixel->b = 255;
+      pixel++;
+    }
+  }
+
+  texture_->BufferUpdated();
+  front_component_->Attach(texture_);
 }
 
 void
@@ -65,16 +124,24 @@ Box::Frame(uint32_t time)
   ry_ += (float)(rand() - RAND_MAX / 2) / (float)RAND_MAX;
   ry_ = ry_ > 10 ? 10 : ry_ < -10 ? -10 : ry_;
 
-  Line *edge = (Line *)vertex_buffer()->data();
-  for (int i = 0; i < 12; i++) {
-    edge->s = glm::rotateY(edge->s, glm::pi<float>() * 0.001f * ry_);
-    edge->e = glm::rotateY(edge->e, glm::pi<float>() * 0.001f * ry_);
-    edge->s = glm::rotateX(edge->s, glm::pi<float>() * 0.001f * rx_);
-    edge->e = glm::rotateX(edge->e, glm::pi<float>() * 0.001f * rx_);
-    edge++;
+  Vertex *vertex = (Vertex *)frame_vertex_buffer_->data();
+  for (int i = 0; i < 24; i++) {
+    vertex->p = glm::rotateY(vertex->p, glm::pi<float>() * 0.001f * ry_);
+    vertex->p = glm::rotateX(vertex->p, glm::pi<float>() * 0.001f * rx_);
+    vertex++;
   }
-  vertex_buffer()->BufferUpdated();
-  component()->Attach(vertex_buffer());
+  frame_vertex_buffer_->BufferUpdated();
+  frame_component_->Attach(frame_vertex_buffer_);
+
+  vertex = (Vertex *)front_vertex_buffer_->data();
+  for (int i = 0; i < 6; i++) {
+    vertex->p = glm::rotateY(vertex->p, glm::pi<float>() * 0.001f * ry_);
+    vertex->p = glm::rotateX(vertex->p, glm::pi<float>() * 0.001f * rx_);
+    vertex++;
+  }
+  front_vertex_buffer_->BufferUpdated();
+  front_component_->Attach(front_vertex_buffer_);
+
   this->NextFrame();
 }
 
@@ -82,15 +149,28 @@ const char *vertex_shader =
     "#version 410\n"
     "uniform mat4 mvp;\n"
     "layout(location = 0) in vec4 position;\n"
+    "layout(location = 1) in vec2 v2UVcoordsIn;\n"
+    "out vec2 v2UVcoords;\n"
     "void main()\n"
     "{\n"
+    "  v2UVcoords = v2UVcoordsIn;\n"
     "  gl_Position = mvp * position;\n"
     "}\n";
 
-const char *fragment_shader =
+const char *green_fragment_shader =
     "#version 410 core\n"
     "out vec4 outputColor;\n"
     "void main()\n"
     "{\n"
     "  outputColor = vec4(0.0, 1.0, 0.0, 1.0);\n"
+    "}\n";
+
+const char *texture_fragment_shader =
+    "#version 410 core\n"
+    "uniform sampler2D userTexture;\n"
+    "in vec2 v2UVcoords;\n"
+    "out vec4 outputColor;\n"
+    "void main()\n"
+    "{\n"
+    "  outputColor = texture(userTexture, v2UVcoords);\n"
     "}\n";

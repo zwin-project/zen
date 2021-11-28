@@ -75,11 +75,18 @@ App::opengl()
   return opengl_;
 }
 
+struct ColorBGRA {
+  uint8_t b, g, r, a;
+};
+
 class Buffer
 {
  public:
   Buffer(App *app, size_t size);
+  Buffer(App *app, int32_t stride, int32_t height, int32_t width,
+      enum wl_shm_format format);
   ~Buffer();
+  inline void *data();
 
  protected:
   size_t size_;
@@ -88,6 +95,12 @@ class Buffer
   struct wl_shm_pool *pool_;
   struct wl_buffer *wl_buffer_;
 };
+
+inline void *
+Buffer::data()
+{
+  return data_;
+}
 
 class VirtualObject
 {
@@ -151,6 +164,23 @@ CuboidWindow::half_size()
   return half_size_;
 }
 
+class OpenGLTexture : public Buffer
+{
+ public:
+  OpenGLTexture(App *app, int32_t height, int32_t width);
+  void BufferUpdated();
+  inline struct zgn_opengl_texture *texture();
+
+ private:
+  struct zgn_opengl_texture *texture_;
+};
+
+inline struct zgn_opengl_texture *
+OpenGLTexture::texture()
+{
+  return texture_;
+}
+
 class OpenGLVertexBuffer : public Buffer
 {
  public:
@@ -159,7 +189,6 @@ class OpenGLVertexBuffer : public Buffer
   void BufferUpdated();
   inline App *app();
   inline struct zgn_opengl_vertex_buffer *vertex_buffer();
-  inline void *data();
 
  private:
   App *app_;
@@ -176,12 +205,6 @@ inline struct zgn_opengl_vertex_buffer *
 OpenGLVertexBuffer::vertex_buffer()
 {
   return vertex_buffer_;
-}
-
-inline void *
-OpenGLVertexBuffer::data()
-{
-  return data_;
 }
 
 class OpenGLShaderProgram
@@ -213,6 +236,7 @@ class OpenGLComponent
   ~OpenGLComponent();
   void Attach(OpenGLVertexBuffer *vertex_buffer);
   void Attach(OpenGLShaderProgram *shader_program);
+  void Attach(OpenGLTexture *texture);
   void SetMin(uint32_t min);
   void SetCount(uint32_t count);
   void SetTopology(enum zgn_opengl_topology topology);

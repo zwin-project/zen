@@ -27,6 +27,7 @@ struct zen_opengl_component {
   struct {
     struct zen_weak_link vertex_buffer_link;
     struct zen_weak_link shader_program_link;
+    struct zen_weak_link texture_link;
     uint32_t min;
     uint32_t count;
     enum zgn_opengl_topology topology;
@@ -36,6 +37,7 @@ struct zen_opengl_component {
   struct {
     struct zen_weak_link vertex_buffer_link;
     struct zen_weak_link shader_program_link;
+    struct zen_weak_link texture_link;
     uint32_t min;
     uint32_t count;
     enum zgn_opengl_topology topology;

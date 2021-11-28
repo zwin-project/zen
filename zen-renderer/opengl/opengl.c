@@ -5,6 +5,7 @@
 
 #include "opengl-component.h"
 #include "opengl-shader-program.h"
+#include "opengl-texture.h"
 #include "opengl-vertex-buffer.h"
 
 WL_EXPORT void zen_opengl_destroy(struct zen_opengl* opengl);
@@ -67,9 +68,13 @@ static void
 zen_opengl_protocol_create_texture(
     struct wl_client* client, struct wl_resource* resource, uint32_t id)
 {
-  UNUSED(client);
   UNUSED(resource);
-  UNUSED(id);
+  struct zen_opengl_texture* texture;
+
+  texture = zen_opengl_texture_create(client, id);
+  if (texture == NULL) {
+    zen_log("zen opengl: failed to create a texture\n");
+  }
 }
 
 static const struct zgn_opengl_interface opengl_interface = {

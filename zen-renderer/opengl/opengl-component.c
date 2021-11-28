@@ -7,6 +7,7 @@
 #include <zigen-opengl-server-protocol.h>
 
 #include "opengl-shader-program.h"
+#include "opengl-texture.h"
 #include "opengl-vertex-buffer.h"
 #include "shader-compiler.h"
 
@@ -60,8 +61,11 @@ zen_opengl_component_protocol_attach_texture(struct wl_client *client,
     struct wl_resource *resource, struct wl_resource *texture)
 {
   UNUSED(client);
-  UNUSED(resource);
-  UNUSED(texture);
+  struct zen_opengl_component *component;
+
+  component = wl_resource_get_user_data(resource);
+
+  zen_weak_link_set(&component->pending.texture_link, texture);
 }
 
 static void
@@ -197,6 +201,7 @@ zen_opengl_component_virtual_object_commit_handler(
   struct zen_opengl_component *component;
   struct zen_opengl_vertex_buffer *vertex_buffer;
   struct zen_opengl_shader_program *shader;
+  struct zen_opengl_texture *texture;
   bool update_vao = false;
 
   component =
@@ -216,6 +221,12 @@ zen_opengl_component_virtual_object_commit_handler(
   if (shader) {
     zen_weak_link_set(
         &component->current.shader_program_link, shader->resource);
+  }
+
+  texture = zen_weak_link_get_user_data(&component->pending.texture_link);
+  if (texture) {
+    zen_opengl_texture_commit(texture);
+    zen_weak_link_set(&component->current.texture_link, texture->resource);
   }
 
   if (component->pending.min_changed) {
@@ -243,6 +254,7 @@ zen_opengl_component_virtual_object_commit_handler(
 
   zen_weak_link_unset(&component->pending.vertex_buffer_link);
   zen_weak_link_unset(&component->pending.shader_program_link);
+  zen_weak_link_unset(&component->pending.texture_link);
 
   if (update_vao) zen_opengl_component_update_vao(component);
 }
@@ -295,6 +307,8 @@ zen_opengl_component_create(struct wl_client *client, uint32_t id,
   zen_weak_link_init(&component->pending.vertex_buffer_link);
   zen_weak_link_init(&component->current.shader_program_link);
   zen_weak_link_init(&component->pending.shader_program_link);
+  zen_weak_link_init(&component->current.texture_link);
+  zen_weak_link_init(&component->pending.texture_link);
   component->current.min = 0;
   component->current.count = 0;
   component->current.topology = ZGN_OPENGL_TOPOLOGY_LINES;
@@ -330,6 +344,8 @@ zen_opengl_component_destroy(struct zen_opengl_component *component)
   zen_weak_link_unset(&component->pending.vertex_buffer_link);
   zen_weak_link_unset(&component->current.shader_program_link);
   zen_weak_link_unset(&component->pending.shader_program_link);
+  zen_weak_link_unset(&component->current.texture_link);
+  zen_weak_link_unset(&component->pending.texture_link);
   wl_array_release(&component->current.vertex_attributes);
   wl_array_release(&component->pending.vertex_attributes);
   wl_list_remove(&component->virtual_object_commit_listener.link);
@@ -346,11 +362,13 @@ zen_opengl_component_render(struct zen_opengl_component *component,
   mat4 mvp;
   struct zen_cuboid_window *cuboid_window;
   struct zen_opengl_shader_program *shader;
+  struct zen_opengl_texture *texture;
 
   if (strcmp(component->virtual_object->role, zen_cuboid_window_role) != 0)
     return;
   cuboid_window = component->virtual_object->role_object;
   shader = zen_weak_link_get_user_data(&component->current.shader_program_link);
+  texture = zen_weak_link_get_user_data(&component->current.texture_link);
 
   if (shader == NULL || shader->linked == false) return;
 
@@ -362,8 +380,10 @@ zen_opengl_component_render(struct zen_opengl_component *component,
   glUseProgram(shader->program_id);
   GLint mvp_matrix_location = glGetUniformLocation(shader->program_id, "mvp");
   glUniformMatrix4fv(mvp_matrix_location, 1, GL_FALSE, (float *)mvp);
+  if (texture) glBindTexture(GL_TEXTURE_2D, texture->id);
   glDrawArrays(component->current.topology, component->current.min,
       component->current.count);
   glUseProgram(0);
+  glBindTexture(GL_TEXTURE_2D, 0);
   glBindVertexArray(0);
 }
