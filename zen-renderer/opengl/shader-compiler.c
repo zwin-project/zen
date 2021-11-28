@@ -1,4 +1,4 @@
-#include "shader-program.h"
+#include "shader-compiler.h"
 
 #include <GL/glew.h>
 #include <libzen-compositor/libzen-compositor.h>
@@ -7,19 +7,20 @@
 /**
  * Each shader source must be null terminated.
  */
-int
-zen_opengl_shader_program_compile(struct zen_opengl_shader_program* shader)
+WL_EXPORT int
+zen_opengl_shader_compiler_compile(
+    struct zen_opengl_shader_compiler_input* input)
 {
   GLuint id = glCreateProgram();
 
-  if (shader->vertex_shader == NULL || shader->fragment_shader == NULL) {
+  if (input->vertex_shader == NULL || input->fragment_shader == NULL) {
     zen_log("opengl shader: vertex shader and fragment shader must be set\n");
     return -1;
   }
 
   // compile vertex shader
   GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertex_shader, 1, &shader->vertex_shader, NULL);
+  glShaderSource(vertex_shader, 1, &input->vertex_shader, NULL);
   glCompileShader(vertex_shader);
 
   GLint vertex_shader_compiled = GL_FALSE;
@@ -35,7 +36,7 @@ zen_opengl_shader_program_compile(struct zen_opengl_shader_program* shader)
 
   // compile fragment shader
   GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragment_shader, 1, &shader->fragment_shader, NULL);
+  glShaderSource(fragment_shader, 1, &input->fragment_shader, NULL);
   glCompileShader(fragment_shader);
 
   GLint fragment_shader_compiled = GL_FALSE;
@@ -62,12 +63,12 @@ zen_opengl_shader_program_compile(struct zen_opengl_shader_program* shader)
   glUseProgram(id);
   glUseProgram(0);
 
-  shader->program_id = id;
+  input->program_id = id;
 
   return 0;
 }
 
-const char* zen_opengl_default_vertex_shader =
+WL_EXPORT const char* zen_opengl_default_vertex_shader =
     "#version 410\n"
     "uniform mat4 mvp;\n"
     "layout(location = 0) in vec4 position;\n"
@@ -80,7 +81,7 @@ const char* zen_opengl_default_vertex_shader =
     "  gl_Position = mvp * position;\n"
     "}\n";
 
-const char* zen_opengl_default_color_fragment_shader =
+WL_EXPORT const char* zen_opengl_default_color_fragment_shader =
     "#version 410 core\n"
     "out vec4 outputColor;\n"
     "void main()\n"
@@ -88,7 +89,7 @@ const char* zen_opengl_default_color_fragment_shader =
     "  outputColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
     "}\n";
 
-const char* zen_opengl_default_texture_fragment_shader =
+WL_EXPORT const char* zen_opengl_default_texture_fragment_shader =
     "#version 410 core\n"
     "uniform sampler2D userTexture;\n"
     "in vec2 v2UVcoords;\n"
