@@ -27,4 +27,31 @@ OpenGLComponent::Attach(OpenGLShaderProgram *shader_program)
       component(), shader_program->shader());
 }
 
+void
+OpenGLComponent::SetMin(uint32_t min)
+{
+  zgn_opengl_component_set_min(component(), min);
+}
+
+void
+OpenGLComponent::SetCount(uint32_t count)
+{
+  zgn_opengl_component_set_count(component(), count);
+}
+
+void
+OpenGLComponent::SetTopology(enum zgn_opengl_topology topology)
+{
+  zgn_opengl_component_set_topology(component(), topology);
+}
+
+void
+OpenGLComponent::AddVertexAttribute(uint32_t index, uint32_t size,
+    enum zgn_opengl_vertex_attribute_type type, uint32_t normalized,
+    uint32_t stride, uint32_t pointer)
+{
+  zgn_opengl_component_add_vertex_attribute(
+      component(), index, size, type, normalized, stride, pointer);
+}
+
 }  // namespace zukou

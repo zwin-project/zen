@@ -32,6 +32,10 @@ Box::Box(zukou::App *app, float length)
   shader_->SetFragmentShader(fragment_shader, strlen(fragment_shader));
   shader_->Link();
   component_->Attach(shader_);
+  component_->SetCount(24);
+  component_->SetTopology(ZGN_OPENGL_TOPOLOGY_LINES);
+  component_->AddVertexAttribute(
+      0, 3, ZGN_OPENGL_VERTEX_ATTRIBUTE_TYPE_FLOAT, false, 0, 0);
 
   Line *edges = (Line *)vertex_buffer()->data();
   for (int i = 0; i < 3; i++) {
