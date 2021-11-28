@@ -184,12 +184,35 @@ OpenGLVertexBuffer::data()
   return data_;
 }
 
+class OpenGLShaderProgram
+{
+ public:
+  OpenGLShaderProgram(App *app);
+  ~OpenGLShaderProgram();
+  bool SetVertexShader(const char *source, size_t len);
+  bool SetFragmentShader(const char *source, size_t len);
+  void Link();
+  inline struct zgn_opengl_shader_program *shader();
+
+ private:
+  struct zgn_opengl_shader_program *shader_;
+  int vertex_shader_fd_;
+  int fragment_shader_fd_;
+};
+
+inline struct zgn_opengl_shader_program *
+OpenGLShaderProgram::shader()
+{
+  return shader_;
+}
+
 class OpenGLComponent
 {
  public:
   OpenGLComponent(App *app, VirtualObject *virtual_object);
   ~OpenGLComponent();
   void Attach(OpenGLVertexBuffer *vertex_buffer);
+  void Attach(OpenGLShaderProgram *shader_program);
   inline App *app();
   inline struct zgn_opengl_component *component();
 

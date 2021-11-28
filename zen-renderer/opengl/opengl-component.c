@@ -6,6 +6,7 @@
 #include <zen-shell/zen-shell.h>
 #include <zigen-opengl-server-protocol.h>
 
+#include "opengl-shader-program.h"
 #include "opengl-vertex-buffer.h"
 #include "shader-compiler.h"
 
@@ -47,8 +48,11 @@ zen_opengl_component_protocol_attach_shader_program(struct wl_client *client,
     struct wl_resource *resource, struct wl_resource *shader_program)
 {
   UNUSED(client);
-  UNUSED(resource);
-  UNUSED(shader_program);
+  struct zen_opengl_component *component;
+
+  component = wl_resource_get_user_data(resource);
+
+  zen_weak_link_set(&component->pending.shader_program_link, shader_program);
 }
 
 static void
@@ -128,7 +132,7 @@ static const struct zgn_opengl_component_interface opengl_component_interface =
 };
 
 static void
-zen_opengl_component_setup_vao(struct zen_opengl_component *component)
+zen_opengl_component_update_vao(struct zen_opengl_component *component)
 {
   struct zen_opengl_vertex_buffer *vertex_buffer;
 
@@ -152,7 +156,8 @@ zen_opengl_component_virtual_object_commit_handler(
   UNUSED(data);
   struct zen_opengl_component *component;
   struct zen_opengl_vertex_buffer *vertex_buffer;
-  bool state_changed = false;
+  struct zen_opengl_shader_program *shader;
+  bool update_vao = false;
 
   component =
       wl_container_of(listener, component, virtual_object_commit_listener);
@@ -163,12 +168,19 @@ zen_opengl_component_virtual_object_commit_handler(
     zen_opengl_vertex_buffer_commit(vertex_buffer);
     zen_weak_link_set(
         &component->current.vertex_buffer_link, vertex_buffer->resource);
-    state_changed = true;
+    update_vao = true;
+  }
+
+  shader = zen_weak_link_get_user_data(&component->pending.shader_program_link);
+  if (shader) {
+    zen_weak_link_set(
+        &component->current.shader_program_link, shader->resource);
   }
 
   zen_weak_link_unset(&component->pending.vertex_buffer_link);
+  zen_weak_link_unset(&component->pending.shader_program_link);
 
-  if (state_changed) zen_opengl_component_setup_vao(component);
+  if (update_vao) zen_opengl_component_update_vao(component);
 }
 
 static void
@@ -217,6 +229,8 @@ zen_opengl_component_create(struct wl_client *client, uint32_t id,
 
   zen_weak_link_init(&component->current.vertex_buffer_link);
   zen_weak_link_init(&component->pending.vertex_buffer_link);
+  zen_weak_link_init(&component->current.shader_program_link);
+  zen_weak_link_init(&component->pending.shader_program_link);
 
   component->virtual_object_commit_listener.notify =
       zen_opengl_component_virtual_object_commit_handler;
@@ -241,6 +255,8 @@ zen_opengl_component_destroy(struct zen_opengl_component *component)
 {
   zen_weak_link_unset(&component->current.vertex_buffer_link);
   zen_weak_link_unset(&component->pending.vertex_buffer_link);
+  zen_weak_link_unset(&component->current.shader_program_link);
+  zen_weak_link_unset(&component->pending.shader_program_link);
   wl_list_remove(&component->virtual_object_commit_listener.link);
   wl_list_remove(&component->virtual_object_destroy_listener.link);
   wl_list_remove(&component->link);
@@ -254,27 +270,24 @@ zen_opengl_component_render(struct zen_opengl_component *component,
 {
   mat4 mvp;
   struct zen_cuboid_window *cuboid_window;
-  struct zen_opengl_shader_compiler_input shader_input;
-  shader_input.vertex_shader = zen_opengl_default_vertex_shader;
-  shader_input.fragment_shader = zen_opengl_default_color_fragment_shader;
-  zen_opengl_shader_compiler_compile(&shader_input);
+  struct zen_opengl_shader_program *shader;
 
   if (strcmp(component->virtual_object->role, zen_cuboid_window_role) != 0)
     return;
   cuboid_window = component->virtual_object->role_object;
+  shader = zen_weak_link_get_user_data(&component->current.shader_program_link);
+
+  if (shader == NULL || shader->linked == false) return;
 
   glm_mat4_copy(cuboid_window->model_matrix, mvp);
   glm_mat4_mul(camera->view_matrix, mvp, mvp);
   glm_mat4_mul(camera->projection_matrix, mvp, mvp);
 
   glBindVertexArray(component->vertex_array_id);
-  glUseProgram(shader_input.program_id);  // FIXME:
-  GLint mvp_matrix_location =
-      glGetUniformLocation(shader_input.program_id, "mvp");
+  glUseProgram(shader->program_id);
+  GLint mvp_matrix_location = glGetUniformLocation(shader->program_id, "mvp");
   glUniformMatrix4fv(mvp_matrix_location, 1, GL_FALSE, (float *)mvp);
   glDrawArrays(GL_LINES, 0, 24);  // FIXME:
   glUseProgram(0);
   glBindVertexArray(0);
-
-  glDeleteProgram(shader_input.program_id);
 }

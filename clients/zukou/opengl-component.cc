@@ -20,4 +20,11 @@ OpenGLComponent::Attach(OpenGLVertexBuffer *vertex_buffer)
       component(), vertex_buffer->vertex_buffer());
 }
 
+void
+OpenGLComponent::Attach(OpenGLShaderProgram *shader_program)
+{
+  zgn_opengl_component_attach_shader_program(
+      component(), shader_program->shader());
+}
+
 }  // namespace zukou

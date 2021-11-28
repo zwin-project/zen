@@ -8,6 +8,7 @@ srcs_opengl_renderer = [
   'opengl.c',
   'opengl-component.c',
   'opengl-renderer.c',
+  'opengl-shader-program.c',
   'opengl-vertex-buffer.c',
   'shader-compiler.c',
   zigen_opengl_protocol_c,

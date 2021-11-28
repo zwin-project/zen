@@ -4,6 +4,7 @@
 #include <zigen-opengl-server-protocol.h>
 
 #include "opengl-component.h"
+#include "opengl-shader-program.h"
 #include "opengl-vertex-buffer.h"
 
 WL_EXPORT void zen_opengl_destroy(struct zen_opengl* opengl);
@@ -53,9 +54,13 @@ static void
 zen_opengl_protocol_create_shader_program(
     struct wl_client* client, struct wl_resource* resource, uint32_t id)
 {
-  UNUSED(client);
   UNUSED(resource);
-  UNUSED(id);
+  struct zen_opengl_shader_program* shader;
+
+  shader = zen_opengl_shader_program_create(client, id);
+  if (shader == NULL) {
+    zen_log("zen opengl: failed to create a shader program\n");
+  }
 }
 
 static void
