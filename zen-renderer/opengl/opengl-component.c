@@ -1,7 +1,13 @@
 #include "opengl-component.h"
 
+#include <cglm/cglm.h>
+#include <string.h>
 #include <wayland-server.h>
+#include <zen-shell/zen-shell.h>
 #include <zigen-opengl-server-protocol.h>
+
+#include "opengl-vertex-buffer.h"
+#include "shader-program.h"
 
 WL_EXPORT
 void zen_opengl_component_destroy(struct zen_opengl_component *component);
@@ -29,8 +35,11 @@ zen_opengl_component_protocol_attach_vertex_buffer(struct wl_client *client,
     struct wl_resource *resource, struct wl_resource *vertex_buffer)
 {
   UNUSED(client);
-  UNUSED(resource);
-  UNUSED(vertex_buffer);
+  struct zen_opengl_component *component;
+
+  component = wl_resource_get_user_data(resource);
+
+  zen_weak_link_set(&component->pending.vertex_buffer_link, vertex_buffer);
 }
 
 static void
@@ -118,8 +127,66 @@ static const struct zgn_opengl_component_interface opengl_component_interface =
         .set_count = zen_opengl_component_protocol_set_count,
 };
 
+static void
+zen_opengl_component_setup_vao(struct zen_opengl_component *component)
+{
+  struct zen_opengl_vertex_buffer *vertex_buffer;
+
+  vertex_buffer =
+      zen_weak_link_get_user_data(&component->current.vertex_buffer_link);
+
+  glBindVertexArray(component->vertex_array_id);
+  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer ? vertex_buffer->id : 0);
+
+  glEnableVertexAttribArray(0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);  // FIXME:
+  glBindVertexArray(0);
+  glDisableVertexAttribArray(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
+static void
+zen_opengl_component_virtual_object_commit_handler(
+    struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+  struct zen_opengl_component *component;
+  struct zen_opengl_vertex_buffer *vertex_buffer;
+  bool state_changed = false;
+
+  component =
+      wl_container_of(listener, component, virtual_object_commit_listener);
+
+  vertex_buffer =
+      zen_weak_link_get_user_data(&component->pending.vertex_buffer_link);
+  if (vertex_buffer) {
+    zen_opengl_vertex_buffer_commit(vertex_buffer);
+    zen_weak_link_set(
+        &component->current.vertex_buffer_link, vertex_buffer->resource);
+    state_changed = true;
+  }
+
+  zen_weak_link_unset(&component->pending.vertex_buffer_link);
+
+  if (state_changed) zen_opengl_component_setup_vao(component);
+}
+
+static void
+zen_opengl_component_virtual_object_destroy_handler(
+    struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+  struct zen_opengl_component *component;
+
+  component =
+      wl_container_of(listener, component, virtual_object_destroy_listener);
+
+  wl_resource_destroy(component->resource);
+}
+
 WL_EXPORT struct zen_opengl_component *
 zen_opengl_component_create(struct wl_client *client, uint32_t id,
+    struct zen_opengl_renderer *renderer,
     struct zen_virtual_object *virtual_object)
 {
   struct zen_opengl_component *component;
@@ -142,7 +209,23 @@ zen_opengl_component_create(struct wl_client *client, uint32_t id,
   wl_resource_set_implementation(resource, &opengl_component_interface,
       component, zen_opengl_component_handle_destroy);
 
+  component->resource = resource;
   component->virtual_object = virtual_object;
+  wl_list_insert(&renderer->component_list, &component->link);
+
+  glGenVertexArrays(1, &component->vertex_array_id);
+
+  zen_weak_link_init(&component->current.vertex_buffer_link);
+  zen_weak_link_init(&component->pending.vertex_buffer_link);
+
+  component->virtual_object_commit_listener.notify =
+      zen_opengl_component_virtual_object_commit_handler;
+  wl_signal_add(&virtual_object->commit_signal,
+      &component->virtual_object_commit_listener);
+  component->virtual_object_destroy_listener.notify =
+      zen_opengl_component_virtual_object_destroy_handler;
+  wl_signal_add(&virtual_object->destroy_signal,
+      &component->virtual_object_destroy_listener);
 
   return component;
 
@@ -156,5 +239,41 @@ err:
 WL_EXPORT void
 zen_opengl_component_destroy(struct zen_opengl_component *component)
 {
+  zen_weak_link_unset(&component->current.vertex_buffer_link);
+  zen_weak_link_unset(&component->pending.vertex_buffer_link);
+  wl_list_remove(&component->virtual_object_commit_listener.link);
+  wl_list_remove(&component->virtual_object_destroy_listener.link);
+  wl_list_remove(&component->link);
+  glDeleteVertexArrays(1, &component->vertex_array_id);
   free(component);
+}
+
+WL_EXPORT void
+zen_opengl_component_render(struct zen_opengl_component *component,
+    struct zen_opengl_renderer_camera *camera)
+{
+  mat4 mvp;
+  struct zen_cuboid_window *cuboid_window;
+  struct zen_opengl_shader_program shader;
+  shader.vertex_shader = zen_opengl_default_vertex_shader;
+  shader.fragment_shader = zen_opengl_default_color_fragment_shader;
+  zen_opengl_shader_program_compile(&shader);
+
+  if (strcmp(component->virtual_object->role, zen_cuboid_window_role) != 0)
+    return;
+  cuboid_window = component->virtual_object->role_object;
+
+  glm_mat4_copy(cuboid_window->model_matrix, mvp);
+  glm_mat4_mul(camera->view_matrix, mvp, mvp);
+  glm_mat4_mul(camera->projection_matrix, mvp, mvp);
+
+  glBindVertexArray(component->vertex_array_id);
+  glUseProgram(shader.program_id);  // FIXME:
+  GLint mvp_matrix_location = glGetUniformLocation(shader.program_id, "mvp");
+  glUniformMatrix4fv(mvp_matrix_location, 1, GL_FALSE, (float *)mvp);
+  glDrawArrays(GL_LINES, 0, 24);  // FIXME:
+  glUseProgram(0);
+  glBindVertexArray(0);
+
+  glDeleteProgram(shader.program_id);
 }

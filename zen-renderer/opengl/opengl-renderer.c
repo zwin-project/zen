@@ -6,6 +6,7 @@
 #include <zen-shell/zen-shell.h>
 
 #include "cuboid-window-render-item.h"
+#include "opengl-component.h"
 #include "opengl.h"
 
 char* zen_opengl_renderer_type = "zen_opengl_renderer";
@@ -28,7 +29,7 @@ zen_renderer_create(struct zen_compositor* compositor)
     goto err;
   }
 
-  opengl = zen_opengl_create(compositor);
+  opengl = zen_opengl_create(compositor, renderer);
   if (opengl == NULL) {
     zen_log("opengl renderer: failed to create zen opengl\n");
     goto err_opengl;
@@ -41,6 +42,7 @@ zen_renderer_create(struct zen_compositor* compositor)
   renderer->camera_count = 0;
   renderer->camera_allocate = 0;
   wl_list_init(&renderer->cuboid_window_render_item_list);
+  wl_list_init(&renderer->component_list);
 
   return &renderer->base;
 
@@ -49,6 +51,15 @@ err_opengl:
 
 err:
   return NULL;
+}
+
+WL_EXPORT void
+zen_renderer_destroy(struct zen_renderer* renderer_base)
+{
+  struct zen_opengl_renderer* renderer = zen_opengl_renderer_get(renderer_base);
+  if (renderer->camera_allocate > 0) free(renderer->cameras);
+  zen_opengl_destroy(renderer->opengl);
+  free(renderer);
 }
 
 WL_EXPORT struct zen_opengl_renderer*
@@ -60,15 +71,6 @@ zen_opengl_renderer_get(struct zen_renderer* renderer_base)
   renderer = wl_container_of(renderer_base, renderer, base);
 
   return renderer;
-}
-
-WL_EXPORT void
-zen_renderer_destroy(struct zen_renderer* renderer_base)
-{
-  struct zen_opengl_renderer* renderer = zen_opengl_renderer_get(renderer_base);
-  if (renderer->camera_allocate > 0) free(renderer->cameras);
-  zen_opengl_destroy(renderer->opengl);
-  free(renderer);
 }
 
 WL_EXPORT void
@@ -112,6 +114,7 @@ zen_opengl_renderer_render(struct zen_opengl_renderer* renderer)
   for (camera = renderer->cameras;
        camera < renderer->cameras + renderer->camera_count; camera++) {
     struct zen_opengl_cuboid_window_render_item* cuboid_window_render_item;
+    struct zen_opengl_component* component;
 
     glBindFramebuffer(GL_FRAMEBUFFER, camera->framebuffer_id);
     glViewport(camera->viewport.x, camera->viewport.y, camera->viewport.width,
@@ -123,6 +126,12 @@ zen_opengl_renderer_render(struct zen_opengl_renderer* renderer)
     {
       zen_opengl_cuboid_window_render_item_render(
           cuboid_window_render_item, camera);
+    }
+
+    // render opengl components
+    wl_list_for_each(component, &renderer->component_list, link)
+    {
+      zen_opengl_component_render(component, camera);
     }
   }
 

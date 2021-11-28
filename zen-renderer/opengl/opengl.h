@@ -6,9 +6,11 @@
 struct zen_opengl {
   struct zen_compositor* compositor;
   struct wl_global* global;
+  struct zen_opengl_renderer* renderer;
 };
 
-struct zen_opengl* zen_opengl_create(struct zen_compositor* compositor);
+struct zen_opengl* zen_opengl_create(
+    struct zen_compositor* compositor, struct zen_opengl_renderer* renderer);
 
 void zen_opengl_destroy(struct zen_opengl* opengl);
 

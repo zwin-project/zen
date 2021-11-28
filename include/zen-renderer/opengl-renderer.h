@@ -17,6 +17,7 @@ struct zen_opengl_renderer {
   uint32_t camera_allocate;
 
   struct wl_list cuboid_window_render_item_list;
+  struct wl_list component_list;
 };
 
 struct zen_opengl_renderer_camera {
