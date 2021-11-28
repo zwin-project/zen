@@ -66,17 +66,25 @@ zen_opengl_component_protocol_attach_texture(struct wl_client *client,
 
 static void
 zen_opengl_component_protocol_add_vertex_attribute(struct wl_client *client,
-    struct wl_resource *resource, uint32_t index, uint32_t size, uint32_t type,
-    uint32_t normalized, uint32_t stride, uint32_t pointer)
+    struct wl_resource *resource, uint32_t index, uint32_t size,
+    enum zgn_opengl_vertex_attribute_type type, uint32_t normalized,
+    uint32_t stride, uint32_t pointer)
 {
   UNUSED(client);
-  UNUSED(resource);
-  UNUSED(index);
-  UNUSED(size);
-  UNUSED(type);
-  UNUSED(normalized);
-  UNUSED(stride);
-  UNUSED(pointer);
+  struct zen_opengl_component *component;
+  struct zen_opengl_vertex_attribute *attribute;
+
+  component = wl_resource_get_user_data(resource);
+
+  attribute =
+      wl_array_add(&component->pending.vertex_attributes, sizeof(*attribute));
+  attribute->index = index;
+  attribute->size = size;
+  attribute->type = type;
+  attribute->normalized = normalized;
+  attribute->stride = stride;
+  attribute->pointer = pointer;
+  component->pending.vertex_attributes_changed = true;
 }
 
 static void
@@ -85,15 +93,27 @@ zen_opengl_component_protocol_clear_vertex_attribute(
 {
   UNUSED(client);
   UNUSED(resource);
+  struct zen_opengl_component *component;
+
+  component = wl_resource_get_user_data(resource);
+
+  wl_array_release(&component->pending.vertex_attributes);
+  wl_array_init(&component->pending.vertex_attributes);
+  component->pending.vertex_attributes_changed = true;
 }
 
 static void
-zen_opengl_component_protocol_set_topology(
-    struct wl_client *client, struct wl_resource *resource, uint32_t topology)
+zen_opengl_component_protocol_set_topology(struct wl_client *client,
+    struct wl_resource *resource, enum zgn_opengl_topology topology)
 {
   UNUSED(client);
   UNUSED(resource);
-  UNUSED(topology);
+  struct zen_opengl_component *component;
+
+  component = wl_resource_get_user_data(resource);
+
+  component->pending.topology = topology;
+  component->pending.topology_changed = true;
 }
 
 static void
@@ -101,8 +121,12 @@ zen_opengl_component_protocol_set_min(
     struct wl_client *client, struct wl_resource *resource, uint32_t min)
 {
   UNUSED(client);
-  UNUSED(resource);
-  UNUSED(min);
+  struct zen_opengl_component *component;
+
+  component = wl_resource_get_user_data(resource);
+
+  component->pending.min = min;
+  component->pending.min_changed = true;
 }
 
 static void
@@ -110,8 +134,12 @@ zen_opengl_component_protocol_set_count(
     struct wl_client *client, struct wl_resource *resource, uint32_t count)
 {
   UNUSED(client);
-  UNUSED(resource);
-  UNUSED(count);
+  struct zen_opengl_component *component;
+
+  component = wl_resource_get_user_data(resource);
+
+  component->pending.count = count;
+  component->pending.count_changed = true;
 }
 
 static const struct zgn_opengl_component_interface opengl_component_interface =
@@ -135,15 +163,27 @@ static void
 zen_opengl_component_update_vao(struct zen_opengl_component *component)
 {
   struct zen_opengl_vertex_buffer *vertex_buffer;
+  struct zen_opengl_vertex_attribute *attribute;
 
   vertex_buffer =
       zen_weak_link_get_user_data(&component->current.vertex_buffer_link);
 
+  if (vertex_buffer == NULL) return;
+
   glBindVertexArray(component->vertex_array_id);
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer ? vertex_buffer->id : 0);
 
-  glEnableVertexAttribArray(0);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);  // FIXME:
+  wl_array_for_each(attribute, &component->current.vertex_attributes)
+  {
+    glEnableVertexAttribArray(attribute->index);
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wint-to-pointer-cast"
+    glVertexAttribPointer(attribute->index, attribute->size, attribute->type,
+        attribute->normalized, attribute->stride, (void *)attribute->pointer);
+#pragma GCC diagnostic pop
+  }
+
   glBindVertexArray(0);
   glDisableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -166,15 +206,39 @@ zen_opengl_component_virtual_object_commit_handler(
       zen_weak_link_get_user_data(&component->pending.vertex_buffer_link);
   if (vertex_buffer) {
     zen_opengl_vertex_buffer_commit(vertex_buffer);
+    if (component->current.vertex_buffer_link.resource == NULL)
+      update_vao = true;
     zen_weak_link_set(
         &component->current.vertex_buffer_link, vertex_buffer->resource);
-    update_vao = true;
   }
 
   shader = zen_weak_link_get_user_data(&component->pending.shader_program_link);
   if (shader) {
     zen_weak_link_set(
         &component->current.shader_program_link, shader->resource);
+  }
+
+  if (component->pending.min_changed) {
+    component->current.min = component->pending.min;
+    component->pending.min_changed = false;
+  }
+
+  if (component->pending.count_changed) {
+    component->current.count = component->pending.count;
+    component->pending.count_changed = false;
+  }
+
+  if (component->pending.topology_changed) {
+    component->current.topology = component->pending.topology;
+    component->pending.topology_changed = false;
+  }
+
+  if (component->pending.vertex_attributes_changed) {
+    wl_array_release(&component->current.vertex_attributes);
+    component->current.vertex_attributes = component->pending.vertex_attributes;
+    wl_array_init(&component->pending.vertex_attributes);
+    component->pending.vertex_attributes_changed = false;
+    update_vao = true;
   }
 
   zen_weak_link_unset(&component->pending.vertex_buffer_link);
@@ -231,6 +295,15 @@ zen_opengl_component_create(struct wl_client *client, uint32_t id,
   zen_weak_link_init(&component->pending.vertex_buffer_link);
   zen_weak_link_init(&component->current.shader_program_link);
   zen_weak_link_init(&component->pending.shader_program_link);
+  component->current.min = 0;
+  component->current.count = 0;
+  component->current.topology = ZGN_OPENGL_TOPOLOGY_LINES;
+  wl_array_init(&component->current.vertex_attributes);
+  component->pending.min_changed = false;
+  component->pending.count_changed = false;
+  component->pending.topology_changed = false;
+  component->pending.vertex_attributes_changed = false;
+  wl_array_init(&component->pending.vertex_attributes);
 
   component->virtual_object_commit_listener.notify =
       zen_opengl_component_virtual_object_commit_handler;
@@ -257,6 +330,8 @@ zen_opengl_component_destroy(struct zen_opengl_component *component)
   zen_weak_link_unset(&component->pending.vertex_buffer_link);
   zen_weak_link_unset(&component->current.shader_program_link);
   zen_weak_link_unset(&component->pending.shader_program_link);
+  wl_array_release(&component->current.vertex_attributes);
+  wl_array_release(&component->pending.vertex_attributes);
   wl_list_remove(&component->virtual_object_commit_listener.link);
   wl_list_remove(&component->virtual_object_destroy_listener.link);
   wl_list_remove(&component->link);
@@ -287,7 +362,8 @@ zen_opengl_component_render(struct zen_opengl_component *component,
   glUseProgram(shader->program_id);
   GLint mvp_matrix_location = glGetUniformLocation(shader->program_id, "mvp");
   glUniformMatrix4fv(mvp_matrix_location, 1, GL_FALSE, (float *)mvp);
-  glDrawArrays(GL_LINES, 0, 24);  // FIXME:
+  glDrawArrays(component->current.topology, component->current.min,
+      component->current.count);
   glUseProgram(0);
   glBindVertexArray(0);
 }

@@ -213,6 +213,12 @@ class OpenGLComponent
   ~OpenGLComponent();
   void Attach(OpenGLVertexBuffer *vertex_buffer);
   void Attach(OpenGLShaderProgram *shader_program);
+  void SetMin(uint32_t min);
+  void SetCount(uint32_t count);
+  void SetTopology(enum zgn_opengl_topology topology);
+  void AddVertexAttribute(uint32_t index, uint32_t size,
+      enum zgn_opengl_vertex_attribute_type type, uint32_t normalized,
+      uint32_t stride, uint32_t pointer);
   inline App *app();
   inline struct zgn_opengl_component *component();
 

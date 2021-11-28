@@ -5,11 +5,16 @@
 #include <libzen-compositor/libzen-compositor.h>
 #include <wayland-server.h>
 #include <zen-renderer/opengl-renderer.h>
+#include <zigen-opengl-server-protocol.h>
 #include <zigen-server-protocol.h>
 
-struct zen_opengl_component_state {
-  struct zen_weak_link vertex_buffer_link;
-  struct zen_weak_link shader_program_link;
+struct zen_opengl_vertex_attribute {
+  uint32_t index;
+  uint32_t size;
+  enum zgn_opengl_vertex_attribute_type type;
+  uint32_t normalized;
+  uint32_t stride;
+  uint32_t pointer;
 };
 
 struct zen_opengl_component {
@@ -19,8 +24,27 @@ struct zen_opengl_component {
 
   GLuint vertex_array_id;
 
-  struct zen_opengl_component_state current;
-  struct zen_opengl_component_state pending;
+  struct {
+    struct zen_weak_link vertex_buffer_link;
+    struct zen_weak_link shader_program_link;
+    uint32_t min;
+    uint32_t count;
+    enum zgn_opengl_topology topology;
+    struct wl_array vertex_attributes;
+  } current;
+
+  struct {
+    struct zen_weak_link vertex_buffer_link;
+    struct zen_weak_link shader_program_link;
+    uint32_t min;
+    uint32_t count;
+    enum zgn_opengl_topology topology;
+    struct wl_array vertex_attributes;
+    bool min_changed;
+    bool count_changed;
+    bool topology_changed;
+    bool vertex_attributes_changed;
+  } pending;
 
   struct wl_listener virtual_object_commit_listener;
   struct wl_listener virtual_object_destroy_listener;
