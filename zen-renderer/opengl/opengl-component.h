@@ -9,6 +9,7 @@
 
 struct zen_opengl_component_state {
   struct zen_weak_link vertex_buffer_link;
+  struct zen_weak_link shader_program_link;
 };
 
 struct zen_opengl_component {

@@ -14,7 +14,9 @@ zen_opengl_shader_compiler_compile(
   GLuint id = glCreateProgram();
 
   if (input->vertex_shader == NULL || input->fragment_shader == NULL) {
-    zen_log("opengl shader: vertex shader and fragment shader must be set\n");
+    zen_log(
+        "opengl shader compiler: vertex shader and fragment shader must be "
+        "set\n");
     return -1;
   }
 
@@ -26,7 +28,7 @@ zen_opengl_shader_compiler_compile(
   GLint vertex_shader_compiled = GL_FALSE;
   glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &vertex_shader_compiled);
   if (vertex_shader_compiled != GL_TRUE) {
-    zen_log("opengl shader: failed to compile vertex shader\n");
+    zen_log("opengl shader compiler: failed to compile vertex shader\n");
     glDeleteProgram(id);
     glDeleteShader(vertex_shader);
     return -1;
@@ -42,7 +44,7 @@ zen_opengl_shader_compiler_compile(
   GLint fragment_shader_compiled = GL_FALSE;
   glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &fragment_shader_compiled);
   if (fragment_shader_compiled != GL_TRUE) {
-    zen_log("opengl shader: failed to compile fragment shader\n");
+    zen_log("opengl shader compiler: failed to compile fragment shader\n");
     glDeleteProgram(id);
     glDeleteShader(fragment_shader);
     return -1;
@@ -55,7 +57,7 @@ zen_opengl_shader_compiler_compile(
   GLint program_success = GL_FALSE;
   glGetProgramiv(id, GL_LINK_STATUS, &program_success);
   if (program_success != GL_TRUE) {
-    zen_log("opengl shader: failed to link program\n");
+    zen_log("opengl shader compiler: failed to link program\n");
     glDeleteProgram(id);
     return -1;
   }

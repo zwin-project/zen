@@ -9,6 +9,7 @@ srcs_zukou = [
   'glm-helper.cc',
   'virtual-object.cc',
   'opengl-component.cc',
+  'opengl-shader-program.cc',
   'opengl-vertex-buffer.cc',
   zigen_protocol_c,
   zigen_client_protocol_h,
