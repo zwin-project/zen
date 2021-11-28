@@ -28,6 +28,12 @@ OpenGLComponent::Attach(OpenGLShaderProgram *shader_program)
 }
 
 void
+OpenGLComponent::Attach(OpenGLTexture *texture)
+{
+  zgn_opengl_component_attach_texture(component(), texture->texture());
+}
+
+void
 OpenGLComponent::SetMin(uint32_t min)
 {
   zgn_opengl_component_set_min(component(), min);
