@@ -20,11 +20,13 @@ class App
       const char *interface, uint32_t version);
   void GlobalRegistryRemover(struct wl_registry *registry, uint32_t id);
   void ShmFormat(struct wl_shm *wl_shm, uint32_t format);
+  void Capabilities(struct zgn_seat *seat, uint32_t capability);
   bool Run();
   void Terminate();
   inline struct wl_display *display();
   inline struct wl_registry *registry();
   inline struct zgn_compositor *compositor();
+  inline struct zgn_seat *seat();
   inline struct zgn_shell *shell();
   inline struct wl_shm *shm();
   inline struct zgn_opengl *opengl();
@@ -33,6 +35,7 @@ class App
   struct wl_display *display_;
   struct wl_registry *registry_;
   struct zgn_compositor *compositor_;
+  struct zgn_seat *seat_;
   struct zgn_shell *shell_;
   struct wl_shm *shm_;
   struct zgn_opengl *opengl_;
@@ -55,6 +58,12 @@ inline struct zgn_compositor *
 App::compositor()
 {
   return compositor_;
+}
+
+inline struct zgn_seat *
+App::seat()
+{
+  return seat_;
 }
 
 inline struct zgn_shell *

@@ -18,6 +18,7 @@ main()
   struct wl_event_loop *loop;
   struct wl_event_source *signals[3];
   struct zen_compositor *compositor;
+  struct zen_seat *seat;
   int ret, exit = EXIT_FAILURE;
 
   display = wl_display_create();
@@ -31,6 +32,13 @@ main()
     zen_log("main: failed to create a compositor\n");
     goto out_compositor;
   }
+
+  seat = zen_seat_create(compositor);
+  if (seat == NULL) {
+    zen_log("main: failed to create a seat\n");
+    goto out_seat;
+  }
+  compositor->seat = seat;
 
   ret = zen_compositor_load_shell(compositor);
   if (ret != 0) {
@@ -75,6 +83,9 @@ out_socket:
 out_backend:
 out_renderer:
 out_shell:
+  zen_seat_destroy(seat);
+
+out_seat:
   zen_compositor_destroy(compositor);
 
 out_compositor:

@@ -106,7 +106,7 @@ Box::Box(zukou::App *app, float length)
       pixel->a = UINT8_MAX;
       pixel->r = x;
       pixel->g = y;
-      pixel->b = 255;
+      pixel->b = UINT8_MAX;
       pixel++;
     }
   }
@@ -162,7 +162,7 @@ const char *green_fragment_shader =
     "out vec4 outputColor;\n"
     "void main()\n"
     "{\n"
-    "  outputColor = vec4(0.0, 1.0, 0.0, 1.0);\n"
+    "  outputColor = vec4(0.0, 1.0, 0.0, 0.5);\n"
     "}\n";
 
 const char *texture_fragment_shader =
