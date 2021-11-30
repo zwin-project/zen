@@ -125,7 +125,6 @@ zen_compositor_create(struct wl_display *display)
   struct wl_event_loop *loop;
   struct wl_event_source *repaint_timer;
   struct wl_global *global;
-  UNUSED(global);
 
   compositor = zalloc(sizeof *compositor);
   if (compositor == NULL) {

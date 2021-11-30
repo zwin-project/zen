@@ -8,6 +8,7 @@ struct glfw_backend {
   struct zen_backend base;
 
   struct zen_compositor* compositor;
+  struct zen_udev_seat* udev_seat;
 };
 
 static void
@@ -21,6 +22,7 @@ zen_backend_create(struct zen_compositor* compositor)
 {
   struct glfw_backend* backend;
   struct zen_output* output;
+  struct zen_udev_seat* udev_seat;
 
   glfwSetErrorCallback(glfw_error_callback);
 
@@ -41,10 +43,20 @@ zen_backend_create(struct zen_compositor* compositor)
     goto err_backend;
   }
 
+  udev_seat = zen_udev_seat_create(compositor);
+  if (udev_seat == NULL) {
+    zen_log("glfw backend: failed to create a udev seat\n");
+    goto err_udev_seat;
+  }
+
   backend->base.output = output;
   backend->compositor = compositor;
+  backend->udev_seat = udev_seat;
 
   return &backend->base;
+
+err_udev_seat:
+  free(backend);
 
 err_backend:
   zen_output_destroy(output);
@@ -61,6 +73,7 @@ zen_backend_destroy(struct zen_backend* backend)
 {
   struct glfw_backend* b = (struct glfw_backend*)backend;
 
+  zen_udev_seat_destroy(b->udev_seat);
   zen_output_destroy(b->base.output);
   glfwTerminate();
   free(b);

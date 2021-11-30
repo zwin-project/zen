@@ -33,6 +33,17 @@ static const struct wl_registry_listener registry_listener = {
 };
 
 static void
+seat_capabilities(void *data, struct zgn_seat *seat, uint32_t capability)
+{
+  App *app = (App *)data;
+  app->Capabilities(seat, capability);
+}
+
+static const struct zgn_seat_listener seat_listener = {
+    seat_capabilities,
+};
+
+static void
 shm_format(void *data, struct wl_shm *wl_shm, uint32_t format)
 {
   App *app = (App *)data;
@@ -81,6 +92,9 @@ App::GlobalRegistryHandler(struct wl_registry *registry, uint32_t id,
   if (strcmp(interface, "zgn_compositor") == 0) {
     compositor_ = (zgn_compositor *)wl_registry_bind(
         registry, id, &zgn_compositor_interface, version);
+  } else if (strcmp(interface, "zgn_seat") == 0) {
+    seat_ = (zgn_seat *)wl_registry_bind(
+        registry, id, &zgn_seat_interface, version);
   } else if (strcmp(interface, "wl_shm") == 0) {
     shm_ = (wl_shm *)wl_registry_bind(registry, id, &wl_shm_interface, version);
     wl_shm_add_listener(shm_, &shm_listener, this);
@@ -105,6 +119,14 @@ App::ShmFormat(struct wl_shm *wl_shm, uint32_t format)
 {
   (void)wl_shm;
   (void)format;
+}
+
+void
+App::Capabilities(struct zgn_seat *seat, uint32_t capability)
+{
+  // TODO: get ray & keyboard
+  (void)seat;
+  (void)capability;
 }
 
 bool

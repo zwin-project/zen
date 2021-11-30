@@ -1,6 +1,8 @@
 deps_zen_compositor = [
   dep_cglm,
   dep_wayland_server,
+  dep_libinput,
+  dep_udev,
 ]
 
 srcs_zen_compositor = [
@@ -8,6 +10,8 @@ srcs_zen_compositor = [
   'cglm-helper.c',
   'compositor.c',
   'log.c',
+  'udev-seat.c',
+  'seat.c',
   'virtual-object.c',
   'weak-link.c',
   zigen_protocol_c,

@@ -20,6 +20,8 @@ dep_glfw3 = dependency('glfw3')
 dep_glew = dependency('glew')
 dep_zgn_protocol = dependency('zigen-protocols')
 dep_cglm = dependency('cglm')
+dep_libinput = dependency('libinput')
+dep_udev = dependency('libudev')
 
 subdir('protocol')
 subdir('libzen-compositor')

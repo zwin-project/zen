@@ -1,6 +1,7 @@
 #ifndef LIBZEN_COMPOSIOR_H
 #define LIBZEN_COMPOSIOR_H
 
+#include <cglm/cglm.h>
 #include <time.h>
 #include <wayland-server.h>
 
@@ -30,6 +31,7 @@ struct zen_compositor {
 
   struct wl_signal frame_signal;
 
+  struct zen_seat* seat;
   struct zen_shell_base* shell_base;
   struct zen_renderer* renderer;
   struct zen_backend* backend;
@@ -55,6 +57,18 @@ struct zen_virtual_object {
   } pending;
 };
 
+struct zen_seat {
+  struct wl_global* global;
+
+  char* seat_name;
+};
+
+struct zen_pointer_motion_event {
+  vec3 delta_origin;
+  float delta_polar_angle;
+  float delta_azimuthal_angle;
+};
+
 struct zen_shell_base {
   const char* type;
 };
@@ -77,6 +91,8 @@ struct zen_backend {
   struct zen_output* output;
 };
 
+struct zen_udev_seat;
+
 // methods of zen_compositor
 struct zen_compositor* zen_compositor_create(struct wl_display* display);
 
@@ -91,6 +107,30 @@ int zen_compositor_load_backend(struct zen_compositor* compositor);
 void zen_compositor_finish_frame(
     struct zen_compositor* compositor, struct timespec next_repaint);
 
+// methods of zen_seat
+
+void zen_seat_notify_add_ray(struct zen_seat* seat);
+
+void zen_seat_notify_release_ray(struct zen_seat* seat);
+
+void zen_seat_notify_add_keyboard(struct zen_seat* seat);
+
+void zen_seat_notify_release_keyboard(struct zen_seat* seat);
+
+void zen_seat_notify_ray_motion(struct zen_seat* seat,
+    const struct timespec* time, struct zen_pointer_motion_event* event);
+
+void zen_seat_notify_ray_button(struct zen_seat* seat,
+    const struct timespec* time, int32_t button,
+    enum wl_pointer_button_state state);
+
+void zen_seat_notify_key(struct zen_seat* seat, const struct timespec* time,
+    uint32_t key, uint32_t state);
+
+struct zen_seat* zen_seat_create(struct zen_compositor* compositor);
+
+void zen_seat_destroy(struct zen_seat* seat);
+
 // methods of zen_weak_link
 void zen_weak_link_init(struct zen_weak_link* link);
 
@@ -100,6 +140,12 @@ void zen_weak_link_set(
 void zen_weak_link_unset(struct zen_weak_link* link);
 
 void* zen_weak_link_get_user_data(struct zen_weak_link* link);
+
+// methods of zen_udev_seat
+
+struct zen_udev_seat* zen_udev_seat_create(struct zen_compositor* compositor);
+
+void zen_udev_seat_destroy(struct zen_udev_seat* udev_seat);
 
 // Interfaces below will be implementaed outside of libzen-compositor
 
