@@ -45,7 +45,7 @@ handle_pointer_motion(
   UNUSED(seat);
   UNUSED(pointer_event);
   struct timespec time;
-  struct zen_pointer_motion_event event = {0};
+  struct zen_ray_motion_event event = {0};
 
   timespec_from_usec(
       &time, libinput_event_pointer_get_time_usec(pointer_event));

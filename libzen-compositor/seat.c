@@ -145,7 +145,7 @@ zen_seat_notify_release_keyboard(struct zen_seat* seat)
 
 WL_EXPORT void
 zen_seat_notify_ray_motion(struct zen_seat* seat, const struct timespec* time,
-    struct zen_pointer_motion_event* event)
+    struct zen_ray_motion_event* event)
 {
   UNUSED(time);
   if (seat->ray) {
@@ -168,7 +168,7 @@ zen_seat_notify_ray_motion(struct zen_seat* seat, const struct timespec* time,
 
 WL_EXPORT void
 zen_seat_notify_ray_button(struct zen_seat* seat, const struct timespec* time,
-    int32_t button, enum wl_pointer_button_state state)
+    int32_t button, enum zgn_ray_button_state state)
 {
   UNUSED(seat);
   UNUSED(time);
