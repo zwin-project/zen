@@ -57,8 +57,28 @@ struct zen_virtual_object {
   } pending;
 };
 
+struct zen_ray {
+  struct wl_list ray_client_list;
+  struct wl_signal destroy_signal;
+
+  vec3 origin;
+  struct {
+    float polar;      // angle with respect to y axis (0 <= polar < pi * 2)
+    float azimuthal;  // (1, 0, 0) -> 0 rad, (0, 0, 1) -> pi/2 rad
+                      // (0 <= azimuthal < pi * 2)
+  } angle;            // radian
+
+  struct zen_render_item* render_item;
+};
+
 struct zen_seat {
   struct wl_global* global;
+  struct zen_compositor* compositor;
+
+  struct zen_ray* ray;
+  int ray_device_count;
+
+  struct wl_list resource_list;
 
   char* seat_name;
 };
@@ -106,6 +126,12 @@ int zen_compositor_load_backend(struct zen_compositor* compositor);
 
 void zen_compositor_finish_frame(
     struct zen_compositor* compositor, struct timespec next_repaint);
+
+// methods of zen_ray
+
+struct zen_ray* zen_ray_create(struct zen_seat* seat);
+
+void zen_ray_destroy(struct zen_ray* ray);
 
 // methods of zen_seat
 
@@ -163,6 +189,11 @@ void zen_backend_destroy(struct zen_backend* backend);
 struct zen_renderer* zen_renderer_create(struct zen_compositor* compositor);
 
 void zen_renderer_destroy(struct zen_renderer* renderer);
+
+struct zen_render_item* zen_ray_render_item_create(
+    struct zen_renderer* renderer, struct zen_ray* ray);
+
+void zen_ray_render_item_destroy(struct zen_render_item* render_item);
 
 #ifdef __cplusplus
 }

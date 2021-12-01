@@ -21,6 +21,14 @@ class App
   void GlobalRegistryRemover(struct wl_registry *registry, uint32_t id);
   void ShmFormat(struct wl_shm *wl_shm, uint32_t format);
   void Capabilities(struct zgn_seat *seat, uint32_t capability);
+  void RayEnter(struct zgn_ray *ray, uint32_t serial,
+      struct zgn_virtual_object *virtual_object, glm::vec3 origin,
+      glm::vec3 direction);
+  void RayLeave(struct zgn_ray *ray, uint32_t serial,
+      struct zgn_virtual_object *virtual_object);
+  void RayMotion(struct zgn_ray *ray, glm::vec3 origin, glm::vec3 direction);
+  void RayButton(struct zgn_ray *ray, uint32_t serial, uint32_t time,
+      uint32_t button, enum zgn_ray_button_state state);
   bool Run();
   void Terminate();
   inline struct wl_display *display();
@@ -39,6 +47,7 @@ class App
   struct zgn_shell *shell_;
   struct wl_shm *shm_;
   struct zgn_opengl *opengl_;
+  struct zgn_ray *ray_;  // nullable
   bool running_ = false;
 };
 

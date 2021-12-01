@@ -8,6 +8,7 @@
 #include "cuboid-window-render-item.h"
 #include "opengl-component.h"
 #include "opengl.h"
+#include "ray-render-item.h"
 
 char* zen_opengl_renderer_type = "zen_opengl_renderer";
 
@@ -41,6 +42,7 @@ zen_renderer_create(struct zen_compositor* compositor)
   renderer->cameras = NULL;
   renderer->camera_count = 0;
   renderer->camera_allocate = 0;
+  wl_list_init(&renderer->ray_render_item_list);
   wl_list_init(&renderer->cuboid_window_render_item_list);
   wl_list_init(&renderer->component_list);
 
@@ -113,12 +115,19 @@ zen_opengl_renderer_render(struct zen_opengl_renderer* renderer)
   glEnable(GL_DEPTH_TEST);
   for (camera = renderer->cameras;
        camera < renderer->cameras + renderer->camera_count; camera++) {
+    struct zen_opengl_ray_render_item* ray_render_item;
     struct zen_opengl_cuboid_window_render_item* cuboid_window_render_item;
     struct zen_opengl_component* component;
 
     glBindFramebuffer(GL_FRAMEBUFFER, camera->framebuffer_id);
     glViewport(camera->viewport.x, camera->viewport.y, camera->viewport.width,
         camera->viewport.height);
+
+    // render rays
+    wl_list_for_each(ray_render_item, &renderer->ray_render_item_list, link)
+    {
+      zen_opengl_ray_render_item_render(ray_render_item, camera);
+    }
 
     // render cuboid windows
     wl_list_for_each(cuboid_window_render_item,

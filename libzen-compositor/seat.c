@@ -2,13 +2,44 @@
 #include <wayland-server.h>
 #include <zigen-server-protocol.h>
 
+#include "ray-client.h"
+
+static enum zgn_seat_capability
+zen_seat_get_current_capabilities(struct zen_seat* seat)
+{
+  enum zgn_seat_capability caps = 0;
+
+  if (seat->ray_device_count > 0) caps |= ZGN_SEAT_CAPABILITY_RAY;
+
+  return caps;
+}
+
+static void
+zen_seat_send_updated_caps(struct zen_seat* seat)
+{
+  struct wl_resource* resource;
+
+  enum zgn_seat_capability caps = zen_seat_get_current_capabilities(seat);
+
+  wl_resource_for_each(resource, &seat->resource_list)
+      zgn_seat_send_capabilities(resource, caps);
+}
+
 static void
 zen_seat_protocol_get_ray(
     struct wl_client* client, struct wl_resource* resource, uint32_t id)
 {
-  UNUSED(client);
-  UNUSED(resource);
-  UNUSED(id);
+  struct zen_seat* seat;
+  struct zen_ray_client* ray_client;
+
+  seat = wl_resource_get_user_data(resource);
+
+  if (seat && seat->ray) {
+    ray_client = zen_ray_client_ensure(client, seat->ray);
+    zen_ray_client_add_resource(ray_client, id);
+  } else {
+    zen_ray_client_create_inert_resource(client, id);
+  }
 }
 
 static void
@@ -35,46 +66,80 @@ static const struct zgn_seat_interface seat_interface = {
 };
 
 static void
+unbind_resource(struct wl_resource* resource)
+{
+  wl_list_remove(wl_resource_get_link(resource));
+}
+
+static void
 zen_seat_bind(
     struct wl_client* client, void* data, uint32_t version, uint32_t id)
 {
   struct zen_seat* seat = data;
   struct wl_resource* resource;
+  enum zgn_seat_capability caps;
 
   resource = wl_resource_create(client, &zgn_seat_interface, version, id);
   if (resource == NULL) {
     wl_client_post_no_memory(client);
     zen_log("seat: failed to create a resource\n");
+    return;
   }
 
-  wl_resource_set_implementation(resource, &seat_interface, seat, NULL);
+  wl_list_insert(&seat->resource_list, wl_resource_get_link(resource));
+
+  wl_resource_set_implementation(
+      resource, &seat_interface, seat, unbind_resource);
+
+  caps = zen_seat_get_current_capabilities(seat);
+
+  zgn_seat_send_capabilities(resource, caps);
 }
 
 WL_EXPORT void
 zen_seat_notify_add_ray(struct zen_seat* seat)
 {
   UNUSED(seat);
-  zen_log("ray added\n");
+  struct zen_ray* ray;
+
+  if (seat->ray) {
+    seat->ray_device_count += 1;
+    if (seat->ray_device_count == 1) {
+      zen_seat_send_updated_caps(seat);
+    }
+    return;
+  }
+
+  ray = zen_ray_create(seat);
+  if (ray == NULL) {
+    zen_log("seat: failed to create a ray\n");
+    return;
+  }
+
+  seat->ray = ray;
+  seat->ray_device_count = 1;
+
+  zen_seat_send_updated_caps(seat);
 }
 
 WL_EXPORT void
 zen_seat_notify_release_ray(struct zen_seat* seat)
 {
-  UNUSED(seat);
-  zen_log("ray released\n");
+  seat->ray_device_count--;
+  if (seat->ray_device_count == 0) {
+    zen_seat_send_updated_caps(seat);
+  }
 }
 
 WL_EXPORT void
 zen_seat_notify_add_keyboard(struct zen_seat* seat)
 {
   UNUSED(seat);
-  zen_log("key board added\n");
 }
 
 WL_EXPORT void
 zen_seat_notify_release_keyboard(struct zen_seat* seat)
 {
-  zen_log("keyboard released\n");
   UNUSED(seat);
 }
 
@@ -82,11 +147,23 @@ WL_EXPORT void
 zen_seat_notify_ray_motion(struct zen_seat* seat, const struct timespec* time,
     struct zen_pointer_motion_event* event)
 {
-  UNUSED(seat);
   UNUSED(time);
-  UNUSED(event);
-  zen_log("motion theta = %f, phi = %f\n", event->delta_azimuthal_angle,
-      event->delta_polar_angle);
+  if (seat->ray) {
+    // FIXME: use grab
+    glm_vec3_add(seat->ray->origin, event->delta_origin, seat->ray->origin);
+    seat->ray->angle.polar += event->delta_polar_angle;
+    while (seat->ray->angle.polar >= GLM_PI * 2)
+      seat->ray->angle.polar -= GLM_PI * 2;
+    while (seat->ray->angle.polar < 0) seat->ray->angle.polar += GLM_PI * 2;
+
+    seat->ray->angle.azimuthal += event->delta_azimuthal_angle;
+    while (seat->ray->angle.azimuthal >= GLM_PI * 2)
+      seat->ray->angle.azimuthal -= GLM_PI * 2;
+    while (seat->ray->angle.azimuthal < 0)
+      seat->ray->angle.azimuthal += GLM_PI * 2;
+
+    seat->ray->render_item->commit(seat->ray->render_item);
+  }
 }
 
 WL_EXPORT void
@@ -97,7 +174,6 @@ zen_seat_notify_ray_button(struct zen_seat* seat, const struct timespec* time,
   UNUSED(time);
   UNUSED(button);
   UNUSED(state);
-  zen_log("pointer button\n");
 }
 
 WL_EXPORT void
@@ -106,11 +182,8 @@ zen_seat_notify_key(struct zen_seat* seat, const struct timespec* time,
 {
   UNUSED(seat);
   UNUSED(time);
-  if (state == ZGN_KEYBOARD_KEY_STATE_PRESSED) {
-    zen_log("%d is pressed\n", key);
-  } else {
-    zen_log("%d is released\n", key);
-  }
+  UNUSED(key);
+  UNUSED(state);
 }
 
 WL_EXPORT struct zen_seat*
@@ -133,6 +206,10 @@ zen_seat_create(struct zen_compositor* compositor)
   }
 
   seat->global = global;
+  seat->compositor = compositor;
+  seat->ray = NULL;
+  seat->ray_device_count = 0;
+  wl_list_init(&seat->resource_list);
   seat->seat_name = "seat0";
 
   return seat;
@@ -147,6 +224,14 @@ err:
 WL_EXPORT void
 zen_seat_destroy(struct zen_seat* seat)
 {
+  struct wl_resource *resource, *tmp;
+
+  wl_resource_for_each_safe(resource, tmp, &seat->resource_list)
+      wl_resource_set_user_data(resource, NULL);
+
+  wl_list_remove(&seat->resource_list);
+
+  if (seat->ray) zen_ray_destroy(seat->ray);
   wl_global_destroy(seat->global);
   free(seat);
 }
