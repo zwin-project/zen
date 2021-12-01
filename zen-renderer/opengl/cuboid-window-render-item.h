@@ -5,8 +5,6 @@
 #include <wayland-server.h>
 #include <zen-renderer/opengl-renderer.h>
 
-#include "shader-compiler.h"
-
 struct zen_opengl_cuboid_window_render_item {
   struct zen_render_item base;
   struct zen_opengl_renderer* renderer;

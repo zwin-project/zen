@@ -22,6 +22,7 @@ dep_zgn_protocol = dependency('zigen-protocols')
 dep_cglm = dependency('cglm')
 dep_libinput = dependency('libinput')
 dep_udev = dependency('libudev')
+dep_m = meson.get_compiler('c').find_library('m')
 
 subdir('protocol')
 subdir('libzen-compositor')

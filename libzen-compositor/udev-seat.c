@@ -50,9 +50,9 @@ handle_pointer_motion(
   timespec_from_usec(
       &time, libinput_event_pointer_get_time_usec(pointer_event));
 
-  event.delta_polar_angle = libinput_event_pointer_get_dy(pointer_event) / 64;
+  event.delta_polar_angle = libinput_event_pointer_get_dy(pointer_event) / 512;
   event.delta_azimuthal_angle =
-      libinput_event_pointer_get_dx(pointer_event) / 64;
+      libinput_event_pointer_get_dx(pointer_event) / 512;
 
   zen_seat_notify_ray_motion(seat, &time, &event);
 }

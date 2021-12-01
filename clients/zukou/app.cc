@@ -54,6 +54,50 @@ static const struct wl_shm_listener shm_listener = {
     shm_format,
 };
 
+static void
+ray_enter(void *data, struct zgn_ray *ray, uint32_t serial,
+    struct zgn_virtual_object *virtual_object, struct wl_array *origin,
+    struct wl_array *direction)
+{
+  App *app = (App *)data;
+  glm::vec3 origin_vec = glm_vec3_from_wl_array(origin);
+  glm::vec3 direction_vec = glm_vec3_from_wl_array(direction);
+  app->RayEnter(ray, serial, virtual_object, origin_vec, direction_vec);
+}
+
+static void
+ray_leave(void *data, struct zgn_ray *ray, uint32_t serial,
+    struct zgn_virtual_object *virtual_object)
+{
+  App *app = (App *)data;
+  app->RayLeave(ray, serial, virtual_object);
+}
+
+static void
+ray_motion(void *data, struct zgn_ray *ray, struct wl_array *origin,
+    struct wl_array *direction)
+{
+  App *app = (App *)data;
+  glm::vec3 origin_vec = glm_vec3_from_wl_array(origin);
+  glm::vec3 direction_vec = glm_vec3_from_wl_array(direction);
+  app->RayMotion(ray, origin_vec, direction_vec);
+}
+
+static void
+ray_button(void *data, struct zgn_ray *ray, uint32_t serial, uint32_t time,
+    uint32_t button, uint32_t state)
+{
+  App *app = (App *)data;
+  app->RayButton(ray, serial, time, button, (enum zgn_ray_button_state)state);
+}
+
+static const struct zgn_ray_listener ray_listener = {
+    ray_enter,
+    ray_leave,
+    ray_motion,
+    ray_button,
+};
+
 bool
 App::Connect(const char *socket)
 {
@@ -95,6 +139,7 @@ App::GlobalRegistryHandler(struct wl_registry *registry, uint32_t id,
   } else if (strcmp(interface, "zgn_seat") == 0) {
     seat_ = (zgn_seat *)wl_registry_bind(
         registry, id, &zgn_seat_interface, version);
+    zgn_seat_add_listener(seat_, &seat_listener, this);
   } else if (strcmp(interface, "wl_shm") == 0) {
     shm_ = (wl_shm *)wl_registry_bind(registry, id, &wl_shm_interface, version);
     wl_shm_add_listener(shm_, &shm_listener, this);
@@ -124,9 +169,55 @@ App::ShmFormat(struct wl_shm *wl_shm, uint32_t format)
 void
 App::Capabilities(struct zgn_seat *seat, uint32_t capability)
 {
-  // TODO: get ray & keyboard
-  (void)seat;
-  (void)capability;
+  if (capability & ZGN_SEAT_CAPABILITY_RAY && ray_ == NULL) {
+    ray_ = zgn_seat_get_ray(seat);
+    zgn_ray_add_listener(ray_, &ray_listener, this);
+  }
+
+  if (!(capability & ZGN_SEAT_CAPABILITY_RAY) && ray_) {
+    zgn_ray_release(ray_);
+    ray_ = NULL;
+  }
+}
+
+void
+App::RayEnter(struct zgn_ray *ray, uint32_t serial,
+    struct zgn_virtual_object *virtual_object, glm::vec3 origin,
+    glm::vec3 direction)
+{
+  (void)ray;
+  (void)serial;
+  (void)virtual_object;
+  (void)origin;
+  (void)direction;
+}
+
+void
+App::RayLeave(struct zgn_ray *ray, uint32_t serial,
+    struct zgn_virtual_object *virtual_object)
+{
+  (void)ray;
+  (void)serial;
+  (void)virtual_object;
+}
+
+void
+App::RayMotion(struct zgn_ray *ray, glm::vec3 origin, glm::vec3 direction)
+{
+  (void)ray;
+  (void)origin;
+  (void)direction;
+}
+
+void
+App::RayButton(struct zgn_ray *ray, uint32_t serial, uint32_t time,
+    uint32_t button, enum zgn_ray_button_state state)
+{
+  (void)ray;
+  (void)serial;
+  (void)time;
+  (void)button;
+  (void)state;
 }
 
 bool

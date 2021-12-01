@@ -1,6 +1,7 @@
 deps_oepngl_renderer = [
   dep_glew,
   dep_libzen_compositor_public,
+  dep_m,
 ]
 
 srcs_opengl_renderer = [
@@ -11,6 +12,7 @@ srcs_opengl_renderer = [
   'opengl-shader-program.c',
   'opengl-texture.c',
   'opengl-vertex-buffer.c',
+  'ray-render-item.c',
   'shader-compiler.c',
   zigen_opengl_protocol_c,
   zigen_opengl_server_protocol_h,
