@@ -57,6 +57,12 @@ struct zen_virtual_object {
   } pending;
 };
 
+struct zen_ray_motion_event {
+  vec3 delta_origin;
+  float delta_polar_angle;
+  float delta_azimuthal_angle;
+};
+
 struct zen_ray {
   struct wl_list ray_client_list;
   struct wl_signal destroy_signal;
@@ -81,12 +87,6 @@ struct zen_seat {
   struct wl_list resource_list;
 
   char* seat_name;
-};
-
-struct zen_pointer_motion_event {
-  vec3 delta_origin;
-  float delta_polar_angle;
-  float delta_azimuthal_angle;
 };
 
 struct zen_shell_base {
@@ -144,11 +144,10 @@ void zen_seat_notify_add_keyboard(struct zen_seat* seat);
 void zen_seat_notify_release_keyboard(struct zen_seat* seat);
 
 void zen_seat_notify_ray_motion(struct zen_seat* seat,
-    const struct timespec* time, struct zen_pointer_motion_event* event);
+    const struct timespec* time, struct zen_ray_motion_event* event);
 
 void zen_seat_notify_ray_button(struct zen_seat* seat,
-    const struct timespec* time, int32_t button,
-    enum wl_pointer_button_state state);
+    const struct timespec* time, int32_t button, uint32_t state);
 
 void zen_seat_notify_key(struct zen_seat* seat, const struct timespec* time,
     uint32_t key, uint32_t state);
