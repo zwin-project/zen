@@ -7,7 +7,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/transform.hpp>
+#include <iostream>
 #include <vector>
 
 extern const char *vertex_shader;
@@ -34,6 +36,7 @@ Box::Box(zukou::App *app, float length)
   length_ = length;
   rx_ = 0;
   ry_ = 0;
+  blue_ = UINT8_MAX;
   frame_component_ = new zukou::OpenGLComponent(app, this);
   frame_vertex_buffer_ = new zukou::OpenGLVertexBuffer(app, sizeof(Line) * 12);
   frame_shader_ = new zukou::OpenGLShaderProgram(app);
@@ -100,19 +103,7 @@ Box::Box(zukou::App *app, float length)
   triangles[1].b = C;
   triangles[1].c = D;
 
-  zukou::ColorBGRA *pixel = (zukou::ColorBGRA *)texture_->data();
-  for (int x = 0; x < 256; x++) {
-    for (int y = 0; y < 256; y++) {
-      pixel->a = UINT8_MAX;
-      pixel->r = x;
-      pixel->g = y;
-      pixel->b = UINT8_MAX;
-      pixel++;
-    }
-  }
-
-  texture_->BufferUpdated();
-  front_component_->Attach(texture_);
+  this->DrawTexture();
 }
 
 void
@@ -142,7 +133,51 @@ Box::Frame(uint32_t time)
   front_vertex_buffer_->BufferUpdated();
   front_component_->Attach(front_vertex_buffer_);
 
+  this->DrawTexture();
+
   this->NextFrame();
+}
+
+void
+Box::RayEnter(uint32_t serial, glm::vec3 origin, glm::vec3 direction)
+{
+  (void)serial;
+  (void)origin;
+  (void)direction;
+}
+
+void
+Box::RayLeave(uint32_t serial)
+{
+  (void)serial;
+}
+
+void
+Box::RayMotion(uint32_t time, glm::vec3 origin, glm::vec3 direction)
+{
+  (void)time;
+  (void)origin;
+  (void)direction;
+  blue_ -= 1;
+  if (blue_ == 0) blue_ = UINT8_MAX;
+}
+
+void
+Box::DrawTexture()
+{
+  zukou::ColorBGRA *pixel = (zukou::ColorBGRA *)texture_->data();
+  for (int x = 0; x < 256; x++) {
+    for (int y = 0; y < 256; y++) {
+      pixel->a = UINT8_MAX;
+      pixel->r = x;
+      pixel->g = y;
+      pixel->b = blue_;
+      pixel++;
+    }
+  }
+
+  texture_->BufferUpdated();
+  front_component_->Attach(texture_);
 }
 
 const char *vertex_shader =

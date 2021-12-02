@@ -10,6 +10,10 @@ class Box : public zukou::CuboidWindow
  public:
   Box(zukou::App *app, float length);
   void Frame(uint32_t time);
+  virtual void RayEnter(uint32_t serial, glm::vec3 origin, glm::vec3 direction);
+  virtual void RayLeave(uint32_t serial);
+  virtual void RayMotion(uint32_t time, glm::vec3 origin, glm::vec3 direction);
+  void DrawTexture();
 
  private:
   zukou::OpenGLComponent *frame_component_;
@@ -22,6 +26,7 @@ class Box : public zukou::CuboidWindow
   float length_;
   float rx_;
   float ry_;
+  uint8_t blue_;
 };
 
 #endif  //  ZEN_CLIENT_SIMPLE_BOX_BOX_H

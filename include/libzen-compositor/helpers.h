@@ -23,6 +23,8 @@ extern "C" {
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
 
+#define GLM_2PI 6.28318530717958647692528676655900576 /* 2 * GLM_PI */
+
 #ifndef container_of
 #define container_of(ptr, type, member)                    \
   ({                                                       \

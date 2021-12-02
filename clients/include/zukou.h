@@ -26,7 +26,8 @@ class App
       glm::vec3 direction);
   void RayLeave(struct zgn_ray *ray, uint32_t serial,
       struct zgn_virtual_object *virtual_object);
-  void RayMotion(struct zgn_ray *ray, glm::vec3 origin, glm::vec3 direction);
+  void RayMotion(struct zgn_ray *ray, uint32_t time, glm::vec3 origin,
+      glm::vec3 direction);
   void RayButton(struct zgn_ray *ray, uint32_t serial, uint32_t time,
       uint32_t button, enum zgn_ray_button_state state);
   bool Run();
@@ -49,6 +50,8 @@ class App
   struct zgn_opengl *opengl_;
   struct zgn_ray *ray_;  // nullable
   bool running_ = false;
+
+  struct zgn_virtual_object *ray_focus_virtual_object_;
 };
 
 inline struct wl_display *
@@ -128,6 +131,9 @@ class VirtualObject
   void NextFrame();
   void Commit();
   virtual void Frame(uint32_t time);
+  virtual void RayEnter(uint32_t serial, glm::vec3 origin, glm::vec3 direction);
+  virtual void RayLeave(uint32_t serial);
+  virtual void RayMotion(uint32_t time, glm::vec3 origin, glm::vec3 direction);
   inline App *app();
   inline struct zgn_virtual_object *virtual_object();
   inline struct wl_callback *frame_callback();

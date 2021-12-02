@@ -42,12 +42,14 @@ struct zen_compositor {
 
 struct zen_virtual_object {
   struct zen_compositor* compositor;
+  struct wl_resource* resource;
 
   char* role;
   void* role_object;
 
   struct wl_signal commit_signal;
   struct wl_signal destroy_signal;
+  struct wl_signal render_commit_signal;
 
   struct wl_listener compositor_frame_signal_listener;
   struct wl_list frame_callback_list;
@@ -63,7 +65,27 @@ struct zen_ray_motion_event {
   float delta_azimuthal_angle;
 };
 
+struct zen_ray_grab {
+  const struct zen_ray_grab_interface* interface;
+  struct zen_ray* ray;
+};
+
+struct zen_ray_grab_interface {
+  void (*focus)(struct zen_ray_grab* grab);
+  void (*motion)(struct zen_ray_grab* grab, const struct timespec* time,
+      struct zen_ray_motion_event* event);
+  void (*button)(struct zen_ray_grab* grab, const struct timespec* time,
+      uint32_t button, uint32_t state);
+  void (*cancel)(struct zen_ray_grab* grab);
+};
+
 struct zen_ray {
+  struct zen_seat* seat;
+  struct zen_ray_grab* grab;
+  struct zen_ray_grab default_grab;
+
+  struct zen_weak_link focus_virtual_object_link;
+
   struct wl_list ray_client_list;
   struct wl_signal destroy_signal;
 
@@ -91,6 +113,8 @@ struct zen_seat {
 
 struct zen_shell_base {
   const char* type;
+  struct zen_virtual_object* (*pick_virtual_object)(
+      struct zen_shell_base* shell_base, struct zen_ray* ray);
 };
 
 struct zen_renderer {
@@ -128,6 +152,10 @@ void zen_compositor_finish_frame(
     struct zen_compositor* compositor, struct timespec next_repaint);
 
 // methods of zen_ray
+
+void zen_ray_get_direction(struct zen_ray* ray, vec3 direction);
+
+void zen_ray_move(struct zen_ray* ray, struct zen_ray_motion_event* event);
 
 struct zen_ray* zen_ray_create(struct zen_seat* seat);
 
