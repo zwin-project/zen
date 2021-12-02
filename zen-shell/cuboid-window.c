@@ -97,7 +97,6 @@ zen_cuboid_window_create(struct wl_client *client, uint32_t id,
   struct zen_render_item *render_item;
   struct zen_shell *shell = wl_resource_get_user_data(shell_resource);
   vec3 zero = GLM_VEC3_ZERO_INIT;
-  mat4 identity = GLM_MAT4_IDENTITY_INIT;
 
   if (virtual_object->role_object != NULL) {
     wl_resource_post_error(shell_resource, ZGN_SHELL_ERROR_ROLE,
@@ -149,9 +148,6 @@ zen_cuboid_window_create(struct wl_client *client, uint32_t id,
   cuboid_window->resource = resource;
   cuboid_window->virtual_object = virtual_object;
   glm_vec3_copy(zero, cuboid_window->half_size);
-  glm_mat4_copy(identity, cuboid_window->model_matrix);
-  glm_translate_z(cuboid_window->model_matrix, -1);
-  glm_translate_y(cuboid_window->model_matrix, 1.5);
 
   wl_list_insert(&shell->cuboid_window_list, &cuboid_window->link);
 

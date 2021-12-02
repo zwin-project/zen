@@ -44,7 +44,7 @@ zen_opengl_cuboid_window_render_item_render(
 {
   glLineWidth(render_item->line_width);
   mat4 mvp;
-  glm_mat4_copy(render_item->cuboid_window->model_matrix, mvp);
+  glm_mat4_copy(render_item->cuboid_window->virtual_object->model_matrix, mvp);
   glm_mat4_mul(camera->view_matrix, mvp, mvp);
   glm_mat4_mul(camera->projection_matrix, mvp, mvp);
 
