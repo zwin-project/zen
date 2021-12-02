@@ -98,6 +98,9 @@ struct zen_ray {
                       // (0 <= azimuthal < pi * 2)
   } angle;            // radian
 
+  vec3 local_origin;
+  vec3 local_direction;
+
   struct zen_render_item* render_item;
 };
 
@@ -116,7 +119,8 @@ struct zen_seat {
 struct zen_shell_base {
   const char* type;
   struct zen_virtual_object* (*pick_virtual_object)(
-      struct zen_shell_base* shell_base, struct zen_ray* ray);
+      struct zen_shell_base* shell_base, struct zen_ray* ray,
+      vec3 local_ray_origin, vec3 local_ray_direction);
 };
 
 struct zen_renderer {

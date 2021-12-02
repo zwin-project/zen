@@ -55,7 +55,8 @@ static const struct zgn_shell_interface shell_interface = {
 };
 
 static struct zen_virtual_object*
-pick_virtual_object(struct zen_shell_base* shell_base, struct zen_ray* ray)
+pick_virtual_object(struct zen_shell_base* shell_base, struct zen_ray* ray,
+    vec3 local_ray_origin, vec3 local_ray_direction)
 {
   struct zen_shell* shell;
   struct zen_cuboid_window *cuboid_window, *focus_cuboid_window = NULL;
@@ -74,6 +75,18 @@ pick_virtual_object(struct zen_shell_base* shell_base, struct zen_ray* ray)
       min_distance = d;
       focus_cuboid_window = cuboid_window;
     }
+  }
+
+  if (focus_cuboid_window) {
+    mat4 model_matrix_inverse;
+    vec3 rat_target, local_ray_target;
+    glm_mat4_inv(focus_cuboid_window->virtual_object->model_matrix,
+        model_matrix_inverse);
+    glm_vec3_add(ray->origin, ray_direction, rat_target);
+    glm_mat4_mulv3(model_matrix_inverse, rat_target, 1, local_ray_target);
+    glm_mat4_mulv3(model_matrix_inverse, ray->origin, 1, local_ray_origin);
+    glm_vec3_sub(local_ray_target, local_ray_origin, local_ray_direction);
+    glm_vec3_normalize(local_ray_direction);
   }
 
   return focus_cuboid_window ? focus_cuboid_window->virtual_object : NULL;

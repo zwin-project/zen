@@ -6,6 +6,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/intersect.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/transform.hpp>
@@ -33,13 +34,18 @@ Box::Box(zukou::App *app, float length)
     : CuboidWindow(app, glm::vec3(length * 1.8))
 {
   srand(time(0));
+
   length_ = length;
-  rx_ = 0;
-  ry_ = 0;
+  theta_ = 0;
+  phi_ = 0;
+  delta_theta_ = 0;
+  delta_phi_ = 0;
   blue_ = UINT8_MAX;
+
   frame_component_ = new zukou::OpenGLComponent(app, this);
   frame_vertex_buffer_ = new zukou::OpenGLVertexBuffer(app, sizeof(Line) * 12);
   frame_shader_ = new zukou::OpenGLShaderProgram(app);
+
   front_component_ = new zukou::OpenGLComponent(app, this);
   front_vertex_buffer_ =
       new zukou::OpenGLVertexBuffer(app, sizeof(Triangle) * 2);
@@ -73,35 +79,26 @@ Box::Box(zukou::App *app, float length)
       ZGN_OPENGL_VERTEX_ATTRIBUTE_TYPE_FLOAT, false, sizeof(Vertex),
       offsetof(Vertex, u));
 
-  Line *edges = (Line *)frame_vertex_buffer_->data();
-  for (int i = 0; i < 3; i++) {
-    int x = i;
-    int y = (i + 1) % 3;
-    int z = (i + 2) % 3;
-    for (int j = -1; j < 2; j += 2) {
-      for (int k = -1; k < 2; k += 2) {
-        edges->s.p[x] = -length_;
-        edges->s.p[y] = length_ * j;
-        edges->s.p[z] = length_ * k;
-        edges->e.p[x] = length_;
-        edges->e.p[y] = length_ * j;
-        edges->e.p[z] = length_ * k;
-        edges++;
+  int i = 0;
+  for (int x = -1; x < 2; x += 2) {
+    for (int y = -1; y < 2; y += 2) {
+      for (int z = -1; z < 2; z += 2) {
+        points_[i].x = length_ * x;
+        points_[i].y = length_ * y;
+        points_[i].z = length_ * z;
+        i++;
       }
     }
   }
 
-  Triangle *triangles = (Triangle *)front_vertex_buffer_->data();
-  Vertex A = {{-length, -length, length}, 0, 0};
-  Vertex B = {{length, -length, length}, 1, 0};
-  Vertex C = {{length, length, length}, 1, 1};
-  Vertex D = {{-length, length, length}, 0, 1};
-  triangles[0].a = A;
-  triangles[0].b = C;
-  triangles[0].c = B;
-  triangles[1].a = A;
-  triangles[1].b = C;
-  triangles[1].c = D;
+  for (int i = 0; i < 8; i++) {
+    rotated_points_[i] = glm::rotateY(points_[i], theta_);
+    rotated_points_[i] = glm::rotateX(rotated_points_[i], phi_);
+  }
+
+  this->DrawFrame();
+
+  this->DrawFront();
 
   this->DrawTexture();
 }
@@ -110,28 +107,24 @@ void
 Box::Frame(uint32_t time)
 {
   (void)time;
-  rx_ += (float)(rand() - RAND_MAX / 2) / (float)RAND_MAX;
-  rx_ = rx_ > 10 ? 10 : rx_ < -10 ? -10 : rx_;
-  ry_ += (float)(rand() - RAND_MAX / 2) / (float)RAND_MAX;
-  ry_ = ry_ > 10 ? 10 : ry_ < -10 ? -10 : ry_;
+  delta_theta_ += (float)(rand() - RAND_MAX / 2) / (float)RAND_MAX;
+  delta_theta_ = delta_theta_ > 10    ? 10
+                 : delta_theta_ < -10 ? -10
+                                      : delta_theta_;
+  delta_phi_ += (float)(rand() - RAND_MAX / 2) / (float)RAND_MAX;
+  delta_phi_ = delta_phi_ > 10 ? 10 : delta_phi_ < -10 ? -10 : delta_phi_;
 
-  Vertex *vertex = (Vertex *)frame_vertex_buffer_->data();
-  for (int i = 0; i < 24; i++) {
-    vertex->p = glm::rotateY(vertex->p, glm::pi<float>() * 0.001f * ry_);
-    vertex->p = glm::rotateX(vertex->p, glm::pi<float>() * 0.001f * rx_);
-    vertex++;
-  }
-  frame_vertex_buffer_->BufferUpdated();
-  frame_component_->Attach(frame_vertex_buffer_);
+  theta_ += glm::pi<float>() * 0.001f * delta_theta_;
+  phi_ += glm::pi<float>() * 0.001f * delta_phi_;
 
-  vertex = (Vertex *)front_vertex_buffer_->data();
-  for (int i = 0; i < 6; i++) {
-    vertex->p = glm::rotateY(vertex->p, glm::pi<float>() * 0.001f * ry_);
-    vertex->p = glm::rotateX(vertex->p, glm::pi<float>() * 0.001f * rx_);
-    vertex++;
+  for (int i = 0; i < 8; i++) {
+    rotated_points_[i] = glm::rotateY(points_[i], theta_);
+    rotated_points_[i] = glm::rotateX(rotated_points_[i], phi_);
   }
-  front_vertex_buffer_->BufferUpdated();
-  front_component_->Attach(front_vertex_buffer_);
+
+  this->DrawFrame();
+
+  this->DrawFront();
 
   this->DrawTexture();
 
@@ -142,36 +135,94 @@ void
 Box::RayEnter(uint32_t serial, glm::vec3 origin, glm::vec3 direction)
 {
   (void)serial;
-  (void)origin;
-  (void)direction;
+  ray_focus_ = true;
+  ray_.origin = origin;
+  ray_.direction = direction;
 }
 
 void
 Box::RayLeave(uint32_t serial)
 {
   (void)serial;
+  ray_focus_ = false;
 }
 
 void
 Box::RayMotion(uint32_t time, glm::vec3 origin, glm::vec3 direction)
 {
   (void)time;
-  (void)origin;
-  (void)direction;
+  ray_.origin = origin;
+  ray_.direction = direction;
   blue_ -= 1;
   if (blue_ == 0) blue_ = UINT8_MAX;
 }
 
 void
+Box::DrawFrame()
+{
+  Vertex *vertex = (Vertex *)frame_vertex_buffer_->data();
+  int indices[24] = {
+      0, 1, 2, 3, 4, 5, 6, 7, 0, 4, 1, 5, 2, 6, 3, 7, 0, 2, 1, 3, 4, 6, 5, 7};
+
+  for (int i = 0; i < 24; i++) vertex[i].p = rotated_points_[indices[i]];
+
+  frame_vertex_buffer_->BufferUpdated();
+  frame_component_->Attach(frame_vertex_buffer_);
+}
+
+void
+Box::DrawFront()
+{
+  Vertex *vertex = (Vertex *)front_vertex_buffer_->data();
+  int indices[6] = {1, 7, 3, 1, 7, 5};
+  int uvs[6][2] = {{0, 0}, {1, 1}, {0, 1}, {0, 0}, {1, 1}, {1, 0}};
+
+  for (int i = 0; i < 6; i++) {
+    vertex[i].p = rotated_points_[indices[i]];
+    vertex[i].u = uvs[i][0];
+    vertex[i].v = uvs[i][1];
+  }
+
+  front_vertex_buffer_->BufferUpdated();
+  front_component_->Attach(front_vertex_buffer_);
+}
+
+void
 Box::DrawTexture()
 {
+  glm::vec2 position, one = {1, 1};
+  float distance;
+  bool intersected = false;
+
+  if (ray_focus_ &&
+      glm::intersectRayTriangle(ray_.origin, ray_.direction, rotated_points_[1],
+          rotated_points_[3], rotated_points_[5], position, distance)) {
+    intersected = true;
+  }
+
+  if (ray_focus_ && !intersected &&
+      glm::intersectRayTriangle(ray_.origin, ray_.direction, rotated_points_[7],
+          rotated_points_[5], rotated_points_[3], position, distance)) {
+    position = one - position;
+    intersected = true;
+  }
+
   zukou::ColorBGRA *pixel = (zukou::ColorBGRA *)texture_->data();
   for (int x = 0; x < 256; x++) {
     for (int y = 0; y < 256; y++) {
-      pixel->a = UINT8_MAX;
-      pixel->r = x;
-      pixel->g = y;
-      pixel->b = blue_;
+      if (intersected && -8 < position.x * UINT8_MAX - x &&
+          position.x * UINT8_MAX - x < 8 && -8 < position.y * UINT8_MAX - y &&
+          position.y * UINT8_MAX - y < 8) {
+        pixel->a = UINT8_MAX;
+        pixel->r = UINT8_MAX;
+        pixel->g = UINT8_MAX;
+        pixel->b = UINT8_MAX;
+      } else {
+        pixel->a = UINT8_MAX;
+        pixel->r = x;
+        pixel->g = y;
+        pixel->b = blue_;
+      }
       pixel++;
     }
   }

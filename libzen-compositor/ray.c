@@ -12,25 +12,21 @@ zen_ray_enter(struct zen_ray* ray, struct zen_virtual_object* virtual_object)
   struct zen_ray_client* ray_client;
   struct wl_resource* resource;
   struct wl_array origin_array, direction_array;
-  vec3 ray_direction;
   uint32_t serial;
 
   ray_client = zen_ray_client_find(
       wl_resource_get_client(virtual_object->resource), ray);
   if (ray_client == NULL) return;
 
-  zen_ray_get_direction(ray, ray_direction);
-
   wl_array_init(&origin_array);
   wl_array_init(&direction_array);
 
-  glm_vec3_to_wl_array(ray->origin, &origin_array);
-  glm_vec3_to_wl_array(ray_direction, &direction_array);
+  glm_vec3_to_wl_array(ray->local_origin, &origin_array);
+  glm_vec3_to_wl_array(ray->local_direction, &direction_array);
 
   serial = wl_display_next_serial(virtual_object->compositor->display);
   wl_resource_for_each(resource, &ray_client->resource_list)
   {
-    // FIXME: send ray data in virtual-object-local coordinate
     zgn_ray_send_enter(resource, serial, virtual_object->resource,
         &origin_array, &direction_array);
   }
@@ -46,7 +42,6 @@ zen_ray_motion(struct zen_ray* ray, const struct timespec* time)
   struct zen_ray_client* ray_client;
   struct wl_resource* resource;
   struct wl_array origin_array, direction_array;
-  vec3 ray_direction;
   uint32_t msecs;
 
   virtual_object = zen_weak_link_get_user_data(&ray->focus_virtual_object_link);
@@ -56,19 +51,16 @@ zen_ray_motion(struct zen_ray* ray, const struct timespec* time)
       wl_resource_get_client(virtual_object->resource), ray);
   if (ray_client == NULL) return;
 
-  zen_ray_get_direction(ray, ray_direction);
-
   wl_array_init(&origin_array);
   wl_array_init(&direction_array);
 
-  glm_vec3_to_wl_array(ray->origin, &origin_array);
-  glm_vec3_to_wl_array(ray_direction, &direction_array);
+  glm_vec3_to_wl_array(ray->local_origin, &origin_array);
+  glm_vec3_to_wl_array(ray->local_direction, &direction_array);
 
   msecs = timespec_to_msec(time);
 
   wl_resource_for_each(resource, &ray_client->resource_list)
   {
-    // FIXME: send ray data in virtual-object-local coordinate
     zgn_ray_send_motion(resource, msecs, &origin_array, &direction_array);
   }
 
@@ -105,10 +97,15 @@ default_grab_focus(struct zen_ray_grab* grab)
   struct zen_ray* ray = grab->ray;
   struct zen_shell_base* shell_base = ray->seat->compositor->shell_base;
   struct zen_virtual_object *virtual_object, *current_focus;
-
-  virtual_object = shell_base->pick_virtual_object(shell_base, ray);
+  vec3 local_ray_origin, local_ray_direction;
 
   current_focus = zen_weak_link_get_user_data(&ray->focus_virtual_object_link);
+
+  virtual_object = shell_base->pick_virtual_object(
+      shell_base, ray, local_ray_origin, local_ray_direction);
+
+  glm_vec3_copy(local_ray_origin, ray->local_origin);
+  glm_vec3_copy(local_ray_direction, ray->local_direction);
 
   if (current_focus == virtual_object) return;
 
