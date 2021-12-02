@@ -372,7 +372,7 @@ zen_opengl_component_render(struct zen_opengl_component *component,
 
   if (shader == NULL || shader->linked == false) return;
 
-  glm_mat4_copy(cuboid_window->model_matrix, mvp);
+  glm_mat4_copy(cuboid_window->virtual_object->model_matrix, mvp);
   glm_mat4_mul(camera->view_matrix, mvp, mvp);
   glm_mat4_mul(camera->projection_matrix, mvp, mvp);
 

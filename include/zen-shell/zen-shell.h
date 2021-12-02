@@ -20,7 +20,6 @@ struct zen_cuboid_window {
   struct wl_resource* resource;
   struct zen_virtual_object* virtual_object;
   vec3 half_size;
-  mat4 model_matrix;
 
   struct wl_list link;
 

@@ -47,6 +47,8 @@ struct zen_virtual_object {
   char* role;
   void* role_object;
 
+  mat4 model_matrix;
+
   struct wl_signal commit_signal;
   struct wl_signal destroy_signal;
   struct wl_signal render_commit_signal;

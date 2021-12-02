@@ -68,7 +68,7 @@ pick_virtual_object(struct zen_shell_base* shell_base, struct zen_ray* ray)
   wl_list_for_each(cuboid_window, &shell->cuboid_window_list, link)
   {
     float d = zen_shell_ray_obb_intersection(ray->origin, ray_direction,
-        cuboid_window->half_size, cuboid_window->model_matrix);
+        cuboid_window->half_size, cuboid_window->virtual_object->model_matrix);
 
     if (d >= 0 && d < min_distance) {
       min_distance = d;
