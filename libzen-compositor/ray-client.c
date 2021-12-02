@@ -100,6 +100,8 @@ zen_ray_client_add_resource(struct zen_ray_client *ray_client, uint32_t id)
 
   wl_list_insert(&ray_client->resource_list, wl_resource_get_link(resource));
 
+  // FIXME: send enter event if already focused
+
   return 0;
 
 err:

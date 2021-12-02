@@ -147,22 +147,9 @@ WL_EXPORT void
 zen_seat_notify_ray_motion(struct zen_seat* seat, const struct timespec* time,
     struct zen_ray_motion_event* event)
 {
-  UNUSED(time);
-  if (seat->ray) {
-    // FIXME: use grab
-    glm_vec3_add(seat->ray->origin, event->delta_origin, seat->ray->origin);
-    seat->ray->angle.polar += event->delta_polar_angle;
-    while (seat->ray->angle.polar >= GLM_PI * 2)
-      seat->ray->angle.polar -= GLM_PI * 2;
-    while (seat->ray->angle.polar < 0) seat->ray->angle.polar += GLM_PI * 2;
-
-    seat->ray->angle.azimuthal += event->delta_azimuthal_angle;
-    while (seat->ray->angle.azimuthal >= GLM_PI * 2)
-      seat->ray->angle.azimuthal -= GLM_PI * 2;
-    while (seat->ray->angle.azimuthal < 0)
-      seat->ray->angle.azimuthal += GLM_PI * 2;
-
-    seat->ray->render_item->commit(seat->ray->render_item);
+  struct zen_ray* ray = seat->ray;
+  if (ray) {
+    ray->grab->interface->motion(ray->grab, time, event);
   }
 }
 

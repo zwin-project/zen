@@ -4,6 +4,7 @@
 #include <zigen-shell-server-protocol.h>
 
 #include "cuboid-window.h"
+#include "intersection.h"
 
 char* zen_shell_type = "zen_shell";
 
@@ -53,6 +54,31 @@ static const struct zgn_shell_interface shell_interface = {
     .get_cuboid_window = zen_shell_protocol_get_cuboid_window,
 };
 
+static struct zen_virtual_object*
+pick_virtual_object(struct zen_shell_base* shell_base, struct zen_ray* ray)
+{
+  struct zen_shell* shell;
+  struct zen_cuboid_window *cuboid_window, *focus_cuboid_window = NULL;
+  float min_distance = FLT_MAX;
+  vec3 ray_direction;
+
+  shell = wl_container_of(shell_base, shell, base);
+  zen_ray_get_direction(ray, ray_direction);
+
+  wl_list_for_each(cuboid_window, &shell->cuboid_window_list, link)
+  {
+    float d = zen_shell_ray_obb_intersection(ray->origin, ray_direction,
+        cuboid_window->half_size, cuboid_window->model_matrix);
+
+    if (d >= 0 && d < min_distance) {
+      min_distance = d;
+      focus_cuboid_window = cuboid_window;
+    }
+  }
+
+  return focus_cuboid_window ? focus_cuboid_window->virtual_object : NULL;
+}
+
 static void
 zen_shell_bind(
     struct wl_client* client, void* data, uint32_t version, uint32_t id)
@@ -90,7 +116,9 @@ zen_shell_create(struct zen_compositor* compositor)
   }
 
   shell->base.type = zen_shell_type;
+  shell->base.pick_virtual_object = pick_virtual_object;
   shell->compositor = compositor;
+  wl_list_init(&shell->cuboid_window_list);
   shell->global = global;
 
   return &shell->base;

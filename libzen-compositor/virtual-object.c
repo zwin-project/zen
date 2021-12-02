@@ -88,6 +88,12 @@ zen_virtual_object_compositor_frame_signal_handler(
   wl_list_init(&virtual_object->frame_callback_list);
 }
 
+WL_EXPORT void
+zen_virtual_object_render_commit(struct zen_virtual_object *virtual_object)
+{
+  wl_signal_emit(&virtual_object->render_commit_signal, NULL);
+}
+
 WL_EXPORT struct zen_virtual_object *
 zen_virtual_object_create(
     struct wl_client *client, uint32_t id, struct zen_compositor *compositor)
@@ -113,12 +119,14 @@ zen_virtual_object_create(
       virtual_object, zen_virtual_object_handle_destroy);
 
   virtual_object->compositor = compositor;
+  virtual_object->resource = resource;
 
   virtual_object->role = NULL;
   virtual_object->role_object = NULL;
 
   wl_signal_init(&virtual_object->commit_signal);
   wl_signal_init(&virtual_object->destroy_signal);
+  wl_signal_init(&virtual_object->render_commit_signal);
 
   virtual_object->compositor_frame_signal_listener.notify =
       zen_virtual_object_compositor_frame_signal_handler;

@@ -4,6 +4,7 @@ deps_zen_shell = [
 
 srcs_zen_shell = [
   'cuboid-window.c',
+  'intersection.c',
   'shell.c',
   zigen_shell_protocol_c,
   zigen_shell_server_protocol_h,

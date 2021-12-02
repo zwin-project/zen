@@ -73,7 +73,21 @@ zen_cuboid_window_virtual_object_destroy_handler(
   wl_resource_destroy(cuboid_window->resource);
 }
 
-WL_EXPORT struct zen_cuboid_window *
+static void
+zen_cuboid_window_virtual_object_render_commit_handler(
+    struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+  struct zen_cuboid_window *cuboid_window;
+
+  cuboid_window = wl_container_of(
+      listener, cuboid_window, virtual_object_render_commit_listener);
+
+  cuboid_window->render_item->commit(cuboid_window->render_item);
+}
+
+WL_EXPORT
+struct zen_cuboid_window *
 zen_cuboid_window_create(struct wl_client *client, uint32_t id,
     struct wl_resource *shell_resource,
     struct zen_virtual_object *virtual_object)
@@ -139,10 +153,17 @@ zen_cuboid_window_create(struct wl_client *client, uint32_t id,
   glm_translate_z(cuboid_window->model_matrix, -1);
   glm_translate_y(cuboid_window->model_matrix, 1.5);
 
+  wl_list_insert(&shell->cuboid_window_list, &cuboid_window->link);
+
   cuboid_window->virtual_object_destroy_listener.notify =
       zen_cuboid_window_virtual_object_destroy_handler;
   wl_signal_add(&virtual_object->destroy_signal,
       &cuboid_window->virtual_object_destroy_listener);
+
+  cuboid_window->virtual_object_render_commit_listener.notify =
+      zen_cuboid_window_virtual_object_render_commit_handler;
+  wl_signal_add(&virtual_object->render_commit_signal,
+      &cuboid_window->virtual_object_render_commit_listener);
 
   cuboid_window->render_item = render_item;
 
@@ -163,6 +184,8 @@ zen_cuboid_window_destroy(struct zen_cuboid_window *cuboid_window)
 {
   cuboid_window->virtual_object->role_object = NULL;
   wl_list_remove(&cuboid_window->virtual_object_destroy_listener.link);
+  wl_list_remove(&cuboid_window->virtual_object_render_commit_listener.link);
+  wl_list_remove(&cuboid_window->link);
   zen_cuboid_window_render_item_destroy(cuboid_window->render_item);
   free(cuboid_window);
 }

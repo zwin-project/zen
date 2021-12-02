@@ -16,6 +16,7 @@ struct zen_opengl_cuboid_window_render_item {
   GLuint vertex_array_id;
   GLuint vertex_buffer_id;
   GLuint program_id;
+  GLfloat line_width;
   vec3 vertex_buffer[48];
 };
 

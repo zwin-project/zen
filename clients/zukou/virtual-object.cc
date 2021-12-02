@@ -6,6 +6,7 @@ VirtualObject::VirtualObject(App *app)
   app_ = app;
   virtual_object_ = zgn_compositor_create_virtual_object(app->compositor());
   frame_callback_ = nullptr;
+  wl_proxy_set_user_data((wl_proxy *)virtual_object_, this);
 }
 
 VirtualObject::~VirtualObject()
@@ -45,6 +46,28 @@ void
 VirtualObject::Frame(uint32_t time)
 {
   (void)time;
+}
+
+void
+VirtualObject::RayEnter(uint32_t serial, glm::vec3 origin, glm::vec3 direction)
+{
+  (void)serial;
+  (void)origin;
+  (void)direction;
+}
+
+void
+VirtualObject::RayLeave(uint32_t serial)
+{
+  (void)serial;
+}
+
+void
+VirtualObject::RayMotion(uint32_t time, glm::vec3 origin, glm::vec3 direction)
+{
+  (void)time;
+  (void)origin;
+  (void)direction;
 }
 
 }  // namespace zukou

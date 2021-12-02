@@ -74,13 +74,13 @@ ray_leave(void *data, struct zgn_ray *ray, uint32_t serial,
 }
 
 static void
-ray_motion(void *data, struct zgn_ray *ray, struct wl_array *origin,
-    struct wl_array *direction)
+ray_motion(void *data, struct zgn_ray *ray, uint32_t time,
+    struct wl_array *origin, struct wl_array *direction)
 {
   App *app = (App *)data;
   glm::vec3 origin_vec = glm_vec3_from_wl_array(origin);
   glm::vec3 direction_vec = glm_vec3_from_wl_array(direction);
-  app->RayMotion(ray, origin_vec, direction_vec);
+  app->RayMotion(ray, time, origin_vec, direction_vec);
 }
 
 static void
@@ -186,10 +186,12 @@ App::RayEnter(struct zgn_ray *ray, uint32_t serial,
     glm::vec3 direction)
 {
   (void)ray;
-  (void)serial;
-  (void)virtual_object;
-  (void)origin;
-  (void)direction;
+  ray_focus_virtual_object_ = virtual_object;
+
+  VirtualObject *v =
+      (VirtualObject *)wl_proxy_get_user_data((wl_proxy *)virtual_object);
+
+  v->RayEnter(serial, origin, direction);
 }
 
 void
@@ -197,16 +199,25 @@ App::RayLeave(struct zgn_ray *ray, uint32_t serial,
     struct zgn_virtual_object *virtual_object)
 {
   (void)ray;
-  (void)serial;
-  (void)virtual_object;
+  ray_focus_virtual_object_ = NULL;
+
+  VirtualObject *v =
+      (VirtualObject *)wl_proxy_get_user_data((wl_proxy *)virtual_object);
+
+  v->RayLeave(serial);
 }
 
 void
-App::RayMotion(struct zgn_ray *ray, glm::vec3 origin, glm::vec3 direction)
+App::RayMotion(
+    struct zgn_ray *ray, uint32_t time, glm::vec3 origin, glm::vec3 direction)
 {
   (void)ray;
-  (void)origin;
-  (void)direction;
+  if (ray_focus_virtual_object_ == NULL) return;
+
+  VirtualObject *v = (VirtualObject *)wl_proxy_get_user_data(
+      (wl_proxy *)ray_focus_virtual_object_);
+
+  v->RayMotion(time, origin, direction);
 }
 
 void

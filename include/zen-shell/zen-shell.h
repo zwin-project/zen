@@ -10,6 +10,8 @@ struct zen_shell {
   struct zen_shell_base base;
   struct zen_compositor* compositor;
 
+  struct wl_list cuboid_window_list;
+
   struct wl_global* global;
 };
 
@@ -20,7 +22,10 @@ struct zen_cuboid_window {
   vec3 half_size;
   mat4 model_matrix;
 
+  struct wl_list link;
+
   struct wl_listener virtual_object_destroy_listener;
+  struct wl_listener virtual_object_render_commit_listener;
 
   struct zen_render_item* render_item;
 };
