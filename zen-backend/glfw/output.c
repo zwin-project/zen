@@ -102,7 +102,8 @@ swap_timer_loop(void* data)
   refresh_msec = millihz_to_nsec(output->refresh) / 1000000;
   timespec_add_msec(&next_repaint, &output->base.frame_time, refresh_msec);
 
-  wl_event_source_timer_update(output->swap_timer, refresh_msec);
+  wl_event_source_timer_update(output->swap_timer,
+      refresh_msec - output->compositor->repaint_window_msec + 1);
 
   zen_compositor_finish_frame(output->compositor, next_repaint);
 
@@ -145,6 +146,7 @@ zen_output_create(struct zen_compositor* compositor)
   mat4 right_eye_view = RIGHT_EYE_VIEW;
   mat4 left_eye_view = LEFT_EYE_VIEW;
   mat4 eye_projection = EYE_PROJECTION;
+  uint32_t refresh_msec;
 
   window = glfwCreateWindow(
       initial_width, initial_height, "zen compositor", NULL, NULL);
@@ -201,6 +203,10 @@ zen_output_create(struct zen_compositor* compositor)
 
   // start swap loop
   swap_timer_loop(output);
+
+  refresh_msec = millihz_to_nsec(refresh) / 1000000;
+  fprintf(stderr, "refresh: %d", refresh_msec);
+  compositor->repaint_window_msec = refresh_msec - 1;
 
   return &output->base;
 
