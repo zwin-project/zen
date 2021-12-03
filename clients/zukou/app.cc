@@ -225,10 +225,12 @@ App::RayButton(struct zgn_ray *ray, uint32_t serial, uint32_t time,
     uint32_t button, enum zgn_ray_button_state state)
 {
   (void)ray;
-  (void)serial;
-  (void)time;
-  (void)button;
-  (void)state;
+  if (ray_focus_virtual_object_ == NULL) return;
+
+  VirtualObject *v = (VirtualObject *)wl_proxy_get_user_data(
+      (wl_proxy *)ray_focus_virtual_object_);
+
+  v->RayButton(serial, time, button, state);
 }
 
 bool

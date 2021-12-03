@@ -41,6 +41,7 @@ Box::Box(zukou::App *app, float length)
   delta_theta_ = 0;
   delta_phi_ = 0;
   blue_ = UINT8_MAX;
+  button_pressed_ = false;
 
   frame_component_ = new zukou::OpenGLComponent(app, this);
   frame_vertex_buffer_ = new zukou::OpenGLVertexBuffer(app, sizeof(Line) * 12);
@@ -158,6 +159,20 @@ Box::RayMotion(uint32_t time, glm::vec3 origin, glm::vec3 direction)
 }
 
 void
+Box::RayButton(uint32_t serial, uint32_t time, uint32_t button,
+    enum zgn_ray_button_state state)
+{
+  (void)time;
+  (void)button;
+  if (state == ZGN_RAY_BUTTON_STATE_PRESSED) {
+    zgn_cuboid_window_move(cuboid_window(), app()->seat(), serial);
+    button_pressed_ = true;
+  } else {
+    button_pressed_ = false;
+  }
+}
+
+void
 Box::DrawFrame()
 {
   Vertex *vertex = (Vertex *)frame_vertex_buffer_->data();
@@ -207,16 +222,18 @@ Box::DrawTexture()
     intersected = true;
   }
 
+  uint8_t cursor_color = button_pressed_ ? 0 : UINT8_MAX;
+
   zukou::ColorBGRA *pixel = (zukou::ColorBGRA *)texture_->data();
   for (int x = 0; x < 256; x++) {
     for (int y = 0; y < 256; y++) {
       if (intersected && -8 < position.x * UINT8_MAX - x &&
           position.x * UINT8_MAX - x < 8 && -8 < position.y * UINT8_MAX - y &&
           position.y * UINT8_MAX - y < 8) {
-        pixel->a = UINT8_MAX;
-        pixel->r = UINT8_MAX;
-        pixel->g = UINT8_MAX;
-        pixel->b = UINT8_MAX;
+        pixel->a = cursor_color;
+        pixel->r = cursor_color;
+        pixel->g = cursor_color;
+        pixel->b = cursor_color;
       } else {
         pixel->a = UINT8_MAX;
         pixel->r = x;
