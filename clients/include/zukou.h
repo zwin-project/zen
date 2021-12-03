@@ -134,6 +134,8 @@ class VirtualObject
   virtual void RayEnter(uint32_t serial, glm::vec3 origin, glm::vec3 direction);
   virtual void RayLeave(uint32_t serial);
   virtual void RayMotion(uint32_t time, glm::vec3 origin, glm::vec3 direction);
+  virtual void RayButton(uint32_t serial, uint32_t time, uint32_t button,
+      enum zgn_ray_button_state state);
   inline App *app();
   inline struct zgn_virtual_object *virtual_object();
   inline struct wl_callback *frame_callback();

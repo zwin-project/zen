@@ -136,10 +136,29 @@ static void
 default_grab_button(struct zen_ray_grab* grab, const struct timespec* time,
     uint32_t button, uint32_t state)
 {
-  UNUSED(grab);
-  UNUSED(time);
-  UNUSED(button);
-  UNUSED(state);
+  struct zen_ray* ray = grab->ray;
+  struct zen_virtual_object* focus_virtual_object;
+  struct zen_ray_client* ray_client;
+  struct wl_resource* resource;
+  uint32_t serial, msec;
+
+  serial = wl_display_next_serial(ray->seat->compositor->display);
+
+  focus_virtual_object =
+      zen_weak_link_get_user_data(&ray->focus_virtual_object_link);
+  if (focus_virtual_object == NULL) return;
+
+  ray_client = zen_ray_client_find(
+      wl_resource_get_client(focus_virtual_object->resource), ray);
+  if (ray_client == NULL) return;
+
+  msec = timespec_to_msec(time);
+
+  wl_resource_for_each(resource, &ray_client->resource_list)
+  {
+    zgn_ray_send_button(resource, serial, msec, button, state);
+    wl_client_flush(wl_resource_get_client(resource));
+  }
 }
 
 static void
@@ -204,6 +223,7 @@ zen_ray_create(struct zen_seat* seat)
   ray->grab = &ray->default_grab;
   ray->default_grab.interface = &default_ray_grab_interface;
   ray->default_grab.ray = ray;
+  ray->button_count = 0;
   zen_weak_link_init(&ray->focus_virtual_object_link);
   wl_list_init(&ray->ray_client_list);
   wl_signal_init(&ray->destroy_signal);

@@ -205,7 +205,6 @@ zen_output_create(struct zen_compositor* compositor)
   swap_timer_loop(output);
 
   refresh_msec = millihz_to_nsec(refresh) / 1000000;
-  fprintf(stderr, "refresh: %d", refresh_msec);
   compositor->repaint_window_msec = refresh_msec - 1;
 
   return &output->base;

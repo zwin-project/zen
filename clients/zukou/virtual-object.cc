@@ -70,4 +70,14 @@ VirtualObject::RayMotion(uint32_t time, glm::vec3 origin, glm::vec3 direction)
   (void)direction;
 }
 
+void
+VirtualObject::RayButton(uint32_t serial, uint32_t time, uint32_t button,
+    enum zgn_ray_button_state state)
+{
+  (void)serial;
+  (void)time;
+  (void)button;
+  (void)state;
+}
+
 }  // namespace zukou

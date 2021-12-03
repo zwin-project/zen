@@ -157,10 +157,18 @@ WL_EXPORT void
 zen_seat_notify_ray_button(struct zen_seat* seat, const struct timespec* time,
     int32_t button, enum zgn_ray_button_state state)
 {
-  UNUSED(seat);
-  UNUSED(time);
-  UNUSED(button);
-  UNUSED(state);
+  struct zen_ray* ray = seat->ray;
+  if (ray == NULL) return;
+
+  if (state == ZGN_RAY_BUTTON_STATE_PRESSED)
+    ray->button_count++;
+  else
+    ray->button_count--;
+
+  ray->grab->interface->button(ray->grab, time, button, state);
+
+  if (ray->button_count == 1)
+    ray->grab_serial = wl_display_get_serial(ray->seat->compositor->display);
 }
 
 WL_EXPORT void

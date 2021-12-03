@@ -85,6 +85,8 @@ struct zen_ray {
   struct zen_seat* seat;
   struct zen_ray_grab* grab;
   struct zen_ray_grab default_grab;
+  uint32_t button_count;
+  uint32_t grab_serial;
 
   struct zen_weak_link focus_virtual_object_link;
 
