@@ -102,6 +102,7 @@ struct zen_ray {
 
   vec3 local_origin;
   vec3 local_direction;
+  float target_distance;
 
   struct zen_render_item* render_item;
 };
@@ -122,7 +123,7 @@ struct zen_shell_base {
   const char* type;
   struct zen_virtual_object* (*pick_virtual_object)(
       struct zen_shell_base* shell_base, struct zen_ray* ray,
-      vec3 local_ray_origin, vec3 local_ray_direction);
+      vec3 local_ray_origin, vec3 local_ray_direction, float* distance);
 };
 
 struct zen_renderer {
@@ -160,6 +161,10 @@ void zen_compositor_finish_frame(
     struct zen_compositor* compositor, struct timespec next_repaint);
 
 // methods of zen_ray
+
+void zen_ray_grab_start(struct zen_ray* ray, struct zen_ray_grab* grab);
+
+void zen_ray_grab_end(struct zen_ray* ray);
 
 void zen_ray_get_direction(struct zen_ray* ray, vec3 direction);
 

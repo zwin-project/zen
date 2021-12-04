@@ -6,6 +6,8 @@
 extern char* zen_shell_type;
 extern char* zen_cuboid_window_role;
 
+struct zen_desktop_api;
+
 struct zen_shell {
   struct zen_shell_base base;
   struct zen_compositor* compositor;
@@ -13,6 +15,8 @@ struct zen_shell {
   struct wl_list cuboid_window_list;
 
   struct wl_global* global;
+
+  struct zen_desktop_api* interface;
 };
 
 struct zen_cuboid_window {
