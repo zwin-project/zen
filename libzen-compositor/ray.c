@@ -97,15 +97,11 @@ default_grab_focus(struct zen_ray_grab* grab)
   struct zen_ray* ray = grab->ray;
   struct zen_shell_base* shell_base = ray->seat->compositor->shell_base;
   struct zen_virtual_object *virtual_object, *current_focus;
-  vec3 local_ray_origin, local_ray_direction;
 
   current_focus = zen_weak_link_get_user_data(&ray->focus_virtual_object_link);
 
-  virtual_object = shell_base->pick_virtual_object(
-      shell_base, ray, local_ray_origin, local_ray_direction);
-
-  glm_vec3_copy(local_ray_origin, ray->local_origin);
-  glm_vec3_copy(local_ray_direction, ray->local_direction);
+  virtual_object = shell_base->pick_virtual_object(shell_base, ray,
+      ray->local_origin, ray->local_direction, &ray->target_distance);
 
   if (current_focus == virtual_object) return;
 
@@ -173,6 +169,29 @@ static const struct zen_ray_grab_interface default_ray_grab_interface = {
     .button = default_grab_button,
     .cancel = default_grab_cancel,
 };
+
+WL_EXPORT void
+zen_ray_grab_start(struct zen_ray* ray, struct zen_ray_grab* grab)
+{
+  struct zen_virtual_object* current_focus;
+  if (ray->grab != &ray->default_grab) return;
+
+  ray->grab = grab;
+  ray->grab->ray = ray;
+  ray->grab->interface->focus(ray->grab);
+
+  current_focus = zen_weak_link_get_user_data(&ray->focus_virtual_object_link);
+
+  zen_ray_leave(ray);
+  zen_weak_link_unset(&ray->focus_virtual_object_link);
+  if (current_focus) zen_virtual_object_render_commit(current_focus);
+}
+
+WL_EXPORT void
+zen_ray_grab_end(struct zen_ray* ray)
+{
+  ray->grab = &ray->default_grab;
+}
 
 WL_EXPORT void
 zen_ray_get_direction(struct zen_ray* ray, vec3 direction)

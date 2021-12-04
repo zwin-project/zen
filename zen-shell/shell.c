@@ -4,6 +4,7 @@
 #include <zigen-shell-server-protocol.h>
 
 #include "cuboid-window.h"
+#include "desktop.h"
 #include "intersection.h"
 
 char* zen_shell_type = "zen_shell";
@@ -56,7 +57,7 @@ static const struct zgn_shell_interface shell_interface = {
 
 static struct zen_virtual_object*
 pick_virtual_object(struct zen_shell_base* shell_base, struct zen_ray* ray,
-    vec3 local_ray_origin, vec3 local_ray_direction)
+    vec3 local_ray_origin, vec3 local_ray_direction, float* distance)
 {
   struct zen_shell* shell;
   struct zen_cuboid_window *cuboid_window, *focus_cuboid_window = NULL;
@@ -87,6 +88,7 @@ pick_virtual_object(struct zen_shell_base* shell_base, struct zen_ray* ray,
     glm_mat4_mulv3(model_matrix_inverse, ray->origin, 1, local_ray_origin);
     glm_vec3_sub(local_ray_target, local_ray_origin, local_ray_direction);
     glm_vec3_normalize(local_ray_direction);
+    *distance = min_distance;
   }
 
   return focus_cuboid_window ? focus_cuboid_window->virtual_object : NULL;
@@ -133,6 +135,7 @@ zen_shell_create(struct zen_compositor* compositor)
   shell->compositor = compositor;
   wl_list_init(&shell->cuboid_window_list);
   shell->global = global;
+  shell->interface = &zen_desktop_shell_interface;
 
   return &shell->base;
 

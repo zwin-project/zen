@@ -3,6 +3,8 @@
 #include <string.h>
 #include <zigen-shell-server-protocol.h>
 
+#include "desktop.h"
+
 char *zen_cuboid_window_role = "zen_cuboid_window";
 
 static void zen_cuboid_window_destroy(struct zen_cuboid_window *cuboid_window);
@@ -41,12 +43,17 @@ zen_cuboid_window_protocol_ack_configure(
 
 static void
 zen_cuboid_window_protocol_move(struct wl_client *client,
-    struct wl_resource *resource, struct wl_resource *seat, uint32_t serial)
+    struct wl_resource *resource, struct wl_resource *seat_resource,
+    uint32_t serial)
 {
   UNUSED(client);
-  UNUSED(resource);
-  UNUSED(seat);
-  UNUSED(serial);
+  struct zen_cuboid_window *cuboid_window;
+  struct zen_seat *seat;
+
+  cuboid_window = wl_resource_get_user_data(resource);
+  seat = wl_resource_get_user_data(seat_resource);
+
+  cuboid_window->shell->interface->move(cuboid_window, seat, serial);
 }
 
 static const struct zgn_cuboid_window_interface cuboid_window_interface = {
