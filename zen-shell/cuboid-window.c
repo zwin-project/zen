@@ -112,7 +112,7 @@ zen_cuboid_window_create(struct wl_client *client, uint32_t id,
     goto err;
   }
 
-  if (virtual_object->role != NULL &&
+  if (strcmp(virtual_object->role, "") != 0 &&
       strcmp(virtual_object->role, zen_cuboid_window_role) != 0) {
     wl_resource_post_error(shell_resource, ZGN_SHELL_ERROR_ROLE,
         "given virtual object has been attached another type of role");
@@ -147,8 +147,8 @@ zen_cuboid_window_create(struct wl_client *client, uint32_t id,
   wl_resource_set_implementation(resource, &cuboid_window_interface,
       cuboid_window, zen_cuboid_window_handle_destroy);
 
-  if (virtual_object->role == NULL)
-    virtual_object->role = strdup(zen_cuboid_window_role);
+  free(virtual_object->role);
+  virtual_object->role = strdup(zen_cuboid_window_role);
   virtual_object->role_object = cuboid_window;
 
   cuboid_window->shell = shell;
