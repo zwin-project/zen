@@ -1,6 +1,7 @@
 #include "virtual-object.h"
 
 #include <libzen-compositor/libzen-compositor.h>
+#include <string.h>
 #include <wayland-client.h>
 #include <zigen-server-protocol.h>
 
@@ -122,7 +123,7 @@ zen_virtual_object_create(
   virtual_object->compositor = compositor;
   virtual_object->resource = resource;
 
-  virtual_object->role = NULL;
+  virtual_object->role = strdup("");
   virtual_object->role_object = NULL;
 
   glm_mat4_copy(identity, virtual_object->model_matrix);
