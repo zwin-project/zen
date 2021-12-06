@@ -233,6 +233,32 @@ OpenGLVertexBuffer::vertex_buffer()
   return vertex_buffer_;
 }
 
+class OpenGLElementArrayBuffer : public Buffer
+{
+ public:
+  OpenGLElementArrayBuffer(App *app, size_t size);
+  ~OpenGLElementArrayBuffer();
+  void BufferUpdated(enum zgn_opengl_element_array_indices_type type);
+  inline App *app();
+  inline struct zgn_opengl_element_array_buffer *element_array_buffer();
+
+ private:
+  App *app_;
+  struct zgn_opengl_element_array_buffer *element_array_buffer_;
+};
+
+inline App *
+OpenGLElementArrayBuffer::app()
+{
+  return app_;
+}
+
+inline struct zgn_opengl_element_array_buffer *
+OpenGLElementArrayBuffer::element_array_buffer()
+{
+  return element_array_buffer_;
+}
+
 class OpenGLShaderProgram
 {
  public:
@@ -261,6 +287,7 @@ class OpenGLComponent
   OpenGLComponent(App *app, VirtualObject *virtual_object);
   ~OpenGLComponent();
   void Attach(OpenGLVertexBuffer *vertex_buffer);
+  void Attach(OpenGLElementArrayBuffer *element_array_buffer);
   void Attach(OpenGLShaderProgram *shader_program);
   void Attach(OpenGLTexture *texture);
   void SetMin(uint32_t min);

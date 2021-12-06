@@ -5,6 +5,11 @@
 
 #include <glm/glm.hpp>
 
+struct Vertex {
+  glm::vec3 p;
+  float u, v;
+};
+
 class Box : public zukou::CuboidWindow
 {
  public:
@@ -15,17 +20,17 @@ class Box : public zukou::CuboidWindow
   virtual void RayMotion(uint32_t time, glm::vec3 origin, glm::vec3 direction);
   virtual void RayButton(uint32_t serial, uint32_t time, uint32_t button,
       enum zgn_ray_button_state state);
-  void DrawFrame();
-  void DrawFront();
   void DrawTexture();
 
  private:
+  zukou::OpenGLVertexBuffer *vertex_buffer_;
+
   zukou::OpenGLComponent *frame_component_;
-  zukou::OpenGLVertexBuffer *frame_vertex_buffer_;
+  zukou::OpenGLElementArrayBuffer *frame_element_array_;
   zukou::OpenGLShaderProgram *frame_shader_;
 
   zukou::OpenGLComponent *front_component_;
-  zukou::OpenGLVertexBuffer *front_vertex_buffer_;
+  zukou::OpenGLElementArrayBuffer *front_element_array_;
   zukou::OpenGLShaderProgram *front_shader_;
   zukou::OpenGLTexture *texture_;
 
@@ -34,8 +39,7 @@ class Box : public zukou::CuboidWindow
   float phi_;
   float delta_theta_;
   float delta_phi_;
-  glm::vec3 points_[8];
-  glm::vec3 rotated_points_[8];
+  Vertex points_[8];
 
   uint8_t blue_;
 

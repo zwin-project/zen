@@ -6,6 +6,7 @@
 #include <zen-shell/zen-shell.h>
 #include <zigen-opengl-server-protocol.h>
 
+#include "opengl-element-array-buffer.h"
 #include "opengl-shader-program.h"
 #include "opengl-texture.h"
 #include "opengl-vertex-buffer.h"
@@ -42,6 +43,20 @@ zen_opengl_component_protocol_attach_vertex_buffer(struct wl_client *client,
   component = wl_resource_get_user_data(resource);
 
   zen_weak_link_set(&component->pending.vertex_buffer_link, vertex_buffer);
+}
+
+static void
+zen_opengl_component_protocol_attach_element_array_buffer(
+    struct wl_client *client, struct wl_resource *resource,
+    struct wl_resource *element_array_buffer)
+{
+  UNUSED(client);
+  struct zen_opengl_component *component;
+
+  component = wl_resource_get_user_data(resource);
+
+  zen_weak_link_set(
+      &component->pending.element_array_buffer_link, element_array_buffer);
 }
 
 static void
@@ -151,6 +166,8 @@ static const struct zgn_opengl_component_interface opengl_component_interface =
         .destroy = zen_opengl_component_protocol_destroy,
         .attach_vertex_buffer =
             zen_opengl_component_protocol_attach_vertex_buffer,
+        .attach_element_array_buffer =
+            zen_opengl_component_protocol_attach_element_array_buffer,
         .attach_shader_program =
             zen_opengl_component_protocol_attach_shader_program,
         .attach_texture = zen_opengl_component_protocol_attach_texture,
@@ -167,15 +184,21 @@ static void
 zen_opengl_component_update_vao(struct zen_opengl_component *component)
 {
   struct zen_opengl_vertex_buffer *vertex_buffer;
+  struct zen_opengl_element_array_buffer *element_array_buffer;
   struct zen_opengl_vertex_attribute *attribute;
 
   vertex_buffer =
       zen_weak_link_get_user_data(&component->current.vertex_buffer_link);
+  element_array_buffer = zen_weak_link_get_user_data(
+      &component->current.element_array_buffer_link);
 
   if (vertex_buffer == NULL) return;
 
   glBindVertexArray(component->vertex_array_id);
-  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer ? vertex_buffer->id : 0);
+  glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer->id);
+
+  if (element_array_buffer)
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_array_buffer->id);
 
   wl_array_for_each(attribute, &component->current.vertex_attributes)
   {
@@ -191,6 +214,7 @@ zen_opengl_component_update_vao(struct zen_opengl_component *component)
   glBindVertexArray(0);
   glDisableVertexAttribArray(0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 static void
@@ -200,6 +224,7 @@ zen_opengl_component_virtual_object_commit_handler(
   UNUSED(data);
   struct zen_opengl_component *component;
   struct zen_opengl_vertex_buffer *vertex_buffer;
+  struct zen_opengl_element_array_buffer *element_array_buffer;
   struct zen_opengl_shader_program *shader;
   struct zen_opengl_texture *texture;
   bool update_vao = false;
@@ -215,6 +240,17 @@ zen_opengl_component_virtual_object_commit_handler(
       update_vao = true;
     zen_weak_link_set(
         &component->current.vertex_buffer_link, vertex_buffer->resource);
+  }
+
+  element_array_buffer = zen_weak_link_get_user_data(
+      &component->pending.element_array_buffer_link);
+  if (element_array_buffer) {
+    zen_opengl_element_array_buffer_commit(element_array_buffer);
+    if (component->current.element_array_buffer_link.resource == NULL) {
+      update_vao = true;
+    }
+    zen_weak_link_set(&component->current.element_array_buffer_link,
+        element_array_buffer->resource);
   }
 
   shader = zen_weak_link_get_user_data(&component->pending.shader_program_link);
@@ -253,6 +289,7 @@ zen_opengl_component_virtual_object_commit_handler(
   }
 
   zen_weak_link_unset(&component->pending.vertex_buffer_link);
+  zen_weak_link_unset(&component->pending.element_array_buffer_link);
   zen_weak_link_unset(&component->pending.shader_program_link);
   zen_weak_link_unset(&component->pending.texture_link);
 
@@ -305,6 +342,8 @@ zen_opengl_component_create(struct wl_client *client, uint32_t id,
 
   zen_weak_link_init(&component->current.vertex_buffer_link);
   zen_weak_link_init(&component->pending.vertex_buffer_link);
+  zen_weak_link_init(&component->current.element_array_buffer_link);
+  zen_weak_link_init(&component->pending.element_array_buffer_link);
   zen_weak_link_init(&component->current.shader_program_link);
   zen_weak_link_init(&component->pending.shader_program_link);
   zen_weak_link_init(&component->current.texture_link);
@@ -342,6 +381,8 @@ zen_opengl_component_destroy(struct zen_opengl_component *component)
 {
   zen_weak_link_unset(&component->current.vertex_buffer_link);
   zen_weak_link_unset(&component->pending.vertex_buffer_link);
+  zen_weak_link_unset(&component->current.element_array_buffer_link);
+  zen_weak_link_unset(&component->pending.element_array_buffer_link);
   zen_weak_link_unset(&component->current.shader_program_link);
   zen_weak_link_unset(&component->pending.shader_program_link);
   zen_weak_link_unset(&component->current.texture_link);
@@ -361,12 +402,15 @@ zen_opengl_component_render(struct zen_opengl_component *component,
 {
   mat4 mvp;
   struct zen_cuboid_window *cuboid_window;
+  struct zen_opengl_element_array_buffer *element_array_buffer;
   struct zen_opengl_shader_program *shader;
   struct zen_opengl_texture *texture;
 
   if (strcmp(component->virtual_object->role, zen_cuboid_window_role) != 0)
     return;
   cuboid_window = component->virtual_object->role_object;
+  element_array_buffer = zen_weak_link_get_user_data(
+      &component->current.element_array_buffer_link);
   shader = zen_weak_link_get_user_data(&component->current.shader_program_link);
   texture = zen_weak_link_get_user_data(&component->current.texture_link);
 
@@ -381,8 +425,14 @@ zen_opengl_component_render(struct zen_opengl_component *component,
   GLint mvp_matrix_location = glGetUniformLocation(shader->program_id, "mvp");
   glUniformMatrix4fv(mvp_matrix_location, 1, GL_FALSE, (float *)mvp);
   if (texture) glBindTexture(GL_TEXTURE_2D, texture->id);
-  glDrawArrays(component->current.topology, component->current.min,
-      component->current.count);
+  if (element_array_buffer) {
+    glDrawElements(component->current.topology, component->current.count,
+        element_array_buffer->type,
+        (const void *)(uintptr_t)component->current.min);
+  } else {
+    glDrawArrays(component->current.topology, component->current.min,
+        component->current.count);
+  }
   glUseProgram(0);
   glBindTexture(GL_TEXTURE_2D, 0);
   glBindVertexArray(0);

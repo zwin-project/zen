@@ -21,6 +21,13 @@ OpenGLComponent::Attach(OpenGLVertexBuffer *vertex_buffer)
 }
 
 void
+OpenGLComponent::Attach(OpenGLElementArrayBuffer *element_array_buffer)
+{
+  zgn_opengl_component_attach_element_array_buffer(
+      component(), element_array_buffer->element_array_buffer());
+}
+
+void
 OpenGLComponent::Attach(OpenGLShaderProgram *shader_program)
 {
   zgn_opengl_component_attach_shader_program(

@@ -8,6 +8,7 @@ srcs_opengl_renderer = [
   'cuboid-window-render-item.c',
   'opengl.c',
   'opengl-component.c',
+  'opengl-element-array-buffer.c',
   'opengl-renderer.c',
   'opengl-shader-program.c',
   'opengl-texture.c',
