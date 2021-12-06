@@ -4,6 +4,7 @@
 #include <zigen-opengl-server-protocol.h>
 
 #include "opengl-component.h"
+#include "opengl-element-array-buffer.h"
 #include "opengl-shader-program.h"
 #include "opengl-texture.h"
 #include "opengl-vertex-buffer.h"
@@ -52,6 +53,19 @@ zen_opengl_protocol_create_vertex_buffer(
 }
 
 static void
+zen_opengl_protocol_create_element_array_buffer(
+    struct wl_client* client, struct wl_resource* resource, uint32_t id)
+{
+  UNUSED(resource);
+  struct zen_opengl_element_array_buffer* element_array_burfer;
+
+  element_array_burfer = zen_opengl_element_array_buffer_create(client, id);
+  if (element_array_burfer == NULL) {
+    zen_log("zen opengl: failed to create a element array buffer\n");
+  }
+}
+
+static void
 zen_opengl_protocol_create_shader_program(
     struct wl_client* client, struct wl_resource* resource, uint32_t id)
 {
@@ -81,6 +95,8 @@ static const struct zgn_opengl_interface opengl_interface = {
     .destroy = zen_opengl_protocol_destroy,
     .create_opengl_component = zen_opengl_protocol_create_opengl_component,
     .create_vertex_buffer = zen_opengl_protocol_create_vertex_buffer,
+    .create_element_array_buffer =
+        zen_opengl_protocol_create_element_array_buffer,
     .create_shader_program = zen_opengl_protocol_create_shader_program,
     .create_texture = zen_opengl_protocol_create_texture,
 };

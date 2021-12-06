@@ -9,6 +9,7 @@ srcs_zukou = [
   'glm-helper.cc',
   'virtual-object.cc',
   'opengl-component.cc',
+  'opengl-element-array-buffer.cc',
   'opengl-shader-program.cc',
   'opengl-texture.cc',
   'opengl-vertex-buffer.cc',

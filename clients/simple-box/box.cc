@@ -17,19 +17,6 @@ extern const char *vertex_shader;
 extern const char *green_fragment_shader;
 extern const char *texture_fragment_shader;
 
-struct Vertex {
-  glm::vec3 p;
-  float u, v;
-};
-
-struct Line {
-  Vertex s, e;
-};
-
-struct Triangle {
-  Vertex a, b, c;
-};
-
 Box::Box(zukou::App *app, float length)
     : CuboidWindow(app, glm::vec3(length * 1.8))
 {
@@ -43,13 +30,16 @@ Box::Box(zukou::App *app, float length)
   blue_ = UINT8_MAX;
   button_pressed_ = false;
 
+  vertex_buffer_ = new zukou::OpenGLVertexBuffer(app, sizeof(Vertex) * 8);
+
   frame_component_ = new zukou::OpenGLComponent(app, this);
-  frame_vertex_buffer_ = new zukou::OpenGLVertexBuffer(app, sizeof(Line) * 12);
+  frame_element_array_ =
+      new zukou::OpenGLElementArrayBuffer(app, sizeof(u_short) * 24);
   frame_shader_ = new zukou::OpenGLShaderProgram(app);
 
   front_component_ = new zukou::OpenGLComponent(app, this);
-  front_vertex_buffer_ =
-      new zukou::OpenGLVertexBuffer(app, sizeof(Triangle) * 2);
+  front_element_array_ =
+      new zukou::OpenGLElementArrayBuffer(app, sizeof(u_short) * 6);
   front_shader_ = new zukou::OpenGLShaderProgram(app);
   texture_ = new zukou::OpenGLTexture(app, 256, 256);
 
@@ -84,24 +74,39 @@ Box::Box(zukou::App *app, float length)
   for (int x = -1; x < 2; x += 2) {
     for (int y = -1; y < 2; y += 2) {
       for (int z = -1; z < 2; z += 2) {
-        points_[i].x = length_ * x;
-        points_[i].y = length_ * y;
-        points_[i].z = length_ * z;
+        points_[i].p.x = length_ * x;
+        points_[i].p.y = length_ * y;
+        points_[i].p.z = length_ * z;
+        points_[i].u = x < 0 ? 1 : 0;
+        points_[i].v = y < 0 ? 1 : 0;
         i++;
       }
     }
   }
 
-  for (int i = 0; i < 8; i++) {
-    rotated_points_[i] = glm::rotateY(points_[i], theta_);
-    rotated_points_[i] = glm::rotateX(rotated_points_[i], phi_);
+  {
+    u_short frame_indices[24] = {
+        0, 1, 2, 3, 4, 5, 6, 7, 0, 4, 1, 5, 2, 6, 3, 7, 0, 2, 1, 3, 4, 6, 5, 7};
+    u_short *indices = (u_short *)frame_element_array_->data();
+    memcpy(indices, frame_indices, sizeof(frame_indices));
+    frame_element_array_->BufferUpdated(
+        ZGN_OPENGL_ELEMENT_ARRAY_INDICES_TYPE_UNSIGNED_SHORT);
+    frame_component_->Attach(frame_element_array_);
   }
 
-  this->DrawFrame();
+  {
+    u_short front_indices[6] = {1, 7, 3, 1, 7, 5};
+    u_short *indices = (u_short *)front_element_array_->data();
+    memcpy(indices, front_indices, sizeof(front_indices));
+    front_element_array_->BufferUpdated(
+        ZGN_OPENGL_ELEMENT_ARRAY_INDICES_TYPE_UNSIGNED_SHORT);
+    front_component_->Attach(front_element_array_);
+  }
 
-  this->DrawFront();
-
-  this->DrawTexture();
+  {
+    Vertex *vertices = (Vertex *)vertex_buffer_->data();
+    memcpy(vertices, points_, sizeof(Vertex) * 8);
+  }
 }
 
 void
@@ -118,14 +123,16 @@ Box::Frame(uint32_t time)
   theta_ += glm::pi<float>() * 0.001f * delta_theta_;
   phi_ += glm::pi<float>() * 0.001f * delta_phi_;
 
+  Vertex *vertices = (Vertex *)vertex_buffer_->data();
+
   for (int i = 0; i < 8; i++) {
-    rotated_points_[i] = glm::rotateY(points_[i], theta_);
-    rotated_points_[i] = glm::rotateX(rotated_points_[i], phi_);
+    vertices[i].p = glm::rotateY(points_[i].p, theta_);
+    vertices[i].p = glm::rotateX(vertices[i].p, phi_);
   }
 
-  this->DrawFrame();
-
-  this->DrawFront();
+  vertex_buffer_->BufferUpdated();
+  frame_component_->Attach(vertex_buffer_);
+  front_component_->Attach(vertex_buffer_);
 
   this->DrawTexture();
 
@@ -173,51 +180,23 @@ Box::RayButton(uint32_t serial, uint32_t time, uint32_t button,
 }
 
 void
-Box::DrawFrame()
-{
-  Vertex *vertex = (Vertex *)frame_vertex_buffer_->data();
-  int indices[24] = {
-      0, 1, 2, 3, 4, 5, 6, 7, 0, 4, 1, 5, 2, 6, 3, 7, 0, 2, 1, 3, 4, 6, 5, 7};
-
-  for (int i = 0; i < 24; i++) vertex[i].p = rotated_points_[indices[i]];
-
-  frame_vertex_buffer_->BufferUpdated();
-  frame_component_->Attach(frame_vertex_buffer_);
-}
-
-void
-Box::DrawFront()
-{
-  Vertex *vertex = (Vertex *)front_vertex_buffer_->data();
-  int indices[6] = {1, 7, 3, 1, 7, 5};
-  int uvs[6][2] = {{0, 0}, {1, 1}, {0, 1}, {0, 0}, {1, 1}, {1, 0}};
-
-  for (int i = 0; i < 6; i++) {
-    vertex[i].p = rotated_points_[indices[i]];
-    vertex[i].u = uvs[i][0];
-    vertex[i].v = uvs[i][1];
-  }
-
-  front_vertex_buffer_->BufferUpdated();
-  front_component_->Attach(front_vertex_buffer_);
-}
-
-void
 Box::DrawTexture()
 {
   glm::vec2 position, one = {1, 1};
   float distance;
   bool intersected = false;
 
+  Vertex *vertices = (Vertex *)vertex_buffer_->data();
+
   if (ray_focus_ &&
-      glm::intersectRayTriangle(ray_.origin, ray_.direction, rotated_points_[1],
-          rotated_points_[3], rotated_points_[5], position, distance)) {
+      glm::intersectRayTriangle(ray_.origin, ray_.direction, vertices[1].p,
+          vertices[3].p, vertices[5].p, position, distance)) {
     intersected = true;
   }
 
   if (ray_focus_ && !intersected &&
-      glm::intersectRayTriangle(ray_.origin, ray_.direction, rotated_points_[7],
-          rotated_points_[5], rotated_points_[3], position, distance)) {
+      glm::intersectRayTriangle(ray_.origin, ray_.direction, vertices[7].p,
+          vertices[5].p, vertices[3].p, position, distance)) {
     position = one - position;
     intersected = true;
   }
