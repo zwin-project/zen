@@ -12,6 +12,14 @@ $ meson build
 $ ninja -C build install
 ----
 
+For development, you can run without HMD
+
+[source, shell]
+----
+$ meson dev_build -Dzen_backend=glfw
+$ ninja -C dev_build install
+----
+
 === How to install `cglm`
 
 Please refer to https://github.com/recp/cglm
@@ -21,6 +29,8 @@ Please refer to https://github.com/recp/cglm
 Please refer to https://github.com/zigen-project/zigen
 
 == Run
+
+Launch SteamVR first, then
 
 ----
 $ mkdir /tmp/.xdg

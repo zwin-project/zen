@@ -15,7 +15,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update &&
-          sudo apt-get install libwayland-dev libglew-dev libglfw3-dev libglm-dev libudev-dev libinput-dev
+          sudo apt-get install libwayland-dev libglew-dev libglfw3-dev libglm-dev libudev-dev libinput-dev libopenvr-dev
 
       - uses: actions/setup-python@v1
         with:

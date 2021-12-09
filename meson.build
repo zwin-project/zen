@@ -22,7 +22,11 @@ dep_zgn_protocol = dependency('zigen-protocols')
 dep_cglm = dependency('cglm')
 dep_libinput = dependency('libinput')
 dep_udev = dependency('libudev')
+dep_openvr = dependency('openvr')
 dep_m = meson.get_compiler('c').find_library('m')
+
+opt_backend = get_option('zen_backend')
+opt_client = get_option('clients')
 
 subdir('protocol')
 subdir('libzen-compositor')
@@ -32,7 +36,7 @@ subdir('zen-backend')
 subdir('zen')
 subdir('tests')
 
-if get_option('clients')
+if opt_client
   dep_glm = dependency('glm')
   subdir('clients')
 endif

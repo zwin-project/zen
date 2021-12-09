@@ -80,5 +80,5 @@ zen_output_destroy(struct zen_output* output)
   struct headless_output* o = (struct headless_output*)output;
 
   wl_event_source_remove(o->swap_timer);
-  free(output);
+  free(o);
 }

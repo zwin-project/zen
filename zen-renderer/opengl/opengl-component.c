@@ -424,15 +424,28 @@ zen_opengl_component_render(struct zen_opengl_component *component,
   glUseProgram(shader->program_id);
   GLint mvp_matrix_location = glGetUniformLocation(shader->program_id, "mvp");
   glUniformMatrix4fv(mvp_matrix_location, 1, GL_FALSE, (float *)mvp);
+
   if (texture) glBindTexture(GL_TEXTURE_2D, texture->id);
-  if (element_array_buffer) {
+
+  if (element_array_buffer && GLEW_VERSION_4_5) {
+    glVertexArrayElementBuffer(
+        component->vertex_array_id, element_array_buffer->id);
+
     glDrawElements(component->current.topology, component->current.count,
         element_array_buffer->type,
         (const void *)(uintptr_t)component->current.min);
+    glVertexArrayElementBuffer(component->vertex_array_id, 0);
+  } else if (element_array_buffer) {
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_array_buffer->id);
+    glDrawElements(component->current.topology, component->current.count,
+        element_array_buffer->type,
+        (const void *)(uintptr_t)component->current.min);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   } else {
     glDrawArrays(component->current.topology, component->current.min,
         component->current.count);
   }
+
   glUseProgram(0);
   glBindTexture(GL_TEXTURE_2D, 0);
   glBindVertexArray(0);

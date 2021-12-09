@@ -26,6 +26,10 @@
 #ifndef TIMESPEC_UTIL_H
 #define TIMESPEC_UTIL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -254,5 +258,9 @@ millihz_to_nsec(uint32_t mhz)
   assert(mhz > 0);
   return 1000000000000LL / mhz;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* TIMESPEC_UTIL_H */
