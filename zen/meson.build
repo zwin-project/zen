@@ -20,5 +20,6 @@ executable(
   'zen',
   src_zen,
   install: true,
+  pie: true,
   dependencies: dep_zen,
 )
