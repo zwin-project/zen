@@ -107,8 +107,7 @@ zen_opengl_renderer_render(struct zen_opengl_renderer* renderer)
        camera < renderer->cameras + renderer->camera_count; camera++) {
     glBindFramebuffer(GL_FRAMEBUFFER, camera->framebuffer_id);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glClear(GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   }
 
   glEnable(GL_MULTISAMPLE);

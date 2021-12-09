@@ -1,6 +1,10 @@
 #ifndef ZEN_RENDERER_OPENGL_RENDERER_H
 #define ZEN_RENDERER_OPENGL_RENDERER_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <GL/glew.h>
 #include <cglm/cglm.h>
 #include <libzen-compositor/libzen-compositor.h>
@@ -40,5 +44,9 @@ void zen_opengl_renderer_set_cameras(struct zen_opengl_renderer* renderer,
     struct zen_opengl_renderer_camera* cameras, uint32_t count);
 
 void zen_opengl_renderer_render(struct zen_opengl_renderer* renderer);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  //  ZEN_RENDERER_OPENGL_RENDERER_H

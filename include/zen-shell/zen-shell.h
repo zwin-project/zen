@@ -1,6 +1,10 @@
 #ifndef ZEN_SHELL_H
 #define ZEN_SHELL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <libzen-compositor/libzen-compositor.h>
 
 extern char* zen_shell_type;
@@ -39,5 +43,9 @@ struct zen_render_item* zen_cuboid_window_render_item_create(
     struct zen_renderer* renderer, struct zen_cuboid_window* cuboid_window);
 
 void zen_cuboid_window_render_item_destroy(struct zen_render_item* render_item);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  //  ZEN_SHELL_H

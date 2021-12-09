@@ -104,7 +104,7 @@ zen_ray_render_item_destroy(struct zen_render_item* render_item_base)
 static void
 update_vertex_buffer(struct zen_opengl_ray_render_item* render_item)
 {
-  const float length = 0.5f;
+  const float length = 1.2f;
   vec3 target;
 
   float theta = render_item->ray->angle.polar;

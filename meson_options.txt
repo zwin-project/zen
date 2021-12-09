@@ -4,3 +4,10 @@ option(
   value: true,
   description: 'Sample clients',
 )
+
+option(
+  'zen_backend',
+  type: 'string',
+  value: 'openvr',
+  description: 'Backend to use',
+)
