@@ -244,7 +244,7 @@ const char *green_fragment_shader =
     "out vec4 outputColor;\n"
     "void main()\n"
     "{\n"
-    "  outputColor = vec4(0.0, 1.0, 0.0, 0.5);\n"
+    "  outputColor = vec4(0.0, 1.0, 0.0, 1.0);\n"
     "}\n";
 
 const char *texture_fragment_shader =
