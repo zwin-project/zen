@@ -113,6 +113,8 @@ zen_opengl_renderer_render(struct zen_opengl_renderer* renderer)
 
   glEnable(GL_MULTISAMPLE);
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_ALPHA_TEST);
+  glAlphaFunc(GL_NOTEQUAL, 0);
   for (camera = renderer->cameras;
        camera < renderer->cameras + renderer->camera_count; camera++) {
     struct zen_opengl_ray_render_item* ray_render_item;
