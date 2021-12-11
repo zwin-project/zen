@@ -18,5 +18,4 @@ executable(
   srcs_simple_box,
   install: true,
   dependencies: deps_simple_box,
-  include_directories: public_inc,
 )
