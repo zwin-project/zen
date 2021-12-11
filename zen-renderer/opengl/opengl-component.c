@@ -396,11 +396,56 @@ zen_opengl_component_destroy(struct zen_opengl_component *component)
   free(component);
 }
 
+static void
+set_uniform_variables(GLuint program_id, mat4 model, mat4 view, mat4 projection)
+{
+  mat4 mvp, vp;
+  glm_mat4_mul(projection, view, vp);
+  glm_mat4_mul(vp, model, mvp);
+
+  GLfloat light_pos[] = {0.0f, 3.0f, 0.0f, 1.0f};
+  GLfloat light_diffuse[] = {1.0f, 1.0f, 1.0f, 1.0f};
+  GLfloat light_ambient[] = {0.25f, 0.25f, 0.25f, 1.0f};
+  GLfloat light_specular[] = {1.0f, 1.0f, 1.0f, 1.0f};
+
+  GLint mvp_matrix_location = glGetUniformLocation(program_id, "zMVP");
+  glUniformMatrix4fv(mvp_matrix_location, 1, GL_FALSE, (float *)mvp);
+
+  GLint model_matrix_location = glGetUniformLocation(program_id, "zModel");
+  glUniformMatrix4fv(model_matrix_location, 1, GL_FALSE, (float *)model);
+
+  GLint view_matrix_location = glGetUniformLocation(program_id, "zView");
+  glUniformMatrix4fv(view_matrix_location, 1, GL_FALSE, (float *)view);
+
+  GLint projection_matrix_location =
+      glGetUniformLocation(program_id, "zProjection");
+  glUniformMatrix4fv(
+      projection_matrix_location, 1, GL_FALSE, (float *)projection);
+
+  GLint vp_matrix_location = glGetUniformLocation(program_id, "zVP");
+  glUniformMatrix4fv(vp_matrix_location, 1, GL_FALSE, (float *)vp);
+
+  GLint light_position_location =
+      glGetUniformLocation(program_id, "zLight.position");
+  glUniform4fv(light_position_location, 1, light_pos);
+
+  GLint light_diffuse_location =
+      glGetUniformLocation(program_id, "zLight.diffuse");
+  glUniform4fv(light_diffuse_location, 1, light_diffuse);
+
+  GLint light_ambient_location =
+      glGetUniformLocation(program_id, "zLight.ambient");
+  glUniform4fv(light_ambient_location, 1, light_ambient);
+
+  GLint light_specular_location =
+      glGetUniformLocation(program_id, "zLight.specular");
+  glUniform4fv(light_specular_location, 1, light_specular);
+}
+
 WL_EXPORT void
 zen_opengl_component_render(struct zen_opengl_component *component,
     struct zen_opengl_renderer_camera *camera)
 {
-  mat4 mvp;
   struct zen_cuboid_window *cuboid_window;
   struct zen_opengl_element_array_buffer *element_array_buffer;
   struct zen_opengl_shader_program *shader;
@@ -416,14 +461,12 @@ zen_opengl_component_render(struct zen_opengl_component *component,
 
   if (shader == NULL || shader->linked == false) return;
 
-  glm_mat4_copy(cuboid_window->virtual_object->model_matrix, mvp);
-  glm_mat4_mul(camera->view_matrix, mvp, mvp);
-  glm_mat4_mul(camera->projection_matrix, mvp, mvp);
-
   glBindVertexArray(component->vertex_array_id);
   glUseProgram(shader->program_id);
-  GLint mvp_matrix_location = glGetUniformLocation(shader->program_id, "mvp");
-  glUniformMatrix4fv(mvp_matrix_location, 1, GL_FALSE, (float *)mvp);
+
+  set_uniform_variables(shader->program_id,
+      cuboid_window->virtual_object->model_matrix, camera->view_matrix,
+      camera->projection_matrix);
 
   if (texture) glBindTexture(GL_TEXTURE_2D, texture->id);
 

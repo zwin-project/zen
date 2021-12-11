@@ -229,14 +229,14 @@ Box::DrawTexture()
 
 const char *vertex_shader =
     "#version 410\n"
-    "uniform mat4 mvp;\n"
+    "uniform mat4 zMVP;\n"
     "layout(location = 0) in vec4 position;\n"
     "layout(location = 1) in vec2 v2UVcoordsIn;\n"
     "out vec2 v2UVcoords;\n"
     "void main()\n"
     "{\n"
     "  v2UVcoords = v2UVcoordsIn;\n"
-    "  gl_Position = mvp * position;\n"
+    "  gl_Position = zMVP * position;\n"
     "}\n";
 
 const char *green_fragment_shader =
