@@ -35,10 +35,9 @@ class Box : public zukou::CuboidWindow
   zukou::OpenGLTexture *texture_;
 
   float length_;
-  float theta_;
-  float phi_;
   float delta_theta_;
   float delta_phi_;
+  glm::mat4 rotate_;
   Vertex points_[8];
 
   uint8_t blue_;

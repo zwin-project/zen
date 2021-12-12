@@ -14,7 +14,7 @@
 #include <vector>
 
 extern const char *vertex_shader;
-extern const char *green_fragment_shader;
+extern const char *fragment_shader;
 extern const char *texture_fragment_shader;
 
 Box::Box(zukou::App *app, float length)
@@ -23,10 +23,9 @@ Box::Box(zukou::App *app, float length)
   srand(time(0));
 
   length_ = length;
-  theta_ = 0;
-  phi_ = 0;
   delta_theta_ = 0;
   delta_phi_ = 0;
+  rotate_ = glm::mat4(1.0f);
   blue_ = UINT8_MAX;
   button_pressed_ = false;
 
@@ -44,9 +43,10 @@ Box::Box(zukou::App *app, float length)
   texture_ = new zukou::OpenGLTexture(app, 256, 256);
 
   frame_shader_->SetVertexShader(vertex_shader, strlen(vertex_shader));
-  frame_shader_->SetFragmentShader(
-      green_fragment_shader, strlen(green_fragment_shader));
+  frame_shader_->SetFragmentShader(fragment_shader, strlen(fragment_shader));
   frame_shader_->Link();
+  frame_shader_->SetUniformVariable("color", glm::vec4(0.0f, 1.0f, 1.0f, 1.0f));
+  frame_shader_->SetUniformVariable("rotate", rotate_);
 
   frame_component_->Attach(frame_shader_);
   frame_component_->SetCount(24);
@@ -59,6 +59,7 @@ Box::Box(zukou::App *app, float length)
   front_shader_->SetFragmentShader(
       texture_fragment_shader, strlen(texture_fragment_shader));
   front_shader_->Link();
+  front_shader_->SetUniformVariable("rotate", rotate_);
 
   front_component_->Attach(front_shader_);
   front_component_->SetCount(6);
@@ -106,6 +107,9 @@ Box::Box(zukou::App *app, float length)
   {
     Vertex *vertices = (Vertex *)vertex_buffer_->data();
     memcpy(vertices, points_, sizeof(Vertex) * 8);
+    vertex_buffer_->BufferUpdated();
+    frame_component_->Attach(vertex_buffer_);
+    front_component_->Attach(vertex_buffer_);
   }
 }
 
@@ -120,19 +124,16 @@ Box::Frame(uint32_t time)
   delta_phi_ += (float)(rand() - RAND_MAX / 2) / (float)RAND_MAX;
   delta_phi_ = delta_phi_ > 10 ? 10 : delta_phi_ < -10 ? -10 : delta_phi_;
 
-  theta_ += glm::pi<float>() * 0.001f * delta_theta_;
-  phi_ += glm::pi<float>() * 0.001f * delta_phi_;
+  rotate_ =
+      glm::rotate(rotate_, delta_theta_ * 0.001f, glm::vec3(1.0f, 0.0, 0.0f));
+  rotate_ =
+      glm::rotate(rotate_, delta_phi_ * 0.001f, glm::vec3(0.0f, 1.0, 0.0f));
 
-  Vertex *vertices = (Vertex *)vertex_buffer_->data();
+  frame_shader_->SetUniformVariable("rotate", rotate_);
+  front_shader_->SetUniformVariable("rotate", rotate_);
 
-  for (int i = 0; i < 8; i++) {
-    vertices[i].p = glm::rotateY(points_[i].p, theta_);
-    vertices[i].p = glm::rotateX(vertices[i].p, phi_);
-  }
-
-  vertex_buffer_->BufferUpdated();
-  frame_component_->Attach(vertex_buffer_);
-  front_component_->Attach(vertex_buffer_);
+  frame_component_->Attach(frame_shader_);
+  front_component_->Attach(front_shader_);
 
   this->DrawTexture();
 
@@ -230,21 +231,23 @@ Box::DrawTexture()
 const char *vertex_shader =
     "#version 410\n"
     "uniform mat4 zMVP;\n"
+    "uniform mat4 rotate;\n"
     "layout(location = 0) in vec4 position;\n"
     "layout(location = 1) in vec2 v2UVcoordsIn;\n"
     "out vec2 v2UVcoords;\n"
     "void main()\n"
     "{\n"
     "  v2UVcoords = v2UVcoordsIn;\n"
-    "  gl_Position = zMVP * position;\n"
+    "  gl_Position = zMVP * rotate * position;\n"
     "}\n";
 
-const char *green_fragment_shader =
+const char *fragment_shader =
     "#version 410 core\n"
+    "uniform vec4 color;\n"
     "out vec4 outputColor;\n"
     "void main()\n"
     "{\n"
-    "  outputColor = vec4(0.0, 1.0, 0.0, 1.0);\n"
+    "  outputColor = color;\n"
     "}\n";
 
 const char *texture_fragment_shader =

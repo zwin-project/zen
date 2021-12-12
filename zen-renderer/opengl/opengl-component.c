@@ -255,6 +255,7 @@ zen_opengl_component_virtual_object_commit_handler(
 
   shader = zen_weak_link_get_user_data(&component->pending.shader_program_link);
   if (shader) {
+    zen_opengl_shader_program_commit(shader);
     zen_weak_link_set(
         &component->current.shader_program_link, shader->resource);
   }

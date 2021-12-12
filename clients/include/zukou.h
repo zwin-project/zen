@@ -264,6 +264,9 @@ class OpenGLShaderProgram
  public:
   OpenGLShaderProgram(App *app);
   ~OpenGLShaderProgram();
+  void SetUniformVariable(const char *location, glm::mat4 mat);
+  void SetUniformVariable(const char *location, glm::vec4 vec);
+  void SetUniformVariable(const char *location, glm::vec3 vec);
   bool SetVertexShader(const char *source, size_t len);
   bool SetFragmentShader(const char *source, size_t len);
   void Link();
@@ -319,6 +322,10 @@ OpenGLComponent::component()
 glm::vec3 glm_vec3_from_wl_array(struct wl_array *array);
 
 void glm_vec3_to_wl_array(glm::vec3 v, struct wl_array *array);
+
+void glm_vec4_to_wl_array(glm::vec4 v, struct wl_array *array);
+
+void glm_mat4_to_wl_array(glm::mat4 m, struct wl_array *array);
 
 }  // namespace zukou
 

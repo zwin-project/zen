@@ -35,6 +35,39 @@ OpenGLShaderProgram::~OpenGLShaderProgram()
   zgn_opengl_shader_program_destroy(shader_);
 }
 
+void
+OpenGLShaderProgram::SetUniformVariable(const char *location, glm::mat4 mat)
+{
+  struct wl_array array;
+  wl_array_init(&array);
+  glm_mat4_to_wl_array(mat, &array);
+  zgn_opengl_shader_program_set_uniform_float_matrix(
+      shader(), location, 4, 4, false, 1, &array);
+  wl_array_release(&array);
+}
+
+void
+OpenGLShaderProgram::SetUniformVariable(const char *location, glm::vec4 vec)
+{
+  struct wl_array array;
+  wl_array_init(&array);
+  glm_vec4_to_wl_array(vec, &array);
+  zgn_opengl_shader_program_set_uniform_float_vector(
+      shader(), location, 4, 1, &array);
+  wl_array_release(&array);
+}
+
+void
+OpenGLShaderProgram::SetUniformVariable(const char *location, glm::vec3 vec)
+{
+  struct wl_array array;
+  wl_array_init(&array);
+  glm_vec3_to_wl_array(vec, &array);
+  zgn_opengl_shader_program_set_uniform_float_vector(
+      shader(), location, 3, 1, &array);
+  wl_array_release(&array);
+}
+
 bool
 OpenGLShaderProgram::SetVertexShader(const char *source, size_t len)
 {
