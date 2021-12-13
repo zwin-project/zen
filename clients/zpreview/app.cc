@@ -3,10 +3,11 @@
 #include <iostream>
 #include <string>
 
+#include "obj-viewer.h"
 #include "stl-viewer.h"
 #include "viewer.h"
 
-App::App(std::string filename) : filename_(filename), viewer_(nullptr) {}
+App::App(std::string filename) : path_(filename), viewer_(nullptr) {}
 
 App::~App()
 {
@@ -18,12 +19,15 @@ App::Init()
 {
   switch (this->DetectFileFormat()) {
     case FileFormat::kStl:
-      this->viewer_ = new StlViewer(filename_);
+      this->viewer_ = new StlViewer(path_);
+      break;
+
+    case FileFormat::kObj:
+      this->viewer_ = new ObjViewer(path_);
       break;
 
     case FileFormat::kUnsupported:
-      std::cout << this->filename_ << ": file format not supported"
-                << std::endl;
+      std::cout << this->path_ << ": file format not supported" << std::endl;
       return false;
   }
 
@@ -39,7 +43,11 @@ App::Show() const
 FileFormat
 App::DetectFileFormat() const
 {
-  if (filename_.rfind(".stl") == filename_.length() - 4)
+  if (path_.rfind(".stl") == path_.length() - 4 ||
+      path_.rfind(".STL") == path_.length() - 4)
     return FileFormat::kStl;
+
+  if (path_.rfind(".obj") == path_.length() - 4) return FileFormat::kObj;
+
   return FileFormat::kUnsupported;
 }

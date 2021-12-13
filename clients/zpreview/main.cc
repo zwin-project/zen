@@ -18,9 +18,9 @@ main(int argc, char const *argv[])
     return exit_code;
   }
 
-  std::string filename(argv[1]);
+  std::string path(argv[1]);
 
-  App *app = new App(filename);
+  App *app = new App(path);
 
   if (app->Init() == false) goto out;
 
