@@ -11,12 +11,12 @@
 class StlViewer : public ViewerInterface
 {
  public:
-  StlViewer(std::string filename);
+  StlViewer(std::string path);
   ~StlViewer();
   bool Show();
 
  private:
-  std::string filename_;
+  std::string path_;
   zukou::App *app_;
   StlObject *object_;
 };

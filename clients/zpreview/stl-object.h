@@ -6,6 +6,8 @@
 #include <glm/glm.hpp>
 #include <vector>
 
+#include "types.h"
+
 #pragma pack(1)
 struct StlTriangle {
   float n[3];
@@ -13,17 +15,6 @@ struct StlTriangle {
   uint16_t unused;
 };
 #pragma pack()
-
-struct Vertex {
-  Vertex(glm::vec3 point, glm::vec3 norm)
-  {
-    this->point = point;
-    this->norm = norm;
-  };
-
-  glm::vec3 point;
-  glm::vec3 norm;
-};
 
 class StlObject : public zukou::CuboidWindow
 {

@@ -5,8 +5,44 @@
 #include <glm/gtx/string_cast.hpp>
 #include <iostream>
 
-extern std::string vertex_shader;
-extern std::string fragment_shader;
+static std::string vertex_shader(
+    "#version 410\n"
+    "\n"
+    "struct ZLight {\n"
+    "  vec4 position;\n"
+    "  vec4 diffuse;\n"
+    "  vec4 ambient;\n"
+    "  vec4 specular;\n"
+    "};\n"
+    "\n"
+    "uniform mat4 zModel;\n"
+    "uniform mat4 zVP;\n"
+    "uniform ZLight zLight;\n"
+    "layout(location = 0) in vec4 localPosition;\n"
+    "layout(location = 1) in vec3 norm;\n"
+    "out vec4 frontColor;\n"
+    "void main()\n"
+    "{\n"
+    "  vec4 position = zModel * localPosition;\n"
+    "  vec3 view = -normalize(position.xyz);\n"
+    "  vec3 light = normalize((zLight.position * position.w - "
+    "zLight.position.w * position).xyz);\n"
+    "  vec3 halfway = normalize(light + view);\n"
+    "  float diffuse = max(dot(light, norm), 0.0);\n"
+    "  float specular = max(dot(norm, halfway), 0.0);\n"
+    "  frontColor = (zLight.diffuse * 0.5 * diffuse + zLight.specular * 0.5 * "
+    "specular + zLight.ambient / 10);\n"
+    "  gl_Position = zVP * position;\n"
+    "}\n");
+
+static std::string fragment_shader(
+    "#version 410 core\n"
+    "out vec4 outputColor;\n"
+    "in vec4 frontColor;\n"
+    "void main()\n"
+    "{\n"
+    "  outputColor = vec4(frontColor.xyz, 1.0);\n"
+    "}\n");
 
 StlObject::StlObject(
     zukou::App *app, std::vector<StlTriangle> triangles, glm::vec3 half_size)
@@ -50,7 +86,12 @@ StlObject::StlObject(
       false, sizeof(Vertex), offsetof(Vertex, norm));
 }
 
-StlObject::~StlObject() {}
+StlObject::~StlObject()
+{
+  delete component_;
+  delete vertex_buffer_;
+  delete shader_;
+}
 
 void
 StlObject::Configure(uint32_t serial, glm::vec3 half_size)
@@ -67,11 +108,6 @@ StlObject::Configure(uint32_t serial, glm::vec3 half_size)
     float r = half_size_[i] * 2 / l;
     if (r < zoom) zoom = r;
   }
-
-  std::cerr << glm::to_string(min_) << std::endl;
-  std::cerr << glm::to_string(max_) << std::endl;
-  std::cerr << glm::to_string(half_size_) << std::endl;
-  std::cerr << zoom << std::endl;
 
   Vertex *data = (Vertex *)vertex_buffer_->data();
 
@@ -96,42 +132,3 @@ StlObject::RayButton(uint32_t serial, uint32_t time, uint32_t button,
     zgn_cuboid_window_move(cuboid_window(), app()->seat(), serial);
   }
 }
-
-std::string vertex_shader(
-    "#version 410\n"
-    "\n"
-    "struct ZLight {\n"
-    "  vec4 position;\n"
-    "  vec4 diffuse;\n"
-    "  vec4 ambient;\n"
-    "  vec4 specular;\n"
-    "};\n"
-    "\n"
-    "uniform mat4 zModel;\n"
-    "uniform mat4 zVP;\n"
-    "uniform ZLight zLight;\n"
-    "layout(location = 0) in vec4 localPosition;\n"
-    "layout(location = 1) in vec3 norm;\n"
-    "out vec4 frontColor;\n"
-    "void main()\n"
-    "{\n"
-    "  vec4 position = zModel * localPosition;\n"
-    "  vec3 view = -normalize(position.xyz);\n"
-    "  vec3 light = normalize((zLight.position * position.w - "
-    "zLight.position.w * position).xyz);\n"
-    "  vec3 halfway = normalize(light + view);\n"
-    "  float diffuse = max(dot(light, norm), 0.0);\n"
-    "  float specular = max(dot(norm, halfway), 0.0);\n"
-    "  frontColor = (zLight.diffuse * 0.5 * diffuse + zLight.specular * 0.5 * "
-    "specular + zLight.ambient / 10);\n"
-    "  gl_Position = zVP * position;\n"
-    "}\n");
-
-std::string fragment_shader(
-    "#version 410 core\n"
-    "out vec4 outputColor;\n"
-    "in vec4 frontColor;\n"
-    "void main()\n"
-    "{\n"
-    "  outputColor = vec4(frontColor.xyz, 1.0);\n"
-    "}\n");

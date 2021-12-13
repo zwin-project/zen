@@ -38,5 +38,6 @@ subdir('tests')
 
 if opt_client
   dep_glm = dependency('glm')
+  dep_curl = dependency('libcurl')
   subdir('clients')
 endif

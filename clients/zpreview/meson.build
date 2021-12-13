@@ -1,8 +1,12 @@
 srcs_zpreview = [
   'app.cc',
   'main.cc',
+  'obj-object.cc',
+  'obj-viewer.cc',
   'stl-object.cc',
   'stl-viewer.cc',
+  'file-reader.cc',
+  'http-reader.cc',
   zigen_protocol_c,
   zigen_client_protocol_h,
   zigen_shell_protocol_c,
@@ -13,6 +17,7 @@ srcs_zpreview = [
 
 deps_zpreview = [
   dep_libzukou_public,
+  dep_curl,
 ]
 
 executable(

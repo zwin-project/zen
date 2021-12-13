@@ -8,18 +8,19 @@
 enum class FileFormat {
   kUnsupported = 0,
   kStl,
+  kObj,
 };
 
 class App
 {
  public:
-  App(std::string filename);
+  App(std::string path);
   ~App();
   bool Init();
   bool Show() const;
 
  private:
-  const std::string filename_;
+  const std::string path_;
   ViewerInterface *viewer_;
 
  private:
