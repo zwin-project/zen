@@ -7,9 +7,6 @@
 
 #include "shader-compiler.h"
 
-#define FOCUS_LINE_WIDTH 3
-#define DEFAULT_LINE_WIDTH 2
-
 static void update_vertex_buffer(
     struct zen_opengl_cuboid_window_render_item* render_item);
 
@@ -30,9 +27,9 @@ zen_opengl_cuboid_window_render_item_commit(
         zen_weak_link_get_user_data(&ray->seat->ray->focus_virtual_object_link);
 
   if (render_item->cuboid_window->virtual_object == focus_virtual_object)
-    render_item->line_width = FOCUS_LINE_WIDTH;
+    render_item->show = true;
   else
-    render_item->line_width = DEFAULT_LINE_WIDTH;
+    render_item->show = false;
 
   update_vertex_buffer(render_item);
 }
@@ -42,9 +39,12 @@ zen_opengl_cuboid_window_render_item_render(
     struct zen_opengl_cuboid_window_render_item* render_item,
     struct zen_opengl_renderer_camera* camera)
 {
-  glLineWidth(render_item->line_width);
   mat4 mvp;
-  glm_mat4_copy(render_item->cuboid_window->virtual_object->model_matrix, mvp);
+  if (!render_item->show) return;
+
+  glLineWidth(3);
+  zen_virtual_object_get_model_matrix(
+      render_item->cuboid_window->virtual_object, mvp);
   glm_mat4_mul(camera->view_matrix, mvp, mvp);
   glm_mat4_mul(camera->projection_matrix, mvp, mvp);
 
@@ -90,7 +90,7 @@ zen_cuboid_window_render_item_create(
   glGenVertexArrays(1, &render_item->vertex_array_id);
   glGenBuffers(1, &render_item->vertex_buffer_id);
   render_item->program_id = shader_input.program_id;
-  render_item->line_width = DEFAULT_LINE_WIDTH;
+  render_item->show = false;
   update_vertex_buffer(render_item);
 
   glBindVertexArray(render_item->vertex_array_id);

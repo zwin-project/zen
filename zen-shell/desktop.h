@@ -7,6 +7,7 @@
 struct zen_desktop_api {
   void (*move)(struct zen_cuboid_window *cuboid_window, struct zen_seat *seat,
       uint32_t serial);
+  void (*rotate)(struct zen_cuboid_window *cuboid_window, versor quatanion);
 };
 
 extern struct zen_desktop_api zen_desktop_shell_interface;

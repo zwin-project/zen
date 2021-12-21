@@ -451,6 +451,7 @@ zen_opengl_component_render(struct zen_opengl_component *component,
   struct zen_opengl_element_array_buffer *element_array_buffer;
   struct zen_opengl_shader_program *shader;
   struct zen_opengl_texture *texture;
+  mat4 model_matrix;
 
   if (strcmp(component->virtual_object->role, zen_cuboid_window_role) != 0)
     return;
@@ -465,8 +466,9 @@ zen_opengl_component_render(struct zen_opengl_component *component,
   glBindVertexArray(component->vertex_array_id);
   glUseProgram(shader->program_id);
 
-  set_uniform_variables(shader->program_id,
-      cuboid_window->virtual_object->model_matrix, camera->view_matrix,
+  zen_virtual_object_get_model_matrix(
+      cuboid_window->virtual_object, model_matrix);
+  set_uniform_variables(shader->program_id, model_matrix, camera->view_matrix,
       camera->projection_matrix);
 
   if (texture) glBindTexture(GL_TEXTURE_2D, texture->id);

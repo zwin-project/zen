@@ -3,6 +3,8 @@
 #include <libzen-compositor/libzen-compositor.h>
 #include <zigen-server-protocol.h>
 
+#include "cuboid-window.h"
+
 struct zen_desktop_move_grab {
   struct zen_ray_grab base;
   struct zen_weak_link cuboid_window_link;
@@ -44,7 +46,7 @@ move_grab_ray_motion(struct zen_ray_grab *grab, const struct timespec *time,
 
   glm_vec3_sub(new_ray_tip, old_ray_tip, delta);
 
-  glm_translate(cuboid_window->virtual_object->model_matrix, delta);
+  zen_virtual_object_move_position(cuboid_window->virtual_object, delta);
 }
 
 static void
@@ -120,6 +122,20 @@ desktop_cuboid_window_move(struct zen_cuboid_window *cuboid_window,
   }
 }
 
+static void
+desktop_cuboid_window_rotate(
+    struct zen_cuboid_window *cuboid_window, versor quaternion)
+{
+  struct zen_ray *ray = cuboid_window->shell->compositor->seat->ray;
+  zen_cuboid_window_configure(
+      cuboid_window, cuboid_window->half_size, quaternion);
+
+  if (ray == NULL) return;
+
+  ray->grab->interface->focus(ray->grab);
+}
+
 WL_EXPORT struct zen_desktop_api zen_desktop_shell_interface = {
     .move = desktop_cuboid_window_move,
+    .rotate = desktop_cuboid_window_rotate,
 };

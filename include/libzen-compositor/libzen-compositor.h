@@ -47,7 +47,12 @@ struct zen_virtual_object {
   char* role;
   void* role_object;
 
-  mat4 model_matrix;
+  struct {
+    // private
+    vec3 _position;
+    versor _quaternion;
+    mat4 _model_matrix;
+  } transform;
 
   struct wl_signal commit_signal;
   struct wl_signal destroy_signal;
@@ -111,7 +116,7 @@ struct zen_seat {
   struct wl_global* global;
   struct zen_compositor* compositor;
 
-  struct zen_ray* ray;
+  struct zen_ray* ray;  // Nullable
   int ray_device_count;
 
   struct wl_list resource_list;
@@ -159,6 +164,20 @@ int zen_compositor_load_backend(struct zen_compositor* compositor);
 
 void zen_compositor_finish_frame(
     struct zen_compositor* compositor, struct timespec next_repaint);
+
+// methods for zen_virtual_object
+
+void zen_virtual_object_set_position(
+    struct zen_virtual_object* virtual_object, vec3 position);
+
+void zen_virtual_object_move_position(
+    struct zen_virtual_object* virtual_object, vec3 delta);
+
+void zen_virtual_object_set_quaternion(
+    struct zen_virtual_object* virtual_object, versor quaternion);
+
+void zen_virtual_object_get_model_matrix(
+    struct zen_virtual_object* virtual_object, mat4 model_matrix);
 
 // methods of zen_ray
 

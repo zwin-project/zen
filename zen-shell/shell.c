@@ -23,6 +23,7 @@ zen_shell_protocol_get_cuboid_window(struct wl_client* client,
     struct wl_resource* virtual_object_resource, struct wl_array* half_size)
 {
   vec3 half_size_vec;
+  versor quaternion = GLM_QUAT_IDENTITY_INIT;
   struct zen_virtual_object* virtual_object;
   struct zen_cuboid_window* cuboid_window;
 
@@ -47,7 +48,7 @@ zen_shell_protocol_get_cuboid_window(struct wl_client* client,
     return;
   }
 
-  zen_cuboid_window_configure(cuboid_window, half_size_vec);
+  zen_cuboid_window_configure(cuboid_window, half_size_vec, quaternion);
 }
 
 static const struct zgn_shell_interface shell_interface = {
@@ -69,8 +70,11 @@ pick_virtual_object(struct zen_shell_base* shell_base, struct zen_ray* ray,
 
   wl_list_for_each(cuboid_window, &shell->cuboid_window_list, link)
   {
-    float d = zen_shell_ray_obb_intersection(ray->origin, ray_direction,
-        cuboid_window->half_size, cuboid_window->virtual_object->model_matrix);
+    mat4 model_matrix;
+    zen_virtual_object_get_model_matrix(
+        cuboid_window->virtual_object, model_matrix);
+    float d = zen_shell_ray_obb_intersection(
+        ray->origin, ray_direction, cuboid_window->half_size, model_matrix);
 
     if (d >= 0 && d < min_distance) {
       min_distance = d;
@@ -80,11 +84,12 @@ pick_virtual_object(struct zen_shell_base* shell_base, struct zen_ray* ray,
 
   if (focus_cuboid_window) {
     mat4 model_matrix_inverse;
-    vec3 rat_target, local_ray_target;
-    glm_mat4_inv(focus_cuboid_window->virtual_object->model_matrix,
-        model_matrix_inverse);
-    glm_vec3_add(ray->origin, ray_direction, rat_target);
-    glm_mat4_mulv3(model_matrix_inverse, rat_target, 1, local_ray_target);
+    vec3 ray_target, local_ray_target;
+    zen_virtual_object_get_model_matrix(
+        focus_cuboid_window->virtual_object, model_matrix_inverse);
+    glm_mat4_inv(model_matrix_inverse, model_matrix_inverse);
+    glm_vec3_add(ray->origin, ray_direction, ray_target);
+    glm_mat4_mulv3(model_matrix_inverse, ray_target, 1, local_ray_target);
     glm_mat4_mulv3(model_matrix_inverse, ray->origin, 1, local_ray_origin);
     glm_vec3_sub(local_ray_target, local_ray_origin, local_ray_direction);
     glm_vec3_normalize(local_ray_direction);

@@ -89,6 +89,48 @@ zen_virtual_object_compositor_frame_signal_handler(
   wl_list_init(&virtual_object->frame_callback_list);
 }
 
+static void
+zen_virtual_object_calculate_model_matrix(
+    struct zen_virtual_object *virtual_object)
+{
+  mat4 rotate, translate = GLM_MAT4_IDENTITY_INIT;
+  glm_quat_mat4(virtual_object->transform._quaternion, rotate);
+  glm_translate(translate, virtual_object->transform._position);
+  glm_mat4_mul(translate, rotate, virtual_object->transform._model_matrix);
+}
+
+WL_EXPORT void
+zen_virtual_object_set_position(
+    struct zen_virtual_object *virtual_object, vec3 position)
+{
+  glm_vec3_copy(position, virtual_object->transform._position);
+  zen_virtual_object_calculate_model_matrix(virtual_object);
+}
+
+WL_EXPORT void
+zen_virtual_object_move_position(
+    struct zen_virtual_object *virtual_object, vec3 delta)
+{
+  glm_vec3_add(virtual_object->transform._position, delta,
+      virtual_object->transform._position);
+  zen_virtual_object_calculate_model_matrix(virtual_object);
+}
+
+WL_EXPORT void
+zen_virtual_object_set_quaternion(
+    struct zen_virtual_object *virtual_object, versor quaternion)
+{
+  glm_quat_copy(quaternion, virtual_object->transform._quaternion);
+  zen_virtual_object_calculate_model_matrix(virtual_object);
+}
+
+WL_EXPORT void
+zen_virtual_object_get_model_matrix(
+    struct zen_virtual_object *virtual_object, mat4 model_matrix)
+{
+  glm_mat4_copy(virtual_object->transform._model_matrix, model_matrix);
+}
+
 WL_EXPORT void
 zen_virtual_object_render_commit(struct zen_virtual_object *virtual_object)
 {
@@ -101,7 +143,7 @@ zen_virtual_object_create(
 {
   struct zen_virtual_object *virtual_object;
   struct wl_resource *resource;
-  mat4 identity = GLM_MAT4_IDENTITY_INIT;
+  vec3 initial_position = {0.0f, 1.5f, -1.0f};
 
   virtual_object = zalloc(sizeof *virtual_object);
   if (virtual_object == NULL) {
@@ -126,9 +168,9 @@ zen_virtual_object_create(
   virtual_object->role = strdup("");
   virtual_object->role_object = NULL;
 
-  glm_mat4_copy(identity, virtual_object->model_matrix);
-  glm_translate_z(virtual_object->model_matrix, -1);
-  glm_translate_y(virtual_object->model_matrix, 1.5);
+  glm_quat_identity(virtual_object->transform._quaternion);
+  glm_vec3_copy(initial_position, virtual_object->transform._position);
+  zen_virtual_object_calculate_model_matrix(virtual_object);
 
   wl_signal_init(&virtual_object->commit_signal);
   wl_signal_init(&virtual_object->destroy_signal);
