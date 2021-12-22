@@ -142,6 +142,8 @@ struct zen_output {
 
 struct zen_backend {
   struct zen_output* output;
+
+  void (*get_head_position)(struct zen_backend* backend, vec3 position);
 };
 
 struct zen_udev_seat;

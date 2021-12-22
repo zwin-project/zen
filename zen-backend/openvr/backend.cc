@@ -1,3 +1,4 @@
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <libzen-compositor/libzen-compositor.h>
 
@@ -8,6 +9,14 @@ struct openvr_backend {
 
   struct zen_udev_seat* udev_seat;
 };
+
+static void
+zen_backend_get_head_position(struct zen_backend* backend, vec3 position)
+{
+  struct openvr_backend* b = wl_container_of(backend, b, base);
+  struct openvr_output* output = wl_container_of(backend->output, output, base);
+  output->hmd->GetHeadPosition(position);
+}
 
 WL_EXPORT struct zen_backend*
 zen_backend_create(struct zen_compositor* compositor)
@@ -35,6 +44,7 @@ zen_backend_create(struct zen_compositor* compositor)
   }
 
   backend->base.output = output;
+  backend->base.get_head_position = zen_backend_get_head_position;
   backend->udev_seat = udev_seat;
 
   return &backend->base;

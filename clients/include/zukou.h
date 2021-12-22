@@ -173,6 +173,7 @@ class CuboidWindow : public VirtualObject
   virtual ~CuboidWindow();
   virtual void Configure(
       uint32_t serial, glm::vec3 half_size, glm::quat quaternion);
+  virtual void Moved(glm::vec3 face_direction);
   void Rotate(glm::quat quaternion);
   struct zgn_cuboid_window *cuboid_window();
   glm::vec3 half_size();

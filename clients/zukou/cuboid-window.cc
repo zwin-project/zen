@@ -5,11 +5,11 @@
 namespace zukou {
 
 static void
-cuboid_window_configure(void *data, struct zgn_cuboid_window *zgn_cuboid_window,
+cuboid_window_configure(void *data,
+    [[maybe_unused]] struct zgn_cuboid_window *zgn_cuboid_window,
     uint32_t serial, struct wl_array *half_size_array,
     struct wl_array *quaternion_array)
 {
-  (void)zgn_cuboid_window;
   CuboidWindow *cuboid_window = (CuboidWindow *)data;
   glm::vec3 half_size = glm_vec3_from_wl_array(half_size_array);
   glm::quat quaternion = glm_quat_from_wl_array(quaternion_array);
@@ -17,8 +17,20 @@ cuboid_window_configure(void *data, struct zgn_cuboid_window *zgn_cuboid_window,
   cuboid_window->Configure(serial, half_size, quaternion);
 }
 
+static void
+cuboid_window_moved(void *data,
+    [[maybe_unused]] struct zgn_cuboid_window *zgn_cuboid_window,
+    struct wl_array *face_direction_array)
+{
+  CuboidWindow *cuboid_window = (CuboidWindow *)data;
+  glm::vec3 face_direction = glm_vec3_from_wl_array(face_direction_array);
+
+  cuboid_window->Moved(face_direction);
+}
+
 static const struct zgn_cuboid_window_listener cuboid_window_listener = {
     cuboid_window_configure,
+    cuboid_window_moved,
 };
 
 CuboidWindow::CuboidWindow(App *app, glm::vec3 half_size, glm::quat quaternion)
@@ -56,6 +68,10 @@ CuboidWindow::Configure(
   half_size_ = half_size;
   quaternion_ = quaternion;
 }
+
+void
+CuboidWindow::Moved([[maybe_unused]] glm::vec3 face_direction)
+{}
 
 void
 CuboidWindow::Rotate(glm::quat quaternion)
