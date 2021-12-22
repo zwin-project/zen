@@ -136,6 +136,9 @@ App::GlobalRegistryHandler(struct wl_registry *registry, uint32_t id,
   if (strcmp(interface, "zgn_compositor") == 0) {
     compositor_ = (zgn_compositor *)wl_registry_bind(
         registry, id, &zgn_compositor_interface, version);
+  } else if (strcmp(interface, "zgn_data_device_manager") == 0) {
+    data_device_manager_ = (zgn_data_device_manager *)wl_registry_bind(
+        registry, id, &zgn_data_device_manager_interface, version);
   } else if (strcmp(interface, "zgn_seat") == 0) {
     seat_ = (zgn_seat *)wl_registry_bind(
         registry, id, &zgn_seat_interface, version);

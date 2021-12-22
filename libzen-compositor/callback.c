@@ -38,7 +38,7 @@ zen_callback_create(struct wl_client *client, uint32_t id)
   resource = wl_resource_create(client, &wl_callback_interface, 1, id);
   if (resource == NULL) {
     wl_client_post_no_memory(client);
-    zen_log("callback: failed to create resource\n");
+    zen_log("callback: failed to create a resource\n");
     goto err_resource;
   }
 

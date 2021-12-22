@@ -55,7 +55,7 @@ zen_virtual_object_protocol_frame(struct wl_client *client,
 
   callback = zen_callback_create(client, callback_id);
   if (callback == NULL) {
-    zen_log("virtual object: failed to create callback\n");
+    zen_log("virtual object: failed to create a callback\n");
     wl_client_post_no_memory(client);
     return;
   }
@@ -105,14 +105,14 @@ zen_virtual_object_create(
 
   virtual_object = zalloc(sizeof *virtual_object);
   if (virtual_object == NULL) {
-    zen_log("virtual object: failed to create virtual object\n");
+    zen_log("virtual object: failed to create a virtual object\n");
     wl_client_post_no_memory(client);
     goto err;
   }
 
   resource = wl_resource_create(client, &zgn_virtual_object_interface, 1, id);
   if (resource == NULL) {
-    zen_log("virtual object: failed to create resource\n");
+    zen_log("virtual object: failed to create a resource\n");
     wl_client_post_no_memory(client);
     goto err_resource;
   }

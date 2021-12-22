@@ -44,6 +44,7 @@ class App
   struct wl_display *display_;
   struct wl_registry *registry_;
   struct zgn_compositor *compositor_;
+  struct zgn_data_device_manager *data_device_manager_;
   struct zgn_seat *seat_;
   struct zgn_shell *shell_;
   struct wl_shm *shm_;

@@ -18,6 +18,7 @@ main()
   struct wl_event_loop *loop;
   struct wl_event_source *signals[3];
   struct zen_compositor *compositor;
+  struct zen_data_device_manager *data_device_manager;
   struct zen_seat *seat;
   int ret, exit = EXIT_FAILURE;
 
@@ -31,6 +32,12 @@ main()
   if (compositor == NULL) {
     zen_log("main: failed to create a compositor\n");
     goto out_compositor;
+  }
+
+  data_device_manager = zen_data_device_manager_create(display);
+  if (data_device_manager == NULL) {
+    zen_log("main: failed to create a data_device_manager\n");
+    goto out_data_device_manager;
   }
 
   seat = zen_seat_create(compositor);
@@ -86,6 +93,9 @@ out_shell:
   zen_seat_destroy(seat);
 
 out_seat:
+  zen_data_device_manager_destroy(data_device_manager);
+
+out_data_device_manager:
   zen_compositor_destroy(compositor);
 
 out_compositor:
