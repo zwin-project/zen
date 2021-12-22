@@ -20,7 +20,7 @@ class ObjObject : public zukou::CuboidWindow
       std::vector<glm::vec3> *vertices, std::vector<glm::vec3> *norms,
       glm::vec3 half_size);
   ~ObjObject();
-  void Configure(uint32_t serial, glm::vec3 half_size);
+  void Configure(uint32_t serial, glm::vec3 half_size, glm::quat quaternion);
   virtual void RayButton(uint32_t serial, uint32_t time, uint32_t button,
       enum zgn_ray_button_state state);
 

@@ -94,10 +94,11 @@ StlObject::~StlObject()
 }
 
 void
-StlObject::Configure(uint32_t serial, glm::vec3 half_size)
+StlObject::Configure(uint32_t serial, glm::vec3 half_size, glm::quat quaternion)
 {
   zgn_cuboid_window_ack_configure(cuboid_window(), serial);
   half_size_ = half_size;
+  quaternion_ = quaternion;
   glm::vec3 delta(0);
 
   float zoom = FLT_MAX;

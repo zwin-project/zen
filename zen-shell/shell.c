@@ -20,22 +20,30 @@ zen_shell_protocol_destroy(
 static void
 zen_shell_protocol_get_cuboid_window(struct wl_client* client,
     struct wl_resource* resource, uint32_t id,
-    struct wl_resource* virtual_object_resource, struct wl_array* half_size)
+    struct wl_resource* virtual_object_resource,
+    struct wl_array* half_size_array, struct wl_array* quaternion_array)
 {
-  vec3 half_size_vec;
+  vec3 half_size;
+  versor quaternion;
   struct zen_virtual_object* virtual_object;
   struct zen_cuboid_window* cuboid_window;
 
   virtual_object = wl_resource_get_user_data(virtual_object_resource);
 
-  if (glm_vec3_from_wl_array(half_size_vec, half_size) != 0) {
-    wl_resource_post_error(resource, ZGN_SHELL_ERROR_INVALID_CUBOID_WINDOW_SIZE,
+  if (glm_vec3_from_wl_array(half_size, half_size_array) != 0) {
+    wl_resource_post_error(resource, ZGN_SHELL_ERROR_INVALID_CUBOID_WINDOW,
         "half_size is not vec3");
     return;
   }
 
-  if (half_size_vec[0] <= 0 || half_size_vec[1] <= 0 || half_size_vec[2] <= 0) {
-    wl_resource_post_error(resource, ZGN_SHELL_ERROR_INVALID_CUBOID_WINDOW_SIZE,
+  if (glm_versor_from_wl_array(quaternion, quaternion_array) != 0) {
+    wl_resource_post_error(resource, ZGN_SHELL_ERROR_INVALID_CUBOID_WINDOW,
+        "quaternion is not vec4");
+    return;
+  }
+
+  if (half_size[0] <= 0 || half_size[1] <= 0 || half_size[2] <= 0) {
+    wl_resource_post_error(resource, ZGN_SHELL_ERROR_INVALID_CUBOID_WINDOW,
         "given cuboid window size has no volume");
     return;
   }
@@ -47,7 +55,7 @@ zen_shell_protocol_get_cuboid_window(struct wl_client* client,
     return;
   }
 
-  zen_cuboid_window_configure(cuboid_window, half_size_vec);
+  zen_cuboid_window_configure(cuboid_window, half_size, quaternion);
 }
 
 static const struct zgn_shell_interface shell_interface = {
@@ -69,8 +77,12 @@ pick_virtual_object(struct zen_shell_base* shell_base, struct zen_ray* ray,
 
   wl_list_for_each(cuboid_window, &shell->cuboid_window_list, link)
   {
-    float d = zen_shell_ray_obb_intersection(ray->origin, ray_direction,
-        cuboid_window->half_size, cuboid_window->virtual_object->model_matrix);
+    mat4 transform;
+    glm_quat_mat4(cuboid_window->quaternion, transform);
+    glm_mat4_mul(
+        cuboid_window->virtual_object->model_matrix, transform, transform);
+    float d = zen_shell_ray_obb_intersection(
+        ray->origin, ray_direction, cuboid_window->half_size, transform);
 
     if (d >= 0 && d < min_distance) {
       min_distance = d;

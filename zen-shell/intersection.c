@@ -24,18 +24,18 @@ ray_obb_intersection_axis_test(vec3 axis, vec3 translation, vec3 ray_direction,
 
 WL_EXPORT float
 zen_shell_ray_obb_intersection(
-    vec3 ray_origin, vec3 ray_direction, vec3 aabb_half_size, mat4 model_matrix)
+    vec3 ray_origin, vec3 ray_direction, vec3 aabb_half_size, mat4 transform)
 {
   float t_min = 0.0f;
   float t_max = FLT_MAX;
 
   vec3 obb_position_worldspace, translation;
-  glm_vec4_copy3(model_matrix[3], obb_position_worldspace);
+  glm_vec4_copy3(transform[3], obb_position_worldspace);
   glm_vec3_sub(obb_position_worldspace, ray_origin, translation);
 
   for (int i = 0; i < 3; i++) {  // test x, y and z axis
     vec3 axis;
-    glm_vec4_copy3(model_matrix[i], axis);
+    glm_vec4_copy3(transform[i], axis);
     if (ray_obb_intersection_axis_test(axis, translation, ray_direction,
             -aabb_half_size[i], aabb_half_size[i], &t_min, &t_max) == -1)
       return -1;
