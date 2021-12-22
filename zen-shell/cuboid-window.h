@@ -11,6 +11,6 @@ struct zen_cuboid_window *zen_cuboid_window_create(struct wl_client *client,
     struct zen_virtual_object *virtual_object);
 
 void zen_cuboid_window_configure(
-    struct zen_cuboid_window *cuboid_window, vec3 half_size);
+    struct zen_cuboid_window *cuboid_window, vec3 half_size, versor quaternion);
 
 #endif  //  ZEN_SHELL_CUBOID_WINDOW__H

@@ -22,7 +22,7 @@ class StlObject : public zukou::CuboidWindow
   StlObject(
       zukou::App *app, std::vector<StlTriangle> triangles, glm::vec3 half_size);
   ~StlObject();
-  void Configure(uint32_t serial, glm::vec3 half_size);
+  void Configure(uint32_t serial, glm::vec3 half_size, glm::quat quaternion);
   virtual void RayButton(uint32_t serial, uint32_t time, uint32_t button,
       enum zgn_ray_button_state state);
 

@@ -118,10 +118,11 @@ ObjObject::~ObjObject()
 }
 
 void
-ObjObject::Configure(uint32_t serial, glm::vec3 half_size)
+ObjObject::Configure(uint32_t serial, glm::vec3 half_size, glm::quat quaternion)
 {
   zgn_cuboid_window_ack_configure(cuboid_window(), serial);
   half_size_ = half_size;
+  quaternion_ = quaternion;
   glm::mat4 model = glm::mat4(1);
   glm::vec3 delta(0);
 

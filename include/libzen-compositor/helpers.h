@@ -43,6 +43,10 @@ int glm_vec3_from_wl_array(vec3 v, struct wl_array *array);
 
 void glm_vec3_to_wl_array(vec3 v, struct wl_array *array);
 
+int glm_versor_from_wl_array(versor v, struct wl_array *array);
+
+void glm_versor_to_wl_array(versor v, struct wl_array *array);
+
 int zen_log(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 
 #ifdef __cplusplus
