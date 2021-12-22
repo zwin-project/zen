@@ -23,6 +23,7 @@ class Hmd
   void DrawPreview(
       GLuint framebuffer, uint32_t view_width, uint32_t view_height);
   void GetCameras(struct zen_opengl_renderer_camera cameras[2]);
+  void GetHeadPosition(vec3 position);
 
  private:
   vr::IVRSystem *vr_system_;

@@ -86,6 +86,13 @@ Hmd::GetCameras(struct zen_opengl_renderer_camera cameras[2])
 }
 
 void
+Hmd::GetHeadPosition(vec3 position)
+{
+  glm_vec4_copy3(head_pose_[3], position);
+  glm_vec3_negate(position);
+}
+
+void
 Hmd::DrawPreview(GLuint framebuffer, uint32_t view_width, uint32_t view_height)
 {
   int x, y, width, height;

@@ -3,8 +3,20 @@
 
 #include <libzen-compositor/libzen-compositor.h>
 
-struct zen_output *zen_output_create(struct zen_compositor *compositor);
+#include "gl-window.h"
+#include "hmd.h"
 
-void zen_output_destroy(struct zen_output *output);
+struct openvr_output {
+  struct zen_output base;
+  struct zen_compositor* compositor;
+  struct zen_opengl_renderer* renderer;
+
+  GlWindow* window;
+  Hmd* hmd;
+};
+
+struct zen_output* zen_output_create(struct zen_compositor* compositor);
+
+void zen_output_destroy(struct zen_output* output);
 
 #endif  //  ZEN_OPENVR_BACKEND_OUTPUT_H

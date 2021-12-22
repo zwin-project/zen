@@ -6,6 +6,15 @@ struct headless_backend {
   struct zen_backend base;
 };
 
+static void
+zen_backend_get_head_position(struct zen_backend* backend, vec3 position)
+{
+  UNUSED(backend);
+  position[0] = 0;
+  position[1] = 0;
+  position[2] = 1;
+}
+
 WL_EXPORT struct zen_backend*
 zen_backend_create(struct zen_compositor* compositor)
 {
@@ -25,6 +34,7 @@ zen_backend_create(struct zen_compositor* compositor)
   }
 
   backend->base.output = output;
+  backend->base.get_head_position = zen_backend_get_head_position;
 
   return &backend->base;
 

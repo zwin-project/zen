@@ -1,3 +1,4 @@
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <libzen-compositor/libzen-compositor.h>
 #include <sys/time.h>
@@ -17,7 +18,20 @@ glfw_error_callback(int code, const char* description)
   zen_log("glfw: %s (%d)\n", description, code);
 }
 
-WL_EXPORT struct zen_backend*
+static void
+zen_backend_get_head_position(struct zen_backend* backend, vec3 position)
+{
+  vec3 right, left;
+  struct glfw_backend* b = wl_container_of(backend, b, base);
+  struct glfw_output* output = wl_container_of(b->base.output, output, base);
+  glm_vec4_copy3(output->eyes[0].view_matrix[3], left);
+  glm_vec4_copy3(output->eyes[1].view_matrix[3], right);
+  glm_vec3_center(left, right, position);
+  glm_vec3_negate(position);
+}
+
+WL_EXPORT
+struct zen_backend*
 zen_backend_create(struct zen_compositor* compositor)
 {
   struct glfw_backend* backend;
@@ -50,6 +64,7 @@ zen_backend_create(struct zen_compositor* compositor)
   }
 
   backend->base.output = output;
+  backend->base.get_head_position = zen_backend_get_head_position;
   backend->compositor = compositor;
   backend->udev_seat = udev_seat;
 

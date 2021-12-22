@@ -8,15 +8,6 @@
 #include "gl-window.h"
 #include "hmd.h"
 
-struct openvr_output {
-  struct zen_output base;
-  struct zen_compositor* compositor;
-  struct zen_opengl_renderer* renderer;
-
-  GlWindow* window;
-  Hmd* hmd;
-};
-
 static void
 OpenvrOutputRepaint(struct zen_output* zen_output)
 {
