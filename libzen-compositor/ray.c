@@ -170,6 +170,20 @@ static const struct zen_ray_grab_interface default_ray_grab_interface = {
     .cancel = default_grab_cancel,
 };
 
+WL_EXPORT
+void
+zen_ray_clear_focus(struct zen_ray* ray)
+{
+  struct zen_virtual_object* focus;
+
+  focus = zen_weak_link_get_user_data(&ray->focus_virtual_object_link);
+  if (focus == NULL) return;
+
+  zen_ray_leave(ray);
+
+  zen_weak_link_unset(&ray->focus_virtual_object_link);
+}
+
 WL_EXPORT void
 zen_ray_grab_start(struct zen_ray* ray, struct zen_ray_grab* grab)
 {

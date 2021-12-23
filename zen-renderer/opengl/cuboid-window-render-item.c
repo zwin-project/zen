@@ -7,8 +7,8 @@
 
 #include "shader-compiler.h"
 
-#define FOCUS_LINE_WIDTH 3
-#define DEFAULT_LINE_WIDTH 2
+#define FOCUS_LINE_WIDTH 4
+#define DEFAULT_LINE_WIDTH 1
 
 static void update_vertex_buffer(
     struct zen_opengl_cuboid_window_render_item* render_item);
@@ -19,15 +19,22 @@ zen_opengl_cuboid_window_render_item_commit(
 {
   struct zen_opengl_cuboid_window_render_item* render_item;
   struct zen_ray* ray;
+  struct zen_data_device* data_device;
   struct zen_virtual_object* focus_virtual_object = NULL;
 
   render_item = wl_container_of(render_item_base, render_item, base);
 
   ray = render_item->cuboid_window->virtual_object->compositor->seat->ray;
 
+  data_device =
+      render_item->cuboid_window->virtual_object->compositor->seat->data_device;
+
   if (ray)
     focus_virtual_object =
         zen_weak_link_get_user_data(&ray->seat->ray->focus_virtual_object_link);
+  if (focus_virtual_object == NULL && data_device)
+    focus_virtual_object =
+        zen_weak_link_get_user_data(&data_device->focus_virtual_object_link);
 
   if (render_item->cuboid_window->virtual_object == focus_virtual_object)
     render_item->line_width = FOCUS_LINE_WIDTH;

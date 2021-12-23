@@ -8,18 +8,22 @@
 
 WL_EXPORT void
 zen_data_device_data_offer(struct zen_data_device *data_device,
-    struct wl_resource *target, struct zen_data_offer *data_offer)
+    struct zen_data_offer *data_offer,
+    struct zen_virtual_object *virtual_object)
 {
-  zgn_data_device_send_data_offer(target, data_offer->resource);
+  zgn_data_device_send_data_offer(data_device->focus_resource,
+      data_offer->resource, virtual_object->resource);
 }
 
 WL_EXPORT void
 zen_data_device_enter(struct zen_data_device *data_device,
-    struct wl_resource *target, struct zen_virtual_object *virtual_object,
-    struct zen_ray *ray, struct zen_data_offer *data_offer)
+    struct zen_virtual_object *virtual_object, struct zen_ray *ray,
+    struct zen_data_offer *data_offer)
 {
   struct wl_array origin_array, direction_array;
   uint32_t serial;
+
+  if (data_device->focus_resource == NULL) return;
 
   wl_array_init(&origin_array);
   wl_array_init(&direction_array);
@@ -29,8 +33,9 @@ zen_data_device_enter(struct zen_data_device *data_device,
 
   serial = wl_display_next_serial(virtual_object->compositor->display);
 
-  zgn_data_device_send_enter(target, serial, virtual_object->resource,
-      &origin_array, &direction_array, data_offer->resource);
+  zgn_data_device_send_enter(data_device->focus_resource, serial,
+      virtual_object->resource, &origin_array, &direction_array,
+      data_offer->resource);
 
   wl_array_release(&origin_array);
   wl_array_release(&direction_array);
@@ -39,25 +44,19 @@ zen_data_device_enter(struct zen_data_device *data_device,
 WL_EXPORT void
 zen_data_device_leave(struct zen_data_device *data_device)
 {
-  struct zen_virtual_object *focus_virtual_object;
+  if (data_device->focus_resource == NULL) return;
 
-  focus_virtual_object =
-      zen_weak_link_get_user_data(&data_device->focus_virtual_object_link);
-  if (focus_virtual_object == NULL) return;
-
-  zgn_data_device_send_leave(focus_virtual_object->resource);
+  zgn_data_device_send_leave(data_device->focus_resource);
 }
 
 WL_EXPORT void
 zen_data_device_motion(struct zen_data_device *data_device, struct zen_ray *ray,
     const struct timespec *time)
 {
-  struct zen_virtual_object *focus;
   struct wl_array origin_array, direction_array;
   uint32_t msecs;
 
-  focus = zen_weak_link_get_user_data(&data_device->focus_virtual_object_link);
-  if (focus == NULL) return;
+  if (data_device->focus_resource == NULL) return;
 
   wl_array_init(&origin_array);
   wl_array_init(&direction_array);
@@ -68,7 +67,7 @@ zen_data_device_motion(struct zen_data_device *data_device, struct zen_ray *ray,
   msecs = timespec_to_msec(time);
 
   zgn_data_device_send_motion(
-      focus->resource, msecs, &origin_array, &direction_array);
+      data_device->focus_resource, msecs, &origin_array, &direction_array);
 
   wl_array_release(&origin_array);
   wl_array_release(&direction_array);
@@ -77,12 +76,9 @@ zen_data_device_motion(struct zen_data_device *data_device, struct zen_ray *ray,
 WL_EXPORT void
 zen_data_device_drop(struct zen_data_device *data_device)
 {
-  struct zen_virtual_object *focus;
+  if (data_device->focus_resource == NULL) return;
 
-  focus = zen_weak_link_get_user_data(&data_device->focus_virtual_object_link);
-  if (focus == NULL) return;
-
-  zgn_data_device_send_drop(focus->resource);
+  zgn_data_device_send_drop(data_device->focus_resource);
 }
 
 static void zen_data_device_destroy(struct zen_data_device *data_device);
@@ -96,9 +92,11 @@ zgn_data_device_protocol_start_drag(struct wl_client *client,
   struct zen_data_device *data_device;
   struct zen_seat *seat;
   struct zen_ray *ray;
-  struct zen_data_source *data_source;
-  struct zen_virtual_object *origin;
-  struct zen_virtual_object *icon;
+  struct zen_data_source *data_source =
+      wl_resource_get_user_data(source_resource);
+  struct zen_virtual_object *origin =
+      wl_resource_get_user_data(origin_resource);
+  // struct zen_virtual_object *icon = wl_resource_get_user_data(icon_resource);
   struct zen_virtual_object *current_focus;
 
   data_device = wl_resource_get_user_data(resource);
@@ -110,16 +108,13 @@ zgn_data_device_protocol_start_drag(struct wl_client *client,
   ray = seat->ray;
   if (!ray || ray->button_count != 1 || ray->grab_serial != serial) return;
 
-  data_source = wl_resource_get_user_data(source_resource);
-  origin = wl_resource_get_user_data(origin_resource);
-  icon = wl_resource_get_user_data(icon_resource);
   current_focus = zen_weak_link_get_user_data(&ray->focus_virtual_object_link);
 
   if (!current_focus || current_focus != origin) return;
 
   // FIXME: set icon role
 
-  zen_ray_start_drag(ray, data_source, icon, client);
+  zen_ray_start_drag(ray, data_source, NULL, client);
 }
 
 static void
@@ -188,6 +183,8 @@ zen_data_device_create(struct wl_client *client, struct zen_seat *seat)
   data_device->seat = seat;
   seat->data_device = data_device;
 
+  data_device->focus_resource = NULL;
+  zen_weak_link_init(&data_device->focus_virtual_object_link);
   wl_list_init(&data_device->resource_list);
 
   return data_device;

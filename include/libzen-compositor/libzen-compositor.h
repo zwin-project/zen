@@ -57,12 +57,15 @@ struct zen_data_device {
 
   struct zen_data_source* data_source;
 
+  struct wl_resource* focus_resource;  // TODO: weak linkで書き換え
   struct zen_weak_link focus_virtual_object_link;
+  // data deviceのfocusがあたってるVO, rayのfocusとはロジックが異なる
 };
 
 struct zen_data_device_manager {
-  struct wl_display* display;  // TODO: compositorで必要ならdisplayいらない
+  struct wl_display* display;
   struct wl_global* global;
+  struct zen_data_device* data_device;
 };
 
 struct zen_virtual_object {
@@ -221,12 +224,12 @@ struct wl_resource* zen_data_device_create_insert_resource(
     struct wl_client* client, uint32_t id);
 
 void zen_data_device_data_offer(struct zen_data_device* data_device,
-    struct wl_resource* target, struct zen_data_offer* data_offer);
+    struct zen_data_offer* data_offer,
+    struct zen_virtual_object* virtual_object);
 
 void zen_data_device_enter(struct zen_data_device* data_device,
-    struct wl_resource* target, struct zen_virtual_object* virtual_object,
-    struct zen_ray* ray, struct zen_data_offer* data_offer);
-// TODO: なんか引数多い
+    struct zen_virtual_object* virtual_object, struct zen_ray* ray,
+    struct zen_data_offer* data_offer);
 
 void zen_data_device_leave(struct zen_data_device* data_device);
 
@@ -243,6 +246,7 @@ void zen_data_device_manager_destroy(
     struct zen_data_device_manager* data_device_manager);
 
 // methods of zen_ray
+void zen_ray_clear_focus(struct zen_ray* ray);
 
 void zen_ray_grab_start(struct zen_ray* ray, struct zen_ray_grab* grab);
 

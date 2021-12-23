@@ -102,6 +102,8 @@ zen_virtual_object_create(
   struct zen_virtual_object *virtual_object;
   struct wl_resource *resource;
   mat4 identity = GLM_MAT4_IDENTITY_INIT;
+  // mat4 identity = {{1.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f, 0.0f},
+  // {0.0f, 0.0f, 1.0f, 0.0f}, {0.0f, 0.0f, 0.0f, 1.0f}};
 
   virtual_object = zalloc(sizeof *virtual_object);
   if (virtual_object == NULL) {
@@ -126,9 +128,14 @@ zen_virtual_object_create(
   virtual_object->role = strdup("");
   virtual_object->role_object = NULL;
 
+  int x = 1;
+  x *= (rand() % 2 == 0) ? 1 : -1;
+  float rand_x = x / 2.0;
+
   glm_mat4_copy(identity, virtual_object->model_matrix);
   glm_translate_z(virtual_object->model_matrix, -1);
   glm_translate_y(virtual_object->model_matrix, 1.5);
+  glm_translate_x(virtual_object->model_matrix, rand_x);
 
   wl_signal_init(&virtual_object->commit_signal);
   wl_signal_init(&virtual_object->destroy_signal);

@@ -8,14 +8,6 @@
 
 #include "types.h"
 
-// #pragma pack(1)
-// struct StlTriangle {
-//   float n[3];
-//   float points[3][3];
-//   uint16_t unused;
-// };
-// #pragma pack()
-
 class StlObject : public zukou::CuboidWindow
 {
  public:

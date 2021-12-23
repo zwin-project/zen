@@ -8,6 +8,8 @@ static void
 zgn_data_device_manager_protocol_create_data_source(
     struct wl_client *client, struct wl_resource *resource, uint32_t id)
 {
+  struct zen_data_device_manager *data_device_manager =
+      wl_resource_get_user_data(resource);
   struct zen_data_source *data_source;
 
   data_source = zen_data_source_create(client, resource, id);
@@ -15,6 +17,9 @@ zgn_data_device_manager_protocol_create_data_source(
     wl_client_post_no_memory(client);
     zen_log("data device manager: failed to create a data source\n");
   }
+
+  if (data_device_manager->data_device)
+    data_device_manager->data_device->data_source = data_source;
 }
 
 static void
@@ -22,14 +27,15 @@ zgn_data_device_manager_protocol_get_data_device(struct wl_client *client,
     struct wl_resource *manager_resource, uint32_t id,
     struct wl_resource *seat_resource)
 {
-  struct zen_seat *seat;
+  struct zen_data_device_manager *data_device_manager =
+      wl_resource_get_user_data(manager_resource);
+  struct zen_seat *seat = wl_resource_get_user_data(seat_resource);
   struct zen_data_device *data_device;
-
-  seat = wl_resource_get_user_data(seat_resource);
 
   if (seat) {
     data_device = zen_data_device_ensure(client, seat);
     zen_data_device_add_resource(data_device, client, id);
+    data_device_manager->data_device = data_device;
   } else {
     // TODO: seatがない場合へ対処
     zen_data_device_create_insert_resource(client, id);
@@ -48,8 +54,8 @@ zen_data_device_manager_bind(
   struct zen_data_device_manager *data_device_manager = data;
   struct wl_resource *resource;
 
-  resource =
-      wl_resource_create(client, &zgn_data_device_interface, version, id);
+  resource = wl_resource_create(
+      client, &zgn_data_device_manager_interface, version, id);
   if (resource == NULL) {
     wl_client_post_no_memory(client);
     zen_log("data device manager: failed to create a resource\n");
