@@ -41,7 +41,9 @@ zen_data_offer_protocol_receive(struct wl_client *client,
 static void
 zen_data_offer_protocol_destroy(
     struct wl_client *client, struct wl_resource *resource)
-{}
+{
+  wl_resource_destroy(resource);
+}
 
 static void
 zen_data_offer_protocol_finish(
@@ -73,7 +75,33 @@ static const struct zgn_data_offer_interface data_offer_interface = {
 static void
 zen_data_offer_handle_destroy(struct wl_resource *resource)
 {
-  // TODO
+  struct zen_data_offer *data_offer = wl_resource_get_user_data(resource);
+
+  if (data_offer->data_source == NULL) goto out;
+
+  wl_list_remove(&data_offer->data_source_destroy_listener.link);
+
+  if (data_offer->data_source->data_offer != data_offer) goto out;
+
+  zen_data_source_cancelled(data_offer->data_source);
+
+  data_offer->data_source->data_offer = NULL;
+
+out:
+  free(data_offer);
+}
+
+static void
+zen_data_offer_data_source_destroy_handler(
+    struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+  struct zen_data_offer *data_offer;
+
+  data_offer =
+      wl_container_of(listener, data_offer, data_source_destroy_listener);
+
+  data_offer->data_source = NULL;
 }
 
 WL_EXPORT struct zen_data_offer *
@@ -103,6 +131,10 @@ zen_data_offer_create(
 
   data_offer->data_source = data_source;
   data_source->data_offer = data_offer;
+  data_offer->data_source_destroy_listener.notify =
+      zen_data_offer_data_source_destroy_handler;
+  wl_signal_add(
+      &data_source->destroy_signal, &data_offer->data_source_destroy_listener);
 
   return data_offer;
 
@@ -111,11 +143,4 @@ err_resource:
 
 err:
   return NULL;
-}
-
-void
-zen_data_offer_destroy(struct zen_data_offer *data_offer)
-{
-  // TODO
-  free(data_offer);
 }

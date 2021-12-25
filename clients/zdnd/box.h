@@ -1,7 +1,6 @@
 #ifndef ZEN_CLIENT_SIMPLE_BOX_BOX_H
 #define ZEN_CLIENT_SIMPLE_BOX_BOX_H
 
-#include <types.h>
 #include <zukou.h>
 
 #include <glm/glm.hpp>
@@ -9,6 +8,7 @@
 #include <vector>
 
 #include "stl-object.h"
+#include "types.h"
 
 class Box : public zukou::CuboidWindow
 {
@@ -34,6 +34,7 @@ class Box : public zukou::CuboidWindow
   void Configure(uint32_t serial, glm::vec3 half_size);
 
   struct wl_array mime_type_list;
+  struct zgn_data_source *data_source;
 
  private:
   const std::string path_;
@@ -53,8 +54,6 @@ class Box : public zukou::CuboidWindow
   bool ray_focus_;
 
   uint32_t drag_enter_serial_;
-
-  struct zgn_data_source *data_source_;
 
   glm::vec3 min_;
   glm::vec3 max_;

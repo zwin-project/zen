@@ -205,6 +205,7 @@ WL_EXPORT void
 zen_ray_grab_end(struct zen_ray* ray)
 {
   ray->grab = &ray->default_grab;
+  ray->grab->interface->focus(ray->grab);
 }
 
 WL_EXPORT void

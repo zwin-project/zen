@@ -8,10 +8,6 @@
 
 #include "virtual-object.h"
 
-struct zen_drag_grab {
-  struct zen_ray_grab base;
-};
-
 static void zen_drag_grab_destroy(struct zen_drag_grab* drag_grab);
 
 static void
@@ -75,11 +71,11 @@ drag_grab_ray_motion(struct zen_ray_grab* grab, const struct timespec* time,
 {
   struct zen_ray* ray = grab->ray;
   struct zen_data_device* data_device = ray->seat->data_device;
-  // FIXME: seat->data_deviceがないことあり得る？
+  // FIXME: To handle the case seat->data_device is NULL if exists
 
-  // ここでicon動かす
+  // TODO: To move icon
 
-  zen_ray_move(ray, event);  // focus呼ばれる
+  zen_ray_move(ray, event);
 
   zen_data_device_motion(data_device, ray, time);
 }
@@ -105,7 +101,7 @@ drag_grab_ray_button(struct zen_ray_grab* grab, const struct timespec* time,
   }
 
   if (ray->button_count == 0 && state == ZGN_RAY_BUTTON_STATE_RELEASED) {
-    zen_ray_grab_end(ray);
+    zen_data_device_end_drag(data_device);
     zen_drag_grab_destroy(drag_grab);
   }
 }
@@ -114,9 +110,10 @@ static void
 drag_grab_ray_cancel(struct zen_ray_grab* grab)
 {
   struct zen_ray* ray = grab->ray;
+  struct zen_data_device* data_device = ray->seat->data_device;
   struct zen_drag_grab* drag_grab = wl_container_of(grab, drag_grab, base);
 
-  zen_ray_grab_end(ray);
+  zen_data_device_end_drag(data_device);
   zen_drag_grab_destroy(drag_grab);
 }
 
@@ -127,39 +124,26 @@ static const struct zen_ray_grab_interface drag_grab_interface = {
     .cancel = drag_grab_ray_cancel,
 };
 
-static struct zen_drag_grab*
-zen_drag_grab_create(struct zen_ray* ray, struct wl_client* client)
+WL_EXPORT struct zen_drag_grab*
+zen_drag_grab_create(struct zen_data_device* data_device)
 {
   struct zen_drag_grab* drag_grab;
+
+  if (data_device->seat == NULL || data_device->seat->ray == NULL) goto err;
 
   drag_grab = zalloc(sizeof *drag_grab);
   if (drag_grab == NULL) {
     zen_log("drag grab: failed to allocate memory\n");
-    wl_client_post_no_memory(client);
     goto err;
   }
 
   drag_grab->base.interface = &drag_grab_interface;
-  drag_grab->base.ray = ray;
+  drag_grab->base.ray = data_device->seat->ray;
 
   return drag_grab;
 
 err:
   return NULL;
-}
-
-WL_EXPORT int
-zen_ray_start_drag(struct zen_ray* ray, struct zen_data_source* data_source,
-    struct zen_virtual_object* icon, struct wl_client* client)
-{
-  struct zen_drag_grab* drag_grab;
-
-  drag_grab = zen_drag_grab_create(ray, client);
-
-  zen_ray_clear_focus(ray);
-  zen_ray_grab_start(ray, &drag_grab->base);
-
-  return 0;
 }
 
 static void

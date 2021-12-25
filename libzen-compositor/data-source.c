@@ -62,7 +62,7 @@ static void
 zen_data_source_protocol_destroy(
     struct wl_client *client, struct wl_resource *resource)
 {
-  // TODO
+  wl_resource_destroy(resource);
 }
 
 static void
@@ -81,7 +81,16 @@ struct zgn_data_source_interface data_source_interface = {
 static void
 zen_data_source_handle_destroy(struct wl_resource *resource)
 {
-  // TODO
+  struct zen_data_source *data_source = wl_resource_get_user_data(resource);
+  char **type;
+
+  wl_signal_emit(&data_source->destroy_signal, data_source);
+
+  wl_array_for_each(type, &data_source->mime_type_list) free(*type);
+
+  wl_array_release(&data_source->mime_type_list);
+
+  free(data_source);
 }
 
 WL_EXPORT struct zen_data_source *
@@ -105,12 +114,14 @@ zen_data_source_create(
     goto err_resource;
   }
 
+  wl_resource_set_implementation(data_source->resource, &data_source_interface,
+      data_source, zen_data_source_handle_destroy);
+
   wl_array_init(&data_source->mime_type_list);
 
   data_source->data_offer = NULL;
 
-  wl_resource_set_implementation(data_source->resource, &data_source_interface,
-      data_source, zen_data_source_handle_destroy);
+  wl_signal_init(&data_source->destroy_signal);
 
   return data_source;
 
@@ -119,18 +130,4 @@ err_resource:
 
 err:
   return NULL;
-}
-
-void
-zen_data_source_destroy(struct zen_data_source *data_source)
-{
-  // TODO
-  char **type;
-
-  // wl_signal_emit(&data_source->destroy_signal); TODO
-
-  wl_array_for_each(type, &data_source->mime_type_list) free(*type);
-  wl_array_release(&data_source->mime_type_list);
-
-  free(data_source);
 }

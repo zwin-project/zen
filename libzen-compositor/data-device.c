@@ -6,6 +6,73 @@
 
 #include "drag-grab.h"
 
+static void
+zen_data_device_data_source_destroy_handler(
+    struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+  struct zen_data_device *data_device;
+
+  data_device =
+      wl_container_of(listener, data_device, data_source_destroy_listener);
+
+  zen_data_device_end_drag(data_device);
+}
+
+static void
+zen_data_device_icon_destroy_handler(struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+  struct zen_data_device *data_device;
+
+  data_device = wl_container_of(listener, data_device, icon_destroy_listener);
+
+  UNUSED(data_device);
+  // TODO: To handle icon destruction
+}
+
+static void
+zen_data_device_start_drag(struct zen_data_device *data_device,
+    struct zen_data_source *data_source, struct zen_virtual_object *icon)
+{
+  struct zen_drag_grab *drag_grab;
+
+  if (data_device->seat == NULL || data_device->seat->ray == NULL) goto out;
+
+  drag_grab = zen_drag_grab_create(data_device);
+  if (drag_grab == NULL) {
+    zen_log("data device: failed to a drag grab");
+    goto out;
+  }
+
+  if (data_source) {
+    data_device->data_source_destroy_listener.notify =
+        zen_data_device_data_source_destroy_handler;
+    wl_signal_add(&data_source->destroy_signal,
+        &data_device->data_source_destroy_listener);
+  }
+
+  if (icon) {
+    data_device->icon_destroy_listener.notify =
+        zen_data_device_icon_destroy_handler;
+    wl_signal_add(&icon->destroy_signal, &data_device->icon_destroy_listener);
+  }
+
+  zen_ray_clear_focus(data_device->seat->ray);
+  zen_ray_grab_start(data_device->seat->ray, &drag_grab->base);
+
+out:
+  return;
+}
+
+WL_EXPORT void
+zen_data_device_end_drag(struct zen_data_device *data_device)
+{
+  zen_data_device_clear_focus(data_device);
+  if (data_device->seat == NULL && data_device->seat->ray != NULL)
+    zen_ray_grab_end(data_device->seat->ray);
+}
+
 WL_EXPORT void
 zen_data_device_data_offer(struct zen_data_device *data_device,
     struct zen_data_offer *data_offer,
@@ -81,8 +148,6 @@ zen_data_device_drop(struct zen_data_device *data_device)
   zgn_data_device_send_drop(data_device->focus_resource);
 }
 
-static void zen_data_device_destroy(struct zen_data_device *data_device);
-
 static void
 zgn_data_device_protocol_start_drag(struct wl_client *client,
     struct wl_resource *resource, struct wl_resource *source_resource,
@@ -114,35 +179,21 @@ zgn_data_device_protocol_start_drag(struct wl_client *client,
 
   // FIXME: set icon role
 
-  zen_ray_start_drag(ray, data_source, NULL, client);
+  zen_data_device_start_drag(data_device, data_source, NULL);
 }
 
 static void
 zgn_data_device_protocol_release(
     struct wl_client *client, struct wl_resource *resource)
 {
-  // TODO
+  UNUSED(client);
+  wl_resource_destroy(resource);
 }
 
 static const struct zgn_data_device_interface data_device_interface = {
     .start_drag = zgn_data_device_protocol_start_drag,
     .release = zgn_data_device_protocol_release,
 };
-
-static void
-zen_data_device_handle_destroy(struct wl_resource *resource)
-{
-  // TODO: destroyの処理をちゃんと考える
-  struct zen_data_device *data_device;
-
-  data_device = wl_resource_get_user_data(resource);
-
-  wl_list_remove(wl_resource_get_link(resource));
-
-  if (data_device && wl_list_empty(&data_device->resource_list)) {
-    zen_data_device_destroy(data_device);
-  }
-}
 
 WL_EXPORT int
 zen_data_device_add_resource(
@@ -157,8 +208,8 @@ zen_data_device_add_resource(
     goto err;
   }
 
-  wl_resource_set_implementation(resource, &data_device_interface, data_device,
-      zen_data_device_handle_destroy);
+  wl_resource_set_implementation(
+      resource, &data_device_interface, data_device, NULL);
 
   wl_list_insert(&data_device->resource_list, wl_resource_get_link(resource));
 
@@ -193,6 +244,15 @@ err:
   return NULL;
 }
 
+WL_EXPORT void
+zen_data_device_clear_focus(struct zen_data_device *data_device)
+{
+  zen_data_device_leave(data_device);
+
+  data_device->focus_resource = NULL;
+  zen_weak_link_unset(&data_device->focus_virtual_object_link);
+}
+
 WL_EXPORT struct zen_data_device *
 zen_data_device_ensure(struct wl_client *client, struct zen_seat *seat)
 {
@@ -224,17 +284,16 @@ err:
   return NULL;
 }
 
-static void
+WL_EXPORT void
 zen_data_device_destroy(struct zen_data_device *data_device)
 {
-  // TODO: ちゃんと考える
   struct wl_resource *resource, *tmp;
+
+  wl_list_remove(&data_device->data_source_destroy_listener.link);
+  wl_list_remove(&data_device->icon_destroy_listener.link);
+
   wl_resource_for_each_safe(resource, tmp, &data_device->resource_list)
-  {
-    wl_resource_set_user_data(resource, NULL);
-    wl_resource_set_destructor(resource, NULL);
-    wl_list_init(wl_resource_get_link(resource));
-  }
+      wl_resource_set_user_data(resource, NULL);
 
   free(data_device);
 }

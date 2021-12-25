@@ -447,14 +447,15 @@ App::Run()
   this->epoll_func = io_default_func;
 
   while (running_) {
-    while (wl_display_prepare_read(display()) != 0) {
+    while (wl_display_prepare_read(display()) != 0) {  // eventがあるかどうか
       if (errno != EAGAIN) return false;
       wl_display_dispatch_pending(display());
     }
-    ret = wl_display_flush(display());
+
+    ret = wl_display_flush(display());  // requestを送信
     if (ret == -1) return false;
-    wl_display_read_events(display());
-    wl_display_dispatch_pending(display());
+    wl_display_read_events(display());       // eventを取り出す
+    wl_display_dispatch_pending(display());  // eventを実行(->handlerで処理)
 
     epoll_count = epoll_wait(this->epoll_fd, ep, 16, 0);
     for (int i = 0; i < epoll_count; i++) {

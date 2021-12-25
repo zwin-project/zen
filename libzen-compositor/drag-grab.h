@@ -1,9 +1,12 @@
-#ifndef ZEN_DRAG_GRAB_H
-#define ZEN_DRAG_GRAB_H
+#ifndef LIBZEN_DRAG_GRAB_H
+#define LIBZEN_DRAG_GRAB_H
 
 #include <libzen-compositor/libzen-compositor.h>
 
-int zen_ray_start_drag(struct zen_ray* ray, struct zen_data_source* data_source,
-    struct zen_virtual_object* icon, struct wl_client* client);
+struct zen_drag_grab {
+  struct zen_ray_grab base;
+};
 
-#endif  // ZEN_DRAG_GRAB_H
+struct zen_drag_grab* zen_drag_grab_create(struct zen_data_device* data_device);
+
+#endif  // LIBZEN_DRAG_GRAB_H

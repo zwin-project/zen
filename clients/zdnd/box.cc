@@ -296,6 +296,7 @@ void
 Box::DataDeviceLeave()
 {
   // data_offerのdestroy
+  // if (app()->data_offer()) zgn_data_offer_destroy(app()->data_offer());
 }
 
 void
@@ -329,6 +330,7 @@ io_func(zukou::App *app)
   close(app->fd);
 
   zgn_data_offer_finish(app->data_offer());
+  zgn_data_offer_destroy(app->data_offer());
 }
 
 void
@@ -390,7 +392,8 @@ data_source_dnd_drop_performed(void *data, struct zgn_data_source *data_source)
 void
 data_source_dnd_finished(void *data, struct zgn_data_source *data_source)
 {
-  // destroy
+  Box *box = (Box *)data;
+  if (box->data_source) zgn_data_source_destroy(box->data_source);
 }
 
 void
@@ -440,12 +443,13 @@ Box::RayButton(uint32_t serial, uint32_t time, uint32_t button,
     // fragment_shader.size()); shader_->Link(); component_->Attach(shader_);
     // this->Commit();
 
-    data_source_ = zgn_data_device_manager_create_data_source(
+    this->data_source = zgn_data_device_manager_create_data_source(
         app()->data_device_manager());
-    zgn_data_source_add_listener(data_source_, &data_source_listener, this);
-    zgn_data_source_offer(data_source_, sample_mime_type);
+    zgn_data_source_add_listener(
+        this->data_source, &data_source_listener, this);
+    zgn_data_source_offer(this->data_source, sample_mime_type);
 
-    zgn_data_device_start_drag(app()->data_device(), data_source_,
+    zgn_data_device_start_drag(app()->data_device(), this->data_source,
         this->virtual_object(), NULL, serial);
 
     wl_array_init(&mime_type_list);

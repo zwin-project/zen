@@ -86,11 +86,19 @@ zen_desktop_move_grab_create(struct zen_cuboid_window *cuboid_window)
   struct zen_desktop_move_grab *move_grab;
 
   move_grab = zalloc(sizeof *move_grab);
+  if (move_grab == NULL) {
+    zen_log("move grab: failed to allocate memory\n");
+    goto err;
+  }
+
   move_grab->base.interface = &move_grab_interface;
   zen_weak_link_init(&move_grab->cuboid_window_link);
   zen_weak_link_set(&move_grab->cuboid_window_link, cuboid_window->resource);
 
   return move_grab;
+
+err:
+  return NULL;
 }
 
 static void
@@ -112,6 +120,7 @@ desktop_cuboid_window_move(struct zen_cuboid_window *cuboid_window,
   if (ray == NULL) return;
 
   move_grab = zen_desktop_move_grab_create(cuboid_window);
+  if (move_grab == NULL) return;
 
   if (ray->button_count > 0 && ray->grab_serial == serial &&
       ray->focus_virtual_object_link.resource ==

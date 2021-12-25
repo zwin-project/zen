@@ -43,12 +43,16 @@ struct zen_compositor {
 struct zen_data_offer {
   struct wl_resource* resource;
   struct zen_data_source* data_source;
+
+  struct wl_listener data_source_destroy_listener;
 };
 
 struct zen_data_source {
   struct wl_resource* resource;
   struct wl_array mime_type_list;
   struct zen_data_offer* data_offer;
+
+  struct wl_signal destroy_signal;
 };
 
 struct zen_data_device {
@@ -58,8 +62,11 @@ struct zen_data_device {
   struct zen_data_source* data_source;
 
   struct wl_resource* focus_resource;  // TODO: weak linkで書き換え
-  struct zen_weak_link focus_virtual_object_link;
-  // data deviceのfocusがあたってるVO, rayのfocusとはロジックが異なる
+  struct zen_weak_link
+      focus_virtual_object_link;  // focus_resourceと同じclientのVO
+
+  struct wl_listener data_source_destroy_listener;
+  struct wl_listener icon_destroy_listener;
 };
 
 struct zen_data_device_manager {
@@ -217,6 +224,8 @@ void zen_data_source_dnd_finished(struct zen_data_source* data_source);
 struct zen_data_device* zen_data_device_ensure(
     struct wl_client* client, struct zen_seat* seat);
 
+void zen_data_device_destroy(struct zen_data_device* data_device);
+
 int zen_data_device_add_resource(
     struct zen_data_device* data_device, struct wl_client* client, uint32_t id);
 
@@ -237,6 +246,10 @@ void zen_data_device_motion(struct zen_data_device* data_device,
     struct zen_ray* ray, const struct timespec* time);
 
 void zen_data_device_drop(struct zen_data_device* data_device);
+
+void zen_data_device_clear_focus(struct zen_data_device* data_device);
+
+void zen_data_device_end_drag(struct zen_data_device* data_device);
 
 // methods of zen_data_device_manager
 struct zen_data_device_manager* zen_data_device_manager_create(

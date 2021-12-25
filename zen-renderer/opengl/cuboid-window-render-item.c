@@ -31,7 +31,7 @@ zen_opengl_cuboid_window_render_item_commit(
 
   if (ray)
     focus_virtual_object =
-        zen_weak_link_get_user_data(&ray->seat->ray->focus_virtual_object_link);
+        zen_weak_link_get_user_data(&ray->focus_virtual_object_link);
   if (focus_virtual_object == NULL && data_device)
     focus_virtual_object =
         zen_weak_link_get_user_data(&data_device->focus_virtual_object_link);

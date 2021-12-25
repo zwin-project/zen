@@ -89,6 +89,7 @@ zen_data_device_manager_create(struct wl_display *display)
   }
 
   data_device_manager->global = global;
+  data_device_manager->data_device = NULL;
 
   return data_device_manager;
 
@@ -105,5 +106,7 @@ zen_data_device_manager_destroy(
     struct zen_data_device_manager *data_device_manager)
 {
   wl_global_destroy(data_device_manager->global);
+  if (data_device_manager->data_device)
+    zen_data_device_destroy(data_device_manager->data_device);
   free(data_device_manager);
 }
