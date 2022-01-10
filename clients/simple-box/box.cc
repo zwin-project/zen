@@ -20,11 +20,19 @@ extern const char *vertex_shader;
 extern const char *fragment_shader;
 extern const char *texture_fragment_shader;
 
-Box::Box(zukou::App *app, float length)
+Box::Box(zukou::App *app, float length) : Box(app, length, false) {}
+
+Box::Box(zukou::App *app, float length, bool print_fps)
     : CuboidWindow(app, glm::vec3(length * 1.8))
 {
   srand(time(0));
   Vertex points[8];
+
+  fps_.show = print_fps;
+  if (fps_.show) {
+    timespec_get(&fps_.prev, TIME_UTC);
+    fps_.count = 0;
+  }
 
   length_ = length;
   delta_theta_ = 0;
@@ -146,6 +154,8 @@ Box::Frame(uint32_t time)
 
   this->DrawTexture();
 
+  this->PrintFps();
+
   this->NextFrame();
 }
 
@@ -264,6 +274,23 @@ Box::RotateWithRay()
   float force = M_PI * glm::length(axis) / 30.0f;
   glm::quat delta = glm::angleAxis(force, glm::normalize(axis));
   this->Rotate(delta * this->quaternion());
+}
+
+void
+Box::PrintFps()
+{
+  struct timespec now;
+  if (!fps_.show) return;
+
+  fps_.count++;
+  timespec_get(&now, TIME_UTC);
+  if ((now.tv_sec - fps_.prev.tv_sec) * 1000000000 + now.tv_nsec -
+          fps_.prev.tv_nsec >
+      1000000000) {
+    std::cout << fps_.count << " fps" << std::endl;
+    fps_.count = 0;
+    fps_.prev = now;
+  }
 }
 
 const char *vertex_shader =

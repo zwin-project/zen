@@ -11,6 +11,8 @@ struct zen_opengl_texture {
   struct {
     struct zen_weak_link buffer_link;
   } pending;
+
+  int32_t width, height;
 };
 
 void zen_opengl_texture_commit(struct zen_opengl_texture *texture);
