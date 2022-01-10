@@ -14,6 +14,7 @@ class Box : public zukou::CuboidWindow
 {
  public:
   Box(zukou::App *app, float length);
+  Box(zukou::App *app, float length, bool print_fps);
   void Frame(uint32_t time);
   virtual void RayEnter(uint32_t serial, glm::vec3 origin, glm::vec3 direction);
   virtual void RayLeave(uint32_t serial);
@@ -34,6 +35,12 @@ class Box : public zukou::CuboidWindow
   zukou::OpenGLShaderProgram *front_shader_;
   zukou::OpenGLTexture *texture_;
 
+  struct {
+    struct timespec prev;
+    int count;
+    bool show;
+  } fps_;
+
   float length_;
   float delta_theta_;
   float delta_phi_;
@@ -53,6 +60,7 @@ class Box : public zukou::CuboidWindow
   } button_;
 
  private:
+  void PrintFps();
   void RotateWithRay();
 };
 
