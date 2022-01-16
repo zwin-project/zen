@@ -9,14 +9,6 @@
 #include <glm/glm.hpp>
 #include <vector>
 
-#pragma pack(1)
-struct StlTriangle {
-  float n[3];
-  float points[3][3];
-  uint16_t unused;
-};
-#pragma pack()
-
 namespace zukou {
 class App
 {
@@ -64,11 +56,6 @@ class App
   inline struct zgn_shell *shell();
   inline struct wl_shm *shm();
   inline struct zgn_opengl *opengl();
-
-  void (*epoll_func)(zukou::App *app);
-  int epoll_fd;
-  int fd;
-  std::vector<StlTriangle> triangle_list;
 
  private:
   struct wl_display *display_;
@@ -189,7 +176,6 @@ class VirtualObject
   virtual void DataOfferAction(uint32_t dnd_action);
   virtual void DataDeviceEnter(uint32_t serial, glm::vec3 origin,
       glm::vec3 direction, struct zgn_data_offer *id);
-  // TODO: Focusの管理をどうする？
   virtual void DataDeviceLeave();
   virtual void DataDeviceMotion(
       uint32_t time, glm::vec3 origin, glm::vec3 direction);

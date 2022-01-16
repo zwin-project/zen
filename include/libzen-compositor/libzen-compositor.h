@@ -61,9 +61,8 @@ struct zen_data_device {
 
   struct zen_data_source* data_source;
 
-  struct wl_resource* focus_resource;  // TODO: weak linkで書き換え
-  struct zen_weak_link
-      focus_virtual_object_link;  // focus_resourceと同じclientのVO
+  struct wl_resource* focus_resource;
+  struct zen_weak_link focus_virtual_object_link;
 
   struct wl_listener data_source_destroy_listener;
   struct wl_listener icon_destroy_listener;
@@ -206,7 +205,7 @@ void zen_data_offer_offer(
 
 // methods of zen_data_source
 struct zen_data_source* zen_data_source_create(
-    struct wl_client* client, struct wl_resource* resource, uint32_t id);
+    struct wl_client* client, uint32_t id);
 
 void zen_data_source_target(
     struct zen_data_source* data_source, const char* mime_type);

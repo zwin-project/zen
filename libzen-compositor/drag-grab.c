@@ -1,5 +1,3 @@
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 #include "drag-grab.h"
 
 #include <libzen-compositor/libzen-compositor.h>
@@ -13,9 +11,6 @@ static void zen_drag_grab_destroy(struct zen_drag_grab* drag_grab);
 static void
 drag_grab_ray_focus(struct zen_ray_grab* grab)
 {
-  // FIXME: data_deviceを持っていないVOの可能性
-  // TODO: data_deviceにどのタイミングでdata_sourceを代入するか?
-  // FIXME: dnd終わった後のrayのfocusのswitch()
   struct zen_ray* ray = grab->ray;
   struct zen_data_device* data_device = ray->seat->data_device;
   struct zen_shell_base* shell_base = ray->seat->compositor->shell_base;
@@ -34,7 +29,6 @@ drag_grab_ray_focus(struct zen_ray_grab* grab)
 
   if (new_focus == NULL) return;
 
-  // new focus voのdata device resourceの探索
   new_focus_data_device_resource = wl_resource_find_for_client(
       &data_device->resource_list, wl_resource_get_client(new_focus->resource));
 
@@ -45,12 +39,11 @@ drag_grab_ray_focus(struct zen_ray_grab* grab)
   if (data_device->focus_resource != NULL) zen_data_device_leave(data_device);
   data_device->focus_resource = new_focus_data_device_resource;
 
-  if (data_device->data_source == NULL)
-    return;  // TODO: data source NULLならdragやめるべき
+  if (data_device->data_source == NULL) return;
 
   data_offer = zen_data_offer_create(
       data_device->data_source, new_focus_data_device_resource);
-  if (data_offer == NULL) return;  // TODO: send error message
+  if (data_offer == NULL) return;
   zen_data_device_data_offer(data_device, data_offer, new_focus);
 
   wl_array_for_each(type, &data_device->data_source->mime_type_list)
@@ -58,11 +51,11 @@ drag_grab_ray_focus(struct zen_ray_grab* grab)
 
   zen_data_device_enter(data_device, new_focus, ray, data_offer);
 
-  if (current_focus) zen_virtual_object_render_commit(current_focus);
-  zen_virtual_object_render_commit(new_focus);
-
   zen_weak_link_set(
       &data_device->focus_virtual_object_link, new_focus->resource);
+
+  if (current_focus) zen_virtual_object_render_commit(current_focus);
+  zen_virtual_object_render_commit(new_focus);
 }
 
 static void
@@ -71,7 +64,6 @@ drag_grab_ray_motion(struct zen_ray_grab* grab, const struct timespec* time,
 {
   struct zen_ray* ray = grab->ray;
   struct zen_data_device* data_device = ray->seat->data_device;
-  // FIXME: To handle the case seat->data_device is NULL if exists
 
   // TODO: To move icon
 
@@ -84,6 +76,7 @@ static void
 drag_grab_ray_button(struct zen_ray_grab* grab, const struct timespec* time,
     uint32_t button, uint32_t state)
 {
+  UNUSED(time);
   struct zen_ray* ray = grab->ray;
   struct zen_drag_grab* drag_grab = wl_container_of(grab, drag_grab, base);
   struct zen_data_device* data_device = ray->seat->data_device;

@@ -1,5 +1,5 @@
-#ifndef ZEN_CLIENT_ZPREVIEW_TYPES_H
-#define ZEN_CLIENT_ZPREVIEW_TYPES_H
+#ifndef ZEN_CLIENT_ZDND_TYPES_H
+#define ZEN_CLIENT_ZDND_TYPES_H
 
 #include <glm/glm.hpp>
 
@@ -14,4 +14,4 @@ struct Vertex {
   glm::vec3 norm;
 };
 
-#endif  //  ZEN_CLIENT_ZPREVIEW_TYPES_H
+#endif  //  ZEN_CLIENT_ZDND_TYPES_H

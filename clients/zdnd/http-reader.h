@@ -1,5 +1,5 @@
-#ifndef ZEN_CLIENT_ZPREVIEW_HTTP_READER_H
-#define ZEN_CLIENT_ZPREVIEW_HTTP_READER_H
+#ifndef ZEN_CLIENT_ZDND_HTTP_READER_H
+#define ZEN_CLIENT_ZDND_HTTP_READER_H
 
 #include <string>
 #include <vector>
@@ -20,4 +20,4 @@ class HttpReader : public Reader
   uint32_t cursor_;
 };
 
-#endif  //  ZEN_CLIENT_ZPREVIEW_HTTP_READER_H
+#endif  //  ZEN_CLIENT_ZDND_HTTP_READER_H

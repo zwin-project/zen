@@ -1,5 +1,5 @@
-#ifndef ZEN_CLIENT_ZPREVIEW_STL_VIEWER_H
-#define ZEN_CLIENT_ZPREVIEW_STL_VIEWER_H
+#ifndef ZEN_CLIENT_ZDND_STL_VIEWER_H
+#define ZEN_CLIENT_ZDND_STL_VIEWER_H
 
 #include <zukou.h>
 
@@ -21,4 +21,4 @@ class StlViewer : public ViewerInterface
   StlObject *object_;
 };
 
-#endif  //  ZEN_CLIENT_ZPREVIEW_STL_VIEWER_H
+#endif  //  ZEN_CLIENT_ZDND_STL_VIEWER_H

@@ -22,8 +22,6 @@ main()
   struct zen_seat *seat;
   int ret, exit = EXIT_FAILURE;
 
-  srand(0);
-
   display = wl_display_create();
   if (display == NULL) {
     zen_log("main: failed to create a display\n");

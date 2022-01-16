@@ -1,5 +1,3 @@
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 #include <libzen-compositor/libzen-compositor.h>
 #include <unistd.h>
 #include <wayland-server.h>
@@ -15,9 +13,11 @@ static void
 zen_data_offer_protocol_accept(struct wl_client *client,
     struct wl_resource *resource, uint32_t serial, const char *mime_type)
 {
+  UNUSED(client);
+  UNUSED(serial);
   struct zen_data_offer *data_offer = wl_resource_get_user_data(resource);
 
-  // TODO: 理解 /* Protect against untimely calls from older data offers */
+  // Protect against untimely calls from older data offers
   if (!data_offer->data_source ||
       data_offer != data_offer->data_source->data_offer)
     return;
@@ -29,6 +29,7 @@ static void
 zen_data_offer_protocol_receive(struct wl_client *client,
     struct wl_resource *resource, const char *mime_type, int32_t fd)
 {
+  UNUSED(client);
   struct zen_data_offer *data_offer = wl_resource_get_user_data(resource);
 
   if (data_offer->data_source &&
@@ -42,6 +43,7 @@ static void
 zen_data_offer_protocol_destroy(
     struct wl_client *client, struct wl_resource *resource)
 {
+  UNUSED(client);
   wl_resource_destroy(resource);
 }
 
@@ -49,6 +51,7 @@ static void
 zen_data_offer_protocol_finish(
     struct wl_client *client, struct wl_resource *resource)
 {
+  UNUSED(client);
   struct zen_data_offer *data_offer = wl_resource_get_user_data(resource);
 
   if (!data_offer->data_source ||
@@ -62,7 +65,12 @@ static void
 zen_data_offer_protocol_set_actions(struct wl_client *client,
     struct wl_resource *resource, uint32_t dnd_actions,
     uint32_t preferred_action)
-{}
+{
+  UNUSED(client);
+  UNUSED(resource);
+  UNUSED(dnd_actions);
+  UNUSED(preferred_action);
+}
 
 static const struct zgn_data_offer_interface data_offer_interface = {
     .accept = zen_data_offer_protocol_accept,

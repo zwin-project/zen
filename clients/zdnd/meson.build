@@ -1,5 +1,5 @@
 srcs_zdnd = [
-  'box.cc',
+  'dnd.cc',
   'main.cc',
   'stl-object.cc',
   'stl-viewer.cc',

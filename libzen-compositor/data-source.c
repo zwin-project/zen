@@ -1,5 +1,3 @@
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 #include <libzen-compositor/libzen-compositor.h>
 #include <string.h>
 #include <wayland-server.h>
@@ -62,6 +60,7 @@ static void
 zen_data_source_protocol_destroy(
     struct wl_client *client, struct wl_resource *resource)
 {
+  UNUSED(client);
   wl_resource_destroy(resource);
 }
 
@@ -69,7 +68,9 @@ static void
 zen_data_source_protocol_set_actions(struct wl_client *client,
     struct wl_resource *resource, uint32_t dnd_actions)
 {
-  // TODO
+  UNUSED(client);
+  UNUSED(resource);
+  UNUSED(dnd_actions);
 }
 
 struct zgn_data_source_interface data_source_interface = {
@@ -94,8 +95,7 @@ zen_data_source_handle_destroy(struct wl_resource *resource)
 }
 
 WL_EXPORT struct zen_data_source *
-zen_data_source_create(
-    struct wl_client *client, struct wl_resource *resource, uint32_t id)
+zen_data_source_create(struct wl_client *client, uint32_t id)
 {
   struct zen_data_source *data_source;
 

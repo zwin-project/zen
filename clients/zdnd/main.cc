@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 
-#include "box.h"
+#include "dnd.h"
 #include "zukou.h"
 
 void
@@ -16,6 +16,8 @@ main(int argc, char const *argv[])
   std::string path = "";
   zukou::App *app = new zukou::App();
 
+  app->Connect("zigen-0");
+
   if (argc >= 2) {
     path = std::string(argv[1]);
 
@@ -25,12 +27,9 @@ main(int argc, char const *argv[])
     }
   }
 
-  app->Connect("zigen-0");
+  ZDnd *zdnd = new ZDnd(app, path, 0.2f);
 
-  Box *box = new Box(app, path, 0.2f);
-  box->NextFrame();
-
-  if (app->Run())
+  if (zdnd->MainLoop())
     return EXIT_SUCCESS;
   else
     return EXIT_FAILURE;

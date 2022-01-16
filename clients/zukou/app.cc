@@ -428,40 +428,20 @@ App::RayButton(struct zgn_ray *ray, uint32_t serial, uint32_t time,
   v->RayButton(serial, time, button, state);
 }
 
-static void
-io_default_func(zukou::App *app)
-{
-  (void)app;
-}
-
 bool
 App::Run()
 {
-  zukou::App *app;
-  struct epoll_event ep[16];
-  int epoll_count;
   int ret;
   running_ = true;
-
-  this->epoll_fd = epoll_create1(EPOLL_CLOEXEC);
-  this->epoll_func = io_default_func;
-
   while (running_) {
-    while (wl_display_prepare_read(display()) != 0) {  // eventがあるかどうか
+    while (wl_display_prepare_read(display()) != 0) {
       if (errno != EAGAIN) return false;
       wl_display_dispatch_pending(display());
     }
-
-    ret = wl_display_flush(display());  // requestを送信
+    ret = wl_display_flush(display());
     if (ret == -1) return false;
-    wl_display_read_events(display());       // eventを取り出す
-    wl_display_dispatch_pending(display());  // eventを実行(->handlerで処理)
-
-    epoll_count = epoll_wait(this->epoll_fd, ep, 16, 0);
-    for (int i = 0; i < epoll_count; i++) {
-      app = (zukou::App *)ep[i].data.ptr;
-      app->epoll_func(this);
-    }
+    wl_display_read_events(display());
+    wl_display_dispatch_pending(display());
   }
   return true;
 }

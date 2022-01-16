@@ -1,11 +1,12 @@
-#ifndef ZEN_CLIENT_ZPREVIEW_STL_OBJECT_H
-#define ZEN_CLIENT_ZPREVIEW_STL_OBJECT_H
+#ifndef ZEN_CLIENT_ZDND_STL_OBJECT_H
+#define ZEN_CLIENT_ZDND_STL_OBJECT_H
 
 #include <zukou.h>
 
 #include <glm/glm.hpp>
 #include <vector>
 
+#include "dnd.h"
 #include "types.h"
 
 class StlObject : public zukou::CuboidWindow
@@ -29,4 +30,4 @@ class StlObject : public zukou::CuboidWindow
   glm::vec3 max_;
 };
 
-#endif  //  ZEN_CLIENT_ZPREVIEW_STL_OBJECT_H
+#endif  //  ZEN_CLIENT_ZDND_STL_OBJECT_H

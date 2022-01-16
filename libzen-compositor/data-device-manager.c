@@ -1,5 +1,3 @@
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 #include <libzen-compositor/libzen-compositor.h>
 #include <wayland-server.h>
 #include <zigen-server-protocol.h>
@@ -12,7 +10,7 @@ zgn_data_device_manager_protocol_create_data_source(
       wl_resource_get_user_data(resource);
   struct zen_data_source *data_source;
 
-  data_source = zen_data_source_create(client, resource, id);
+  data_source = zen_data_source_create(client, id);
   if (data_source == NULL) {
     wl_client_post_no_memory(client);
     zen_log("data device manager: failed to create a data source\n");
@@ -37,7 +35,7 @@ zgn_data_device_manager_protocol_get_data_device(struct wl_client *client,
     zen_data_device_add_resource(data_device, client, id);
     data_device_manager->data_device = data_device;
   } else {
-    // TODO: seatがない場合へ対処
+    // FIXME: the case seat doesn't exist
     zen_data_device_create_insert_resource(client, id);
   }
 }
@@ -64,8 +62,6 @@ zen_data_device_manager_bind(
 
   wl_resource_set_implementation(
       resource, &data_device_manager_interface, data_device_manager, NULL);
-  // TODO: zgn_data_device_managerでresourceのリストは保持してないので,
-  // resourceのdestroy handlerはいらない?
 }
 
 WL_EXPORT struct zen_data_device_manager *

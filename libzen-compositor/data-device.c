@@ -1,5 +1,3 @@
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 #include <libzen-compositor/libzen-compositor.h>
 #include <wayland-server.h>
 #include <zigen-server-protocol.h>
@@ -22,12 +20,9 @@ zen_data_device_data_source_destroy_handler(
 static void
 zen_data_device_icon_destroy_handler(struct wl_listener *listener, void *data)
 {
+  UNUSED(listener);
   UNUSED(data);
-  struct zen_data_device *data_device;
 
-  data_device = wl_container_of(listener, data_device, icon_destroy_listener);
-
-  UNUSED(data_device);
   // TODO: To handle icon destruction
 }
 
@@ -69,7 +64,7 @@ WL_EXPORT void
 zen_data_device_end_drag(struct zen_data_device *data_device)
 {
   zen_data_device_clear_focus(data_device);
-  if (data_device->seat == NULL && data_device->seat->ray != NULL)
+  if (data_device->seat != NULL && data_device->seat->ray != NULL)
     zen_ray_grab_end(data_device->seat->ray);
 }
 
@@ -154,6 +149,8 @@ zgn_data_device_protocol_start_drag(struct wl_client *client,
     struct wl_resource *origin_resource, struct wl_resource *icon_resource,
     uint32_t serial)
 {
+  UNUSED(client);
+  UNUSED(icon_resource);
   struct zen_data_device *data_device;
   struct zen_seat *seat;
   struct zen_ray *ray;
@@ -161,7 +158,6 @@ zgn_data_device_protocol_start_drag(struct wl_client *client,
       wl_resource_get_user_data(source_resource);
   struct zen_virtual_object *origin =
       wl_resource_get_user_data(origin_resource);
-  // struct zen_virtual_object *icon = wl_resource_get_user_data(icon_resource);
   struct zen_virtual_object *current_focus;
 
   data_device = wl_resource_get_user_data(resource);
@@ -176,8 +172,6 @@ zgn_data_device_protocol_start_drag(struct wl_client *client,
   current_focus = zen_weak_link_get_user_data(&ray->focus_virtual_object_link);
 
   if (!current_focus || current_focus != origin) return;
-
-  // FIXME: set icon role
 
   zen_data_device_start_drag(data_device, data_source, NULL);
 }
