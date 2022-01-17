@@ -176,8 +176,9 @@ ZDnd::MainLoop()
 }
 
 void
-ZDnd::Configure(uint32_t serial, glm::vec3 half_size)
+ZDnd::Configure(uint32_t serial, glm::vec3 half_size, glm::quat quaternion)
 {
+  (void)quaternion;
   zgn_cuboid_window_ack_configure(cuboid_window(), serial);
   half_size_ = half_size;
 

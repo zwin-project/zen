@@ -37,7 +37,7 @@ class ZDnd : public zukou::CuboidWindow
       enum zgn_ray_button_state state);
 
   bool MainLoop();
-  void Configure(uint32_t serial, glm::vec3 half_size);
+  void Configure(uint32_t serial, glm::vec3 half_size, glm::quat quaternion);
   void InitGL();
   void UpdateVertex();
 

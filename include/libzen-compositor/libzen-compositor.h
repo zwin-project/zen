@@ -231,9 +231,8 @@ int zen_data_device_add_resource(
 struct wl_resource* zen_data_device_create_insert_resource(
     struct wl_client* client, uint32_t id);
 
-void zen_data_device_data_offer(struct zen_data_device* data_device,
-    struct zen_data_offer* data_offer,
-    struct zen_virtual_object* virtual_object);
+void zen_data_device_data_offer(
+    struct zen_data_device* data_device, struct zen_data_offer* data_offer);
 
 void zen_data_device_enter(struct zen_data_device* data_device,
     struct zen_virtual_object* virtual_object, struct zen_ray* ray,

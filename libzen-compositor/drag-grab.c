@@ -44,7 +44,7 @@ drag_grab_ray_focus(struct zen_ray_grab* grab)
   data_offer = zen_data_offer_create(
       data_device->data_source, new_focus_data_device_resource);
   if (data_offer == NULL) return;
-  zen_data_device_data_offer(data_device, data_offer, new_focus);
+  zen_data_device_data_offer(data_device, data_offer);
 
   wl_array_for_each(type, &data_device->data_source->mime_type_list)
       zen_data_offer_offer(data_offer, *type);

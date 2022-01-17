@@ -25,8 +25,8 @@ class App
   void DataOfferSourceAction(
       struct zgn_data_offer *data_offer, uint32_t source_actions);
   void DataOfferAction(struct zgn_data_offer *data_offer, uint32_t dnd_action);
-  void DataDeviceDataOffer(struct zgn_data_device *data_device,
-      struct zgn_data_offer *id, struct zgn_virtual_object *virtual_object);
+  void DataDeviceDataOffer(
+      struct zgn_data_device *data_device, struct zgn_data_offer *id);
   void DataDeviceEnter(struct zgn_data_device *data_device, uint32_t serial,
       struct zgn_virtual_object *virtual_object, glm::vec3 origin,
       glm::vec3 direction, struct zgn_data_offer *id);

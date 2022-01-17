@@ -35,11 +35,11 @@ static const struct wl_registry_listener registry_listener = {
 };
 
 static void
-data_device_data_offer(void *data, struct zgn_data_device *data_device,
-    struct zgn_data_offer *id, struct zgn_virtual_object *virtual_object)
+data_device_data_offer(
+    void *data, struct zgn_data_device *data_device, struct zgn_data_offer *id)
 {
   App *app = (App *)data;
-  app->DataDeviceDataOffer(data_device, id, virtual_object);
+  app->DataDeviceDataOffer(data_device, id);
 }
 
 static void
@@ -298,11 +298,10 @@ App::DataOfferAction(struct zgn_data_offer *data_offer, uint32_t dnd_action)
 }
 
 void
-App::DataDeviceDataOffer(struct zgn_data_device *data_device,
-    struct zgn_data_offer *id, struct zgn_virtual_object *virtual_object)
+App::DataDeviceDataOffer(
+    struct zgn_data_device *data_device, struct zgn_data_offer *id)
 {
   (void)data_device;
-  data_offer_focus_virtual_object_ = virtual_object;
 
   data_offer_ = id;
   zgn_data_offer_add_listener(data_offer_, &data_offer_listener, this);

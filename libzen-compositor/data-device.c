@@ -69,12 +69,11 @@ zen_data_device_end_drag(struct zen_data_device *data_device)
 }
 
 WL_EXPORT void
-zen_data_device_data_offer(struct zen_data_device *data_device,
-    struct zen_data_offer *data_offer,
-    struct zen_virtual_object *virtual_object)
+zen_data_device_data_offer(
+    struct zen_data_device *data_device, struct zen_data_offer *data_offer)
 {
-  zgn_data_device_send_data_offer(data_device->focus_resource,
-      data_offer->resource, virtual_object->resource);
+  zgn_data_device_send_data_offer(
+      data_device->focus_resource, data_offer->resource);
 }
 
 WL_EXPORT void
