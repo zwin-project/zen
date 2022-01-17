@@ -3,6 +3,7 @@
 #include "dnd.h"
 
 #include <fcntl.h>
+#include <linux/input-event-codes.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/epoll.h>
@@ -439,16 +440,19 @@ ZDnd::RayButton(uint32_t serial, uint32_t time, uint32_t button,
     enum zgn_ray_button_state state)
 {
   (void)time;
-  (void)button;
 
   if (state == ZGN_RAY_BUTTON_STATE_PRESSED) {
-    this->data_source = zgn_data_device_manager_create_data_source(
-        app()->data_device_manager());
-    zgn_data_source_add_listener(
-        this->data_source, &data_source_listener, this);
-    zgn_data_source_offer(this->data_source, stl_mime_type);
+    if (button == BTN_RIGHT) {
+      zgn_cuboid_window_move(cuboid_window(), app()->seat(), serial);
+    } else if (button == BTN_LEFT) {
+      this->data_source = zgn_data_device_manager_create_data_source(
+          app()->data_device_manager());
+      zgn_data_source_add_listener(
+          this->data_source, &data_source_listener, this);
+      zgn_data_source_offer(this->data_source, stl_mime_type);
 
-    zgn_data_device_start_drag(app()->data_device(), this->data_source,
-        this->virtual_object(), NULL, serial);
+      zgn_data_device_start_drag(app()->data_device(), this->data_source,
+          this->virtual_object(), NULL, serial);
+    }
   }
 }
