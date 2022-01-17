@@ -49,6 +49,51 @@ VirtualObject::Frame(uint32_t time)
 }
 
 void
+VirtualObject::DataOfferOffer(const char *mime_type)
+{
+  (void)mime_type;
+}
+
+void
+VirtualObject::DataOfferSourceActions(uint32_t source_actions)
+{
+  (void)source_actions;
+}
+
+void
+VirtualObject::DataOfferAction(uint32_t dnd_action)
+{
+  (void)dnd_action;
+}
+
+void
+VirtualObject::DataDeviceEnter(uint32_t serial, glm::vec3 origin,
+    glm::vec3 direction, struct zgn_data_offer *id)
+{
+  (void)serial;
+  (void)origin;
+  (void)direction;
+  (void)id;
+}
+
+void
+VirtualObject::DataDeviceLeave()
+{}
+
+void
+VirtualObject::DataDeviceMotion(
+    uint32_t time, glm::vec3 origin, glm::vec3 direction)
+{
+  (void)time;
+  (void)origin;
+  (void)direction;
+}
+
+void
+VirtualObject::DataDeviceDrop()
+{}
+
+void
 VirtualObject::RayEnter(uint32_t serial, glm::vec3 origin, glm::vec3 direction)
 {
   (void)serial;

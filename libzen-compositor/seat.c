@@ -160,9 +160,12 @@ zen_seat_notify_ray_button(struct zen_seat* seat, const struct timespec* time,
   struct zen_ray* ray = seat->ray;
   if (ray == NULL) return;
 
-  if (state == ZGN_RAY_BUTTON_STATE_PRESSED)
+  if (state == ZGN_RAY_BUTTON_STATE_PRESSED) {
+    if (ray->button_count == 0) {
+      ray->grab_button = button;
+    }
     ray->button_count++;
-  else
+  } else
     ray->button_count--;
 
   ray->grab->interface->button(ray->grab, time, button, state);
@@ -202,6 +205,7 @@ zen_seat_create(struct zen_compositor* compositor)
 
   seat->global = global;
   seat->compositor = compositor;
+  seat->data_device = NULL;
   seat->ray = NULL;
   seat->ray_device_count = 0;
   wl_list_init(&seat->resource_list);

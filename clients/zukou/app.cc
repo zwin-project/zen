@@ -1,5 +1,7 @@
 #include <errno.h>
+#include <stdio.h>
 #include <string.h>
+#include <sys/epoll.h>
 #include <zigen-client-protocol.h>
 #include <zigen-opengl-client-protocol.h>
 #include <zukou.h>
@@ -30,6 +32,59 @@ global_registry_remover(void *data, struct wl_registry *registry, uint32_t id)
 static const struct wl_registry_listener registry_listener = {
     global_registry_handler,
     global_registry_remover,
+};
+
+static void
+data_device_data_offer(
+    void *data, struct zgn_data_device *data_device, struct zgn_data_offer *id)
+{
+  App *app = (App *)data;
+  app->DataDeviceDataOffer(data_device, id);
+}
+
+static void
+data_device_enter(void *data, struct zgn_data_device *data_device,
+    uint32_t serial, struct zgn_virtual_object *virtual_object,
+    struct wl_array *origin, struct wl_array *direction,
+    struct zgn_data_offer *id)
+{
+  App *app = (App *)data;
+  glm::vec3 origin_vec = glm_vec3_from_wl_array(origin);
+  glm::vec3 direction_vec = glm_vec3_from_wl_array(direction);
+  app->DataDeviceEnter(
+      data_device, serial, virtual_object, origin_vec, direction_vec, id);
+}
+
+static void
+data_device_leave(void *data, struct zgn_data_device *data_device)
+{
+  App *app = (App *)data;
+  app->DataDeviceLeave(data_device);
+}
+
+static void
+data_device_motion(void *data, struct zgn_data_device *data_device,
+    uint32_t time, struct wl_array *origin, struct wl_array *direction)
+{
+  App *app = (App *)data;
+  glm::vec3 origin_vec = glm_vec3_from_wl_array(origin);
+  glm::vec3 direction_vec = glm_vec3_from_wl_array(direction);
+  app->DataDeviceMotion(data_device, time, origin_vec, direction_vec);
+}
+
+static void
+data_device_drop(void *data, struct zgn_data_device *data_device)
+{
+  App *app = (App *)data;
+  app->DataDeviceDrop(data_device);
+}
+
+static const struct zgn_data_device_listener data_device_listener = {
+    data_device_data_offer,
+    data_device_enter,
+    data_device_leave,
+    data_device_motion,
+    data_device_drop,
 };
 
 static void
@@ -136,10 +191,19 @@ App::GlobalRegistryHandler(struct wl_registry *registry, uint32_t id,
   if (strcmp(interface, "zgn_compositor") == 0) {
     compositor_ = (zgn_compositor *)wl_registry_bind(
         registry, id, &zgn_compositor_interface, version);
+  } else if (strcmp(interface, "zgn_data_device_manager") == 0) {
+    data_device_manager_ = (zgn_data_device_manager *)wl_registry_bind(
+        registry, id, &zgn_data_device_manager_interface, version);
   } else if (strcmp(interface, "zgn_seat") == 0) {
     seat_ = (zgn_seat *)wl_registry_bind(
         registry, id, &zgn_seat_interface, version);
     zgn_seat_add_listener(seat_, &seat_listener, this);
+
+    if (data_device_manager_ == NULL || data_device_ != NULL) return;
+
+    data_device_ =
+        zgn_data_device_manager_get_data_device(data_device_manager_, seat_);
+    zgn_data_device_add_listener(data_device_, &data_device_listener, this);
   } else if (strcmp(interface, "wl_shm") == 0) {
     shm_ = (wl_shm *)wl_registry_bind(registry, id, &wl_shm_interface, version);
     wl_shm_add_listener(shm_, &shm_listener, this);
@@ -164,6 +228,136 @@ App::ShmFormat(struct wl_shm *wl_shm, uint32_t format)
 {
   (void)wl_shm;
   (void)format;
+}
+
+void
+data_offer_offer(
+    void *data, struct zgn_data_offer *data_offer, const char *mime_type)
+{
+  App *app = (App *)data;
+  app->DataOfferOffer(data_offer, mime_type);
+}
+
+void
+data_offer_source_actions(
+    void *data, struct zgn_data_offer *data_offer, uint32_t source_actions)
+{
+  App *app = (App *)data;
+  app->DataOfferSourceAction(data_offer, source_actions);
+}
+
+void
+data_offer_action(
+    void *data, struct zgn_data_offer *data_offer, uint32_t dnd_action)
+{
+  App *app = (App *)data;
+  app->DataOfferAction(data_offer, dnd_action);
+}
+
+static const struct zgn_data_offer_listener data_offer_listener = {
+    data_offer_offer,
+    data_offer_source_actions,
+    data_offer_action,
+};
+
+void
+App::DataOfferOffer(struct zgn_data_offer *data_offer, const char *mime_type)
+{
+  (void)data_offer;
+  if (data_offer_focus_virtual_object_ == NULL) return;
+
+  VirtualObject *v = (VirtualObject *)wl_proxy_get_user_data(
+      (wl_proxy *)data_offer_focus_virtual_object_);
+
+  v->DataOfferOffer(mime_type);
+}
+
+void
+App::DataOfferSourceAction(
+    struct zgn_data_offer *data_offer, uint32_t source_actions)
+{
+  (void)data_offer;
+  if (data_offer_focus_virtual_object_ == NULL) return;
+
+  VirtualObject *v = (VirtualObject *)wl_proxy_get_user_data(
+      (wl_proxy *)data_offer_focus_virtual_object_);
+
+  v->DataOfferSourceActions(source_actions);
+}
+
+void
+App::DataOfferAction(struct zgn_data_offer *data_offer, uint32_t dnd_action)
+{
+  (void)data_offer;
+  if (data_offer_focus_virtual_object_ == NULL) return;
+
+  VirtualObject *v = (VirtualObject *)wl_proxy_get_user_data(
+      (wl_proxy *)data_offer_focus_virtual_object_);
+
+  v->DataOfferSourceActions(dnd_action);
+}
+
+void
+App::DataDeviceDataOffer(
+    struct zgn_data_device *data_device, struct zgn_data_offer *id)
+{
+  (void)data_device;
+
+  data_offer_ = id;
+  zgn_data_offer_add_listener(data_offer_, &data_offer_listener, this);
+}
+
+void
+App::DataDeviceEnter(struct zgn_data_device *data_device, uint32_t serial,
+    struct zgn_virtual_object *virtual_object, glm::vec3 origin,
+    glm::vec3 direction, struct zgn_data_offer *id)
+{
+  (void)data_device;
+  data_device_focus_virtual_object_ = virtual_object;
+
+  VirtualObject *v =
+      (VirtualObject *)wl_proxy_get_user_data((wl_proxy *)virtual_object);
+
+  v->DataDeviceEnter(serial, origin, direction, id);
+}
+
+void
+App::DataDeviceLeave(struct zgn_data_device *data_device)
+{
+  (void)data_device;
+  if (data_device_focus_virtual_object_ == NULL) return;
+
+  VirtualObject *v = (VirtualObject *)wl_proxy_get_user_data(
+      (wl_proxy *)data_device_focus_virtual_object_);
+
+  v->DataDeviceLeave();
+
+  data_device_focus_virtual_object_ = NULL;
+}
+
+void
+App::DataDeviceMotion(struct zgn_data_device *data_device, uint32_t time,
+    glm::vec3 origin, glm::vec3 direction)
+{
+  (void)data_device;
+  if (data_device_focus_virtual_object_ == NULL) return;
+
+  VirtualObject *v = (VirtualObject *)wl_proxy_get_user_data(
+      (wl_proxy *)data_device_focus_virtual_object_);
+
+  v->DataDeviceMotion(time, origin, direction);
+}
+
+void
+App::DataDeviceDrop(struct zgn_data_device *data_device)
+{
+  (void)data_device;
+  if (data_device_focus_virtual_object_ == NULL) return;
+
+  VirtualObject *v = (VirtualObject *)wl_proxy_get_user_data(
+      (wl_proxy *)data_device_focus_virtual_object_);
+
+  v->DataDeviceDrop();
 }
 
 void

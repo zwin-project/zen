@@ -40,6 +40,40 @@ struct zen_compositor {
   uint32_t repaint_window_msec;
 };
 
+struct zen_data_offer {
+  struct wl_resource* resource;
+  struct zen_data_source* data_source;
+
+  struct wl_listener data_source_destroy_listener;
+};
+
+struct zen_data_source {
+  struct wl_resource* resource;
+  struct wl_array mime_type_list;
+  struct zen_data_offer* data_offer;
+
+  struct wl_signal destroy_signal;
+};
+
+struct zen_data_device {
+  struct zen_seat* seat;
+  struct wl_list resource_list;
+
+  struct zen_data_source* data_source;
+
+  struct wl_resource* focus_resource;
+  struct zen_weak_link focus_virtual_object_link;
+
+  struct wl_listener data_source_destroy_listener;
+  struct wl_listener icon_destroy_listener;
+};
+
+struct zen_data_device_manager {
+  struct wl_display* display;
+  struct wl_global* global;
+  struct zen_data_device* data_device;
+};
+
 struct zen_virtual_object {
   struct zen_compositor* compositor;
   struct wl_resource* resource;
@@ -86,6 +120,7 @@ struct zen_ray {
   struct zen_ray_grab* grab;
   struct zen_ray_grab default_grab;
   uint32_t button_count;
+  uint32_t grab_button;
   uint32_t grab_serial;
 
   struct zen_weak_link focus_virtual_object_link;
@@ -110,6 +145,7 @@ struct zen_ray {
 struct zen_seat {
   struct wl_global* global;
   struct zen_compositor* compositor;
+  struct zen_data_device* data_device;
 
   struct zen_ray* ray;
   int ray_device_count;
@@ -162,7 +198,68 @@ int zen_compositor_load_backend(struct zen_compositor* compositor);
 void zen_compositor_finish_frame(
     struct zen_compositor* compositor, struct timespec next_repaint);
 
+// methods of zen_data_offer
+struct zen_data_offer* zen_data_offer_create(
+    struct zen_data_source* data_source, struct wl_resource* target);
+
+void zen_data_offer_offer(
+    struct zen_data_offer* data_offer, const char* mime_type);
+
+// methods of zen_data_source
+struct zen_data_source* zen_data_source_create(
+    struct wl_client* client, uint32_t id);
+
+void zen_data_source_target(
+    struct zen_data_source* data_source, const char* mime_type);
+
+void zen_data_source_send(
+    struct zen_data_source* data_source, const char* mime_type, int32_t fd);
+
+void zen_data_source_cancelled(struct zen_data_source* data_source);
+
+void zen_data_source_dnd_drop_performed(struct zen_data_source* data_source);
+
+void zen_data_source_dnd_finished(struct zen_data_source* data_source);
+
+// methods of zen_data_device
+struct zen_data_device* zen_data_device_ensure(
+    struct wl_client* client, struct zen_seat* seat);
+
+void zen_data_device_destroy(struct zen_data_device* data_device);
+
+int zen_data_device_add_resource(
+    struct zen_data_device* data_device, struct wl_client* client, uint32_t id);
+
+struct wl_resource* zen_data_device_create_insert_resource(
+    struct wl_client* client, uint32_t id);
+
+void zen_data_device_data_offer(
+    struct zen_data_device* data_device, struct zen_data_offer* data_offer);
+
+void zen_data_device_enter(struct zen_data_device* data_device,
+    struct zen_virtual_object* virtual_object, struct zen_ray* ray,
+    struct zen_data_offer* data_offer);
+
+void zen_data_device_leave(struct zen_data_device* data_device);
+
+void zen_data_device_motion(struct zen_data_device* data_device,
+    struct zen_ray* ray, const struct timespec* time);
+
+void zen_data_device_drop(struct zen_data_device* data_device);
+
+void zen_data_device_clear_focus(struct zen_data_device* data_device);
+
+void zen_data_device_end_drag(struct zen_data_device* data_device);
+
+// methods of zen_data_device_manager
+struct zen_data_device_manager* zen_data_device_manager_create(
+    struct wl_display* display);
+
+void zen_data_device_manager_destroy(
+    struct zen_data_device_manager* data_device_manager);
+
 // methods of zen_ray
+void zen_ray_clear_focus(struct zen_ray* ray);
 
 void zen_ray_grab_start(struct zen_ray* ray, struct zen_ray_grab* grab);
 

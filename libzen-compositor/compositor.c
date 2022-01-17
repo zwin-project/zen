@@ -16,7 +16,7 @@ zen_compositor_protocol_create_virtual_object(
 
   virtual_object = zen_virtual_object_create(client, id, compositor);
   if (virtual_object == NULL) {
-    zen_log("compositor: failed to create virtual object\n");
+    zen_log("compositor: failed to create a virtual object\n");
   }
 }
 

@@ -21,6 +21,19 @@ class App
       const char *interface, uint32_t version);
   void GlobalRegistryRemover(struct wl_registry *registry, uint32_t id);
   void ShmFormat(struct wl_shm *wl_shm, uint32_t format);
+  void DataOfferOffer(struct zgn_data_offer *data_offer, const char *mime_type);
+  void DataOfferSourceAction(
+      struct zgn_data_offer *data_offer, uint32_t source_actions);
+  void DataOfferAction(struct zgn_data_offer *data_offer, uint32_t dnd_action);
+  void DataDeviceDataOffer(
+      struct zgn_data_device *data_device, struct zgn_data_offer *id);
+  void DataDeviceEnter(struct zgn_data_device *data_device, uint32_t serial,
+      struct zgn_virtual_object *virtual_object, glm::vec3 origin,
+      glm::vec3 direction, struct zgn_data_offer *id);
+  void DataDeviceLeave(struct zgn_data_device *data_device);
+  void DataDeviceMotion(struct zgn_data_device *data_device, uint32_t time,
+      glm::vec3 origin, glm::vec3 direction);
+  void DataDeviceDrop(struct zgn_data_device *data_device);
   void Capabilities(struct zgn_seat *seat, uint32_t capability);
   void RayEnter(struct zgn_ray *ray, uint32_t serial,
       struct zgn_virtual_object *virtual_object, glm::vec3 origin,
@@ -36,6 +49,9 @@ class App
   inline struct wl_display *display();
   inline struct wl_registry *registry();
   inline struct zgn_compositor *compositor();
+  inline struct zgn_data_device_manager *data_device_manager();
+  inline struct zgn_data_device *data_device();
+  inline struct zgn_data_offer *data_offer();
   inline struct zgn_seat *seat();
   inline struct zgn_shell *shell();
   inline struct wl_shm *shm();
@@ -45,6 +61,9 @@ class App
   struct wl_display *display_;
   struct wl_registry *registry_;
   struct zgn_compositor *compositor_;
+  struct zgn_data_device_manager *data_device_manager_;
+  struct zgn_data_device *data_device_;
+  struct zgn_data_offer *data_offer_;  // nullable
   struct zgn_seat *seat_;
   struct zgn_shell *shell_;
   struct wl_shm *shm_;
@@ -53,6 +72,8 @@ class App
   bool running_ = false;
 
   struct zgn_virtual_object *ray_focus_virtual_object_;
+  struct zgn_virtual_object *data_device_focus_virtual_object_;
+  struct zgn_virtual_object *data_offer_focus_virtual_object_;
 };
 
 inline struct wl_display *
@@ -71,6 +92,24 @@ inline struct zgn_compositor *
 App::compositor()
 {
   return compositor_;
+}
+
+inline struct zgn_data_device_manager *
+App::data_device_manager()
+{
+  return data_device_manager_;
+}
+
+inline struct zgn_data_device *
+App::data_device()
+{
+  return data_device_;
+}
+
+inline struct zgn_data_offer *
+App::data_offer()
+{
+  return data_offer_;
 }
 
 inline struct zgn_seat *
@@ -132,6 +171,15 @@ class VirtualObject
   void NextFrame();
   void Commit();
   virtual void Frame(uint32_t time);
+  virtual void DataOfferOffer(const char *mime_type);
+  virtual void DataOfferSourceActions(uint32_t source_actions);
+  virtual void DataOfferAction(uint32_t dnd_action);
+  virtual void DataDeviceEnter(uint32_t serial, glm::vec3 origin,
+      glm::vec3 direction, struct zgn_data_offer *id);
+  virtual void DataDeviceLeave();
+  virtual void DataDeviceMotion(
+      uint32_t time, glm::vec3 origin, glm::vec3 direction);
+  virtual void DataDeviceDrop();
   virtual void RayEnter(uint32_t serial, glm::vec3 origin, glm::vec3 direction);
   virtual void RayLeave(uint32_t serial);
   virtual void RayMotion(uint32_t time, glm::vec3 origin, glm::vec3 direction);
