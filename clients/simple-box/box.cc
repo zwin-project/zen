@@ -1,12 +1,15 @@
 #include "box.h"
 
+#include <linux/input-event-codes.h>
 #include <string.h>
 #include <time.h>
 #include <zukou.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/intersect.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtx/transform.hpp>
@@ -17,17 +20,27 @@ extern const char *vertex_shader;
 extern const char *fragment_shader;
 extern const char *texture_fragment_shader;
 
-Box::Box(zukou::App *app, float length)
+Box::Box(zukou::App *app, float length) : Box(app, length, false) {}
+
+Box::Box(zukou::App *app, float length, bool print_fps)
     : CuboidWindow(app, glm::vec3(length * 1.8))
 {
   srand(time(0));
+  Vertex points[8];
+
+  fps_.show = print_fps;
+  if (fps_.show) {
+    timespec_get(&fps_.prev, TIME_UTC);
+    fps_.count = 0;
+  }
 
   length_ = length;
   delta_theta_ = 0;
   delta_phi_ = 0;
   rotate_ = glm::mat4(1.0f);
   blue_ = UINT8_MAX;
-  button_pressed_ = false;
+  button_.right = false;
+  button_.left = false;
 
   vertex_buffer_ = new zukou::OpenGLVertexBuffer(app, sizeof(Vertex) * 8);
 
@@ -75,11 +88,11 @@ Box::Box(zukou::App *app, float length)
   for (int x = -1; x < 2; x += 2) {
     for (int y = -1; y < 2; y += 2) {
       for (int z = -1; z < 2; z += 2) {
-        points_[i].p.x = length_ * x;
-        points_[i].p.y = length_ * y;
-        points_[i].p.z = length_ * z;
-        points_[i].u = x < 0 ? 1 : 0;
-        points_[i].v = y < 0 ? 1 : 0;
+        points[i].p.x = length_ * x;
+        points[i].p.y = length_ * y;
+        points[i].p.z = length_ * z;
+        points[i].u = x < 0 ? 0 : 1;
+        points[i].v = y < 0 ? 0 : 1;
         i++;
       }
     }
@@ -106,7 +119,7 @@ Box::Box(zukou::App *app, float length)
 
   {
     Vertex *vertices = (Vertex *)vertex_buffer_->data();
-    memcpy(vertices, points_, sizeof(Vertex) * 8);
+    memcpy(vertices, points, sizeof(Vertex) * 8);
     vertex_buffer_->BufferUpdated();
     frame_component_->Attach(vertex_buffer_);
     front_component_->Attach(vertex_buffer_);
@@ -129,13 +142,19 @@ Box::Frame(uint32_t time)
   rotate_ =
       glm::rotate(rotate_, delta_phi_ * 0.001f, glm::vec3(0.0f, 1.0, 0.0f));
 
-  frame_shader_->SetUniformVariable("rotate", rotate_);
-  front_shader_->SetUniformVariable("rotate", rotate_);
+  frame_shader_->SetUniformVariable(
+      "rotate", glm::toMat4(quaternion_) * rotate_);
+  front_shader_->SetUniformVariable(
+      "rotate", glm::toMat4(quaternion_) * rotate_);
 
   frame_component_->Attach(frame_shader_);
   front_component_->Attach(front_shader_);
 
+  if (button_.right) this->RotateWithRay();
+
   this->DrawTexture();
+
+  this->PrintFps();
 
   this->NextFrame();
 }
@@ -154,6 +173,8 @@ Box::RayLeave(uint32_t serial)
 {
   (void)serial;
   ray_focus_ = false;
+  button_.right = false;
+  button_.left = false;
 }
 
 void
@@ -171,12 +192,28 @@ Box::RayButton(uint32_t serial, uint32_t time, uint32_t button,
     enum zgn_ray_button_state state)
 {
   (void)time;
-  (void)button;
-  if (state == ZGN_RAY_BUTTON_STATE_PRESSED) {
-    zgn_cuboid_window_move(cuboid_window(), app()->seat(), serial);
-    button_pressed_ = true;
-  } else {
-    button_pressed_ = false;
+  switch (button) {
+    case BTN_LEFT:
+      if (state == ZGN_RAY_BUTTON_STATE_PRESSED) {
+        zgn_cuboid_window_move(cuboid_window(), app()->seat(), serial);
+        button_.left = true;
+      } else {
+        button_.left = false;
+      }
+      break;
+
+    case BTN_RIGHT:
+      if (state == ZGN_RAY_BUTTON_STATE_PRESSED) {
+        this->RotateWithRay();
+        button_.right = true;
+      } else {
+        button_.right = false;
+      }
+      break;
+
+    case BTN_MIDDLE:
+      this->Rotate(glm::quat(glm::vec3(0.0f, 0.0f, 0.0f)));
+      break;
   }
 }
 
@@ -190,42 +227,70 @@ Box::DrawTexture()
   Vertex *vertices = (Vertex *)vertex_buffer_->data();
 
   if (ray_focus_ &&
-      glm::intersectRayTriangle(ray_.origin, ray_.direction, vertices[1].p,
-          vertices[3].p, vertices[5].p, position, distance)) {
+      glm::intersectRayTriangle(ray_.origin, ray_.direction,
+          glm::vec3(quaternion_ * (rotate_ * glm::vec4(vertices[1].p, 1))),
+          glm::vec3(quaternion_ * (rotate_ * glm::vec4(vertices[3].p, 1))),
+          glm::vec3(quaternion_ * (rotate_ * glm::vec4(vertices[5].p, 1))),
+          position, distance)) {
     intersected = true;
   }
 
   if (ray_focus_ && !intersected &&
-      glm::intersectRayTriangle(ray_.origin, ray_.direction, vertices[7].p,
-          vertices[5].p, vertices[3].p, position, distance)) {
+      glm::intersectRayTriangle(ray_.origin, ray_.direction,
+          glm::vec3(quaternion_ * (rotate_ * glm::vec4(vertices[7].p, 1))),
+          glm::vec3(quaternion_ * (rotate_ * glm::vec4(vertices[5].p, 1))),
+          glm::vec3(quaternion_ * (rotate_ * glm::vec4(vertices[3].p, 1))),
+          position, distance)) {
     position = one - position;
     intersected = true;
   }
 
-  uint8_t cursor_color = button_pressed_ ? 0 : UINT8_MAX;
-
   zukou::ColorBGRA *pixel = (zukou::ColorBGRA *)texture_->data();
   for (int x = 0; x < 256; x++) {
     for (int y = 0; y < 256; y++) {
-      if (intersected && -8 < position.x * UINT8_MAX - x &&
-          position.x * UINT8_MAX - x < 8 && -8 < position.y * UINT8_MAX - y &&
-          position.y * UINT8_MAX - y < 8) {
-        pixel->a = cursor_color;
-        pixel->r = cursor_color;
-        pixel->g = cursor_color;
-        pixel->b = cursor_color;
-      } else {
+      if (!intersected)
         pixel->a = UINT8_MAX;
-        pixel->r = x;
-        pixel->g = y;
-        pixel->b = blue_;
+      else {
+        int r2 = (position.x * UINT8_MAX - x) * (position.x * UINT8_MAX - x) +
+                 (position.y * UINT8_MAX - y) * (position.y * UINT8_MAX - y);
+        pixel->a = r2 < 1024 ? 0 : UINT8_MAX;
       }
+      pixel->r = x;
+      pixel->g = y;
+      pixel->b = blue_;
       pixel++;
     }
   }
 
   texture_->BufferUpdated();
   front_component_->Attach(texture_);
+}
+
+void
+Box::RotateWithRay()
+{
+  glm::vec3 model_direction = -glm::normalize(ray_.origin);
+  glm::vec3 axis = glm::cross(ray_.direction, model_direction);
+  float force = M_PI * glm::length(axis) / 30.0f;
+  glm::quat delta = glm::angleAxis(force, glm::normalize(axis));
+  this->Rotate(delta * this->quaternion());
+}
+
+void
+Box::PrintFps()
+{
+  struct timespec now;
+  if (!fps_.show) return;
+
+  fps_.count++;
+  timespec_get(&now, TIME_UTC);
+  if ((now.tv_sec - fps_.prev.tv_sec) * 1000000000 + now.tv_nsec -
+          fps_.prev.tv_nsec >
+      1000000000) {
+    std::cout << fps_.count << " fps" << std::endl;
+    fps_.count = 0;
+    fps_.prev = now;
+  }
 }
 
 const char *vertex_shader =

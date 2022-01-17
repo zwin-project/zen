@@ -50,8 +50,10 @@ zen_opengl_cuboid_window_render_item_render(
     struct zen_opengl_renderer_camera* camera)
 {
   glLineWidth(render_item->line_width);
-  mat4 mvp;
-  glm_mat4_copy(render_item->cuboid_window->virtual_object->model_matrix, mvp);
+  mat4 mvp, rotate;
+  glm_quat_mat4(render_item->cuboid_window->quaternion, rotate);
+  glm_mat4_mul(
+      render_item->cuboid_window->virtual_object->model_matrix, rotate, mvp);
   glm_mat4_mul(camera->view_matrix, mvp, mvp);
   glm_mat4_mul(camera->projection_matrix, mvp, mvp);
 

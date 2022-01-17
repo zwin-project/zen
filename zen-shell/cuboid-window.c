@@ -56,10 +56,29 @@ zen_cuboid_window_protocol_move(struct wl_client *client,
   cuboid_window->shell->interface->move(cuboid_window, seat, serial);
 }
 
+static void
+zen_cuboid_window_protocol_rotate(struct wl_client *client,
+    struct wl_resource *resource, struct wl_array *quaternion_array)
+{
+  UNUSED(client);
+  struct zen_cuboid_window *cuboid_window;
+  versor quaternion;
+
+  if (glm_versor_from_wl_array(quaternion, quaternion_array) != 0) {
+    wl_client_post_implementation_error(client, "quaternion is not vec4");
+    return;
+  }
+
+  cuboid_window = wl_resource_get_user_data(resource);
+
+  cuboid_window->shell->interface->rotate(cuboid_window, quaternion);
+}
+
 static const struct zgn_cuboid_window_interface cuboid_window_interface = {
     .destroy = zen_cuboid_window_protocol_destroy,
     .ack_configure = zen_cuboid_window_protocol_ack_configure,
     .move = zen_cuboid_window_protocol_move,
+    .rotate = zen_cuboid_window_protocol_rotate,
 };
 
 static void
@@ -103,7 +122,6 @@ zen_cuboid_window_create(struct wl_client *client, uint32_t id,
   struct wl_resource *resource;
   struct zen_render_item *render_item;
   struct zen_shell *shell = wl_resource_get_user_data(shell_resource);
-  vec3 zero = GLM_VEC3_ZERO_INIT;
 
   if (virtual_object->role_object != NULL) {
     wl_resource_post_error(shell_resource, ZGN_SHELL_ERROR_ROLE,
@@ -154,7 +172,8 @@ zen_cuboid_window_create(struct wl_client *client, uint32_t id,
   cuboid_window->shell = shell;
   cuboid_window->resource = resource;
   cuboid_window->virtual_object = virtual_object;
-  glm_vec3_copy(zero, cuboid_window->half_size);
+  glm_vec3_zero(cuboid_window->half_size);
+  glm_quat_identity(cuboid_window->quaternion);
 
   wl_list_insert(&shell->cuboid_window_list, &cuboid_window->link);
 
@@ -195,22 +214,25 @@ zen_cuboid_window_destroy(struct zen_cuboid_window *cuboid_window)
 
 WL_EXPORT void
 zen_cuboid_window_configure(
-    struct zen_cuboid_window *cuboid_window, vec3 half_size)
+    struct zen_cuboid_window *cuboid_window, vec3 half_size, versor quaternion)
 {
-  struct wl_array half_size_array;
+  struct wl_array half_size_array, quaternion_array;
 
   // TODO: apply configuration after receiving ack_configure
   glm_vec3_copy(half_size, cuboid_window->half_size);
+  glm_quat_copy(quaternion, cuboid_window->quaternion);
 
   uint32_t serial =
       wl_display_next_serial(cuboid_window->shell->compositor->display);
 
   wl_array_init(&half_size_array);
+  wl_array_init(&quaternion_array);
 
   glm_vec3_to_wl_array(cuboid_window->half_size, &half_size_array);
+  glm_versor_to_wl_array(quaternion, &quaternion_array);
 
   zgn_cuboid_window_send_configure(
-      cuboid_window->resource, serial, &half_size_array);
+      cuboid_window->resource, serial, &half_size_array, &quaternion_array);
 
   wl_array_release(&half_size_array);
 }

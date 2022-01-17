@@ -32,21 +32,6 @@
   {  0.0f,   0.0f, -0.002000002000002f,  0.0f}}
 // clang-format on
 
-struct glfw_output {
-  struct zen_output base;
-  struct zen_compositor* compositor;
-  struct zen_opengl_renderer* renderer;
-
-  GLFWwindow* window;
-  uint32_t width;
-  uint32_t height;
-
-  uint32_t refresh;  // milli hz
-  struct wl_event_source* swap_timer;
-
-  struct zen_opengl_renderer_camera eyes[2];  // [left, right]
-};
-
 static void
 glfw_output_set_window_size(
     struct glfw_output* output, uint32_t width, uint32_t height)

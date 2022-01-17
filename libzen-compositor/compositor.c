@@ -51,8 +51,9 @@ repaint_timer_handler(void *data)
 
   frame_time_msec = timespec_to_msec(&output->frame_time);
 
-  output->repaint(output);
   wl_signal_emit(&compositor->frame_signal, &frame_time_msec);
+  wl_display_flush_clients(compositor->display);
+  output->repaint(output);
   return 0;
 }
 

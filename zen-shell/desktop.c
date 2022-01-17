@@ -2,6 +2,11 @@
 
 #include <libzen-compositor/libzen-compositor.h>
 #include <zigen-server-protocol.h>
+#include <zigen-shell-server-protocol.h>
+
+#include "cuboid-window.h"
+
+static void move_grab_ray_cancel(struct zen_ray_grab *grab);
 
 struct zen_desktop_move_grab {
   struct zen_ray_grab base;
@@ -58,8 +63,7 @@ move_grab_ray_button(struct zen_ray_grab *grab, const struct timespec *time,
       wl_container_of(grab, move_grab, base);
 
   if (grab->ray->button_count == 0 && state == ZGN_RAY_BUTTON_STATE_RELEASED) {
-    zen_ray_grab_end(grab->ray);
-    zen_desktop_move_grab_destroy(move_grab);
+    move_grab_ray_cancel(grab);
   }
 }
 
@@ -68,8 +72,30 @@ move_grab_ray_cancel(struct zen_ray_grab *grab)
 {
   struct zen_desktop_move_grab *move_grab =
       wl_container_of(grab, move_grab, base);
+  struct zen_cuboid_window *cuboid_window =
+      zen_weak_link_get_user_data(&move_grab->cuboid_window_link);
 
   zen_ray_grab_end(grab->ray);
+
+  if (cuboid_window) {
+    vec3 position;
+    mat4 model_inv;
+    struct wl_array position_array;
+    struct zen_backend *backend = grab->ray->seat->compositor->backend;
+
+    backend->get_head_position(backend, position);
+    glm_mat4_inv(cuboid_window->virtual_object->model_matrix, model_inv);
+    glm_mat4_mulv3(model_inv, position, 1, position);
+    glm_vec3_normalize(position);
+
+    wl_array_init(&position_array);
+    glm_vec3_to_wl_array(position, &position_array);
+
+    zgn_cuboid_window_send_moved(cuboid_window->resource, &position_array);
+
+    wl_array_release(&position_array);
+  }
+
   zen_desktop_move_grab_destroy(move_grab);
 }
 
@@ -129,6 +155,20 @@ desktop_cuboid_window_move(struct zen_cuboid_window *cuboid_window,
   }
 }
 
+static void
+desktop_cuboid_window_rotate(
+    struct zen_cuboid_window *cuboid_window, versor quaternion)
+{
+  struct zen_ray *ray = cuboid_window->shell->compositor->seat->ray;
+  zen_cuboid_window_configure(
+      cuboid_window, cuboid_window->half_size, quaternion);
+
+  if (ray == NULL) return;
+
+  ray->grab->interface->focus(ray->grab);
+}
+
 WL_EXPORT struct zen_desktop_api zen_desktop_shell_interface = {
     .move = desktop_cuboid_window_move,
+    .rotate = desktop_cuboid_window_rotate,
 };

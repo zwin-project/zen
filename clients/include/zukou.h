@@ -7,7 +7,7 @@
 #include <zigen-shell-client-protocol.h>
 
 #include <glm/glm.hpp>
-#include <vector>
+#include <glm/gtc/quaternion.hpp>
 
 namespace zukou {
 class App
@@ -217,14 +217,20 @@ class CuboidWindow : public VirtualObject
 {
  public:
   CuboidWindow(App *app, glm::vec3 half_size);
+  CuboidWindow(App *app, glm::vec3 half_size, glm::quat quaternion);
   virtual ~CuboidWindow();
-  virtual void Configure(uint32_t serial, glm::vec3 half_size);
+  virtual void Configure(
+      uint32_t serial, glm::vec3 half_size, glm::quat quaternion);
+  virtual void Moved(glm::vec3 face_direction);
+  void Rotate(glm::quat quaternion);
   struct zgn_cuboid_window *cuboid_window();
   glm::vec3 half_size();
+  glm::quat quaternion();
 
  protected:
   struct zgn_cuboid_window *cuboid_window_;
   glm::vec3 half_size_;
+  glm::quat quaternion_;
 };
 
 inline struct zgn_cuboid_window *
@@ -237,6 +243,12 @@ inline glm::vec3
 CuboidWindow::half_size()
 {
   return half_size_;
+}
+
+inline glm::quat
+CuboidWindow::quaternion()
+{
+  return quaternion_;
 }
 
 class OpenGLTexture : public Buffer
@@ -375,6 +387,10 @@ void glm_vec3_to_wl_array(glm::vec3 v, struct wl_array *array);
 void glm_vec4_to_wl_array(glm::vec4 v, struct wl_array *array);
 
 void glm_mat4_to_wl_array(glm::mat4 m, struct wl_array *array);
+
+glm::quat glm_quat_from_wl_array(struct wl_array *array);
+
+void glm_quat_to_wl_array(glm::quat quaternion, struct wl_array *array);
 
 }  // namespace zukou
 

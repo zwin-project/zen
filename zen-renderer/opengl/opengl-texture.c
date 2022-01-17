@@ -64,8 +64,15 @@ zen_opengl_texture_commit(struct zen_opengl_texture *texture)
 
   glBindTexture(GL_TEXTURE_2D, texture->id);
   if (format == WL_SHM_FORMAT_ARGB8888 || format == WL_SHM_FORMAT_XRGB8888) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA,
-        GL_UNSIGNED_INT_8_8_8_8_REV, data);
+    if (texture->width == width && texture->height == height) {
+      glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_BGRA,
+          GL_UNSIGNED_INT_8_8_8_8_REV, data);
+    } else {
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA,
+          GL_UNSIGNED_INT_8_8_8_8_REV, data);
+      texture->width = width;
+      texture->height = height;
+    }
   }
   wl_shm_buffer_end_access(shm_buffer);
   wl_buffer_send_release(buffer);
@@ -103,6 +110,8 @@ zen_opengl_texture_create(struct wl_client *client, uint32_t id)
   glGenTextures(1, &texture->id);
   texture->resource = resource;
   zen_weak_link_init(&texture->pending.buffer_link);
+  texture->width = 0;
+  texture->height = 0;
 
   return texture;
 
