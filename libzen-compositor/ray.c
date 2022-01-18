@@ -133,6 +133,7 @@ default_grab_button(struct zen_ray_grab* grab, const struct timespec* time,
     uint32_t button, uint32_t state)
 {
   struct zen_ray* ray = grab->ray;
+  struct zen_keyboard* keyboard = ray->seat->keyboard;
   struct zen_virtual_object* focus_virtual_object;
   struct zen_ray_client* ray_client;
   struct wl_resource* resource;
@@ -142,6 +143,7 @@ default_grab_button(struct zen_ray_grab* grab, const struct timespec* time,
 
   focus_virtual_object =
       zen_weak_link_get_user_data(&ray->focus_virtual_object_link);
+  if (keyboard) zen_keyboard_set_focus(keyboard, focus_virtual_object);
   if (focus_virtual_object == NULL) return;
 
   ray_client = zen_ray_client_find(
