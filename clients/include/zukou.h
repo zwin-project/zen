@@ -31,6 +31,14 @@ class App
       glm::vec3 direction);
   void RayButton(struct zgn_ray *ray, uint32_t serial, uint32_t time,
       uint32_t button, enum zgn_ray_button_state state);
+  void KeyboardKeymap(struct zgn_keyboard *keyboard,
+      enum zgn_keyboard_keymap_format format, int32_t fd, uint32_t size);
+  void KeyboardEnter(struct zgn_keyboard *keyboard, uint32_t serial,
+      struct zgn_virtual_object *virtual_object, struct wl_array *keys);
+  void KeyboardLeave(struct zgn_keyboard *keyboard, uint32_t serial,
+      struct zgn_virtual_object *virtual_object);
+  void KeyboardKey(struct zgn_keyboard *keyboard, uint32_t serial,
+      uint32_t time, uint32_t key, enum zgn_keyboard_key_state state);
   bool Run();
   void Terminate();
   inline struct wl_display *display();
@@ -49,10 +57,12 @@ class App
   struct zgn_shell *shell_;
   struct wl_shm *shm_;
   struct zgn_opengl *opengl_;
-  struct zgn_ray *ray_;  // nullable
+  struct zgn_ray *ray_;            // nullable
+  struct zgn_keyboard *keyboard_;  // nullable
   bool running_ = false;
 
   struct zgn_virtual_object *ray_focus_virtual_object_;
+  struct zgn_virtual_object *keyboard_focus_virtual_object_;
 };
 
 inline struct wl_display *
@@ -137,6 +147,14 @@ class VirtualObject
   virtual void RayMotion(uint32_t time, glm::vec3 origin, glm::vec3 direction);
   virtual void RayButton(uint32_t serial, uint32_t time, uint32_t button,
       enum zgn_ray_button_state state);
+  virtual void KeyboardKeymap(
+      enum zgn_keyboard_keymap_format format, int32_t fd, uint32_t size);
+  virtual void KeyboardEnter(uint32_t serial,
+      struct zgn_virtual_object *virtual_object, struct wl_array *keys);
+  virtual void KeyboardLeave(
+      uint32_t serial, struct zgn_virtual_object *virtual_object);
+  virtual void KeyboardKey(uint32_t serial, uint32_t time, uint32_t key,
+      enum zgn_keyboard_key_state state);
   inline App *app();
   inline struct zgn_virtual_object *virtual_object();
   inline struct wl_callback *frame_callback();
