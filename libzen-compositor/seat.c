@@ -12,6 +12,8 @@ zen_seat_get_current_capabilities(struct zen_seat* seat)
 
   if (seat->ray_device_count > 0) caps |= ZGN_SEAT_CAPABILITY_RAY;
 
+  if (seat->keyboard_device_count > 0) caps |= ZGN_SEAT_CAPABILITY_KEYBOARD;
+
   return caps;
 }
 
@@ -146,12 +148,35 @@ WL_EXPORT void
 zen_seat_notify_add_keyboard(struct zen_seat* seat)
 {
   UNUSED(seat);
+  struct zen_keyboard* keyboard;
+
+  if (seat->keyboard) {
+    seat->keyboard_device_count += 1;
+    if (seat->keyboard_device_count == 1) {
+      zen_seat_send_updated_caps(seat);
+    }
+    return;
+  }
+
+  keyboard = zen_keyboard_create(seat);
+  if (keyboard == NULL) {
+    zen_log("seat: failed to create a keyboard\n");
+    return;
+  }
+
+  seat->keyboard = keyboard;
+  seat->keyboard_device_count = 1;
+
+  zen_seat_send_updated_caps(seat);
 }
 
 WL_EXPORT void
 zen_seat_notify_release_keyboard(struct zen_seat* seat)
 {
-  UNUSED(seat);
+  seat->keyboard_device_count--;
+  if (seat->keyboard_device_count == 0) {
+    zen_seat_send_updated_caps(seat);
+  }
 }
 
 WL_EXPORT void
@@ -186,10 +211,10 @@ WL_EXPORT void
 zen_seat_notify_key(struct zen_seat* seat, const struct timespec* time,
     uint32_t key, enum zgn_keyboard_key_state state)
 {
-  UNUSED(seat);
-  UNUSED(time);
-  UNUSED(key);
-  UNUSED(state);
+  struct zen_keyboard* keyboard = seat->keyboard;
+  if (keyboard == NULL) return;
+
+  keyboard->grab->interface->key(keyboard->grab, time, key, state);
 }
 
 WL_EXPORT struct zen_seat*
@@ -215,6 +240,8 @@ zen_seat_create(struct zen_compositor* compositor)
   seat->compositor = compositor;
   seat->ray = NULL;
   seat->ray_device_count = 0;
+  seat->keyboard = NULL;
+  seat->keyboard_device_count = 0;
   wl_list_init(&seat->resource_list);
   seat->seat_name = "seat0";
 
@@ -238,6 +265,7 @@ zen_seat_destroy(struct zen_seat* seat)
   wl_list_remove(&seat->resource_list);
 
   if (seat->ray) zen_ray_destroy(seat->ray);
+  if (seat->keyboard) zen_keyboard_destroy(seat->keyboard);
   wl_global_destroy(seat->global);
   free(seat);
 }
