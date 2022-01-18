@@ -2,6 +2,7 @@
 #include <wayland-server.h>
 #include <zigen-server-protocol.h>
 
+#include "keyboard-client.h"
 #include "ray-client.h"
 
 static enum zgn_seat_capability
@@ -38,7 +39,7 @@ zen_seat_protocol_get_ray(
     ray_client = zen_ray_client_ensure(client, seat->ray);
     zen_ray_client_add_resource(ray_client, id);
   } else {
-    zen_ray_client_create_inert_resource(client, id);
+    zen_ray_client_create_insert_resource(client, id);
   }
 }
 
@@ -46,9 +47,19 @@ static void
 zen_seat_protocol_get_keyboard(
     struct wl_client* client, struct wl_resource* resource, uint32_t id)
 {
-  UNUSED(client);
-  UNUSED(resource);
-  UNUSED(id);
+  struct zen_seat* seat;
+  struct zen_keyboard_client* keyboard_client;
+
+  seat = wl_resource_get_user_data(resource);
+
+  if (seat && seat->keyboard) {
+    keyboard_client = zen_keyboard_client_ensure(client, seat->keyboard);
+    zen_keyboard_client_add_resource(keyboard_client, id);
+
+    zen_keyboard_keymap(seat->keyboard, client);
+  } else {
+    zen_keyboard_client_create_insert_resource(client, id);
+  }
 }
 
 static void

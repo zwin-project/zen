@@ -136,7 +136,7 @@ zen_ray_client_ensure(struct wl_client *client, struct zen_ray *ray)
 }
 
 WL_EXPORT struct wl_resource *
-zen_ray_client_create_inert_resource(struct wl_client *client, uint32_t id)
+zen_ray_client_create_insert_resource(struct wl_client *client, uint32_t id)
 {
   struct wl_resource *resource;
 

@@ -3,13 +3,18 @@ deps_zen_compositor = [
   dep_wayland_server,
   dep_libinput,
   dep_udev,
+  deb_xkbcommon,
 ]
 
 srcs_zen_compositor = [
   'callback.c',
   'cglm-helper.c',
   'compositor.c',
+  'file.c',
+  'keyboard-client.c',
+  'keyboard.c',
   'log.c',
+  'ray-client.c',
   'ray.c',
   'ray-client.c',
   'seat.c',
