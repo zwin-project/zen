@@ -55,7 +55,7 @@ zen_data_offer_protocol_finish(
   struct zen_data_offer *data_offer = wl_resource_get_user_data(resource);
 
   if (!data_offer->data_source ||
-      data_offer != data_offer->data_source->data_offer)  // TODO: 理解
+      data_offer != data_offer->data_source->data_offer)
     return;
 
   zen_data_source_dnd_finished(data_offer->data_source);
