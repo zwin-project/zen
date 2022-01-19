@@ -128,8 +128,23 @@ static const struct zen_ray_grab_interface drag_grab_interface = {
     .cancel = drag_grab_ray_cancel,
 };
 
+static void
+zen_drag_grab_data_source_handle_destroy(
+    struct wl_listener* listener, void* data)
+{
+  UNUSED(data);
+  struct zen_drag_grab* drag_grab;
+
+  drag_grab =
+      wl_container_of(listener, drag_grab, data_source_destroy_listener);
+
+  if (drag_grab->base.ray)
+    zen_data_device_end_drag(drag_grab->base.ray->seat->data_device);
+}
+
 WL_EXPORT struct zen_drag_grab*
-zen_drag_grab_create(struct zen_data_device* data_device)
+zen_drag_grab_create(
+    struct zen_data_device* data_device, struct zen_data_source* data_source)
 {
   struct zen_drag_grab* drag_grab;
 
@@ -144,6 +159,13 @@ zen_drag_grab_create(struct zen_data_device* data_device)
   drag_grab->base.interface = &drag_grab_interface;
   drag_grab->base.ray = data_device->seat->ray;
 
+  if (data_source) {
+    drag_grab->data_source_destroy_listener.notify =
+        zen_drag_grab_data_source_handle_destroy;
+    wl_signal_add(
+        &data_source->destroy_signal, &drag_grab->data_source_destroy_listener);
+  }
+
   return drag_grab;
 
 err:
@@ -153,5 +175,6 @@ err:
 static void
 zen_drag_grab_destroy(struct zen_drag_grab* drag_grab)
 {
+  wl_list_remove(&drag_grab->data_source_destroy_listener.link);
   free(drag_grab);
 }
