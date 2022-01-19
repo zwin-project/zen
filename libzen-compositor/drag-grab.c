@@ -27,27 +27,38 @@ drag_grab_ray_focus(struct zen_ray_grab* grab)
 
   if (current_focus == new_focus) return;
 
-  if (new_focus == NULL) return;
+  if (data_device->focus_resource) zen_data_device_clear_focus(data_device);
+
+  if (data_device->data_source && data_device->data_source->data_offer) {
+    // Unlink the offer from the source
+    data_offer = data_device->data_source->data_offer;
+    data_offer->data_source = NULL;
+    data_device->data_source->data_offer = NULL;
+    wl_list_remove(&data_offer->data_source_destroy_listener.link);
+  }
+
+  if (new_focus == NULL) {
+    if (current_focus) zen_virtual_object_render_commit(current_focus);
+    return;
+  }
 
   new_focus_data_device_resource = wl_resource_find_for_client(
       &data_device->resource_list, wl_resource_get_client(new_focus->resource));
+  if (new_focus_data_device_resource == NULL) return;
 
-  if (new_focus_data_device_resource == NULL ||
-      data_device->focus_resource == new_focus_data_device_resource)
-    return;
-
-  if (data_device->focus_resource != NULL) zen_data_device_leave(data_device);
   data_device->focus_resource = new_focus_data_device_resource;
 
-  if (data_device->data_source == NULL) return;
-
-  data_offer = zen_data_offer_create(
-      data_device->data_source, new_focus_data_device_resource);
-  if (data_offer == NULL) return;
-  zen_data_device_data_offer(data_device, data_offer);
-
-  wl_array_for_each(type, &data_device->data_source->mime_type_list)
-      zen_data_offer_offer(data_offer, *type);
+  if (data_device->data_source) {
+    data_offer = zen_data_offer_create(
+        data_device->data_source, new_focus_data_device_resource);
+    if (data_offer == NULL) {
+      zen_log("drag grab: failed to create a data offer\n");
+      return;
+    }
+    zen_data_device_data_offer(data_device, data_offer);
+    wl_array_for_each(type, &data_device->data_source->mime_type_list)
+        zen_data_offer_offer(data_offer, *type);
+  }
 
   zen_data_device_enter(data_device, new_focus, ray, data_offer);
 
