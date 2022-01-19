@@ -6,8 +6,7 @@ static void
 zgn_data_device_manager_protocol_create_data_source(
     struct wl_client *client, struct wl_resource *resource, uint32_t id)
 {
-  struct zen_data_device_manager *data_device_manager =
-      wl_resource_get_user_data(resource);
+  UNUSED(resource);
   struct zen_data_source *data_source;
 
   data_source = zen_data_source_create(client, id);
@@ -15,9 +14,6 @@ zgn_data_device_manager_protocol_create_data_source(
     wl_client_post_no_memory(client);
     zen_log("data device manager: failed to create a data source\n");
   }
-
-  if (data_device_manager->data_device)
-    data_device_manager->data_device->data_source = data_source;
 }
 
 static void
@@ -25,18 +21,13 @@ zgn_data_device_manager_protocol_get_data_device(struct wl_client *client,
     struct wl_resource *manager_resource, uint32_t id,
     struct wl_resource *seat_resource)
 {
-  struct zen_data_device_manager *data_device_manager =
-      wl_resource_get_user_data(manager_resource);
+  UNUSED(manager_resource);
   struct zen_seat *seat = wl_resource_get_user_data(seat_resource);
-  struct zen_data_device *data_device;
 
-  if (seat) {
-    data_device = zen_data_device_ensure(client, seat);
-    zen_data_device_add_resource(data_device, client, id);
-    data_device_manager->data_device = data_device;
+  if (seat && seat->data_device) {
+    zen_data_device_add_resource(seat->data_device, client, id);
   } else {
     // FIXME: the case seat doesn't exist
-    zen_data_device_create_insert_resource(client, id);
   }
 }
 
@@ -85,7 +76,6 @@ zen_data_device_manager_create(struct wl_display *display)
   }
 
   data_device_manager->global = global;
-  data_device_manager->data_device = NULL;
 
   return data_device_manager;
 
@@ -96,13 +86,10 @@ err:
   return NULL;
 }
 
-WL_EXPORT
-void
+WL_EXPORT void
 zen_data_device_manager_destroy(
     struct zen_data_device_manager *data_device_manager)
 {
   wl_global_destroy(data_device_manager->global);
-  if (data_device_manager->data_device)
-    zen_data_device_destroy(data_device_manager->data_device);
   free(data_device_manager);
 }
