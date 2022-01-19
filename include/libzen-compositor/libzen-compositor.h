@@ -63,15 +63,13 @@ struct zen_data_device {
 
   struct wl_resource* focus_resource;
   struct zen_weak_link focus_virtual_object_link;
-
-  struct wl_listener data_source_destroy_listener;
-  struct wl_listener icon_destroy_listener;
 };
 
 struct zen_data_device_manager {
   struct wl_display* display;
   struct wl_global* global;
-  struct zen_data_device* data_device;
+
+  struct zen_seat* seat;
 };
 
 struct zen_virtual_object {
@@ -206,9 +204,6 @@ void zen_data_offer_offer(
     struct zen_data_offer* data_offer, const char* mime_type);
 
 // methods of zen_data_source
-struct zen_data_source* zen_data_source_create(
-    struct wl_client* client, uint32_t id);
-
 void zen_data_source_target(
     struct zen_data_source* data_source, const char* mime_type);
 
@@ -221,18 +216,10 @@ void zen_data_source_dnd_drop_performed(struct zen_data_source* data_source);
 
 void zen_data_source_dnd_finished(struct zen_data_source* data_source);
 
-// methods of zen_data_device
-struct zen_data_device* zen_data_device_ensure(
-    struct wl_client* client, struct zen_seat* seat);
-
-void zen_data_device_destroy(struct zen_data_device* data_device);
-
-int zen_data_device_add_resource(
-    struct zen_data_device* data_device, struct wl_client* client, uint32_t id);
-
-struct wl_resource* zen_data_device_create_insert_resource(
+struct zen_data_source* zen_data_source_create(
     struct wl_client* client, uint32_t id);
 
+// methods of zen_data_device
 void zen_data_device_data_offer(
     struct zen_data_device* data_device, struct zen_data_offer* data_offer);
 
@@ -250,6 +237,13 @@ void zen_data_device_drop(struct zen_data_device* data_device);
 void zen_data_device_clear_focus(struct zen_data_device* data_device);
 
 void zen_data_device_end_drag(struct zen_data_device* data_device);
+
+int zen_data_device_add_resource(
+    struct zen_data_device* data_device, struct wl_client* client, uint32_t id);
+
+struct zen_data_device* zen_data_device_create(struct zen_seat* seat);
+
+void zen_data_device_destroy(struct zen_data_device* data_device);
 
 // methods of zen_data_device_manager
 struct zen_data_device_manager* zen_data_device_manager_create(
