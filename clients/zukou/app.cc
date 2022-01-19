@@ -194,16 +194,16 @@ App::GlobalRegistryHandler(struct wl_registry *registry, uint32_t id,
   } else if (strcmp(interface, "zgn_data_device_manager") == 0) {
     data_device_manager_ = (zgn_data_device_manager *)wl_registry_bind(
         registry, id, &zgn_data_device_manager_interface, version);
-  } else if (strcmp(interface, "zgn_seat") == 0) {
-    seat_ = (zgn_seat *)wl_registry_bind(
-        registry, id, &zgn_seat_interface, version);
-    zgn_seat_add_listener(seat_, &seat_listener, this);
 
-    if (data_device_manager_ == NULL || data_device_ != NULL) return;
+    if (seat_ == NULL) return;
 
     data_device_ =
         zgn_data_device_manager_get_data_device(data_device_manager_, seat_);
     zgn_data_device_add_listener(data_device_, &data_device_listener, this);
+  } else if (strcmp(interface, "zgn_seat") == 0) {
+    seat_ = (zgn_seat *)wl_registry_bind(
+        registry, id, &zgn_seat_interface, version);
+    zgn_seat_add_listener(seat_, &seat_listener, this);
   } else if (strcmp(interface, "wl_shm") == 0) {
     shm_ = (wl_shm *)wl_registry_bind(registry, id, &wl_shm_interface, version);
     wl_shm_add_listener(shm_, &shm_listener, this);

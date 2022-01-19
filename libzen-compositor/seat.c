@@ -188,6 +188,7 @@ WL_EXPORT struct zen_seat*
 zen_seat_create(struct zen_compositor* compositor)
 {
   struct zen_seat* seat;
+  struct zen_data_device* data_device;
   struct wl_global* global;
 
   seat = zalloc(sizeof *seat);
@@ -202,10 +203,17 @@ zen_seat_create(struct zen_compositor* compositor)
     zen_log("seat: failed to create a seat global\n");
     goto err_global;
   }
-
   seat->global = global;
+
   seat->compositor = compositor;
-  seat->data_device = NULL;
+
+  data_device = zen_data_device_create(seat);
+  if (data_device == NULL) {
+    zen_log("seat: failed to create a data device\n");
+    goto err_data_device;
+  }
+  seat->data_device = data_device;
+
   seat->ray = NULL;
   seat->ray_device_count = 0;
   wl_list_init(&seat->resource_list);
@@ -213,6 +221,7 @@ zen_seat_create(struct zen_compositor* compositor)
 
   return seat;
 
+err_data_device:
 err_global:
   free(seat);
 
@@ -231,6 +240,7 @@ zen_seat_destroy(struct zen_seat* seat)
   wl_list_remove(&seat->resource_list);
 
   if (seat->ray) zen_ray_destroy(seat->ray);
+  zen_data_device_destroy(seat->data_device);
   wl_global_destroy(seat->global);
   free(seat);
 }
