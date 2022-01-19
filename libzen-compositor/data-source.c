@@ -23,15 +23,13 @@ zen_data_source_cancelled(struct zen_data_source *data_source)
   zgn_data_source_send_cancelled(data_source->resource);
 }
 
-WL_EXPORT
-void
+WL_EXPORT void
 zen_data_source_dnd_drop_performed(struct zen_data_source *data_source)
 {
   zgn_data_source_send_dnd_drop_performed(data_source->resource);
 }
 
-WL_EXPORT
-void
+WL_EXPORT void
 zen_data_source_dnd_finished(struct zen_data_source *data_source)
 {
   zgn_data_source_send_dnd_finished(data_source->resource);
