@@ -112,8 +112,7 @@ zen_cuboid_window_virtual_object_render_commit_handler(
   cuboid_window->render_item->commit(cuboid_window->render_item);
 }
 
-WL_EXPORT
-struct zen_cuboid_window *
+WL_EXPORT struct zen_cuboid_window *
 zen_cuboid_window_create(struct wl_client *client, uint32_t id,
     struct wl_resource *shell_resource,
     struct zen_virtual_object *virtual_object)

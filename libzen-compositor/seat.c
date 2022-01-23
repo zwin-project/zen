@@ -41,7 +41,7 @@ zen_seat_protocol_get_ray(
     ray_client = zen_ray_client_ensure(client, seat->ray);
     zen_ray_client_add_resource(ray_client, id);
   } else {
-    zen_ray_client_create_insert_resource(client, id);
+    zen_ray_client_create_inert_resource(client, id);
   }
 }
 
@@ -60,7 +60,7 @@ zen_seat_protocol_get_keyboard(
 
     zen_keyboard_keymap(seat->keyboard, client);
   } else {
-    zen_keyboard_client_create_insert_resource(client, id);
+    zen_keyboard_client_create_inert_resource(client, id);
   }
 }
 

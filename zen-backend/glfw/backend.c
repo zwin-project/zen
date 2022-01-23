@@ -30,8 +30,7 @@ zen_backend_get_head_position(struct zen_backend* backend, vec3 position)
   glm_vec3_negate(position);
 }
 
-WL_EXPORT
-struct zen_backend*
+WL_EXPORT struct zen_backend*
 zen_backend_create(struct zen_compositor* compositor)
 {
   struct glfw_backend* backend;

@@ -22,7 +22,7 @@ struct zen_ray_client *zen_ray_client_find(
 struct zen_ray_client *zen_ray_client_ensure(
     struct wl_client *client, struct zen_ray *ray);
 
-struct wl_resource *zen_ray_client_create_insert_resource(
+struct wl_resource *zen_ray_client_create_inert_resource(
     struct wl_client *client, uint32_t id);
 
 #endif  //  LIBZEN_COMPOSITOR_RAY_CLIENT_H

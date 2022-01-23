@@ -5,11 +5,10 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-WL_EXPORT
-int
+WL_EXPORT int
 create_shared_file(off_t size, void* content)
 {
-  const char* name = "zazen-shared";
+  const char* name = "zen-shared";
   int fd;
   void* data;
 
