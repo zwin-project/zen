@@ -171,6 +171,12 @@ App::Connect(const char *socket)
       shell_ == nullptr)
     goto err_globals;
 
+  if (seat_ != nullptr) {
+    data_device_ =
+        zgn_data_device_manager_get_data_device(data_device_manager_, seat_);
+    zgn_data_device_add_listener(data_device_, &data_device_listener, this);
+  }
+
   return true;
 
 err_globals:
@@ -194,12 +200,6 @@ App::GlobalRegistryHandler(struct wl_registry *registry, uint32_t id,
   } else if (strcmp(interface, "zgn_data_device_manager") == 0) {
     data_device_manager_ = (zgn_data_device_manager *)wl_registry_bind(
         registry, id, &zgn_data_device_manager_interface, version);
-
-    if (seat_ == NULL) return;
-
-    data_device_ =
-        zgn_data_device_manager_get_data_device(data_device_manager_, seat_);
-    zgn_data_device_add_listener(data_device_, &data_device_listener, this);
   } else if (strcmp(interface, "zgn_seat") == 0) {
     seat_ = (zgn_seat *)wl_registry_bind(
         registry, id, &zgn_seat_interface, version);
