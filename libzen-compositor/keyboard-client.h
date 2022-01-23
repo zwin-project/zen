@@ -8,6 +8,7 @@ struct zen_keyboard_client {
   struct zen_keyboard *keyboard;
   struct wl_list link;
   struct wl_listener keyboard_destroy_listener;
+  struct wl_listener client_destroy_listener;
 
   struct wl_client *client;
   struct wl_list resource_list;
