@@ -138,8 +138,8 @@ zen_drag_grab_data_source_handle_destroy(
   drag_grab =
       wl_container_of(listener, drag_grab, data_source_destroy_listener);
 
-  if (drag_grab->base.ray)
-    zen_data_device_end_drag(drag_grab->base.ray->seat->data_device);
+  zen_data_device_end_drag(drag_grab->base.ray->seat->data_device);
+  zen_drag_grab_destroy(drag_grab);
 }
 
 WL_EXPORT struct zen_drag_grab*

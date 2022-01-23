@@ -13,19 +13,16 @@ zen_data_device_start_drag(struct zen_data_device *data_device,
 
   data_device->data_source = data_source;
 
-  if (data_device->seat->ray == NULL) goto out;
+  if (data_device->seat->ray == NULL) return;
 
   drag_grab = zen_drag_grab_create(data_device, data_source);
   if (drag_grab == NULL) {
     zen_log("data device: failed to a drag grab");
-    goto out;
+    return;
   }
 
   zen_ray_clear_focus(data_device->seat->ray);
   zen_ray_grab_start(data_device->seat->ray, &drag_grab->base);
-
-out:
-  return;
 }
 
 static void
@@ -93,6 +90,7 @@ WL_EXPORT void
 zen_data_device_end_drag(struct zen_data_device *data_device)
 {
   zen_data_device_clear_focus(data_device);
+  data_device->data_source = NULL;
   if (data_device->seat->ray != NULL) zen_ray_grab_end(data_device->seat->ray);
 }
 

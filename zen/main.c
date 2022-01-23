@@ -46,7 +46,6 @@ main()
     zen_log("main: failed to create a data_device_manager\n");
     goto out_data_device_manager;
   }
-  data_device_manager->seat = seat;
 
   ret = zen_compositor_load_shell(compositor);
   if (ret != 0) {
