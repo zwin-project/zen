@@ -84,7 +84,6 @@ zen_ray_leave(struct zen_ray* ray)
   if (ray_client == NULL) return;
 
   serial = wl_display_next_serial(virtual_object->compositor->display);
-
   wl_resource_for_each(resource, &ray_client->resource_list)
   {
     zgn_ray_send_leave(resource, serial, virtual_object->resource);
@@ -137,13 +136,13 @@ default_grab_button(struct zen_ray_grab* grab, const struct timespec* time,
   struct zen_virtual_object* focus_virtual_object;
   struct zen_ray_client* ray_client;
   struct wl_resource* resource;
-  uint32_t serial, msec;
-
-  serial = wl_display_next_serial(ray->seat->compositor->display);
+  uint32_t msec, serial;
 
   focus_virtual_object =
       zen_weak_link_get_user_data(&ray->focus_virtual_object_link);
-  if (keyboard) zen_keyboard_set_focus(keyboard, focus_virtual_object);
+  if (keyboard && ray->button_count == 1 &&
+      state == ZGN_RAY_BUTTON_STATE_PRESSED)
+    zen_keyboard_set_focus(keyboard, focus_virtual_object);
   if (focus_virtual_object == NULL) return;
 
   ray_client = zen_ray_client_find(
@@ -152,6 +151,7 @@ default_grab_button(struct zen_ray_grab* grab, const struct timespec* time,
 
   msec = timespec_to_msec(time);
 
+  serial = wl_display_next_serial(ray->seat->compositor->display);
   wl_resource_for_each(resource, &ray_client->resource_list)
   {
     zgn_ray_send_button(resource, serial, msec, button, state);

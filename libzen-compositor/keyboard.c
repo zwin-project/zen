@@ -60,8 +60,6 @@ default_grab_key(struct zen_keyboard_grab* grab, const struct timespec* time,
   struct wl_resource* resource;
   uint32_t serial, msec;
 
-  serial = wl_display_next_serial(keyboard->seat->compositor->display);
-
   focus_virtual_object =
       zen_weak_link_get_user_data(&keyboard->focus_virtual_object_link);
   if (focus_virtual_object == NULL) return;
@@ -72,6 +70,7 @@ default_grab_key(struct zen_keyboard_grab* grab, const struct timespec* time,
 
   msec = timespec_to_msec(time);
 
+  serial = wl_display_next_serial(keyboard->seat->compositor->display);
   wl_resource_for_each(resource, &keyboard_client->resource_list)
   {
     zgn_keyboard_send_key(resource, serial, msec, key, state);
