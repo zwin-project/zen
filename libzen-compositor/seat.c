@@ -175,6 +175,8 @@ zen_seat_notify_release_keyboard(struct zen_seat* seat)
 {
   seat->keyboard_device_count--;
   if (seat->keyboard_device_count == 0) {
+    if (seat->keyboard) zen_keyboard_destroy(seat->keyboard);
+    seat->keyboard = NULL;
     zen_seat_send_updated_caps(seat);
   }
 }

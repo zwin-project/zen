@@ -9,15 +9,7 @@ static void zen_keyboard_client_destroy(
 static void
 zen_keyboard_client_handle_destroy(struct wl_resource *resource)
 {
-  struct zen_keyboard_client *keyboard_client;
-
-  keyboard_client = wl_resource_get_user_data(resource);
-
   wl_list_remove(wl_resource_get_link(resource));
-
-  if (keyboard_client && wl_list_empty(&keyboard_client->resource_list)) {
-    zen_keyboard_client_destroy(keyboard_client);
-  }
 }
 
 static void
@@ -45,6 +37,19 @@ zen_keyboard_client_keyboard_destroy_handler(
   zen_keyboard_client_destroy(keyboard_client);
 }
 
+static void
+zen_keyboard_client_client_destroy_handler(
+    struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+  struct zen_keyboard_client *keyboard_client;
+
+  keyboard_client =
+      wl_container_of(listener, keyboard_client, client_destroy_listener);
+
+  zen_keyboard_client_destroy(keyboard_client);
+}
+
 static struct zen_keyboard_client *
 zen_keyboard_client_create(
     struct wl_client *client, struct zen_keyboard *keyboard)
@@ -60,10 +65,17 @@ zen_keyboard_client_create(
 
   keyboard_client->keyboard = keyboard;
   wl_list_insert(&keyboard->keyboard_client_list, &keyboard_client->link);
+
   keyboard_client->keyboard_destroy_listener.notify =
       zen_keyboard_client_keyboard_destroy_handler;
   wl_signal_add(
       &keyboard->destroy_signal, &keyboard_client->keyboard_destroy_listener);
+
+  keyboard_client->client_destroy_listener.notify =
+      zen_keyboard_client_client_destroy_handler;
+  wl_client_add_destroy_listener(
+      client, &keyboard_client->client_destroy_listener);
+
   keyboard_client->client = client;
   wl_list_init(&keyboard_client->resource_list);
 
@@ -84,6 +96,7 @@ zen_keyboard_client_destroy(struct zen_keyboard_client *keyboard_client)
     wl_list_init(wl_resource_get_link(resource));
   }
 
+  wl_list_remove(&keyboard_client->client_destroy_listener.link);
   wl_list_remove(&keyboard_client->keyboard_destroy_listener.link);
   wl_list_remove(&keyboard_client->link);
   free(keyboard_client);
