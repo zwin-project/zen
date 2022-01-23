@@ -201,6 +201,8 @@ struct zen_data_offer* zen_data_offer_create(
 void zen_data_offer_offer(
     struct zen_data_offer* data_offer, const char* mime_type);
 
+void zen_data_offer_inert(struct zen_data_offer* data_offer);
+
 // methods of zen_data_source
 void zen_data_source_target(
     struct zen_data_source* data_source, const char* mime_type);

@@ -112,6 +112,13 @@ zen_data_offer_data_source_destroy_handler(
   data_offer->data_source = NULL;
 }
 
+WL_EXPORT void
+zen_data_offer_inert(struct zen_data_offer *data_offer)
+{
+  data_offer->data_source = NULL;
+  wl_list_remove(&data_offer->data_source_destroy_listener.link);
+}
+
 WL_EXPORT struct zen_data_offer *
 zen_data_offer_create(
     struct zen_data_source *data_source, struct wl_resource *target)
