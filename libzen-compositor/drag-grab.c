@@ -30,11 +30,8 @@ drag_grab_ray_focus(struct zen_ray_grab* grab)
   if (data_device->focus_resource) zen_data_device_clear_focus(data_device);
 
   if (data_device->data_source && data_device->data_source->data_offer) {
-    // Unlink the offer from the source
-    data_offer = data_device->data_source->data_offer;
-    data_offer->data_source = NULL;
+    zen_data_offer_inert(data_device->data_source->data_offer);
     data_device->data_source->data_offer = NULL;
-    wl_list_remove(&data_offer->data_source_destroy_listener.link);
   }
 
   if (new_focus == NULL) {
