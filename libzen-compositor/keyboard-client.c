@@ -147,8 +147,7 @@ zen_keyboard_client_ensure(
 }
 
 WL_EXPORT struct wl_resource *
-zen_keyboard_client_create_insert_resource(
-    struct wl_client *client, uint32_t id)
+zen_keyboard_client_create_inert_resource(struct wl_client *client, uint32_t id)
 {
   struct wl_resource *resource;
 

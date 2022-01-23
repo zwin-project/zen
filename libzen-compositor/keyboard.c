@@ -148,8 +148,7 @@ out:
   return;
 }
 
-WL_EXPORT
-void
+WL_EXPORT void
 zen_keyboard_set_focus(
     struct zen_keyboard* keyboard, struct zen_virtual_object* virtual_object)
 {
@@ -170,8 +169,7 @@ zen_keyboard_set_focus(
     zen_weak_link_unset(&keyboard->focus_virtual_object_link);
 }
 
-WL_EXPORT
-void
+WL_EXPORT void
 zen_keyboard_keymap(struct zen_keyboard* keyboard, struct wl_client* client)
 {
   struct zen_keyboard_client* keyboard_client;
@@ -187,8 +185,7 @@ zen_keyboard_keymap(struct zen_keyboard* keyboard, struct wl_client* client)
   }
 }
 
-WL_EXPORT
-struct zen_keyboard*
+WL_EXPORT struct zen_keyboard*
 zen_keyboard_create(struct zen_seat* seat)
 {
   struct zen_keyboard* keyboard;
@@ -216,8 +213,7 @@ err:
   return NULL;
 }
 
-WL_EXPORT
-void
+WL_EXPORT void
 zen_keyboard_destroy(struct zen_keyboard* keyboard)
 {
   keyboard->grab->interface->cancel(keyboard->grab);
