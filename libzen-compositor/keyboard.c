@@ -133,7 +133,7 @@ zen_keyboard_add_keymap(struct zen_keyboard* keyboard)
 
   keyboard->keymap_size = strlen(keymap_string) + 1;
   keyboard->keymap_fd =
-      create_shared_file(keyboard->keymap_size, keymap_string);
+      zen_util_create_shared_file(keyboard->keymap_size, keymap_string);
   keyboard->keymap_format = ZGN_KEYBOARD_KEYMAP_FORMAT_XKB_V1;
 
   free(keymap_string);

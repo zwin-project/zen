@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 WL_EXPORT int
-create_shared_file(off_t size, void* content)
+zen_util_create_shared_file(off_t size, void* content)
 {
   const char* name = "zen-shared";
   int fd;
@@ -21,7 +21,7 @@ create_shared_file(off_t size, void* content)
     return -1;
   }
 
-  data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+  data = mmap(NULL, size, PROT_WRITE, MAP_SHARED, fd, 0);
   if (data == MAP_FAILED) {
     close(fd);
     return -1;
