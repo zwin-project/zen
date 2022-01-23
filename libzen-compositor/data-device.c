@@ -36,8 +36,7 @@ zgn_data_device_protocol_start_drag(struct wl_client *client,
   struct zen_data_device *data_device;
   struct zen_seat *seat;
   struct zen_ray *ray;
-  struct zen_data_source *data_source =
-      wl_resource_get_user_data(source_resource);
+  struct zen_data_source *data_source = NULL;
   struct zen_virtual_object *origin =
       wl_resource_get_user_data(origin_resource);
   struct zen_virtual_object *current_focus;
@@ -52,9 +51,9 @@ zgn_data_device_protocol_start_drag(struct wl_client *client,
   if (!ray || ray->button_count != 1 || ray->grab_serial != serial) return;
 
   current_focus = zen_weak_link_get_user_data(&ray->focus_virtual_object_link);
-
   if (!current_focus || current_focus != origin) return;
 
+  if (source_resource) data_source = wl_resource_get_user_data(source_resource);
   zen_data_device_start_drag(data_device, data_source, NULL);
 }
 
