@@ -68,8 +68,6 @@ struct zen_data_device {
 struct zen_data_device_manager {
   struct wl_display* display;
   struct wl_global* global;
-
-  struct zen_seat* seat;
 };
 
 struct zen_virtual_object {

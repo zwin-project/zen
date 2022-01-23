@@ -205,14 +205,14 @@ zen_seat_create(struct zen_compositor* compositor)
   }
   seat->global = global;
 
-  seat->compositor = compositor;
-
   data_device = zen_data_device_create(seat);
   if (data_device == NULL) {
     zen_log("seat: failed to create a data device\n");
     goto err_data_device;
   }
   seat->data_device = data_device;
+
+  seat->compositor = compositor;
 
   seat->ray = NULL;
   seat->ray_device_count = 0;
@@ -222,6 +222,8 @@ zen_seat_create(struct zen_compositor* compositor)
   return seat;
 
 err_data_device:
+  wl_global_destroy(global);
+
 err_global:
   free(seat);
 

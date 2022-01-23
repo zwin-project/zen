@@ -11,8 +11,8 @@ zgn_data_device_manager_protocol_create_data_source(
 
   data_source = zen_data_source_create(client, id);
   if (data_source == NULL) {
-    wl_client_post_no_memory(client);
     zen_log("data device manager: failed to create a data source\n");
+    return;
   }
 }
 
@@ -24,11 +24,7 @@ zgn_data_device_manager_protocol_get_data_device(struct wl_client *client,
   UNUSED(manager_resource);
   struct zen_seat *seat = wl_resource_get_user_data(seat_resource);
 
-  if (seat && seat->data_device) {
-    zen_data_device_add_resource(seat->data_device, client, id);
-  } else {
-    // FIXME: the case seat doesn't exist
-  }
+  zen_data_device_add_resource(seat->data_device, client, id);
 }
 
 struct zgn_data_device_manager_interface data_device_manager_interface = {
@@ -71,7 +67,8 @@ zen_data_device_manager_create(struct wl_display *display)
       data_device_manager, zen_data_device_manager_bind);
   if (global == NULL) {
     zen_log(
-        "data device manager: failed to create a data_device_manager global\n");
+        "data device manager: failed to create a data_device_manager "
+        "global\n");
     goto err_global;
   }
 
