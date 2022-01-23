@@ -105,7 +105,7 @@ static const struct zen_keyboard_grab_interface
         .cancel = default_grab_cancel,
 };
 
-static void
+static int
 zen_keyboard_add_keymap(struct zen_keyboard* keyboard)
 {
   struct xkb_context* context;
@@ -132,10 +132,23 @@ zen_keyboard_add_keymap(struct zen_keyboard* keyboard)
   }
 
   keyboard->keymap_size = strlen(keymap_string) + 1;
+  keyboard->keymap_format = ZGN_KEYBOARD_KEYMAP_FORMAT_XKB_V1;
   keyboard->keymap_fd =
       zen_util_create_shared_file(keyboard->keymap_size, keymap_string);
-  keyboard->keymap_format = ZGN_KEYBOARD_KEYMAP_FORMAT_XKB_V1;
+  if (keyboard->keymap_fd < 0) {
+    zen_log("keyboard: failed to create a keymap file\n");
+    goto out_file;
+  }
 
+  free(keymap_string);
+
+  xkb_keymap_unref(keymap);
+
+  xkb_context_unref(context);
+
+  return 0;
+
+out_file:
   free(keymap_string);
 
 out_keymap:
@@ -145,7 +158,7 @@ out_context:
   xkb_context_unref(context);
 
 out:
-  return;
+  return -1;
 }
 
 WL_EXPORT void
@@ -189,6 +202,7 @@ WL_EXPORT struct zen_keyboard*
 zen_keyboard_create(struct zen_seat* seat)
 {
   struct zen_keyboard* keyboard;
+  int ret;
 
   keyboard = zalloc(sizeof *keyboard);
   if (keyboard == NULL) {
@@ -196,6 +210,11 @@ zen_keyboard_create(struct zen_seat* seat)
     goto err;
   }
 
+  ret = zen_keyboard_add_keymap(keyboard);
+  if (ret < 0) {
+    zen_log("keyboard: failed to add keymap\n");
+    goto err_keymap;
+  }
   keyboard->seat = seat;
   keyboard->grab = &keyboard->default_grab;
   keyboard->default_grab.interface = &default_keyboard_grab_interface;
@@ -205,9 +224,10 @@ zen_keyboard_create(struct zen_seat* seat)
   wl_signal_init(&keyboard->destroy_signal);
   wl_array_init(&keyboard->keys);
 
-  zen_keyboard_add_keymap(keyboard);
-
   return keyboard;
+
+err_keymap:
+  free(keyboard);
 
 err:
   return NULL;
@@ -220,5 +240,6 @@ zen_keyboard_destroy(struct zen_keyboard* keyboard)
   zen_weak_link_unset(&keyboard->focus_virtual_object_link);
   wl_signal_emit(&keyboard->destroy_signal, NULL);
   close(keyboard->keymap_fd);
+  wl_array_release(&keyboard->keys);
   free(keyboard);
 }
