@@ -11,6 +11,7 @@ zen_data_device_start_drag(struct zen_data_device *data_device,
   UNUSED(icon);
   struct zen_drag_grab *drag_grab;
 
+  // FIXME: handle the case data source already exists
   data_device->data_source = data_source;
 
   if (data_device->seat->ray == NULL) return;

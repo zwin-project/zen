@@ -1,4 +1,5 @@
 #include <libzen-compositor/libzen-compositor.h>
+#include <strings.h>
 #include <unistd.h>
 #include <wayland-server.h>
 #include <zigen-server-protocol.h>
@@ -61,15 +62,56 @@ zen_data_offer_protocol_finish(
   zen_data_source_dnd_finished(data_offer->data_source);
 }
 
+static uint32_t
+zen_data_offer_choose_action(struct zen_data_offer *data_offer)
+{
+  uint32_t available_actions, preferred_action = 0;
+  uint32_t source_actions, offer_actions;
+
+  offer_actions = data_offer->actions;
+  preferred_action = data_offer->preferred_action;
+
+  source_actions = data_offer->data_source->actions;
+
+  // FIXME: support ask action
+  available_actions =
+      offer_actions & source_actions & ~ZGN_DATA_DEVICE_MANAGER_DND_ACTION_ASK;
+
+  if (!available_actions) return ZGN_DATA_DEVICE_MANAGER_DND_ACTION_NONE;
+
+  if ((preferred_action & available_actions) != 0) return preferred_action;
+
+  return 1 << (ffs(available_actions) - 1);
+}
+
+static void
+zen_data_offer_update_action(struct zen_data_offer *data_offer)
+{
+  uint32_t action;
+
+  if (data_offer->data_source == NULL) return;
+
+  action = zen_data_offer_choose_action(data_offer);
+
+  if (data_offer->data_source->current_dnd_action == action) return;
+
+  data_offer->data_source->current_dnd_action = action;
+
+  zgn_data_source_send_action(data_offer->data_source->resource, action);
+  zgn_data_offer_send_action(data_offer->resource, action);
+}
+
 static void
 zen_data_offer_protocol_set_actions(struct wl_client *client,
     struct wl_resource *resource, uint32_t dnd_actions,
     uint32_t preferred_action)
 {
   UNUSED(client);
-  UNUSED(resource);
-  UNUSED(dnd_actions);
-  UNUSED(preferred_action);
+  struct zen_data_offer *data_offer = wl_resource_get_user_data(resource);
+
+  data_offer->actions = dnd_actions;
+  data_offer->preferred_action = preferred_action;
+  zen_data_offer_update_action(data_offer);
 }
 
 static const struct zgn_data_offer_interface data_offer_interface = {
@@ -146,6 +188,9 @@ zen_data_offer_create(
 
   data_offer->data_source = data_source;
   data_source->data_offer = data_offer;
+  data_offer->actions = ZGN_DATA_DEVICE_MANAGER_DND_ACTION_NONE;
+  data_offer->preferred_action = ZGN_DATA_DEVICE_MANAGER_DND_ACTION_NONE;
+
   data_offer->data_source_destroy_listener.notify =
       zen_data_offer_data_source_destroy_handler;
   wl_signal_add(

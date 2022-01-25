@@ -67,8 +67,11 @@ zen_data_source_protocol_set_actions(struct wl_client *client,
     struct wl_resource *resource, uint32_t dnd_actions)
 {
   UNUSED(client);
-  UNUSED(resource);
-  UNUSED(dnd_actions);
+  struct zen_data_source *data_source;
+
+  data_source = wl_resource_get_user_data(resource);
+
+  data_source->actions = dnd_actions;
 }
 
 struct zgn_data_source_interface data_source_interface = {
@@ -118,8 +121,11 @@ zen_data_source_create(struct wl_client *client, uint32_t id)
   wl_array_init(&data_source->mime_type_list);
 
   data_source->data_offer = NULL;
+  data_source->current_dnd_action = ZGN_DATA_DEVICE_MANAGER_DND_ACTION_NONE;
 
   wl_signal_init(&data_source->destroy_signal);
+
+  data_source->actions = ZGN_DATA_DEVICE_MANAGER_DND_ACTION_NONE;
 
   return data_source;
 

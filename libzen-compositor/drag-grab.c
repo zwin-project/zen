@@ -55,6 +55,9 @@ drag_grab_ray_focus(struct zen_ray_grab* grab)
     zen_data_device_data_offer(data_device, data_offer);
     wl_array_for_each(type, &data_device->data_source->mime_type_list)
         zen_data_offer_offer(data_offer, *type);
+
+    zgn_data_offer_send_source_actions(
+        data_offer->resource, data_device->data_source->actions);
   }
 
   zen_data_device_enter(data_device, new_focus, ray, data_offer);
