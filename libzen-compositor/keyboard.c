@@ -239,6 +239,7 @@ zen_keyboard_destroy(struct zen_keyboard* keyboard)
   zen_weak_link_unset(&keyboard->focus_virtual_object_link);
   wl_signal_emit(&keyboard->destroy_signal, NULL);
   close(keyboard->keymap_fd);
-  wl_array_release(&keyboard->keys);
+  wl_array_release(
+      &keyboard->keys);  // TODO: release the contents of this array
   free(keyboard);
 }
