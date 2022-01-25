@@ -44,6 +44,9 @@ struct zen_data_offer {
   struct wl_resource* resource;
   struct zen_data_source* data_source;
 
+  uint32_t actions;
+  uint32_t preferred_action;
+
   struct wl_listener data_source_destroy_listener;
 };
 
@@ -52,14 +55,17 @@ struct zen_data_source {
   struct wl_array mime_type_list;
   struct zen_data_offer* data_offer;
 
+  uint32_t current_dnd_action;
+
   struct wl_signal destroy_signal;
+  uint32_t actions;
 };
 
 struct zen_data_device {
   struct zen_seat* seat;
   struct wl_list resource_list;
 
-  struct zen_data_source* data_source;
+  struct zen_data_source* data_source; /* nullable; dragging data_source */
 
   struct wl_resource* focus_resource;
   struct zen_weak_link focus_virtual_object_link;
