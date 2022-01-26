@@ -12,8 +12,8 @@
 #include "opengl-vertex-buffer.h"
 #include "shader-compiler.h"
 
-WL_EXPORT
-void zen_opengl_component_destroy(struct zen_opengl_component *component);
+WL_EXPORT void zen_opengl_component_destroy(
+    struct zen_opengl_component *component);
 
 static void
 zen_opengl_component_handle_destroy(struct wl_resource *resource)

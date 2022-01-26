@@ -8,15 +8,7 @@ static void zen_ray_client_destroy(struct zen_ray_client *ray_client);
 static void
 zen_ray_client_handle_destroy(struct wl_resource *resource)
 {
-  struct zen_ray_client *ray_client;
-
-  ray_client = wl_resource_get_user_data(resource);
-
   wl_list_remove(wl_resource_get_link(resource));
-
-  if (ray_client && wl_list_empty(&ray_client->resource_list)) {
-    zen_ray_client_destroy(ray_client);
-  }
 }
 
 static void
@@ -42,6 +34,17 @@ zen_ray_client_ray_destroy_handler(struct wl_listener *listener, void *data)
   zen_ray_client_destroy(ray_client);
 }
 
+static void
+zen_ray_client_client_destroy_handler(struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+  struct zen_ray_client *ray_client;
+
+  ray_client = wl_container_of(listener, ray_client, client_destroy_listener);
+
+  zen_ray_client_destroy(ray_client);
+}
+
 static struct zen_ray_client *
 zen_ray_client_create(struct wl_client *client, struct zen_ray *ray)
 {
@@ -56,8 +59,14 @@ zen_ray_client_create(struct wl_client *client, struct zen_ray *ray)
 
   ray_client->ray = ray;
   wl_list_insert(&ray->ray_client_list, &ray_client->link);
+
   ray_client->ray_destroy_listener.notify = zen_ray_client_ray_destroy_handler;
   wl_signal_add(&ray->destroy_signal, &ray_client->ray_destroy_listener);
+
+  ray_client->client_destroy_listener.notify =
+      zen_ray_client_client_destroy_handler;
+  wl_client_add_destroy_listener(client, &ray_client->client_destroy_listener);
+
   ray_client->client = client;
   wl_list_init(&ray_client->resource_list);
 
@@ -78,6 +87,7 @@ zen_ray_client_destroy(struct zen_ray_client *ray_client)
     wl_list_init(wl_resource_get_link(resource));
   }
 
+  wl_list_remove(&ray_client->client_destroy_listener.link);
   wl_list_remove(&ray_client->ray_destroy_listener.link);
   wl_list_remove(&ray_client->link);
   free(ray_client);
