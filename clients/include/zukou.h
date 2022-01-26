@@ -1,6 +1,7 @@
 #ifndef ZEN_CLIENT_ZUKOU_H
 #define ZEN_CLIENT_ZUKOU_H
 
+#include <sys/epoll.h>
 #include <wayland-client.h>
 #include <zigen-client-protocol.h>
 #include <zigen-opengl-client-protocol.h>
@@ -8,23 +9,26 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <string>
+#include <vector>
 
 namespace zukou {
+
+class DataOffer;
+class DataSource;
+class VirtualObject;
+
 class App
 {
  public:
   App();
-  ~App();
+  virtual ~App();
 
   bool Connect(const char *socket);
   void GlobalRegistryHandler(struct wl_registry *registry, uint32_t id,
       const char *interface, uint32_t version);
   void GlobalRegistryRemover(struct wl_registry *registry, uint32_t id);
   void ShmFormat(struct wl_shm *wl_shm, uint32_t format);
-  void DataOfferOffer(struct zgn_data_offer *data_offer, const char *mime_type);
-  void DataOfferSourceAction(
-      struct zgn_data_offer *data_offer, uint32_t source_actions);
-  void DataOfferAction(struct zgn_data_offer *data_offer, uint32_t dnd_action);
   void DataDeviceDataOffer(
       struct zgn_data_device *data_device, struct zgn_data_offer *id);
   void DataDeviceEnter(struct zgn_data_device *data_device, uint32_t serial,
@@ -52,6 +56,17 @@ class App
       struct zgn_virtual_object *virtual_object);
   void KeyboardKey(struct zgn_keyboard *keyboard, uint32_t serial,
       uint32_t time, uint32_t key, enum zgn_keyboard_key_state state);
+  void StartDrag(VirtualObject *virtual_object,
+      std::vector<std::string> *mime_types, uint32_t enter_serial);
+
+  void DestroyDataSource();
+  void DestroyDataOffer();
+
+  virtual void DataSourceTarget(const char *mime_type);
+  virtual void DataSourceSend(const char *mime_type, int32_t fd);
+  virtual void DataSourceDndDropPerformed();
+  virtual void DataSourceAction(uint32_t action);
+
   bool Run();
   void Terminate();
   inline struct wl_display *display();
@@ -59,19 +74,22 @@ class App
   inline struct zgn_compositor *compositor();
   inline struct zgn_data_device_manager *data_device_manager();
   inline struct zgn_data_device *data_device();
-  inline struct zgn_data_offer *data_offer();
+  inline DataOffer *data_offer();
+  inline DataSource *data_source();
   inline struct zgn_seat *seat();
   inline struct zgn_shell *shell();
   inline struct wl_shm *shm();
   inline struct zgn_opengl *opengl();
+  inline int epoll_fd();
 
  private:
   struct wl_display *display_;
   struct wl_registry *registry_;
   struct zgn_compositor *compositor_;
   struct zgn_data_device_manager *data_device_manager_;
-  struct zgn_data_device *data_device_;
-  struct zgn_data_offer *data_offer_;  // nullable
+  struct zgn_data_device *data_device_;  // nonnull
+  DataOffer *data_offer_;                // nullable
+  DataSource *data_source_;              // nullable
   struct zgn_seat *seat_;
   struct zgn_shell *shell_;
   struct wl_shm *shm_;
@@ -79,6 +97,8 @@ class App
   struct zgn_ray *ray_;            // nullable
   struct zgn_keyboard *keyboard_;  // nullable
   bool running_ = false;
+
+  int epoll_fd_;
 
   struct zgn_virtual_object *ray_focus_virtual_object_;
   struct zgn_virtual_object *data_device_focus_virtual_object_;
@@ -116,10 +136,16 @@ App::data_device()
   return data_device_;
 }
 
-inline struct zgn_data_offer *
+inline DataOffer *
 App::data_offer()
 {
   return data_offer_;
+}
+
+inline DataSource *
+App::data_source()
+{
+  return data_source_;
 }
 
 inline struct zgn_seat *
@@ -144,6 +170,12 @@ inline struct zgn_opengl *
 App::opengl()
 {
   return opengl_;
+}
+
+inline int
+App::epoll_fd()
+{
+  return epoll_fd_;
 }
 
 struct ColorBGRA {
@@ -181,9 +213,6 @@ class VirtualObject
   void NextFrame();
   void Commit();
   virtual void Frame(uint32_t time);
-  virtual void DataOfferOffer(const char *mime_type);
-  virtual void DataOfferSourceActions(uint32_t source_actions);
-  virtual void DataOfferAction(uint32_t dnd_action);
   virtual void DataDeviceEnter(uint32_t serial, glm::vec3 origin,
       glm::vec3 direction, struct zgn_data_offer *id);
   virtual void DataDeviceLeave();
@@ -267,6 +296,95 @@ inline glm::quat
 CuboidWindow::quaternion()
 {
   return quaternion_;
+}
+
+class Task
+{
+ public:
+  virtual ~Task(){};
+  virtual void Done(){};
+};
+
+class DndTask : Task
+{
+ public:
+  virtual ~DndTask(){};
+  virtual void Done(){};
+  int fd;
+};
+
+class DataOffer
+{
+ public:
+  DataOffer(struct zgn_data_offer *data_offer, App *app);
+  ~DataOffer();
+  void Offer(const char *mime_type);
+  void SourceActions(uint32_t source_actions);
+  void Action(uint32_t dnd_action);
+  void Receive(std::string mime_type, DndTask *task);
+  void Accept(uint32_t serial, std::string mime_type);
+  void SetActions(uint32_t actions, uint32_t preffered_action);
+
+  inline struct zgn_data_offer *data_offer();
+  inline std::vector<std::string> *mime_types();
+  inline uint32_t source_actions();
+  inline uint32_t dnd_action();
+
+ private:
+  App *app_;
+  struct zgn_data_offer *data_offer_;
+  std::vector<std::string> mime_types_;
+  uint32_t source_actions_;
+  uint32_t dnd_action_;
+};
+
+inline struct zgn_data_offer *
+DataOffer::data_offer()
+{
+  return data_offer_;
+}
+
+inline std::vector<std::string> *
+DataOffer::mime_types()
+{
+  return &mime_types_;
+}
+
+inline uint32_t
+DataOffer::source_actions()
+{
+  return source_actions_;
+}
+
+inline uint32_t
+DataOffer::dnd_action()
+{
+  return dnd_action_;
+}
+
+class DataSource
+{
+ public:
+  DataSource(App *app);
+  ~DataSource();
+  void Target(const char *mime_type);
+  void Send(const char *mime_type, int32_t fd);
+  void Cancelled();
+  void DndDropPerformed();
+  void DndFinished();
+  void Action(uint32_t dnd_action);
+
+  inline struct zgn_data_source *data_source();
+
+ private:
+  App *app_;
+  struct zgn_data_source *data_source_;
+};
+
+inline struct zgn_data_source *
+DataSource::data_source()
+{
+  return data_source_;
 }
 
 class OpenGLTexture : public Buffer

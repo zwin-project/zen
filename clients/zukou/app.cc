@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/epoll.h>
+#include <unistd.h>
 #include <zigen-client-protocol.h>
 #include <zigen-opengl-client-protocol.h>
 #include <zukou.h>
@@ -12,6 +13,8 @@ App::App() {}
 App::~App()
 {
   if (display_) wl_display_disconnect(display_);
+  if (data_offer_) delete data_offer_;
+  if (data_source_) delete data_source_;
 }
 
 static void
@@ -224,14 +227,14 @@ App::Connect(const char *socket)
   wl_display_roundtrip(display_);
 
   if (compositor_ == nullptr || shm_ == nullptr || opengl_ == nullptr ||
-      shell_ == nullptr)
+      seat_ == nullptr || shell_ == nullptr)
     goto err_globals;
 
-  if (seat_ != nullptr) {
-    data_device_ =
-        zgn_data_device_manager_get_data_device(data_device_manager_, seat_);
-    zgn_data_device_add_listener(data_device_, &data_device_listener, this);
-  }
+  data_device_ =
+      zgn_data_device_manager_get_data_device(data_device_manager_, seat_);
+  zgn_data_device_add_listener(data_device_, &data_device_listener, this);
+
+  this->epoll_fd_ = epoll_create1(EPOLL_CLOEXEC);
 
   return true;
 
@@ -287,80 +290,13 @@ App::ShmFormat(struct wl_shm *wl_shm, uint32_t format)
 }
 
 void
-data_offer_offer(
-    void *data, struct zgn_data_offer *data_offer, const char *mime_type)
-{
-  App *app = (App *)data;
-  app->DataOfferOffer(data_offer, mime_type);
-}
-
-void
-data_offer_source_actions(
-    void *data, struct zgn_data_offer *data_offer, uint32_t source_actions)
-{
-  App *app = (App *)data;
-  app->DataOfferSourceAction(data_offer, source_actions);
-}
-
-void
-data_offer_action(
-    void *data, struct zgn_data_offer *data_offer, uint32_t dnd_action)
-{
-  App *app = (App *)data;
-  app->DataOfferAction(data_offer, dnd_action);
-}
-
-static const struct zgn_data_offer_listener data_offer_listener = {
-    data_offer_offer,
-    data_offer_source_actions,
-    data_offer_action,
-};
-
-void
-App::DataOfferOffer(struct zgn_data_offer *data_offer, const char *mime_type)
-{
-  (void)data_offer;
-  if (data_offer_focus_virtual_object_ == NULL) return;
-
-  VirtualObject *v = (VirtualObject *)wl_proxy_get_user_data(
-      (wl_proxy *)data_offer_focus_virtual_object_);
-
-  v->DataOfferOffer(mime_type);
-}
-
-void
-App::DataOfferSourceAction(
-    struct zgn_data_offer *data_offer, uint32_t source_actions)
-{
-  (void)data_offer;
-  if (data_offer_focus_virtual_object_ == NULL) return;
-
-  VirtualObject *v = (VirtualObject *)wl_proxy_get_user_data(
-      (wl_proxy *)data_offer_focus_virtual_object_);
-
-  v->DataOfferSourceActions(source_actions);
-}
-
-void
-App::DataOfferAction(struct zgn_data_offer *data_offer, uint32_t dnd_action)
-{
-  (void)data_offer;
-  if (data_offer_focus_virtual_object_ == NULL) return;
-
-  VirtualObject *v = (VirtualObject *)wl_proxy_get_user_data(
-      (wl_proxy *)data_offer_focus_virtual_object_);
-
-  v->DataOfferSourceActions(dnd_action);
-}
-
-void
 App::DataDeviceDataOffer(
     struct zgn_data_device *data_device, struct zgn_data_offer *id)
 {
   (void)data_device;
 
-  data_offer_ = id;
-  zgn_data_offer_add_listener(data_offer_, &data_offer_listener, this);
+  if (data_offer_) delete data_offer_;
+  data_offer_ = new DataOffer(id, this);
 }
 
 void
@@ -545,10 +481,60 @@ App::KeyboardKey(struct zgn_keyboard *keyboard, uint32_t serial, uint32_t time,
   v->KeyboardKey(serial, time, key, state);
 }
 
+void
+App::StartDrag(VirtualObject *virtual_object,
+    std::vector<std::string> *mime_types, uint32_t enter_serial)
+{
+  if (data_source_) delete data_source_;
+  data_source_ = new DataSource(this);
+
+  for (auto mime_type : *mime_types)
+    zgn_data_source_offer(data_source_->data_source(), mime_type.c_str());
+
+  zgn_data_device_start_drag(data_device(), data_source_->data_source(),
+      virtual_object->virtual_object(), NULL, enter_serial);
+}
+
+void
+App::DestroyDataSource()
+{
+  if (data_source_) delete data_source_;
+  data_source_ = NULL;
+}
+
+void
+App::DestroyDataOffer()
+{
+  if (data_offer_) delete data_offer_;
+  data_offer_ = NULL;
+}
+
+void
+App::DataSourceTarget([[maybe_unused]] const char *mime_type)
+{}
+
+void
+App::DataSourceSend([[maybe_unused]] const char *mime_type, int32_t fd)
+{
+  close(fd);
+}
+
+void
+App::DataSourceDndDropPerformed()
+{}
+
+void
+App::DataSourceAction([[maybe_unused]] uint32_t action)
+{}
+
 bool
 App::Run()
 {
   int ret;
+  int epoll_count;
+  struct epoll_event ep[16];
+  Task *task;
+
   running_ = true;
   while (running_) {
     while (wl_display_prepare_read(display()) != 0) {
@@ -559,6 +545,13 @@ App::Run()
     if (ret == -1) return false;
     wl_display_read_events(display());
     wl_display_dispatch_pending(display());
+
+    epoll_count = epoll_wait(this->epoll_fd(), ep, 16, 0);
+    for (int i = 0; i < epoll_count; i++) {
+      task = (Task *)ep->data.ptr;
+      task->Done();
+      delete task;
+    }
   }
   return true;
 }
