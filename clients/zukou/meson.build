@@ -6,6 +6,8 @@ srcs_zukou = [
   'app.cc',
   'buffer.cc',
   'cuboid-window.cc',
+  'data-offer.cc',
+  'data-source.cc',
   'glm-helper.cc',
   'virtual-object.cc',
   'opengl-component.cc',

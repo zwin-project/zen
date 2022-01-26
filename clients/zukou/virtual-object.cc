@@ -49,24 +49,6 @@ VirtualObject::Frame(uint32_t time)
 }
 
 void
-VirtualObject::DataOfferOffer(const char *mime_type)
-{
-  (void)mime_type;
-}
-
-void
-VirtualObject::DataOfferSourceActions(uint32_t source_actions)
-{
-  (void)source_actions;
-}
-
-void
-VirtualObject::DataOfferAction(uint32_t dnd_action)
-{
-  (void)dnd_action;
-}
-
-void
 VirtualObject::DataDeviceEnter(uint32_t serial, glm::vec3 origin,
     glm::vec3 direction, struct zgn_data_offer *id)
 {
