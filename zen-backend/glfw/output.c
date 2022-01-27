@@ -120,11 +120,14 @@ get_refresh_rate()
 WL_EXPORT struct zen_output*
 zen_output_create(struct zen_compositor* compositor)
 {
+  // primary_monitor & mode will be freed by glfw
+  GLFWmonitor* primary_monitor;
+  const GLFWvidmode* mode;
   struct glfw_output* output;
   GLFWwindow* window;
   uint32_t refresh;
-  uint32_t initial_width = 640;
-  uint32_t initial_height = 320;
+  uint32_t initial_width;
+  uint32_t initial_height;
   struct wl_event_loop* loop;
   struct wl_event_source* swap_timer;
   struct zen_opengl_renderer* renderer;
@@ -133,11 +136,34 @@ zen_output_create(struct zen_compositor* compositor)
   mat4 eye_projection = EYE_PROJECTION;
   uint32_t refresh_msec;
 
-  window = glfwCreateWindow(
-      initial_width, initial_height, "zen compositor", NULL, NULL);
+  primary_monitor = glfwGetPrimaryMonitor();
+  if (primary_monitor == NULL) {
+    zen_log("openvr backend - gl window: failed to get primary monitor\n");
+    goto err_primary_monitor;
+  }
+
+  mode = glfwGetVideoMode(primary_monitor);
+  if (mode == NULL) {
+    zen_log(
+        "openvr backend - gl window: failed to get mode of primary monitor\n");
+    goto err_mode;
+  }
+
+  if (compositor->config->fullscreen_preview) {
+    initial_width = mode->width;
+    initial_height = mode->height;
+    window = glfwCreateWindow(
+        initial_width, initial_height, "zen compositor", primary_monitor, NULL);
+  } else {
+    initial_width = 640;
+    initial_height = 320;
+    window = glfwCreateWindow(
+        initial_width, initial_height, "zen compositor", NULL, NULL);
+  }
+
   if (window == NULL) {
     zen_log("glfw output: failed to create a window\n");
-    goto err;
+    goto err_window;
   }
 
   glfwMakeContextCurrent(window);
@@ -199,7 +225,9 @@ err_renderer:
 err_glew:
   glfwDestroyWindow(window);
 
-err:
+err_window:
+err_mode:
+err_primary_monitor:
   return NULL;
 }
 

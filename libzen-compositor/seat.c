@@ -301,7 +301,7 @@ zen_seat_create(struct zen_compositor* compositor)
   seat->keyboard = NULL;
   seat->keyboard_device_count = 0;
   wl_list_init(&seat->resource_list);
-  seat->seat_name = "seat0";
+  seat->seat_name = compositor->config->seat;
 
   return seat;
 

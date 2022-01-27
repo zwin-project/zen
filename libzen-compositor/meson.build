@@ -10,6 +10,7 @@ srcs_zen_compositor = [
   'callback.c',
   'cglm-helper.c',
   'compositor.c',
+  'config.c',
   'file.c',
   'ray-client.c',
   'ray.c',
