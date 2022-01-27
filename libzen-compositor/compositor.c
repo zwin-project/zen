@@ -120,7 +120,7 @@ err:
 }
 
 WL_EXPORT struct zen_compositor *
-zen_compositor_create(struct wl_display *display)
+zen_compositor_create(struct wl_display *display, struct zen_config *config)
 {
   struct zen_compositor *compositor;
   struct wl_event_loop *loop;
@@ -151,6 +151,7 @@ zen_compositor_create(struct wl_display *display)
 
   compositor->display = display;
   compositor->global = global;
+  compositor->config = config;
   wl_signal_init(&compositor->frame_signal);
   compositor->backend = NULL;
   compositor->repaint_timer = repaint_timer;

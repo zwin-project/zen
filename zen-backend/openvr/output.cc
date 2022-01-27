@@ -56,7 +56,7 @@ zen_output_create(struct zen_compositor* compositor)
   }
 
   window = new GlWindow();
-  if (!window->Init()) {
+  if (!window->Init(compositor->config->fullscreen_preview)) {
     zen_log("openvr output: failed to initialize GlWindow\n");
     goto err_window;
   }

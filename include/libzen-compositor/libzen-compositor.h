@@ -5,6 +5,7 @@
 #include <time.h>
 #include <wayland-server.h>
 
+#include "config.h"
 #include "debug.h"
 #include "helpers.h"
 #include "timespec-util.h"
@@ -20,6 +21,11 @@ extern "C" {
 //         \-------------------------->  |                     |
 //                                       + ------------------- +
 
+struct zen_config {
+  bool fullscreen_preview;
+  char* seat;
+};
+
 struct zen_weak_link {
   struct wl_resource* resource;
   struct wl_listener listener;
@@ -28,6 +34,7 @@ struct zen_weak_link {
 struct zen_compositor {
   struct wl_display* display;
   struct wl_global* global;
+  struct zen_config* config;
 
   struct wl_signal frame_signal;
 
@@ -183,7 +190,8 @@ struct zen_backend {
 struct zen_udev_seat;
 
 // methods of zen_compositor
-struct zen_compositor* zen_compositor_create(struct wl_display* display);
+struct zen_compositor* zen_compositor_create(
+    struct wl_display* display, struct zen_config* config);
 
 void zen_compositor_destroy(struct zen_compositor* compositor);
 
