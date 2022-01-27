@@ -49,6 +49,8 @@ void glm_versor_to_wl_array(versor v, struct wl_array *array);
 
 int zen_log(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 
+int zen_util_create_shared_file(off_t size, void *content);
+
 #ifdef __cplusplus
 }
 #endif

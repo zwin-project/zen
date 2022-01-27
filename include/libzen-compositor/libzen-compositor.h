@@ -138,6 +138,37 @@ struct zen_ray {
   struct zen_render_item* render_item;
 };
 
+struct zen_keyboard_grab {
+  const struct zen_keyboard_grab_interface* interface;
+  struct zen_keyboard* keyboard;
+};
+
+struct zen_keyboard_grab_interface {
+  void (*key)(struct zen_keyboard_grab* grab, const struct timespec* time,
+      uint32_t key, uint32_t state);
+  void (*modifiers)(struct zen_keyboard_grab* grab, uint32_t serial,
+      uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked,
+      uint32_t group);
+  void (*cancel)(struct zen_keyboard_grab* grab);
+};
+
+struct zen_keyboard {
+  struct zen_seat* seat;
+  struct zen_keyboard_grab* grab;
+  struct zen_keyboard_grab default_grab;
+
+  struct zen_weak_link focus_virtual_object_link;
+
+  struct wl_list keyboard_client_list;
+  struct wl_signal destroy_signal;
+
+  int keymap_fd;
+  size_t keymap_size;
+  uint32_t keymap_format;
+
+  struct wl_array keys;
+};
+
 struct zen_seat {
   struct wl_global* global;
   struct zen_compositor* compositor;
@@ -145,6 +176,9 @@ struct zen_seat {
 
   struct zen_ray* ray;
   int ray_device_count;
+
+  struct zen_keyboard* keyboard;
+  int keyboard_device_count;
 
   struct wl_list resource_list;
 
@@ -266,6 +300,18 @@ void zen_ray_move(struct zen_ray* ray, struct zen_ray_motion_event* event);
 struct zen_ray* zen_ray_create(struct zen_seat* seat);
 
 void zen_ray_destroy(struct zen_ray* ray);
+
+// methods of zen_keyboard
+
+void zen_keyboard_set_focus(
+    struct zen_keyboard* keyboard, struct zen_virtual_object* virtual_object);
+
+void zen_keyboard_keymap(
+    struct zen_keyboard* keyboard, struct wl_client* client);
+
+struct zen_keyboard* zen_keyboard_create(struct zen_seat* seat);
+
+void zen_keyboard_destroy(struct zen_keyboard* keyboard);
 
 // methods of zen_seat
 

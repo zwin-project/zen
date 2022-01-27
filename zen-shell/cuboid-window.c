@@ -221,15 +221,14 @@ zen_cuboid_window_configure(
   glm_vec3_copy(half_size, cuboid_window->half_size);
   glm_quat_copy(quaternion, cuboid_window->quaternion);
 
-  uint32_t serial =
-      wl_display_next_serial(cuboid_window->shell->compositor->display);
-
   wl_array_init(&half_size_array);
   wl_array_init(&quaternion_array);
 
   glm_vec3_to_wl_array(cuboid_window->half_size, &half_size_array);
   glm_versor_to_wl_array(quaternion, &quaternion_array);
 
+  uint32_t serial =
+      wl_display_next_serial(cuboid_window->shell->compositor->display);
   zgn_cuboid_window_send_configure(
       cuboid_window->resource, serial, &half_size_array, &quaternion_array);
 
