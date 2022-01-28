@@ -144,7 +144,7 @@ zen_seat_notify_modifiers(struct zen_seat* seat, uint32_t serial)
 }
 
 static void
-zen_seat_update_modifier_sate(struct zen_seat* seat, uint32_t serial,
+zen_seat_update_modifier_state(struct zen_seat* seat, uint32_t serial,
     uint32_t key, enum zgn_keyboard_key_state state)
 {
   struct zen_keyboard* keyboard = seat->keyboard;
@@ -271,7 +271,7 @@ zen_seat_notify_key(struct zen_seat* seat, const struct timespec* time,
 
   keyboard->grab->interface->key(keyboard->grab, time, key, state);
 
-  zen_seat_update_modifier_sate(
+  zen_seat_update_modifier_state(
       seat, wl_display_get_serial(seat->compositor->display), key, state);
 }
 
