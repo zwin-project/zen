@@ -429,6 +429,7 @@ App::RayButton(struct zgn_ray *ray, uint32_t serial, uint32_t time,
   v->RayButton(serial, time, button, state);
 }
 
+void
 App::KeyboardKeymap(struct zgn_keyboard *keyboard,
     enum zgn_keyboard_keymap_format format, int32_t fd, uint32_t size)
 {
@@ -479,7 +480,7 @@ App::KeyboardKey(struct zgn_keyboard *keyboard, uint32_t serial, uint32_t time,
 
   v->KeyboardKey(serial, time, key, state);
 }
-  
+
 void
 App::StartDrag(VirtualObject *virtual_object,
     std::vector<std::string> *mime_types, uint32_t enter_serial)
