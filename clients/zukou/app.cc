@@ -156,6 +156,62 @@ static const struct zgn_ray_listener ray_listener = {
     ray_button,
 };
 
+static void
+keyboard_keymap(void *data, struct zgn_keyboard *keyboard, uint32_t format,
+    int32_t fd, uint32_t size)
+{
+  App *app = (App *)data;
+  app->KeyboardKeymap(
+      keyboard, (enum zgn_keyboard_keymap_format)format, fd, size);
+}
+
+static void
+keyboard_enter(void *data, struct zgn_keyboard *keyboard, uint32_t serial,
+    struct zgn_virtual_object *virtual_object, struct wl_array *keys)
+{
+  App *app = (App *)data;
+  app->KeyboardEnter(keyboard, serial, virtual_object, keys);
+}
+
+static void
+keyboard_leave(void *data, struct zgn_keyboard *keyboard, uint32_t serial,
+    struct zgn_virtual_object *virtual_object)
+{
+  App *app = (App *)data;
+  app->KeyboardLeave(keyboard, serial, virtual_object);
+}
+
+static void
+keyboard_key(void *data, struct zgn_keyboard *keyboard, uint32_t serial,
+    uint32_t time, uint32_t key, uint32_t state)
+{
+  App *app = (App *)data;
+  app->KeyboardKey(
+      keyboard, serial, time, key, (enum zgn_keyboard_key_state)state);
+}
+
+static void
+keyboard_modifiers(void *data, struct zgn_keyboard *keyboard, uint32_t serial,
+    uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked,
+    uint32_t group)
+{
+  (void)data;
+  (void)keyboard;
+  (void)serial;
+  (void)mods_depressed;
+  (void)mods_latched;
+  (void)mods_locked;
+  (void)group;
+}
+
+static const struct zgn_keyboard_listener keyboard_listener = {
+    keyboard_keymap,
+    keyboard_enter,
+    keyboard_leave,
+    keyboard_key,
+    keyboard_modifiers,
+};
+
 bool
 App::Connect(const char *socket)
 {
@@ -308,6 +364,16 @@ App::Capabilities(struct zgn_seat *seat, uint32_t capability)
     zgn_ray_release(ray_);
     ray_ = NULL;
   }
+
+  if (capability & ZGN_SEAT_CAPABILITY_KEYBOARD && keyboard_ == NULL) {
+    keyboard_ = zgn_seat_get_keyboard(seat);
+    zgn_keyboard_add_listener(keyboard_, &keyboard_listener, this);
+  }
+
+  if (!(capability & ZGN_SEAT_CAPABILITY_KEYBOARD) && keyboard_) {
+    zgn_keyboard_release(keyboard_);
+    keyboard_ = NULL;
+  }
 }
 
 void
@@ -363,6 +429,57 @@ App::RayButton(struct zgn_ray *ray, uint32_t serial, uint32_t time,
   v->RayButton(serial, time, button, state);
 }
 
+App::KeyboardKeymap(struct zgn_keyboard *keyboard,
+    enum zgn_keyboard_keymap_format format, int32_t fd, uint32_t size)
+{
+  (void)keyboard;
+  if (keyboard_focus_virtual_object_ == NULL) return;
+
+  VirtualObject *v = (VirtualObject *)wl_proxy_get_user_data(
+      (wl_proxy *)keyboard_focus_virtual_object_);
+
+  v->KeyboardKeymap(format, fd, size);
+}
+
+void
+App::KeyboardEnter(struct zgn_keyboard *keyboard, uint32_t serial,
+    struct zgn_virtual_object *virtual_object, struct wl_array *keys)
+{
+  (void)keyboard;
+  keyboard_focus_virtual_object_ = virtual_object;
+
+  VirtualObject *v =
+      (VirtualObject *)wl_proxy_get_user_data((wl_proxy *)virtual_object);
+
+  v->KeyboardEnter(serial, virtual_object, keys);
+}
+
+void
+App::KeyboardLeave(struct zgn_keyboard *keyboard, uint32_t serial,
+    struct zgn_virtual_object *virtual_object)
+{
+  (void)keyboard;
+  keyboard_focus_virtual_object_ = NULL;
+
+  VirtualObject *v =
+      (VirtualObject *)wl_proxy_get_user_data((wl_proxy *)virtual_object);
+
+  v->KeyboardLeave(serial, virtual_object);
+}
+
+void
+App::KeyboardKey(struct zgn_keyboard *keyboard, uint32_t serial, uint32_t time,
+    uint32_t key, enum zgn_keyboard_key_state state)
+{
+  (void)keyboard;
+  if (keyboard_focus_virtual_object_ == NULL) return;
+
+  VirtualObject *v = (VirtualObject *)wl_proxy_get_user_data(
+      (wl_proxy *)keyboard_focus_virtual_object_);
+
+  v->KeyboardKey(serial, time, key, state);
+}
+  
 void
 App::StartDrag(VirtualObject *virtual_object,
     std::vector<std::string> *mime_types, uint32_t enter_serial)

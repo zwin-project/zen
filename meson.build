@@ -22,6 +22,7 @@ dep_zgn_protocol = dependency('zigen-protocols')
 dep_cglm = dependency('cglm')
 dep_libinput = dependency('libinput')
 dep_udev = dependency('libudev')
+deb_xkbcommon = dependency('xkbcommon')
 dep_openvr = dependency('openvr')
 dep_m = meson.get_compiler('c').find_library('m')
 

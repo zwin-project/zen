@@ -107,4 +107,40 @@ VirtualObject::RayButton(uint32_t serial, uint32_t time, uint32_t button,
   (void)state;
 }
 
+void
+VirtualObject::KeyboardKeymap(
+    enum zgn_keyboard_keymap_format format, int32_t fd, uint32_t size)
+{
+  (void)format;
+  (void)fd;
+  (void)size;
+}
+
+void
+VirtualObject::KeyboardEnter(uint32_t serial,
+    struct zgn_virtual_object *virtual_object, struct wl_array *keys)
+{
+  (void)serial;
+  (void)virtual_object;
+  (void)keys;
+}
+
+void
+VirtualObject::KeyboardLeave(
+    uint32_t serial, struct zgn_virtual_object *virtual_object)
+{
+  (void)serial;
+  (void)virtual_object;
+}
+
+void
+VirtualObject::KeyboardKey(uint32_t serial, uint32_t time, uint32_t key,
+    enum zgn_keyboard_key_state state)
+{
+  (void)serial;
+  (void)time;
+  (void)key;
+  (void)state;
+}
+
 }  // namespace zukou

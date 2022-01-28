@@ -3,6 +3,7 @@ deps_zen_compositor = [
   dep_wayland_server,
   dep_libinput,
   dep_udev,
+  deb_xkbcommon,
 ]
 
 srcs_zen_compositor = [
@@ -14,9 +15,12 @@ srcs_zen_compositor = [
   'data-offer.c',
   'data-source.c',
   'drag-grab.c',
+  'file.c',
+  'keyboard-client.c',
+  'keyboard.c',
   'log.c',
-  'ray.c',
   'ray-client.c',
+  'ray.c',
   'seat.c',
   'udev-seat.c',
   'virtual-object.c',
