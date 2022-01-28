@@ -10,6 +10,7 @@ srcs_zen_compositor = [
   'callback.c',
   'cglm-helper.c',
   'compositor.c',
+  'config.c',
   'data-device-manager.c',
   'data-device.c',
   'data-offer.c',

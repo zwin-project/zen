@@ -83,12 +83,25 @@ default_grab_modifiers(struct zen_keyboard_grab* grab, uint32_t serial,
     uint32_t mods_depressed, uint32_t mods_latched, uint32_t mods_locked,
     uint32_t group)
 {
-  UNUSED(grab);
-  UNUSED(serial);
-  UNUSED(mods_depressed);
-  UNUSED(mods_latched);
-  UNUSED(mods_locked);
-  UNUSED(group);
+  struct zen_keyboard* keyboard = grab->keyboard;
+  struct zen_virtual_object* focus_virtual_object;
+  struct zen_keyboard_client* keyboard_client;
+  struct wl_resource* resource;
+
+  focus_virtual_object =
+      zen_weak_link_get_user_data(&keyboard->focus_virtual_object_link);
+  if (focus_virtual_object == NULL) return;
+
+  keyboard_client = zen_keyboard_client_find(
+      wl_resource_get_client(focus_virtual_object->resource), keyboard);
+  if (keyboard_client == NULL) return;
+
+  wl_resource_for_each(resource, &keyboard_client->resource_list)
+  {
+    zgn_keyboard_send_modifiers(
+        resource, serial, mods_depressed, mods_latched, mods_locked, group);
+    wl_client_flush(wl_resource_get_client(resource));
+  }
 }
 
 static void
@@ -109,6 +122,7 @@ zen_keyboard_add_keymap(struct zen_keyboard* keyboard)
 {
   struct xkb_context* context;
   struct xkb_keymap* keymap;
+  struct xkb_state* state;
   char* keymap_string;
 
   context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
@@ -124,10 +138,17 @@ zen_keyboard_add_keymap(struct zen_keyboard* keyboard)
     goto out_context;
   }
 
+  state = xkb_state_new(keymap);
+  if (state == NULL) {
+    zen_log("keyboard: failed to initialise XKB state\n");
+    goto out_keymap;
+  }
+  keyboard->state = state;
+
   keymap_string = xkb_keymap_get_as_string(keymap, XKB_KEYMAP_FORMAT_TEXT_V1);
   if (keymap_string == NULL) {
     zen_log("keyboard: failed to get XKB keymap as string\n");
-    goto out_keymap;
+    goto out_state;
   }
 
   keyboard->keymap_size = strlen(keymap_string) + 1;
@@ -149,6 +170,9 @@ zen_keyboard_add_keymap(struct zen_keyboard* keyboard)
 
 out_file:
   free(keymap_string);
+
+out_state:
+  xkb_state_unref(state);
 
 out_keymap:
   xkb_keymap_unref(keymap);
@@ -241,5 +265,6 @@ zen_keyboard_destroy(struct zen_keyboard* keyboard)
   close(keyboard->keymap_fd);
   wl_array_release(
       &keyboard->keys);  // TODO: release the contents of this array
+  xkb_state_unref(keyboard->state);
   free(keyboard);
 }

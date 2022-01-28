@@ -1,6 +1,16 @@
 #include <libzen-compositor/libzen-compositor.h>
 #include <signal.h>
 
+static struct zen_config config = {
+    .fullscreen_preview = false,
+    .seat = "seat0",
+};
+
+static const struct zen_option options[] = {
+    {ZEN_OPTION_BOOLEAN, "fullscreen preview", &config.fullscreen_preview},
+    {ZEN_OPTION_STRING, "seat", &config.seat},
+};
+
 static int
 on_term_signal(int signal_number, void *data)
 {
@@ -11,7 +21,7 @@ on_term_signal(int signal_number, void *data)
 }
 
 int
-main()
+main(int argc, char const *argv[])
 {
   const char *socket = "zigen-0";
   struct wl_display *display;
@@ -22,13 +32,15 @@ main()
   struct zen_seat *seat;
   int ret, exit = EXIT_FAILURE;
 
+  if (!parse_config(options, ARRAY_LENGTH(options), argc, argv, NULL)) goto out;
+
   display = wl_display_create();
   if (display == NULL) {
     zen_log("main: failed to create a display\n");
-    goto out;
+    goto out_display;
   }
 
-  compositor = zen_compositor_create(display);
+  compositor = zen_compositor_create(display, &config);
   if (compositor == NULL) {
     zen_log("main: failed to create a compositor\n");
     goto out_compositor;
@@ -101,6 +113,7 @@ out_seat:
 out_compositor:
   wl_display_destroy(display);
 
+out_display:
 out:
   if (exit == EXIT_SUCCESS)
     zen_log("zen compositor terminated successfully.\n");
