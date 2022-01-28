@@ -1,5 +1,6 @@
 #include <libzen-compositor/libzen-compositor.h>
 #include <wayland-server.h>
+#include <xkbcommon/xkbcommon.h>
 #include <zigen-server-protocol.h>
 
 #include "keyboard-client.h"
@@ -107,6 +108,58 @@ zen_seat_bind(
   caps = zen_seat_get_current_capabilities(seat);
 
   zgn_seat_send_capabilities(resource, caps);
+}
+
+static void
+zen_seat_notify_modifiers(struct zen_seat* seat, uint32_t serial)
+{
+  struct zen_keyboard* keyboard = seat->keyboard;
+  uint32_t mods_depressed, mods_latched, mods_locked, group;
+  bool changed = false;
+
+  mods_depressed =
+      xkb_state_serialize_mods(keyboard->state, XKB_STATE_MODS_DEPRESSED);
+  mods_latched =
+      xkb_state_serialize_mods(keyboard->state, XKB_STATE_MODS_LATCHED);
+  mods_locked =
+      xkb_state_serialize_mods(keyboard->state, XKB_STATE_MODS_LOCKED);
+  group =
+      xkb_state_serialize_layout(keyboard->state, XKB_STATE_LAYOUT_EFFECTIVE);
+
+  if (mods_depressed != keyboard->modifiers.mods_depressed ||
+      mods_latched != keyboard->modifiers.mods_latched ||
+      mods_locked != keyboard->modifiers.mods_locked ||
+      group != keyboard->modifiers.group)
+    changed = true;
+
+  keyboard->modifiers.mods_depressed = mods_depressed;
+  keyboard->modifiers.mods_latched = mods_latched;
+  keyboard->modifiers.mods_locked = mods_locked;
+  keyboard->modifiers.group = group;
+
+  if (changed)
+    keyboard->grab->interface->modifiers(keyboard->grab, serial,
+        keyboard->modifiers.mods_depressed, keyboard->modifiers.mods_latched,
+        keyboard->modifiers.mods_locked, keyboard->modifiers.group);
+}
+
+static void
+zen_seat_update_modifier_state(struct zen_seat* seat, uint32_t serial,
+    uint32_t key, enum zgn_keyboard_key_state state)
+{
+  struct zen_keyboard* keyboard = seat->keyboard;
+  enum xkb_key_direction direction;
+
+  if (state == ZGN_KEYBOARD_KEY_STATE_PRESSED)
+    direction = XKB_KEY_DOWN;
+  else
+    direction = XKB_KEY_UP;
+
+  /* Offset the keycode by 8, as the evdev XKB rules refrect X's broken keycode
+   * system, which starts at 8*/
+  xkb_state_update_key(keyboard->state, key + 8, direction);
+
+  zen_seat_notify_modifiers(seat, serial);
 }
 
 WL_EXPORT void
@@ -220,6 +273,9 @@ zen_seat_notify_key(struct zen_seat* seat, const struct timespec* time,
   if (keyboard == NULL) return;
 
   keyboard->grab->interface->key(keyboard->grab, time, key, state);
+
+  zen_seat_update_modifier_state(
+      seat, wl_display_get_serial(seat->compositor->display), key, state);
 }
 
 WL_EXPORT struct zen_seat*
@@ -257,7 +313,7 @@ zen_seat_create(struct zen_compositor* compositor)
   seat->keyboard = NULL;
   seat->keyboard_device_count = 0;
   wl_list_init(&seat->resource_list);
-  seat->seat_name = "seat0";
+  seat->seat_name = compositor->config->seat;
 
   return seat;
 
