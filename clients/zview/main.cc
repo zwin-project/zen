@@ -17,11 +17,12 @@ main(int argc, char const* argv[])
 
   if (cmd.parse(argc, argv) == false) {
     std::cout << cmd.error_full() << cmd.usage();
-    goto err;
+    goto out;
   }
 
   if (cmd.exist("help")) {
     std::cout << cmd.usage();
+    exit_code = EXIT_SUCCESS;
     goto out;
   }
 
@@ -33,13 +34,13 @@ main(int argc, char const* argv[])
   app = new App();
   app->set_location(location);
 
-  if (app->Show() == false) goto err;
+  if (app->Show() == false) goto out_app;
 
-out:
   exit_code = EXIT_SUCCESS;
 
-err:
+out_app:
   delete app;
 
+out:
   return exit_code;
 }
