@@ -167,6 +167,7 @@ zen_output_create(struct zen_compositor* compositor)
   }
 
   glfwMakeContextCurrent(window);
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
   GLenum glewError = glewInit();
   if (glewError != GLEW_OK) {

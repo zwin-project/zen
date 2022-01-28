@@ -58,6 +58,7 @@ GlWindow::Init(bool fullscreen)
   }
 
   glfwMakeContextCurrent(glfw_window_);
+  glfwSetInputMode(glfw_window_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
   glfwSwapInterval(0);
 
   glewError = glewInit();
