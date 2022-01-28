@@ -4,6 +4,7 @@
 #include <cglm/cglm.h>
 #include <time.h>
 #include <wayland-server.h>
+#include <xkbcommon/xkbcommon.h>
 
 #include "debug.h"
 #include "helpers.h"
@@ -136,6 +137,14 @@ struct zen_keyboard {
   uint32_t keymap_format;
 
   struct wl_array keys;
+
+  struct xkb_state* state;
+  struct {
+    uint32_t mods_depressed;
+    uint32_t mods_latched;
+    uint32_t mods_locked;
+    uint32_t group;
+  } modifiers;
 };
 
 struct zen_seat {
