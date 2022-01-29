@@ -6,6 +6,7 @@
 
 struct zen_config config = {
     .fullscreen_preview = false,
+    .hidden_cursor = false,
     .seat = "seat0",
 };
 

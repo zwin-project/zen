@@ -62,7 +62,7 @@ create_env_name(const char *name)
 {
   int prefix_len = ARRAY_LENGTH(env_prefix) - 1;
   int len = strlen(name);
-  char *env_name = malloc(len + prefix_len);
+  char *env_name = malloc(prefix_len + len + 1);
   strcpy(env_name, env_prefix);
   for (int i = 0; i < len; i++) {
     switch (name[i]) {
@@ -74,6 +74,7 @@ create_env_name(const char *name)
         env_name[prefix_len + i] = toupper(name[i]);
     }
   }
+  env_name[prefix_len + len] = '\0';
   return env_name;
 }
 
