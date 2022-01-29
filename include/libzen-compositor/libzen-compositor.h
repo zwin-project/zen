@@ -24,6 +24,7 @@ extern "C" {
 
 struct zen_config {
   bool fullscreen_preview;
+  bool hidden_cursor;
   char* seat;
 };
 

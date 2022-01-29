@@ -13,7 +13,7 @@ GlfwErrorCallback(int code, const char* description)
 GlWindow::GlWindow() {}
 
 bool
-GlWindow::Init(bool fullscreen)
+GlWindow::Init(bool fullscreen, bool hidden_cursor)
 {
   // primary_monitor & mode will be freed by glfw
   GLFWmonitor* primary_monitor;
@@ -58,8 +58,10 @@ GlWindow::Init(bool fullscreen)
   }
 
   glfwMakeContextCurrent(glfw_window_);
-  glfwSetInputMode(glfw_window_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
   glfwSwapInterval(0);
+
+  if (hidden_cursor)
+    glfwSetInputMode(glfw_window_, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
   glewError = glewInit();
   if (glewError != GLEW_OK) {

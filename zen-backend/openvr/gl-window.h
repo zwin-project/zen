@@ -9,7 +9,7 @@ class GlWindow
 {
  public:
   GlWindow();
-  bool Init(bool fullscreen);
+  bool Init(bool fullscreen, bool hidden_cursor);
   ~GlWindow();
   void Swap();
   bool Poll();
