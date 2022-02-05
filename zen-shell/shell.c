@@ -55,6 +55,10 @@ zen_shell_protocol_get_cuboid_window(struct wl_client* client,
     return;
   }
 
+  vec3 initial_position = {
+      0, 1.5, -(half_size[0] + half_size[1] + half_size[2])};
+  glm_translate(cuboid_window->virtual_object->model_matrix, initial_position);
+
   zen_cuboid_window_configure(cuboid_window, half_size, quaternion);
 }
 
