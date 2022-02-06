@@ -447,14 +447,13 @@ WL_EXPORT void
 zen_opengl_component_render(struct zen_opengl_component *component,
     struct zen_opengl_renderer_camera *camera)
 {
-  struct zen_cuboid_window *cuboid_window;
   struct zen_opengl_element_array_buffer *element_array_buffer;
   struct zen_opengl_shader_program *shader;
   struct zen_opengl_texture *texture;
 
-  if (strcmp(component->virtual_object->role, zen_cuboid_window_role) != 0)
+  if (strcmp(component->virtual_object->role, zen_cuboid_window_role) != 0 &&
+      strcmp(component->virtual_object->role, zen_background_role) != 0)
     return;
-  cuboid_window = component->virtual_object->role_object;
   element_array_buffer = zen_weak_link_get_user_data(
       &component->current.element_array_buffer_link);
   shader = zen_weak_link_get_user_data(&component->current.shader_program_link);
@@ -466,8 +465,9 @@ zen_opengl_component_render(struct zen_opengl_component *component,
   glUseProgram(shader->program_id);
 
   set_uniform_variables(shader->program_id,
-      cuboid_window->virtual_object->model_matrix, camera->view_matrix,
+      component->virtual_object->model_matrix, camera->view_matrix,
       camera->projection_matrix);
+  // TODO: set uniform variables for background
 
   if (texture) glBindTexture(GL_TEXTURE_2D, texture->id);
 
