@@ -168,6 +168,9 @@ zen_output_create(struct zen_compositor* compositor)
 
   glfwMakeContextCurrent(window);
 
+  if (compositor->config->hidden_cursor)
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
   GLenum glewError = glewInit();
   if (glewError != GLEW_OK) {
     zen_log("glfw output: failed to initialize glew: %s\n",
