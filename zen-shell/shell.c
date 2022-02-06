@@ -1,8 +1,10 @@
 #include <libzen-compositor/libzen-compositor.h>
+#include <string.h>
 #include <wayland-server.h>
 #include <zen-shell/zen-shell.h>
 #include <zigen-shell-server-protocol.h>
 
+#include "background.h"
 #include "cuboid-window.h"
 #include "desktop.h"
 #include "intersection.h"
@@ -62,9 +64,27 @@ zen_shell_protocol_get_cuboid_window(struct wl_client* client,
   zen_cuboid_window_configure(cuboid_window, half_size, quaternion);
 }
 
+static void
+zen_shell_protocol_set_background(struct wl_client* client,
+    struct wl_resource* resource, uint32_t id,
+    struct wl_resource* virtual_object_resource)
+{
+  struct zen_virtual_object* virtual_object;
+  struct zen_background* background;
+
+  virtual_object = wl_resource_get_user_data(virtual_object_resource);
+
+  background = zen_background_create(client, id, resource, virtual_object);
+  if (background == NULL) {
+    zen_log("shell: failed to create a background\n");
+    return;
+  }
+}
+
 static const struct zgn_shell_interface shell_interface = {
     .destroy = zen_shell_protocol_destroy,
     .get_cuboid_window = zen_shell_protocol_get_cuboid_window,
+    .set_background = zen_shell_protocol_set_background,
 };
 
 static struct zen_virtual_object*
@@ -127,6 +147,19 @@ zen_shell_bind(
   wl_resource_set_implementation(resource, &shell_interface, shell, NULL);
 }
 
+WL_EXPORT void
+zen_shell_unset_background(struct zen_shell* shell)
+{
+  struct zen_background *background, *tmp;
+
+  wl_list_for_each_safe(background, tmp, &shell->background_list, link)
+  {
+    free(background->virtual_object->role);
+    background->virtual_object->role = strdup("");
+    zen_background_destroy(background);
+  }
+}
+
 WL_EXPORT struct zen_shell_base*
 zen_shell_create(struct zen_compositor* compositor)
 {
@@ -150,6 +183,7 @@ zen_shell_create(struct zen_compositor* compositor)
   shell->base.pick_virtual_object = pick_virtual_object;
   shell->compositor = compositor;
   wl_list_init(&shell->cuboid_window_list);
+  wl_list_init(&shell->background_list);
   shell->global = global;
   shell->interface = &zen_desktop_shell_interface;
 

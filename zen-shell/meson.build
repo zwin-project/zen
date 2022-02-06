@@ -3,6 +3,7 @@ deps_zen_shell = [
 ]
 
 srcs_zen_shell = [
+  'background.c',
   'cuboid-window.c',
   'desktop.c',
   'intersection.c',
