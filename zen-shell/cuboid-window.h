@@ -1,5 +1,5 @@
-#ifndef ZEN_SHELL_CUBOID_WINDOW__H
-#define ZEN_SHELL_CUBOID_WINDOW__H
+#ifndef ZEN_SHELL_CUBOID_WINDOW_H
+#define ZEN_SHELL_CUBOID_WINDOW_H
 
 #include <cglm/cglm.h>
 #include <libzen-compositor/libzen-compositor.h>
@@ -13,4 +13,4 @@ struct zen_cuboid_window *zen_cuboid_window_create(struct wl_client *client,
 void zen_cuboid_window_configure(
     struct zen_cuboid_window *cuboid_window, vec3 half_size, versor quaternion);
 
-#endif  //  ZEN_SHELL_CUBOID_WINDOW__H
+#endif  //  ZEN_SHELL_CUBOID_WINDOW_H
