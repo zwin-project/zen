@@ -60,7 +60,7 @@ zen_opengl_element_array_buffer_commit(
   shm_buffer = wl_shm_buffer_get(buffer);
   data = wl_shm_buffer_get_data(shm_buffer);
   stride = wl_shm_buffer_get_stride(shm_buffer);
-  height = wl_shm_buffer_get_stride(shm_buffer);
+  height = wl_shm_buffer_get_height(shm_buffer);
   buffer_size = stride * height;
 
   wl_shm_buffer_begin_access(shm_buffer);
