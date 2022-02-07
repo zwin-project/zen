@@ -136,10 +136,16 @@ zen_opengl_shader_program_protocol_set_vertex_shader(struct wl_client* client,
   GLint vertex_shader_compiled = GL_FALSE;
   glGetShaderiv(vertex_shader_id, GL_COMPILE_STATUS, &vertex_shader_compiled);
   if (vertex_shader_compiled != GL_TRUE) {
+    int error_message_length = 512;
+    char error_message[error_message_length];
+
+    glGetShaderiv(vertex_shader_id, GL_INFO_LOG_LENGTH, &error_message_length);
+    glGetShaderInfoLog(
+        vertex_shader_id, error_message_length, NULL, error_message);
     glDeleteShader(vertex_shader_id);
     wl_resource_post_error(resource,
         ZGN_OPENGL_SHADER_PROGRAM_ERROR_COMPILATION_ERROR,
-        "failed to compile vertex shader");
+        "failed to compile vertex shader\n%s", error_message);
     return;
   }
 
@@ -177,10 +183,18 @@ zen_opengl_shader_program_protocol_set_fragment_shader(struct wl_client* client,
   glGetShaderiv(
       fragment_shader_id, GL_COMPILE_STATUS, &fragment_shader_compiled);
   if (fragment_shader_compiled != GL_TRUE) {
+    int error_message_length = 512;
+    char error_message[error_message_length];
+
+    glGetShaderiv(
+        fragment_shader_id, GL_INFO_LOG_LENGTH, &error_message_length);
+    glGetShaderInfoLog(
+        fragment_shader_id, error_message_length, NULL, error_message);
+
     glDeleteShader(fragment_shader_id);
     wl_resource_post_error(resource,
         ZGN_OPENGL_SHADER_PROGRAM_ERROR_COMPILATION_ERROR,
-        "failed to compile fragment shader");
+        "failed to compile fragment shader\n%s", error_message);
     return;
   }
 
