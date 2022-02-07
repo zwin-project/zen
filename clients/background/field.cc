@@ -96,22 +96,15 @@ const char *sky_fragment_shader = GLSL(
 
 Field::Field(zukou::App *app) : Background(app)
 {
-  vertex_buffer_ = new zukou::OpenGLVertexBuffer(app, 0);
-
   sky_component_ = new zukou::OpenGLComponent(app, this);
-  sky_element_array_ = new zukou::OpenGLElementArrayBuffer(app, 0);
 
   sky_shader_ = new zukou::OpenGLShaderProgram(app);
   sky_shader_->SetVertexShader(sky_vertex_shader, strlen(sky_vertex_shader));
   sky_shader_->SetFragmentShader(
       sky_fragment_shader, strlen(sky_fragment_shader));
-  printf("vertex shader: %s\n", sky_vertex_shader);
-  printf("fragment shader: %s\n", sky_fragment_shader);
   sky_shader_->Link();
-  // component_ = new zukou::OpenGLComponent(app, this);
 
   sky_component_->Attach(sky_shader_);
   sky_component_->SetCount(4);
   sky_component_->SetTopology(ZGN_OPENGL_TOPOLOGY_TRIANGLE_STRIP);
-  // sky_component_->AddVertexAttribute();
 }
