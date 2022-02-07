@@ -8,8 +8,6 @@ main(void)
 
   app->Connect("zigen-0");
 
-  // Box *box = new Box(app, 0.2f, cmd.exist("fps"));
-  // box->NextFrame();
   Field *field = new Field(app);
   field->Commit();
 

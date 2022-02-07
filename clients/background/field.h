@@ -9,10 +9,7 @@ class Field : public zukou::Background
   Field(zukou::App *app);
 
  private:
-  zukou::OpenGLVertexBuffer *vertex_buffer_;
-
   zukou::OpenGLComponent *sky_component_;
-  zukou::OpenGLElementArrayBuffer *sky_element_array_;
   zukou::OpenGLShaderProgram *sky_shader_;
 };
 
