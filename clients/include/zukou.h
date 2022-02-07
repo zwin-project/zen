@@ -298,6 +298,23 @@ CuboidWindow::quaternion()
   return quaternion_;
 }
 
+class Background : public VirtualObject
+{
+ public:
+  Background(App *app);
+  virtual ~Background();
+  struct zgn_background *background();
+
+ protected:
+  struct zgn_background *background_;
+};
+
+inline struct zgn_background *
+Background::background()
+{
+  return background_;
+}
+
 class Task
 {
  public:

@@ -4,6 +4,7 @@ deps_zukou = [
 
 srcs_zukou = [
   'app.cc',
+  'background.cc',
   'buffer.cc',
   'cuboid-window.cc',
   'data-offer.cc',
