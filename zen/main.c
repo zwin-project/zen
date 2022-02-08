@@ -4,12 +4,14 @@
 static struct zen_config config = {
     .fullscreen_preview = false,
     .hidden_cursor = false,
+    .better_preview = false,
     .seat = "seat0",
 };
 
 static const struct zen_option options[] = {
     {ZEN_OPTION_BOOLEAN, "fullscreen preview", &config.fullscreen_preview},
     {ZEN_OPTION_BOOLEAN, "hidden cursor", &config.hidden_cursor},
+    {ZEN_OPTION_BOOLEAN, "better preview", &config.better_preview},
     {ZEN_OPTION_STRING, "seat", &config.seat},
 };
 
