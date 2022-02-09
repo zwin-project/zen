@@ -38,7 +38,7 @@ main(int argc, char const *argv[])
   if (app->Connect("zigen-0") == false) return EXIT_FAILURE;
 
   ObjViewer *viewer = new ObjViewer(app, parser);
-  viewer->Render();
+  (void)viewer;
 
   if (app->Run())
     return EXIT_SUCCESS;
