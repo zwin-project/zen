@@ -13,17 +13,14 @@ struct GLComponentObject {
   zukou::OpenGLShaderProgram *shader;
 };
 
-class ObjViewer
+class ObjViewer : public zukou::Background
 {
  public:
-  ObjViewer(zukou::App *app, zukou::VirtualObject *virtual_object,
-      ObjParser *obj_parser);
+  ObjViewer(zukou::App *app, ObjParser *obj_parser);
   ~ObjViewer();
   bool Render();
 
  private:
-  zukou::App *app_;
-  zukou::VirtualObject *virtual_object_;
   ObjParser *parser_;
 
   std::vector<GLComponentObject> component_list_;
