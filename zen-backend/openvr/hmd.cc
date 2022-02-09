@@ -4,7 +4,7 @@
 #include <libzen-compositor/libzen-compositor.h>
 #include <openvr/openvr.h>
 
-Hmd::Hmd() {}
+Hmd::Hmd(struct zen_config *config) : better_preview_(config->better_preview) {}
 
 bool
 Hmd::Init()
@@ -24,17 +24,26 @@ Hmd::Init()
   }
 
   vr_system_->GetRecommendedRenderTargetSize(&display_width_, &display_height_);
+  preview_width_ = 1920;
+  preview_height_ = 1080;
+  preview_distance_ = 960;
 
   glm_mat4_identity(head_pose_);
 
-  if (!InitEye(kLeftEye)) {
+  if (!InitEye(kLeftEye, display_width_, display_height_)) {
     zen_log("Hmd: failed to init a left eye\n");
     goto err_left_eye;
   }
 
-  if (!InitEye(kRightEye)) {
+  if (!InitEye(kRightEye, display_width_, display_height_)) {
     zen_log("Hmd: failed to init a right eye\n");
     goto err_right_eye;
+  }
+
+  if (better_preview_ &&
+      !InitEye(kPreviewEye, preview_width_, preview_height_)) {
+    zen_log("Hmd: failed to init a preview eye\n");
+    goto err_preview_eye;
   }
 
   if (!InitPreview()) {
@@ -45,6 +54,9 @@ Hmd::Init()
   return true;
 
 err_preview:
+  DeinitEye(kPreviewEye);
+
+err_preview_eye:
   DeinitEye(kRightEye);
 
 err_right_eye:
@@ -66,8 +78,8 @@ Hmd::~Hmd()
   vr::VR_Shutdown();
 }
 
-void
-Hmd::GetCameras(struct zen_opengl_renderer_camera cameras[2])
+int
+Hmd::GetCameras(struct zen_opengl_renderer_camera *cameras)
 {
   for (int i = 0; i < 2; i++) {
     cameras[i].framebuffer_id = eyes_[i].framebuffer_id_;
@@ -83,6 +95,24 @@ Hmd::GetCameras(struct zen_opengl_renderer_camera cameras[2])
     cameras[i].viewport.x = 0;
     cameras[i].viewport.y = 0;
   }
+
+  if (!better_preview_) return 2;
+
+  cameras[2].framebuffer_id = eyes_[kPreviewEye].framebuffer_id_;
+
+  glm_mat4_copy(
+      eyes_[kPreviewEye].projection_matrix_, cameras[2].projection_matrix);
+
+  glm_mat4_copy(head_pose_, cameras[2].view_matrix);
+  glm_mat4_mul(eyes_[kPreviewEye].head_to_view_matrix_, cameras[2].view_matrix,
+      cameras[2].view_matrix);
+
+  cameras[2].viewport.width = preview_width_;
+  cameras[2].viewport.height = preview_height_;
+  cameras[2].viewport.x = 0;
+  cameras[2].viewport.y = 0;
+
+  return 3;
 }
 
 void
@@ -94,6 +124,17 @@ Hmd::GetHeadPosition(vec3 position)
 
 void
 Hmd::DrawPreview(GLuint framebuffer, uint32_t view_width, uint32_t view_height)
+{
+  if (better_preview_) {
+    DrawBetterPreview(framebuffer, view_width, view_height);
+  } else {
+    DrawCopyPreview(framebuffer, view_width, view_height);
+  }
+}
+
+void
+Hmd::DrawCopyPreview(
+    GLuint framebuffer, uint32_t view_width, uint32_t view_height)
 {
   int x, y, width, height;
   if (view_width * display_height_ > display_width_ * 2 * view_height) {
@@ -132,6 +173,52 @@ Hmd::DrawPreview(GLuint framebuffer, uint32_t view_width, uint32_t view_height)
   glDrawElements(GL_TRIANGLES, preview_.index_count_ / 2, GL_UNSIGNED_SHORT,
       (const void *)(uintptr_t)(sizeof(unsigned short) * preview_.index_count_ /
                                 2));
+
+  glBindVertexArray(0);
+  glUseProgram(0);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void
+Hmd::DrawBetterPreview(
+    GLuint framebuffer, uint32_t view_width, uint32_t view_height)
+{
+  int x, y, width, height;
+  if (view_width * preview_height_ > preview_width_ * view_height) {
+    height = view_height;
+    width = preview_width_ * view_height / preview_height_;
+    x = (view_width - width) / 2;
+    y = 0;
+  } else {
+    width = view_width;
+    height = preview_height_ * view_width / preview_width_;
+    x = 0;
+    y = (view_height - height) / 2;
+  }
+
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, eyes_[kPreviewEye].framebuffer_id_);
+  glBindFramebuffer(
+      GL_DRAW_FRAMEBUFFER, eyes_[kPreviewEye].resolve_framebuffer_id_);
+  glBlitFramebuffer(0, 0, preview_width_, preview_height_, 0, 0, preview_width_,
+      preview_height_, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+  glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+  glDisable(GL_DEPTH_TEST);
+  glViewport(x, y, width, height);
+  glClearColor(0.4, 0.4, 0.4, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
+
+  glBindVertexArray(preview_.vertex_array_);
+  glUseProgram(preview_.shader_);
+
+  glBindTexture(GL_TEXTURE_2D, eyes_[kPreviewEye].resolve_texture_id_);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glDrawElements(GL_TRIANGLES, preview_.index_count_, GL_UNSIGNED_SHORT, 0);
 
   glBindVertexArray(0);
   glUseProgram(0);
@@ -193,7 +280,7 @@ Hmd::CompileShader(
 }
 
 bool
-Hmd::InitEye(HmdEye eye)
+Hmd::InitEye(HmdEye eye, uint32_t width, uint32_t height)
 {
   glGenFramebuffers(1, &eyes_[eye].framebuffer_id_);
   glBindFramebuffer(GL_FRAMEBUFFER, eyes_[eye].framebuffer_id_);
@@ -201,14 +288,14 @@ Hmd::InitEye(HmdEye eye)
   glGenRenderbuffers(1, &eyes_[eye].depth_buffer_id_);
   glBindRenderbuffer(GL_RENDERBUFFER, eyes_[eye].depth_buffer_id_);
   glRenderbufferStorageMultisample(
-      GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT, display_width_, display_height_);
+      GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT, width, height);
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
       GL_RENDERBUFFER, eyes_[eye].depth_buffer_id_);
 
   glGenTextures(1, &eyes_[eye].texture_id_);
   glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, eyes_[eye].texture_id_);
-  glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8,
-      display_width_, display_height_, true);
+  glTexImage2DMultisample(
+      GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8, width, height, true);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
       GL_TEXTURE_2D_MULTISAMPLE, eyes_[eye].texture_id_, 0);
 
@@ -219,8 +306,8 @@ Hmd::InitEye(HmdEye eye)
   glBindTexture(GL_TEXTURE_2D, eyes_[eye].resolve_texture_id_);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, display_width_, display_height_, 0,
-      GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA,
+      GL_UNSIGNED_BYTE, nullptr);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
       eyes_[eye].resolve_texture_id_, 0);
 
@@ -289,8 +376,16 @@ Hmd::InitPreview()
       {+1, +1, 1, 1},
   };
 
-  GLushort indices[] = {0, 1, 3, 0, 3, 2, 4, 5, 7, 4, 7, 6};
-  preview_.index_count_ = sizeof(indices) / sizeof(indices[0]);
+  GLushort better_preview_indices[] = {0, 2, 5, 7, 5, 2};
+  GLushort copy_preview_indices[] = {0, 1, 3, 0, 3, 2, 4, 5, 7, 4, 7, 6};
+  GLushort *indices;
+  if (better_preview_) {
+    preview_.index_count_ = ARRAY_LENGTH(better_preview_indices);
+    indices = better_preview_indices;
+  } else {
+    preview_.index_count_ = ARRAY_LENGTH(copy_preview_indices);
+    indices = copy_preview_indices;
+  }
 
   glGenVertexArrays(1, &preview_.vertex_array_);
   glBindVertexArray(preview_.vertex_array_);
@@ -388,6 +483,18 @@ Hmd::UpdateProjectionMatrix(HmdEye eye)
 {
   float nearClip = 0.1f;
   float farClip = 10000.0f;
+
+  if (eye == kPreviewEye) {
+    mat4 tmp = {
+        2 * (float)preview_distance_ / (float)preview_width_, 0, 0, 0,   //
+        0, 2 * (float)preview_distance_ / (float)preview_height_, 0, 0,  //
+        0, 0, farClip / (nearClip - farClip), -1,                        //
+        0, 0, farClip * nearClip / (nearClip - farClip), 0               //
+    };
+    glm_mat4_copy(tmp, eyes_[eye].projection_matrix_);
+    return;
+  }
+
   vr::Hmd_Eye hmd_eye = eye == kLeftEye ? vr::Eye_Left : vr::Eye_Right;
   vr::HmdMatrix44_t mat =
       vr_system_->GetProjectionMatrix(hmd_eye, nearClip, farClip);
@@ -405,6 +512,11 @@ Hmd::UpdateProjectionMatrix(HmdEye eye)
 void
 Hmd::UpdateHeadToViewMatrix(HmdEye eye)
 {
+  if (eye == kPreviewEye) {
+    glm_mat4_identity(eyes_[eye].head_to_view_matrix_);
+    return;
+  }
+
   vr::Hmd_Eye hmd_eye = eye == kLeftEye ? vr::Eye_Left : vr::Eye_Right;
   vr::HmdMatrix34_t mat = vr_system_->GetEyeToHeadTransform(hmd_eye);
 

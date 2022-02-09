@@ -13,11 +13,11 @@ OpenvrOutputRepaint(struct zen_output* zen_output)
 {
   struct timespec next_repaint;
   struct openvr_output* output = (struct openvr_output*)zen_output;
-  struct zen_opengl_renderer_camera cameras[2];
+  struct zen_opengl_renderer_camera cameras[3];
+  int camera_count;
 
-  output->hmd->GetCameras(cameras);
-  zen_opengl_renderer_set_cameras(
-      output->renderer, cameras, ARRAY_LENGTH(cameras));
+  camera_count = output->hmd->GetCameras(cameras);
+  zen_opengl_renderer_set_cameras(output->renderer, cameras, camera_count);
   zen_opengl_renderer_render(output->renderer);
 
   output->hmd->Submit();
@@ -62,7 +62,7 @@ zen_output_create(struct zen_compositor* compositor)
     goto err_window;
   }
 
-  hmd = new Hmd();
+  hmd = new Hmd(compositor->config);
   if (!hmd->Init()) {
     zen_log("openvr output: failed to initialize HMD\n");
     goto err_hmd;
