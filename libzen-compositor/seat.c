@@ -266,6 +266,25 @@ zen_seat_notify_ray_button(struct zen_seat* seat, const struct timespec* time,
 }
 
 WL_EXPORT void
+zen_seat_notify_ray_axis(struct zen_seat* seat, const struct timespec* time,
+    struct zen_ray_axis_event* event)
+{
+  struct zen_ray* ray = seat->ray;
+  if (ray == NULL) return;
+
+  ray->grab->interface->axis(ray->grab, time, event);
+}
+
+WL_EXPORT void
+zen_seat_notify_ray_frame(struct zen_seat* seat)
+{
+  struct zen_ray* ray = seat->ray;
+  if (ray == NULL) return;
+
+  ray->grab->interface->frame(ray->grab);
+}
+
+WL_EXPORT void
 zen_seat_notify_key(struct zen_seat* seat, const struct timespec* time,
     uint32_t key, enum zgn_keyboard_key_state state)
 {

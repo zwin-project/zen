@@ -111,6 +111,21 @@ drag_grab_ray_button(struct zen_ray_grab* grab, const struct timespec* time,
 }
 
 static void
+drag_grab_ray_axis(struct zen_ray_grab* grab, const struct timespec* time,
+    struct zen_ray_axis_event* event)
+{
+  UNUSED(grab);
+  UNUSED(time);
+  UNUSED(event);
+}
+
+static void
+drag_grab_ray_frame(struct zen_ray_grab* grab)
+{
+  UNUSED(grab);
+}
+
+static void
 drag_grab_ray_cancel(struct zen_ray_grab* grab)
 {
   struct zen_ray* ray = grab->ray;
@@ -125,6 +140,8 @@ static const struct zen_ray_grab_interface drag_grab_interface = {
     .focus = drag_grab_ray_focus,
     .motion = drag_grab_ray_motion,
     .button = drag_grab_ray_button,
+    .axis = drag_grab_ray_axis,
+    .frame = drag_grab_ray_frame,
     .cancel = drag_grab_ray_cancel,
 };
 

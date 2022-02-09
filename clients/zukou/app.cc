@@ -149,11 +149,45 @@ ray_button(void *data, struct zgn_ray *ray, uint32_t serial, uint32_t time,
   app->RayButton(ray, serial, time, button, (enum zgn_ray_button_state)state);
 }
 
+static void
+ray_axis(void *data, struct zgn_ray *zgn_ray, uint32_t time, uint32_t axis,
+    wl_fixed_t value)
+{
+  // TODO:
+  (void)data;
+  (void)zgn_ray;
+  (void)time;
+  (void)axis;
+  (void)value;
+}
+
+static void
+ray_frame(void *data, struct zgn_ray *zgn_ray)
+{
+  // TODO:
+  (void)data;
+  (void)zgn_ray;
+}
+
+static void
+ray_axis_discrete(
+    void *data, struct zgn_ray *zgn_ray, uint32_t axis, int32_t discrete)
+{
+  // TODO:
+  (void)data;
+  (void)zgn_ray;
+  (void)axis;
+  (void)discrete;
+}
+
 static const struct zgn_ray_listener ray_listener = {
     ray_enter,
     ray_leave,
     ray_motion,
     ray_button,
+    ray_axis,
+    ray_frame,
+    ray_axis_discrete,
 };
 
 static void

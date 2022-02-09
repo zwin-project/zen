@@ -38,7 +38,7 @@ static const struct libinput_interface interface = {
     .close_restricted = close_restricted,
 };
 
-static void
+static bool
 handle_pointer_motion(
     struct zen_seat* seat, struct libinput_event_pointer* pointer_event)
 {
@@ -55,9 +55,11 @@ handle_pointer_motion(
       libinput_event_pointer_get_dx(pointer_event) / 1024;
 
   zen_seat_notify_ray_motion(seat, &time, &event);
+
+  return true;
 }
 
-static void
+static bool
 handle_pointer_button(
     struct zen_seat* seat, struct libinput_event_pointer* pointer_event)
 {
@@ -70,13 +72,104 @@ handle_pointer_button(
           seat_button_count != 1) ||
       (button_state == LIBINPUT_BUTTON_STATE_RELEASED &&
           seat_button_count != 0))
-    return;
+    return false;
 
   timespec_from_usec(
       &time, libinput_event_pointer_get_time_usec(pointer_event));
 
   zen_seat_notify_ray_button(seat, &time,
       libinput_event_pointer_get_button(pointer_event), button_state);
+
+  return true;
+}
+
+static double
+normalize_scroll(struct libinput_event_pointer* pointer_event,
+    enum libinput_pointer_axis axis)
+{
+  enum libinput_pointer_axis_source source;
+  double value = 0.0;
+
+  source = libinput_event_pointer_get_axis_source(pointer_event);
+
+  switch (source) {
+    case LIBINPUT_POINTER_AXIS_SOURCE_WHEEL:
+      value = 10 * libinput_event_pointer_get_axis_value_discrete(
+                       pointer_event, axis);
+      break;
+    case LIBINPUT_POINTER_AXIS_SOURCE_FINGER:
+    case LIBINPUT_POINTER_AXIS_SOURCE_CONTINUOUS:
+      value = libinput_event_pointer_get_axis_value(pointer_event, axis);
+      break;
+    default:
+      assert(!"unhandled event source in normalize_scroll");
+  }
+
+  return value;
+}
+
+static int32_t
+get_axis_discrete(struct libinput_event_pointer* pointer_event,
+    enum libinput_pointer_axis axis)
+{
+  enum libinput_pointer_axis_source source;
+
+  source = libinput_event_pointer_get_axis_source(pointer_event);
+
+  if (source != LIBINPUT_POINTER_AXIS_SOURCE_WHEEL) return 0;
+
+  return libinput_event_pointer_get_axis_value_discrete(pointer_event, axis);
+}
+
+static bool
+handle_pointer_axis(
+    struct zen_seat* seat, struct libinput_event_pointer* pointer_event)
+{
+  bool has_vert, has_horiz;
+  double vert, horiz;
+  struct timespec time;
+  enum libinput_pointer_axis axis;
+  struct zen_ray_axis_event zen_axis_event;
+  int32_t vert_discrete, horiz_discrete;
+
+  has_vert = libinput_event_pointer_has_axis(
+      pointer_event, LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL);
+
+  has_horiz = libinput_event_pointer_has_axis(
+      pointer_event, LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL);
+
+  if (!has_vert && !has_horiz) return false;
+
+  // TODO: axis source
+
+  timespec_from_usec(
+      &time, libinput_event_pointer_get_time_usec(pointer_event));
+
+  if (has_vert) {
+    axis = LIBINPUT_POINTER_AXIS_SCROLL_VERTICAL;
+    vert_discrete = get_axis_discrete(pointer_event, axis);
+    vert = normalize_scroll(pointer_event, axis);
+    zen_axis_event.axis = ZGN_RAY_AXIS_VERTICAL_SCROLL;
+    zen_axis_event.value = vert;
+    zen_axis_event.discrete = vert_discrete;
+    zen_axis_event.has_discrete = (vert_discrete != 0);
+
+    zen_seat_notify_ray_axis(seat, &time, &zen_axis_event);
+  }
+
+  if (has_horiz) {
+    axis = LIBINPUT_POINTER_AXIS_SCROLL_HORIZONTAL;
+    horiz_discrete = get_axis_discrete(pointer_event, axis);
+    horiz = normalize_scroll(pointer_event, axis);
+    zen_axis_event.axis = ZGN_RAY_AXIS_HORIZONTAL_SCROLL;
+    zen_axis_event.value = horiz;
+    zen_axis_event.discrete = horiz_discrete;
+    zen_axis_event.has_discrete = (horiz_discrete != 0);
+
+    zen_seat_notify_ray_axis(seat, &time, &zen_axis_event);
+  }
+
+  return true;
 }
 
 static void
@@ -139,14 +232,20 @@ handle_event(int fd, uint32_t mask, void* data)
     zen_log("libinput device: failed to dispatch libinput\n");
 
   while ((event = libinput_get_event(udev_seat->libinput))) {
+    bool need_frame = false;
     switch (libinput_event_get_type(event)) {
       case LIBINPUT_EVENT_POINTER_MOTION:
-        handle_pointer_motion(
+        need_frame = handle_pointer_motion(
             udev_seat->base, libinput_event_get_pointer_event(event));
         break;
 
       case LIBINPUT_EVENT_POINTER_BUTTON:
-        handle_pointer_button(
+        need_frame = handle_pointer_button(
+            udev_seat->base, libinput_event_get_pointer_event(event));
+        break;
+
+      case LIBINPUT_EVENT_POINTER_AXIS:
+        need_frame = handle_pointer_axis(
             udev_seat->base, libinput_event_get_pointer_event(event));
         break;
 
@@ -167,6 +266,9 @@ handle_event(int fd, uint32_t mask, void* data)
       default:
         break;
     }
+
+    if (need_frame) zen_seat_notify_ray_frame(udev_seat->base);
+
     libinput_event_destroy(event);
   }
 
