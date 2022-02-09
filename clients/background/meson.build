@@ -1,6 +1,10 @@
 srcs_background = [
   'field.cc',
   'main.cc',
+  'file-reader.cc',
+  'http-reader.cc',
+  'obj-parser.cc',
+  'obj-viewer.cc',
   zigen_protocol_c,
   zigen_client_protocol_h,
   zigen_shell_protocol_c,
@@ -11,6 +15,7 @@ srcs_background = [
 
 deps_background = [
   dep_libzukou_public,
+  dep_curl,
 ]
 
 executable(
