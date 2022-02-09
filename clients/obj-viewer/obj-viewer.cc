@@ -1,7 +1,11 @@
 #include "obj-viewer.h"
 
+#include <linux/input-event-codes.h>
 #include <string.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <iostream>
 
 #include "types.h"
@@ -26,7 +30,7 @@ const char *vertex_shader = GLSL(
       vec4 specular;
     };
     uniform mat4 zModel; uniform mat4 zVP; uniform ZLight zLight;
-    layout(location = 0) in vec4 localPosition;
+    uniform mat4 model; layout(location = 0) in vec4 localPosition;
     layout(location = 1) in vec3 norm; out vec4 frontColor; void main() {
       vec4 position = zModel * localPosition;
       vec3 view = -normalize(position.xyz);
@@ -37,7 +41,7 @@ const char *vertex_shader = GLSL(
       float specular = max(dot(norm, halfway), 0.0);
       frontColor = (zLight.diffuse * 0.5 * diffuse +
                     zLight.specular * 0.5 * specular + zLight.ambient / 10);
-      gl_Position = zVP * position + vec4(0.0, 0.0, -1.0, 1.0);
+      gl_Position = zVP * model * position;
     });
 
 // const char *fragment_shader =
@@ -55,90 +59,122 @@ const char *vertex_shader = GLSL(
 //                effectiveOpacity);
 //          });
 
-const char *fragment_shader =
-    GLSL(out vec4 outputColor; in vec4 frontColor;
-         void main() { outputColor = vec4(frontColor.xyz, 1.0); });
+const char *fragment_shader = GLSL(
+    uniform vec3 ambient; uniform vec3 diffuse; uniform vec3 specular;
+    out vec4 outputColor; in vec4 frontColor; void main() {
+      outputColor = vec4((ambient + diffuse + specular) * frontColor.xyz, 1.0);
+    });
 
-ObjViewer::ObjViewer(zukou::App *app, ObjParser *obj_parser) : Background(app)
+ObjViewer::ObjViewer(zukou::App *app, ObjParser *obj_parser)
+    : CuboidWindow(app, glm::vec3(1.0)), min_(FLT_MAX), max_(FLT_MIN)
 {
   parser_ = obj_parser;
-}
-// : app_(app), virtual_object_(virtual_object), parser_(obj_parser)
 
-ObjViewer::~ObjViewer() {}
-
-bool
-ObjViewer::Render()
-{
   for (auto obj : parser_->obj_list()) {
-    // uint32_t triangle_count = 0;
-    // for (auto face : obj.faces) {
-    // triangle_count += face.size() - 2;
-    // }
-    int vertex_count = 0;
-    for (auto face : obj.faces) vertex_count += face.size();
+    std::vector<Vertex> buffer;
+    for (auto face : obj.faces) {
+      for (size_t i = 2; i < face.size(); i++) {
+        ObjFacePoint face_point = face[0];
+        buffer.push_back(Vertex(parser_->vertices()[face_point.vertex_index],
+            parser_->norms()[face_point.norm_index]));
+
+        face_point = face[i - 1];
+        buffer.push_back(Vertex(parser_->vertices()[face_point.vertex_index],
+            parser_->norms()[face_point.norm_index]));
+
+        face_point = face[i];
+        buffer.push_back(Vertex(parser_->vertices()[face_point.vertex_index],
+            parser_->norms()[face_point.norm_index]));
+      }
+    }
 
     zukou::OpenGLComponent *component = new zukou::OpenGLComponent(app_, this);
     zukou::OpenGLVertexBuffer *vertex_buffer =
-        new zukou::OpenGLVertexBuffer(app_, sizeof(Vertex) * vertex_count);
+        new zukou::OpenGLVertexBuffer(app_, sizeof(Vertex) * buffer.size());
     zukou::OpenGLShaderProgram *shader = new zukou::OpenGLShaderProgram(app_);
 
     if (obj.mtl_name == "" || parser_->mtl_table().count(obj.mtl_name) == 0) {
       std::cerr << "material not found: " << obj.mtl_name << std::endl;
-      return false;
+      return;
     }
 
     MtlObject mtl = parser_->mtl_table()[obj.mtl_name];
 
-    Vertex *data = (Vertex *)vertex_buffer->data();
-
-    for (auto face : obj.faces) {
-      for (auto f : face) {
-        data->point = parser_->vertices()[f.vertex_index];
-        data->norm = parser_->norms()[f.norm_index];
-
-        // if (obj.name == "Plane") {
-        // std::cout << "point: (";
-        // std::cout << data->point[0] << ", ";
-        // std::cout << data->point[1] << ", ";
-        // std::cout << data->point[2] << "";
-        // std::cout << ") ";
-        // std::cout << "norm: (";
-        // std::cout << data->norm[0] << ", ";
-        // std::cout << data->norm[1] << ", ";
-        // std::cout << data->norm[2] << "";
-        // std::cout << ")";
-        // std::cout << std::endl;
-        // }
-
-        data++;
-      }
-    }
-
-    // std::cout << "triangle size: " << triangle_count << std::endl;
-
     shader->SetVertexShader(vertex_shader, strlen(vertex_shader));
     shader->SetFragmentShader(fragment_shader, strlen(fragment_shader));
     shader->Link();
-    // shader->SetUniformVariable("ambient", mtl.ambient);
-    // shader->SetUniformVariable("diffuse", mtl.diffuse);
+    shader->SetUniformVariable("ambient", mtl.ambient);
+    shader->SetUniformVariable("diffuse", mtl.diffuse);
     // shader->SetUniformVariable("emissive", mtl.emissive);
-    // shader->SetUniformVariable("specular", mtl.specular);
+    shader->SetUniformVariable("specular", mtl.specular);
     // shader->SetUniformVariable("shininess", mtl.shininess);
     // shader->SetUniformVariable("opacity", mtl.opacity);
+    shader->SetUniformVariable("model", glm::mat4(1));
 
     component->Attach(shader);
-    component->SetCount(vertex_count);
-    // component->SetTopology(ZGN_OPENGL_TOPOLOGY_TRIANGLES);
-    component->SetTopology(ZGN_OPENGL_TOPOLOGY_LINES);
+    component->SetCount(buffer.size());
+    component->SetTopology(ZGN_OPENGL_TOPOLOGY_TRIANGLES);
     component->AddVertexAttribute(0, 3, ZGN_OPENGL_VERTEX_ATTRIBUTE_TYPE_FLOAT,
         false, sizeof(Vertex), offsetof(Vertex, point));
     component->AddVertexAttribute(1, 3, ZGN_OPENGL_VERTEX_ATTRIBUTE_TYPE_FLOAT,
         false, sizeof(Vertex), offsetof(Vertex, norm));
 
-    vertex_buffer->BufferUpdated();
-    component->Attach(vertex_buffer);
-  }
+    {
+      Vertex *data = (Vertex *)vertex_buffer->data();
+      memcpy(data, buffer.data(), sizeof(Vertex) * buffer.size());
 
-  return true;
+      vertex_buffer->BufferUpdated();
+      component->Attach(vertex_buffer);
+    }
+
+    this->component_list_.push_back({
+        component,
+        vertex_buffer,
+        shader,
+    });
+  }
+}
+
+ObjViewer::~ObjViewer() {}
+
+void
+ObjViewer::Configure(uint32_t serial, glm::vec3 half_size, glm::quat quaternion)
+{
+  zgn_cuboid_window_ack_configure(cuboid_window(), serial);
+  half_size_ = half_size;
+  quaternion_ = quaternion;
+  // glm::mat4 model = glm::mat4(1);
+  // glm::vec3 delta(0);
+
+  // float zoom = FLT_MAX;
+  // for (int i = 0; i < 3; i++) {
+  //   delta[i] = (max_[i] + min_[i]) / 2;
+
+  //   float l = max_[i] - min_[i];
+  //   float r = half_size_[i] * 2 / l;
+  //   if (r < zoom) zoom = r;
+  // }
+
+  // model = glm::rotate(model, -(float)M_PI / 2, glm::vec3(1.0, 0.0, 0.0));
+  // model = glm::rotate(model, -(float)M_PI / 2, glm::vec3(0.0, 0.0, 1.0));
+  // model = glm::scale(model, glm::vec3(zoom));
+  // model = glm::translate(model, -delta);
+
+  // for (auto component_object : component_list_) {
+  //   component_object.shader->SetUniformVariable("model", model);
+  //   component_object.component->Attach(component_object.shader);
+  // }
+
+  this->Commit();
+}
+
+void
+ObjViewer::RayButton(uint32_t serial, uint32_t time, uint32_t button,
+    enum zgn_ray_button_state state)
+{
+  (void)time;
+  (void)button;
+  if (state == ZGN_RAY_BUTTON_STATE_PRESSED) {
+    zgn_cuboid_window_move(cuboid_window(), app()->seat(), serial);
+  }
 }
