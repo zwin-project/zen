@@ -68,6 +68,18 @@ OpenGLShaderProgram::SetUniformVariable(const char *location, glm::vec3 vec)
   wl_array_release(&array);
 }
 
+void
+OpenGLShaderProgram::SetUniformVariable(const char *location, float value)
+{
+  struct wl_array array;
+  glm::vec1 vec(value);
+  wl_array_init(&array);
+  glm_vec1_to_wl_array(vec, &array);
+  zgn_opengl_shader_program_set_uniform_float_vector(
+      shader(), location, 1, 1, &array);
+  wl_array_release(&array);
+}
+
 bool
 OpenGLShaderProgram::SetVertexShader(const char *source, size_t len)
 {

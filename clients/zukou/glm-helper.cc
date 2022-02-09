@@ -14,6 +14,14 @@ glm_vec3_from_wl_array(struct wl_array *array)
 }
 
 void
+glm_vec1_to_wl_array(glm::vec1 v, struct wl_array *array)
+{
+  size_t size = sizeof(float) * 1;
+  float *data = (float *)wl_array_add(array, size);
+  memcpy(data, &v, size);
+}
+
+void
 glm_vec3_to_wl_array(glm::vec3 v, struct wl_array *array)
 {
   size_t size = sizeof(float) * 3;

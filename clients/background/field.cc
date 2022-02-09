@@ -14,7 +14,7 @@ const char *sky_vertex_shader = GLSL(
         vec2(-1.0, 1.0), vec2(-1.0, -1.0), vec2(1.0, 1.0), vec2(1.0, -1.0));
 
     void main() {
-      gl_Position = vec4(data[gl_VertexID], 0.0, 1.0);
+      gl_Position = vec4(data[gl_VertexID], 1.0, 1.0);
       pos = transpose(mat3(zView)) * (inverse(zProjection) * gl_Position).xyz;
       fsun = vec3(0.0, sin(time * 0.01), cos(time * 0.01));
     });
@@ -94,7 +94,7 @@ const char *sky_fragment_shader = GLSL(
       color.rgb += noise(pos * 1000) * 0.01;
     });
 
-Field::Field(zukou::App *app) : Background(app)
+Field::Field(zukou::App *app) : Background(app), app_(app), time_(0.0)
 {
   sky_component_ = new zukou::OpenGLComponent(app, this);
 
@@ -103,8 +103,21 @@ Field::Field(zukou::App *app) : Background(app)
   sky_shader_->SetFragmentShader(
       sky_fragment_shader, strlen(sky_fragment_shader));
   sky_shader_->Link();
+  sky_shader_->SetUniformVariable("time", time_);
 
   sky_component_->Attach(sky_shader_);
   sky_component_->SetCount(4);
   sky_component_->SetTopology(ZGN_OPENGL_TOPOLOGY_TRIANGLE_STRIP);
+}
+
+void
+Field::Frame(uint32_t time)
+{
+  (void)time;
+  time_ += 0.01;
+
+  sky_shader_->SetUniformVariable("time", time_);
+  sky_component_->Attach(sky_shader_);
+
+  this->NextFrame();
 }
