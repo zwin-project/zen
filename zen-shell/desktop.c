@@ -68,6 +68,36 @@ move_grab_ray_button(struct zen_ray_grab *grab, const struct timespec *time,
 }
 
 static void
+move_grab_ray_axis(struct zen_ray_grab *grab, const struct timespec *time,
+    struct zen_ray_axis_event *event)
+{
+  UNUSED(grab);
+  UNUSED(time);
+  struct zen_ray *ray = grab->ray;
+  struct zen_desktop_move_grab *move_grab =
+      wl_container_of(grab, move_grab, base);
+  struct zen_cuboid_window *cuboid_window =
+      zen_weak_link_get_user_data(&move_grab->cuboid_window_link);
+  vec3 direction, delta;
+  float old_target_distance = ray->target_distance;
+
+  if (cuboid_window == NULL) return;
+
+  ray->target_distance *= (1.0f - event->value / 500);
+
+  zen_ray_get_direction(ray, direction);
+  glm_vec3_scale(direction, ray->target_distance - old_target_distance, delta);
+
+  glm_translate(cuboid_window->virtual_object->model_matrix, delta);
+}
+
+static void
+move_grab_ray_frame(struct zen_ray_grab *grab)
+{
+  UNUSED(grab);
+}
+
+static void
 move_grab_ray_cancel(struct zen_ray_grab *grab)
 {
   struct zen_desktop_move_grab *move_grab =
@@ -103,6 +133,8 @@ static const struct zen_ray_grab_interface move_grab_interface = {
     .focus = move_grab_ray_focus,
     .motion = move_grab_ray_motion,
     .button = move_grab_ray_button,
+    .axis = move_grab_ray_axis,
+    .frame = move_grab_ray_frame,
     .cancel = move_grab_ray_cancel,
 };
 

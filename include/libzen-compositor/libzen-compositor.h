@@ -113,6 +113,13 @@ struct zen_ray_motion_event {
   float delta_azimuthal_angle;
 };
 
+struct zen_ray_axis_event {
+  uint32_t axis;
+  double value;
+  bool has_discrete;
+  int32_t discrete;
+};
+
 struct zen_ray_grab {
   const struct zen_ray_grab_interface* interface;
   struct zen_ray* ray;
@@ -124,6 +131,9 @@ struct zen_ray_grab_interface {
       struct zen_ray_motion_event* event);
   void (*button)(struct zen_ray_grab* grab, const struct timespec* time,
       uint32_t button, uint32_t state);
+  void (*axis)(struct zen_ray_grab* grab, const struct timespec* time,
+      struct zen_ray_axis_event* event);
+  void (*frame)(struct zen_ray_grab* grab);
   void (*cancel)(struct zen_ray_grab* grab);
 };
 
@@ -353,6 +363,11 @@ void zen_seat_notify_ray_motion(struct zen_seat* seat,
 
 void zen_seat_notify_ray_button(struct zen_seat* seat,
     const struct timespec* time, int32_t button, uint32_t state);
+
+void zen_seat_notify_ray_axis(struct zen_seat* seat,
+    const struct timespec* time, struct zen_ray_axis_event* event);
+
+void zen_seat_notify_ray_frame(struct zen_seat* seat);
 
 void zen_seat_notify_key(struct zen_seat* seat, const struct timespec* time,
     uint32_t key, uint32_t state);

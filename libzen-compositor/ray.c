@@ -155,8 +155,67 @@ default_grab_button(struct zen_ray_grab* grab, const struct timespec* time,
   wl_resource_for_each(resource, &ray_client->resource_list)
   {
     zgn_ray_send_button(resource, serial, msec, button, state);
-    wl_client_flush(wl_resource_get_client(resource));
   }
+}
+
+static void
+default_grab_axis(struct zen_ray_grab* grab, const struct timespec* time,
+    struct zen_ray_axis_event* event)
+{
+  struct zen_ray* ray = grab->ray;
+  struct zen_virtual_object* focus_virtual_object;
+  struct zen_ray_client* ray_client;
+  struct wl_resource* resource;
+  uint32_t msec;
+
+  focus_virtual_object =
+      zen_weak_link_get_user_data(&ray->focus_virtual_object_link);
+
+  if (focus_virtual_object == NULL) return;
+
+  ray_client = zen_ray_client_find(
+      wl_resource_get_client(focus_virtual_object->resource), ray);
+
+  if (ray_client == NULL) return;
+
+  msec = timespec_to_msec(time);
+
+  wl_resource_for_each(resource, &ray_client->resource_list)
+  {
+    if (event->has_discrete) {
+      zgn_ray_send_axis_discrete(resource, event->axis, event->discrete);
+    }
+
+    if (event->value)
+      zgn_ray_send_axis(
+          resource, msec, event->axis, wl_fixed_from_double(event->value));
+  }
+}
+
+static void
+default_grab_frame(struct zen_ray_grab* grab)
+{
+  struct zen_ray* ray = grab->ray;
+  struct zen_virtual_object* focus_virtual_object;
+  struct zen_ray_client* ray_client;
+  struct wl_resource* resource;
+
+  focus_virtual_object =
+      zen_weak_link_get_user_data(&ray->focus_virtual_object_link);
+
+  if (focus_virtual_object == NULL) return;
+
+  ray_client = zen_ray_client_find(
+      wl_resource_get_client(focus_virtual_object->resource), ray);
+
+  if (ray_client == NULL) return;
+
+  wl_resource_for_each(resource, &ray_client->resource_list)
+  {
+    zgn_ray_send_frame(resource);
+  }
+
+  wl_client_flush(ray_client->client);
 }
 
 static void
@@ -169,6 +228,8 @@ static const struct zen_ray_grab_interface default_ray_grab_interface = {
     .focus = default_grab_focus,
     .motion = default_grab_motion,
     .button = default_grab_button,
+    .axis = default_grab_axis,
+    .frame = default_grab_frame,
     .cancel = default_grab_cancel,
 };
 
@@ -240,7 +301,7 @@ zen_ray_create(struct zen_seat* seat)
 {
   struct zen_ray* ray;
   struct zen_render_item* render_item;
-  vec3 initial_origin = {0.3f, 1.1f, -0.3f};
+  vec3 initial_origin = {0.3f, 1.1f, 0.0f};
 
   ray = zalloc(sizeof *ray);
   if (ray == NULL) {
