@@ -25,28 +25,35 @@ const char *vertex_shader = GLSL(
       vec4 specular;
     };
     uniform mat4 zModel; uniform mat4 zVP; uniform ZLight zLight;
-    uniform mat4 model; layout(location = 0) in vec4 localPosition;
-    layout(location = 1) in vec3 normUnnormalized; out vec4 frontColor;
+    uniform mat4 model;
+
+    uniform vec3 mtlAmbient; uniform vec3 mtlDiffuse; uniform vec3 mtlSpecular;
+    uniform float mtlShininess;
+
+    layout(location = 0) in vec4 localPosition;
+    layout(location = 1) in vec3 normUnnormalized;
+
+    out vec4 frontColor;
+
     void main() {
       vec3 norm = normalize(model * vec4(normUnnormalized, 0)).xyz;
-      vec4 position = zModel * (localPosition + vec4(2.0, -6.0, 7.0, 0.0));
+      vec4 position = zModel * (localPosition + vec4(-2.0, -4.0, 7.0, 0.0));
       position.z *= -1;
-      vec3 view = -normalize(position.xyz);
       vec3 light = normalize(
           (zLight.position * position.w - zLight.position.w * position).xyz);
-      vec3 halfway = normalize(light + view);
       float diffuse = max(dot(light, norm), 0.0);
-      float specular = max(dot(norm, halfway), 0.0);
-      frontColor = (zLight.diffuse * 0.5 * diffuse +
-                    zLight.specular * 0.5 * specular + zLight.ambient / 10);
+
+      vec3 view = -normalize(position.xyz);
+      vec3 halfway = normalize(light + view);
+      float specular = pow(max(dot(norm, halfway), 0.0), mtlShininess);
+      frontColor =
+          vec4((mtlDiffuse * diffuse + mtlSpecular * specular + mtlAmbient / 5),
+              1.0);
       gl_Position = zVP * model * position;
     });
 
-const char *fragment_shader = GLSL(
-    uniform vec3 ambient; uniform vec3 diffuse; uniform vec3 specular;
-    out vec4 outputColor; in vec4 frontColor; void main() {
-      outputColor = vec4((ambient + diffuse + specular) * frontColor.xyz, 1.0);
-    });
+const char *fragment_shader = GLSL(in vec4 frontColor; out vec4 outputColor;
+                                   void main() { outputColor = frontColor; });
 
 ObjViewer::ObjViewer(zukou::App *app, ObjParser *obj_parser)
     : CuboidWindow(app, glm::vec3(1.0)), min_(FLT_MAX), max_(FLT_MIN)
@@ -102,12 +109,10 @@ ObjViewer::ObjViewer(zukou::App *app, ObjParser *obj_parser)
       model = glm::rotate(model, 0.2f, glm::vec3(0, 1, 0));
       shader->SetUniformVariable("model", model);
 
-      shader->SetUniformVariable("ambient", mtl.ambient);
-      shader->SetUniformVariable("diffuse", mtl.diffuse);
-      // shader->SetUniformVariable("emissive", mtl.emissive);
-      shader->SetUniformVariable("specular", mtl.specular);
-      // shader->SetUniformVariable("shininess", mtl.shininess);
-      // shader->SetUniformVariable("opacity", mtl.opacity);
+      shader->SetUniformVariable("mtlAmbient", mtl.ambient);
+      shader->SetUniformVariable("mtlDiffuse", mtl.diffuse);
+      shader->SetUniformVariable("mtlSpecular", mtl.specular);
+      shader->SetUniformVariable("mtlShininess", mtl.shininess);
 
       component->Attach(shader);
       component->SetCount(buffer.size());
