@@ -65,7 +65,7 @@ zen_shell_protocol_get_cuboid_window(struct wl_client* client,
 }
 
 static void
-zen_shell_protocol_set_background(struct wl_client* client,
+zen_shell_protocol_get_background(struct wl_client* client,
     struct wl_resource* resource, uint32_t id,
     struct wl_resource* virtual_object_resource)
 {
@@ -84,7 +84,7 @@ zen_shell_protocol_set_background(struct wl_client* client,
 static const struct zgn_shell_interface shell_interface = {
     .destroy = zen_shell_protocol_destroy,
     .get_cuboid_window = zen_shell_protocol_get_cuboid_window,
-    .set_background = zen_shell_protocol_set_background,
+    .get_background = zen_shell_protocol_get_background,
 };
 
 static struct zen_virtual_object*
