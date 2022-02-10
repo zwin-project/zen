@@ -15,11 +15,13 @@ struct ObjFacePoint {
   int norm_index;
 };
 
+typedef std::vector<ObjFacePoint> ObjFaceLine;
+
 struct ObjObject {
   std::string name;
-  std::string mtl_name;
   bool smooth_shading;
-  std::vector<std::vector<ObjFacePoint>> faces;
+  std::unordered_map<std::string, std::vector<ObjFaceLine>>
+      faces;  // face lines per mtl name;
 };
 
 struct MtlObject {
@@ -53,6 +55,8 @@ class ObjParser
   std::string mtl_path_;
 
   std::string target_mtl_path_;
+  std::string pending_mtl_name_;
+
   std::vector<glm::vec3> vertices_;
   std::vector<glm::vec2> textures_;
   std::vector<glm::vec3> norms_;

@@ -12,6 +12,7 @@ ObjParser::ObjParser(std::string obj_path, std::string mtl_path)
     : obj_path_(obj_path), mtl_path_(mtl_path)
 {
   target_mtl_path_ = "";
+  pending_mtl_name_ = "";
 }
 
 ObjParser::~ObjParser() {}
@@ -79,9 +80,7 @@ ObjParser::ParseObjName(std::vector<std::string> *tokens)
 
   ObjObject obj;
   obj.name = tokens->at(1);
-  obj.mtl_name = "";
   obj.smooth_shading = false;
-  obj.faces = {};
 
   obj_list_.push_back(obj);
 
@@ -151,7 +150,7 @@ ObjParser::ParseObjMtlName(std::vector<std::string> *tokens)
   if (tokens->size() < 2) return false;
   if (obj_list_.size() == 0) return false;
 
-  obj_list_[obj_list_.size() - 1].mtl_name = tokens->at(1);
+  pending_mtl_name_ = tokens->at(1);
 
   return true;
 }
@@ -173,6 +172,7 @@ ObjParser::ParseFace(std::vector<std::string> *tokens)
 {
   if (tokens->size() < 4) return false;
   if (obj_list_.size() == 0) return false;
+  if (pending_mtl_name_ == "") return false;
   ObjFacePoint face_point;
   std::vector<ObjFacePoint> face;
 
@@ -199,7 +199,7 @@ ObjParser::ParseFace(std::vector<std::string> *tokens)
   } catch (const std::out_of_range &e) {
     return false;
   }
-  obj_list_[obj_list_.size() - 1].faces.push_back(face);
+  obj_list_[obj_list_.size() - 1].faces[pending_mtl_name_].push_back(face);
   return true;
 }
 
