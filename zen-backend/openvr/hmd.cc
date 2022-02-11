@@ -81,12 +81,15 @@ Hmd::~Hmd()
 int
 Hmd::GetCameras(struct zen_opengl_renderer_camera *cameras)
 {
+  mat4 inv_head_pose;
+  glm_mat4_inv_precise(head_pose_, inv_head_pose);
+
   for (int i = 0; i < 2; i++) {
     cameras[i].framebuffer_id = eyes_[i].framebuffer_id_;
 
     glm_mat4_copy(eyes_[i].projection_matrix_, cameras[i].projection_matrix);
 
-    glm_mat4_copy(head_pose_, cameras[i].view_matrix);
+    glm_mat4_copy(inv_head_pose, cameras[i].view_matrix);
     glm_mat4_mul(eyes_[i].head_to_view_matrix_, cameras[i].view_matrix,
         cameras[i].view_matrix);
 
@@ -103,7 +106,7 @@ Hmd::GetCameras(struct zen_opengl_renderer_camera *cameras)
   glm_mat4_copy(
       eyes_[kPreviewEye].projection_matrix_, cameras[2].projection_matrix);
 
-  glm_mat4_copy(head_pose_, cameras[2].view_matrix);
+  glm_mat4_copy(inv_head_pose, cameras[2].view_matrix);
   glm_mat4_mul(eyes_[kPreviewEye].head_to_view_matrix_, cameras[2].view_matrix,
       cameras[2].view_matrix);
 
@@ -119,7 +122,6 @@ void
 Hmd::GetHeadPosition(vec3 position)
 {
   glm_vec4_copy3(head_pose_[3], position);
-  glm_vec3_negate(position);
 }
 
 void
@@ -447,7 +449,7 @@ Hmd::WaitUpdatePoses()
         mat.m[0][3], mat.m[1][3], mat.m[2][3], 1.0f   //
     };
 
-    glm_mat4_inv_precise(tmp, head_pose_);
+    glm_mat4_copy(tmp, head_pose_);
   }
 }
 
@@ -483,13 +485,20 @@ Hmd::UpdateProjectionMatrix(HmdEye eye)
 {
   float nearClip = 0.1f;
   float farClip = 10000.0f;
+  float tan3 = tan(3);
+  float a = 2 * (float)preview_distance_ / (float)preview_width_;
+  float b = 2 * (float)preview_distance_ / (float)preview_height_;
+  float c = (float)(preview_distance_)*tan3 * 2 /
+            (float)preview_height_;  // 6 degrees below
+  float d = farClip / (nearClip - farClip);
+  float e = farClip * nearClip / (nearClip - farClip);
 
   if (eye == kPreviewEye) {
     mat4 tmp = {
-        2 * (float)preview_distance_ / (float)preview_width_, 0, 0, 0,   //
-        0, 2 * (float)preview_distance_ / (float)preview_height_, 0, 0,  //
-        0, 0, farClip / (nearClip - farClip), -1,                        //
-        0, 0, farClip * nearClip / (nearClip - farClip), 0               //
+        a, 0, 0, 0,   //
+        0, b, 0, 0,   //
+        0, c, d, -1,  //
+        0, 0, e, 0    //
     };
     glm_mat4_copy(tmp, eyes_[eye].projection_matrix_);
     return;

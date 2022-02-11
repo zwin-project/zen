@@ -8,7 +8,7 @@
 #include "shader-compiler.h"
 
 #define FOCUS_LINE_WIDTH 4
-#define DEFAULT_LINE_WIDTH 1
+#define DEFAULT_LINE_WIDTH 0
 
 static void update_vertex_buffer(
     struct zen_opengl_cuboid_window_render_item* render_item);
@@ -49,6 +49,7 @@ zen_opengl_cuboid_window_render_item_render(
     struct zen_opengl_cuboid_window_render_item* render_item,
     struct zen_opengl_renderer_camera* camera)
 {
+  if (render_item->line_width == 0) return;
   glLineWidth(render_item->line_width);
   mat4 mvp, rotate;
   glm_quat_mat4(render_item->cuboid_window->quaternion, rotate);
