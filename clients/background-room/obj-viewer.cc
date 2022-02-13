@@ -20,7 +20,8 @@
 
 const char *vertex_shader = GLSL(
 
-    uniform mat4 zModel; uniform mat4 zVP; uniform mat4 model;
+    uniform mat4 zModel; uniform mat4 zVP; uniform mat4 rotate;
+    uniform mat4 transform;
 
     layout(location = 0) in vec4 localPosition;
     layout(location = 1) in vec3 normUnnormalized;
@@ -29,10 +30,10 @@ const char *vertex_shader = GLSL(
     out vec4 position; out vec3 norm; out vec2 texCoord;
 
     void main() {
-      norm = normalize(model * vec4(normUnnormalized, 0)).xyz;
-      position = zModel * (localPosition + vec4(2.0, 0.0, -6.0, 0.0));
+      norm = normalize(rotate * vec4(normUnnormalized, 0)).xyz;
+      position = zModel * rotate * transform * localPosition;
 
-      gl_Position = zVP * model * position;
+      gl_Position = zVP * position;
       texCoord = texCoordIn;
     }
 
@@ -88,6 +89,13 @@ const char *fragment_shader = GLSL(
 ObjViewer::ObjViewer(zukou::App *app, ObjParser *obj_parser)
     : Background(app), min_(FLT_MAX), max_(FLT_MIN)
 {
+  glm::mat4 transform(1);
+  transform = glm::translate(transform, glm::vec3(1, 1, -3));
+  transform = glm::scale(transform, glm::vec3(0.5));
+
+  glm::mat4 rotate = glm::mat4(1);
+  rotate = glm::rotate(rotate, (float)(M_PI / 2.0f), glm::vec3(0, 1, 0));
+
   parser_ = obj_parser;
 
   for (auto mtl : parser_->mtl_table()) {
@@ -156,9 +164,8 @@ ObjViewer::ObjViewer(zukou::App *app, ObjParser *obj_parser)
       shader->SetFragmentShader(fragment_shader, strlen(fragment_shader));
       shader->Link();
 
-      glm::mat4 model = glm::mat4(1);
-      model = glm::rotate(model, (float)(M_PI / 4.0f), glm::vec3(0, 1, 0));
-      shader->SetUniformVariable("model", model);
+      shader->SetUniformVariable("rotate", rotate);
+      shader->SetUniformVariable("transform", transform);
 
       shader->SetUniformVariable("mtlAmbient", mtl.ambient);
       shader->SetUniformVariable("mtlDiffuse", mtl.diffuse);
