@@ -40,5 +40,6 @@ subdir('tests')
 if opt_client
   dep_glm = dependency('glm')
   dep_curl = dependency('libcurl')
+  dep_png = dependency('libpng')
   subdir('clients')
 endif
