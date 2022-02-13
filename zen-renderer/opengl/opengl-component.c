@@ -451,6 +451,7 @@ zen_opengl_component_render(struct zen_opengl_component *component,
   struct zen_opengl_shader_program *shader;
   struct zen_opengl_texture *texture;
 
+  // FIXME: To change implementation to not draw all backgrounds
   if (strcmp(component->virtual_object->role, zen_cuboid_window_role) != 0 &&
       strcmp(component->virtual_object->role, zen_background_role) != 0)
     return;

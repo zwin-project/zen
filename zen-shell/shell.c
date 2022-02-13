@@ -1,5 +1,4 @@
 #include <libzen-compositor/libzen-compositor.h>
-#include <string.h>
 #include <wayland-server.h>
 #include <zen-shell/zen-shell.h>
 #include <zigen-shell-server-protocol.h>
@@ -147,19 +146,6 @@ zen_shell_bind(
   wl_resource_set_implementation(resource, &shell_interface, shell, NULL);
 }
 
-WL_EXPORT void
-zen_shell_unset_background(struct zen_shell* shell)
-{
-  struct zen_background *background, *tmp;
-
-  wl_list_for_each_safe(background, tmp, &shell->background_list, link)
-  {
-    free(background->virtual_object->role);
-    background->virtual_object->role = strdup("");
-    zen_background_destroy(background);
-  }
-}
-
 WL_EXPORT struct zen_shell_base*
 zen_shell_create(struct zen_compositor* compositor)
 {
@@ -183,7 +169,6 @@ zen_shell_create(struct zen_compositor* compositor)
   shell->base.pick_virtual_object = pick_virtual_object;
   shell->compositor = compositor;
   wl_list_init(&shell->cuboid_window_list);
-  wl_list_init(&shell->background_list);
   shell->global = global;
   shell->interface = &zen_desktop_shell_interface;
 

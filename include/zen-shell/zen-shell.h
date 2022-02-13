@@ -18,7 +18,6 @@ struct zen_shell {
   struct zen_compositor* compositor;
 
   struct wl_list cuboid_window_list;
-  struct wl_list background_list;
 
   struct wl_global* global;
 
@@ -44,14 +43,10 @@ struct zen_background {
   struct wl_resource* resource;
   struct zen_virtual_object* virtual_object;
 
-  struct wl_list link;
-
   struct wl_listener virtual_object_destroy_listener;
 };
 
 // Interfaces below will be implementaed outside of zen-shell
-
-void zen_shell_unset_background(struct zen_shell* shell);
 
 struct zen_render_item* zen_cuboid_window_render_item_create(
     struct zen_renderer* renderer, struct zen_cuboid_window* cuboid_window);
