@@ -225,9 +225,17 @@ zen_opengl_shader_program_protocol_link(
   GLint link_success = GL_FALSE;
   glGetProgramiv(shader->program_id, GL_LINK_STATUS, &link_success);
   if (link_success != GL_TRUE) {
+    int error_message_length = 512;
+    char error_message[error_message_length];
+
+    glGetProgramiv(
+        shader->program_id, GL_INFO_LOG_LENGTH, &error_message_length);
+    glGetProgramInfoLog(
+        shader->program_id, error_message_length, NULL, error_message);
+
     wl_resource_post_error(resource,
         ZGN_OPENGL_SHADER_PROGRAM_ERROR_LINKAGE_ERROR,
-        "failed to link shader programs");
+        "failed to link shader programs\n%s", error_message);
     return;
   }
   glUseProgram(shader->program_id);
