@@ -52,7 +52,6 @@ zen_background_create(struct wl_client *client, uint32_t id,
 {
   struct zen_background *background;
   struct wl_resource *resource;
-  struct zen_shell *shell = wl_resource_get_user_data(shell_resource);
 
   if (virtual_object->role_object != NULL) {
     wl_resource_post_error(shell_resource, ZGN_SHELL_ERROR_ROLE,
@@ -88,16 +87,12 @@ zen_background_create(struct wl_client *client, uint32_t id,
   wl_resource_set_implementation(resource, &background_interface, background,
       zen_background_handle_destroy);
 
-  zen_shell_unset_background(shell);
-
   free(virtual_object->role);
   virtual_object->role = strdup(zen_background_role);
   virtual_object->role_object = background;
 
   background->resource = resource;
   background->virtual_object = virtual_object;
-
-  wl_list_insert(&shell->background_list, &background->link);
 
   background->virtual_object_destroy_listener.notify =
       zen_background_virtual_object_destroy_handler;
@@ -118,6 +113,5 @@ zen_background_destroy(struct zen_background *background)
 {
   background->virtual_object->role_object = NULL;
   wl_list_remove(&background->virtual_object_destroy_listener.link);
-  wl_list_remove(&background->link);
   free(background);
 }
