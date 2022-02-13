@@ -1,4 +1,4 @@
-srcs_background = [
+srcs_background_sky = [
   'field.cc',
   'main.cc',
   zigen_protocol_c,
@@ -9,13 +9,13 @@ srcs_background = [
   zigen_opengl_client_protocol_h,
 ]
 
-deps_background = [
+deps_background_sky = [
   dep_libzukou_public,
 ]
 
 executable(
-  'zen-background',
-  srcs_background,
+  'zen-background-sky',
+  srcs_background_sky,
   install: true,
-  dependencies: deps_background,
+  dependencies: deps_background_sky,
 )
