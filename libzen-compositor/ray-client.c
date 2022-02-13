@@ -19,7 +19,21 @@ zen_ray_client_protocol_release(
   wl_resource_destroy(resource);
 }
 
+static void
+zen_ray_client_protocol_set_length(struct wl_client *client,
+    struct wl_resource *resource, uint32_t serial, wl_fixed_t length)
+{
+  struct zen_ray_client *ray_client = wl_resource_get_user_data(resource);
+  struct zen_ray *ray = ray_client->ray;
+  struct wl_resource *focus_resource = ray->focus_virtual_object_link.resource;
+
+  if (focus_resource && wl_resource_get_client(resource) == client &&
+      ray->enter_serial == serial)
+    zen_ray_set_target_distance(ray, wl_fixed_to_double(length));
+}
+
 static const struct zgn_ray_interface ray_interface = {
+    .set_length = zen_ray_client_protocol_set_length,
     .release = zen_ray_client_protocol_release,
 };
 

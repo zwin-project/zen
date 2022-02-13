@@ -5,7 +5,7 @@
 #include <wayland-server.h>
 
 struct zen_ray_client {
-  struct zen_ray *ray;
+  struct zen_ray *ray; /* nonnull */
   struct wl_list link;
   struct wl_listener ray_destroy_listener;
   struct wl_listener client_destroy_listener;

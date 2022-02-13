@@ -22,6 +22,8 @@ extern "C" {
 //         \-------------------------->  |                     |
 //                                       + ------------------- +
 
+#define ZEN_DEFAULT_RAY_LENGTH 1.2
+
 struct zen_config {
   bool fullscreen_preview;
   bool hidden_cursor;
@@ -77,6 +79,7 @@ struct zen_data_device {
 
   struct zen_data_source* data_source; /* nullable; dragging data_source */
 
+  uint32_t enter_serial;
   struct wl_resource* focus_resource;
   struct zen_weak_link focus_virtual_object_link;
 };
@@ -144,6 +147,7 @@ struct zen_ray {
   uint32_t button_count;
   uint32_t grab_button;
   uint32_t grab_serial;
+  uint32_t enter_serial;
 
   struct zen_weak_link focus_virtual_object_link;
 
@@ -331,6 +335,8 @@ void zen_ray_grab_end(struct zen_ray* ray);
 void zen_ray_get_direction(struct zen_ray* ray, vec3 direction);
 
 void zen_ray_move(struct zen_ray* ray, struct zen_ray_motion_event* event);
+
+void zen_ray_set_target_distance(struct zen_ray* ray, float length);
 
 struct zen_ray* zen_ray_create(struct zen_seat* seat);
 

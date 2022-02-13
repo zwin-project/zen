@@ -33,6 +33,8 @@ zen_ray_enter(struct zen_ray* ray, struct zen_virtual_object* virtual_object)
 
   wl_array_release(&origin_array);
   wl_array_release(&direction_array);
+
+  ray->enter_serial = serial;
 }
 
 static void
@@ -96,13 +98,18 @@ default_grab_focus(struct zen_ray_grab* grab)
   struct zen_ray* ray = grab->ray;
   struct zen_shell_base* shell_base = ray->seat->compositor->shell_base;
   struct zen_virtual_object *virtual_object, *current_focus;
+  float ray_distance = ZEN_DEFAULT_RAY_LENGTH;
 
   current_focus = zen_weak_link_get_user_data(&ray->focus_virtual_object_link);
 
-  virtual_object = shell_base->pick_virtual_object(shell_base, ray,
-      ray->local_origin, ray->local_direction, &ray->target_distance);
+  virtual_object = shell_base->pick_virtual_object(
+      shell_base, ray, ray->local_origin, ray->local_direction, &ray_distance);
 
   if (current_focus == virtual_object) return;
+
+  if (ray_distance != ray->target_distance) {
+    zen_ray_set_target_distance(ray, ray_distance);
+  }
 
   if (current_focus) zen_ray_leave(ray);
   if (virtual_object) zen_ray_enter(ray, virtual_object);
@@ -296,6 +303,13 @@ zen_ray_move(struct zen_ray* ray, struct zen_ray_motion_event* event)
   ray->grab->interface->focus(ray->grab);
 }
 
+WL_EXPORT void
+zen_ray_set_target_distance(struct zen_ray* ray, float length)
+{
+  ray->target_distance = length;
+  ray->render_item->commit(ray->render_item);
+}
+
 WL_EXPORT struct zen_ray*
 zen_ray_create(struct zen_seat* seat)
 {
@@ -320,6 +334,7 @@ zen_ray_create(struct zen_seat* seat)
   ray->default_grab.interface = &default_ray_grab_interface;
   ray->default_grab.ray = ray;
   ray->button_count = 0;
+  ray->target_distance = ZEN_DEFAULT_RAY_LENGTH;
   zen_weak_link_init(&ray->focus_virtual_object_link);
   wl_list_init(&ray->ray_client_list);
   wl_signal_init(&ray->destroy_signal);
