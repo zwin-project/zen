@@ -83,7 +83,8 @@ move_grab_ray_axis(struct zen_ray_grab *grab, const struct timespec *time,
 
   if (cuboid_window == NULL) return;
 
-  ray->target_distance *= (1.0f - event->value / 500);
+  zen_ray_set_target_distance(
+      ray, ray->target_distance * (1.0f - event->value / 500));
 
   zen_ray_get_direction(ray, direction);
   glm_vec3_scale(direction, ray->target_distance - old_target_distance, delta);

@@ -5,6 +5,23 @@
 #include "drag-grab.h"
 
 static void
+zen_data_device_protocol_set_length(struct wl_client *client,
+    struct wl_resource *resource, uint32_t serial, wl_fixed_t length)
+{
+  struct zen_data_device *data_device;
+  struct zen_ray *ray;
+  struct wl_resource *focus_resource;
+
+  data_device = wl_resource_get_user_data(resource);
+  ray = data_device->seat->ray;
+  focus_resource = data_device->focus_virtual_object_link.resource;
+
+  if (ray && focus_resource && wl_resource_get_client(resource) == client &&
+      data_device->enter_serial == serial)
+    zen_ray_set_target_distance(ray, wl_fixed_to_double(length));
+}
+
+static void
 zen_data_device_start_drag(struct zen_data_device *data_device,
     struct zen_data_source *data_source, struct zen_virtual_object *icon)
 {
@@ -27,7 +44,7 @@ zen_data_device_start_drag(struct zen_data_device *data_device,
 }
 
 static void
-zgn_data_device_protocol_start_drag(struct wl_client *client,
+zen_data_device_protocol_start_drag(struct wl_client *client,
     struct wl_resource *resource, struct wl_resource *source_resource,
     struct wl_resource *origin_resource, struct wl_resource *icon_resource,
     uint32_t serial)
@@ -64,7 +81,7 @@ err:
 }
 
 static void
-zgn_data_device_protocol_release(
+zen_data_device_protocol_release(
     struct wl_client *client, struct wl_resource *resource)
 {
   UNUSED(client);
@@ -72,8 +89,9 @@ zgn_data_device_protocol_release(
 }
 
 static const struct zgn_data_device_interface data_device_interface = {
-    .start_drag = zgn_data_device_protocol_start_drag,
-    .release = zgn_data_device_protocol_release,
+    .set_length = zen_data_device_protocol_set_length,
+    .start_drag = zen_data_device_protocol_start_drag,
+    .release = zen_data_device_protocol_release,
 };
 
 static void
@@ -133,6 +151,8 @@ zen_data_device_enter(struct zen_data_device *data_device,
 
   wl_array_release(&origin_array);
   wl_array_release(&direction_array);
+
+  data_device->enter_serial = serial;
 }
 
 WL_EXPORT void

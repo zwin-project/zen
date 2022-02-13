@@ -18,14 +18,19 @@ drag_grab_ray_focus(struct zen_ray_grab* grab)
   struct zen_data_offer* data_offer = NULL;
   struct wl_resource* new_focus_data_device_resource;
   char** type;
+  float ray_distance = ZEN_DEFAULT_RAY_LENGTH;
 
   current_focus =
       zen_weak_link_get_user_data(&data_device->focus_virtual_object_link);
 
-  new_focus = shell_base->pick_virtual_object(shell_base, ray,
-      ray->local_origin, ray->local_direction, &ray->target_distance);
+  new_focus = shell_base->pick_virtual_object(
+      shell_base, ray, ray->local_origin, ray->local_direction, &ray_distance);
 
   if (current_focus == new_focus) return;
+
+  if (ray->target_distance != ray_distance) {
+    zen_ray_set_target_distance(ray, ray_distance);
+  }
 
   if (data_device->focus_resource) zen_data_device_clear_focus(data_device);
 
