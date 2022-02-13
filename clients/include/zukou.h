@@ -178,6 +178,10 @@ App::epoll_fd()
   return epoll_fd_;
 }
 
+struct ColorRGBA {
+  uint8_t r, g, b, a;
+};
+
 struct ColorBGRA {
   uint8_t b, g, r, a;
 };
