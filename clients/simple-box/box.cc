@@ -131,9 +131,8 @@ Box::Frame(uint32_t time)
 {
   (void)time;
   delta_theta_ += (float)(rand() - RAND_MAX / 2) / (float)RAND_MAX;
-  delta_theta_ = delta_theta_ > 10    ? 10
-                 : delta_theta_ < -10 ? -10
-                                      : delta_theta_;
+  delta_theta_ =
+      delta_theta_ > 10 ? 10 : delta_theta_ < -10 ? -10 : delta_theta_;
   delta_phi_ += (float)(rand() - RAND_MAX / 2) / (float)RAND_MAX;
   delta_phi_ = delta_phi_ > 10 ? 10 : delta_phi_ < -10 ? -10 : delta_phi_;
 

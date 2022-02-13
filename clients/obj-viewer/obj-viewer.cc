@@ -13,9 +13,18 @@
 #include <glm/gtx/transform.hpp>
 #include <iostream>
 
-#include "types.h"
-
 #define GLSL(str) (const char *)"#version 410\n" #str
+
+struct Vertex {
+  Vertex(glm::vec3 point, glm::vec3 norm)
+  {
+    this->point = point;
+    this->norm = norm;
+  };
+
+  glm::vec3 point;
+  glm::vec3 norm;
+};
 
 const char *vertex_shader = GLSL(
     struct ZLight {
@@ -50,10 +59,19 @@ const char *vertex_shader = GLSL(
           vec4((mtlDiffuse * diffuse + mtlSpecular * specular + mtlAmbient / 5),
               1.0);
       gl_Position = zVP * model * position;
-    });
+    }
 
-const char *fragment_shader = GLSL(in vec4 frontColor; out vec4 outputColor;
-                                   void main() { outputColor = frontColor; });
+);
+
+const char *fragment_shader = GLSL(
+
+    in vec4 frontColor;
+
+    out vec4 outputColor;
+
+    void main() { outputColor = frontColor; }
+
+);
 
 ObjViewer::ObjViewer(zukou::App *app, ObjParser *obj_parser)
     : CuboidWindow(app, glm::vec3(1.0)), min_(FLT_MAX), max_(FLT_MIN)

@@ -97,7 +97,6 @@ ObjParser::ParseVertex(std::vector<std::string> *tokens)
     glm::vec3 vertex(std::stof(tokens->at(1)), std::stof(tokens->at(2)),
         std::stof(tokens->at(3)));
     vertices_.push_back(vertex);
-    // obj_list_[obj_list_.size() - 1].vertices.push_back(vertex);
   } catch (const std::invalid_argument &e) {
     return false;
   } catch (const std::out_of_range &e) {
@@ -116,7 +115,6 @@ ObjParser::ParseTextureVertex(std::vector<std::string> *tokens)
     glm::vec2 texture_vertex(
         std::stof(tokens->at(1)), std::stof(tokens->at(2)));
     textures_.push_back(texture_vertex);
-    // obj_list_[obj_list_.size() - 1].textures.push_back(texture_vertex);
   } catch (const std::invalid_argument &e) {
     return false;
   } catch (const std::out_of_range &e) {
@@ -135,7 +133,6 @@ ObjParser::ParseNorm(std::vector<std::string> *tokens)
     glm::vec3 norm(std::stof(tokens->at(1)), std::stof(tokens->at(2)),
         std::stof(tokens->at(3)));
     norms_.push_back(norm);
-    // obj_list_[obj_list_.size() - 1].norms.push_back(norm);
   } catch (const std::invalid_argument &e) {
     return false;
   } catch (const std::out_of_range &e) {

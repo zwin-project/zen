@@ -11,10 +11,8 @@ PrintHelp([[maybe_unused]] int argc, char const *argv[])
 }
 
 int
-main(int argc, char const *argv[])
+main([[maybe_unused]] int argc, [[maybe_unused]] char const *argv[])
 {
-  (void)argc;
-  (void)argv;
   zukou::App *app = new zukou::App();
   if (argc < 2) {
     PrintHelp(argc, argv);
