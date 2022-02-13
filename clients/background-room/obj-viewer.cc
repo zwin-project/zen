@@ -114,10 +114,22 @@ ObjViewer::ObjViewer(zukou::App *app, ObjParser *obj_parser)
       return;
     }
 
-    zukou::ColorRGBA *pixel = (zukou::ColorRGBA *)texture->data();
     zukou::ColorRGBA *data = (zukou::ColorRGBA *)png_loader->data();
-    memcpy(pixel, data,
-        sizeof(zukou::ColorRGBA) * png_loader->height() * png_loader->width());
+    zukou::ColorBGRA *pixel = (zukou::ColorBGRA *)texture->data();
+
+    // Flip the original image upside down and save it to texture.
+    data += (png_loader->height() - 1) * png_loader->width();
+    for (uint32_t y = 0; y < png_loader->height(); ++y) {
+      for (uint32_t x = 0; x < png_loader->width(); ++x) {
+        pixel->r = data->r;
+        pixel->g = data->g;
+        pixel->b = data->b;
+        pixel->a = data->a;
+        pixel++;
+        data++;
+      }
+      data -= 2 * (png_loader->width());
+    }
 
     texture_table_[mtl_object.name] = texture;
   }
