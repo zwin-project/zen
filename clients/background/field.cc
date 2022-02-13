@@ -17,7 +17,9 @@ const char *sky_vertex_shader = GLSL(
       gl_Position = vec4(data[gl_VertexID], 1.0, 1.0);
       pos = transpose(mat3(zView)) * (inverse(zProjection) * gl_Position).xyz;
       fsun = vec3(0.0, sin(time * 0.01), cos(time * 0.01));
-    });
+    }
+
+);
 
 const char *sky_fragment_shader = GLSL(
     in vec3 pos; in vec3 fsun; out vec4 color; uniform float time = 0.0;
@@ -92,7 +94,9 @@ const char *sky_fragment_shader = GLSL(
 
       // Dithering Noise
       color.rgb += noise(pos * 1000) * 0.01;
-    });
+    }
+
+);
 
 Field::Field(zukou::App *app) : Background(app), app_(app), time_(0.0)
 {

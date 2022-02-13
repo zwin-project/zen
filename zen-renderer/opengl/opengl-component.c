@@ -456,11 +456,6 @@ zen_opengl_component_render(struct zen_opengl_component *component,
       strcmp(component->virtual_object->role, zen_background_role) != 0)
     return;
 
-  if (strcmp(component->virtual_object->role, zen_background_role) == 0)
-    glDepthFunc(GL_LEQUAL);
-  else
-    glDepthFunc(GL_LESS);
-
   element_array_buffer = zen_weak_link_get_user_data(
       &component->current.element_array_buffer_link);
   shader = zen_weak_link_get_user_data(&component->current.shader_program_link);
