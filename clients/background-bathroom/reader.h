@@ -1,5 +1,5 @@
-#ifndef ZEN_CLIENT_BACKGROUND_ROOM_READER_H
-#define ZEN_CLIENT_BACKGROUND_ROOM_READER_H
+#ifndef ZEN_CLIENT_BACKGROUND_BATHROOM_READER_H
+#define ZEN_CLIENT_BACKGROUND_BATHROOM_READER_H
 
 #include <string>
 
@@ -15,4 +15,4 @@ class Reader
   virtual bool GetLine([[maybe_unused]] std::string *str) { return false; };
 };
 
-#endif  //  ZEN_CLIENT_BACKGROUND_ROOM_READER_H
+#endif  //  ZEN_CLIENT_BACKGROUND_BATHROOM_READER_H

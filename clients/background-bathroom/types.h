@@ -1,5 +1,5 @@
-#ifndef ZEN_CLIENT_BACKGROUND_ROOM_TYPES_H
-#define ZEN_CLIENT_BACKGROUND_ROOM_TYPES_H
+#ifndef ZEN_CLIENT_BACKGROUND_BATHROOM_TYPES_H
+#define ZEN_CLIENT_BACKGROUND_BATHROOM_TYPES_H
 
 #include <glm/glm.hpp>
 
@@ -15,4 +15,4 @@ struct Vertex {
   glm::vec3 norm;
   glm::vec2 texture;
 };
-#endif  //  ZEN_CLIENT_BACKGROUND_ROOM_TYPES_H
+#endif  //  ZEN_CLIENT_BACKGROUND_BATHROOM_TYPES_H
