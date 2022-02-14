@@ -94,7 +94,7 @@ ObjViewer::ObjViewer(zukou::App *app, ObjParser *obj_parser)
   transform = glm::scale(transform, glm::vec3(0.5));
 
   glm::mat4 rotate = glm::mat4(1);
-  rotate = glm::rotate(rotate, (float)(M_PI / 2.0f), glm::vec3(0, 1, 0));
+  rotate = glm::rotate(rotate, (float)(M_PI / 8.0f), glm::vec3(0, 1, 0));
 
   parser_ = obj_parser;
 
