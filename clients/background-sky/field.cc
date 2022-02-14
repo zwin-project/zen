@@ -94,6 +94,7 @@ const char *sky_fragment_shader = GLSL(
 
       // Dithering Noise
       color.rgb += noise(pos * 1000) * 0.01;
+      color.a = 1.0;
     }
 
 );
