@@ -1,4 +1,3 @@
-#include <chrono>
 #include <iostream>
 
 #include "obj-parser.h"
@@ -15,8 +14,6 @@ PrintHelp([[maybe_unused]] int argc, char const *argv[])
 int
 main([[maybe_unused]] int argc, [[maybe_unused]] char const *argv[])
 {
-  std::chrono::system_clock::time_point start, end;
-  start = std::chrono::system_clock::now();
   std::string obj_path, mtl_path, textures_dir_path;
   zukou::App *app = new zukou::App();
 
@@ -38,14 +35,6 @@ main([[maybe_unused]] int argc, [[maybe_unused]] char const *argv[])
 
   ObjViewer *viewer = new ObjViewer(app, parser);
   (void)viewer;
-
-  end = std::chrono::system_clock::now();
-  double elapsed =
-      std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
-          .count() /
-      1000.0;
-
-  std::cout << "taken time: " << elapsed << std::endl;
 
   if (app->Run())
 

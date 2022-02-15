@@ -7,8 +7,9 @@
 #define GLSL(str) (const char *)"#version 330\n" #str
 
 const char *sky_vertex_shader = GLSL(
-    out vec3 pos; out vec3 fsun; uniform mat4 zView; uniform mat4 zProjection;
-    uniform float time = 0.0;
+    out vec3 pos; out vec3 fsun;
+
+    uniform mat4 zView; uniform mat4 zProjection; uniform float time = 0.0;
 
     const vec2 data[4] = vec2[](
         vec2(-1.0, 1.0), vec2(-1.0, -1.0), vec2(1.0, 1.0), vec2(1.0, -1.0));
@@ -22,8 +23,10 @@ const char *sky_vertex_shader = GLSL(
 );
 
 const char *sky_fragment_shader = GLSL(
-    in vec3 pos; in vec3 fsun; out vec4 color; uniform float time = 0.0;
-    uniform float cirrus = 0.4; uniform float cumulus = 0.8;
+    in vec3 pos; in vec3 fsun; out vec4 color;
+
+    uniform float time = 0.0; uniform float cirrus = 0.4;
+    uniform float cumulus = 0.8;
 
     const float Br = 0.0025; const float Bm = 0.0003; const float g = 0.9800;
     const vec3 nitrogen = vec3(0.650, 0.570, 0.475);
@@ -58,48 +61,63 @@ const char *sky_fragment_shader = GLSL(
     }
 
     void main() {
-      if (pos.y < 0) discard;
+      float K = 1.0;
+      vec3 locationPos = pos;
+
+      if (locationPos.y < 0) {
+        locationPos.y *= -1;
+        K = 0.8;
+      }
 
       // Atmosphere Scattering
-      float mu = dot(normalize(pos), normalize(fsun));
+      float mu = dot(normalize(locationPos), normalize(fsun));
       float rayleigh = 3.0 / (8.0 * 3.14) * (1.0 + mu * mu);
       vec3 mie = (Kr + Km * (1.0 - g * g) / (2.0 + g * g) /
                            pow(1.0 + g * g - 2.0 * g * mu, 1.5)) /
                  (Br + Bm);
 
-      vec3 day_extinction = exp(-exp(-((pos.y + fsun.y * 4.0) *
-                                         (exp(-pos.y * 16.0) + 0.1) / 80.0) /
-                                     Br) *
-                                (exp(-pos.y * 16.0) + 0.1) * Kr / Br) *
-                            exp(-pos.y * exp(-pos.y * 8.0) * 4.0) *
-                            exp(-pos.y * 2.0) * 4.0;
+      vec3 day_extinction =
+          exp(-exp(-((locationPos.y + fsun.y * 4.0) *
+                       (exp(-locationPos.y * 16.0) + 0.1) / 80.0) /
+                   Br) *
+              (exp(-locationPos.y * 16.0) + 0.1) * Kr / Br) *
+          exp(-locationPos.y * exp(-locationPos.y * 8.0) * 4.0) *
+          exp(-locationPos.y * 2.0) * 4.0;
       vec3 night_extinction = vec3(1.0 - exp(fsun.y)) * 0.2;
       vec3 extinction =
           mix(day_extinction, night_extinction, -fsun.y * 0.2 + 0.5);
       color.rgb = rayleigh * mie * extinction;
 
       // Cirrus Clouds
-      float density = smoothstep(1.0 - cirrus, 1.0,
-                          fbm(pos.xyz / pos.y * 2.0 + time * 0.05)) *
-                      0.3;
-      color.rgb = mix(color.rgb, extinction * 4.0, density * max(pos.y, 0.0));
+      float density =
+          smoothstep(1.0 - cirrus, 1.0,
+              fbm(locationPos.xyz / locationPos.y * 2.0 + time * 0.05)) *
+          0.3;
+      color.rgb = K * mix(color.rgb, extinction * 4.0,
+                          density * max(locationPos.y, 0.0));
 
       // Cumulus Clouds
       for (int i = 0; i < 3; i++) {
         float density = smoothstep(1.0 - cumulus, 1.0,
-            fbm((0.7 + float(i) * 0.01) * pos.xyz / pos.y + time * 0.3));
-        color.rgb = mix(color.rgb, extinction * density * 5.0,
-            min(density, 1.0) * max(pos.y, 0.0));
+            fbm((0.7 + float(i) * 0.01) * locationPos.xyz / locationPos.y +
+                time * 0.3));
+        color.rgb = K * mix(color.rgb, extinction * density * 5.0,
+                            min(density, 1.0) * max(locationPos.y, 0.0));
       }
 
       // Dithering Noise
-      color.rgb += noise(pos * 1000) * 0.01;
+      color.rgb += noise(locationPos * 1000) * 0.01;
+      if (locationPos.y < 0) {
+        color.r *= 0.8;
+        color.g *= 1.2;
+        color.b *= 1.0;
+      }
       color.a = 1.0;
     }
 
 );
 
-Field::Field(zukou::App *app) : Background(app), app_(app), time_(0.0)
+Field::Field(zukou::App *app) : Background(app), app_(app), time_(6.00)
 {
   sky_component_ = new zukou::OpenGLComponent(app, this);
 
@@ -119,7 +137,7 @@ void
 Field::Frame(uint32_t time)
 {
   (void)time;
-  time_ += 0.01;
+  time_ += 0.004;
 
   sky_shader_->SetUniformVariable("time", time_);
   sky_component_->Attach(sky_shader_);
