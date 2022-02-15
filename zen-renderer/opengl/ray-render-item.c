@@ -23,6 +23,7 @@ zen_opengl_ray_render_item_render(
     struct zen_opengl_renderer_camera* camera)
 {
   mat4 mvp;
+  glLineWidth(4);
   glm_mat4_copy(camera->view_matrix, mvp);
   glm_mat4_mul(camera->projection_matrix, mvp, mvp);
 
@@ -33,6 +34,7 @@ zen_opengl_ray_render_item_render(
   glUniformMatrix4fv(mvp_matrix_location, 1, GL_FALSE, (float*)mvp);
   glDrawArrays(GL_LINES, 0, ARRAY_LENGTH(render_item->vertex_buffer));
   glBindVertexArray(0);
+  glLineWidth(1);
 }
 
 WL_EXPORT struct zen_render_item*
