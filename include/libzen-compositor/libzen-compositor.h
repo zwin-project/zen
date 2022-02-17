@@ -166,6 +166,7 @@ struct zen_ray {
   float target_distance;
 
   struct zen_render_item* render_item;
+  bool is_dragging;
 };
 
 struct zen_keyboard_grab {
