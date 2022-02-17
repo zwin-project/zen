@@ -6,6 +6,7 @@
 #include <libzen-compositor/libzen-compositor.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <unistd.h>
 #include <zigen-opengl-server-protocol.h>
 
 static void zen_opengl_shader_program_destroy(
@@ -122,7 +123,7 @@ zen_opengl_shader_program_protocol_set_vertex_shader(struct wl_client* client,
     wl_resource_post_error(resource,
         ZGN_OPENGL_SHADER_PROGRAM_ERROR_IMMUTABLE_ERROR,
         "cannot update vertex shader once the programs are linked");
-    return;
+    goto out;
   }
 
   source = mmap(NULL, vertex_shader_size, PROT_READ, MAP_SHARED,
@@ -147,11 +148,14 @@ zen_opengl_shader_program_protocol_set_vertex_shader(struct wl_client* client,
     wl_resource_post_error(resource,
         ZGN_OPENGL_SHADER_PROGRAM_ERROR_COMPILATION_ERROR,
         "failed to compile vertex shader\n%s", error_message);
-    return;
+    goto out;
   }
 
   if (shader->vertex_shader_id != 0) glDeleteShader(shader->vertex_shader_id);
   shader->vertex_shader_id = vertex_shader_id;
+
+out:
+  close(vertex_shader_source_fd);
 }
 
 static void
@@ -169,7 +173,7 @@ zen_opengl_shader_program_protocol_set_fragment_shader(struct wl_client* client,
     wl_resource_post_error(resource,
         ZGN_OPENGL_SHADER_PROGRAM_ERROR_IMMUTABLE_ERROR,
         "cannot update fragment shader once the programs are linked");
-    return;
+    goto out;
   }
 
   source = mmap(NULL, fragment_shader_size, PROT_READ, MAP_SHARED,
@@ -197,12 +201,15 @@ zen_opengl_shader_program_protocol_set_fragment_shader(struct wl_client* client,
         ZGN_OPENGL_SHADER_PROGRAM_ERROR_COMPILATION_ERROR,
         "failed to compile fragment shader\n%s[%d]", error_message,
         error_message_length);
-    return;
+    goto out;
   }
 
   if (shader->fragment_shader_id != 0)
     glDeleteShader(shader->fragment_shader_id);
   shader->fragment_shader_id = fragment_shader_id;
+
+out:
+  close(fragment_shader_source_fd);
 }
 
 static void
