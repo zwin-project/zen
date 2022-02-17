@@ -62,8 +62,12 @@ const char *fragment_shader = GLSL(
     out vec4 outputColor;
 
     void main() {
+      vec4 globalLightPosition = zLight.position;
+      globalLightPosition.z -= 1.5;
+      globalLightPosition.y -= 0.8;
       vec3 light = normalize(
-          (zLight.position * position.w - zLight.position.w * position).xyz);
+          (globalLightPosition * position.w - globalLightPosition.w * position)
+              .xyz);
       float diffuse = abs(dot(light, norm));
 
       vec3 view = -normalize(position.xyz);
@@ -74,7 +78,7 @@ const char *fragment_shader = GLSL(
 
       vec3 effectiveEmissive = mtlEmissive;
       vec3 effectiveDiffuse = diffuse * mtlDiffuse * diffuseMapColor.rgb;
-      vec3 effectiveSpecular = specular * mtlSpecular;
+      vec3 effectiveSpecular = 0.5 * specular * mtlSpecular;
       vec3 effectiveAmbient = 0.3 * mtlAmbient;
 
       float effectiveOpacity = mtlOpacity * diffuseMapColor.a;
@@ -90,7 +94,7 @@ ObjViewer::ObjViewer(zukou::App *app, ObjParser *obj_parser)
     : Background(app), min_(FLT_MAX), max_(FLT_MIN)
 {
   glm::mat4 transform(1), rotate(1);
-  transform = glm::translate(transform, glm::vec3(0.8, -0.5, 0.8));
+  transform = glm::translate(transform, glm::vec3(0.8, -0.3, 0.8));
   transform = glm::scale(transform, glm::vec3(1.5));
 
   rotate = glm::rotate(rotate, (float)(M_PI * 3.0 / 4.0), glm::vec3(0, 1, 0));
