@@ -39,6 +39,7 @@ zen_data_device_start_drag(struct zen_data_device *data_device,
     return;
   }
 
+  data_device->seat->ray->is_dragging = true;
   zen_ray_clear_focus(data_device->seat->ray);
   zen_ray_grab_start(data_device->seat->ray, &drag_grab->base);
 }
@@ -114,7 +115,10 @@ zen_data_device_end_drag(struct zen_data_device *data_device)
 {
   zen_data_device_clear_focus(data_device);
   data_device->data_source = NULL;
-  if (data_device->seat->ray != NULL) zen_ray_grab_end(data_device->seat->ray);
+  if (data_device->seat->ray != NULL) {
+    data_device->seat->ray->is_dragging = false;
+    zen_ray_grab_end(data_device->seat->ray);
+  }
 }
 
 WL_EXPORT void

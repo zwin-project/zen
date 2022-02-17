@@ -17,6 +17,15 @@ struct zen_opengl_ray_render_item {
   GLuint vertex_buffer_id;
   GLuint program_id;
   vec3 vertex_buffer[2];
+
+  GLuint dnd_vertex_array_id;
+  GLuint dnd_vertex_buffer_id;
+  GLuint dnd_program_id;
+  GLuint dnd_texture_id;
+  struct {
+    vec3 p;
+    vec2 uv;
+  } dnd_vertex_buffer[6];
 };
 
 void zen_opengl_ray_render_item_render(
