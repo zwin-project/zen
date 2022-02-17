@@ -74,8 +74,8 @@ const char *fragment_shader = GLSL(
 
       vec3 effectiveEmissive = mtlEmissive;
       vec3 effectiveDiffuse = diffuse * mtlDiffuse * diffuseMapColor.rgb;
-      vec3 effectiveSpecular = specular * mtlSpecular;
-      vec3 effectiveAmbient = mtlAmbient / 5.0;
+      vec3 effectiveSpecular = 0.3 * specular * mtlSpecular;
+      vec3 effectiveAmbient = 0.2 * mtlAmbient;
 
       float effectiveOpacity = mtlOpacity * diffuseMapColor.a;
 
@@ -90,7 +90,8 @@ ObjViewer::ObjViewer(zukou::App *app, ObjParser *obj_parser)
     : Background(app), min_(FLT_MAX), max_(FLT_MIN)
 {
   glm::mat4 transform(1);
-  transform = glm::translate(transform, glm::vec3(1, 1, -3));
+  // transform = glm::translate(transform, glm::vec3(1, 1, -3));
+  transform = glm::translate(transform, glm::vec3(1 + 2, 1, -3 + 1));
   transform = glm::scale(transform, glm::vec3(0.5));
 
   glm::mat4 rotate = glm::mat4(1);
