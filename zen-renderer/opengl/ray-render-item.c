@@ -199,15 +199,15 @@ update_vertex_buffer(struct zen_opengl_ray_render_item* render_item)
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-struct rgba {
-  uint8_t r, g, b, a;
+struct bgra {
+  uint8_t b, g, r, a;
 };
 
 static void
 draw_dnd_icon_texture(struct zen_opengl_ray_render_item* render_item)
 {
-  struct rgba* colors =
-      zalloc(sizeof(struct rgba) * icon_bmp_width * icon_bmp_height);
+  struct bgra* colors =
+      zalloc(sizeof(struct bgra) * icon_bmp_width * icon_bmp_height);
 
   render_item->dnd_vertex_buffer[0].uv[0] = 0;
   render_item->dnd_vertex_buffer[0].uv[1] = 1;
@@ -227,9 +227,9 @@ draw_dnd_icon_texture(struct zen_opengl_ray_render_item* render_item)
   for (uint32_t x = 0; x < icon_bmp_width; x++) {
     for (uint32_t y = 0; y < icon_bmp_height; y++) {
       colors[j].a = icon_bmp[i];
-      colors[j].r = 0;
-      colors[j].g = 0;
-      colors[j].b = 0;
+      colors[j].r = 0x0;
+      colors[j].g = 0xff;
+      colors[j].b = 0xff;
       i++;
       j--;
     }
