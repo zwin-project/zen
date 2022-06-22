@@ -6,10 +6,15 @@ project(
   default_options: [ 'warning_level=3', 'werror=true', 'optimization=2', 'c_std=gnu11' ],
 )
 
-sources = [ 'main.c' ]
+add_project_arguments('-D_GNU_SOURCE', language: 'c')
 
-executable(
-  'zen',
-  sources,
-  install: false,
-)
+# generic version requirements
+
+wayland_server_req = '>= 1.18.0'
+
+# dependencies
+
+wayland_server_dep = dependency('wayland-server', version: wayland_server_req)
+
+subdir('zen-util')
+subdir('src')
