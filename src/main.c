@@ -1,6 +1,7 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <wayland-server.h>
+#include <zen-session.h>
 #include <zen-util.h>
 
 static int
@@ -20,6 +21,7 @@ main()
   struct wl_display *display;
   struct wl_event_loop *loop;
   struct wl_event_source *signal_sources[3];
+  struct zn_session *session;
   int i, status = EXIT_FAILURE;
 
   display = wl_display_create();
@@ -41,9 +43,23 @@ main()
     goto err_signal;
   }
 
+  session = zn_session_create();
+  if (session == NULL) {
+    zn_log("main: failed to create a session\n");
+    goto err_signal;
+  }
+
+  if (zn_session_connect(session) != 0) {
+    zn_log("main: session connection failed\n");
+    goto err_session;
+  }
+
   wl_display_run(display);
 
   status = EXIT_SUCCESS;
+
+err_session:
+  zn_session_destroy(session);
 
 err_signal:
   for (i = ARRAY_LENGTH(signal_sources) - 1; i >= 0; i--)
