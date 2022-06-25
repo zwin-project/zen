@@ -10,11 +10,13 @@ add_project_arguments('-D_GNU_SOURCE', language: 'c')
 
 # generic version requirements
 
+dbus_req = '>= 1.12'
 systemd_req = '>= 209'
 wayland_server_req = '>= 1.18.0'
 
 # dependencies
 
+dbus_dep = dependency('dbus-1', version: dbus_req)
 systemd_dep = dependency('libsystemd', version: systemd_req)
 wayland_server_dep = dependency('wayland-server', version: wayland_server_req)
 

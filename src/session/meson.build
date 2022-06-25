@@ -1,11 +1,14 @@
 zen_session_inc = include_directories('include')
 
 zen_session_srcs = [
+  'dbus.c',
   'session-logind.c'
 ]
 
 zen_session_deps = [
+  dbus_dep,
   systemd_dep,
+  wayland_server_dep,
   zen_util_dep,
 ]
 

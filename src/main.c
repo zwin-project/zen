@@ -22,6 +22,7 @@ main()
   struct wl_event_loop *loop;
   struct wl_event_source *signal_sources[3];
   struct zn_session *session;
+  const char seat_id[] = "seat0";  // FIXME: enable to configure
   int i, status = EXIT_FAILURE;
 
   display = wl_display_create();
@@ -43,13 +44,13 @@ main()
     goto err_signal;
   }
 
-  session = zn_session_create();
+  session = zn_session_create(display);
   if (session == NULL) {
     zn_log("main: failed to create a session\n");
     goto err_signal;
   }
 
-  if (zn_session_connect(session) != 0) {
+  if (zn_session_connect(session, seat_id) != 0) {
     zn_log("main: session connection failed\n");
     goto err_session;
   }
