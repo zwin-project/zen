@@ -1,3 +1,3 @@
-zigen_util_inc = include_directories('include')
+zen_util_inc = include_directories('include')
 
 subdir('src')

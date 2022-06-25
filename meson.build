@@ -10,10 +10,12 @@ add_project_arguments('-D_GNU_SOURCE', language: 'c')
 
 # generic version requirements
 
+systemd_req = '>= 209'
 wayland_server_req = '>= 1.18.0'
 
 # dependencies
 
+systemd_dep = dependency('libsystemd', version: systemd_req)
 wayland_server_dep = dependency('wayland-server', version: wayland_server_req)
 
 subdir('zen-util')

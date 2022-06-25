@@ -17,7 +17,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update &&
-          sudo apt-get install libwayland-dev
+          sudo apt-get install libwayland-dev libsystemd-dev
 
       - uses: actions/setup-python@v1
         with:
