@@ -380,7 +380,79 @@ seat_id_is_equal_to_session_seat_id(const char* seat_id, char* session_id)
   return ret;
 }
 
-ZN_EXPORT int
+static int
+zn_session_logind_take_control(struct zn_session_logind* self)
+{
+  DBusError err;
+  DBusMessage *message, *reply;
+  dbus_bool_t force;
+  bool ret;
+
+  dbus_error_init(&err);
+
+  message = dbus_message_new_method_call("org.freedesktop.login1",
+      self->session_path, "org.freedesktop.login1.Session", "TakeControl");
+  if (message == NULL) goto err;
+
+  force = false;
+  ret = dbus_message_append_args(
+      message, DBUS_TYPE_BOOLEAN, &force, DBUS_TYPE_INVALID);
+  if (ret == false) goto err_unref;
+
+  reply =
+      dbus_connection_send_with_reply_and_block(self->dbus, message, -1, &err);
+  if (reply == NULL) {
+    if (dbus_error_has_name(&err, DBUS_ERROR_UNKNOWN_METHOD))
+      zn_log("logind: old systemd version detected\n");
+    else
+      zn_log("logind: cannot take control over session %s\n", self->session_id);
+
+    if (dbus_error_is_set(&err)) dbus_error_free(&err);
+
+    goto err_unref;
+  }
+
+  dbus_message_unref(reply);
+  dbus_message_unref(message);
+
+  return 0;
+
+err_unref:
+  dbus_message_unref(message);
+
+err:
+  return -1;
+}
+
+static void
+zn_session_logind_release_control(struct zn_session_logind* self)
+{
+  DBusMessage* message;
+
+  message = dbus_message_new_method_call("org.freedesktop.login1",
+      self->session_path, "org.freedesktop.login1.Session", "ReleaseControl");
+  if (message == NULL) return;
+
+  dbus_connection_send(self->dbus, message, NULL);
+  dbus_message_unref(message);
+}
+
+static int
+zn_session_logind_activate(struct zn_session_logind* self)
+{
+  DBusMessage* message;
+
+  message = dbus_message_new_method_call("org.freedesktop.login1",
+      self->session_path, "org.freedesktop.login1.Session", "Activate");
+
+  if (message == NULL) return -1;
+
+  dbus_connection_send(self->dbus, message, NULL);
+  return 0;
+}
+
+ZN_EXPORT
+int
 zn_session_connect(struct zn_session* parent, const char* seat_id)
 {
   struct zn_session_logind* self = zn_container_of(parent, self, base);
@@ -420,9 +492,18 @@ zn_session_connect(struct zn_session* parent, const char* seat_id)
   ret = zn_session_logind_setup_dbus(self);
   if (ret < 0) goto err_dbus;
 
-  // TODO: There is more to be done
+  ret = zn_session_logind_take_control(self);
+  if (ret < 0) goto err_dbus_cleanup;
+
+  ret = zn_session_logind_activate(self);
+  if (ret < 0) goto err_dbus_cleanup;
+
+  zn_log("logind: session control granted\n");
 
   return 0;
+
+err_dbus_cleanup:
+  zn_session_logind_teardown_dbus(self);
 
 err_dbus:
   zn_dbus_connection_destroy(self->dbus, self->dbus_event_source);
@@ -462,6 +543,7 @@ zn_session_destroy(struct zn_session* parent)
     dbus_pending_call_unref(self->pending_active);
   }
 
+  zn_session_logind_release_control(self);
   zn_dbus_connection_destroy(self->dbus, self->dbus_event_source);
   zn_session_logind_teardown_dbus(self);
   free(self->session_id);
