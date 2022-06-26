@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <stdio.h>
 #include <sys/eventfd.h>
 #include <unistd.h>
 #include <zen-util.h>
@@ -11,8 +12,8 @@ zn_dbus_connection_dispatch(int fd, uint32_t mask, void* data)
 {
   DBusConnection* connection = data;
   DBusDispatchStatus status;
-  (void)fd;
-  (void)mask;
+  UNUSED(fd);
+  UNUSED(mask);
 
   do {
     status = dbus_connection_dispatch(connection);
@@ -39,7 +40,7 @@ zn_dbus_connection_dispatch_watch(int fd, uint32_t mask, void* data)
 {
   DBusWatch* watch = data;
   uint32_t flags = 0;
-  (void)fd;
+  UNUSED(fd);
 
   if (dbus_watch_get_enabled(watch)) {
     if (mask & WL_EVENT_READABLE) flags |= DBUS_WATCH_READABLE;
@@ -82,7 +83,7 @@ static void
 zn_dbus_connection_remove_watch(DBusWatch* watch, void* data)
 {
   struct wl_event_source* event_source;
-  (void)data;
+  UNUSED(data);
 
   event_source = dbus_watch_get_data(watch);
   if (event_source == NULL) return;
@@ -95,8 +96,8 @@ zn_dbus_connection_toggle_watch(DBusWatch* watch, void* data)
 {
   struct wl_event_source* event_source;
   uint32_t mask = 0, flags;
-  (void)watch;
-  (void)data;
+  UNUSED(watch);
+  UNUSED(data);
 
   event_source = dbus_watch_get_data(watch);
   if (!event_source) return;
@@ -158,7 +159,7 @@ static void
 zn_dbus_connection_remove_timeout(DBusTimeout* timeout, void* data)
 {
   struct wl_event_source* event_source;
-  (void)data;
+  UNUSED(data);
 
   event_source = dbus_timeout_get_data(timeout);
   if (!event_source) return;
@@ -170,12 +171,53 @@ static void
 zn_dbus_connection_toggle_timeout(DBusTimeout* timeout, void* data)
 {
   struct wl_event_source* event_source;
-  (void)data;
+  UNUSED(data);
 
   event_source = dbus_timeout_get_data(timeout);
   if (!event_source) return;
 
   zn_dbus_connection_adjust_timeout(timeout, event_source);
+}
+
+static int
+zn_dbus_connection_add_match(
+    DBusConnection* connection, const char* format, ...)
+{
+  DBusError err;
+  int ret;
+  va_list list;
+  char* str;
+
+  va_start(list, format);
+  ret = vasprintf(&str, format, list);
+  va_end(list);
+
+  if (ret < 0) return -1;
+
+  dbus_error_init(&err);
+  dbus_bus_add_match(connection, str, &err);
+  free(str);
+  if (dbus_error_is_set(&err)) {
+    zn_log("dbus: failed to add a match rule: %s\n", err.message);
+    dbus_error_free(&err);
+    return -1;
+  }
+
+  return 0;
+}
+
+ZN_EXPORT int
+zn_dbus_connection_add_match_signal(DBusConnection* connection,
+    const char* sender, const char* interface, const char* member,
+    const char* path)
+{
+  return zn_dbus_connection_add_match(connection,
+      "type='signal',"
+      "sender='%s',"
+      "interface='%s',"
+      "member='%s',"
+      "path='%s'",
+      sender, interface, member, path);
 }
 
 ZN_EXPORT struct wl_event_source*

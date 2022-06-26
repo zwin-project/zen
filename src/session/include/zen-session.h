@@ -3,10 +3,16 @@
 
 #include <wayland-server.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-struct zn_session {};
-#pragma GCC diagnostic pop
+struct zn_session_device_changed_signal_arg {
+  dev_t device;
+  bool added;
+};
+
+struct zn_session {
+  // data: struct zn_session_device_changed_signal_arg*
+  struct wl_signal device_changed_signal;
+  struct wl_signal session_signal;  // data: bool*
+};
 
 /**
  * @return 0 on success, -1 on failure

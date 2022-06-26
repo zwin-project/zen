@@ -4,6 +4,10 @@
 #include <dbus/dbus.h>
 #include <wayland-server.h>
 
+int zn_dbus_connection_add_match_signal(DBusConnection* connection,
+    const char* sender, const char* interface, const char* member,
+    const char* path);
+
 /**
  * @return null on failure
  */
