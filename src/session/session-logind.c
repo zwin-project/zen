@@ -451,8 +451,7 @@ zn_session_logind_activate(struct zn_session_logind* self)
   return 0;
 }
 
-ZN_EXPORT
-int
+ZN_EXPORT int
 zn_session_connect(struct zn_session* parent, const char* seat_id)
 {
   struct zn_session_logind* self = zn_container_of(parent, self, base);

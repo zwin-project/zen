@@ -6,7 +6,20 @@ project(
   default_options: [ 'warning_level=3', 'werror=true', 'optimization=2', 'c_std=gnu11' ],
 )
 
-add_project_arguments('-D_GNU_SOURCE', language: 'c')
+cc = meson.get_compiler('c')
+
+global_args = []
+global_args_maybe = [
+  '-D_GNU_SOURCE',
+  '-fvisibility=hidden',
+]
+
+foreach arg : global_args_maybe
+  if cc.has_argument(arg)
+    global_args += arg
+  endif
+endforeach
+add_project_arguments(global_args, language: 'c')
 
 # generic version requirements
 
