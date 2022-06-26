@@ -1,7 +1,7 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <wayland-server.h>
-#include <zen-session.h>
+#include <zen-backend.h>
 #include <zen-util.h>
 
 static int
@@ -21,8 +21,7 @@ main()
   struct wl_display *display;
   struct wl_event_loop *loop;
   struct wl_event_source *signal_sources[3];
-  struct zn_session *session;
-  const char seat_id[] = "seat0";  // FIXME: enable to configure
+  struct zn_backend *backend;
   int i, status = EXIT_FAILURE;
 
   display = wl_display_create();
@@ -44,23 +43,17 @@ main()
     goto err_signal;
   }
 
-  session = zn_session_create(display);
-  if (session == NULL) {
-    zn_log("main: failed to create a session\n");
+  backend = zn_backend_create(display);
+  if (backend == NULL) {
+    zn_log("main: failed to create a backend\n");
     goto err_signal;
-  }
-
-  if (zn_session_connect(session, seat_id) != 0) {
-    zn_log("main: session connection failed\n");
-    goto err_session;
   }
 
   wl_display_run(display);
 
   status = EXIT_SUCCESS;
 
-err_session:
-  zn_session_destroy(session);
+  zn_backend_destroy(backend);
 
 err_signal:
   for (i = ARRAY_LENGTH(signal_sources) - 1; i >= 0; i--)
