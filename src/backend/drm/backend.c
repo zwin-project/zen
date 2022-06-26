@@ -8,7 +8,7 @@ struct zn_drm_backend {
   struct zn_session *session;
 };
 
-struct zn_backend *
+ZN_EXPORT struct zn_backend *
 zn_backend_create(struct wl_display *display)
 {
   struct zn_drm_backend *self;
@@ -41,7 +41,7 @@ err:
   return NULL;
 }
 
-void
+ZN_EXPORT void
 zn_backend_destroy(struct zn_backend *parent)
 {
   struct zn_drm_backend *self = zn_container_of(parent, self, base);

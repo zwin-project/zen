@@ -206,7 +206,7 @@ zn_dbus_connection_add_match(
   return 0;
 }
 
-ZN_EXPORT int
+int
 zn_dbus_connection_add_match_signal(DBusConnection* connection,
     const char* sender, const char* interface, const char* member,
     const char* path)
@@ -220,7 +220,7 @@ zn_dbus_connection_add_match_signal(DBusConnection* connection,
       sender, interface, member, path);
 }
 
-ZN_EXPORT struct wl_event_source*
+struct wl_event_source*
 zn_dbus_connection_bind(DBusConnection* connection, struct wl_event_loop* loop)
 {
   struct wl_event_source* event_source;
@@ -273,7 +273,7 @@ zn_dbus_connection_unbind(
   if (event_source) wl_event_source_remove(event_source);
 }
 
-ZN_EXPORT DBusConnection*
+DBusConnection*
 zn_dbus_connection_create(DBusBusType type)
 {
   DBusConnection* connection;
@@ -301,7 +301,7 @@ err:
   return NULL;
 }
 
-ZN_EXPORT void
+void
 zn_dbus_connection_destroy(
     DBusConnection* connection, struct wl_event_source* event_source)
 {
