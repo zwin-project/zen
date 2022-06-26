@@ -7,6 +7,7 @@ zen_backend_libinput_srcs = [
 zen_backend_libinput_deps = [
   libinput_dep,
   udev_dep,
+  zen_session_dep,
   zen_util_dep,
 ]
 

@@ -2,10 +2,12 @@
 #define ZEN_BACKEND_LIBINPUT_H
 
 #include <libudev.h>
+#include <zen-session.h>
 
 struct zn_libinput;
 
-struct zn_libinput *zn_libinput_create(struct udev *udev);
+struct zn_libinput *zn_libinput_create(
+    struct udev *udev, struct zn_session *session);
 
 void zn_libinput_destroy(struct zn_libinput *self);
 

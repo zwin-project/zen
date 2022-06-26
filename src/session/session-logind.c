@@ -1,8 +1,10 @@
 #include <dbus/dbus.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <sys/sysmacros.h>
 #include <systemd/sd-login.h>
 #include <unistd.h>
@@ -355,6 +357,67 @@ zn_session_logind_teardown_dbus(struct zn_session_logind* self)
   free(self->session_path);
 }
 
+static int
+zn_session_logind_take_device(
+    struct zn_session_logind* self, uint32_t major, uint32_t minor)
+{
+  DBusMessage *message, *reply;
+  bool ret_bool;
+  int ret = -1, fd;
+  dbus_bool_t inactive;
+
+  message = dbus_message_new_method_call("org.freedesktop.login1",
+      self->session_path, "org.freedesktop.login1.Session", "TakeDevice");
+  if (message == NULL) goto err;
+
+  ret_bool = dbus_message_append_args(message, DBUS_TYPE_UINT32, &major,
+      DBUS_TYPE_UINT32, &minor, DBUS_TYPE_INVALID);
+  if (ret_bool == false) goto err_unref;
+
+  reply =
+      dbus_connection_send_with_reply_and_block(self->dbus, message, -1, NULL);
+  if (reply == NULL) {
+    zn_log("logind: TakeDevice on %d:%d failed\n", major, minor);
+    goto err_unref;
+  }
+
+  ret_bool = dbus_message_get_args(reply, NULL, DBUS_TYPE_UNIX_FD, &fd,
+      DBUS_TYPE_BOOLEAN, &inactive, DBUS_TYPE_INVALID);
+  if (ret_bool == false) {
+    zn_log("logind: error parsing reply to TakeDevice\n");
+    goto err_reply;
+  }
+
+  ret = fd;
+
+err_reply:
+  dbus_message_unref(reply);
+
+err_unref:
+  dbus_message_unref(message);
+
+err:
+  return ret;
+}
+
+static void
+zn_session_logind_release_device(
+    struct zn_session_logind* self, uint32_t major, uint32_t minor)
+{
+  DBusMessage* message;
+  bool ret;
+
+  message = dbus_message_new_method_call("org.freedesktop.login1",
+      self->session_path, "org.freedesktop.login1.Session", "ReleaseDevice");
+  if (message == NULL) return;
+
+  ret = dbus_message_append_args(message, DBUS_TYPE_UINT32, &major,
+      DBUS_TYPE_UINT32, &minor, DBUS_TYPE_INVALID);
+
+  if (ret == true) dbus_connection_send(self->dbus, message, NULL);
+  dbus_message_unref(message);
+}
+
 /**
  * no side effect
  * @return 0 if equal, < 0 otherwise
@@ -449,6 +512,77 @@ zn_session_logind_activate(struct zn_session_logind* self)
 
   dbus_connection_send(self->dbus, message, NULL);
   return 0;
+}
+
+ZN_EXPORT int
+zn_session_open_file(struct zn_session* parent, const char* path, int flags)
+{
+  struct zn_session_logind* self = zn_container_of(parent, self, base);
+  struct stat st;
+  int fl, ret, fd;
+
+  ret = stat(path, &st);
+  if (ret < 0) {
+    zn_log("logind: cannot stat: %s. error=%s\n", path, strerror(errno));
+    goto err;
+  }
+
+  if (!S_ISCHR(st.st_mode)) {
+    zn_log("logind: %s is not a character special file\n", path);
+    goto err;
+  }
+
+  fd =
+      zn_session_logind_take_device(self, major(st.st_rdev), minor(st.st_rdev));
+  if (fd < 0) {
+    zn_log("logind: TakeDevice on %s failed\n", path);
+    goto err;
+  }
+
+  fl = fcntl(fd, F_GETFL);
+  if (fl < 0) {
+    zn_log("logind: cannot get file flags: %s\n", strerror(errno));
+    goto err_close;
+  }
+
+  fl |= (flags & O_NONBLOCK);
+
+  ret = fcntl(fd, F_SETFL, fl);
+  if (ret < 0) {
+    zn_log("logind: cannot set O_NONBLOCK: %s\n", strerror(errno));
+    goto err_close;
+  }
+
+  return fd;
+
+err_close:
+  close(fd);
+  zn_session_logind_release_device(self, major(st.st_rdev), minor(st.st_rdev));
+
+err:
+  return -1;
+}
+
+ZN_EXPORT void
+zn_session_close_file(struct zn_session* parent, int fd)
+{
+  struct zn_session_logind* self = zn_container_of(parent, self, base);
+  struct stat st;
+  int ret;
+
+  ret = fstat(fd, &st);
+  close(fd);
+  if (ret < 0) {
+    zn_log("logind: cannot fstat fd: %s\n", strerror(errno));
+    return;
+  }
+
+  if (!S_ISCHR(st.st_mode)) {
+    zn_log("logind: invalid device passed\n");
+    return;
+  }
+
+  zn_session_logind_release_device(self, major(st.st_rdev), minor(st.st_rdev));
 }
 
 ZN_EXPORT int
