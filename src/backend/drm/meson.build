@@ -3,6 +3,8 @@ zen_drm_backend_srcs = [
 ]
 
 zen_drm_backend_deps = [
+  udev_dep,
+  zen_backend_libinput_dep,
   zen_session_dep,
   zen_util_dep,
 ]
