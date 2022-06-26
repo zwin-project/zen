@@ -14,6 +14,10 @@ struct zn_session {
   struct wl_signal session_signal;  // data: bool*
 };
 
+int zn_session_open_file(struct zn_session* self, const char* path, int flags);
+
+void zn_session_close_file(struct zn_session* self, int fd);
+
 /**
  * @return 0 on success, -1 on failure
  */
