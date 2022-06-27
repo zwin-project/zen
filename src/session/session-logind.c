@@ -640,6 +640,7 @@ err_dbus_cleanup:
 
 err_dbus:
   zn_dbus_connection_destroy(self->dbus, self->dbus_event_source);
+  self->dbus = NULL;
 
 err_session:
   free(self->session_id);
@@ -676,8 +677,10 @@ zn_session_destroy(struct zn_session* parent)
     dbus_pending_call_unref(self->pending_active);
   }
 
-  zn_session_logind_release_control(self);
-  zn_dbus_connection_destroy(self->dbus, self->dbus_event_source);
+  if (self->dbus) {
+    zn_session_logind_release_control(self);
+    zn_dbus_connection_destroy(self->dbus, self->dbus_event_source);
+  }
   zn_session_logind_teardown_dbus(self);
   free(self->session_id);
   free(self);
