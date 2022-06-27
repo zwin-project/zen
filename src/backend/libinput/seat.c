@@ -8,6 +8,15 @@ struct zn_libinput {
   struct libinput *libinput;
 };
 
+static void
+libinput_log_func(struct libinput *libinput,
+    enum libinput_log_priority priority, const char *format, va_list args)
+{
+  UNUSED(libinput);
+  UNUSED(priority);
+  zn_vlog(format, args);
+}
+
 static int
 zn_libinput_open_restricted(const char *path, int flags, void *user_data)
 {
@@ -33,6 +42,7 @@ ZN_EXPORT struct zn_libinput *
 zn_libinput_create(struct udev *udev, struct zn_session *session)
 {
   struct zn_libinput *self;
+  enum libinput_log_priority priority = LIBINPUT_LOG_PRIORITY_INFO;
   UNUSED(udev);
 
   self = zalloc(sizeof *self);
@@ -41,6 +51,10 @@ zn_libinput_create(struct udev *udev, struct zn_session *session)
   self->libinput =
       libinput_udev_create_context(&libinput_interface, self, udev);
   if (self->libinput == NULL) goto err_free;
+
+  libinput_log_set_handler(self->libinput, &libinput_log_func);
+
+  libinput_log_set_priority(self->libinput, priority);
 
   // TODO: There is more to be done
 

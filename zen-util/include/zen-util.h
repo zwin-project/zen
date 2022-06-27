@@ -1,6 +1,7 @@
 #ifndef ZEN_UTIL_H
 #define ZEN_UTIL_H
 
+#include <stdarg.h>
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -34,5 +35,8 @@ zalloc(size_t size)
 
 /** logger */
 int zn_log(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
+
+/* alternative logger api */
+int zn_vlog(const char *fmt, va_list ap);
 
 #endif  //  ZEN_UTIL_H
