@@ -27,6 +27,8 @@ zn_backend_create(struct wl_display *display)
     goto err_free;
   }
 
+  zn_log("Press Q to exit...\n");  // FIXME: for dev only, remove this later...
+
   if (zn_session_connect(self->session, seat_id) != 0) {
     zn_log("drm backend: session connection failed\n");
     goto err_session;
@@ -38,7 +40,7 @@ zn_backend_create(struct wl_display *display)
     goto err_session;
   }
 
-  self->input = zn_libinput_create(self->udev, self->session, seat_id);
+  self->input = zn_libinput_create(self->udev, self->session, display, seat_id);
   if (self->input == NULL) {
     zn_log("drm backend: failed to create input devices\n");
     goto err_udev;
