@@ -39,7 +39,8 @@ static const struct libinput_interface libinput_interface = {
 };
 
 ZN_EXPORT struct zn_libinput *
-zn_libinput_create(struct udev *udev, struct zn_session *session)
+zn_libinput_create(
+    struct udev *udev, struct zn_session *session, const char *seat_id)
 {
   struct zn_libinput *self;
   enum libinput_log_priority priority = LIBINPUT_LOG_PRIORITY_INFO;
@@ -56,11 +57,19 @@ zn_libinput_create(struct udev *udev, struct zn_session *session)
 
   libinput_log_set_priority(self->libinput, priority);
 
+  if (libinput_udev_assign_seat(self->libinput, seat_id) != 0) {
+    zn_log("libinput: failed to assign seat id: %s\n", seat_id);
+    goto err_unref;
+  }
+
   // TODO: There is more to be done
 
   self->session = session;
 
   return self;
+
+err_unref:
+  libinput_unref(self->libinput);
 
 err_free:
   free(self);

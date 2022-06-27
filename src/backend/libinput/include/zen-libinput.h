@@ -7,7 +7,7 @@
 struct zn_libinput;
 
 struct zn_libinput *zn_libinput_create(
-    struct udev *udev, struct zn_session *session);
+    struct udev *udev, struct zn_session *session, const char *seat_id);
 
 void zn_libinput_destroy(struct zn_libinput *self);
 

@@ -38,7 +38,7 @@ zn_backend_create(struct wl_display *display)
     goto err_session;
   }
 
-  self->input = zn_libinput_create(self->udev, self->session);
+  self->input = zn_libinput_create(self->udev, self->session, seat_id);
   if (self->input == NULL) {
     zn_log("drm backend: failed to create input devices\n");
     goto err_udev;
