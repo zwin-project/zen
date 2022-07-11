@@ -1,0 +1,21 @@
+name: editorconfig_linting
+
+on:
+  push:
+    branches:
+      - main
+      - dev-wlroots
+  pull_request:
+    branches:
+      - main
+      - dev-wlroots
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Editorconfig Checker
+        uses: editorconfig-checker/action-editorconfig-checker@v1

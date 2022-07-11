@@ -1,0 +1,36 @@
+name: meson_test
+
+on:
+  push:
+    branches:
+      - main
+      - dev-wlroots
+  pull_request:
+    branches:
+      - main
+      - dev-wlroots
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update &&
+          sudo apt-get install \
+            libwayland-dev libwlroots-dev
+
+      - uses: actions/setup-python@v1
+        with:
+          python-version: "3.x"
+
+      - name: Install meson & ninja
+        run: pip install meson ninja
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Build zen
+        run: meson build && ninja -C build
+        env:
+          CC: clang

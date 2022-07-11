@@ -1,0 +1,13 @@
+= ZEN
+
+XR Desktop Environment
+
+== Build & Install
+
+[source, shell]
+----
+$ git clone https://github.com/zigen-project/zen.git
+$ cd zen
+$ meson build
+$ ninja -C build install
+----
