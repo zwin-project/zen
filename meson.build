@@ -11,6 +11,7 @@ cc = meson.get_compiler('c')
 global_args = []
 global_args_maybe = [
   '-D_GNU_SOURCE',
+  '-DWLR_USE_UNSTABLE',
   '-fvisibility=hidden',
 ]
 
@@ -31,5 +32,5 @@ wlroots_req = '>=0.10.0'
 wayland_server_dep = dependency('wayland-server', version: wayland_server_req)
 wlroots_dep = dependency('wlroots', version: wlroots_req)
 
-subdir('zen-util')
+subdir('common')
 subdir('src')

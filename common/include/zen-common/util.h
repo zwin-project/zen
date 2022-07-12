@@ -1,10 +1,6 @@
 #ifndef ZEN_UTIL_H
 #define ZEN_UTIL_H
 
-#include <assert.h>
-#include <errno.h>
-#include <stdarg.h>
-#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -35,11 +31,5 @@ zalloc(size_t size)
 /** Retrieve a pointer to a containing struct */
 #define zn_container_of(ptr, sample, member) \
   (__typeof__(sample))((char *)(ptr)-offsetof(__typeof__(*sample), member))
-
-/** logger */
-int zn_log(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
-
-/* alternative logger api */
-int zn_vlog(const char *fmt, va_list ap);
 
 #endif  //  ZEN_UTIL_H
