@@ -1,4 +1,7 @@
-_zen_desktop_srcs = [ 'main.c' ]
+_zen_desktop_srcs = [
+  'main.c',
+  'server.c',
+]
 
 _zen_desktop_deps = [
   wayland_server_dep,
