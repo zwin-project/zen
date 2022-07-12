@@ -4,11 +4,11 @@ on:
   push:
     branches:
       - main
-      - dev-wlroots
+      - dev
   pull_request:
     branches:
       - main
-      - dev-wlroots
+      - dev
 
 jobs:
   lint:

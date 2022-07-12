@@ -4,14 +4,14 @@ on:
   push:
     branches:
       - main
-      - dev-wlroots
+      - dev
   pull_request:
     branches:
       - main
-      - dev-wlroots
+      - dev
 
 jobs:
-  test:
+  build-with-gcc:
     runs-on: ubuntu-latest
     steps:
       - name: Install dependencies
@@ -33,4 +33,4 @@ jobs:
       - name: Build zen
         run: meson build && ninja -C build
         env:
-          CC: clang
+          CC: gcc
