@@ -1,10 +1,34 @@
 #include <signal.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <wlr/util/log.h>
 
 #include "server.h"
 #include "zen-common.h"
 
 static struct zn_server *server;
+
+static zn_log_importance_t
+convert_wlr_log_importance(enum wlr_log_importance importance)
+{
+  switch (importance) {
+    case WLR_ERROR:
+      return ZEN_ERROR;
+    case WLR_INFO:
+      return ZEN_INFO;
+    default:
+      return ZEN_DEBUG;
+  }
+}
+
+static void
+handle_wlr_log(
+    enum wlr_log_importance importance, const char *fmt, va_list args)
+{
+  static char zn_fmt[1024];
+  snprintf(zn_fmt, sizeof(zn_fmt), "[wlr] %s", fmt);
+  _zn_vlog(convert_wlr_log_importance(importance), zn_fmt, args);
+}
 
 static void
 zn_terminate(int exit_code)
@@ -32,6 +56,7 @@ main()
   int i, exit_status = EXIT_FAILURE;
 
   zn_log_init(ZEN_INFO, zn_terminate);
+  wlr_log_init(WLR_INFO, handle_wlr_log);
 
   display = wl_display_create();
   if (display == NULL) {
