@@ -55,8 +55,8 @@ main()
   struct wl_event_source *signal_sources[3];
   int i, exit_status = EXIT_FAILURE;
 
-  zn_log_init(ZEN_INFO, zn_terminate);
-  wlr_log_init(WLR_INFO, handle_wlr_log);
+  zn_log_init(ZEN_DEBUG, zn_terminate);
+  wlr_log_init(WLR_DEBUG, handle_wlr_log);
 
   display = wl_display_create();
   if (display == NULL) {
