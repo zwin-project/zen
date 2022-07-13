@@ -25,7 +25,7 @@ add_project_arguments(global_args, language: 'c')
 # generic version requirements
 
 wayland_server_req = '>= 1.18.0'
-wlroots_req = '>=0.10.0'
+wlroots_req = ['>= 0.15', '< 0.16']
 
 # dependencies
 

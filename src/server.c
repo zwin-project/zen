@@ -60,7 +60,7 @@ zn_server_create(struct wl_display *display)
   self->display = display;
   self->exit_code = EXIT_FAILURE;
 
-  self->backend = wlr_backend_autocreate(self->display, NULL);
+  self->backend = wlr_backend_autocreate(self->display);
   if (self->backend == NULL) {
     zn_error("Failed to create a backend");
     goto err_free;
