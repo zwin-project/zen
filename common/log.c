@@ -16,6 +16,7 @@ static struct timespec start_time = {-1, -1};
 static const char *verbosity_colors[] = {
     [ZEN_SILENT] = "",
     [ZEN_ERROR] = "\x1B[1;31m",
+    [ZEN_WARN] = "\x1B[1;33m",
     [ZEN_INFO] = "\x1B[1;34m",
     [ZEN_DEBUG] = "\x1B[1;30m",
 };
@@ -23,6 +24,7 @@ static const char *verbosity_colors[] = {
 static const char *verbosity_headers[] = {
     [ZEN_SILENT] = "",
     [ZEN_ERROR] = "[ERROR]",
+    [ZEN_WARN] = "[WARNING]",
     [ZEN_INFO] = "[INFO]",
     [ZEN_DEBUG] = "[DEBUG]",
 };

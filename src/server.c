@@ -2,14 +2,19 @@
 
 #include <wayland-server.h>
 #include <wlr/backend.h>
+#include <wlr/render/allocator.h>
+#include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_output.h>
 
+#include "output.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 
 struct zn_server {
   struct wl_display *display;
   struct wlr_backend *backend;
+  struct wlr_renderer *renderer;
+  struct wlr_allocator *allocator;
 
   struct wl_listener new_output_listener;
 
@@ -20,11 +25,28 @@ static void
 zn_server_new_output_handler(struct wl_listener *listener, void *data)
 {
   struct zn_server *self = zn_container_of(listener, self, new_output_listener);
-  struct wlr_output *output = data;
-  UNUSED(self);
-  UNUSED(output);
+  struct wlr_output *wlr_output = data;
+  struct zn_output *output;
 
-  // TODO: implement here
+  zn_debug("New output %p: %s (non-desktop: %d)", (void *)wlr_output,
+      wlr_output->name, wlr_output->non_desktop);
+
+  if (wlr_output->non_desktop) {
+    zn_debug("Not configuring non-desktop output");
+  }
+
+  if (wlr_output_init_render(wlr_output, self->allocator, self->renderer) ==
+      false) {
+    zn_error("Failed to initialize output renderer");
+    return;
+  }
+
+  output = zn_output_create(wlr_output);
+  if (output == NULL) {
+    zn_error("Failed to create a zen output");
+    return;
+  }
+  UNUSED(output);
 }
 
 int
@@ -66,10 +88,28 @@ zn_server_create(struct wl_display *display)
     goto err_free;
   }
 
+  self->renderer = wlr_renderer_autocreate(self->backend);
+  if (self->renderer == NULL) {
+    zn_error("Failed to create renderer");
+    goto err_backend;
+  }
+
+  self->allocator = wlr_allocator_autocreate(self->backend, self->renderer);
+  if (self->allocator == NULL) {
+    zn_error("Failed to create allocator");
+    goto err_renderer;
+  }
+
   self->new_output_listener.notify = zn_server_new_output_handler;
   wl_signal_add(&self->backend->events.new_output, &self->new_output_listener);
 
   return self;
+
+err_renderer:
+  wlr_renderer_destroy(self->renderer);
+
+err_backend:
+  wlr_backend_destroy(self->backend);
 
 err_free:
   free(self);
@@ -81,6 +121,8 @@ err:
 void
 zn_server_destroy(struct zn_server *self)
 {
+  wlr_allocator_destroy(self->allocator);
+  wlr_renderer_destroy(self->renderer);
   wlr_backend_destroy(self->backend);
   free(self);
 }
