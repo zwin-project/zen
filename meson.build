@@ -25,13 +25,17 @@ add_project_arguments(global_args, language: 'c')
 # generic version requirements
 
 wayland_server_req = '>= 1.18.0'
+wayland_protocols_req = '>= 1.24'
 wlroots_req = ['>= 0.15', '< 0.16']
 
 # dependencies
 
 wayland_server_dep = dependency('wayland-server', version: wayland_server_req)
+wayland_scanner_dep = dependency('wayland-scanner')
+wayland_protocols_dep = dependency('wayland-protocols', version: wayland_protocols_req)
 wlroots_dep = dependency('wlroots', version: wlroots_req)
 pixman_dep = dependency('pixman-1')
 
+subdir('protocols')
 subdir('common')
 subdir('src')

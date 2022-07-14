@@ -5,7 +5,9 @@
 #include <wlr/backend.h>
 #include <wlr/render/allocator.h>
 #include <wlr/render/wlr_renderer.h>
+#include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_output.h>
+#include <wlr/types/wlr_xdg_shell.h>
 
 #include "output.h"
 #include "zen-common/log.h"
@@ -18,9 +20,14 @@ struct zn_server {
   struct wlr_renderer *renderer;
   struct wlr_allocator *allocator;
 
+  // these objects will be automatically destroyed when wl_display is destroyed
+  struct wlr_compositor *w_compositor;
+  struct wlr_xdg_shell *xdg_shell;
+
   char *socket;
 
   struct wl_listener new_output_listener;
+  struct wl_listener xdg_shell_new_surface_listener;
 
   int exit_code;
 };
@@ -53,6 +60,22 @@ zn_server_new_output_handler(struct wl_listener *listener, void *data)
     return;
   }
   UNUSED(output);
+}
+
+static void
+zn_server_xdg_shell_new_surfce_handler(struct wl_listener *listener, void *data)
+{
+  struct wlr_xdg_surface *xdg_surface = data;
+  UNUSED(listener);
+
+  if (xdg_surface->role == WLR_XDG_SURFACE_ROLE_POPUP) {
+    zn_debug("New xdg_shell popup");
+    return;
+  }
+
+  zn_debug("New xdg_shell toplevel title='%s' app_id='%s'",
+      xdg_surface->toplevel->title, xdg_surface->toplevel->app_id);
+  wlr_xdg_surface_ping(xdg_surface);
 }
 
 struct wl_event_loop *
@@ -126,6 +149,23 @@ zn_server_create(struct wl_display *display)
     goto err_renderer;
   }
 
+  self->w_compositor = wlr_compositor_create(self->display, self->renderer);
+  if (self->w_compositor == NULL) {
+    zn_error("Failed to create wlr_compositor");
+    goto err_allocator;
+  }
+
+  self->xdg_shell = wlr_xdg_shell_create(self->display);
+  if (self->display == NULL) {
+    zn_error("Failed to create wlr_xdg_shell");
+    goto err_allocator;
+  }
+
+  self->xdg_shell_new_surface_listener.notify =
+      zn_server_xdg_shell_new_surfce_handler;
+  wl_signal_add(&self->xdg_shell->events.new_surface,
+      &self->xdg_shell_new_surface_listener);
+
   for (int i = 1; i <= 32; i++) {
     sprintf(socket_name_candidate, "wayland-%d", i);
     if (wl_display_add_socket(self->display, socket_name_candidate) >= 0) {
@@ -136,7 +176,7 @@ zn_server_create(struct wl_display *display)
 
   if (self->socket == NULL) {
     zn_error("Failed to open wayland socket");
-    goto err_renderer;
+    goto err_allocator;
   }
 
   setenv("WAYLAND_DISPLAY", self->socket, true);
@@ -148,6 +188,9 @@ zn_server_create(struct wl_display *display)
   wl_signal_add(&self->backend->events.new_output, &self->new_output_listener);
 
   return self;
+
+err_allocator:
+  wlr_allocator_destroy(self->allocator);
 
 err_renderer:
   wlr_renderer_destroy(self->renderer);
