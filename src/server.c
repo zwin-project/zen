@@ -93,6 +93,12 @@ zn_server_get_renderer(struct zn_server *self)
   return self->renderer;
 }
 
+struct zn_scene *
+zn_server_get_scene(struct zn_server *self)
+{
+  return self->scene;
+}
+
 int
 zn_server_run(struct zn_server *self)
 {

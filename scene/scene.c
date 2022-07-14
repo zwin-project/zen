@@ -1,10 +1,7 @@
+#include "scene.h"
+
 #include "zen-common.h"
 #include "zen-scene.h"
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-struct zn_scene {};
-#pragma GCC diagnostic pop
 
 struct zn_scene *
 zn_scene_create()
@@ -17,6 +14,8 @@ zn_scene_create()
     goto err;
   }
 
+  wl_list_init(&self->output_list);
+
   return self;
 
 err:
@@ -26,5 +25,8 @@ err:
 void
 zn_scene_destroy(struct zn_scene *self)
 {
+  // ensure safety when zn_scene_output is destroyed
+  wl_list_remove(&self->output_list);
+
   free(self);
 }
