@@ -12,6 +12,7 @@
 
 struct zn_server {
   struct wl_display *display;
+  struct wl_event_loop *loop;
   struct wlr_backend *backend;
   struct wlr_renderer *renderer;
   struct wlr_allocator *allocator;
@@ -33,20 +34,34 @@ zn_server_new_output_handler(struct wl_listener *listener, void *data)
 
   if (wlr_output->non_desktop) {
     zn_debug("Not configuring non-desktop output");
+    // TODO: DRM lease support for VR headsets
+    return;
   }
 
   if (wlr_output_init_render(wlr_output, self->allocator, self->renderer) ==
       false) {
-    zn_error("Failed to initialize output renderer");
+    zn_abort("Failed to initialize output renderer");
     return;
   }
 
-  output = zn_output_create(wlr_output);
+  output = zn_output_create(wlr_output, self);
   if (output == NULL) {
-    zn_error("Failed to create a zen output");
+    zn_warn("Failed to create a zen output");
     return;
   }
   UNUSED(output);
+}
+
+struct wl_event_loop *
+zn_server_get_loop(struct zn_server *self)
+{
+  return self->loop;
+}
+
+struct wlr_renderer *
+zn_server_get_renderer(struct zn_server *self)
+{
+  return self->renderer;
 }
 
 int
@@ -81,6 +96,7 @@ zn_server_create(struct wl_display *display)
 
   self->display = display;
   self->exit_code = EXIT_FAILURE;
+  self->loop = wl_display_get_event_loop(display);
 
   self->backend = wlr_backend_autocreate(self->display);
   if (self->backend == NULL) {

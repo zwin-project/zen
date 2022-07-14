@@ -2,8 +2,13 @@
 #define ZEN_SERVER_H
 
 #include <wayland-server-core.h>
+#include <wlr/render/wlr_renderer.h>
 
 struct zn_server;
+
+struct wl_event_loop *zn_server_get_loop(struct zn_server *self);
+
+struct wlr_renderer *zn_server_get_renderer(struct zn_server *self);
 
 /** returns exit code */
 int zn_server_run(struct zn_server *self);

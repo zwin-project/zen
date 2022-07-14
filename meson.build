@@ -31,6 +31,7 @@ wlroots_req = ['>= 0.15', '< 0.16']
 
 wayland_server_dep = dependency('wayland-server', version: wayland_server_req)
 wlroots_dep = dependency('wlroots', version: wlroots_req)
+pixman_dep = dependency('pixman-1')
 
 subdir('common')
 subdir('src')
