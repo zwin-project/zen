@@ -38,4 +38,5 @@ pixman_dep = dependency('pixman-1')
 
 subdir('protocols')
 subdir('common')
+subdir('scene')
 subdir('src')

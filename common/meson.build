@@ -1,12 +1,12 @@
 _zen_common_inc = include_directories('include')
 
-_zen_common_src = [
+_zen_common_srcs = [
   'log.c',
 ]
 
 _zen_common_lib = static_library(
   'zen-common',
-  _zen_common_src,
+  _zen_common_srcs,
   include_directories: _zen_common_inc,
   install: false,
 )
