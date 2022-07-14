@@ -2,7 +2,9 @@
 
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_output_damage.h>
-#include <zen-common.h>
+
+#include "zen-common.h"
+#include "zen-scene.h"
 
 struct zn_output {
   struct wlr_output *wlr_output;  // nonnull
@@ -10,6 +12,8 @@ struct zn_output {
 
   /** nonnull, automatically destroyed when wlr_output is destroyed */
   struct wlr_output_damage *damage;
+
+  struct zn_scene_output *scene_output;  // controlled by zn_output
 
   // TODO: use this for better repaint loop
   struct wl_event_source *repaint_timer;
@@ -107,6 +111,12 @@ zn_output_create(struct wlr_output *wlr_output, struct zn_server *server)
     goto err_free;
   }
 
+  self->scene_output = zn_scene_output_create(zn_server_get_scene(server));
+  if (self->scene_output == NULL) {
+    zn_error("Failed to create zn_scene_output");
+    goto err_damage;
+  }
+
   self->wlr_output_destroy_listener.notify =
       zn_output_wlr_output_destroy_handler;
   wl_signal_add(
@@ -142,6 +152,9 @@ err_repaint_timer:
   wl_event_source_remove(self->repaint_timer);
   wl_list_remove(&self->wlr_output_destroy_listener.link);
   wl_list_remove(&self->damage_frame_listener.link);
+  zn_scene_output_destroy(self->scene_output);
+
+err_damage:
   wlr_output_damage_destroy(self->damage);
 
 err_free:
@@ -156,5 +169,6 @@ static void
 zn_output_destroy(struct zn_output *self)
 {
   wl_event_source_remove(self->repaint_timer);
+  zn_scene_output_destroy(self->scene_output);
   free(self);
 }
