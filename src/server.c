@@ -1,5 +1,6 @@
 #include "server.h"
 
+#include <stdio.h>
 #include <wayland-server.h>
 #include <wlr/backend.h>
 #include <wlr/render/allocator.h>
@@ -16,6 +17,8 @@ struct zn_server {
   struct wlr_backend *backend;
   struct wlr_renderer *renderer;
   struct wlr_allocator *allocator;
+
+  char *socket;
 
   struct wl_listener new_output_listener;
 
@@ -87,6 +90,8 @@ struct zn_server *
 zn_server_create(struct wl_display *display)
 {
   struct zn_server *self;
+  char socket_name_candidate[16];
+  char *xdg;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -110,11 +115,34 @@ zn_server_create(struct wl_display *display)
     goto err_backend;
   }
 
+  if (wlr_renderer_init_wl_display(self->renderer, self->display) == false) {
+    zn_error("Failed to initialize renderer with wl_display");
+    goto err_renderer;
+  }
+
   self->allocator = wlr_allocator_autocreate(self->backend, self->renderer);
   if (self->allocator == NULL) {
     zn_error("Failed to create allocator");
     goto err_renderer;
   }
+
+  for (int i = 1; i <= 32; i++) {
+    sprintf(socket_name_candidate, "wayland-%d", i);
+    if (wl_display_add_socket(self->display, socket_name_candidate) >= 0) {
+      self->socket = strdup(socket_name_candidate);
+      break;
+    }
+  }
+
+  if (self->socket == NULL) {
+    zn_error("Failed to open wayland socket");
+    goto err_renderer;
+  }
+
+  setenv("WAYLAND_DISPLAY", self->socket, true);
+  xdg = getenv("XDG_RUNTIME_DIR");
+  zn_debug("WAYLAND_DISPLAY=%s", self->socket);
+  zn_debug("XDG_RUNTIME_DIR=%s", xdg);
 
   self->new_output_listener.notify = zn_server_new_output_handler;
   wl_signal_add(&self->backend->events.new_output, &self->new_output_listener);
@@ -137,6 +165,7 @@ err:
 void
 zn_server_destroy(struct zn_server *self)
 {
+  free(self->socket);
   wlr_allocator_destroy(self->allocator);
   wlr_renderer_destroy(self->renderer);
   wlr_backend_destroy(self->backend);
