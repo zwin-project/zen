@@ -26,6 +26,17 @@ timespec_sub(
   }
 }
 
+/* Convert timespec to nanoseconds
+ *
+ * \param a timespec
+ * \return nanoseconds
+ */
+static inline int64_t
+timespec_to_nsec(const struct timespec *a)
+{
+  return (int64_t)a->tv_sec * NSEC_PER_SEC + a->tv_nsec;
+}
+
 #ifdef __cplusplus
 }
 #endif
