@@ -12,6 +12,7 @@
 #include "output.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
+#include "zen-scene.h"
 
 struct zn_server {
   struct wl_display *display;
@@ -23,6 +24,8 @@ struct zn_server {
   // these objects will be automatically destroyed when wl_display is destroyed
   struct wlr_compositor *w_compositor;
   struct wlr_xdg_shell *xdg_shell;
+
+  struct zn_scene *scene;
 
   char *socket;
 
@@ -161,6 +164,12 @@ zn_server_create(struct wl_display *display)
     goto err_allocator;
   }
 
+  self->scene = zn_scene_create();
+  if (self->scene == NULL) {
+    zn_error("Failed to creaet zn_scene");
+    goto err_allocator;
+  }
+
   self->xdg_shell_new_surface_listener.notify =
       zn_server_xdg_shell_new_surfce_handler;
   wl_signal_add(&self->xdg_shell->events.new_surface,
@@ -176,7 +185,7 @@ zn_server_create(struct wl_display *display)
 
   if (self->socket == NULL) {
     zn_error("Failed to open wayland socket");
-    goto err_allocator;
+    goto err_scene;
   }
 
   setenv("WAYLAND_DISPLAY", self->socket, true);
@@ -188,6 +197,9 @@ zn_server_create(struct wl_display *display)
   wl_signal_add(&self->backend->events.new_output, &self->new_output_listener);
 
   return self;
+
+err_scene:
+  zn_scene_destroy(self->scene);
 
 err_allocator:
   wlr_allocator_destroy(self->allocator);
@@ -209,6 +221,7 @@ void
 zn_server_destroy(struct zn_server *self)
 {
   free(self->socket);
+  zn_scene_destroy(self->scene);
   wlr_allocator_destroy(self->allocator);
   wlr_renderer_destroy(self->renderer);
   wlr_backend_destroy(self->backend);
