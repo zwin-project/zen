@@ -1,12 +1,15 @@
+#include <getopt.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <wait.h>
 #include <wlr/util/log.h>
 
 #include "server.h"
 #include "zen-common.h"
 
 static struct zn_server *server;
+static pid_t startup_command_pid = -1;
 
 static zn_log_importance_t
 convert_wlr_log_importance(enum wlr_log_importance importance)
@@ -47,13 +50,92 @@ on_term_signal(int signal_number, void *data)
   return 1;
 }
 
+static int
+on_signal_child(int signal_number, void *data)
+{
+  pid_t pid;
+  int status;
+  UNUSED(data);
+  UNUSED(signal_number);
+
+  while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+    if (startup_command_pid != -1 && pid == startup_command_pid) {
+      zn_debug("Startup command exited");
+      zn_server_terminate(server, EXIT_SUCCESS);
+    }
+  }
+
+  if (pid < 0 && errno != ECHILD) zn_error("waitpid error %s", strerror(errno));
+
+  return 1;
+}
+
+static pid_t
+launch_startup_command(char *command)
+{
+  pid_t pid = -1;
+
+  pid = fork();
+  if (pid == -1) {
+    zn_error("Failed to fork startup command process: %s", strerror(errno));
+    goto err;
+  } else if (pid == 0) {
+    execl("/bin/sh", "/bin/sh", "-c", command, NULL);
+    fprintf(stderr, "Failed to execute startup command (%s): %s\n", command,
+        strerror(errno));
+    _exit(EXIT_FAILURE);
+  }
+
+err:
+  return pid;
+}
+
 int
-main()
+main(int argc, char *argv[])
 {
   struct wl_display *display;
   struct wl_event_loop *loop;
-  struct wl_event_source *signal_sources[3];
+  struct wl_event_source *signal_sources[4];
   int i, exit_status = EXIT_FAILURE;
+  char *startup_command = NULL;
+
+  static const struct option long_options[] = {
+      {"help", no_argument, NULL, 'h'},
+      {"startup-command", required_argument, NULL, 's'},
+      {0, 0, 0, 0},
+  };
+
+  const char *usage =
+      "Usage: zen-desktop [options]"
+      "\n"
+      "  -h --help             Show help message and quit.\n"
+      "  -s --startup-command  Specify startup command.\n"
+      "\n";
+
+  while (1) {
+    int c, option_index = 0;
+    c = getopt_long(argc, argv, "hs:", long_options, &option_index);
+    if (c == -1) break;
+
+    switch (c) {
+      case 'h':  // help
+        printf("%s", usage);
+        exit(EXIT_SUCCESS);
+        break;
+      case 's':  // startup command
+        startup_command = strdup(optarg);
+        break;
+      default:
+        fprintf(stderr, "%s", usage);
+        exit(EXIT_FAILURE);
+        break;
+    }
+  }
+
+  if (optind < argc) {
+    fprintf(stderr, "%s", usage);
+    exit(EXIT_FAILURE);
+  }
 
   zn_log_init(ZEN_DEBUG, zn_terminate);
   wlr_log_init(WLR_DEBUG, handle_wlr_log);
@@ -71,6 +153,8 @@ main()
       wl_event_loop_add_signal(loop, SIGINT, on_term_signal, display);
   signal_sources[2] =
       wl_event_loop_add_signal(loop, SIGQUIT, on_term_signal, display);
+  signal_sources[3] =
+      wl_event_loop_add_signal(loop, SIGCHLD, on_signal_child, display);
 
   if (!signal_sources[0] || !signal_sources[1] || !signal_sources[2]) {
     zn_error("Failed to add signal handler");
@@ -83,8 +167,14 @@ main()
     goto err_signal;
   }
 
+  if (startup_command) {
+    startup_command_pid = launch_startup_command(startup_command);
+    if (startup_command_pid < 0) goto err_server;
+  }
+
   exit_status = zn_server_run(server);
 
+err_server:
   zn_server_destroy(server);
   server = NULL;
 
@@ -96,6 +186,9 @@ err_signal:
   wl_display_destroy(display);
 
 err:
+  free(startup_command);
+  startup_command = NULL;
+
   zn_info("Exited gracefully");
   return exit_status;
 }

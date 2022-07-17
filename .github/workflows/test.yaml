@@ -18,7 +18,7 @@ jobs:
         run: |
           sudo apt-get update &&
           sudo apt-get install \
-            libwayland-dev libwlroots-dev libpixman-1-dev
+            libwayland-dev libwlroots-dev libpixman-1-dev weston
 
       - uses: actions/setup-python@v1
         with:
