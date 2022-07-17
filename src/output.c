@@ -111,7 +111,8 @@ zn_output_create(struct wlr_output *wlr_output, struct zn_server *server)
     goto err_free;
   }
 
-  self->scene_output = zn_scene_output_create(zn_server_get_scene(server));
+  self->scene_output =
+      zn_scene_output_create(zn_server_get_scene(server), wlr_output);
   if (self->scene_output == NULL) {
     zn_error("Failed to create zn_scene_output");
     goto err_damage;

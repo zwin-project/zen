@@ -1,6 +1,7 @@
 #ifndef ZEN_SCENE_H
 #define ZEN_SCENE_H
 
+#include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_xdg_shell.h>
 
 struct zn_scene;
@@ -15,7 +16,12 @@ void zn_scene_destroy(struct zn_scene* self);
 
 /* zn_scene_output */
 
-struct zn_scene_output* zn_scene_output_create(struct zn_scene* scene);
+/**
+ * caller of this function must call zn_scene_output_destroy when the wlr_output
+ * is destroyed
+ */
+struct zn_scene_output* zn_scene_output_create(
+    struct zn_scene* scene, struct wlr_output* wlr_output);
 
 void zn_scene_output_destroy(struct zn_scene_output* self);
 
@@ -23,7 +29,7 @@ void zn_scene_output_destroy(struct zn_scene_output* self);
 
 /**
  * caller of this function must call zn_scene_toplevel_view_destroy when the
- * given wlr_xdg_toplevel is destroyed
+ * wlr_xdg_toplevel is destroyed
  */
 struct zn_scene_toplevel_view* zn_scene_toplevel_view_create(
     struct zn_scene* scene, struct wlr_xdg_toplevel* wlr_xdg_toplevel,

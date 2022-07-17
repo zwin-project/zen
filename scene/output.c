@@ -5,7 +5,7 @@
 #include "zen-scene.h"
 
 struct zn_scene_output*
-zn_scene_output_create(struct zn_scene* scene)
+zn_scene_output_create(struct zn_scene* scene, struct wlr_output* wlr_output)
 {
   struct zn_scene_output* self;
 
@@ -13,6 +13,8 @@ zn_scene_output_create(struct zn_scene* scene)
   if (self == NULL) {
     goto err;
   }
+
+  self->wlr_output = wlr_output;
 
   wl_list_init(&self->toplevels);
   wl_list_insert(&scene->output_list, &self->link);
