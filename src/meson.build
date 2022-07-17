@@ -18,6 +18,6 @@ _zen_desktop_deps = [
 executable(
   'zen-desktop',
   _zen_desktop_srcs,
-  install: false,
+  install: true,
   dependencies: _zen_desktop_deps,
 )

@@ -22,6 +22,8 @@ foreach arg : global_args_maybe
 endforeach
 add_project_arguments(global_args, language: 'c')
 
+datadir = get_option('datadir')
+
 # generic version requirements
 
 wayland_server_req = '>= 1.18.0'
@@ -40,3 +42,10 @@ subdir('protocols')
 subdir('common')
 subdir('scene')
 subdir('src')
+
+find_program('weston-terminal', required: true) # used in zen.desktop
+
+install_data(
+  'zen.desktop',
+  install_dir: join_paths(datadir, 'wayland-sessions')
+)

@@ -11,3 +11,25 @@ $ cd zen
 $ meson build
 $ ninja -C build install
 ----
+
+== Start ZEN Desktop
+
+[red]#***__caution__**# +
+If you are not used to switching virtual terminals or cannot connect via ssh
+from another PC, do not use zen-desktop yet. You may not know how to return to
+the original GUI other than a forced reboot.
+
+Select `ZEN` from your display manager.
+
+== Stop ZEN Desktop
+
+Since we have not yet implemented the input functionalities, the possible way to
+stop ZEN Desktop is to send a kill signal to the process from another terminal.
+
+
+From another terminal (another virtual terminal or ssh)
+
+[source, shell]
+----
+$ pkill zen-desktop
+----

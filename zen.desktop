@@ -1,0 +1,5 @@
+[Desktop Entry]
+Name=ZEN
+Comment=Wayland based XR windowing system
+Exec=zen-desktop -s weston-terminal
+Type=Application
