@@ -3,10 +3,12 @@
 
 #include <wlr/types/wlr_xdg_shell.h>
 
+#include "server.h"
+
 /** this destroys itself when the given wlr_xdg_surface is destroyed */
 struct zn_xdg_toplevel_view;
 
 struct zn_xdg_toplevel_view *zn_xdg_toplevel_view_create(
-    struct wlr_xdg_surface *xdg_surface);
+    struct wlr_xdg_toplevel *xdg_toplevel, struct zn_server *server);
 
 #endif  //  ZEN_XDG_TOPLEVEL_VIEW_H
