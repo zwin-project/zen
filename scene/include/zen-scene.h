@@ -16,6 +16,9 @@ void zn_scene_destroy(struct zn_scene* self);
 
 /* zn_scene_output */
 
+void zn_scene_output_for_each_surface(struct zn_scene_output* self,
+    void (*iterator)(struct wlr_surface* surface, void* data), void* data);
+
 /**
  * caller of this function must call zn_scene_output_destroy when the wlr_output
  * is destroyed

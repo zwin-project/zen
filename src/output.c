@@ -64,6 +64,16 @@ zn_output_repaint_timer_handler(void *data)
 }
 
 static void
+send_frame_done(struct wlr_surface *surface, void *data)
+{
+  struct timespec now;
+  UNUSED(data);
+
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  wlr_surface_send_frame_done(surface, &now);
+}
+
+static void
 zn_output_damage_frame_handler(struct wl_listener *listener, void *data)
 {
   struct zn_output *self =
@@ -76,7 +86,7 @@ zn_output_damage_frame_handler(struct wl_listener *listener, void *data)
 
   zn_output_repaint_timer_handler(self);
 
-  // TODO: Send frame done to all visible surfaces
+  zn_scene_output_for_each_surface(self->scene_output, send_frame_done, NULL);
 }
 
 struct zn_output *
