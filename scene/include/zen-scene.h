@@ -37,4 +37,8 @@ struct zn_scene_toplevel_view* zn_scene_toplevel_view_create(
 
 void zn_scene_toplevel_view_destroy(struct zn_scene_toplevel_view* self);
 
+/* zn_scene_render */
+
+void zn_scene_render_output(struct zn_scene_output* output);
+
 #endif  //  ZEN_SCENE_H

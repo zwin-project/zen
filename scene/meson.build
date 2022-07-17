@@ -2,6 +2,7 @@ _zen_scene_inc = include_directories('include')
 
 _zen_scene_srcs = [
   'output.c',
+  'render.c',
   'scene.c',
   'toplevel-view.c',
 ]
