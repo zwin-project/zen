@@ -39,35 +39,26 @@ zn_output_repaint_timer_handler(void *data)
 {
   struct zn_output *self = data;
   struct wlr_renderer *renderer = zn_server_get_renderer(self->server);
+  pixman_region32_t damage;
+  bool needs_frame;
 
   self->wlr_output->frame_pending = false;
 
-  // FIXME:
-  {
-    struct timespec now;
-    int64_t now_nsec;
-    float red;
-    pixman_region32_t damage;
-    bool needs_frame;
-    pixman_region32_init(&damage);
+  pixman_region32_init(&damage);
 
-    wlr_output_damage_attach_render(self->damage, &needs_frame, &damage);
+  wlr_output_damage_attach_render(self->damage, &needs_frame, &damage);
 
-    wlr_renderer_begin(
-        renderer, self->wlr_output->width, self->wlr_output->height);
+  wlr_renderer_begin(
+      renderer, self->wlr_output->width, self->wlr_output->height);
 
-    clock_gettime(CLOCK_MONOTONIC, &now);
-    now_nsec = timespec_to_nsec(&now);
-    red = (float)(now_nsec % (NSEC_PER_SEC * 2)) / (float)NSEC_PER_SEC - 1.0;
-    red = red < 0 ? -red : red;
+  wlr_renderer_clear(renderer, (float[]){0.2, 0.3, 0.2, 1});
 
-    wlr_renderer_clear(renderer, (float[]){red, 1, 0, 1});
+  zn_scene_render_output(self->scene_output);
 
-    wlr_renderer_end(renderer);
-    pixman_region32_fini(&damage);
+  wlr_renderer_end(renderer);
+  pixman_region32_fini(&damage);
 
-    wlr_output_commit(self->wlr_output);
-  }
+  wlr_output_commit(self->wlr_output);
 
   return 0;
 }
