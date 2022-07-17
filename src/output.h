@@ -5,7 +5,7 @@
 
 #include "server.h"
 
-/** self-deleting object */
+/** this destroys itself when the given wlr_output is destroyed */
 struct zn_output;
 
 struct zn_output *zn_output_create(

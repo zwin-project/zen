@@ -10,6 +10,7 @@
 #include <wlr/types/wlr_xdg_shell.h>
 
 #include "output.h"
+#include "xdg-toplevel-view.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 #include "zen-scene.h"
@@ -66,7 +67,8 @@ zn_server_new_output_handler(struct wl_listener *listener, void *data)
 }
 
 static void
-zn_server_xdg_shell_new_surfce_handler(struct wl_listener *listener, void *data)
+zn_server_xdg_shell_new_surface_handler(
+    struct wl_listener *listener, void *data)
 {
   struct wlr_xdg_surface *xdg_surface = data;
   UNUSED(listener);
@@ -79,6 +81,8 @@ zn_server_xdg_shell_new_surfce_handler(struct wl_listener *listener, void *data)
   zn_debug("New xdg_shell toplevel title='%s' app_id='%s'",
       xdg_surface->toplevel->title, xdg_surface->toplevel->app_id);
   wlr_xdg_surface_ping(xdg_surface);
+
+  (void)zn_xdg_toplevel_view_create(xdg_surface);
 }
 
 struct wl_event_loop *
@@ -172,12 +176,12 @@ zn_server_create(struct wl_display *display)
 
   self->scene = zn_scene_create();
   if (self->scene == NULL) {
-    zn_error("Failed to creaet zn_scene");
+    zn_error("Failed to create zn_scene");
     goto err_allocator;
   }
 
   self->xdg_shell_new_surface_listener.notify =
-      zn_server_xdg_shell_new_surfce_handler;
+      zn_server_xdg_shell_new_surface_handler;
   wl_signal_add(&self->xdg_shell->events.new_surface,
       &self->xdg_shell_new_surface_listener);
 
