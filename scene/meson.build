@@ -3,9 +3,11 @@ _zen_scene_inc = include_directories('include')
 _zen_scene_srcs = [
   'output.c',
   'scene.c',
+  'toplevel-view.c',
 ]
 
 _zen_scene_deps = [
+  server_protocols,
   wlroots_dep,
   wayland_server_dep,
   zen_common_dep,

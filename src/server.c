@@ -71,7 +71,8 @@ zn_server_xdg_shell_new_surface_handler(
     struct wl_listener *listener, void *data)
 {
   struct wlr_xdg_surface *xdg_surface = data;
-  UNUSED(listener);
+  struct zn_server *self =
+      zn_container_of(listener, self, xdg_shell_new_surface_listener);
 
   if (xdg_surface->role == WLR_XDG_SURFACE_ROLE_POPUP) {
     zn_debug("New xdg_shell popup");
@@ -82,7 +83,7 @@ zn_server_xdg_shell_new_surface_handler(
       xdg_surface->toplevel->title, xdg_surface->toplevel->app_id);
   wlr_xdg_surface_ping(xdg_surface);
 
-  (void)zn_xdg_toplevel_view_create(xdg_surface);
+  (void)zn_xdg_toplevel_view_create(xdg_surface->toplevel, self);
 }
 
 struct wl_event_loop *
