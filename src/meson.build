@@ -1,4 +1,5 @@
 _zen_desktop_srcs = [
+  'input-manager.c',
   'main.c',
   'output.c',
   'server.c',

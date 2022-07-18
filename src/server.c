@@ -9,6 +9,7 @@
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_xdg_shell.h>
 
+#include "input-manager.h"
 #include "output.h"
 #include "xdg-toplevel-view.h"
 #include "zen-common/log.h"
@@ -25,6 +26,8 @@ struct zn_server {
   // these objects will be automatically destroyed when wl_display is destroyed
   struct wlr_compositor *w_compositor;
   struct wlr_xdg_shell *xdg_shell;
+
+  struct zn_input_manager *input_manager;
 
   struct zn_scene *scene;
 
@@ -207,7 +210,16 @@ zn_server_create(struct wl_display *display)
   self->new_output_listener.notify = zn_server_new_output_handler;
   wl_signal_add(&self->backend->events.new_output, &self->new_output_listener);
 
+  self->input_manager = zn_input_manager_create();
+  if (self->input_manager == NULL) {
+    zn_error("Failed to create input manager");
+    goto err_socket;
+  }
+
   return self;
+
+err_socket:
+  free(self->socket);
 
 err_scene:
   zn_scene_destroy(self->scene);
@@ -231,6 +243,7 @@ err:
 void
 zn_server_destroy(struct zn_server *self)
 {
+  zn_input_manager_destroy(self->input_manager);
   free(self->socket);
   zn_scene_destroy(self->scene);
   wlr_allocator_destroy(self->allocator);
