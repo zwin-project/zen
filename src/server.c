@@ -201,6 +201,12 @@ zn_server_create(struct wl_display *display)
     zn_error("Failed to open wayland socket");
     goto err_scene;
   }
+  
+  self->input_manager = zn_input_manager_create();
+  if (self->input_manager == NULL) {
+    zn_error("Failed to create input manager");
+    goto err_socket;
+  }
 
   setenv("WAYLAND_DISPLAY", self->socket, true);
   xdg = getenv("XDG_RUNTIME_DIR");
@@ -209,12 +215,6 @@ zn_server_create(struct wl_display *display)
 
   self->new_output_listener.notify = zn_server_new_output_handler;
   wl_signal_add(&self->backend->events.new_output, &self->new_output_listener);
-
-  self->input_manager = zn_input_manager_create();
-  if (self->input_manager == NULL) {
-    zn_error("Failed to create input manager");
-    goto err_socket;
-  }
 
   return self;
 
