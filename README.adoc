@@ -15,9 +15,9 @@ $ ninja -C build install
 == Start ZEN Desktop
 
 [red]#***__caution__**# +
-If you are not used to switching virtual terminals or cannot connect via ssh
-from another PC, do not use zen-desktop yet. You may not know how to return to
-the original GUI other than a forced reboot.
+If you cannot connect to your machine via ssh from another PC, do not use
+zen-desktop yet. You will have no way to return to the original GUI other than
+a forced reboot.
 
 Select `ZEN` from your display manager.
 
