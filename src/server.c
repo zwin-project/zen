@@ -202,7 +202,7 @@ zn_server_create(struct wl_display *display)
     goto err_scene;
   }
   
-  self->input_manager = zn_input_manager_create();
+  self->input_manager = zn_input_manager_create(self->display);
   if (self->input_manager == NULL) {
     zn_error("Failed to create input manager");
     goto err_socket;

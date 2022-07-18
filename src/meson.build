@@ -2,6 +2,7 @@ _zen_desktop_srcs = [
   'input-manager.c',
   'main.c',
   'output.c',
+  'seat.c',
   'server.c',
   'view.c',
   'xdg-toplevel-view.c',
