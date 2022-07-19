@@ -39,13 +39,13 @@ zn_input_manager_create(struct wl_display* display)
     goto err;
   }
 
-  wl_list_init(&self->devices);
-
   self->seat = zn_seat_create(display, ZEN_DEFAULT_SEAT);
   if (self->seat == NULL) {
     zn_error("Failed to create zn_seat");
     goto err_free;
   }
+
+  wl_list_init(&self->devices);
 
   return self;
 
