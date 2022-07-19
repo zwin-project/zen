@@ -33,7 +33,7 @@ zn_input_device_create(
   struct zn_input_device* self;
   self = zalloc(sizeof *self);
   if (self == NULL) {
-    zn_error("Failed to create zn_input_device");
+    zn_error("Failed to allocate memory");
     goto err;
   }
 
