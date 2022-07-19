@@ -56,7 +56,7 @@ zn_seat_update_capabilities(struct zn_seat* self)
   }
 
   wlr_seat_set_capabilities(self->wlr_seat, caps);
-  if (caps & WL_SEAT_CAPABILITY_POINTER) {
+  if (zn_seat_has_capabilities(self, WL_SEAT_CAPABILITY_POINTER)) {
     // pointer device is connected just now, so show cursor image
     if (!(prev_caps & WL_SEAT_CAPABILITY_POINTER)) {
       // TODO: show cursor image
@@ -112,6 +112,12 @@ zn_seat_add_device(struct zn_seat* self, struct zn_input_device* input_device)
 
   zn_seat_configure_device(self, input_device);
   zn_seat_update_capabilities(self);
+}
+
+bool
+zn_seat_has_capabilities(struct zn_seat* self, enum wl_seat_capability type)
+{
+  return (self->wlr_seat->capabilities & type) != 0;
 }
 
 struct zn_seat*
