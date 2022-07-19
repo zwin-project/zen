@@ -21,12 +21,10 @@ zn_input_manager_new_input(
     zn_error("Failed to create zn_input_device");
     return;
   }
-  
+
   // TODO: add multi seat support
 
   zn_seat_add_device(self->seat, input_device);
-
-  zn_debug("New input: '%s'", wlr_input->name);
 }
 
 struct zn_input_manager*

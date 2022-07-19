@@ -31,7 +31,6 @@ static void
 zn_seat_update_capabilities(struct zn_seat* self)
 {
   uint32_t caps = 0;
-  uint32_t prev_caps = self->wlr_seat->capabilities;
 
   struct zn_seat_device* seat_device;
   wl_list_for_each(seat_device, &self->devices, link)
@@ -56,50 +55,12 @@ zn_seat_update_capabilities(struct zn_seat* self)
   }
 
   wlr_seat_set_capabilities(self->wlr_seat, caps);
-  if (zn_seat_has_capabilities(self, WL_SEAT_CAPABILITY_POINTER)) {
-    // pointer device is connected just now, so show cursor image
-    if (!(prev_caps & WL_SEAT_CAPABILITY_POINTER)) {
-      // TODO: show cursor image
-    }
-  } else {
-    // no pointer devices are connected, so hide cursor image
-    // TODO: hide cursor image
-  }
-}
-
-void
-zn_seat_configure_device(
-    struct zn_seat* self, struct zn_input_device* input_device)
-{
-  struct zn_seat_device* seat_device = zn_seat_get_device(self, input_device);
-
-  if (seat_device) {
-    wl_list_for_each(seat_device, &self->devices, link)
-    {
-      // TODO
-      switch (zn_input_device_get_type(seat_device->input_device)) {
-        case WLR_INPUT_DEVICE_KEYBOARD:
-          break;
-        case WLR_INPUT_DEVICE_POINTER:
-          break;
-        case WLR_INPUT_DEVICE_TOUCH:
-          break;
-        case WLR_INPUT_DEVICE_TABLET_TOOL:
-          break;
-        case WLR_INPUT_DEVICE_TABLET_PAD:
-          break;
-        case WLR_INPUT_DEVICE_SWITCH:
-          break;
-      }
-    }
-  }
 }
 
 void
 zn_seat_add_device(struct zn_seat* self, struct zn_input_device* input_device)
 {
   if (zn_seat_get_device(self, input_device)) {
-    zn_seat_configure_device(self, input_device);
     return;
   }
 
@@ -110,7 +71,6 @@ zn_seat_add_device(struct zn_seat* self, struct zn_input_device* input_device)
     return;
   }
 
-  zn_seat_configure_device(self, input_device);
   zn_seat_update_capabilities(self);
 }
 

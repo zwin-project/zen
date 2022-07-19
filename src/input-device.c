@@ -16,7 +16,6 @@ handle_device_destroy(struct wl_listener* listener, void* data)
   UNUSED(data);
   struct zn_input_device* self =
       zn_container_of(listener, self, device_destroy);
-  zn_debug("Removed input: '%s'", self->wlr_input->name);
   zn_input_device_destroy(self);
 }
 

@@ -4,9 +4,9 @@
 #include <wayland-server.h>
 #include <wlr/types/wlr_input_device.h>
 
-struct zn_input_manager;
+#include "input-device.h"
 
-struct zn_input_device;
+struct zn_input_manager;
 
 void zn_input_manager_new_input(
     struct zn_input_manager* self, struct wlr_input_device* wlr_input);
