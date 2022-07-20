@@ -42,7 +42,6 @@ zen_inc = include_directories('include')
 
 subdir('protocols')
 subdir('common')
-subdir('scene')
 subdir('zen')
 
 find_program('weston-terminal', required: true) # used in zen.desktop

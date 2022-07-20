@@ -1,12 +1,11 @@
-#include "scene.h"
+#include "zen/scene/scene.h"
 
 #include "zen-common.h"
-#include "zen-scene.h"
 
-struct zn_scene *
+struct zn_scene*
 zn_scene_create()
 {
-  struct zn_scene *self;
+  struct zn_scene* self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -14,7 +13,7 @@ zn_scene_create()
     goto err;
   }
 
-  wl_list_init(&self->output_list);
+  wl_list_init(&self->screens);
 
   return self;
 
@@ -23,10 +22,10 @@ err:
 }
 
 void
-zn_scene_destroy(struct zn_scene *self)
+zn_scene_destroy(struct zn_scene* self)
 {
   // ensure safety when zn_scene_output is destroyed
-  wl_list_remove(&self->output_list);
+  wl_list_remove(&self->screens);
 
   free(self);
 }

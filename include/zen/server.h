@@ -4,8 +4,6 @@
 #include <wayland-server-core.h>
 #include <wlr/render/wlr_renderer.h>
 
-#include "zen-scene.h"
-
 struct zn_server;
 
 struct wl_event_loop *zn_server_get_loop(struct zn_server *self);

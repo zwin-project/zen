@@ -2,9 +2,12 @@
 
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_output_damage.h>
+#include <wlr/types/wlr_surface.h>
 
 #include "zen-common.h"
-#include "zen-scene.h"
+#include "zen/render-2d.h"
+#include "zen/scene/screen.h"
+#include "zen/scene/view.h"
 
 struct zn_output {
   struct wlr_output *wlr_output;  // nonnull
@@ -13,7 +16,7 @@ struct zn_output {
   /** nonnull, automatically destroyed when wlr_output is destroyed */
   struct wlr_output_damage *damage;
 
-  struct zn_scene_output *scene_output;  // controlled by zn_output
+  struct zn_screen *screen;  // controlled by zn_output
 
   // TODO: use this for better repaint loop
   struct wl_event_source *repaint_timer;
@@ -53,7 +56,7 @@ zn_output_repaint_timer_handler(void *data)
 
   wlr_renderer_clear(renderer, (float[]){0.2, 0.3, 0.2, 1});
 
-  zn_scene_render_output(self->scene_output);
+  zn_render_2d_screen(self->screen, renderer);
 
   wlr_renderer_end(renderer);
   pixman_region32_fini(&damage);
@@ -64,20 +67,12 @@ zn_output_repaint_timer_handler(void *data)
 }
 
 static void
-send_frame_done(struct wlr_surface *surface, void *data)
-{
-  struct timespec now;
-  UNUSED(data);
-
-  clock_gettime(CLOCK_MONOTONIC, &now);
-  wlr_surface_send_frame_done(surface, &now);
-}
-
-static void
 zn_output_damage_frame_handler(struct wl_listener *listener, void *data)
 {
   struct zn_output *self =
       zn_container_of(listener, self, damage_frame_listener);
+  struct zn_view *view;
+  struct timespec now;
   UNUSED(data);
 
   if (self->wlr_output->enabled == false) return;
@@ -86,7 +81,10 @@ zn_output_damage_frame_handler(struct wl_listener *listener, void *data)
 
   zn_output_repaint_timer_handler(self);
 
-  zn_scene_output_for_each_surface(self->scene_output, send_frame_done, NULL);
+  clock_gettime(CLOCK_MONOTONIC, &now);
+
+  wl_list_for_each(view, &self->screen->views, link)
+      wlr_surface_send_frame_done(view->impl->get_wlr_surface(view), &now);
 }
 
 struct zn_output *
@@ -112,10 +110,9 @@ zn_output_create(struct wlr_output *wlr_output, struct zn_server *server)
     goto err_free;
   }
 
-  self->scene_output =
-      zn_scene_output_create(zn_server_get_scene(server), wlr_output);
-  if (self->scene_output == NULL) {
-    zn_error("Failed to create zn_scene_output");
+  self->screen = zn_screen_create(zn_server_get_scene(server), self);
+  if (self->screen == NULL) {
+    zn_error("Failed to create zn_screen");
     goto err_damage;
   }
 
@@ -154,7 +151,7 @@ err_repaint_timer:
   wl_event_source_remove(self->repaint_timer);
   wl_list_remove(&self->wlr_output_destroy_listener.link);
   wl_list_remove(&self->damage_frame_listener.link);
-  zn_scene_output_destroy(self->scene_output);
+  zn_screen_destroy(self->screen);
 
 err_damage:
   wlr_output_damage_destroy(self->damage);
@@ -171,6 +168,6 @@ static void
 zn_output_destroy(struct zn_output *self)
 {
   wl_event_source_remove(self->repaint_timer);
-  zn_scene_output_destroy(self->scene_output);
+  zn_screen_destroy(self->screen);
   free(self);
 }

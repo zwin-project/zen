@@ -11,8 +11,8 @@
 
 #include "zen-common/log.h"
 #include "zen-common/util.h"
-#include "zen-scene.h"
 #include "zen/output.h"
+#include "zen/scene/scene.h"
 #include "zen/xdg-toplevel-view.h"
 
 struct zn_server {
