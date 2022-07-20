@@ -1,4 +1,4 @@
-#include "view.h"
+#include "zen/view.h"
 
 #include "zen-common.h"
 

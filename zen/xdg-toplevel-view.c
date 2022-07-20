@@ -1,8 +1,8 @@
-#include "xdg-toplevel-view.h"
+#include "zen/xdg-toplevel-view.h"
 
-#include "view.h"
 #include "zen-common.h"
 #include "zen-scene.h"
+#include "zen/view.h"
 
 struct zn_xdg_toplevel_view {
   struct zn_view base;

@@ -1,4 +1,4 @@
-#include "server.h"
+#include "zen/server.h"
 
 #include <stdio.h>
 #include <wayland-server.h>
@@ -9,11 +9,11 @@
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_xdg_shell.h>
 
-#include "output.h"
-#include "xdg-toplevel-view.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 #include "zen-scene.h"
+#include "zen/output.h"
+#include "zen/xdg-toplevel-view.h"
 
 struct zn_server {
   struct wl_display *display;

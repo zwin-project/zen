@@ -3,7 +3,7 @@
 
 #include <wlr/types/wlr_xdg_shell.h>
 
-#include "server.h"
+#include "zen/server.h"
 
 /** this destroys itself when the given wlr_xdg_surface is destroyed */
 struct zn_xdg_toplevel_view;

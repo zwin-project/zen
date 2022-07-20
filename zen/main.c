@@ -5,8 +5,8 @@
 #include <wait.h>
 #include <wlr/util/log.h>
 
-#include "server.h"
 #include "zen-common.h"
+#include "zen/server.h"
 
 static struct zn_server *server;
 static pid_t startup_command_pid = -1;
