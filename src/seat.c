@@ -35,7 +35,6 @@ zn_seat_update_capabilities(struct zn_seat* self)
   struct zn_seat_device* seat_device;
   wl_list_for_each(seat_device, &self->devices, link)
   {
-    // TODO
     switch (zn_input_device_get_type(seat_device->input_device)) {
       case WLR_INPUT_DEVICE_KEYBOARD:
         caps |= WL_SEAT_CAPABILITY_KEYBOARD;
