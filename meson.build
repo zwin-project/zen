@@ -41,7 +41,7 @@ pixman_dep = dependency('pixman-1')
 subdir('protocols')
 subdir('common')
 subdir('scene')
-subdir('src')
+subdir('zen')
 
 find_program('weston-terminal', required: true) # used in zen.desktop
 
