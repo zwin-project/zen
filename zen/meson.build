@@ -20,4 +20,5 @@ executable(
   _zen_desktop_srcs,
   install: true,
   dependencies: _zen_desktop_deps,
+  include_directories: zen_inc,
 )
