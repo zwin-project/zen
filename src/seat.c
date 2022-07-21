@@ -45,8 +45,6 @@ zn_seat_update_capabilities(struct zn_seat* self)
         // TODO: support touch device
         break;
       case WLR_INPUT_DEVICE_TABLET_TOOL:
-        caps |= WL_SEAT_CAPABILITY_POINTER;
-        break;
       case WLR_INPUT_DEVICE_TABLET_PAD:
       case WLR_INPUT_DEVICE_SWITCH:
         break;
