@@ -83,7 +83,7 @@ zn_xdg_toplevel_view_create(
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
-    zn_error("failed to allocate memory");
+    zn_error("Failed to allocate memory");
     wl_resource_post_no_memory(wlr_xdg_toplevel->resource);
     goto err;
   }
@@ -105,6 +105,8 @@ zn_xdg_toplevel_view_create(
       zn_xdg_toplevel_view_wlr_xdg_surface_destroy_handler;
   wl_signal_add(&wlr_xdg_toplevel->base->events.destroy,
       &self->wlr_xdg_surface_destroy_listener);
+
+  return self;
 
 err:
   return NULL;
