@@ -68,6 +68,14 @@ zn_seat_add_device(struct zn_seat* self, struct zn_input_device* input_device)
   zn_seat_update_capabilities(self);
 }
 
+void
+zn_seat_remove_device(
+    struct zn_seat* self, struct zn_input_device* input_device)
+{
+  zn_input_device_destroy(input_device);
+  zn_seat_update_capabilities(self);
+}
+
 struct zn_seat*
 zn_seat_create(struct wl_display* display, const char* seat_name)
 {

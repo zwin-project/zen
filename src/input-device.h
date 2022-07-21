@@ -7,11 +7,12 @@
 struct zn_input_device {
   struct wlr_input_device* wlr_input;
   struct wl_list link;  // zn_seat::devices
+  struct zn_seat* seat;
   struct wl_listener device_destroy;
 };
 
 struct zn_input_device* zn_input_device_create(
-    struct wlr_input_device* wlr_input);
+    struct zn_seat* seat, struct wlr_input_device* wlr_input);
 
 void zn_input_device_destroy(struct zn_input_device* self);
 
