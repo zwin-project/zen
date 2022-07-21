@@ -8,6 +8,7 @@
 #include <wlr/types/wlr_compositor.h>
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_xdg_shell.h>
+#include <wlr/xwayland.h>
 
 #include "zen-common/log.h"
 #include "zen-common/util.h"
@@ -15,6 +16,7 @@
 #include "zen/output.h"
 #include "zen/scene/scene.h"
 #include "zen/xdg-toplevel-view.h"
+#include "zen/xwayland-view.h"
 
 struct zn_server {
   struct wl_display *display;
@@ -26,6 +28,7 @@ struct zn_server {
   // these objects will be automatically destroyed when wl_display is destroyed
   struct wlr_compositor *w_compositor;
   struct wlr_xdg_shell *xdg_shell;
+  struct wlr_xwayland *xwayland;
 
   struct zn_input_manager *input_manager;
 
@@ -36,6 +39,7 @@ struct zn_server {
   struct wl_listener new_input_listener;
   struct wl_listener new_output_listener;
   struct wl_listener xdg_shell_new_surface_listener;
+  struct wl_listener xwayland_new_surface_listener;
 
   int exit_code;
 };
@@ -98,6 +102,20 @@ zn_server_xdg_shell_new_surface_handler(
   (void)zn_xdg_toplevel_view_create(xdg_surface->toplevel, self);
 }
 
+static void
+zn_server_xwayland_new_surface_handler(struct wl_listener *listener, void *data)
+{
+  struct wlr_xwayland_surface *xwayland_surface = data;
+  struct zn_server *self =
+      zn_container_of(listener, self, xwayland_new_surface_listener);
+
+  zn_debug("New xwayland surface title='%s' class='%s'",
+      xwayland_surface->title, xwayland_surface->class);
+  wlr_xwayland_surface_ping(xwayland_surface);
+
+  (void)zn_xwayland_view_create(xwayland_surface, self);
+}
+
 struct wl_event_loop *
 zn_server_get_loop(struct zn_server *self)
 {
@@ -119,6 +137,18 @@ zn_server_get_scene(struct zn_server *self)
 int
 zn_server_run(struct zn_server *self)
 {
+  self->xwayland = wlr_xwayland_create(self->display, self->w_compositor, 0);
+  if (self->xwayland == NULL) {
+    zn_error("Failed to start xwayland");
+    return EXIT_FAILURE;
+  }
+  self->xwayland_new_surface_listener.notify =
+      zn_server_xwayland_new_surface_handler;
+  wl_signal_add(&self->xwayland->events.new_surface,
+      &self->xwayland_new_surface_listener);
+  setenv("DISPLAY", self->xwayland->display_name, true);
+  zn_debug("DISPLAY=%s", self->xwayland->display_name);
+
   if (!wlr_backend_start(self->backend)) {
     zn_error("Failed to start backend");
     return EXIT_FAILURE;
@@ -132,6 +162,7 @@ void
 zn_server_terminate(struct zn_server *self, int exit_code)
 {
   self->exit_code = exit_code;
+  wlr_xwayland_destroy(self->xwayland);
   wl_display_terminate(self->display);
 }
 
