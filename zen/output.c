@@ -6,6 +6,8 @@
 
 #include "zen-common.h"
 #include "zen/render-2d.h"
+#include "zen/scene/scene.h"
+#include "zen/scene/screen-layout.h"
 #include "zen/scene/screen.h"
 #include "zen/scene/view.h"
 
@@ -112,7 +114,7 @@ zn_output_create(struct wlr_output *wlr_output, struct zn_server *server)
     goto err_free;
   }
 
-  self->screen = zn_screen_create(server->scene, self);
+  self->screen = zn_screen_create(server->scene->screen_layout, self);
   if (self->screen == NULL) {
     zn_error("Failed to create zn_screen");
     goto err_damage;
