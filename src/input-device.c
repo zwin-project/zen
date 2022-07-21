@@ -14,8 +14,7 @@ handle_device_destroy(struct wl_listener* listener, void* data)
 }
 
 struct zn_input_device*
-zn_input_device_create(
-    struct wlr_input_device* wlr_input, struct wl_list* devices)
+zn_input_device_create(struct wlr_input_device* wlr_input)
 {
   struct zn_input_device* self;
   self = zalloc(sizeof *self);
@@ -29,8 +28,6 @@ zn_input_device_create(
 
   self->device_destroy.notify = handle_device_destroy;
   wl_signal_add(&wlr_input->events.destroy, &self->device_destroy);
-
-  wl_list_insert(devices, &self->link);
 
   return self;
 

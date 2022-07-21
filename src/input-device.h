@@ -11,7 +11,7 @@ struct zn_input_device {
 };
 
 struct zn_input_device* zn_input_device_create(
-    struct wlr_input_device* wlr_input, struct wl_list* devices);
+    struct wlr_input_device* wlr_input);
 
 void zn_input_device_destroy(struct zn_input_device* self);
 

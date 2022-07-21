@@ -8,7 +8,6 @@
 #include "zen-common.h"
 
 struct zn_input_manager {
-  struct wl_list devices;  // zn_input_device::link
   struct zn_seat* seat;
 };
 
@@ -16,8 +15,7 @@ void
 zn_input_manager_handle_new_wlr_input(
     struct zn_input_manager* self, struct wlr_input_device* wlr_input)
 {
-  struct zn_input_device* input_device =
-      zn_input_device_create(wlr_input, &self->devices);
+  struct zn_input_device* input_device = zn_input_device_create(wlr_input);
   if (input_device == NULL) {
     zn_error("Failed to create zn_input_device");
     return;
@@ -44,8 +42,6 @@ zn_input_manager_create(struct wl_display* display)
     goto err_free;
   }
 
-  wl_list_init(&self->devices);
-
   return self;
 
 err_free:
@@ -59,6 +55,5 @@ void
 zn_input_manager_destroy(struct zn_input_manager* self)
 {
   zn_seat_destroy(self->seat);
-  wl_list_remove(&self->devices);
   free(self);
 }
