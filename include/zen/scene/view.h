@@ -15,6 +15,7 @@ struct zn_view_impl {
 
 enum zn_view_type {
   ZN_VIEW_XDG_TOPLEVEL,
+  ZN_VIEW_XWAYLAND,
 };
 
 struct zn_view {

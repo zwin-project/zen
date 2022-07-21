@@ -7,6 +7,7 @@ _zen_desktop_srcs = [
   'seat.c',
   'server.c',
   'xdg-toplevel-view.c',
+  'xwayland-view.c',
 
   'scene/scene.c',
   'scene/screen.c',
