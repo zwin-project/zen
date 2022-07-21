@@ -5,7 +5,7 @@
 #include "zen-common.h"
 
 static void
-handle_device_destroy(struct wl_listener* listener, void* data)
+zn_input_device_handle_device_destroy(struct wl_listener* listener, void* data)
 {
   UNUSED(data);
   struct zn_input_device* self =
@@ -26,7 +26,7 @@ zn_input_device_create(struct wlr_input_device* wlr_input)
   wlr_input->data = self;
   self->wlr_input = wlr_input;
 
-  self->device_destroy.notify = handle_device_destroy;
+  self->device_destroy.notify = zn_input_device_handle_device_destroy;
   wl_signal_add(&wlr_input->events.destroy, &self->device_destroy);
 
   return self;
