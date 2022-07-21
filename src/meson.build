@@ -4,7 +4,6 @@ _zen_desktop_srcs = [
   'main.c',
   'output.c',
   'seat.c',
-  'seat-device.c',
   'server.c',
   'view.c',
   'xdg-toplevel-view.c',

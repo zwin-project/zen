@@ -4,10 +4,11 @@
 #include <wayland-server.h>
 #include <wlr/types/wlr_input_device.h>
 
-struct zn_input_device;
-
-enum wlr_input_device_type zn_input_device_get_type(
-    struct zn_input_device* self);
+struct zn_input_device {
+  struct wlr_input_device* wlr_input;
+  struct wl_list link;  // zn_seat::devices
+  struct wl_listener device_destroy;
+};
 
 struct zn_input_device* zn_input_device_create(
     struct wlr_input_device* wlr_input, struct wl_list* devices);

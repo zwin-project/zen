@@ -4,12 +4,6 @@
 
 #include "zen-common.h"
 
-struct zn_input_device {
-  struct wlr_input_device* wlr_input;
-  struct wl_list link;  // zn_input_manager::devices
-  struct wl_listener device_destroy;
-};
-
 static void
 handle_device_destroy(struct wl_listener* listener, void* data)
 {
@@ -17,12 +11,6 @@ handle_device_destroy(struct wl_listener* listener, void* data)
   struct zn_input_device* self =
       zn_container_of(listener, self, device_destroy);
   zn_input_device_destroy(self);
-}
-
-enum wlr_input_device_type
-zn_input_device_get_type(struct zn_input_device* self)
-{
-  return self->wlr_input->type;
 }
 
 struct zn_input_device*

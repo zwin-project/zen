@@ -3,22 +3,21 @@
 #include <wlr/types/wlr_seat.h>
 
 #include "input-device.h"
-#include "seat-device.h"
 #include "zen-common.h"
 
 struct zn_seat {
   struct wlr_seat* wlr_seat;
-  struct wl_list devices;  // zn_seat_device::link
+  struct wl_list devices;  // zn_input_device::link
 };
 
-static struct zn_seat_device*
+static struct zn_input_device*
 zn_seat_get_device(struct zn_seat* self, struct zn_input_device* input_device)
 {
-  struct zn_seat_device* seat_device;
-  wl_list_for_each(seat_device, &self->devices, link)
+  struct zn_input_device* dev;
+  wl_list_for_each(dev, &self->devices, link)
   {
-    if (seat_device->input_device == input_device) {
-      return seat_device;
+    if (dev == input_device) {
+      return input_device;
     }
   }
 
@@ -32,10 +31,10 @@ zn_seat_update_capabilities(struct zn_seat* self)
 {
   uint32_t caps = 0;
 
-  struct zn_seat_device* seat_device;
-  wl_list_for_each(seat_device, &self->devices, link)
+  struct zn_input_device* input_device;
+  wl_list_for_each(input_device, &self->devices, link)
   {
-    switch (zn_input_device_get_type(seat_device->input_device)) {
+    switch (input_device->wlr_input->type) {
       case WLR_INPUT_DEVICE_KEYBOARD:
         caps |= WL_SEAT_CAPABILITY_KEYBOARD;
         break;
@@ -63,12 +62,7 @@ zn_seat_add_device(struct zn_seat* self, struct zn_input_device* input_device)
     return;
   }
 
-  struct zn_seat_device* seat_device =
-      zn_seat_device_create(self, input_device, &self->devices);
-  if (seat_device == NULL) {
-    zn_error("Failed to create zn_seat_device");
-    return;
-  }
+  wl_list_insert(&self->devices, &input_device->link);
 
   zn_seat_update_capabilities(self);
 }
