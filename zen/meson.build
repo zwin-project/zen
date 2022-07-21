@@ -1,7 +1,10 @@
 _zen_desktop_srcs = [
+  'input-device.c',
+  'input-manager.c',
   'main.c',
   'output.c',
   'render-2d.c',
+  'seat.c',
   'server.c',
   'xdg-toplevel-view.c',
 

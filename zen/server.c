@@ -11,6 +11,7 @@
 
 #include "zen-common/log.h"
 #include "zen-common/util.h"
+#include "zen/input-manager.h"
 #include "zen/output.h"
 #include "zen/scene/scene.h"
 #include "zen/xdg-toplevel-view.h"
@@ -26,15 +27,26 @@ struct zn_server {
   struct wlr_compositor *w_compositor;
   struct wlr_xdg_shell *xdg_shell;
 
+  struct zn_input_manager *input_manager;
+
   struct zn_scene *scene;
 
   char *socket;
 
+  struct wl_listener new_input_listener;
   struct wl_listener new_output_listener;
   struct wl_listener xdg_shell_new_surface_listener;
 
   int exit_code;
 };
+
+static void
+zn_server_new_input_handler(struct wl_listener *listener, void *data)
+{
+  struct zn_server *self = zn_container_of(listener, self, new_input_listener);
+  struct wlr_input_device *wlr_input = data;
+  zn_input_manager_handle_new_wlr_input(self->input_manager, wlr_input);
+}
 
 static void
 zn_server_new_output_handler(struct wl_listener *listener, void *data)
@@ -199,15 +211,27 @@ zn_server_create(struct wl_display *display)
     goto err_scene;
   }
 
+  self->input_manager = zn_input_manager_create(self->display);
+  if (self->input_manager == NULL) {
+    zn_error("Failed to create input manager");
+    goto err_socket;
+  }
+
   setenv("WAYLAND_DISPLAY", self->socket, true);
   xdg = getenv("XDG_RUNTIME_DIR");
   zn_debug("WAYLAND_DISPLAY=%s", self->socket);
   zn_debug("XDG_RUNTIME_DIR=%s", xdg);
 
+  self->new_input_listener.notify = zn_server_new_input_handler;
+  wl_signal_add(&self->backend->events.new_input, &self->new_input_listener);
+
   self->new_output_listener.notify = zn_server_new_output_handler;
   wl_signal_add(&self->backend->events.new_output, &self->new_output_listener);
 
   return self;
+
+err_socket:
+  free(self->socket);
 
 err_scene:
   zn_scene_destroy(self->scene);
@@ -231,6 +255,7 @@ err:
 void
 zn_server_destroy(struct zn_server *self)
 {
+  zn_input_manager_destroy(self->input_manager);
   free(self->socket);
   zn_scene_destroy(self->scene);
   wlr_allocator_destroy(self->allocator);
