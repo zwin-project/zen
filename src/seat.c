@@ -67,12 +67,6 @@ zn_seat_add_device(struct zn_seat* self, struct zn_input_device* input_device)
   zn_seat_update_capabilities(self);
 }
 
-bool
-zn_seat_has_capabilities(struct zn_seat* self, enum wl_seat_capability type)
-{
-  return (self->wlr_seat->capabilities & type) != 0;
-}
-
 struct zn_seat*
 zn_seat_create(struct wl_display* display, const char* seat_name)
 {
