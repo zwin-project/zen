@@ -13,10 +13,11 @@ struct zn_input_manager {
 };
 
 void
-zn_input_manager_new_input(
+zn_input_manager_handle_new_wlr_input(
     struct zn_input_manager* self, struct wlr_input_device* wlr_input)
 {
-  struct zn_input_device* input_device = zn_input_device_create(wlr_input, &self->devices);
+  struct zn_input_device* input_device =
+      zn_input_device_create(wlr_input, &self->devices);
   if (input_device == NULL) {
     zn_error("Failed to create zn_input_device");
     return;
