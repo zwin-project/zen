@@ -45,7 +45,7 @@ zn_server_new_input_handler(struct wl_listener *listener, void *data)
 {
   struct zn_server *self = zn_container_of(listener, self, new_input_listener);
   struct wlr_input_device *wlr_input = data;
-  zn_input_manager_new_input(self->input_manager, wlr_input);
+  zn_input_manager_handle_new_wlr_input(self->input_manager, wlr_input);
 }
 
 static void

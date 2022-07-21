@@ -8,7 +8,7 @@
 
 struct zn_input_manager;
 
-void zn_input_manager_new_input(
+void zn_input_manager_handle_new_wlr_input(
     struct zn_input_manager* self, struct wlr_input_device* wlr_input);
 
 struct zn_input_manager* zn_input_manager_create(struct wl_display* display);
