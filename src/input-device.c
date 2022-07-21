@@ -11,7 +11,7 @@ zn_input_device_handle_device_destroy(struct wl_listener* listener, void* data)
   UNUSED(data);
   struct zn_input_device* self =
       zn_container_of(listener, self, device_destroy);
-  zn_seat_remove_device(self->seat, self);
+  zn_input_device_destroy(self);
 }
 
 struct zn_input_device*
@@ -42,7 +42,7 @@ err:
 void
 zn_input_device_destroy(struct zn_input_device* self)
 {
-  wl_list_remove(&self->link);
+  zn_seat_remove_device(self->seat, self);
   wl_list_remove(&self->device_destroy.link);
   free(self);
 }

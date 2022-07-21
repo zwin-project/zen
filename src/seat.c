@@ -72,7 +72,7 @@ void
 zn_seat_remove_device(
     struct zn_seat* self, struct zn_input_device* input_device)
 {
-  zn_input_device_destroy(input_device);
+  wl_list_remove(&input_device->link);
   zn_seat_update_capabilities(self);
 }
 
