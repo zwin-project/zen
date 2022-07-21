@@ -38,10 +38,11 @@ wayland_protocols_dep = dependency('wayland-protocols', version: wayland_protoco
 wlroots_dep = dependency('wlroots', version: wlroots_req)
 pixman_dep = dependency('pixman-1')
 
+zen_inc = include_directories('include')
+
 subdir('protocols')
 subdir('common')
-subdir('scene')
-subdir('src')
+subdir('zen')
 
 find_program('weston-terminal', required: true) # used in zen.desktop
 

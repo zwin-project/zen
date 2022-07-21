@@ -1,11 +1,11 @@
-#include "input-manager.h"
+#include "zen/input-manager.h"
 
 #include <wayland-server.h>
 #include <wlr/types/wlr_input_device.h>
 
-#include "input-device.h"
-#include "seat.h"
 #include "zen-common.h"
+#include "zen/input-device.h"
+#include "zen/seat.h"
 
 struct zn_input_manager {
   struct zn_seat* seat;

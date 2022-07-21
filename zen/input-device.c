@@ -1,9 +1,9 @@
-#include "input-device.h"
+#include "zen/input-device.h"
 
 #include <wayland-server.h>
 
-#include "seat.h"
 #include "zen-common.h"
+#include "zen/seat.h"
 
 static void
 zn_input_device_handle_device_destroy(struct wl_listener* listener, void* data)

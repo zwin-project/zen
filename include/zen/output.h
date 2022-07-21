@@ -3,7 +3,7 @@
 
 #include <wlr/types/wlr_output.h>
 
-#include "server.h"
+#include "zen/server.h"
 
 /** this destroys itself when the given wlr_output is destroyed */
 struct zn_output;

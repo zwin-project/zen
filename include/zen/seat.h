@@ -3,7 +3,7 @@
 
 #include <wayland-server.h>
 
-#include "input-device.h"
+#include "zen/input-device.h"
 
 #define ZEN_DEFAULT_SEAT "seat0"
 

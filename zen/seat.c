@@ -1,9 +1,9 @@
-#include "seat.h"
+#include "zen/seat.h"
 
 #include <wlr/types/wlr_seat.h>
 
-#include "input-device.h"
 #include "zen-common.h"
+#include "zen/input-device.h"
 
 struct zn_seat {
   struct wlr_seat* wlr_seat;
