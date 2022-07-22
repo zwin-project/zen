@@ -5,7 +5,7 @@
 
 #include "zen/server.h"
 
-/** this destroys itself when the given wlr_wayland_surface is destroyed */
+/** this destroys itself when the given wlr_xwayland_surface is destroyed */
 struct zn_xwayland_view;
 
 struct zn_xwayland_view *zn_xwayland_view_create(

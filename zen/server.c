@@ -164,7 +164,6 @@ void
 zn_server_terminate(struct zn_server *self, int exit_code)
 {
   self->exit_code = exit_code;
-  wlr_xwayland_destroy(self->xwayland);
   wl_display_terminate(self->display);
 }
 
@@ -288,6 +287,7 @@ err:
 void
 zn_server_destroy(struct zn_server *self)
 {
+  if (self->xwayland) wlr_xwayland_destroy(self->xwayland);
   zn_input_manager_destroy(self->input_manager);
   free(self->socket);
   zn_scene_destroy(self->scene);
