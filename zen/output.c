@@ -104,6 +104,8 @@ zn_output_create(struct wlr_output *wlr_output, struct zn_server *server)
   self->wlr_output = wlr_output;
   self->server = server;
 
+  wlr_output_create_global(wlr_output);
+
   self->damage = wlr_output_damage_create(self->wlr_output);
   if (self->damage == NULL) {
     zn_error("Failed to create wlr_output_damage");
@@ -169,5 +171,6 @@ zn_output_destroy(struct zn_output *self)
 {
   wl_event_source_remove(self->repaint_timer);
   zn_screen_destroy(self->screen);
+  wlr_output_destroy_global(self->wlr_output);
   free(self);
 }

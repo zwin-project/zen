@@ -137,15 +137,17 @@ zn_server_get_scene(struct zn_server *self)
 int
 zn_server_run(struct zn_server *self)
 {
-  self->xwayland = wlr_xwayland_create(self->display, self->w_compositor, 0);
+  self->xwayland = wlr_xwayland_create(self->display, self->w_compositor, true);
   if (self->xwayland == NULL) {
     zn_error("Failed to start xwayland");
     return EXIT_FAILURE;
   }
+
   self->xwayland_new_surface_listener.notify =
       zn_server_xwayland_new_surface_handler;
   wl_signal_add(&self->xwayland->events.new_surface,
       &self->xwayland_new_surface_listener);
+
   setenv("DISPLAY", self->xwayland->display_name, true);
   zn_debug("DISPLAY=%s", self->xwayland->display_name);
 
