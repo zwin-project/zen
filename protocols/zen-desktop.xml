@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<protocol name="zen_desktop">
+  <copyright>
+    MIT License
+
+    Copyright (c) 2022 Akihiro Kiuchi &amp; Taishi Eguchi
+
+    Permission is hereby granted, free of charge, to any person
+    obtaining a copy of this software and associated documentation files
+    (the "Software"), to deal in the Software without restriction,
+    including without limitation the rights to use, copy, modify, merge,
+    publish, distribute, sublicense, and/or sell copies of the Software,
+    and to permit persons to whom the Software is furnished to do so,
+    subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be
+    included in all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+    MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+    NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+    BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+    ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+  </copyright>
+  <interface name="zen_desktop_mode_switcher" version="1">
+    <description summary="desktop mode switcher singleton">
+      A singleton global object, through which clients can request to switch
+      desktop mode.
+    </description>
+
+    <enum name="error">
+      <description summary="zen_desktop_mode_switcher error values"/>
+      <entry name="no_3d_device" value="0" summary="No device found for 3d desktop mode"/>
+    </enum>
+
+    <enum name="desktop_mode">
+      <description summary="desktop modes"/>
+      <entry name="2d" value="0" summary="Traditional mode using physical monitors"/>
+      <entry name="3d" value="1" summary="Mode using virtual environment such as VR"/>
+    </enum>
+
+    <request name="switch_mode">
+      <description summary="switch desktop mode">
+        Request a server to switch dekstop mode.
+      </description>
+      <arg name="mode" type="uint" enum="desktop_mode"/>
+    </request>
+
+    <event name="applied">
+      <description summary="new desktop mode applied">
+        Notification that a new desktop mode has been applied.
+      </description>
+      <arg name="mode" type="uint" enum="desktop-mode" summary="new desktop mode"/>
+    </event>
+
+    <request name="release" type="destructor">
+      <description summary="release the zen_desktop_mode_switcher object">
+        Using this request, a client can tell the server that it is not going to
+        use the zen_desktop_mode_switcher anymore.
+      </description>
+    </request>
+  </interface>
+</protocol>
