@@ -28,6 +28,7 @@ struct zn_server {
   // these objects will be automatically destroyed when wl_display is destroyed
   struct wlr_compositor *w_compositor;
   struct wlr_xdg_shell *xdg_shell;
+
   struct wlr_xwayland *xwayland;
 
   struct zn_input_manager *input_manager;
@@ -139,7 +140,7 @@ zn_server_run(struct zn_server *self)
 {
   self->xwayland = wlr_xwayland_create(self->display, self->w_compositor, true);
   if (self->xwayland == NULL) {
-    zn_error("Failed to start xwayland");
+    zn_error("Failed to create xwayland");
     return EXIT_FAILURE;
   }
 

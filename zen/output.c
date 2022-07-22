@@ -159,6 +159,7 @@ err_damage:
   wlr_output_damage_destroy(self->damage);
 
 err_free:
+  wlr_output_destroy_global(self->wlr_output);
   free(self);
 
 err:
