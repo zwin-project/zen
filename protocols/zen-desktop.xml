@@ -25,41 +25,42 @@
     CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
   </copyright>
-  <interface name="zen_desktop_mode_switcher" version="1">
-    <description summary="desktop mode switcher singleton">
-      A singleton global object, through which clients can request to switch
-      desktop mode.
+  <interface name="zen_display_system" version="1">
+    <description summary="a singleton managing display system">
+      A singleton global object through which clients can manage zen's display
+      system, which manages how the desktop environment is presented to the
+      user. For example, it can be presented in VR.
     </description>
 
     <enum name="error">
-      <description summary="zen_desktop_mode_switcher error values"/>
-      <entry name="no_3d_device" value="0" summary="No device found for 3d desktop mode"/>
+      <description summary="zen_display_system error values"/>
+      <entry name="no_immersive_device" value="0" summary="No device found for immersive display"/>
     </enum>
 
-    <enum name="desktop_mode">
-      <description summary="desktop modes"/>
-      <entry name="2d" value="0" summary="Traditional mode using physical monitors"/>
-      <entry name="3d" value="1" summary="Mode using virtual environment such as VR"/>
+    <enum name="type">
+      <description summary="display system type"/>
+      <entry name="screen" value="0" summary="display desktop environment with physical screens"/>
+      <entry name="immersive" value="1" summary="display desktop environment with immersive display"/>
     </enum>
 
-    <request name="switch_mode">
-      <description summary="switch desktop mode">
-        Request a server to switch dekstop mode.
+    <request name="switch_type">
+      <description summary="switch display system type">
+        Request a server to switch display system type.
       </description>
-      <arg name="mode" type="uint" enum="desktop_mode"/>
+      <arg name="type" type="uint" enum="type"/>
     </request>
 
     <event name="applied">
-      <description summary="new desktop mode applied">
-        Notification that a new desktop mode has been applied.
+      <description summary="new display system type applied">
+        Notification that a new display system type has been applied.
       </description>
-      <arg name="mode" type="uint" enum="desktop-mode" summary="new desktop mode"/>
+      <arg name="type" type="uint" enum="type" summary="new display system type"/>
     </event>
 
     <request name="release" type="destructor">
-      <description summary="release the zen_desktop_mode_switcher object">
-        Using this request, a client can tell the server that it is not going to
-        use the zen_desktop_mode_switcher anymore.
+      <description summary="release the zen_display_system object">
+        Using this request, a client can tell the server that the client is not
+        going to use the zen_display_system anymore.
       </description>
     </request>
   </interface>
