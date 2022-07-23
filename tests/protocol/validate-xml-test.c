@@ -4,11 +4,10 @@
 #include "test-runner.h"
 
 void
-validate_xml(const char *xml_path)
+validate_xml_with_dtd(const char *xml_path, const char *dtd_path)
 {
   int success;
-  const char *wayland_dtd_path = getenv("WAYLAND_DTD_PATH");
-  assert(wayland_dtd_path && xml_path);
+  assert(dtd_path && xml_path);
 
   xmlParserCtxtPtr ctx = NULL;
   xmlDocPtr doc = NULL;
@@ -20,8 +19,7 @@ validate_xml(const char *xml_path)
   ctx = xmlNewParserCtxt();
   assert(dtdctx && ctx);
 
-  buffer = xmlParserInputBufferCreateFilename(
-      wayland_dtd_path, XML_CHAR_ENCODING_UTF8);
+  buffer = xmlParserInputBufferCreateFilename(dtd_path, XML_CHAR_ENCODING_UTF8);
   assert(buffer);
 
   dtd = xmlIOParseDTD(NULL, buffer, XML_CHAR_ENCODING_UTF8);
@@ -36,8 +34,9 @@ validate_xml(const char *xml_path)
   assert(success);
 }
 
-TEST(validate_zigen_xml)
+TEST(validate_zen_desktop_xml)
 {
   const char *zigen_xml = getenv("ZEN_DESKTOP_XML");
-  validate_xml(zigen_xml);
+  const char *wayland_dtd_path = getenv("WAYLAND_DTD_PATH");
+  validate_xml_with_dtd(zigen_xml, wayland_dtd_path);
 }
