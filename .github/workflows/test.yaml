@@ -11,14 +11,14 @@ on:
       - dev
 
 jobs:
-  build-with-gcc:
+  test-with-gcc:
     runs-on: ubuntu-22.04
     steps:
       - name: Install dependencies
         run: |
           sudo apt-get update &&
           sudo apt-get install \
-            libwayland-dev libwlroots-dev libpixman-1-dev weston
+            libwayland-dev libwlroots-dev libpixman-1-dev libxml2-dev weston
 
       - uses: actions/setup-python@v1
         with:
@@ -30,7 +30,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Build zen
-        run: meson build && ninja -C build
+      - name: Build & Test
+        run: meson build && ninja -C build test
         env:
           CC: gcc

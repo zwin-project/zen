@@ -35,3 +35,5 @@ server_protocols = declare_dependency(
   link_with: _lib_server_protocols,
   sources: _wayland_protocol_headers,
 )
+
+zen_desktop_xml_abs_path = join_paths(meson.current_source_dir(), 'zen-desktop.xml')
