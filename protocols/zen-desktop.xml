@@ -32,8 +32,8 @@
       user. For example, it can be presented in VR.
     </description>
 
-    <enum name="error">
-      <description summary="zen_display_system error values"/>
+    <enum name="warning">
+      <description summary="warning values"/>
       <entry name="no_immersive_device" value="0" summary="No device found for immersive display"/>
     </enum>
 
@@ -52,9 +52,20 @@
 
     <event name="applied">
       <description summary="new display system type applied">
-        Notification that a new display system type has been applied.
+        Notification that a new display system type has been applied. When a
+        client binds to zen_displa_system, creating clien-side handle, the
+        server must send this event immediately to the handle.
       </description>
       <arg name="type" type="uint" enum="type" summary="new display system type"/>
+    </event>
+
+    <event name="warning">
+      <description summary="warning event">
+       The warning event is sent out when a non-fatal error has occurred. The
+       message is a brief description of the error, for (debugging) convenience.
+      </description>
+      <arg name="code" type="uint" enum="warning" summary="warning code"/>
+      <arg name="message" type="string" summary="warning description"/>
     </event>
 
     <request name="release" type="destructor">

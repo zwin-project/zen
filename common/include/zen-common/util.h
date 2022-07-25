@@ -1,6 +1,10 @@
 #ifndef ZEN_UTIL_H
 #define ZEN_UTIL_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 #include <stdlib.h>
 
@@ -31,5 +35,9 @@ zalloc(size_t size)
 /** Retrieve a pointer to a containing struct */
 #define zn_container_of(ptr, sample, member) \
   (__typeof__(sample))((char *)(ptr)-offsetof(__typeof__(*sample), member))
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  //  ZEN_UTIL_H

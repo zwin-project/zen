@@ -138,8 +138,21 @@ display_system_applied(
       type == ZEN_DISPLAY_SYSTEM_TYPE_SCREEN ? "screen" : "immersive");
 }
 
+static void
+display_system_warning(void *data,
+    struct zen_display_system *zen_display_system, uint32_t code,
+    const char *message)
+{
+  struct client *cui = data;
+  UNUSED(zen_display_system);
+  UNUSED(code);
+
+  command_printf(&cui->cmd, "<<< WARN: %s\n", message);
+}
+
 static const struct zen_display_system_listener display_system_listener = {
     .applied = display_system_applied,
+    .warning = display_system_warning,
 };
 
 static void
@@ -181,7 +194,6 @@ connect(struct client *cui, char *socket_name)
   cui->registry = wl_display_get_registry(cui->display);
   wl_registry_add_listener(cui->registry, &registry_listener, cui);
 
-  wl_display_dispatch(cui->display);
   wl_display_roundtrip(cui->display);
 
   if (cui->display_system == NULL) {
