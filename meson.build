@@ -1,5 +1,5 @@
 project(
-  'zen', 'c',
+  'zen', 'c', 'cpp',
   version: '0.0.1-dev',
   license: 'MIT',
   meson_version: '>= 0.58.0',
@@ -86,6 +86,7 @@ zen_inc = include_directories('include')
 
 subdir('protocols')
 subdir('common')
+subdir('immersive-backend')
 subdir('zen')
 if get_option('cui-client')
   subdir('cui-client')

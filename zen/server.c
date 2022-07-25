@@ -76,9 +76,23 @@ zn_server_display_system_switch_handler(
       zn_container_of(listener, self, display_system_switch_listener);
   struct zn_display_system_switch_event *event = data;
 
+  if (self->display_system->type == event->type) return;
+
+  if (event->type == ZEN_DISPLAY_SYSTEM_TYPE_IMMERSIVE) {
+    if (zn_immersive_backend_connect(self->immersive_backend) == false) {
+      zen_display_system_send_warning(event->issuer,
+          ZEN_DISPLAY_SYSTEM_WARNING_NO_IMMERSIVE_DEVICE,
+          "No available immersive device found");
+      zn_warn("Failed to connect to a immersive backend");
+      return;
+    }
+  } else {
+    zn_immersive_backend_disconnect(self->immersive_backend);
+  }
+
   // TODO: implement here
 
-  zn_display_system_send_applied(self->display_system, event->type);
+  zn_display_system_applied(self->display_system, event->type);
 }
 
 static void
@@ -192,6 +206,12 @@ zn_server_create(struct wl_display *display)
     goto err_scene;
   }
 
+  self->immersive_backend = zn_immersive_backend_create();
+  if (self->immersive_backend == NULL) {
+    zn_error("Failed to create a immersive backend");
+    goto err_display_system;
+  }
+
   for (int i = 1; i <= 32; i++) {
     sprintf(socket_name_candidate, "wayland-%d", i);
     if (wl_display_add_socket(self->display, socket_name_candidate) >= 0) {
@@ -202,7 +222,7 @@ zn_server_create(struct wl_display *display)
 
   if (self->socket == NULL) {
     zn_error("Failed to open wayland socket");
-    goto err_display_system;
+    goto err_immersive_backend;
   }
 
   self->input_manager = zn_input_manager_create(self->display);
@@ -236,6 +256,9 @@ zn_server_create(struct wl_display *display)
 
 err_socket:
   free(self->socket);
+
+err_immersive_backend:
+  zn_immersive_backend_destroy(self->immersive_backend);
 
 err_display_system:
   zn_display_system_destroy(self->display_system);

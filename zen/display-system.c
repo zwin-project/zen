@@ -16,6 +16,7 @@ zn_display_system_protocol_switch_type(
   struct zn_display_system_switch_event event;
   UNUSED(client);
 
+  event.issuer = resource;
   event.type = type;
   wl_signal_emit(&self->switch_signal, &event);
 }
@@ -52,13 +53,18 @@ zn_display_system_bind(
       zn_display_system_handle_destroy);
 
   wl_list_insert(&self->resources, &resource->link);
+
+  zen_display_system_send_applied(resource, self->type);
 }
 
 void
-zn_display_system_send_applied(
+zn_display_system_applied(
     struct zn_display_system *self, enum zen_display_system_type type)
 {
   struct wl_resource *resource;
+  if (self->type == type) return;
+  self->type = type;
+
   wl_resource_for_each(resource, &self->resources)
       zen_display_system_send_applied(resource, type);
 }
@@ -73,6 +79,8 @@ zn_display_system_create(struct wl_display *display)
     zn_error("Failed to allocate memory");
     goto err;
   }
+
+  self->type = ZEN_DISPLAY_SYSTEM_TYPE_SCREEN;
 
   self->global = wl_global_create(
       display, &zen_display_system_interface, 1, self, zn_display_system_bind);

@@ -25,6 +25,7 @@ _zen_desktop_deps = [
   wayland_server_dep,
   wlroots_dep,
   zen_common_dep,
+  zen_openvr_immersive_backend_dep,
 ]
 
 executable(
