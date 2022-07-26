@@ -1,8 +1,10 @@
 _zen_openvr_immersive_backend_srcs =[
   'immersive-backend.cc',
+  'vr-system.cc',
 ]
 
 _zen_openvr_immersive_backend_deps =[
+  openvr_dep,
   zen_common_dep,
 ]
 
