@@ -35,26 +35,22 @@ shorter_path_len = slen >= blen ? blen : slen
 relative_source_parts = []
 common_prefix_len = 0
 
-foreach _ : build_root
-  if shorter_path_len > common_prefix_len and source_root[common_prefix_len] == build_root[common_prefix_len]
-    common_prefix_len += 1
-  else
-    break
-  endif
-endforeach
-
 i = 0
-foreach _ : build_root
-  if i >= common_prefix_len
-    relative_source_parts += '..'
+in_prefix = true
+foreach p : build_root
+  if not in_prefix or p != source_root[i]
+    in_prefix = false
+    relative_dir_parts += '..'
   endif
   i += 1
 endforeach
 
 i = 0
-foreach dir : source_root
-  if i >= common_prefix_len
-    relative_source_parts += dir
+in_prefix = true
+foreach p : source_root
+  if not in_prefix or build_root[i] != p
+    in_prefix = false
+    relative_dir_parts += p
   endif
   i += 1
 endforeach
