@@ -30,7 +30,7 @@ build_root = meson.global_build_root().split('/')
 slen = source_root.length()
 blen = build_root.length()
 
-shorter_path_len = source_root.length() >= build_root.length() ? build_root.length() : source_root.length()
+shorter_path_len = slen >= blen ? blen : slen
 
 relative_source_parts = []
 common_prefix_len = 0
