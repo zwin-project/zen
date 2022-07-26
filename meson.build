@@ -3,7 +3,7 @@ project(
   version: '0.0.1-dev',
   license: 'MIT',
   meson_version: '>= 0.58.0',
-  default_options: [ 'warning_level=3', 'werror=true', 'optimization=2', 'c_std=gnu11' ],
+  default_options: [ 'warning_level=3', 'werror=true', 'optimization=2', 'c_std=gnu11', 'cpp_std=gnu++14' ],
 )
 
 cc = meson.get_compiler('c')
@@ -67,17 +67,19 @@ datadir = get_option('datadir')
 
 # generic version requirements
 
-wayland_server_req = '>= 1.18.0'
+openvr_req = '>= 1.12.5'
 wayland_protocols_req = '>= 1.24'
+wayland_server_req = '>= 1.18.0'
 wlroots_req = ['>= 0.15', '< 0.16']
 
 # dependencies
 
-wayland_server_dep = dependency('wayland-server', version: wayland_server_req)
-wayland_scanner_dep = dependency('wayland-scanner')
-wayland_protocols_dep = dependency('wayland-protocols', version: wayland_protocols_req)
-wlroots_dep = dependency('wlroots', version: wlroots_req)
+openvr_dep = dependency('openvr', version: openvr_req)
 pixman_dep = dependency('pixman-1')
+wayland_protocols_dep = dependency('wayland-protocols', version: wayland_protocols_req)
+wayland_scanner_dep = dependency('wayland-scanner')
+wayland_server_dep = dependency('wayland-server', version: wayland_server_req)
+wlroots_dep = dependency('wlroots', version: wlroots_req)
 if get_option('cui-client')
   wayland_client_dep = dependency('wayland-client')
 endif
