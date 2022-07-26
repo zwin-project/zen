@@ -30,17 +30,14 @@ build_root = meson.global_build_root().split('/')
 slen = source_root.length()
 blen = build_root.length()
 
-shorter_path_len = slen >= blen ? blen : slen
-
 relative_source_parts = []
-common_prefix_len = 0
 
 i = 0
 in_prefix = true
 foreach p : build_root
-  if not in_prefix or p != source_root[i]
+  if not in_prefix or i >= slen or p != source_root[i]
     in_prefix = false
-    relative_dir_parts += '..'
+    relative_source_parts += '..'
   endif
   i += 1
 endforeach
@@ -48,9 +45,9 @@ endforeach
 i = 0
 in_prefix = true
 foreach p : source_root
-  if not in_prefix or build_root[i] != p
+  if not in_prefix or i >= blen or build_root[i] != p
     in_prefix = false
-    relative_dir_parts += p
+    relative_source_parts += p
   endif
   i += 1
 endforeach
