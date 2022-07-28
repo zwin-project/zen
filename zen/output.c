@@ -6,24 +6,10 @@
 
 #include "zen-common.h"
 #include "zen/render-2d.h"
+#include "zen/scene/scene.h"
+#include "zen/scene/screen-layout.h"
 #include "zen/scene/screen.h"
 #include "zen/scene/view.h"
-
-struct zn_output {
-  struct wlr_output *wlr_output;  // nonnull
-  struct zn_server *server;       // nonnull
-
-  /** nonnull, automatically destroyed when wlr_output is destroyed */
-  struct wlr_output_damage *damage;
-
-  struct zn_screen *screen;  // controlled by zn_output
-
-  // TODO: use this for better repaint loop
-  struct wl_event_source *repaint_timer;
-
-  struct wl_listener wlr_output_destroy_listener;
-  struct wl_listener damage_frame_listener;
-};
 
 static void zn_output_destroy(struct zn_output *self);
 
@@ -112,12 +98,6 @@ zn_output_create(struct wlr_output *wlr_output, struct zn_server *server)
     goto err_free;
   }
 
-  self->screen = zn_screen_create(server->scene, self);
-  if (self->screen == NULL) {
-    zn_error("Failed to create zn_screen");
-    goto err_damage;
-  }
-
   self->wlr_output_destroy_listener.notify =
       zn_output_wlr_output_destroy_handler;
   wl_signal_add(
@@ -131,7 +111,7 @@ zn_output_create(struct wlr_output *wlr_output, struct zn_server *server)
 
   if (wl_list_empty(&self->wlr_output->modes)) {
     zn_warn("Failed to get output mode");
-    goto err_repaint_timer;
+    goto err_damage;
   }
 
   mode = wlr_output_preferred_mode(self->wlr_output);
@@ -144,6 +124,13 @@ zn_output_create(struct wlr_output *wlr_output, struct zn_server *server)
   wlr_output_enable(self->wlr_output, true);
   if (wlr_output_commit(self->wlr_output) == false) {
     zn_warn("Failed to set output mode");
+    goto err_repaint_timer;
+  }
+
+  // zn_screen must create after configuration of wlr_output
+  self->screen = zn_screen_create(server->scene->screen_layout, self);
+  if (self->screen == NULL) {
+    zn_error("Failed to create zn_screen");
     goto err_repaint_timer;
   }
 

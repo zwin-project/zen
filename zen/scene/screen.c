@@ -1,9 +1,11 @@
 #include "zen/scene/screen.h"
 
 #include "zen-common.h"
+#include "zen/scene/screen-layout.h"
 
 struct zn_screen *
-zn_screen_create(struct zn_scene *scene, struct zn_output *output)
+zn_screen_create(
+    struct zn_screen_layout *screen_layout, struct zn_output *output)
 {
   struct zn_screen *self;
 
@@ -14,8 +16,9 @@ zn_screen_create(struct zn_scene *scene, struct zn_output *output)
   }
 
   self->output = output;
+  self->screen_layout = screen_layout;
+  zn_screen_layout_add(screen_layout, self);
   wl_list_init(&self->views);
-  wl_list_insert(&scene->screens, &self->link);
 
   return self;
 
@@ -27,6 +30,6 @@ void
 zn_screen_destroy(struct zn_screen *self)
 {
   wl_list_remove(&self->views);
-  wl_list_remove(&self->link);
+  zn_screen_layout_remove(self->screen_layout, self);
   free(self);
 }
