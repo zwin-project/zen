@@ -10,6 +10,7 @@ zn_screen_layout_add(
   int x = 0;
   struct zn_screen* screen;
   struct wlr_box box;
+
   wl_list_insert(&self->screens, &new_screen->link);
   wl_list_for_each(screen, &self->screens, link)
   {
