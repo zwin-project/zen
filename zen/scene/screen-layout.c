@@ -1,6 +1,7 @@
 #include "zen/scene/screen-layout.h"
 
 #include "zen-common.h"
+#include "zen/scene/screen.h"
 
 void
 zn_screen_layout_add(

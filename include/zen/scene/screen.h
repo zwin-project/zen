@@ -4,9 +4,7 @@
 #include <wayland-server-core.h>
 
 #include "zen/output.h"
-
-// if include screen-layout.h, fail to compile
-struct zn_screen_layout;
+#include "zen/scene/screen-layout.h"
 
 struct zn_screen {
   int x, y;

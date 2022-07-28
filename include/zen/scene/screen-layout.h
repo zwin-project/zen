@@ -3,7 +3,8 @@
 
 #include <wayland-server-core.h>
 
-#include "zen/scene/screen.h"
+// if include screen.h, fail to compile
+struct zn_screen;
 
 struct zn_screen_layout {
   struct wl_list screens;  // zn_screen::link
