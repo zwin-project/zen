@@ -1,6 +1,7 @@
 #include "zen/xwayland-view.h"
 
 #include "zen-common.h"
+#include "zen/scene/scene.h"
 #include "zen/scene/view.h"
 
 struct zn_xwayland_view {
@@ -27,13 +28,13 @@ zn_xwayland_view_map(struct wl_listener* listener, void* data)
   if (!zn_assert(!zn_view_is_mapped(&self->base), "Tried to map a mapped view"))
     return;
 
-  if (wl_list_empty(&scene->screens)) {
+  if (wl_list_empty(&scene->screen_layout->screens)) {
     // TODO: handle this properly
     zn_warn("View is mapped but no screen found");
     return;
   }
 
-  screen = zn_container_of(scene->screens.next, screen, link);
+  screen = zn_container_of(scene->screen_layout->screens.next, screen, link);
 
   zn_view_map_to_screen(&self->base, screen);
 }
