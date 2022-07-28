@@ -11,22 +11,6 @@
 #include "zen/scene/screen.h"
 #include "zen/scene/view.h"
 
-struct zn_output {
-  struct wlr_output *wlr_output;  // nonnull
-  struct zn_server *server;       // nonnull
-
-  /** nonnull, automatically destroyed when wlr_output is destroyed */
-  struct wlr_output_damage *damage;
-
-  struct zn_screen *screen;  // controlled by zn_output
-
-  // TODO: use this for better repaint loop
-  struct wl_event_source *repaint_timer;
-
-  struct wl_listener wlr_output_destroy_listener;
-  struct wl_listener damage_frame_listener;
-};
-
 static void zn_output_destroy(struct zn_output *self);
 
 static void

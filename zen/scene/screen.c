@@ -1,6 +1,7 @@
 #include "zen/scene/screen.h"
 
 #include "zen-common.h"
+#include "zen/scene/screen-layout.h"
 
 struct zn_screen *
 zn_screen_create(
