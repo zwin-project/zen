@@ -17,7 +17,7 @@ zn_screen_create(
 
   self->output = output;
   wl_list_init(&self->views);
-  wl_list_insert(&screen_layout->screens, &self->link);
+  zn_screen_layout_add(screen_layout, self);
 
   return self;
 
