@@ -20,7 +20,7 @@ static void
 zn_xwayland_view_map(struct wl_listener* listener, void* data)
 {
   struct zn_xwayland_view* self = zn_container_of(listener, self, map_listener);
-  struct zn_scene* scene = zn_server_get_scene(self->server);
+  struct zn_scene* scene = self->server->scene;
   struct zn_screen* screen;
   UNUSED(data);
 

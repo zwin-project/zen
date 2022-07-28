@@ -41,7 +41,7 @@ static int
 zn_output_repaint_timer_handler(void *data)
 {
   struct zn_output *self = data;
-  struct wlr_renderer *renderer = zn_server_get_renderer(self->server);
+  struct wlr_renderer *renderer = self->server->renderer;
   pixman_region32_t damage;
   bool needs_frame;
 
@@ -91,7 +91,7 @@ struct zn_output *
 zn_output_create(struct wlr_output *wlr_output, struct zn_server *server)
 {
   struct zn_output *self;
-  struct wl_event_loop *loop = zn_server_get_loop(server);
+  struct wl_event_loop *loop = server->loop;
   struct wlr_output_mode *mode;
 
   self = zalloc(sizeof *self);
@@ -112,7 +112,7 @@ zn_output_create(struct wlr_output *wlr_output, struct zn_server *server)
     goto err_free;
   }
 
-  self->screen = zn_screen_create(zn_server_get_scene(server), self);
+  self->screen = zn_screen_create(server->scene, self);
   if (self->screen == NULL) {
     zn_error("Failed to create zn_screen");
     goto err_damage;
