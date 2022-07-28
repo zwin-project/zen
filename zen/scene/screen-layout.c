@@ -21,6 +21,13 @@ zn_screen_layout_add(
   }
 }
 
+void
+zn_screen_layout_remove(struct zn_screen_layout* self, struct zn_screen* screen)
+{
+  UNUSED(self);
+  wl_list_remove(&screen->link);
+}
+
 struct zn_screen_layout*
 zn_screen_layout_create(void)
 {

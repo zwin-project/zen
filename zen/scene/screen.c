@@ -16,8 +16,9 @@ zn_screen_create(
   }
 
   self->output = output;
-  wl_list_init(&self->views);
+  self->screen_layout = screen_layout;
   zn_screen_layout_add(screen_layout, self);
+  wl_list_init(&self->views);
 
   return self;
 
@@ -29,6 +30,6 @@ void
 zn_screen_destroy(struct zn_screen *self)
 {
   wl_list_remove(&self->views);
-  wl_list_remove(&self->link);
+  zn_screen_layout_remove(self->screen_layout, self);
   free(self);
 }

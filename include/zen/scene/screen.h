@@ -9,6 +9,7 @@
 struct zn_screen {
   int x, y;
   struct zn_output *output;  // zn_output owns zn_screen, nonnull
+  struct zn_screen_layout *screen_layout;
 
   struct wl_list views;  // zn_view::link;
 
