@@ -12,6 +12,7 @@ struct zn_screen_layout {
 
 void zn_screen_layout_add(
     struct zn_screen_layout* self, struct zn_screen* screen);
+
 void zn_screen_layout_remove(
     struct zn_screen_layout* self, struct zn_screen* screen);
 
