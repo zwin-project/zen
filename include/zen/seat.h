@@ -7,7 +7,10 @@
 
 #define ZEN_DEFAULT_SEAT "seat0"
 
-struct zn_seat;
+struct zn_seat {
+  struct wlr_seat* wlr_seat;
+  struct wl_list devices;  // zn_input_device::link
+};
 
 void zn_seat_add_device(
     struct zn_seat* self, struct zn_input_device* input_device);

@@ -5,11 +5,6 @@
 #include "zen-common.h"
 #include "zen/input-device.h"
 
-struct zn_seat {
-  struct wlr_seat* wlr_seat;
-  struct wl_list devices;  // zn_input_device::link
-};
-
 static struct zn_input_device*
 zn_seat_get_device(struct zn_seat* self, struct zn_input_device* input_device)
 {
