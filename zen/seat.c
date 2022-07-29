@@ -26,6 +26,26 @@ zn_seat_get_device(struct zn_seat* self, struct zn_input_device* input_device)
   return NULL;
 }
 
+void
+zn_seat_configure_device(
+    struct zn_seat* self, struct zn_input_device* input_device)
+{
+  UNUSED(self);
+  switch (input_device->wlr_input->type) {
+    case WLR_INPUT_DEVICE_KEYBOARD:
+      // TODO: keyboard configure
+      break;
+    case WLR_INPUT_DEVICE_POINTER:
+      // TODO: pointer configure
+      break;
+    case WLR_INPUT_DEVICE_TOUCH:
+    case WLR_INPUT_DEVICE_TABLET_TOOL:
+    case WLR_INPUT_DEVICE_TABLET_PAD:
+    case WLR_INPUT_DEVICE_SWITCH:
+      break;
+  }
+}
+
 static void
 zn_seat_update_capabilities(struct zn_seat* self)
 {
@@ -58,10 +78,13 @@ void
 zn_seat_add_device(struct zn_seat* self, struct zn_input_device* input_device)
 {
   if (zn_seat_get_device(self, input_device)) {
+    zn_seat_configure_device(self, input_device);
     return;
   }
 
   wl_list_insert(&self->devices, &input_device->link);
+
+  zn_seat_configure_device(self, input_device);
 
   zn_seat_update_capabilities(self);
 }
