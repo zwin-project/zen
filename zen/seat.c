@@ -5,6 +5,14 @@
 #include "zen-common.h"
 #include "zen/input-device.h"
 
+static void
+zn_seat_configure_keyboard(
+    struct zn_seat* self, struct zn_input_device* input_device)
+{
+  zn_keyboard_configure(self->keyboard, input_device);
+  wlr_seat_set_keyboard(self->wlr_seat, input_device->wlr_input);
+}
+
 static struct zn_input_device*
 zn_seat_get_device(struct zn_seat* self, struct zn_input_device* input_device)
 {
@@ -28,7 +36,7 @@ zn_seat_configure_device(
   UNUSED(self);
   switch (input_device->wlr_input->type) {
     case WLR_INPUT_DEVICE_KEYBOARD:
-      // TODO: keyboard configure
+      zn_seat_configure_keyboard(self, input_device);
       break;
     case WLR_INPUT_DEVICE_POINTER:
       // TODO: pointer configure
@@ -108,9 +116,18 @@ zn_seat_create(struct wl_display* display, const char* seat_name)
     goto err_free;
   }
 
+  self->keyboard = zn_keyboard_create();
+  if (self->keyboard == NULL) {
+    zn_error("Failed to create zn_keyboard");
+    goto err_wlr_seat;
+  }
+
   wl_list_init(&self->devices);
 
   return self;
+
+err_wlr_seat:
+  wlr_seat_destroy(self->wlr_seat);
 
 err_free:
   free(self);
