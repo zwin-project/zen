@@ -23,7 +23,7 @@ zn_keyboard_configure(
 }
 
 struct zn_keyboard*
-zn_keyboard_create()
+zn_keyboard_create(struct zn_seat* seat)
 {
   struct zn_keyboard* self;
   self = zalloc(sizeof *self);
@@ -32,6 +32,7 @@ zn_keyboard_create()
     goto err;
   }
 
+  wl_list_insert(&seat->keyboards, &self->link);
   wl_list_init(&self->key_listener.link);
 
   return self;
@@ -43,5 +44,7 @@ err:
 void
 zn_keyboard_destroy(struct zn_keyboard* self)
 {
+  wl_list_remove(&self->key_listener.link);
+  wl_list_remove(&self->link);
   free(self);
 }

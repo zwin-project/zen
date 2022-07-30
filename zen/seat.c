@@ -9,7 +9,12 @@ static void
 zn_seat_configure_keyboard(
     struct zn_seat* self, struct zn_input_device* input_device)
 {
-  zn_keyboard_configure(self->keyboard, input_device);
+  struct zn_keyboard* keyboard = zn_keyboard_create(self);
+  if (keyboard == NULL) {
+    zn_error("Failed to create zn_keyboard");
+    return;
+  }
+  zn_keyboard_configure(keyboard, input_device);
   wlr_seat_set_keyboard(self->wlr_seat, input_device->wlr_input);
 }
 
@@ -33,7 +38,6 @@ void
 zn_seat_configure_device(
     struct zn_seat* self, struct zn_input_device* input_device)
 {
-  UNUSED(self);
   switch (input_device->wlr_input->type) {
     case WLR_INPUT_DEVICE_KEYBOARD:
       zn_seat_configure_keyboard(self, input_device);
@@ -116,18 +120,10 @@ zn_seat_create(struct wl_display* display, const char* seat_name)
     goto err_free;
   }
 
-  self->keyboard = zn_keyboard_create();
-  if (self->keyboard == NULL) {
-    zn_error("Failed to create zn_keyboard");
-    goto err_wlr_seat;
-  }
-
   wl_list_init(&self->devices);
+  wl_list_init(&self->keyboards);
 
   return self;
-
-err_wlr_seat:
-  wlr_seat_destroy(self->wlr_seat);
 
 err_free:
   free(self);
@@ -139,6 +135,7 @@ err:
 void
 zn_seat_destroy(struct zn_seat* self)
 {
+  wl_list_remove(&self->keyboards);
   wl_list_remove(&self->devices);
   wlr_seat_destroy(self->wlr_seat);
   free(self);

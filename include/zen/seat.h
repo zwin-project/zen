@@ -10,7 +10,8 @@
 
 struct zn_seat {
   struct wlr_seat* wlr_seat;
-  struct wl_list devices;  // zn_input_device::link
+  struct wl_list devices;    // zn_input_device::link
+  struct wl_list keyboards;  // zn_keyboard::link
 
   struct zn_keyboard* keyboard;
 };
