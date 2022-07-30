@@ -5,27 +5,6 @@
 #include "zen-common.h"
 #include "zen/input-device.h"
 
-struct zn_seat {
-  struct wlr_seat* wlr_seat;
-  struct wl_list devices;  // zn_input_device::link
-};
-
-static struct zn_input_device*
-zn_seat_get_device(struct zn_seat* self, struct zn_input_device* input_device)
-{
-  struct zn_input_device* dev;
-  wl_list_for_each(dev, &self->devices, link)
-  {
-    if (dev == input_device) {
-      return input_device;
-    }
-  }
-
-  // TODO: keyboard group
-
-  return NULL;
-}
-
 static void
 zn_seat_update_capabilities(struct zn_seat* self)
 {
@@ -57,12 +36,7 @@ zn_seat_update_capabilities(struct zn_seat* self)
 void
 zn_seat_add_device(struct zn_seat* self, struct zn_input_device* input_device)
 {
-  if (zn_seat_get_device(self, input_device)) {
-    return;
-  }
-
   wl_list_insert(&self->devices, &input_device->link);
-
   zn_seat_update_capabilities(self);
 }
 

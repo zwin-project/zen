@@ -24,6 +24,24 @@ zn_input_device_create(struct zn_seat* seat, struct wlr_input_device* wlr_input)
     goto err;
   }
 
+  switch (wlr_input->type) {
+    case WLR_INPUT_DEVICE_KEYBOARD:
+      self->keyboard = zn_keyboard_create(wlr_input);
+      if (self->keyboard == NULL) {
+        zn_error("Failed to create zn_keyboard");
+        goto err_free;
+      }
+      break;
+    case WLR_INPUT_DEVICE_POINTER:
+      // TODO: create pointer
+      break;
+    case WLR_INPUT_DEVICE_TOUCH:
+    case WLR_INPUT_DEVICE_TABLET_TOOL:
+    case WLR_INPUT_DEVICE_TABLET_PAD:
+    case WLR_INPUT_DEVICE_SWITCH:
+      break;
+  }
+
   self->seat = seat;
   self->wlr_input = wlr_input;
   wlr_input->data = self;
@@ -35,6 +53,9 @@ zn_input_device_create(struct zn_seat* seat, struct wlr_input_device* wlr_input)
 
   return self;
 
+err_free:
+  free(self);
+
 err:
   return NULL;
 }
@@ -42,6 +63,20 @@ err:
 void
 zn_input_device_destroy(struct zn_input_device* self)
 {
+  switch (self->wlr_input->type) {
+    case WLR_INPUT_DEVICE_KEYBOARD:
+      zn_keyboard_destroy(self->keyboard);
+      break;
+    case WLR_INPUT_DEVICE_POINTER:
+      // TODO: create pointer
+      break;
+    case WLR_INPUT_DEVICE_TOUCH:
+    case WLR_INPUT_DEVICE_TABLET_TOOL:
+    case WLR_INPUT_DEVICE_TABLET_PAD:
+    case WLR_INPUT_DEVICE_SWITCH:
+      break;
+  }
+
   zn_seat_remove_device(self->seat, self);
   wl_list_remove(&self->device_destroy_listener.link);
   free(self);
