@@ -5,6 +5,7 @@ _zen_openvr_immersive_backend_srcs =[
 
 _zen_openvr_immersive_backend_deps =[
   openvr_dep,
+  wayland_server_dep,
   zen_common_dep,
 ]
 

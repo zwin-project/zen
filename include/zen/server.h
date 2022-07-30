@@ -39,6 +39,7 @@ struct zn_server {
   struct wl_listener new_output_listener;
   struct wl_listener xdg_shell_new_surface_listener;
   struct wl_listener display_system_switch_listener;
+  struct wl_listener immersive_backend_disconnected_listener;
   struct wl_listener xwayland_new_surface_listener;
 
   int exit_code;
