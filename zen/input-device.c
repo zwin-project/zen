@@ -26,7 +26,7 @@ zn_input_device_create(struct zn_seat* seat, struct wlr_input_device* wlr_input)
 
   switch (wlr_input->type) {
     case WLR_INPUT_DEVICE_KEYBOARD:
-      self->keyboard = zn_keyboard_create(seat, wlr_input);
+      self->keyboard = zn_keyboard_create(wlr_input);
       if (self->keyboard == NULL) {
         zn_error("Failed to create zn_keyboard");
         goto err_free;

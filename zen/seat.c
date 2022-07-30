@@ -65,7 +65,6 @@ zn_seat_create(struct wl_display* display, const char* seat_name)
   }
 
   wl_list_init(&self->devices);
-  wl_list_init(&self->keyboards);
 
   return self;
 
@@ -79,7 +78,6 @@ err:
 void
 zn_seat_destroy(struct zn_seat* self)
 {
-  wl_list_remove(&self->keyboards);
   wl_list_remove(&self->devices);
   wlr_seat_destroy(self->wlr_seat);
   free(self);
