@@ -9,6 +9,7 @@ handle_key(struct wl_listener* listener, void* data)
 {
   UNUSED(listener);
   UNUSED(data);
+  // Terminate the program with a keyboard event for development convenience.
   exit(0);
 }
 
