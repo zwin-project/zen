@@ -16,6 +16,7 @@ void
 zn_keyboard_configure(
     struct zn_keyboard* self, struct zn_input_device* input_device)
 {
+  wl_list_remove(&self->key_listener.link);
   self->key_listener.notify = handle_key;
   wl_signal_add(
       &input_device->wlr_input->keyboard->events.key, &self->key_listener);
@@ -30,6 +31,8 @@ zn_keyboard_create()
     zn_error("Failed to allocate memory");
     goto err;
   }
+
+  wl_list_init(&self->key_listener.link);
 
   return self;
 
