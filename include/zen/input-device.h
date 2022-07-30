@@ -6,9 +6,13 @@
 
 struct zn_input_device {
   struct wlr_input_device* wlr_input;
-  struct wl_list link;  // zn_seat::devices
 
   struct zn_seat* seat;
+  struct wl_list link;  // zn_seat::devices
+
+  union {
+    struct zn_keyboard* keyboard;
+  };
 
   struct wl_listener device_destroy_listener;
 };

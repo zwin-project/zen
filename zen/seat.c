@@ -6,54 +6,6 @@
 #include "zen/input-device.h"
 
 static void
-zn_seat_configure_keyboard(
-    struct zn_seat* self, struct zn_input_device* input_device)
-{
-  struct zn_keyboard* keyboard = zn_keyboard_create(self);
-  if (keyboard == NULL) {
-    zn_error("Failed to create zn_keyboard");
-    return;
-  }
-  zn_keyboard_configure(keyboard, input_device);
-  wlr_seat_set_keyboard(self->wlr_seat, input_device->wlr_input);
-}
-
-static struct zn_input_device*
-zn_seat_get_device(struct zn_seat* self, struct zn_input_device* input_device)
-{
-  struct zn_input_device* dev;
-  wl_list_for_each(dev, &self->devices, link)
-  {
-    if (dev == input_device) {
-      return input_device;
-    }
-  }
-
-  // TODO: keyboard group
-
-  return NULL;
-}
-
-void
-zn_seat_configure_device(
-    struct zn_seat* self, struct zn_input_device* input_device)
-{
-  switch (input_device->wlr_input->type) {
-    case WLR_INPUT_DEVICE_KEYBOARD:
-      zn_seat_configure_keyboard(self, input_device);
-      break;
-    case WLR_INPUT_DEVICE_POINTER:
-      // TODO: pointer configure
-      break;
-    case WLR_INPUT_DEVICE_TOUCH:
-    case WLR_INPUT_DEVICE_TABLET_TOOL:
-    case WLR_INPUT_DEVICE_TABLET_PAD:
-    case WLR_INPUT_DEVICE_SWITCH:
-      break;
-  }
-}
-
-static void
 zn_seat_update_capabilities(struct zn_seat* self)
 {
   uint32_t caps = 0;
@@ -84,15 +36,7 @@ zn_seat_update_capabilities(struct zn_seat* self)
 void
 zn_seat_add_device(struct zn_seat* self, struct zn_input_device* input_device)
 {
-  if (zn_seat_get_device(self, input_device)) {
-    zn_seat_configure_device(self, input_device);
-    return;
-  }
-
   wl_list_insert(&self->devices, &input_device->link);
-
-  zn_seat_configure_device(self, input_device);
-
   zn_seat_update_capabilities(self);
 }
 

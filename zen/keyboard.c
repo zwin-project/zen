@@ -12,19 +12,16 @@ handle_key(struct wl_listener* listener, void* data)
   exit(0);
 }
 
-void
-zn_keyboard_configure(
-    struct zn_keyboard* self, struct zn_input_device* input_device)
-{
-  wl_list_remove(&self->key_listener.link);
-  self->key_listener.notify = handle_key;
-  wl_signal_add(
-      &input_device->wlr_input->keyboard->events.key, &self->key_listener);
-}
-
 struct zn_keyboard*
-zn_keyboard_create(struct zn_seat* seat)
+zn_keyboard_create(
+    struct zn_seat* seat, struct wlr_input_device* wlr_input_device)
 {
+  if (!zn_assert(wlr_input_device->type == WLR_INPUT_DEVICE_KEYBOARD,
+          "Wrong type - expect: %d, actual: %d", WLR_INPUT_DEVICE_KEYBOARD,
+          wlr_input_device->type)) {
+    goto err;
+  }
+
   struct zn_keyboard* self;
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -32,8 +29,9 @@ zn_keyboard_create(struct zn_seat* seat)
     goto err;
   }
 
+  self->key_listener.notify = handle_key;
+  wl_signal_add(&wlr_input_device->keyboard->events.key, &self->key_listener);
   wl_list_insert(&seat->keyboards, &self->link);
-  wl_list_init(&self->key_listener.link);
 
   return self;
 
