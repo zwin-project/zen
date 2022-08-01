@@ -37,7 +37,7 @@ char_is_alphanumeric(char c)
 }
 
 static void
-cursor_erase_line()
+cursor_erase_line(void)
 {
   printf("\x1b[2K");  // clear line
   printf("\x1b[0G");  // move cursor to the head of the line
@@ -55,7 +55,7 @@ cursor_move_right(int n)
 
 /** remove chars after the cursor */
 static void
-cursor_erase_after()
+cursor_erase_after(void)
 {
   printf("\x1b[0J");
 }
@@ -282,7 +282,7 @@ handle_stdin(struct client *cui)
 }
 
 static void
-set_stdin_non_canonical_and_no_echo()
+set_stdin_non_canonical_and_no_echo(void)
 {
   struct termios opt;
   tcgetattr(STDIN_FILENO, &opt);
@@ -292,7 +292,7 @@ set_stdin_non_canonical_and_no_echo()
 }
 
 int
-main()
+main(void)
 {
   struct client cui;
   char *socket;
