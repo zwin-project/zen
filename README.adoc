@@ -14,22 +14,29 @@ $ ninja -C build install
 
 == Start ZEN Desktop
 
-[red]#***__caution__**# +
-If you cannot connect to your machine via ssh from another PC, do not use
-zen-desktop yet. You will have no way to return to the original GUI other than
-a forced reboot.
+=== Option 1
 
 Select `ZEN` from your display manager.
 
+=== Option 2
+
+[red]#***__caution__**# +
+Switching between virtual terminals may be confusing if you are not familiar
+with it. You may not be able to return to your GUI desktop except by forced
+reboot.
+
+- Switch virtual terminal
+
+```
+$ sudo chvt <number>
+```
+
+- In a virtual terminal (CUI),
+
+```
+$ zen-desktop
+```
+
 == Stop ZEN Desktop
 
-Since we have not yet implemented the input functionalities, the possible way to
-stop ZEN Desktop is to send a kill signal to the process from another terminal.
-
-
-From another terminal (another virtual terminal or ssh)
-
-[source, shell]
-----
-$ pkill zen-desktop
-----
+Press `q` to quit.
