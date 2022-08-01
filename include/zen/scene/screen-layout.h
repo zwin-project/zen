@@ -8,6 +8,10 @@ struct zn_screen;
 
 struct zn_screen_layout {
   struct wl_list screens;  // zn_screen::link
+
+  // this is emited when zn_screen added to zn_screen_layout.
+  struct wl_signal add_screen;  // (struct zn_screen *)
+  // TODO: remove_screen signal is required?
 };
 
 void zn_screen_layout_add(
