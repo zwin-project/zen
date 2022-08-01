@@ -10,6 +10,8 @@
 #include "zen/xdg-toplevel-view.h"
 #include "zen/xwayland-view.h"
 
+static struct zn_server *server_singleton = NULL;
+
 static void
 zn_server_new_input_handler(struct wl_listener *listener, void *data)
 {
@@ -109,6 +111,14 @@ zn_server_xwayland_new_surface_handler(struct wl_listener *listener, void *data)
   (void)zn_xwayland_view_create(xwayland_surface, self);
 }
 
+struct zn_server *
+zn_server_get_singleton()
+{
+  zn_assert(server_singleton != NULL,
+      "zn_server_get_singleton was called before creating zn_server");
+  return server_singleton;
+}
+
 int
 zn_server_run(struct zn_server *self)
 {
@@ -148,6 +158,9 @@ zn_server_create(struct wl_display *display)
   struct zn_server *self;
   char socket_name_candidate[16];
   char *xdg;
+
+  zn_assert(
+      server_singleton == NULL, "Tried to create zn_server multiple times");
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -252,6 +265,7 @@ zn_server_create(struct wl_display *display)
   wl_signal_add(&self->display_system->switch_signal,
       &self->display_system_switch_listener);
 
+  server_singleton = self;
   return self;
 
 err_socket:
@@ -285,6 +299,7 @@ err:
 void
 zn_server_destroy(struct zn_server *self)
 {
+  server_singleton = NULL;
   if (self->xwayland) wlr_xwayland_destroy(self->xwayland);
   zn_input_manager_destroy(self->input_manager);
   zn_display_system_destroy(self->display_system);

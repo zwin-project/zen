@@ -3,14 +3,16 @@
 #include <wlr/types/wlr_seat.h>
 
 #include "zen-common.h"
+#include "zen/server.h"
 
 static void
-handle_key(struct wl_listener* listener, void* data)
+zn_keyboard_handle_key(struct wl_listener* listener, void* data)
 {
+  struct zn_server* server = zn_server_get_singleton();
   UNUSED(listener);
   UNUSED(data);
   // Terminate the program with a keyboard event for development convenience.
-  exit(0);
+  zn_server_terminate(server, EXIT_SUCCESS);
 }
 
 struct zn_keyboard*
@@ -29,7 +31,7 @@ zn_keyboard_create(struct wlr_input_device* wlr_input_device)
     goto err;
   }
 
-  self->key_listener.notify = handle_key;
+  self->key_listener.notify = zn_keyboard_handle_key;
   wl_signal_add(&wlr_input_device->keyboard->events.key, &self->key_listener);
 
   return self;
