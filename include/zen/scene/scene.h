@@ -9,7 +9,7 @@ struct zn_scene {
   struct zn_screen_layout* screen_layout;
 };
 
-struct zn_scene* zn_scene_create();
+struct zn_scene* zn_scene_create(void);
 
 void zn_scene_destroy(struct zn_scene* self);
 

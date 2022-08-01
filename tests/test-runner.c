@@ -37,7 +37,7 @@ run_test(const struct test *t)
 }
 
 int
-main()
+main(void)
 {
   const struct test *t;
   pid_t pid;

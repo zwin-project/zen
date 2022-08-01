@@ -14,7 +14,7 @@ bool zn_immersive_backend_connect(struct zn_immersive_backend* self);
 
 void zn_immersive_backend_disconnect(struct zn_immersive_backend* self);
 
-struct zn_immersive_backend* zn_immersive_backend_create();
+struct zn_immersive_backend* zn_immersive_backend_create(void);
 
 void zn_immersive_backend_destroy(struct zn_immersive_backend* self);
 

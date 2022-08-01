@@ -3,7 +3,7 @@
 #include "zen-common.h"
 
 struct zn_scene*
-zn_scene_create()
+zn_scene_create(void)
 {
   struct zn_scene* self;
 
