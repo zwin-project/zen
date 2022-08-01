@@ -8,7 +8,6 @@
 #include "zen-common.h"
 #include "zen/server.h"
 
-static struct zn_server *server;
 static pid_t startup_command_pid = -1;
 
 static zn_log_importance_t
@@ -36,12 +35,14 @@ handle_wlr_log(
 static void
 zn_terminate(int exit_code)
 {
+  struct zn_server *server = zn_server_get_singleton();
   zn_server_terminate(server, exit_code);
 }
 
 static int
 on_term_signal(int signal_number, void *data)
 {
+  struct zn_server *server = zn_server_get_singleton();
   UNUSED(data);
 
   zn_info("Caught signal %d", signal_number);
@@ -53,6 +54,7 @@ on_term_signal(int signal_number, void *data)
 static int
 on_signal_child(int signal_number, void *data)
 {
+  struct zn_server *server = zn_server_get_singleton();
   pid_t pid;
   int status;
   UNUSED(data);
@@ -98,6 +100,7 @@ main(int argc, char *argv[])
   struct wl_event_source *signal_sources[4];
   int i, exit_status = EXIT_FAILURE;
   char *startup_command = NULL;
+  struct zn_server *server;
 
   static const struct option long_options[] = {
       {"help", no_argument, NULL, 'h'},
