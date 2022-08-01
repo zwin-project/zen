@@ -159,8 +159,10 @@ zn_server_create(struct wl_display *display)
   char socket_name_candidate[16];
   char *xdg;
 
-  zn_assert(
-      server_singleton == NULL, "Tried to create zn_server multiple times");
+  if (!zn_assert(server_singleton == NULL,
+          "Tried to create zn_server multiple times")) {
+    goto err;
+  }
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
