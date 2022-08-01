@@ -14,7 +14,8 @@ struct zn_input_device {
     struct zn_keyboard* keyboard;
   };
 
-  struct wl_listener device_destroy_listener;
+  struct wl_listener wlr_input_destroy_listener;
+  struct wl_listener seat_destroy_listener;
 };
 
 struct zn_input_device* zn_input_device_create(
