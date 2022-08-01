@@ -1,5 +1,6 @@
 #include "zen/keyboard.h"
 
+#include <linux/input.h>
 #include <wlr/types/wlr_seat.h>
 
 #include "zen-common.h"
@@ -9,10 +10,12 @@ static void
 zn_keyboard_handle_key(struct wl_listener* listener, void* data)
 {
   struct zn_server* server = zn_server_get_singleton();
+  struct wlr_event_keyboard_key* event = data;
   UNUSED(listener);
-  UNUSED(data);
+
   // Terminate the program with a keyboard event for development convenience.
-  zn_server_terminate(server, EXIT_SUCCESS);
+  if (event->keycode == KEY_Q && event->state == WL_KEYBOARD_KEY_STATE_PRESSED)
+    zn_server_terminate(server, EXIT_SUCCESS);
 }
 
 struct zn_keyboard*
