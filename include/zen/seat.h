@@ -4,12 +4,15 @@
 #include <wayland-server.h>
 
 #include "zen/keyboard.h"
+#include "zen/cursor.h"
 
 #define ZEN_DEFAULT_SEAT "seat0"
 
 struct zn_seat {
   struct wlr_seat* wlr_seat;
   struct wl_list devices;  // zn_input_device::link
+
+  struct zn_cursor* cursor;
 
   struct {
     struct wl_signal destroy;

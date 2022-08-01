@@ -64,10 +64,19 @@ zn_seat_create(struct wl_display* display, const char* seat_name)
     goto err_free;
   }
 
+  self->cursor = zn_cursor_create();
+  if (self->cursor == NULL) {
+    zn_error("Failed to create zn_cursor");
+    goto err_wlr_seat;
+  }
+
   wl_list_init(&self->devices);
   wl_signal_init(&self->events.destroy);
 
   return self;
+
+err_wlr_seat:
+  wlr_seat_destroy(self->wlr_seat);
 
 err_free:
   free(self);
@@ -82,6 +91,7 @@ zn_seat_destroy(struct zn_seat* self)
   wl_signal_emit(&self->events.destroy, NULL);
 
   wl_list_remove(&self->devices);
+  zn_cursor_destroy(self->cursor);
   wlr_seat_destroy(self->wlr_seat);
   free(self);
 }

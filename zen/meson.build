@@ -1,4 +1,5 @@
 _zen_desktop_srcs = [
+  'cursor.c',
   'display-system.c',
   'input-device.c',
   'input-manager.c',
