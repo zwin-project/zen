@@ -170,6 +170,7 @@ zn_server_create(struct wl_display *display)
     goto err;
   }
 
+  server_singleton = self;
   self->display = display;
   self->exit_code = EXIT_FAILURE;
   self->loop = wl_display_get_event_loop(display);
@@ -267,7 +268,6 @@ zn_server_create(struct wl_display *display)
   wl_signal_add(&self->display_system->switch_signal,
       &self->display_system_switch_listener);
 
-  server_singleton = self;
   return self;
 
 err_socket:
@@ -301,7 +301,6 @@ err:
 void
 zn_server_destroy(struct zn_server *self)
 {
-  server_singleton = NULL;
   if (self->xwayland) wlr_xwayland_destroy(self->xwayland);
   zn_input_manager_destroy(self->input_manager);
   zn_display_system_destroy(self->display_system);
@@ -310,5 +309,6 @@ zn_server_destroy(struct zn_server *self)
   wlr_allocator_destroy(self->allocator);
   wlr_renderer_destroy(self->renderer);
   wlr_backend_destroy(self->backend);
+  server_singleton = NULL;
   free(self);
 }
