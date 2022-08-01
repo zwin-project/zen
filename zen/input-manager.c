@@ -7,10 +7,6 @@
 #include "zen/input-device.h"
 #include "zen/seat.h"
 
-struct zn_input_manager {
-  struct zn_seat* seat;
-};
-
 void
 zn_input_manager_handle_new_wlr_input(
     struct zn_input_manager* self, struct wlr_input_device* wlr_input)
