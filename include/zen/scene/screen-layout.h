@@ -10,7 +10,7 @@ struct zn_screen_layout {
   struct wl_list screens;  // zn_screen::link
 
   struct {
-    // Emited when a zn_screen is added
+    // Emitted when a zn_screen is added
     struct wl_signal new_screen;  // (struct zn_screen *)
   } events;
 };
