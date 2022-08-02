@@ -11,37 +11,50 @@
 #include "zen/server.h"
 
 static void
+zn_cursor_set_screen(struct zn_cursor* self, struct zn_screen* screen)
+{
+  if (self->screen == screen) {
+    return;
+  }
+
+  if (self->screen != NULL) {
+    wl_list_remove(&self->destroy_screen_listener.link);
+    wl_list_init(&self->destroy_screen_listener.link);
+  }
+  if (screen != NULL) {
+    self->x = screen->output->wlr_output->width / 2;
+    self->y = screen->output->wlr_output->height / 2;
+    wl_signal_add(&screen->events.destroy, &self->destroy_screen_listener);
+  }
+
+  self->screen = screen;
+}
+
+static void
 zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
 {
   UNUSED(data);
   struct zn_cursor* self = zn_container_of(listener, self, new_screen_listener);
   struct zn_server* server = zn_server_get_singleton();
   struct zn_screen_layout* screen_layout = server->scene->screen_layout;
-
-  wl_list_remove(&self->destroy_screen_listener.link);
-  wl_list_init(&self->destroy_screen_listener.link);
+  struct zn_screen* screen;
 
   if (wl_list_empty(&screen_layout->screens)) {
-    self->screen = NULL;
+    screen = NULL;
   } else {
-    self->screen =
-        zn_container_of(&screen_layout->screens.next, self->screen, link);
+    screen = zn_container_of(&screen_layout->screens.next, self->screen, link);
   }
+
+  zn_cursor_set_screen(self, screen);
 }
 
 static void
 zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
 {
   struct zn_cursor* self = zn_container_of(listener, self, new_screen_listener);
-  struct zn_screen* screen = data;
 
   if (self->screen == NULL) {
-    self->screen = screen;
-    self->x = self->screen->output->wlr_output->width / 2;
-    self->y = self->screen->output->wlr_output->height / 2;
-
-    self->destroy_screen_listener.notify = zn_cursor_handle_destroy_screen;
-    wl_signal_add(&screen->events.destroy, &self->destroy_screen_listener);
+    zn_cursor_set_screen(self, data);
   }
 }
 
@@ -80,6 +93,7 @@ zn_cursor_create(void)
 
   self->new_screen_listener.notify = zn_cursor_handle_new_screen;
   wl_signal_add(&screen_layout->events.new_screen, &self->new_screen_listener);
+  self->destroy_screen_listener.notify = zn_cursor_handle_destroy_screen;
 
   wl_list_init(&self->destroy_screen_listener.link);
 
