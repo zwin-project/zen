@@ -44,7 +44,7 @@ struct zn_server {
   int exit_code;
 };
 
-struct zn_server *zn_server_get_singleton();
+struct zn_server *zn_server_get_singleton(void);
 
 /** returns exit code */
 int zn_server_run(struct zn_server *self);

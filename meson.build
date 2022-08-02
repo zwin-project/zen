@@ -13,6 +13,7 @@ global_args_maybe = [
   '-D_GNU_SOURCE',
   '-DWLR_USE_UNSTABLE',
   '-fvisibility=hidden',
+  '-Wstrict-prototypes',
 ]
 
 foreach arg : global_args_maybe
