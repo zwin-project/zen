@@ -16,7 +16,7 @@ struct zn_screen {
   struct wl_list link;  // zn_screen_layout::screens;
 
   struct {
-    struct wl_signal destroy;  // (struct zn_screen *)
+    struct wl_signal destroy;  // (NULL)
   } events;
 };
 

@@ -31,7 +31,7 @@ err:
 void
 zn_screen_destroy(struct zn_screen *self)
 {
-  wl_signal_emit(&self->events.destroy, self);
+  wl_signal_emit(&self->events.destroy, NULL);
 
   wl_list_remove(&self->views);
   zn_screen_layout_remove(self->screen_layout, self);
