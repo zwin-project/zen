@@ -11,7 +11,7 @@
 
 struct zn_cursor {
   int x, y;
-  struct zn_screen* screen;
+  struct zn_screen* screen; // nullable
   struct wlr_texture* texture;
   struct wlr_xcursor_manager* xcursor_manager;
 
