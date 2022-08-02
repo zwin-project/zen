@@ -19,6 +19,7 @@ zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
   struct zn_screen_layout* screen_layout = server->scene->screen_layout;
 
   wl_list_remove(&self->destroy_screen_listener.link);
+  wl_list_init(&self->destroy_screen_listener.link);
 
   if (wl_list_empty(&screen_layout->screens)) {
     self->screen = NULL;
