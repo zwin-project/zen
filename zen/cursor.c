@@ -2,6 +2,7 @@
 
 #include <drm/drm_fourcc.h>
 #include <linux/input.h>
+#include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/xcursor.h>
 
@@ -17,6 +18,22 @@ zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
     self->screen = data;
     self->x = self->screen->output->wlr_output->width / 2;
     self->y = self->screen->output->wlr_output->height / 2;
+  }
+}
+
+void
+zn_cursor_render(struct zn_cursor* self, struct zn_screen* screen,
+    struct wlr_renderer* renderer)
+{
+  float transform[9] = {
+      1, 0, 0,  //
+      0, 1, 0,  //
+      0, 0, 1   //
+  };
+
+  if (self->screen == screen && self->texture) {
+    wlr_render_texture(
+        renderer, self->texture, transform, self->x, self->y, 1.f);
   }
 }
 
