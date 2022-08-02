@@ -11,6 +11,25 @@
 #include "zen/server.h"
 
 static void
+zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
+{
+  struct zn_cursor* self = zn_container_of(listener, self, new_screen_signal);
+  struct zn_server* server = zn_server_get_singleton();
+  struct zn_screen_layout* screen_layout = server->scene->screen_layout;
+
+  if (self->screen != data) {
+    return;
+  }
+
+  if (wl_list_empty(&screen_layout->screens)) {
+    self->screen = NULL;
+  } else {
+    self->screen =
+        zn_container_of(&screen_layout->screens.next, self->screen, link);
+  }
+}
+
+static void
 zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
 {
   struct zn_cursor* self = zn_container_of(listener, self, new_screen_signal);
@@ -74,6 +93,10 @@ zn_cursor_create(void)
 
   self->new_screen_signal.notify = zn_cursor_handle_new_screen;
   wl_signal_add(&screen_layout->events.new_screen, &self->new_screen_signal);
+
+  self->destroy_screen_signal.notify = zn_cursor_handle_destroy_screen;
+  wl_signal_add(
+      &screen_layout->events.destroy_screen, &self->destroy_screen_signal);
 
   return self;
 

@@ -16,6 +16,7 @@ struct zn_cursor {
   struct wlr_xcursor_manager* xcursor_manager;
 
   struct wl_listener new_screen_signal;
+  struct wl_listener destroy_screen_signal;
 };
 
 void zn_cursor_render(struct zn_cursor* self, struct zn_screen* screen,
