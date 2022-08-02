@@ -19,9 +19,6 @@ struct zn_cursor {
   struct wl_listener destroy_screen_listener;
 };
 
-void zn_cursor_render(struct zn_cursor* self, struct zn_screen* screen,
-    struct wlr_renderer* renderer);
-
 struct zn_cursor* zn_cursor_create(void);
 
 void zn_cursor_destroy(struct zn_cursor* self);

@@ -44,22 +44,6 @@ zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
   }
 }
 
-void
-zn_cursor_render(struct zn_cursor* self, struct zn_screen* screen,
-    struct wlr_renderer* renderer)
-{
-  float transform[9] = {
-      1, 0, 0,  //
-      0, 1, 0,  //
-      0, 0, 1   //
-  };
-
-  if (self->screen == screen && self->texture) {
-    wlr_render_texture(
-        renderer, self->texture, transform, self->x, self->y, 1.f);
-  }
-}
-
 struct zn_cursor*
 zn_cursor_create(void)
 {
