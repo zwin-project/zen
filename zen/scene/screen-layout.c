@@ -20,6 +20,8 @@ zn_screen_layout_add(
     screen->y = 0;
     x += box.width;
   }
+
+  wl_signal_emit(&self->events.new_screen, new_screen);
 }
 
 void
@@ -41,6 +43,7 @@ zn_screen_layout_create(void)
   }
 
   wl_list_init(&self->screens);
+  wl_signal_init(&self->events.new_screen);
 
   return self;
 

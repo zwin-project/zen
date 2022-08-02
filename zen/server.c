@@ -305,10 +305,10 @@ zn_server_destroy(struct zn_server *self)
   zn_input_manager_destroy(self->input_manager);
   zn_display_system_destroy(self->display_system);
   free(self->socket);
-  zn_scene_destroy(self->scene);
   wlr_allocator_destroy(self->allocator);
   wlr_renderer_destroy(self->renderer);
   wlr_backend_destroy(self->backend);
+  zn_scene_destroy(self->scene);
   server_singleton = NULL;
   free(self);
 }

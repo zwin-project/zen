@@ -6,6 +6,7 @@
 #include "zen/output.h"
 #include "zen/scene/screen.h"
 #include "zen/scene/view.h"
+#include "zen/seat.h"
 
 static void
 zn_render_2d_view(struct zn_view *view, struct wlr_renderer *renderer)
@@ -22,10 +23,31 @@ zn_render_2d_view(struct zn_view *view, struct wlr_renderer *renderer)
   wlr_render_texture(renderer, texture, transform, 0, 0, 1);
 }
 
+static void
+zn_render_2d_cursor(struct zn_cursor *cursor, struct zn_screen *screen,
+    struct wlr_renderer *renderer)
+{
+  float transform[9] = {
+      1, 0, 0,  //
+      0, 1, 0,  //
+      0, 0, 1   //
+  };
+
+  if (cursor->screen == screen && cursor->texture) {
+    wlr_render_texture(
+        renderer, cursor->texture, transform, cursor->x, cursor->y, 1.f);
+  }
+}
+
 void
 zn_render_2d_screen(struct zn_screen *screen, struct wlr_renderer *renderer)
 {
   struct zn_view *view;
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_cursor *cursor = server->input_manager->seat->cursor;
+
   wl_list_for_each(view, &screen->views, link)
       zn_render_2d_view(view, renderer);
+
+  zn_render_2d_cursor(cursor, screen, renderer);
 }
