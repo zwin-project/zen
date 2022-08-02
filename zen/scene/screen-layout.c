@@ -21,13 +21,14 @@ zn_screen_layout_add(
     x += box.width;
   }
 
-  wl_signal_emit(&self->add_screen, new_screen);
+  wl_signal_emit(&self->events.new_screen, new_screen);
 }
 
 void
 zn_screen_layout_remove(struct zn_screen_layout* self, struct zn_screen* screen)
 {
-  UNUSED(self);
+  wl_signal_emit(&self->events.destroy_screen, screen);
+
   wl_list_remove(&screen->link);
 }
 
@@ -43,7 +44,8 @@ zn_screen_layout_create(void)
   }
 
   wl_list_init(&self->screens);
-  wl_signal_init(&self->add_screen);
+  wl_signal_init(&self->events.new_screen);
+  wl_signal_init(&self->events.destroy_screen);
 
   return self;
 

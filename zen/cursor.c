@@ -10,9 +10,9 @@
 #include "zen/server.h"
 
 static void
-zn_cursor_handle_add_screen(struct wl_listener* listener, void* data)
+zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
 {
-  struct zn_cursor* self = zn_container_of(listener, self, add_screen_signal);
+  struct zn_cursor* self = zn_container_of(listener, self, new_screen_signal);
   if (self->screen == NULL) {
     self->screen = data;
     self->x = self->screen->output->wlr_output->width / 2;
@@ -55,8 +55,8 @@ zn_cursor_create(void)
 
   self->screen = NULL;
 
-  self->add_screen_signal.notify = zn_cursor_handle_add_screen;
-  wl_signal_add(&screen_layout->add_screen, &self->add_screen_signal);
+  self->new_screen_signal.notify = zn_cursor_handle_new_screen;
+  wl_signal_add(&screen_layout->events.new_screen, &self->new_screen_signal);
 
   return self;
 
@@ -73,7 +73,7 @@ err:
 void
 zn_cursor_destroy(struct zn_cursor* self)
 {
-  wl_list_remove(&self->add_screen_signal.link);
+  wl_list_remove(&self->new_screen_signal.link);
   wlr_texture_destroy(self->texture);
   wlr_xcursor_manager_destroy(self->xcursor_manager);
   free(self);
