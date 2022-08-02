@@ -11,6 +11,17 @@
 #include "zen/server.h"
 
 static void
+zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
+{
+  struct zn_cursor* self = zn_container_of(listener, self, new_screen_signal);
+  if (self->screen == NULL) {
+    self->screen = data;
+    self->x = self->screen->output->wlr_output->width / 2;
+    self->y = self->screen->output->wlr_output->height / 2;
+  }
+}
+
+static void
 zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
 {
   struct zn_cursor* self = zn_container_of(listener, self, new_screen_signal);
@@ -26,17 +37,6 @@ zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
   } else {
     self->screen =
         zn_container_of(&screen_layout->screens.next, self->screen, link);
-  }
-}
-
-static void
-zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
-{
-  struct zn_cursor* self = zn_container_of(listener, self, new_screen_signal);
-  if (self->screen == NULL) {
-    self->screen = data;
-    self->x = self->screen->output->wlr_output->width / 2;
-    self->y = self->screen->output->wlr_output->height / 2;
   }
 }
 
