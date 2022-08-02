@@ -112,7 +112,7 @@ zn_server_xwayland_new_surface_handler(struct wl_listener *listener, void *data)
 }
 
 struct zn_server *
-zn_server_get_singleton()
+zn_server_get_singleton(void)
 {
   zn_assert(server_singleton != NULL,
       "zn_server_get_singleton was called before creating zn_server");
