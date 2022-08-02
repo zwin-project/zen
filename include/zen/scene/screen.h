@@ -14,6 +14,10 @@ struct zn_screen {
   struct wl_list views;  // zn_view::link;
 
   struct wl_list link;  // zn_screen_layout::screens;
+
+  struct {
+    struct wl_signal destroy;  // (struct zn_screen *)
+  } events;
 };
 
 struct zn_screen *zn_screen_create(
