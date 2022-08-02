@@ -11,32 +11,36 @@
 #include "zen/server.h"
 
 static void
-zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
-{
-  struct zn_cursor* self = zn_container_of(listener, self, new_screen_signal);
-  if (self->screen == NULL) {
-    self->screen = data;
-    self->x = self->screen->output->wlr_output->width / 2;
-    self->y = self->screen->output->wlr_output->height / 2;
-  }
-}
-
-static void
 zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
 {
-  struct zn_cursor* self = zn_container_of(listener, self, new_screen_signal);
+  UNUSED(data);
+  struct zn_cursor* self = zn_container_of(listener, self, new_screen_listener);
   struct zn_server* server = zn_server_get_singleton();
   struct zn_screen_layout* screen_layout = server->scene->screen_layout;
 
-  if (self->screen != data) {
-    return;
-  }
+  wl_list_remove(&self->destroy_screen_listener.link);
 
   if (wl_list_empty(&screen_layout->screens)) {
     self->screen = NULL;
   } else {
     self->screen =
         zn_container_of(&screen_layout->screens.next, self->screen, link);
+  }
+}
+
+static void
+zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
+{
+  struct zn_cursor* self = zn_container_of(listener, self, new_screen_listener);
+  struct zn_screen* screen = data;
+
+  if (self->screen == NULL) {
+    self->screen = screen;
+    self->x = self->screen->output->wlr_output->width / 2;
+    self->y = self->screen->output->wlr_output->height / 2;
+
+    self->destroy_screen_listener.notify = zn_cursor_handle_destroy_screen;
+    wl_signal_add(&screen->events.destroy, &self->destroy_screen_listener);
   }
 }
 
@@ -89,14 +93,12 @@ zn_cursor_create(void)
   self->texture = wlr_texture_from_pixels(server->renderer, DRM_FORMAT_ARGB8888,
       image->width * 4, image->width, image->height, image->buffer);
 
+  self->new_screen_listener.notify = zn_cursor_handle_new_screen;
+  wl_signal_add(&screen_layout->events.new_screen, &self->new_screen_listener);
+
+  wl_list_init(&self->destroy_screen_listener.link);
+
   self->screen = NULL;
-
-  self->new_screen_signal.notify = zn_cursor_handle_new_screen;
-  wl_signal_add(&screen_layout->events.new_screen, &self->new_screen_signal);
-
-  self->destroy_screen_signal.notify = zn_cursor_handle_destroy_screen;
-  wl_signal_add(
-      &screen_layout->events.destroy_screen, &self->destroy_screen_signal);
 
   return self;
 
@@ -113,7 +115,8 @@ err:
 void
 zn_cursor_destroy(struct zn_cursor* self)
 {
-  wl_list_remove(&self->new_screen_signal.link);
+  wl_list_remove(&self->new_screen_listener.link);
+  wl_list_remove(&self->destroy_screen_listener.link);
   wlr_texture_destroy(self->texture);
   wlr_xcursor_manager_destroy(self->xcursor_manager);
   free(self);
