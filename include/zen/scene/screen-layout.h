@@ -12,8 +12,6 @@ struct zn_screen_layout {
   struct {
     // this is emited when zn_screen is added to zn_screen_layout.
     struct wl_signal new_screen;  // (struct zn_screen *)
-    // this is emited when zn_screen is destroyed.
-    struct wl_signal destroy_screen; // (struct zn_screen *)
   } events;
 };
 
