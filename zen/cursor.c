@@ -34,7 +34,7 @@ static void
 zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
 {
   UNUSED(data);
-  struct zn_cursor* self = zn_container_of(listener, self, new_screen_listener);
+  struct zn_cursor* self = zn_container_of(listener, self, destroy_screen_listener);
   struct zn_server* server = zn_server_get_singleton();
   struct zn_screen_layout* screen_layout = server->scene->screen_layout;
   struct zn_screen* screen;
