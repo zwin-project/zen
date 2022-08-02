@@ -20,27 +20,15 @@ zn_cursor_handle_add_screen(struct wl_listener* listener, void* data)
   }
 }
 
-void
-zn_cursor_set_image(struct zn_cursor* self, const char* name)
-{
-  struct zn_server* server = zn_server_get_singleton();
-  struct wlr_xcursor* xcursor;
-
-  xcursor = wlr_xcursor_manager_get_xcursor(self->xcursor_manager, name, 1.f);
-  if (xcursor == NULL) {
-    zn_error("Failed to get xcursor (%s)", name);
-    return;
-  }
-  struct wlr_xcursor_image* image = xcursor->images[0];
-
-  self->texture = wlr_texture_from_pixels(server->renderer, DRM_FORMAT_ARGB8888,
-      image->width * 4, image->width, image->height, image->buffer);
-}
-
 struct zn_cursor*
 zn_cursor_create(void)
 {
+  struct zn_server* server = zn_server_get_singleton();
+  struct zn_screen_layout* screen_layout = server->scene->screen_layout;
+  struct wlr_xcursor* xcursor;
+  struct wlr_xcursor_image* image;
   struct zn_cursor* self;
+
   self = zalloc(sizeof *self);
   if (self == NULL) {
     zn_error("Failed to allocate memory");
@@ -49,20 +37,31 @@ zn_cursor_create(void)
 
   self->xcursor_manager = wlr_xcursor_manager_create(NULL, 24);
   if (self->xcursor_manager == NULL) {
-    zn_error("Failed to create wlr_xcursor");
+    zn_error("Failed to create wlr_xcursor_manager");
     goto err_free;
   }
   wlr_xcursor_manager_load(self->xcursor_manager, 1.f);
 
-  self->screen = NULL;
-  zn_cursor_set_image(self, "left_ptr");
+  xcursor =
+      wlr_xcursor_manager_get_xcursor(self->xcursor_manager, "left_ptr", 1.f);
+  if (xcursor == NULL) {
+    zn_error("Failed to get xcursor");
+    goto err_wlr_xcursor_manager;
+  }
+  image = xcursor->images[0];
 
-  struct zn_server* server = zn_server_get_singleton();
-  struct zn_screen_layout* screen_layout = server->scene->screen_layout;
+  self->texture = wlr_texture_from_pixels(server->renderer, DRM_FORMAT_ARGB8888,
+      image->width * 4, image->width, image->height, image->buffer);
+
+  self->screen = NULL;
+
   self->add_screen_signal.notify = zn_cursor_handle_add_screen;
   wl_signal_add(&screen_layout->add_screen, &self->add_screen_signal);
 
   return self;
+
+err_wlr_xcursor_manager:
+  wlr_xcursor_manager_destroy(self->xcursor_manager);
 
 err_free:
   free(self);

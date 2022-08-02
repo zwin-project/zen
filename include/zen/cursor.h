@@ -18,8 +18,6 @@ struct zn_cursor {
   struct wl_listener add_screen_signal;
 };
 
-void zn_cursor_set_image(struct zn_cursor* self, const char* name);
-
 struct zn_cursor* zn_cursor_create(void);
 
 void zn_cursor_destroy(struct zn_cursor* self);
