@@ -13,8 +13,6 @@ zn_screen_layout_add(
   wl_list_insert(&self->screens, &new_screen->link);
   wl_list_for_each(screen, &self->screens, link)
   {
-    wlr_output_effective_resolution(
-        screen->output->wlr_output, &screen->box.width, &screen->box.height);
     screen->box.x = x;
     screen->box.y = 0;
     x += screen->box.width;
