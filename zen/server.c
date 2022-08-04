@@ -122,20 +122,6 @@ zn_server_get_singleton(void)
 int
 zn_server_run(struct zn_server *self)
 {
-  self->xwayland = wlr_xwayland_create(self->display, self->w_compositor, true);
-  if (self->xwayland == NULL) {
-    zn_error("Failed to create xwayland");
-    return EXIT_FAILURE;
-  }
-
-  self->xwayland_new_surface_listener.notify =
-      zn_server_xwayland_new_surface_handler;
-  wl_signal_add(&self->xwayland->events.new_surface,
-      &self->xwayland_new_surface_listener);
-
-  setenv("DISPLAY", self->xwayland->display_name, true);
-  zn_debug("DISPLAY=%s", self->xwayland->display_name);
-
   if (!wlr_backend_start(self->backend)) {
     zn_error("Failed to start backend");
     return EXIT_FAILURE;
@@ -241,16 +227,25 @@ zn_server_create(struct wl_display *display)
     goto err_immersive_backend;
   }
 
+  setenv("WAYLAND_DISPLAY", self->socket, true);
+  xdg = getenv("XDG_RUNTIME_DIR");
+  zn_debug("WAYLAND_DISPLAY=%s", self->socket);
+  zn_debug("XDG_RUNTIME_DIR=%s", xdg);
+
   self->input_manager = zn_input_manager_create(self->display);
   if (self->input_manager == NULL) {
     zn_error("Failed to create input manager");
     goto err_socket;
   }
 
-  setenv("WAYLAND_DISPLAY", self->socket, true);
-  xdg = getenv("XDG_RUNTIME_DIR");
-  zn_debug("WAYLAND_DISPLAY=%s", self->socket);
-  zn_debug("XDG_RUNTIME_DIR=%s", xdg);
+  self->xwayland = wlr_xwayland_create(self->display, self->w_compositor, true);
+  if (self->xwayland == NULL) {
+    zn_error("Failed to create xwayland");
+    goto err_input_manager;
+  }
+
+  setenv("DISPLAY", self->xwayland->display_name, true);
+  zn_debug("DISPLAY=%s", self->xwayland->display_name);
 
   self->new_input_listener.notify = zn_server_new_input_handler;
   wl_signal_add(&self->backend->events.new_input, &self->new_input_listener);
@@ -268,7 +263,15 @@ zn_server_create(struct wl_display *display)
   wl_signal_add(&self->display_system->switch_signal,
       &self->display_system_switch_listener);
 
+  self->xwayland_new_surface_listener.notify =
+      zn_server_xwayland_new_surface_handler;
+  wl_signal_add(&self->xwayland->events.new_surface,
+      &self->xwayland_new_surface_listener);
+
   return self;
+
+err_input_manager:
+  zn_input_manager_destroy(self->input_manager);
 
 err_socket:
   free(self->socket);
@@ -301,9 +304,10 @@ err:
 void
 zn_server_destroy(struct zn_server *self)
 {
-  if (self->xwayland) wlr_xwayland_destroy(self->xwayland);
+  wlr_xwayland_destroy(self->xwayland);
   zn_input_manager_destroy(self->input_manager);
   zn_display_system_destroy(self->display_system);
+  zn_immersive_backend_destroy(self->immersive_backend);
   free(self->socket);
   wlr_allocator_destroy(self->allocator);
   wlr_renderer_destroy(self->renderer);
