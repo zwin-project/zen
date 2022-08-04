@@ -82,19 +82,6 @@ zn_cursor_move_relative(struct zn_cursor* self, int dx, int dy)
     return;
   }
 
-  if (new_screen) {
-    zn_debug(
-        "\n"
-        "    scr: (%4d, %4d, %4d, %4d, %p)\n"
-        "new_scr: (%4d, %4d, %4d, %4d, %p)\n"
-        "    pos: (%4d, %4d)",
-        self->screen->box.x, self->screen->box.y, self->screen->box.width,
-        self->screen->box.height, (void*)self->screen, new_screen->box.x,
-        new_screen->box.y, new_screen->box.width, new_screen->box.height,
-        (void*)new_screen, self->x, self->y);
-  } else
-    zn_debug("new_scr is NULL");
-
   left = self->x < 0;
   right = self->x >= self->screen->box.width;
   top = self->y < 0;
@@ -131,10 +118,7 @@ zn_cursor_move_relative(struct zn_cursor* self, int dx, int dy)
   if (bottom) {
     self->y = 0;
   }
-  // self->x += (new_screen->box.x - self->screen->box.x);
-  // self->y += (new_screen->box.y - self->screen->box.y);
-  zn_debug(
-      "\nnew_pos: (%4d, %4d)\n=============================", self->x, self->y);
+
   zn_cursor_set_screen(self, new_screen);
 }
 
