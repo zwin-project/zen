@@ -19,6 +19,8 @@ struct zn_cursor {
   struct wl_listener destroy_screen_listener;
 };
 
+void zn_cursor_move_relative(struct zn_cursor* self, int dx, int dy);
+
 struct zn_cursor* zn_cursor_create(void);
 
 void zn_cursor_destroy(struct zn_cursor* self);

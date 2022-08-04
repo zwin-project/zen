@@ -6,6 +6,8 @@
 
 struct zn_pointer {
   struct wlr_pointer* wlr_pointer;
+
+  struct wl_listener motion_relative_listener;
 };
 
 struct zn_pointer* zn_pointer_create(struct wlr_input_device* input_device);
