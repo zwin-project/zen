@@ -22,8 +22,8 @@ zn_cursor_set_screen(struct zn_cursor* self, struct zn_screen* screen)
     wl_list_init(&self->destroy_screen_listener.link);
   }
   if (screen != NULL) {
-    self->x = screen->output->wlr_output->width / 2;
-    self->y = screen->output->wlr_output->height / 2;
+    self->x = screen->box.width / 2;
+    self->y = screen->box.height / 2;
     wl_signal_add(&screen->events.destroy, &self->destroy_screen_listener);
   }
 

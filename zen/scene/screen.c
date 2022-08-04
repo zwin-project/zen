@@ -15,6 +15,8 @@ zn_screen_create(
     goto err;
   }
 
+  self->box.x = output->wlr_output->width;
+  self->box.y = output->wlr_output->height;
   self->output = output;
   self->screen_layout = screen_layout;
   wl_list_init(&self->views);

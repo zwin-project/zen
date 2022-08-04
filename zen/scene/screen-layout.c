@@ -9,16 +9,15 @@ zn_screen_layout_add(
 {
   int x = 0;
   struct zn_screen* screen;
-  struct wlr_box box;
 
   wl_list_insert(&self->screens, &new_screen->link);
   wl_list_for_each(screen, &self->screens, link)
   {
     wlr_output_effective_resolution(
-        screen->output->wlr_output, &box.width, &box.height);
-    screen->x = x;
-    screen->y = 0;
-    x += box.width;
+        screen->output->wlr_output, &screen->box.width, &screen->box.height);
+    screen->box.x = x;
+    screen->box.y = 0;
+    x += screen->box.width;
   }
 
   wl_signal_emit(&self->events.new_screen, new_screen);
