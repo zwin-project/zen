@@ -22,8 +22,6 @@ zn_cursor_set_screen(struct zn_cursor* self, struct zn_screen* screen)
     wl_list_init(&self->destroy_screen_listener.link);
   }
   if (screen != NULL) {
-    self->x = screen->box.width / 2;
-    self->y = screen->box.height / 2;
     wl_signal_add(&screen->events.destroy, &self->destroy_screen_listener);
   }
 
@@ -56,17 +54,88 @@ static void
 zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
 {
   struct zn_cursor* self = zn_container_of(listener, self, new_screen_listener);
+  struct zn_screen* screen = data;
 
   if (self->screen == NULL) {
-    zn_cursor_set_screen(self, data);
+    zn_cursor_set_screen(self, screen);
+    self->x = screen->box.width / 2;
+    self->y = screen->box.height / 2;
   }
 }
 
 void
 zn_cursor_move_relative(struct zn_cursor* self, int dx, int dy)
 {
+  struct zn_server* server = zn_server_get_singleton();
+  struct zn_screen_layout* layout = server->scene->screen_layout;
+  struct zn_screen* new_screen;
+  bool left, right, top, bottom;
+
   self->x += dx;
   self->y += dy;
+
+  new_screen = zn_screen_layout_get_screen_at(
+      layout, self->screen->box.x + self->x, self->screen->box.y + self->y);
+
+  if (self->screen == new_screen || self->x == self->screen->box.x ||
+      self->y == self->screen->box.y) {
+    return;
+  }
+
+  if (new_screen) {
+    zn_debug(
+        "\n"
+        "    scr: (%4d, %4d, %4d, %4d, %p)\n"
+        "new_scr: (%4d, %4d, %4d, %4d, %p)\n"
+        "    pos: (%4d, %4d)",
+        self->screen->box.x, self->screen->box.y, self->screen->box.width,
+        self->screen->box.height, (void*)self->screen, new_screen->box.x,
+        new_screen->box.y, new_screen->box.width, new_screen->box.height,
+        (void*)new_screen, self->x, self->y);
+  } else
+    zn_debug("new_scr is NULL");
+
+  left = self->x < 0;
+  right = self->x >= self->screen->box.width;
+  top = self->y < 0;
+  bottom = self->y >= self->screen->box.height;
+
+  if (!new_screen) {
+    // restrict position
+    if (left) {
+      self->x = 0;
+    }
+    if (right) {
+      self->x = self->screen->box.width - 1;
+    }
+    if (top) {
+      self->y = 0;
+    }
+    if (bottom) {
+      self->y = self->screen->box.height - 1;
+    }
+    return;
+  }
+
+  // move to another screen
+  if (left) {
+    self->x = new_screen->box.width - 1;
+  }
+  if (right) {
+    self->x = 0;
+  }
+
+  if (top) {
+    self->y = new_screen->box.height - 1;
+  }
+  if (bottom) {
+    self->y = 0;
+  }
+  // self->x += (new_screen->box.x - self->screen->box.x);
+  // self->y += (new_screen->box.y - self->screen->box.y);
+  zn_debug(
+      "\nnew_pos: (%4d, %4d)\n=============================", self->x, self->y);
+  zn_cursor_set_screen(self, new_screen);
 }
 
 struct zn_cursor*

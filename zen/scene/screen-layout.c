@@ -3,6 +3,21 @@
 #include "zen-common.h"
 #include "zen/scene/screen.h"
 
+struct zn_screen*
+zn_screen_layout_get_screen_at(struct zn_screen_layout* self, int x, int y)
+{
+  struct zn_screen* screen;
+
+  wl_list_for_each(screen, &self->screens, link)
+  {
+    if (wlr_box_contains_point(&screen->box, x, y)) {
+      return screen;
+    }
+  }
+
+  return NULL;
+}
+
 void
 zn_screen_layout_add(
     struct zn_screen_layout* self, struct zn_screen* new_screen)
