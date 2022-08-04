@@ -12,6 +12,7 @@ struct zn_input_device {
 
   union {
     struct zn_keyboard* keyboard;
+    struct zn_pointer* pointer;
   };
 
   struct wl_listener wlr_input_destroy_listener;
