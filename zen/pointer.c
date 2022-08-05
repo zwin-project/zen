@@ -34,8 +34,6 @@ zn_pointer_create(struct wlr_input_device* wlr_input_device)
     goto err;
   }
 
-  self->wlr_pointer = wlr_input_device->pointer;
-
   self->motion_listener.notify = zn_pointer_handle_motion;
   wl_signal_add(
       &wlr_input_device->pointer->events.motion, &self->motion_listener);
@@ -49,7 +47,6 @@ err:
 void
 zn_pointer_destroy(struct zn_pointer* self)
 {
-  // wlr_pointer is destroyed by wlr_input_device
   wl_list_remove(&self->motion_listener.link);
   free(self);
 }
