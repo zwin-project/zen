@@ -21,13 +21,14 @@ zn_pointer_handle_motion(struct wl_listener* listener, void* data)
 struct zn_pointer*
 zn_pointer_create(struct wlr_input_device* wlr_input_device)
 {
+  struct zn_pointer* self;
+
   if (!zn_assert(wlr_input_device->type == WLR_INPUT_DEVICE_POINTER,
           "Wrong type - expect: %d, actual: %d", WLR_INPUT_DEVICE_POINTER,
           wlr_input_device->type)) {
     goto err;
   }
 
-  struct zn_pointer* self;
   self = zalloc(sizeof *self);
   if (self == NULL) {
     zn_error("Failed to allocate memory");
