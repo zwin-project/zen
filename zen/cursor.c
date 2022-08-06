@@ -29,6 +29,41 @@ zn_cursor_set_screen(struct zn_cursor* self, struct zn_screen* screen)
 }
 
 static void
+zn_cursor_move(struct zn_cursor* self, int x, int y)
+{
+  struct zn_server* server = zn_server_get_singleton();
+  struct zn_screen_layout* layout = server->scene->screen_layout;
+  struct zn_screen* new_screen;
+  int layout_x, layout_y;
+
+  zn_screen_get_screen_layout_coords(self->screen, x, y, &layout_x, &layout_y);
+
+  new_screen = zn_screen_layout_get_closest_screen(
+      layout, layout_x, layout_y, &self->x, &self->y);
+  zn_cursor_set_screen(self, new_screen);
+}
+
+static void
+zn_cursor_move_center(struct zn_cursor* self)
+{
+  struct wlr_box box;
+  zn_screen_get_box(self->screen, &box);
+  zn_cursor_move(self, box.width / 2, box.height / 2);
+}
+
+static void
+zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
+{
+  struct zn_cursor* self = zn_container_of(listener, self, new_screen_listener);
+  struct zn_screen* screen = data;
+
+  if (self->screen == NULL) {
+    zn_cursor_set_screen(self, screen);
+    zn_cursor_move_center(self);
+  }
+}
+
+static void
 zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
 {
   UNUSED(data);
@@ -48,33 +83,8 @@ zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
   }
 
   zn_cursor_set_screen(self, found ? screen : NULL);
-}
-
-static void
-zn_cursor_move(struct zn_cursor* self, int x, int y)
-{
-  struct zn_server* server = zn_server_get_singleton();
-  struct zn_screen_layout* layout = server->scene->screen_layout;
-  struct zn_screen* new_screen;
-  int layout_x, layout_y;
-
-  zn_screen_get_screen_layout_coords(self->screen, x, y, &layout_x, &layout_y);
-
-  new_screen = zn_screen_layout_get_closest_screen(
-      layout, layout_x, layout_y, &self->x, &self->y);
-  zn_cursor_set_screen(self, new_screen);
-}
-
-static void
-zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
-{
-  struct zn_cursor* self = zn_container_of(listener, self, new_screen_listener);
-  struct zn_screen* screen = data;
-
-  if (self->screen == NULL) {
-    zn_cursor_set_screen(self, screen);
-    self->x = screen->box.width / 2;
-    self->y = screen->box.height / 2;
+  if (found) {
+    zn_cursor_move_center(self);
   }
 }
 
