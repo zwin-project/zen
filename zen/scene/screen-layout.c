@@ -24,13 +24,15 @@ zn_screen_layout_add(
 {
   int x = 0;
   struct zn_screen* screen;
+  struct wlr_box box;
 
   wl_list_insert(&self->screens, &new_screen->link);
   wl_list_for_each(screen, &self->screens, link)
   {
-    screen->box.x = x;
-    screen->box.y = 0;
-    x += screen->box.width;
+    zn_screen_get_box(screen, &box);
+    screen->x = x;
+    screen->y = 0;
+    x += box.width;
   }
 
   wl_signal_emit(&self->events.new_screen, new_screen);
