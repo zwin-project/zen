@@ -6,6 +6,7 @@ _zen_desktop_srcs = [
   'keyboard.c',
   'main.c',
   'output.c',
+  'pointer.c',
   'render-2d.c',
   'seat.c',
   'server.c',

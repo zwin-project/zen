@@ -62,6 +62,13 @@ zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
   }
 }
 
+void
+zn_cursor_move_relative(struct zn_cursor* self, int dx, int dy)
+{
+  self->x += dx;
+  self->y += dy;
+}
+
 struct zn_cursor*
 zn_cursor_create(void)
 {

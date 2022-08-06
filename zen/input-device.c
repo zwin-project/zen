@@ -3,6 +3,8 @@
 #include <wayland-server.h>
 
 #include "zen-common.h"
+#include "zen/keyboard.h"
+#include "zen/pointer.h"
 #include "zen/seat.h"
 
 static void
@@ -43,7 +45,11 @@ zn_input_device_create(struct zn_seat* seat, struct wlr_input_device* wlr_input)
       }
       break;
     case WLR_INPUT_DEVICE_POINTER:
-      // TODO: create pointer
+      self->pointer = zn_pointer_create(wlr_input);
+      if (self->pointer == NULL) {
+        zn_error("Failed to create zn_pointer");
+        goto err_free;
+      }
       break;
     case WLR_INPUT_DEVICE_TOUCH:
     case WLR_INPUT_DEVICE_TABLET_TOOL:
@@ -82,7 +88,7 @@ zn_input_device_destroy(struct zn_input_device* self)
       zn_keyboard_destroy(self->keyboard);
       break;
     case WLR_INPUT_DEVICE_POINTER:
-      // TODO: create pointer
+      zn_pointer_destroy(self->pointer);
       break;
     case WLR_INPUT_DEVICE_TOUCH:
     case WLR_INPUT_DEVICE_TABLET_TOOL:
