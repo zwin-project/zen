@@ -3,6 +3,15 @@
 #include "zen-common.h"
 #include "zen/scene/screen-layout.h"
 
+void
+zn_screen_get_box(struct zn_screen *self, struct wlr_box *box)
+{
+  wlr_output_effective_resolution(
+      self->output->wlr_output, &box->width, &box->height);
+  box->x = self->x;
+  box->y = self->y;
+}
+
 struct zn_screen *
 zn_screen_create(
     struct zn_screen_layout *screen_layout, struct zn_output *output)
@@ -15,8 +24,6 @@ zn_screen_create(
     goto err;
   }
 
-  self->box.width = output->wlr_output->width;
-  self->box.height = output->wlr_output->height;
   self->output = output;
   self->screen_layout = screen_layout;
   wl_list_init(&self->views);
