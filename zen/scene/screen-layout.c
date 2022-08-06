@@ -4,18 +4,32 @@
 #include "zen/scene/screen.h"
 
 struct zn_screen*
-zn_screen_layout_get_screen_at(struct zn_screen_layout* self, int x, int y)
+zn_screen_layout_get_closest_screen(
+    struct zn_screen_layout* self, int x, int y, int* dst_x, int* dst_y)
 {
+  double current_closest_x, current_closest_y, current_closest_distance;
+  double closest_x, closest_y, closest_distance;
+  struct wlr_box box;
+  struct zn_screen* closest_screen = NULL;
   struct zn_screen* screen;
 
   wl_list_for_each(screen, &self->screens, link)
   {
-    if (wlr_box_contains_point(&screen->box, x, y)) {
-      return screen;
+    zn_screen_get_box(screen, &box);
+    wlr_box_closest_point(&box, x, y, &current_closest_x, &current_closest_y);
+    current_closest_distance =
+        pow(x - current_closest_x, 2) + pow(y - current_closest_y, 2);
+    if (closest_screen == NULL || current_closest_distance < closest_distance) {
+      closest_x = current_closest_x;
+      closest_y = current_closest_y;
+      closest_distance = current_closest_distance;
+      closest_screen = screen;
     }
   }
 
-  return NULL;
+  *dst_x = closest_x - closest_screen->x;
+  *dst_y = closest_y - closest_screen->y;
+  return closest_screen;
 }
 
 void

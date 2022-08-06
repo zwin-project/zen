@@ -16,9 +16,9 @@ struct zn_screen_layout {
 };
 
 // Returns the screen at the given x, y of the coordinates of screen layout.
-// If there is no screen, returns NULL.
-struct zn_screen* zn_screen_layout_get_screen_at(
-    struct zn_screen_layout* self, int x, int y);
+// And set the coordinates of the screen to dst_{x,y}
+struct zn_screen* zn_screen_layout_get_closest_screen(
+    struct zn_screen_layout* self, int x, int y, int* dst_x, int* dst_y);
 
 void zn_screen_layout_add(
     struct zn_screen_layout* self, struct zn_screen* screen);

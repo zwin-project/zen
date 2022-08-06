@@ -51,6 +51,21 @@ zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
 }
 
 static void
+zn_cursor_move(struct zn_cursor* self, int x, int y)
+{
+  struct zn_server* server = zn_server_get_singleton();
+  struct zn_screen_layout* layout = server->scene->screen_layout;
+  struct zn_screen* new_screen;
+  int layout_x, layout_y;
+
+  zn_screen_get_screen_layout_coords(self->screen, x, y, &layout_x, &layout_y);
+
+  new_screen = zn_screen_layout_get_closest_screen(
+      layout, layout_x, layout_y, &self->x, &self->y);
+  zn_cursor_set_screen(self, new_screen);
+}
+
+static void
 zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
 {
   struct zn_cursor* self = zn_container_of(listener, self, new_screen_listener);
@@ -66,60 +81,7 @@ zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
 void
 zn_cursor_move_relative(struct zn_cursor* self, int dx, int dy)
 {
-  struct zn_server* server = zn_server_get_singleton();
-  struct zn_screen_layout* layout = server->scene->screen_layout;
-  struct zn_screen* new_screen;
-  bool left, right, top, bottom;
-
-  self->x += dx;
-  self->y += dy;
-
-  new_screen = zn_screen_layout_get_screen_at(
-      layout, self->screen->box.x + self->x, self->screen->box.y + self->y);
-
-  if (self->screen == new_screen || self->x == self->screen->box.x ||
-      self->y == self->screen->box.y) {
-    return;
-  }
-
-  left = self->x < 0;
-  right = self->x >= self->screen->box.width;
-  top = self->y < 0;
-  bottom = self->y >= self->screen->box.height;
-
-  if (!new_screen) {
-    // restrict position
-    if (left) {
-      self->x = 0;
-    }
-    if (right) {
-      self->x = self->screen->box.width - 1;
-    }
-    if (top) {
-      self->y = 0;
-    }
-    if (bottom) {
-      self->y = self->screen->box.height - 1;
-    }
-    return;
-  }
-
-  // move to another screen
-  if (left) {
-    self->x = new_screen->box.width - 1;
-  }
-  if (right) {
-    self->x = 0;
-  }
-
-  if (top) {
-    self->y = new_screen->box.height - 1;
-  }
-  if (bottom) {
-    self->y = 0;
-  }
-
-  zn_cursor_set_screen(self, new_screen);
+  zn_cursor_move(self, self->x + dx, self->y + dy);
 }
 
 struct zn_cursor*
