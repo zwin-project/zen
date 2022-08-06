@@ -15,9 +15,8 @@ struct zn_screen_layout {
   } events;
 };
 
-// Searches for the screen from **global** coordinates,
-// and return the screen corresponding to the position.
-// If there is no screen, return NULL.
+// Returns the screen at the given x, y of the coordinates of screen layout.
+// If there is no screen, returns NULL.
 struct zn_screen* zn_screen_layout_get_screen_at(
     struct zn_screen_layout* self, int x, int y);
 
