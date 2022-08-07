@@ -1,5 +1,7 @@
 #include "zen/scene/screen-layout.h"
 
+#include <math.h>
+
 #include "zen-common.h"
 #include "zen/scene/screen.h"
 

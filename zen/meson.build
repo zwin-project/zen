@@ -25,6 +25,7 @@ _zen_desktop_srcs = [
 ]
 
 _zen_desktop_deps = [
+  m_dep,
   pixman_dep,
   wayland_server_dep,
   wlroots_dep,
