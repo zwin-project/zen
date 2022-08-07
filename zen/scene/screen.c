@@ -2,6 +2,25 @@
 
 #include "zen-common.h"
 #include "zen/scene/screen-layout.h"
+#include "zen/scene/view.h"
+
+struct zn_view *
+zn_screen_get_view_at(struct zn_screen *self, int x, int y)
+{
+  struct wlr_box box;
+  struct zn_view *view;
+
+  wl_list_for_each(view, &self->views, link)
+  {
+    zn_view_get_box(view, &box);
+
+    if (wlr_box_contains_point(&box, x, y)) {
+      return view;
+    }
+  }
+
+  return NULL;
+}
 
 void
 zn_screen_get_screen_layout_coords(

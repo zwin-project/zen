@@ -20,6 +20,8 @@ struct zn_screen {
   } events;
 };
 
+struct zn_view *zn_screen_get_view_at(struct zn_screen *self, int x, int y);
+
 void zn_screen_get_screen_layout_coords(
     struct zn_screen *self, int x, int y, int *dst_x, int *dst_y);
 
