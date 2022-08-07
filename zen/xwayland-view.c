@@ -4,17 +4,6 @@
 #include "zen/scene/scene.h"
 #include "zen/scene/view.h"
 
-struct zn_xwayland_view {
-  struct zn_view base;
-  struct wlr_xwayland_surface* wlr_xwayland_surface;  // nonnull
-
-  struct zn_server* server;
-
-  struct wl_listener map_listener;
-  struct wl_listener unmap_listener;
-  struct wl_listener wlr_xwayland_surface_destroy_listener;
-};
-
 static void zn_xwayland_view_destroy(struct zn_xwayland_view* self);
 
 static void
@@ -74,6 +63,14 @@ zn_xwayland_view_impl_get_wlr_surface(struct zn_view* view)
 static const struct zn_view_impl zn_xwayland_view_impl = {
     .get_wlr_surface = zn_xwayland_view_impl_get_wlr_surface,
 };
+
+void
+zn_xwayland_view_focus(struct zn_xwayland_view* self)
+{
+  wlr_xwayland_surface_activate(self->wlr_xwayland_surface, true);
+  wlr_xwayland_surface_restack(
+      self->wlr_xwayland_surface, NULL, XCB_STACK_MODE_ABOVE);
+}
 
 struct zn_xwayland_view*
 zn_xwayland_view_create(

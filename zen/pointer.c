@@ -40,6 +40,29 @@ zn_pointer_handle_motion(struct wl_listener* listener, void* data)
   }
 }
 
+static void
+zn_pointer_handle_button(struct wl_listener* listener, void* data)
+{
+  UNUSED(listener);
+  struct wlr_event_pointer_button* event = data;
+  struct zn_server* server = zn_server_get_singleton();
+  struct zn_cursor* cursor = server->input_manager->seat->cursor;
+  struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
+  struct zn_view* view;
+
+  wlr_seat_pointer_notify_button(
+      seat, event->time_msec, event->button, event->state);
+
+  if (event->state == WLR_BUTTON_RELEASED) {
+    return;
+  }
+
+  view = zn_screen_get_view_at(cursor->screen, cursor->x, cursor->y);
+  if (view) {
+    zn_view_focus(view);
+  }
+}
+
 struct zn_pointer*
 zn_pointer_create(struct wlr_input_device* wlr_input_device)
 {
@@ -61,6 +84,10 @@ zn_pointer_create(struct wlr_input_device* wlr_input_device)
   wl_signal_add(
       &wlr_input_device->pointer->events.motion, &self->motion_listener);
 
+  self->button_listener.notify = zn_pointer_handle_button;
+  wl_signal_add(
+      &wlr_input_device->pointer->events.button, &self->button_listener);
+
   return self;
 
 err:
@@ -71,5 +98,6 @@ void
 zn_pointer_destroy(struct zn_pointer* self)
 {
   wl_list_remove(&self->motion_listener.link);
+  wl_list_remove(&self->button_listener.link);
   free(self);
 }

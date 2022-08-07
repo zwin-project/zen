@@ -5,17 +5,6 @@
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/view.h"
 
-struct zn_xdg_toplevel_view {
-  struct zn_view base;
-  struct wlr_xdg_toplevel* wlr_xdg_toplevel;  // nonnull
-
-  struct zn_server* server;
-
-  struct wl_listener map_listener;
-  struct wl_listener unmap_listener;
-  struct wl_listener wlr_xdg_surface_destroy_listener;
-};
-
 static void zn_xdg_toplevel_view_destroy(struct zn_xdg_toplevel_view* self);
 
 static void
@@ -39,6 +28,7 @@ zn_xdg_toplevel_view_map(struct wl_listener* listener, void* data)
   screen = zn_container_of(scene->screen_layout->screens.next, screen, link);
 
   zn_view_map_to_screen(&self->base, screen);
+  zn_xdg_toplevel_view_focus(self);
 }
 
 static void
@@ -76,6 +66,12 @@ zn_xdg_toplevel_view_impl_get_wlr_surface(struct zn_view* view)
 static const struct zn_view_impl zn_xdg_toplevel_view_impl = {
     .get_wlr_surface = zn_xdg_toplevel_view_impl_get_wlr_surface,
 };
+
+void
+zn_xdg_toplevel_view_focus(struct zn_xdg_toplevel_view* self)
+{
+  wlr_xdg_toplevel_set_activated(self->wlr_xdg_toplevel->base, true);
+}
 
 struct zn_xdg_toplevel_view*
 zn_xdg_toplevel_view_create(
