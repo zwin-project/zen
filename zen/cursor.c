@@ -36,6 +36,9 @@ zn_cursor_move(struct zn_cursor* self, int x, int y)
   struct zn_screen* new_screen;
   int layout_x, layout_y;
 
+  if (self->screen == NULL) {
+    return;
+  }
   zn_screen_get_screen_layout_coords(self->screen, x, y, &layout_x, &layout_y);
 
   new_screen = zn_screen_layout_get_closest_screen(
@@ -47,6 +50,10 @@ static void
 zn_cursor_move_center(struct zn_cursor* self)
 {
   struct wlr_box box;
+
+  if (self->screen == NULL) {
+    return;
+  }
   zn_screen_get_box(self->screen, &box);
   zn_cursor_move(self, box.width / 2, box.height / 2);
 }
