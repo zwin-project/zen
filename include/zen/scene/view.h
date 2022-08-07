@@ -19,12 +19,16 @@ enum zn_view_type {
 };
 
 struct zn_view {
+  int x, y;
+
   enum zn_view_type type;
 
   const struct zn_view_impl *impl;
 
   struct wl_list link;  // zn_screen::views;
 };
+
+void zn_view_get_box(struct zn_view *self, struct wlr_box *box);
 
 bool zn_view_is_mapped(struct zn_view *self);
 
