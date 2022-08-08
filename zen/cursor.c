@@ -95,6 +95,12 @@ zn_cursor_move_relative(struct zn_cursor* self, int dx, int dy)
   zn_cursor_update_position(self, new_screen, screen_x, screen_y);
 }
 
+void
+zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface)
+{
+  self->texture = wlr_surface_get_texture(surface);
+}
+
 struct zn_cursor*
 zn_cursor_create(void)
 {
