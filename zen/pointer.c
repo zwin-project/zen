@@ -12,7 +12,7 @@
 static void
 zn_pointer_handle_motion(struct wl_listener* listener, void* data)
 {
-  UNUSED(listener);
+  struct zn_pointer* self = zn_container_of(listener, self, motion_listener);
   struct wlr_event_pointer_motion* event = data;
   struct zn_server* server = zn_server_get_singleton();
   struct zn_cursor* cursor = server->input_manager->seat->cursor;
@@ -24,26 +24,32 @@ zn_pointer_handle_motion(struct wl_listener* listener, void* data)
   zn_cursor_move_relative(cursor, event->delta_x, event->delta_y);
 
   view = zn_screen_get_view_at(cursor->screen, cursor->x, cursor->y);
-  if (!view) {
-    wlr_seat_pointer_notify_clear_focus(seat);
-    return;
-  }
-
-  surface = view->impl->get_wlr_surface(view);
-  if (surface) {
-    view_x = cursor->x - view->x;
-    view_y = cursor->y - view->y;
-    wlr_seat_pointer_notify_enter(seat, surface, view_x, view_y);
-    wlr_seat_pointer_notify_motion(seat, event->time_msec, view_x, view_y);
+  if (view) {
+    surface = view->impl->get_wlr_surface(view);
+    if (surface) {
+      view_x = cursor->x - view->x;
+      view_y = cursor->y - view->y;
+      wlr_seat_pointer_notify_enter(seat, surface, view_x, view_y);
+      wlr_seat_pointer_notify_motion(seat, event->time_msec, view_x, view_y);
+    } else {
+      wlr_seat_pointer_notify_clear_focus(seat);
+    }
   } else {
     wlr_seat_pointer_notify_clear_focus(seat);
+  }
+
+  if (self->grabbing_view != NULL) {
+    zn_view_move(self->grabbing_view, cursor->x - self->prev_x,
+        cursor->y - self->prev_y);
+    self->prev_x = cursor->x;
+    self->prev_y = cursor->y;
   }
 }
 
 static void
 zn_pointer_handle_button(struct wl_listener* listener, void* data)
 {
-  UNUSED(listener);
+  struct zn_pointer* self = zn_container_of(listener, self, button_listener);
   struct wlr_event_pointer_button* event = data;
   struct zn_server* server = zn_server_get_singleton();
   struct zn_cursor* cursor = server->input_manager->seat->cursor;
@@ -53,13 +59,20 @@ zn_pointer_handle_button(struct wl_listener* listener, void* data)
   wlr_seat_pointer_notify_button(
       seat, event->time_msec, event->button, event->state);
 
-  if (event->state == WLR_BUTTON_RELEASED) {
-    return;
-  }
-
   view = zn_screen_get_view_at(cursor->screen, cursor->x, cursor->y);
-  if (view) {
-    zn_view_focus(view);
+  if (event->state == WLR_BUTTON_PRESSED) {
+    self->prev_x = cursor->x;
+    self->prev_y = cursor->y;
+
+    if (view != NULL) {
+      self->grabbing_view = view;
+      zn_view_focus(view);
+    }
+  } else {
+    if (self->grabbing_view != NULL) {
+      self->grabbing_view->is_moving = false;
+    }
+    self->grabbing_view = NULL;
   }
 }
 

@@ -5,6 +5,9 @@
 #include <wlr/interfaces/wlr_pointer.h>
 
 struct zn_pointer {
+  int prev_x, prev_y;
+  struct zn_view* grabbing_view;  // nullable
+
   struct wl_listener button_listener;
   struct wl_listener motion_listener;
 };
