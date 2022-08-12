@@ -98,7 +98,11 @@ zn_cursor_move_relative(struct zn_cursor* self, int dx, int dy)
 void
 zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface)
 {
-  self->texture = wlr_surface_get_texture(surface);
+  if (surface == NULL) {
+    self->texture = NULL;
+  } else {
+    self->texture = wlr_surface_get_texture(surface);
+  }
 }
 
 struct zn_cursor*
