@@ -11,6 +11,7 @@
 
 struct zn_cursor {
   int x, y;
+  bool visible;
   struct zn_screen* screen;  // nullable
   struct wlr_texture* texture;
   struct wlr_surface* surface;

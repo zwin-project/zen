@@ -118,6 +118,7 @@ zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface)
     wl_signal_add(&surface->events.destroy, &self->destroy_surface_listener);
   }
 
+  self->visible = surface != NULL;
   self->surface = surface;
 }
 
