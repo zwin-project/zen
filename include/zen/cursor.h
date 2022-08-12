@@ -13,10 +13,12 @@ struct zn_cursor {
   int x, y;
   struct zn_screen* screen;  // nullable
   struct wlr_texture* texture;
+  struct wlr_surface* surface;
   struct wlr_xcursor_manager* xcursor_manager;
 
   struct wl_listener new_screen_listener;
   struct wl_listener destroy_screen_listener;
+  struct wl_listener destroy_surface_listener;
 };
 
 void zn_cursor_move_relative(struct zn_cursor* self, int dx, int dy);

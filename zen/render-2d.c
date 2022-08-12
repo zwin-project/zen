@@ -29,6 +29,7 @@ static void
 zn_render_2d_cursor(struct zn_cursor *cursor, struct zn_screen *screen,
     struct wlr_renderer *renderer)
 {
+  struct wlr_texture *texture;
   float transform[9] = {
       1, 0, 0,  //
       0, 1, 0,  //
@@ -36,8 +37,12 @@ zn_render_2d_cursor(struct zn_cursor *cursor, struct zn_screen *screen,
   };
 
   if (cursor->screen == screen && cursor->texture) {
-    wlr_render_texture(
-        renderer, cursor->texture, transform, cursor->x, cursor->y, 1.f);
+    if (cursor->surface != NULL) {
+      texture = wlr_surface_get_texture(cursor->surface);
+    } else {
+      texture = cursor->texture;
+    }
+    wlr_render_texture(renderer, texture, transform, cursor->x, cursor->y, 1.f);
   }
 }
 
