@@ -19,7 +19,8 @@ zn_seat_handle_request_set_cursor(struct wl_listener* listener, void* data)
   }
 
   if (event->seat_client->client == focused_client) {
-    zn_cursor_set_surface(self->cursor, event->surface);
+    zn_cursor_set_surface(
+      self->cursor, event->surface, event->hotspot_x, event->hotspot_y);
   }
 }
 

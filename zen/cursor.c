@@ -106,7 +106,8 @@ zn_cursor_move_relative(struct zn_cursor* self, int dx, int dy)
 }
 
 void
-zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface)
+zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface,
+    int hotspot_x, int hotspot_y)
 {
   if (self->surface != NULL) {
     wl_list_remove(&self->destroy_surface_listener.link);
@@ -117,6 +118,8 @@ zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface)
     wl_signal_add(&surface->events.destroy, &self->destroy_surface_listener);
   }
 
+  self->hotspot_x = hotspot_x;
+  self->hotspot_y = hotspot_y;
   self->visible = surface != NULL;
   self->surface = surface;
 }
@@ -160,6 +163,8 @@ zn_cursor_create(void)
   }
   image = xcursor->images[0];
 
+  self->hotspot_x = image->hotspot_x;
+  self->hotspot_y = image->hotspot_y;
   self->texture = wlr_texture_from_pixels(server->renderer, DRM_FORMAT_ARGB8888,
       image->width * 4, image->width, image->height, image->buffer);
 

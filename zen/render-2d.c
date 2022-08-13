@@ -47,7 +47,8 @@ zn_render_2d_cursor(struct zn_cursor *cursor, struct zn_screen *screen,
   }
 
   if (texture != NULL) {
-    wlr_render_texture(renderer, texture, transform, cursor->x, cursor->y, 1.f);
+    wlr_render_texture(renderer, texture, transform,
+        cursor->x - cursor->hotspot_x, cursor->y - cursor->hotspot_y, 1.f);
   }
 }
 
