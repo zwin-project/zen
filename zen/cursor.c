@@ -163,6 +163,7 @@ zn_cursor_create(void)
   wl_list_init(&self->destroy_screen_listener.link);
 
   self->screen = NULL;
+  self->visible = true;
 
   return self;
 
