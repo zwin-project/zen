@@ -22,7 +22,7 @@ zn_screen_layout_get_closest_screen(
     wlr_box_closest_point(&box, x, y, &current_closest_x, &current_closest_y);
     current_closest_distance =
         pow(x - current_closest_x, 2) + pow(y - current_closest_y, 2);
-    if (closest_screen == NULL || current_closest_distance < closest_distance) {
+    if (current_closest_distance < closest_distance) {
       closest_x = current_closest_x;
       closest_y = current_closest_y;
       closest_distance = current_closest_distance;
