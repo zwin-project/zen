@@ -47,26 +47,16 @@ zn_cursor_move(struct zn_cursor* self, int x, int y)
 }
 
 static void
-zn_cursor_move_center(struct zn_cursor* self)
-{
-  struct wlr_box box;
-
-  if (self->screen == NULL) {
-    return;
-  }
-  zn_screen_get_box(self->screen, &box);
-  zn_cursor_move(self, box.width / 2, box.height / 2);
-}
-
-static void
 zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
 {
   struct zn_cursor* self = zn_container_of(listener, self, new_screen_listener);
   struct zn_screen* screen = data;
+  struct wlr_box box;
 
   if (self->screen == NULL) {
     zn_cursor_set_screen(self, screen);
-    zn_cursor_move_center(self);
+    zn_screen_get_box(self->screen, &box);
+    zn_cursor_move(self, box.width / 2, box.height / 2);
   }
 }
 
@@ -79,6 +69,7 @@ zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
   struct zn_server* server = zn_server_get_singleton();
   struct zn_screen_layout* screen_layout = server->scene->screen_layout;
   struct zn_screen* screen;
+  struct wlr_box box;
   bool found = false;
 
   wl_list_for_each(screen, &screen_layout->screens, link)
@@ -91,7 +82,8 @@ zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
 
   zn_cursor_set_screen(self, found ? screen : NULL);
   if (found) {
-    zn_cursor_move_center(self);
+    zn_screen_get_box(self->screen, &box);
+    zn_cursor_move(self, box.width / 2, box.height / 2);
   }
 }
 
