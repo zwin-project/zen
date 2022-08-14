@@ -39,6 +39,7 @@ zn_cursor_move(struct zn_cursor* self, int x, int y)
   if (self->screen == NULL) {
     return;
   }
+
   zn_screen_get_screen_layout_coords(self->screen, x, y, &layout_x, &layout_y);
 
   new_screen = zn_screen_layout_get_closest_screen(
