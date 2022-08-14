@@ -1,5 +1,6 @@
 #include "zen/scene/screen-layout.h"
 
+#include <float.h>
 #include <math.h>
 
 #include "zen-common.h"
@@ -9,14 +10,15 @@ struct zn_screen*
 zn_screen_layout_get_closest_screen(
     struct zn_screen_layout* self, int x, int y, int* dst_x, int* dst_y)
 {
-  double current_closest_x, current_closest_y, current_closest_distance;
   double closest_x, closest_y, closest_distance;
-  struct wlr_box box;
   struct zn_screen* closest_screen = NULL;
   struct zn_screen* screen;
 
   wl_list_for_each(screen, &self->screens, link)
   {
+    double current_closest_x, current_closest_y,
+        current_closest_distance = DBL_MAX;
+    struct wlr_box box;
     zn_screen_get_box(screen, &box);
     wlr_box_closest_point(&box, x, y, &current_closest_x, &current_closest_y);
     current_closest_distance =
