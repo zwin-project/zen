@@ -28,23 +28,14 @@ zn_cursor_set_screen(struct zn_cursor* self, struct zn_screen* screen)
   self->screen = screen;
 }
 
+// screen_x and screen_y must be less than screen->width/height
 static void
-zn_cursor_process_move(struct zn_cursor* self, int x, int y)
+zn_cursor_update_position(struct zn_cursor* self, struct zn_screen* screen,
+    int screen_x, int screen_y)
 {
-  struct zn_server* server = zn_server_get_singleton();
-  struct zn_screen_layout* layout = server->scene->screen_layout;
-  struct zn_screen* new_screen;
-  int layout_x, layout_y;
-
-  if (self->screen == NULL) {
-    return;
-  }
-
-  zn_screen_get_screen_layout_coords(self->screen, x, y, &layout_x, &layout_y);
-
-  new_screen = zn_screen_layout_get_closest_screen(
-      layout, layout_x, layout_y, &self->x, &self->y);
-  zn_cursor_set_screen(self, new_screen);
+  zn_cursor_set_screen(self, screen);
+  self->x = screen_x;
+  self->y = screen_y;
 }
 
 static void
@@ -55,9 +46,8 @@ zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
   struct wlr_box box;
 
   if (self->screen == NULL) {
-    zn_cursor_set_screen(self, screen);
-    zn_screen_get_box(self->screen, &box);
-    zn_cursor_process_move(self, box.width / 2, box.height / 2);
+    zn_screen_get_box(screen, &box);
+    zn_cursor_update_position(self, screen, box.width / 2, box.height / 2);
   }
 }
 
@@ -70,7 +60,7 @@ zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
   struct zn_server* server = zn_server_get_singleton();
   struct zn_screen_layout* screen_layout = server->scene->screen_layout;
   struct zn_screen* screen;
-  struct wlr_box box;
+  struct wlr_box box = {0};
   bool found = false;
 
   wl_list_for_each(screen, &screen_layout->screens, link)
@@ -81,17 +71,32 @@ zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
     }
   }
 
-  zn_cursor_set_screen(self, found ? screen : NULL);
   if (found) {
     zn_screen_get_box(self->screen, &box);
-    zn_cursor_process_move(self, box.width / 2, box.height / 2);
   }
+  zn_cursor_update_position(self, screen, box.width / 2, box.height / 2);
 }
 
 void
 zn_cursor_move_relative(struct zn_cursor* self, int dx, int dy)
 {
-  zn_cursor_process_move(self, self->x + dx, self->y + dy);
+  struct zn_server* server = zn_server_get_singleton();
+  struct zn_screen_layout* layout = server->scene->screen_layout;
+  struct zn_screen* new_screen;
+  int layout_x, layout_y;
+  int screen_x = self->x + dx;
+  int screen_y = self->y + dy;
+
+  if (self->screen == NULL) {
+    return;
+  }
+
+  zn_screen_get_screen_layout_coords(
+      self->screen, screen_x, screen_y, &layout_x, &layout_y);
+
+  new_screen = zn_screen_layout_get_closest_screen(
+      layout, layout_x, layout_y, &screen_x, &screen_y);
+  zn_cursor_update_position(self, new_screen, screen_x, screen_y);
 }
 
 struct zn_cursor*
