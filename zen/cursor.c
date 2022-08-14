@@ -10,9 +10,14 @@
 #include "zen/scene/screen-layout.h"
 #include "zen/server.h"
 
+// screen_x and screen_y must be less than screen->width/height
 static void
-zn_cursor_set_screen(struct zn_cursor* self, struct zn_screen* screen)
+zn_cursor_update_position(struct zn_cursor* self, struct zn_screen* screen,
+    int screen_x, int screen_y)
 {
+  self->x = screen_x;
+  self->y = screen_y;
+
   if (self->screen == screen) {
     return;
   }
@@ -22,12 +27,23 @@ zn_cursor_set_screen(struct zn_cursor* self, struct zn_screen* screen)
     wl_list_init(&self->destroy_screen_listener.link);
   }
   if (screen != NULL) {
-    self->x = screen->output->wlr_output->width / 2;
-    self->y = screen->output->wlr_output->height / 2;
     wl_signal_add(&screen->events.destroy, &self->destroy_screen_listener);
   }
 
   self->screen = screen;
+}
+
+static void
+zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
+{
+  struct zn_cursor* self = zn_container_of(listener, self, new_screen_listener);
+  struct zn_screen* screen = data;
+  struct wlr_box box;
+
+  if (self->screen == NULL) {
+    zn_screen_get_box(screen, &box);
+    zn_cursor_update_position(self, screen, box.width / 2, box.height / 2);
+  }
 }
 
 static void
@@ -39,6 +55,7 @@ zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
   struct zn_server* server = zn_server_get_singleton();
   struct zn_screen_layout* screen_layout = server->scene->screen_layout;
   struct zn_screen* screen;
+  struct wlr_box box = {0};
   bool found = false;
 
   wl_list_for_each(screen, &screen_layout->screens, link)
@@ -49,24 +66,33 @@ zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
     }
   }
 
-  zn_cursor_set_screen(self, found ? screen : NULL);
-}
-
-static void
-zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
-{
-  struct zn_cursor* self = zn_container_of(listener, self, new_screen_listener);
-
-  if (self->screen == NULL) {
-    zn_cursor_set_screen(self, data);
+  if (found) {
+    zn_screen_get_box(self->screen, &box);
   }
+  zn_cursor_update_position(
+      self, found ? screen : NULL, box.width / 2, box.height / 2);
 }
 
 void
 zn_cursor_move_relative(struct zn_cursor* self, int dx, int dy)
 {
-  self->x += dx;
-  self->y += dy;
+  struct zn_server* server = zn_server_get_singleton();
+  struct zn_screen_layout* layout = server->scene->screen_layout;
+  struct zn_screen* new_screen;
+  int layout_x, layout_y;
+  int screen_x = self->x + dx;
+  int screen_y = self->y + dy;
+
+  if (self->screen == NULL) {
+    return;
+  }
+
+  zn_screen_get_screen_layout_coords(
+      self->screen, screen_x, screen_y, &layout_x, &layout_y);
+
+  new_screen = zn_screen_layout_get_closest_screen(
+      layout, layout_x, layout_y, &screen_x, &screen_y);
+  zn_cursor_update_position(self, new_screen, screen_x, screen_y);
 }
 
 struct zn_cursor*

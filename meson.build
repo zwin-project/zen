@@ -75,6 +75,7 @@ wlroots_req = ['>= 0.15', '< 0.16']
 
 # dependencies
 
+m_dep = cc.find_library('m')
 openvr_dep = dependency('openvr', version: openvr_req)
 pixman_dep = dependency('pixman-1')
 wayland_protocols_dep = dependency('wayland-protocols', version: wayland_protocols_req)

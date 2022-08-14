@@ -1,7 +1,39 @@
 #include "zen/scene/screen-layout.h"
 
+#include <float.h>
+#include <math.h>
+
 #include "zen-common.h"
 #include "zen/scene/screen.h"
+
+struct zn_screen*
+zn_screen_layout_get_closest_screen(
+    struct zn_screen_layout* self, int x, int y, int* dst_x, int* dst_y)
+{
+  double closest_x = 0, closest_y = 0, closest_distance = DBL_MAX;
+  struct zn_screen* closest_screen = NULL;
+  struct zn_screen* screen;
+
+  wl_list_for_each(screen, &self->screens, link)
+  {
+    double current_closest_x, current_closest_y, current_closest_distance;
+    struct wlr_box box;
+    zn_screen_get_box(screen, &box);
+    wlr_box_closest_point(&box, x, y, &current_closest_x, &current_closest_y);
+    current_closest_distance =
+        pow(x - current_closest_x, 2) + pow(y - current_closest_y, 2);
+    if (current_closest_distance < closest_distance) {
+      closest_x = current_closest_x;
+      closest_y = current_closest_y;
+      closest_distance = current_closest_distance;
+      closest_screen = screen;
+    }
+  }
+
+  *dst_x = closest_x - closest_screen->x;
+  *dst_y = closest_y - closest_screen->y;
+  return closest_screen;
+}
 
 void
 zn_screen_layout_add(
@@ -14,8 +46,7 @@ zn_screen_layout_add(
   wl_list_insert(&self->screens, &new_screen->link);
   wl_list_for_each(screen, &self->screens, link)
   {
-    wlr_output_effective_resolution(
-        screen->output->wlr_output, &box.width, &box.height);
+    zn_screen_get_box(screen, &box);
     screen->x = x;
     screen->y = 0;
     x += box.width;
