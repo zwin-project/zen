@@ -69,7 +69,8 @@ zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
   if (found) {
     zn_screen_get_box(self->screen, &box);
   }
-  zn_cursor_update_position(self, screen, box.width / 2, box.height / 2);
+  zn_cursor_update_position(
+      self, found ? screen : NULL, box.width / 2, box.height / 2);
 }
 
 void
