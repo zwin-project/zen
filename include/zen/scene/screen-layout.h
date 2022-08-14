@@ -16,7 +16,7 @@ struct zn_screen_layout {
 };
 
 // Returns the screen at the given x, y of the coordinates of screen layout.
-// And sets the the screen-local coordinates to dst_{x,y}
+// And sets the screen-local coordinates to dst_{x,y}
 struct zn_screen* zn_screen_layout_get_closest_screen(
     struct zn_screen_layout* self, int x, int y, int* dst_x, int* dst_y);
 
