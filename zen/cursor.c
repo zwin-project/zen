@@ -10,9 +10,14 @@
 #include "zen/scene/screen-layout.h"
 #include "zen/server.h"
 
+// screen_x and screen_y must be less than screen->width/height
 static void
-zn_cursor_set_screen(struct zn_cursor* self, struct zn_screen* screen)
+zn_cursor_update_position(struct zn_cursor* self, struct zn_screen* screen,
+    int screen_x, int screen_y)
 {
+  self->x = screen_x;
+  self->y = screen_y;
+
   if (self->screen == screen) {
     return;
   }
@@ -26,16 +31,6 @@ zn_cursor_set_screen(struct zn_cursor* self, struct zn_screen* screen)
   }
 
   self->screen = screen;
-}
-
-// screen_x and screen_y must be less than screen->width/height
-static void
-zn_cursor_update_position(struct zn_cursor* self, struct zn_screen* screen,
-    int screen_x, int screen_y)
-{
-  zn_cursor_set_screen(self, screen);
-  self->x = screen_x;
-  self->y = screen_y;
 }
 
 static void
