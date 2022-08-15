@@ -19,7 +19,7 @@ jobs:
           sudo apt-get update &&
           sudo apt-get install \
             libwayland-dev libwlroots-dev libpixman-1-dev libxml2-dev \
-            libopenvr-dev weston
+            libopenvr-dev libxkbcommon-dev weston
 
       - uses: actions/setup-python@v1
         with:

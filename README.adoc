@@ -39,4 +39,4 @@ $ zen-desktop
 
 == Stop ZEN Desktop
 
-Press `q` to quit.
+Press `<alt> + q` to quit.
