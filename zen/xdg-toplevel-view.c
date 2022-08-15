@@ -28,7 +28,6 @@ zn_xdg_toplevel_view_map(struct wl_listener* listener, void* data)
   screen = zn_container_of(scene->screen_layout->screens.next, screen, link);
 
   zn_view_map_to_screen(&self->base, screen);
-  zn_xdg_toplevel_view_focus(self);
 }
 
 static void
