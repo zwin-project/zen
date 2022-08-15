@@ -53,13 +53,11 @@ zn_pointer_handle_button(struct wl_listener* listener, void* data)
   wlr_seat_pointer_notify_button(
       seat, event->time_msec, event->button, event->state);
 
-  if (event->state == WLR_BUTTON_RELEASED) {
-    return;
-  }
-
   view = zn_screen_get_view_at(cursor->screen, cursor->x, cursor->y);
-  if (view) {
-    zn_view_focus(view);
+  if (event->state == WLR_BUTTON_RELEASED) {
+    if (view != NULL) {
+      zn_view_focus(view);
+    }
   }
 }
 
