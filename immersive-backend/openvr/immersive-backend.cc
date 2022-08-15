@@ -82,6 +82,7 @@ zn_immersive_backend_destroy(struct zn_immersive_backend* parent)
   struct zn_openvr_immersive_backend* self =
       zn_container_of(parent, self, base);
 
+  self->vr_system->Disconnect();
   self->vr_system.reset();
   free(self);
 }
