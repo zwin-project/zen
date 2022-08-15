@@ -10,7 +10,7 @@ zn_screen_get_view_at(struct zn_screen *self, int x, int y)
   struct wlr_box box;
   struct zn_view *view;
 
-  wl_list_for_each(view, &self->views, link)
+  wl_list_for_each_reverse(view, &self->views, link)
   {
     zn_view_get_box(view, &box);
 
