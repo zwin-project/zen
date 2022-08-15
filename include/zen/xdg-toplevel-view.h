@@ -18,8 +18,6 @@ struct zn_xdg_toplevel_view {
   struct wl_listener wlr_xdg_surface_destroy_listener;
 };
 
-void zn_xdg_toplevel_view_focus(struct zn_xdg_toplevel_view *self);
-
 struct zn_xdg_toplevel_view *zn_xdg_toplevel_view_create(
     struct wlr_xdg_toplevel *xdg_toplevel, struct zn_server *server);
 

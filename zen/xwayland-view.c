@@ -64,14 +64,6 @@ static const struct zn_view_impl zn_xwayland_view_impl = {
     .get_wlr_surface = zn_xwayland_view_impl_get_wlr_surface,
 };
 
-void
-zn_xwayland_view_focus(struct zn_xwayland_view* self)
-{
-  wlr_xwayland_surface_activate(self->wlr_xwayland_surface, true);
-  wlr_xwayland_surface_restack(
-      self->wlr_xwayland_surface, NULL, XCB_STACK_MODE_ABOVE);
-}
-
 struct zn_xwayland_view*
 zn_xwayland_view_create(
     struct wlr_xwayland_surface* xwayland_surface, struct zn_server* server)

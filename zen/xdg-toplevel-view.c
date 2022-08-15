@@ -66,12 +66,6 @@ static const struct zn_view_impl zn_xdg_toplevel_view_impl = {
     .get_wlr_surface = zn_xdg_toplevel_view_impl_get_wlr_surface,
 };
 
-void
-zn_xdg_toplevel_view_focus(struct zn_xdg_toplevel_view* self)
-{
-  wlr_xdg_toplevel_set_activated(self->wlr_xdg_toplevel->base, true);
-}
-
 struct zn_xdg_toplevel_view*
 zn_xdg_toplevel_view_create(
     struct wlr_xdg_toplevel* wlr_xdg_toplevel, struct zn_server* server)
