@@ -87,7 +87,7 @@ zn_view_map_to_screen(struct zn_view *self, struct zn_screen *screen)
   self->x = (screen_box.width / 2) - (view_box.width / 2);
   self->y = (screen_box.height / 2) - (view_box.height / 2);
 
-  wl_list_insert(&screen->views, &self->link);
+  wl_list_insert(screen->views.prev, &self->link);
   zn_view_focus(self);
 }
 
