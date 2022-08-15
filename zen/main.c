@@ -1,4 +1,5 @@
 #include <getopt.h>
+#include <linux/input.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,6 +38,17 @@ zn_terminate(int exit_code)
 {
   struct zn_server *server = zn_server_get_singleton();
   zn_server_terminate(server, exit_code);
+}
+
+static void
+zn_terminate_binding_handler(uint32_t time_msec, uint32_t key, void *data)
+{
+  struct zn_server *server = zn_server_get_singleton();
+  UNUSED(time_msec);
+  UNUSED(key);
+  UNUSED(data);
+
+  zn_server_terminate(server, EXIT_SUCCESS);
 }
 
 static int
@@ -169,6 +181,10 @@ main(int argc, char *argv[])
     zn_error("Failed to create a zen server");
     goto err_signal;
   }
+
+  // Terminate the program with a keyboard event for development convenience.
+  zn_input_manager_add_key_binding(server->input_manager, KEY_Q,
+      WLR_MODIFIER_ALT, zn_terminate_binding_handler, NULL);
 
   if (startup_command) {
     startup_command_pid = launch_startup_command(startup_command);

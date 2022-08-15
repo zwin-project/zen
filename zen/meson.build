@@ -1,4 +1,5 @@
 _zen_desktop_srcs = [
+  'binding.c',
   'cursor.c',
   'display-system.c',
   'input-device.c',
@@ -29,6 +30,7 @@ _zen_desktop_deps = [
   pixman_dep,
   wayland_server_dep,
   wlroots_dep,
+  xkbcommon_dep,
   zen_common_dep,
   zen_openvr_immersive_backend_dep,
 ]
