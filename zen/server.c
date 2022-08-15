@@ -333,9 +333,9 @@ zn_server_destroy(struct zn_server *self)
   zn_display_system_destroy(self->display_system);
   zn_immersive_backend_destroy(self->immersive_backend);
   free(self->socket);
+  wlr_backend_destroy(self->backend);
   wlr_allocator_destroy(self->allocator);
   wlr_renderer_destroy(self->renderer);
-  wlr_backend_destroy(self->backend);
   zn_scene_destroy(self->scene);
   server_singleton = NULL;
   free(self);
