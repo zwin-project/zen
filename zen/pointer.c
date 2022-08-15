@@ -57,6 +57,8 @@ zn_pointer_handle_button(struct wl_listener* listener, void* data)
   if (event->state == WLR_BUTTON_RELEASED) {
     if (view != NULL) {
       zn_view_focus(view);
+    }else {
+      zn_view_unfocus(view);
     }
   }
 }

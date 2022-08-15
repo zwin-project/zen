@@ -34,6 +34,8 @@ bool zn_view_is_mapped(struct zn_view *self);
 
 void zn_view_focus(struct zn_view *self);
 
+void zn_view_unfocus(struct zn_view *self);
+
 void zn_view_map_to_screen(struct zn_view *self, struct zn_screen *screen);
 
 void zn_view_unmap(struct zn_view *self);

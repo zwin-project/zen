@@ -73,6 +73,12 @@ zn_xdg_toplevel_view_focus(struct zn_xdg_toplevel_view* self)
   wlr_xdg_toplevel_set_activated(self->wlr_xdg_toplevel->base, true);
 }
 
+void
+zn_xdg_toplevel_view_unfocus(struct zn_xdg_toplevel_view* self)
+{
+  wlr_xdg_toplevel_set_activated(self->wlr_xdg_toplevel->base, false);
+}
+
 struct zn_xdg_toplevel_view*
 zn_xdg_toplevel_view_create(
     struct wlr_xdg_toplevel* wlr_xdg_toplevel, struct zn_server* server)

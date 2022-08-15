@@ -26,6 +26,32 @@ zn_view_is_mapped(struct zn_view *self)
 }
 
 void
+zn_view_unfocus(struct zn_view *self)
+{
+  struct zn_server *server = zn_server_get_singleton();
+  struct wlr_surface *current_surface =
+      server->input_manager->seat->wlr_seat->pointer_state.focused_surface;
+  struct zn_xdg_toplevel_view *xdg_toplevel_view;
+  struct zn_xwayland_view *xwayland_view;
+
+  switch (self->type) {
+    case ZN_VIEW_XDG_TOPLEVEL:
+      xdg_toplevel_view = zn_container_of(self, xdg_toplevel_view, base);
+      if (xdg_toplevel_view->wlr_xdg_toplevel->base->surface !=
+          current_surface) {
+        zn_xdg_toplevel_view_unfocus(xdg_toplevel_view);
+      }
+      break;
+    case ZN_VIEW_XWAYLAND:
+      xwayland_view = zn_container_of(self, xwayland_view, base);
+      if (xwayland_view->wlr_xwayland_surface->surface != current_surface) {
+        zn_xwayland_view_unfocus(xwayland_view);
+      }
+      break;
+  }
+}
+
+void
 zn_view_focus(struct zn_view *self)
 {
   struct zn_server *server = zn_server_get_singleton();
