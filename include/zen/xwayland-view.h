@@ -20,8 +20,6 @@ struct zn_xwayland_view {
 
 void zn_xwayland_view_focus(struct zn_xwayland_view *self);
 
-void zn_xwayland_view_unfocus(struct zn_xwayland_view *self);
-
 struct zn_xwayland_view *zn_xwayland_view_create(
     struct wlr_xwayland_surface *xwayland_surface, struct zn_server *server);
 
