@@ -8,16 +8,6 @@
 static void zn_xdg_toplevel_view_destroy(struct zn_xdg_toplevel_view* self);
 
 static void
-zn_xdg_toplevel_view_handle_request_move(
-    struct wl_listener* listener, void* data)
-{
-  UNUSED(data);
-  struct zn_xdg_toplevel_view* self =
-      zn_container_of(listener, self, request_move_listener);
-  self->base.is_moving = true;
-}
-
-static void
 zn_xdg_toplevel_view_map(struct wl_listener* listener, void* data)
 {
   struct zn_xdg_toplevel_view* self =
@@ -102,10 +92,6 @@ zn_xdg_toplevel_view_create(
 
   self->wlr_xdg_toplevel = wlr_xdg_toplevel;
 
-  self->request_move_listener.notify = zn_xdg_toplevel_view_handle_request_move;
-  wl_signal_add(&self->wlr_xdg_toplevel->events.request_move,
-      &self->request_move_listener);
-
   self->map_listener.notify = zn_xdg_toplevel_view_map;
   wl_signal_add(&self->wlr_xdg_toplevel->base->events.map, &self->map_listener);
 
@@ -130,7 +116,6 @@ zn_xdg_toplevel_view_destroy(struct zn_xdg_toplevel_view* self)
   wl_list_remove(&self->wlr_xdg_surface_destroy_listener.link);
   wl_list_remove(&self->map_listener.link);
   wl_list_remove(&self->unmap_listener.link);
-  wl_list_remove(&self->request_move_listener.link);
   zn_view_fini(&self->base);
   free(self);
 }

@@ -26,16 +26,6 @@ zn_view_is_mapped(struct zn_view *self)
 }
 
 void
-zn_view_move(struct zn_view *self, int dx, int dy)
-{
-  if (!self->is_moving) {
-    return;
-  }
-  self->x += dx;
-  self->y += dy;
-}
-
-void
 zn_view_focus(struct zn_view *self)
 {
   struct zn_server *server = zn_server_get_singleton();

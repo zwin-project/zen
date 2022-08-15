@@ -13,7 +13,6 @@ struct zn_xdg_toplevel_view {
 
   struct zn_server *server;
 
-  struct wl_listener request_move_listener;
   struct wl_listener map_listener;
   struct wl_listener unmap_listener;
   struct wl_listener wlr_xdg_surface_destroy_listener;

@@ -20,7 +20,6 @@ enum zn_view_type {
 
 struct zn_view {
   int x, y;
-  bool is_moving;
 
   enum zn_view_type type;
 
@@ -32,8 +31,6 @@ struct zn_view {
 void zn_view_get_box(struct zn_view *self, struct wlr_box *box);
 
 bool zn_view_is_mapped(struct zn_view *self);
-
-void zn_view_move(struct zn_view *self, int dx, int dy);
 
 void zn_view_focus(struct zn_view *self);
 
