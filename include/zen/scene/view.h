@@ -19,7 +19,7 @@ enum zn_view_type {
 };
 
 struct zn_view {
-  int x, y;
+  double x, y;
 
   enum zn_view_type type;
 
