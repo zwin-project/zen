@@ -5,14 +5,19 @@
 #include "zen/scene/view.h"
 
 struct zn_view *
-zn_screen_get_view_at(struct zn_screen *self, int x, int y)
+zn_screen_get_view_at(struct zn_screen *self, double x, double y)
 {
-  struct wlr_box box;
+  struct wlr_fbox fbox;
   struct zn_view *view;
 
   wl_list_for_each_reverse(view, &self->views, link)
   {
-    zn_view_get_box(view, &box);
+    struct wlr_box box;
+    zn_view_get_fbox(view, &fbox);
+    box.x = fbox.x;
+    box.y = fbox.y;
+    box.width = fbox.width;
+    box.height = fbox.height;
 
     if (wlr_box_contains_point(&box, x, y)) {
       return view;

@@ -28,7 +28,7 @@ struct zn_view {
   struct wl_list link;  // zn_screen::views;
 };
 
-void zn_view_get_box(struct zn_view *self, struct wlr_box *box);
+void zn_view_get_fbox(struct zn_view *self, struct wlr_fbox *fbox);
 
 bool zn_view_is_mapped(struct zn_view *self);
 

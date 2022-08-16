@@ -19,7 +19,7 @@ zn_pointer_handle_motion(struct wl_listener* listener, void* data)
   struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
   struct wlr_surface* surface;
   struct zn_view* view;
-  int view_x, view_y;
+  double view_x, view_y;
 
   zn_cursor_move_relative(cursor, event->delta_x, event->delta_y);
 
