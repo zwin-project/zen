@@ -13,14 +13,10 @@ zn_screen_get_view_at(
 
   wl_list_for_each_reverse(view, &self->views, link)
   {
-    struct wlr_box box;
     zn_view_get_fbox(view, &fbox);
-    box.x = fbox.x;
-    box.y = fbox.y;
-    box.width = fbox.width;
-    box.height = fbox.height;
 
-    if (wlr_box_contains_point(&box, x, y)) {
+    if (fbox.x <= x && x < fbox.x + fbox.width && fbox.y <= y &&
+        y < fbox.y + fbox.height) {
       *view_x = x - view->x;
       *view_y = y - view->y;
       return view;
