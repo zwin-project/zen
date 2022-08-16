@@ -36,6 +36,7 @@ zn_view_map_to_screen(struct zn_view *self, struct zn_screen *screen)
   self->x = (screen_box.width / 2) - (view_fbox.width / 2);
   self->y = (screen_box.height / 2) - (view_fbox.height / 2);
 
+  // List of mapped zn_view in z-order, from bottom to top
   wl_list_insert(screen->views.prev, &self->link);
 }
 
