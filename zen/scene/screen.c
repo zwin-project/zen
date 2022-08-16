@@ -5,7 +5,8 @@
 #include "zen/scene/view.h"
 
 struct zn_view *
-zn_screen_get_view_at(struct zn_screen *self, double x, double y)
+zn_screen_get_view_at(
+    struct zn_screen *self, double x, double y, double *view_x, double *view_y)
 {
   struct wlr_fbox fbox;
   struct zn_view *view;
@@ -20,6 +21,8 @@ zn_screen_get_view_at(struct zn_screen *self, double x, double y)
     box.height = fbox.height;
 
     if (wlr_box_contains_point(&box, x, y)) {
+      *view_x = x - view->x;
+      *view_y = y - view->y;
       return view;
     }
   }
