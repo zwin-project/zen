@@ -29,7 +29,7 @@ VrSystem::Connect()
   auto init_error = vr::VRInitError_None;
 
   if (poll_thread_.joinable()) poll_thread_.join();
-  (void)vr::VR_Init(&init_error, vr::VRApplication_Scene);
+  std::ignore = vr::VR_Init(&init_error, vr::VRApplication_Scene);
   if (init_error != vr::VRInitError_None) {
     zn_warn("Failed to init OpenVR: %s",
         vr::VR_GetVRInitErrorAsEnglishDescription(init_error));
@@ -88,7 +88,6 @@ VrSystem::PollInThread()
     vr::IVRCompositor *compositor = vr::VRCompositor();
     vr::IVRSystem *system = vr::VRSystem();
     VrSystem::PollInThreadResult res;
-    ssize_t unused __attribute__((unused));
 
     compositor->WaitGetPoses(
         tracked_device_post_list, vr::k_unMaxTrackedDeviceCount, NULL, 0);
@@ -102,7 +101,8 @@ VrSystem::PollInThread()
         res = VrSystem::PollInThreadResult::kShouldStopOpenVr;
 
         // just return even if write fails
-        unused = write(pipe_[1], &res, sizeof(VrSystem::PollInThreadResult));
+        std::ignore =
+            write(pipe_[1], &res, sizeof(VrSystem::PollInThreadResult));
         return;
 
       default:
@@ -110,7 +110,7 @@ VrSystem::PollInThread()
     }
 
     res = VrSystem::PollInThreadResult::kReadyForNextRepaint;
-    unused = write(pipe_[1], &res, sizeof(VrSystem::PollInThreadResult));
+    std::ignore = write(pipe_[1], &res, sizeof(VrSystem::PollInThreadResult));
   });
 }
 
