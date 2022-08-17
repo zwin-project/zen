@@ -26,6 +26,7 @@ zn_pointer_handle_motion(struct wl_listener* listener, void* data)
   view = zn_screen_get_view_at(
       cursor->screen, cursor->x, cursor->y, &view_x, &view_y);
   if (!view) {
+    zn_cursor_reset_surface(cursor);
     wlr_seat_pointer_notify_clear_focus(seat);
     return;
   }
@@ -35,6 +36,7 @@ zn_pointer_handle_motion(struct wl_listener* listener, void* data)
     wlr_seat_pointer_notify_enter(seat, surface, view_x, view_y);
     wlr_seat_pointer_notify_motion(seat, event->time_msec, view_x, view_y);
   } else {
+    zn_cursor_reset_surface(cursor);
     wlr_seat_pointer_notify_clear_focus(seat);
   }
 }

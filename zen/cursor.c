@@ -122,6 +122,15 @@ zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface)
   self->surface = surface;
 }
 
+void
+zn_cursor_reset_surface(struct zn_cursor* self)
+{
+  if (self->surface != NULL) {
+    zn_cursor_set_surface(self, NULL);
+  }
+  self->visible = true;
+}
+
 struct zn_cursor*
 zn_cursor_create(void)
 {

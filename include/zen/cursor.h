@@ -26,6 +26,8 @@ void zn_cursor_move_relative(struct zn_cursor* self, int dx, int dy);
 
 void zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface);
 
+void zn_cursor_reset_surface(struct zn_cursor* self);
+
 struct zn_cursor* zn_cursor_create(void);
 
 void zn_cursor_destroy(struct zn_cursor* self);
