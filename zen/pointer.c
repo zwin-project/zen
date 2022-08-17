@@ -116,5 +116,6 @@ zn_pointer_destroy(struct zn_pointer* self)
   wl_list_remove(&self->motion_listener.link);
   wl_list_remove(&self->button_listener.link);
   wl_list_remove(&self->axis_listener.link);
+  wl_list_remove(&self->frame_listener.link);
   free(self);
 }
