@@ -5,17 +5,6 @@
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/view.h"
 
-struct zn_xdg_toplevel_view {
-  struct zn_view base;
-  struct wlr_xdg_toplevel* wlr_xdg_toplevel;  // nonnull
-
-  struct zn_server* server;
-
-  struct wl_listener map_listener;
-  struct wl_listener unmap_listener;
-  struct wl_listener wlr_xdg_surface_destroy_listener;
-};
-
 static void zn_xdg_toplevel_view_destroy(struct zn_xdg_toplevel_view* self);
 
 static void

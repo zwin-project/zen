@@ -4,17 +4,6 @@
 #include "zen/scene/scene.h"
 #include "zen/scene/view.h"
 
-struct zn_xwayland_view {
-  struct zn_view base;
-  struct wlr_xwayland_surface* wlr_xwayland_surface;  // nonnull
-
-  struct zn_server* server;
-
-  struct wl_listener map_listener;
-  struct wl_listener unmap_listener;
-  struct wl_listener wlr_xwayland_surface_destroy_listener;
-};
-
 static void zn_xwayland_view_destroy(struct zn_xwayland_view* self);
 
 static void

@@ -13,6 +13,7 @@ zn_render_2d_view(struct zn_view *view, struct wlr_renderer *renderer)
 {
   struct wlr_surface *wlr_surface = view->impl->get_wlr_surface(view);
   struct wlr_texture *texture = wlr_surface_get_texture(wlr_surface);
+  struct wlr_fbox fbox;
 
   float transform[9] = {
       1, 0, 0,  //
@@ -20,7 +21,8 @@ zn_render_2d_view(struct zn_view *view, struct wlr_renderer *renderer)
       0, 0, 1   //
   };
 
-  wlr_render_texture(renderer, texture, transform, 0, 0, 1);
+  zn_view_get_fbox(view, &fbox);
+  wlr_render_texture(renderer, texture, transform, fbox.x, fbox.y, 1);
 }
 
 static void

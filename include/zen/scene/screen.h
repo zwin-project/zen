@@ -11,6 +11,7 @@ struct zn_screen {
   struct zn_output *output;  // zn_output owns zn_screen, nonnull
   struct zn_screen_layout *screen_layout;
 
+  // List of mapped zn_view in z-order, from bottom to top
   struct wl_list views;  // zn_view::link;
 
   struct wl_list link;  // zn_screen_layout::screens;
@@ -19,6 +20,9 @@ struct zn_screen {
     struct wl_signal destroy;  // (NULL)
   } events;
 };
+
+struct zn_view *zn_screen_get_view_at(
+    struct zn_screen *self, double x, double y, double *view_x, double *view_y);
 
 void zn_screen_get_screen_layout_coords(
     struct zn_screen *self, int x, int y, int *dst_x, int *dst_y);
