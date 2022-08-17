@@ -128,7 +128,7 @@ void
 zn_cursor_reset_surface(struct zn_cursor* self)
 {
   if (self->surface != NULL) {
-    zn_cursor_set_surface(self, NULL);
+    zn_cursor_set_surface(self, NULL, 0, 0);
   }
   self->visible = true;
 }
