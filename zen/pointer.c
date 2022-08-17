@@ -62,6 +62,16 @@ zn_pointer_handle_axis(struct wl_listener* listener, void* data)
       event->delta, event->delta_discrete, event->source);
 }
 
+static void
+zn_pointer_handle_frame(struct wl_listener* listener, void* data)
+{
+  UNUSED(listener);
+  UNUSED(data);
+  struct zn_server* server = zn_server_get_singleton();
+  struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
+  wlr_seat_pointer_notify_frame(seat);
+}
+
 struct zn_pointer*
 zn_pointer_create(struct wlr_input_device* wlr_input_device)
 {
@@ -89,6 +99,10 @@ zn_pointer_create(struct wlr_input_device* wlr_input_device)
   self->button_listener.notify = zn_pointer_handle_button;
   wl_signal_add(
       &wlr_input_device->pointer->events.button, &self->button_listener);
+
+  self->frame_listener.notify = zn_pointer_handle_frame;
+  wl_signal_add(
+      &wlr_input_device->pointer->events.frame, &self->frame_listener);
 
   return self;
 

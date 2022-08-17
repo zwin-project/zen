@@ -8,6 +8,7 @@ struct zn_pointer {
   struct wl_listener button_listener;
   struct wl_listener motion_listener;
   struct wl_listener axis_listener;
+  struct wl_listener frame_listener;
 };
 
 struct zn_pointer* zn_pointer_create(struct wlr_input_device* input_device);
