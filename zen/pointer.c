@@ -93,12 +93,12 @@ zn_pointer_create(struct wlr_input_device* wlr_input_device)
   wl_signal_add(
       &wlr_input_device->pointer->events.motion, &self->motion_listener);
 
-  self->axis_listener.notify = zn_pointer_handle_axis;
-  wl_signal_add(&wlr_input_device->pointer->events.axis, &self->axis_listener);
-
   self->button_listener.notify = zn_pointer_handle_button;
   wl_signal_add(
       &wlr_input_device->pointer->events.button, &self->button_listener);
+
+  self->axis_listener.notify = zn_pointer_handle_axis;
+  wl_signal_add(&wlr_input_device->pointer->events.axis, &self->axis_listener);
 
   self->frame_listener.notify = zn_pointer_handle_frame;
   wl_signal_add(
