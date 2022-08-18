@@ -36,16 +36,17 @@ zn_render_2d_cursor(struct zn_cursor *cursor, struct zn_screen *screen,
       0, 0, 1   //
   };
 
-  if (!cursor->visible) {
+  if (!cursor->visible || cursor->screen != screen) {
     return;
   }
 
-  if (cursor->screen == screen && cursor->texture) {
-    if (cursor->surface != NULL) {
-      texture = wlr_surface_get_texture(cursor->surface);
-    } else {
-      texture = cursor->texture;
-    }
+  if (cursor->surface != NULL) {
+    texture = wlr_surface_get_texture(cursor->surface);
+  } else {
+    texture = cursor->texture;
+  }
+
+  if (cursor->texture) {
     wlr_render_texture(renderer, texture, transform, cursor->x, cursor->y, 1.f);
   }
 }
