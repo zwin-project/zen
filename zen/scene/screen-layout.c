@@ -53,6 +53,8 @@ zn_screen_layout_add(
   }
 
   wl_signal_emit(&self->events.new_screen, new_screen);
+
+  zn_scene_reassign_boards(self->scene);
 }
 
 void
@@ -60,10 +62,12 @@ zn_screen_layout_remove(struct zn_screen_layout* self, struct zn_screen* screen)
 {
   UNUSED(self);
   wl_list_remove(&screen->link);
+
+  zn_scene_reassign_boards(self->scene);
 }
 
 struct zn_screen_layout*
-zn_screen_layout_create(void)
+zn_screen_layout_create(struct zn_scene* scene)
 {
   struct zn_screen_layout* self;
   self = zalloc(sizeof *self);
@@ -73,6 +77,7 @@ zn_screen_layout_create(void)
     goto err;
   }
 
+  self->scene = scene;
   wl_list_init(&self->screens);
   wl_signal_init(&self->events.new_screen);
 

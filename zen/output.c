@@ -6,6 +6,7 @@
 
 #include "zen-common.h"
 #include "zen/render-2d.h"
+#include "zen/scene/board.h"
 #include "zen/scene/scene.h"
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/screen.h"
