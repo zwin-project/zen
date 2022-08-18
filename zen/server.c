@@ -266,6 +266,8 @@ zn_server_create(struct wl_display *display)
   setenv("DISPLAY", self->xwayland->display_name, true);
   zn_debug("DISPLAY=%s", self->xwayland->display_name);
 
+  zn_scene_setup_bindings(self->scene);
+
   self->new_input_listener.notify = zn_server_new_input_handler;
   wl_signal_add(&self->backend->events.new_input, &self->new_input_listener);
 

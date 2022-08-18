@@ -11,21 +11,12 @@ zn_xwayland_view_map(struct wl_listener* listener, void* data)
 {
   struct zn_xwayland_view* self = zn_container_of(listener, self, map_listener);
   struct zn_scene* scene = self->server->scene;
-  struct zn_screen* screen;
   UNUSED(data);
 
   if (!zn_assert(!zn_view_is_mapped(&self->base), "Tried to map a mapped view"))
     return;
 
-  if (wl_list_empty(&scene->screen_layout->screens)) {
-    // TODO: handle this properly
-    zn_warn("View is mapped but no screen found");
-    return;
-  }
-
-  screen = zn_container_of(scene->screen_layout->screens.next, screen, link);
-
-  zn_view_map_to_screen(&self->base, screen);
+  zn_view_map_to_scene(&self->base, scene);
 }
 
 static void

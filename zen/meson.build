@@ -14,6 +14,7 @@ _zen_desktop_srcs = [
   'xdg-toplevel-view.c',
   'xwayland-view.c',
 
+  'scene/board.c',
   'scene/scene.c',
   'scene/screen.c',
   'scene/screen-layout.c',
