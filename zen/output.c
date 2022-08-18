@@ -10,6 +10,7 @@
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/screen.h"
 #include "zen/scene/view.h"
+#include "zen/seat.h"
 
 static void zn_output_destroy(struct zn_output *self);
 
@@ -57,6 +58,8 @@ zn_output_damage_frame_handler(struct wl_listener *listener, void *data)
 {
   struct zn_output *self =
       zn_container_of(listener, self, damage_frame_listener);
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_cursor *cursor = server->input_manager->seat->cursor;
   struct zn_view *view;
   struct timespec now;
   UNUSED(data);
@@ -71,6 +74,10 @@ zn_output_damage_frame_handler(struct wl_listener *listener, void *data)
 
   wl_list_for_each(view, &self->screen->views, link)
       wlr_surface_send_frame_done(view->impl->get_wlr_surface(view), &now);
+
+  if (cursor->screen == self->screen && cursor->surface != NULL) {
+    wlr_surface_send_frame_done(cursor->surface, &now);
+  }
 }
 
 struct zn_output *
