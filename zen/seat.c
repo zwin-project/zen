@@ -11,8 +11,12 @@ zn_seat_handle_request_set_cursor(struct wl_listener* listener, void* data)
   struct zn_seat* self =
       zn_container_of(listener, self, request_set_cursor_listener);
   struct wlr_seat_pointer_request_set_cursor_event* event = data;
+  struct wlr_surface* focused_surface =
+      self->wlr_seat->pointer_state.focused_surface;
+  struct wl_client* focused_client =
+      wl_resource_get_client(focused_surface->resource);
 
-  if (event->seat_client == self->wlr_seat->pointer_state.focused_client) {
+  if (event->seat_client->client == focused_client) {
     zn_cursor_set_surface(self->cursor, event->surface);
   }
 }
