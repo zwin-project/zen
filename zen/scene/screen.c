@@ -3,6 +3,25 @@
 #include "zen-common.h"
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/view.h"
+#include "zen/seat.h"
+
+void
+zn_screen_for_each_visible_surface(struct zn_screen *self,
+    zn_screen_for_each_visible_surface_callback_t callback, void* data)
+{
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_cursor *cursor = server->input_manager->seat->cursor;
+  struct zn_view *view;
+
+  wl_list_for_each(view, &self->views, link)
+  {
+    callback(view->impl->get_wlr_surface(view), data);
+  }
+
+  if (cursor->screen == self && cursor->surface != NULL) {
+    callback(cursor->surface, data);
+  }
+}
 
 struct zn_view *
 zn_screen_get_view_at(

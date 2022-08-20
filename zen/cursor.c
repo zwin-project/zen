@@ -73,6 +73,16 @@ zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
       self, found ? screen : NULL, box.width / 2, box.height / 2);
 }
 
+static void
+zn_cursor_handle_destroy_surface(struct wl_listener* listener, void* data)
+{
+  UNUSED(data);
+  struct zn_cursor* self =
+      zn_container_of(listener, self, destroy_surface_listener);
+
+  zn_cursor_set_surface(self, NULL);
+}
+
 void
 zn_cursor_move_relative(struct zn_cursor* self, int dx, int dy)
 {
@@ -93,6 +103,31 @@ zn_cursor_move_relative(struct zn_cursor* self, int dx, int dy)
   new_screen = zn_screen_layout_get_closest_screen(
       layout, layout_x, layout_y, &screen_x, &screen_y);
   zn_cursor_update_position(self, new_screen, screen_x, screen_y);
+}
+
+void
+zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface)
+{
+  if (self->surface != NULL) {
+    wl_list_remove(&self->destroy_surface_listener.link);
+    wl_list_init(&self->destroy_surface_listener.link);
+  }
+
+  if (surface != NULL) {
+    wl_signal_add(&surface->events.destroy, &self->destroy_surface_listener);
+  }
+
+  self->visible = surface != NULL;
+  self->surface = surface;
+}
+
+void
+zn_cursor_reset_surface(struct zn_cursor* self)
+{
+  if (self->surface != NULL) {
+    zn_cursor_set_surface(self, NULL);
+  }
+  self->visible = true;
 }
 
 struct zn_cursor*
@@ -131,10 +166,12 @@ zn_cursor_create(void)
   self->new_screen_listener.notify = zn_cursor_handle_new_screen;
   wl_signal_add(&screen_layout->events.new_screen, &self->new_screen_listener);
   self->destroy_screen_listener.notify = zn_cursor_handle_destroy_screen;
+  self->destroy_surface_listener.notify = zn_cursor_handle_destroy_surface;
 
   wl_list_init(&self->destroy_screen_listener.link);
 
   self->screen = NULL;
+  self->visible = true;
 
   return self;
 

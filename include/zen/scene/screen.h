@@ -2,9 +2,13 @@
 #define ZEN_SCREEN_H
 
 #include <wayland-server-core.h>
+#include <wlr/types/wlr_surface.h>
 
 #include "zen/output.h"
 #include "zen/scene/screen-layout.h"
+
+typedef void (*zn_screen_for_each_visible_surface_callback_t)(
+    struct wlr_surface *surface, void* data);
 
 struct zn_screen {
   int x, y;
@@ -20,6 +24,9 @@ struct zn_screen {
     struct wl_signal destroy;  // (NULL)
   } events;
 };
+
+void zn_screen_for_each_visible_surface(struct zn_screen *self,
+    zn_screen_for_each_visible_surface_callback_t callback, void* data);
 
 struct zn_view *zn_screen_get_view_at(
     struct zn_screen *self, double x, double y, double *view_x, double *view_y);
