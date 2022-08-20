@@ -80,7 +80,6 @@ zn_cursor_handle_destroy_surface(struct wl_listener* listener, void* data)
   struct zn_cursor* self =
       zn_container_of(listener, self, destroy_surface_listener);
 
-  wl_list_remove(&self->destroy_surface_listener.link);
   zn_cursor_set_surface(self, NULL);
 }
 
