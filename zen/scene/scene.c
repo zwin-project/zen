@@ -62,6 +62,10 @@ zn_scene_get_focus_board(struct zn_scene* self)
 {
   struct zn_screen* screen = zn_scene_get_focus_screen(self);
 
+  if (screen == NULL) {
+    return NULL;
+  }
+
   return zn_screen_get_current_board(screen);
 }
 
