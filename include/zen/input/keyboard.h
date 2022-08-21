@@ -3,8 +3,8 @@
 
 #include <wayland-server.h>
 
-#include "zen/input-device.h"
-#include "zen/seat.h"
+#include "zen/input/input-device.h"
+#include "zen/input/seat.h"
 
 struct zn_keyboard {
   struct zn_input_device* input_device;

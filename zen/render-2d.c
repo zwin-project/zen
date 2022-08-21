@@ -3,10 +3,10 @@
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_surface.h>
 
+#include "zen/input/seat.h"
 #include "zen/output.h"
 #include "zen/scene/screen.h"
 #include "zen/scene/view.h"
-#include "zen/seat.h"
 
 static void
 zn_render_2d_view(struct zn_view *view, struct wlr_renderer *renderer)

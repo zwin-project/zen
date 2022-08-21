@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 #include "zen-common.h"
-#include "zen/seat.h"
+#include "zen/input/seat.h"
 #include "zen/xdg-toplevel-view.h"
 #include "zen/xwayland-view.h"
 

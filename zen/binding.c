@@ -2,7 +2,7 @@
 
 #include <zen-common.h>
 
-#include "zen/input-manager.h"
+#include "zen/input/input-manager.h"
 #include "zen/server.h"
 
 bool

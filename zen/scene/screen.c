@@ -1,13 +1,13 @@
 #include "zen/scene/screen.h"
 
 #include "zen-common.h"
+#include "zen/input/seat.h"
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/view.h"
-#include "zen/seat.h"
 
 void
 zn_screen_for_each_visible_surface(struct zn_screen *self,
-    zn_screen_for_each_visible_surface_callback_t callback, void* data)
+    zn_screen_for_each_visible_surface_callback_t callback, void *data)
 {
   struct zn_server *server = zn_server_get_singleton();
   struct zn_cursor *cursor = server->input_manager->seat->cursor;

@@ -1,12 +1,12 @@
-#include "zen/input-manager.h"
+#include "zen/input/input-manager.h"
 
 #include <wayland-server.h>
 #include <wlr/types/wlr_input_device.h>
 
 #include "zen-common.h"
 #include "zen/binding.h"
-#include "zen/input-device.h"
-#include "zen/seat.h"
+#include "zen/input/input-device.h"
+#include "zen/input/seat.h"
 
 bool
 zn_input_manager_bindings_notify_key(struct zn_input_manager* self,
