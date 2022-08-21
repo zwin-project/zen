@@ -11,6 +11,7 @@
 
 struct zn_cursor {
   int x, y;
+  int hotspot_x, hotspot_y;
   bool visible;
   struct zn_screen* screen;  // nullable
   struct wlr_texture* texture;
@@ -24,7 +25,8 @@ struct zn_cursor {
 
 void zn_cursor_move_relative(struct zn_cursor* self, int dx, int dy);
 
-void zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface);
+void zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface,
+    int hotspot_x, int hotspot_y);
 
 void zn_cursor_reset_surface(struct zn_cursor* self);
 
