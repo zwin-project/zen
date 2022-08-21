@@ -84,6 +84,9 @@ zn_render_2d_view(struct zn_view *view, struct wlr_renderer *renderer)
 
   wlr_surface_for_each_surface(
       wlr_surface, zn_render_wlr_surface_iterator, &data);
+
+  // TODO: render popups only focused view
+  zn_render_2d_view_popups(view, renderer);
 }
 
 static void
@@ -110,12 +113,7 @@ zn_render_2d_screen(struct zn_screen *screen, struct wlr_renderer *renderer)
   struct zn_cursor *cursor = server->input_manager->seat->cursor;
 
   wl_list_for_each(view, &screen->views, link)
-  {
-    zn_render_2d_view(view, renderer);
-
-    // TODO: render popups only focused view
-    zn_render_2d_view_popups(view, renderer);
-  }
+      zn_render_2d_view(view, renderer);
 
   zn_render_2d_cursor(cursor, screen, renderer);
 }
