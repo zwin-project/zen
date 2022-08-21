@@ -24,14 +24,10 @@ static void
 zn_render_get_surface_fbox(struct wlr_surface *surface, struct zn_view *view,
     int surface_x, int surface_y, struct wlr_fbox *surface_box)
 {
-  struct wlr_fbox box = {
-      .x = view->x + surface_x,
-      .y = view->y + surface_y,
-      .width = surface->current.width,
-      .height = surface->current.height,
-  };
-
-  memcpy(surface_box, &box, sizeof(box));
+  surface_box->x = view->x + surface_x;
+  surface_box->y = view->y + surface_y;
+  surface_box->width = surface->current.width;
+  surface_box->height = surface->current.height;
 }
 
 static void
