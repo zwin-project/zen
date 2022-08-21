@@ -11,7 +11,6 @@ _zen_desktop_srcs = [
   'render-2d.c',
   'seat.c',
   'server.c',
-  'xdg-popup-view.c',
   'xdg-toplevel-view.c',
   'xwayland-view.c',
 
