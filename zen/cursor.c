@@ -13,7 +13,7 @@
 // screen_x and screen_y must be less than screen->width/height
 static void
 zn_cursor_update_position(struct zn_cursor* self, struct zn_screen* screen,
-    int screen_x, int screen_y)
+    double screen_x, double screen_y)
 {
   self->x = screen_x;
   self->y = screen_y;
@@ -84,14 +84,14 @@ zn_cursor_handle_destroy_surface(struct wl_listener* listener, void* data)
 }
 
 void
-zn_cursor_move_relative(struct zn_cursor* self, int dx, int dy)
+zn_cursor_move_relative(struct zn_cursor* self, double dx, double dy)
 {
   struct zn_server* server = zn_server_get_singleton();
   struct zn_screen_layout* layout = server->scene->screen_layout;
   struct zn_screen* new_screen;
-  int layout_x, layout_y;
-  int screen_x = self->x + dx;
-  int screen_y = self->y + dy;
+  double layout_x, layout_y;
+  double screen_x = self->x + dx;
+  double screen_y = self->y + dy;
 
   if (self->screen == NULL) {
     return;

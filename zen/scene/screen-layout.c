@@ -23,8 +23,8 @@ zn_screen_layout_rearrange(struct zn_screen_layout* self)
 }
 
 struct zn_screen*
-zn_screen_layout_get_closest_screen(
-    struct zn_screen_layout* self, int x, int y, int* dst_x, int* dst_y)
+zn_screen_layout_get_closest_screen(struct zn_screen_layout* self, double x,
+    double y, double* dst_x, double* dst_y)
 {
   double closest_x = 0, closest_y = 0, closest_distance = DBL_MAX;
   struct zn_screen* closest_screen = NULL;

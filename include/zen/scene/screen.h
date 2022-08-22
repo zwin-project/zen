@@ -9,10 +9,10 @@
 #include "zen/scene/screen-layout.h"
 
 typedef void (*zn_screen_for_each_visible_surface_callback_t)(
-    struct wlr_surface *surface, void* data);
+    struct wlr_surface *surface, void *data);
 
 struct zn_screen {
-  int x, y;
+  double x, y;
   struct zn_output *output;  // zn_output owns zn_screen, nonnull
   struct zn_screen_layout *screen_layout;
 
@@ -28,7 +28,7 @@ struct zn_screen {
 };
 
 void zn_screen_for_each_visible_surface(struct zn_screen *self,
-    zn_screen_for_each_visible_surface_callback_t callback, void* data);
+    zn_screen_for_each_visible_surface_callback_t callback, void *data);
 
 struct zn_view *zn_screen_get_view_at(
     struct zn_screen *self, double x, double y, double *view_x, double *view_y);
@@ -49,7 +49,7 @@ void zn_screen_set_current_board(
 struct zn_board *zn_screen_get_current_board(struct zn_screen *self);
 
 void zn_screen_get_screen_layout_coords(
-    struct zn_screen *self, int x, int y, int *dst_x, int *dst_y);
+    struct zn_screen *self, double x, double y, double *dst_x, double *dst_y);
 
 void zn_screen_get_box(struct zn_screen *self, struct wlr_box *box);
 

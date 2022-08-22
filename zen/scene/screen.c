@@ -178,7 +178,7 @@ zn_screen_get_current_board(struct zn_screen *self)
 
 void
 zn_screen_get_screen_layout_coords(
-    struct zn_screen *self, int x, int y, int *dst_x, int *dst_y)
+    struct zn_screen *self, double x, double y, double *dst_x, double *dst_y)
 {
   *dst_x = self->x + x;
   *dst_y = self->y + y;
