@@ -15,6 +15,7 @@ _zen_desktop_srcs = [
   'input/pointer.c',
   'input/seat.c',
 
+  'scene/board.c',
   'scene/scene.c',
   'scene/screen.c',
   'scene/screen-layout.c',
