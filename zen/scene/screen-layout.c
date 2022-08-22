@@ -6,6 +6,22 @@
 #include "zen-common.h"
 #include "zen/scene/screen.h"
 
+static void
+zn_screen_layout_rearrange(struct zn_screen_layout* self)
+{
+  int x = 0;
+  struct zn_screen* screen;
+  struct wlr_box box;
+
+  wl_list_for_each(screen, &self->screens, link)
+  {
+    zn_screen_get_box(screen, &box);
+    screen->x = x;
+    screen->y = 0;
+    x += box.width;
+  }
+}
+
 struct zn_screen*
 zn_screen_layout_get_closest_screen(
     struct zn_screen_layout* self, int x, int y, int* dst_x, int* dst_y)
@@ -39,19 +55,8 @@ void
 zn_screen_layout_add(
     struct zn_screen_layout* self, struct zn_screen* new_screen)
 {
-  int x = 0;
-  struct zn_screen* screen;
-  struct wlr_box box;
-
   wl_list_insert(&self->screens, &new_screen->link);
-  wl_list_for_each(screen, &self->screens, link)
-  {
-    zn_screen_get_box(screen, &box);
-    screen->x = x;
-    screen->y = 0;
-    x += box.width;
-  }
-
+  zn_screen_layout_rearrange(self);
   wl_signal_emit(&self->events.new_screen, new_screen);
 
   zn_scene_reassign_boards(self->scene);
@@ -60,9 +65,8 @@ zn_screen_layout_add(
 void
 zn_screen_layout_remove(struct zn_screen_layout* self, struct zn_screen* screen)
 {
-  UNUSED(self);
   wl_list_remove(&screen->link);
-
+  zn_screen_layout_rearrange(self);
   zn_scene_reassign_boards(self->scene);
 }
 
