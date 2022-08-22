@@ -75,12 +75,17 @@ zn_board_create(struct zn_scene *scene)
   self->height = 1080;
 
   self->scene = scene;
+
   wl_list_init(&self->view_list);
+
   wl_list_insert(scene->board_list.prev, &self->link);
+
   wl_list_init(&self->screen_link);
   self->screen = NULL;
+
   self->screen_destroy_listener.notify = zn_board_screen_destroy_handler;
   wl_list_init(&self->screen_destroy_listener.link);
+
   wl_signal_init(&self->events.screen_assigned);
 
   return self;
