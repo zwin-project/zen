@@ -3,12 +3,32 @@
 #include <drm/drm_fourcc.h>
 #include <linux/input.h>
 #include <wlr/render/wlr_renderer.h>
+#include <wlr/types/wlr_output_damage.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/xcursor.h>
 
 #include "zen-common.h"
 #include "zen/scene/screen-layout.h"
 #include "zen/server.h"
+
+static void
+zn_cursor_update_size(struct zn_cursor* self)
+{
+  if (self->visible == false) {
+    self->width = 0;
+    self->height = 0;
+    return;
+  }
+
+  if (self->surface != NULL) {
+    self->width = self->surface->current.width;
+    self->height = self->surface->current.height;
+    return;
+  }
+
+  self->width = self->texture->width;
+  self->height = self->texture->height;
+}
 
 // screen_x and screen_y must be less than screen->width/height
 static void
@@ -23,14 +43,22 @@ zn_cursor_update_position(struct zn_cursor* self, struct zn_screen* screen,
   }
 
   if (self->screen != NULL) {
-    wl_list_remove(&self->destroy_screen_listener.link);
-    wl_list_init(&self->destroy_screen_listener.link);
+    wl_list_remove(&self->screen_destroy_listener.link);
+    wl_list_init(&self->screen_destroy_listener.link);
   }
   if (screen != NULL) {
-    wl_signal_add(&screen->events.destroy, &self->destroy_screen_listener);
+    wl_signal_add(&screen->events.destroy, &self->screen_destroy_listener);
   }
 
   self->screen = screen;
+}
+
+static void
+zn_cursor_damage_whole(struct zn_cursor* self)
+{
+  struct wlr_fbox fbox;
+  zn_cursor_get_fbox(self, &fbox);
+  zn_output_add_damage_box(self->screen->output, &fbox);
 }
 
 static void
@@ -43,15 +71,16 @@ zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
   if (self->screen == NULL) {
     zn_screen_get_fbox(screen, &box);
     zn_cursor_update_position(self, screen, box.width / 2, box.height / 2);
+    zn_cursor_damage_whole(self);
   }
 }
 
 static void
-zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
+zn_cursor_handle_screen_destroy(struct wl_listener* listener, void* data)
 {
   UNUSED(data);
   struct zn_cursor* self =
-      zn_container_of(listener, self, destroy_screen_listener);
+      zn_container_of(listener, self, screen_destroy_listener);
   struct zn_server* server = zn_server_get_singleton();
   struct zn_screen_layout* screen_layout = server->scene->screen_layout;
   struct zn_screen* screen;
@@ -68,17 +97,40 @@ zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
 
   if (found) {
     zn_screen_get_fbox(self->screen, &box);
+    zn_cursor_update_position(self, screen, box.width / 2, box.height / 2);
+    zn_cursor_damage_whole(self);
+  } else {
+    zn_cursor_update_position(self, NULL, 0, 0);
   }
-  zn_cursor_update_position(
-      self, found ? screen : NULL, box.width / 2, box.height / 2);
 }
 
 static void
-zn_cursor_handle_destroy_surface(struct wl_listener* listener, void* data)
+zn_cursor_handle_surface_commit(struct wl_listener* listener, void* data)
+{
+  struct zn_cursor* self =
+      zn_container_of(listener, self, surface_commit_listener);
+  UNUSED(data);
+
+  if (!zn_assert(
+          self->surface, "Handling surface commit while no surface exists")) {
+    return;
+  }
+
+  self->visible = wlr_surface_has_buffer(self->surface);
+
+  zn_cursor_damage_whole(self);
+
+  zn_cursor_update_size(self);
+
+  zn_cursor_damage_whole(self);
+}
+
+static void
+zn_cursor_handle_surface_destroy(struct wl_listener* listener, void* data)
 {
   UNUSED(data);
   struct zn_cursor* self =
-      zn_container_of(listener, self, destroy_surface_listener);
+      zn_container_of(listener, self, surface_destroy_listener);
 
   zn_cursor_set_surface(self, NULL, 0, 0);
 }
@@ -102,7 +154,21 @@ zn_cursor_move_relative(struct zn_cursor* self, double dx, double dy)
 
   new_screen = zn_screen_layout_get_closest_screen(
       layout, layout_x, layout_y, &screen_x, &screen_y);
+
+  zn_cursor_damage_whole(self);
+
   zn_cursor_update_position(self, new_screen, screen_x, screen_y);
+
+  zn_cursor_damage_whole(self);
+}
+
+void
+zn_cursor_get_fbox(struct zn_cursor* self, struct wlr_fbox* fbox)
+{
+  fbox->x = self->x - self->hotspot_x;
+  fbox->y = self->y - self->hotspot_y;
+  fbox->width = self->width;
+  fbox->height = self->height;
 }
 
 void
@@ -110,18 +176,27 @@ zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface,
     int hotspot_x, int hotspot_y)
 {
   if (self->surface != NULL) {
-    wl_list_remove(&self->destroy_surface_listener.link);
-    wl_list_init(&self->destroy_surface_listener.link);
+    wl_list_remove(&self->surface_destroy_listener.link);
+    wl_list_init(&self->surface_destroy_listener.link);
+    wl_list_remove(&self->surface_commit_listener.link);
+    wl_list_init(&self->surface_commit_listener.link);
   }
 
   if (surface != NULL) {
-    wl_signal_add(&surface->events.destroy, &self->destroy_surface_listener);
+    wl_signal_add(&surface->events.destroy, &self->surface_destroy_listener);
+    wl_signal_add(&surface->events.commit, &self->surface_commit_listener);
   }
+
+  zn_cursor_damage_whole(self);
 
   self->hotspot_x = hotspot_x;
   self->hotspot_y = hotspot_y;
   self->visible = surface != NULL;
   self->surface = surface;
+
+  zn_cursor_update_size(self);
+
+  zn_cursor_damage_whole(self);
 }
 
 void
@@ -130,7 +205,12 @@ zn_cursor_reset_surface(struct zn_cursor* self)
   if (self->surface != NULL) {
     zn_cursor_set_surface(self, NULL, 0, 0);
   }
+
   self->visible = true;
+
+  zn_cursor_update_size(self);
+
+  zn_cursor_damage_whole(self);
 }
 
 struct zn_cursor*
@@ -170,13 +250,19 @@ zn_cursor_create(void)
 
   self->new_screen_listener.notify = zn_cursor_handle_new_screen;
   wl_signal_add(&screen_layout->events.new_screen, &self->new_screen_listener);
-  self->destroy_screen_listener.notify = zn_cursor_handle_destroy_screen;
-  self->destroy_surface_listener.notify = zn_cursor_handle_destroy_surface;
 
-  wl_list_init(&self->destroy_screen_listener.link);
+  self->screen_destroy_listener.notify = zn_cursor_handle_screen_destroy;
+  wl_list_init(&self->screen_destroy_listener.link);
+
+  self->surface_commit_listener.notify = zn_cursor_handle_surface_commit;
+  wl_list_init(&self->surface_commit_listener.link);
+
+  self->surface_destroy_listener.notify = zn_cursor_handle_surface_destroy;
+  wl_list_init(&self->surface_destroy_listener.link);
 
   self->screen = NULL;
   self->visible = true;
+  zn_cursor_update_size(self);
 
   return self;
 
@@ -194,7 +280,9 @@ void
 zn_cursor_destroy(struct zn_cursor* self)
 {
   wl_list_remove(&self->new_screen_listener.link);
-  wl_list_remove(&self->destroy_screen_listener.link);
+  wl_list_remove(&self->screen_destroy_listener.link);
+  wl_list_remove(&self->surface_commit_listener.link);
+  wl_list_remove(&self->surface_destroy_listener.link);
   wlr_texture_destroy(self->texture);
   wlr_xcursor_manager_destroy(self->xcursor_manager);
   free(self);

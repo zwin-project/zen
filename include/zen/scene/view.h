@@ -25,8 +25,17 @@ struct zn_view {
 
   const struct zn_view_impl *impl;
 
-  struct wl_list link;  // zn_board::view_list;
+  struct wl_list link;     // zn_board::view_list;
+  struct zn_board *board;  // non null, when mapped
 };
+
+/**
+ * Add the damage of all surfaces associated with the view to the output where
+ * the view id displayed.
+ */
+void zn_view_damage(struct zn_view *self);
+
+void zn_view_damage_whole(struct zn_view *self);
 
 void zn_view_get_fbox(struct zn_view *self, struct wlr_fbox *fbox);
 
