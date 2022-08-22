@@ -5,9 +5,9 @@
 #include <wlr/render/wlr_texture.h>
 #include <wlr/types/wlr_xcursor_manager.h>
 
-#include "zen/input-device.h"
+#include "zen/input/input-device.h"
+#include "zen/input/seat.h"
 #include "zen/scene/screen.h"
-#include "zen/seat.h"
 
 struct zn_cursor {
   int x, y;

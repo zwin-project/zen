@@ -12,7 +12,7 @@
 
 #include "zen-immersive-backend.h"
 #include "zen/display-system.h"
-#include "zen/input-manager.h"
+#include "zen/input/input-manager.h"
 #include "zen/scene/scene.h"
 
 struct zn_server {

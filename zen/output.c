@@ -5,12 +5,12 @@
 #include <wlr/types/wlr_surface.h>
 
 #include "zen-common.h"
+#include "zen/input/seat.h"
 #include "zen/render-2d.h"
 #include "zen/scene/scene.h"
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/screen.h"
 #include "zen/scene/view.h"
-#include "zen/seat.h"
 
 static void zn_output_destroy(struct zn_output *self);
 

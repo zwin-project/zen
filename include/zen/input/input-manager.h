@@ -5,8 +5,8 @@
 #include <wlr/types/wlr_input_device.h>
 
 #include "zen/binding.h"
-#include "zen/input-device.h"
-#include "zen/keyboard.h"
+#include "zen/input/input-device.h"
+#include "zen/input/keyboard.h"
 
 struct zn_input_manager {
   struct zn_seat* seat;

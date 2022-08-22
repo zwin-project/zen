@@ -1,4 +1,4 @@
-#include "zen/keyboard.h"
+#include "zen/input/keyboard.h"
 
 #include <wlr/types/wlr_seat.h>
 #include <xkbcommon/xkbcommon.h>

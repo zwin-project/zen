@@ -1,10 +1,10 @@
 #include "zen/scene/screen.h"
 
 #include "zen-common.h"
+#include "zen/input/seat.h"
 #include "zen/scene/board.h"
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/view.h"
-#include "zen/seat.h"
 
 void
 zn_screen_for_each_visible_surface(struct zn_screen *self,

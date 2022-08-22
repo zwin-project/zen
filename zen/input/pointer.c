@@ -1,4 +1,4 @@
-#include "zen/pointer.h"
+#include "zen/input/pointer.h"
 
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_pointer.h>
