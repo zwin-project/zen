@@ -6,16 +6,47 @@
 #include "zen-common.h"
 #include "zen/scene/screen.h"
 
+// from wlroots::wlr_box_closest_point
+static void
+wlr_fbox_closest_point(const struct wlr_fbox* box, double x, double y,
+    double* dest_x, double* dest_y)
+{
+  // if box is empty, then it contains no points, so no closest point either
+  if (box->width <= 0 || box->height <= 0) {
+    *dest_x = NAN;
+    *dest_y = NAN;
+    return;
+  }
+
+  // find the closest x point
+  if (x < box->x) {
+    *dest_x = box->x;
+  } else if (x >= box->x + box->width) {
+    *dest_x = box->x + box->width - 1;
+  } else {
+    *dest_x = x;
+  }
+
+  // find closest y point
+  if (y < box->y) {
+    *dest_y = box->y;
+  } else if (y >= box->y + box->height) {
+    *dest_y = box->y + box->height - 1;
+  } else {
+    *dest_y = y;
+  }
+}
+
 static void
 zn_screen_layout_rearrange(struct zn_screen_layout* self)
 {
   int x = 0;
   struct zn_screen* screen;
-  struct wlr_box box;
+  struct wlr_fbox box;
 
   wl_list_for_each(screen, &self->screens, link)
   {
-    zn_screen_get_box(screen, &box);
+    zn_screen_get_fbox(screen, &box);
     screen->x = x;
     screen->y = 0;
     x += box.width;
@@ -33,9 +64,9 @@ zn_screen_layout_get_closest_screen(struct zn_screen_layout* self, double x,
   wl_list_for_each(screen, &self->screens, link)
   {
     double current_closest_x, current_closest_y, current_closest_distance;
-    struct wlr_box box;
-    zn_screen_get_box(screen, &box);
-    wlr_box_closest_point(&box, x, y, &current_closest_x, &current_closest_y);
+    struct wlr_fbox box;
+    zn_screen_get_fbox(screen, &box);
+    wlr_fbox_closest_point(&box, x, y, &current_closest_x, &current_closest_y);
     current_closest_distance =
         pow(x - current_closest_x, 2) + pow(y - current_closest_y, 2);
     if (current_closest_distance < closest_distance) {

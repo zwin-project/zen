@@ -185,12 +185,15 @@ zn_screen_get_screen_layout_coords(
 }
 
 void
-zn_screen_get_box(struct zn_screen *self, struct wlr_box *box)
+zn_screen_get_fbox(struct zn_screen *self, struct wlr_fbox *box)
 {
+  int width, height;
   wlr_output_effective_resolution(
-      self->output->wlr_output, &box->width, &box->height);
+      self->output->wlr_output, &width, &height);
   box->x = self->x;
   box->y = self->y;
+  box->width = width;
+  box->height = height;
 }
 
 struct zn_screen *

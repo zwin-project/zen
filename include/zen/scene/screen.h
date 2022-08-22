@@ -51,7 +51,7 @@ struct zn_board *zn_screen_get_current_board(struct zn_screen *self);
 void zn_screen_get_screen_layout_coords(
     struct zn_screen *self, double x, double y, double *dst_x, double *dst_y);
 
-void zn_screen_get_box(struct zn_screen *self, struct wlr_box *box);
+void zn_screen_get_fbox(struct zn_screen *self, struct wlr_fbox *box);
 
 struct zn_screen *zn_screen_create(
     struct zn_screen_layout *screen_layout, struct zn_output *output);

@@ -38,10 +38,10 @@ zn_cursor_handle_new_screen(struct wl_listener* listener, void* data)
 {
   struct zn_cursor* self = zn_container_of(listener, self, new_screen_listener);
   struct zn_screen* screen = data;
-  struct wlr_box box;
+  struct wlr_fbox box;
 
   if (self->screen == NULL) {
-    zn_screen_get_box(screen, &box);
+    zn_screen_get_fbox(screen, &box);
     zn_cursor_update_position(self, screen, box.width / 2, box.height / 2);
   }
 }
@@ -55,7 +55,7 @@ zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
   struct zn_server* server = zn_server_get_singleton();
   struct zn_screen_layout* screen_layout = server->scene->screen_layout;
   struct zn_screen* screen;
-  struct wlr_box box = {0};
+  struct wlr_fbox box = {0};
   bool found = false;
 
   wl_list_for_each(screen, &screen_layout->screens, link)
@@ -67,7 +67,7 @@ zn_cursor_handle_destroy_screen(struct wl_listener* listener, void* data)
   }
 
   if (found) {
-    zn_screen_get_box(self->screen, &box);
+    zn_screen_get_fbox(self->screen, &box);
   }
   zn_cursor_update_position(
       self, found ? screen : NULL, box.width / 2, box.height / 2);
