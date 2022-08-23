@@ -1,3 +1,5 @@
+subdir('backend')
+
 _zen_desktop_srcs = [
   'binding.c',
   'cursor.c',
