@@ -39,8 +39,12 @@ zn_screen_get_view_at(
     zn_view_get_fbox(view, &fbox);
 
     if (zn_wlr_fbox_contains_point(&fbox, x, y)) {
-      *view_x = x - view->x;
-      *view_y = y - view->y;
+      if (view_x != NULL) {
+        *view_x = x - view->x;
+      }
+      if (view_y != NULL) {
+        *view_y = y - view->y;
+      }
       return view;
     }
   }

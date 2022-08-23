@@ -11,6 +11,7 @@ struct zn_view;
 
 struct zn_view_impl {
   struct wlr_surface *(*get_wlr_surface)(struct zn_view *view);
+  void (*focus)(struct zn_view *view);
 };
 
 enum zn_view_type {

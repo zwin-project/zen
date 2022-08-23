@@ -3,8 +3,8 @@
 #include <stdbool.h>
 
 #include "zen-common.h"
-#include "zen/scene/board.h"
 #include "zen/input/seat.h"
+#include "zen/scene/board.h"
 #include "zen/xdg-toplevel-view.h"
 #include "zen/xwayland-view.h"
 
@@ -51,6 +51,7 @@ zn_view_map_to_scene(struct zn_view *self, struct zn_scene *scene)
   self->y = (board->height - fbox.height) / 2;
 
   wl_list_insert(&board->view_list, &self->link);
+  self->impl->focus(self);
 }
 
 void
