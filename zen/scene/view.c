@@ -3,7 +3,8 @@
 #include <stdbool.h>
 
 #include "zen-common.h"
-#include "zen/seat.h"
+#include "zen/scene/board.h"
+#include "zen/input/seat.h"
 #include "zen/xdg-toplevel-view.h"
 #include "zen/xwayland-view.h"
 
@@ -21,22 +22,35 @@ zn_view_get_fbox(struct zn_view *self, struct wlr_fbox *fbox)
 bool
 zn_view_is_mapped(struct zn_view *self)
 {
-  // some zn_screen has this view in zn_screen::views
+  // check if some zn_board has this view in zn_board::view_list
   return !wl_list_empty(&self->link);
 }
 
 void
-zn_view_map_to_screen(struct zn_view *self, struct zn_screen *screen)
+zn_view_map_to_scene(struct zn_view *self, struct zn_scene *scene)
 {
-  struct wlr_box screen_box;
-  struct wlr_fbox view_fbox;
-  zn_screen_get_box(screen, &screen_box);
-  zn_view_get_fbox(self, &view_fbox);
+  struct zn_board *board;
+  struct wlr_fbox fbox;
 
-  self->x = (screen_box.width / 2) - (view_fbox.width / 2);
-  self->y = (screen_box.height / 2) - (view_fbox.height / 2);
+  board = zn_scene_get_focus_board(scene);
 
-  wl_list_insert(screen->views.prev, &self->link);
+  if (board == NULL && zn_assert(!wl_list_empty(&scene->board_list),
+                           "zn_scene::board_list should not be empty")) {
+    board = zn_container_of(scene->board_list.next, board, link);
+  }
+
+  if (board == NULL) {
+    zn_error("Failed to find a board to which view is mapped");
+    return;
+  }
+
+  // TODO: handle board destruction
+
+  zn_view_get_fbox(self, &fbox);
+  self->x = (board->width - fbox.width) / 2;
+  self->y = (board->height - fbox.height) / 2;
+
+  wl_list_insert(&board->view_list, &self->link);
 }
 
 void

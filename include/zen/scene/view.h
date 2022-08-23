@@ -5,7 +5,7 @@
 #include <wlr/types/wlr_surface.h>
 #include <wlr/types/wlr_xdg_shell.h>
 
-#include "zen/scene/screen.h"
+#include "zen/scene/scene.h"
 
 struct zn_view;
 
@@ -27,14 +27,14 @@ struct zn_view {
 
   const struct zn_view_impl *impl;
 
-  struct wl_list link;  // zn_screen::views;
+  struct wl_list link;  // zn_board::view_list;
 };
 
 void zn_view_get_fbox(struct zn_view *self, struct wlr_fbox *fbox);
 
 bool zn_view_is_mapped(struct zn_view *self);
 
-void zn_view_map_to_screen(struct zn_view *self, struct zn_screen *screen);
+void zn_view_map_to_scene(struct zn_view *self, struct zn_scene *scene);
 
 void zn_view_unmap(struct zn_view *self);
 

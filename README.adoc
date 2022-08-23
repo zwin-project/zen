@@ -37,6 +37,25 @@ $ sudo chvt <number>
 $ zen-desktop
 ```
 
-== Stop ZEN Desktop
+== Key bindings
 
-Press `<alt> + q` to quit.
+We cannot customize these bindings for now.
+
+.Key bindings
+[%autowidth.stretch]
+|===
+|bindings|description
+
+|<mod> + <shift> + →
+|Move to next board
+
+|<mod> + <shift> + ←
+|Move to previous board
+
+|<mod> + <shift> + n
+|Create new board
+
+|<alt> + q
+|Terminate ZEN Desktop (for development convenience)
+
+|===

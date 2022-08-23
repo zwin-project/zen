@@ -1,11 +1,11 @@
-#include "zen/input-device.h"
+#include "zen/input/input-device.h"
 
 #include <wayland-server.h>
 
 #include "zen-common.h"
-#include "zen/keyboard.h"
-#include "zen/pointer.h"
-#include "zen/seat.h"
+#include "zen/input/keyboard.h"
+#include "zen/input/pointer.h"
+#include "zen/input/seat.h"
 
 static void
 zn_input_device_seat_destroy_handler(struct wl_listener* listener, void* data)

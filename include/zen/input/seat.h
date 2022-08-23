@@ -16,6 +16,8 @@ struct zn_seat {
   struct {
     struct wl_signal destroy;
   } events;
+
+  struct wl_listener request_set_cursor_listener;
 };
 
 void zn_seat_add_device(

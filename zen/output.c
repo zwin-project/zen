@@ -5,6 +5,7 @@
 #include <wlr/types/wlr_surface.h>
 
 #include "zen-common.h"
+#include "zen/input/seat.h"
 #include "zen/render-2d.h"
 #include "zen/scene/scene.h"
 #include "zen/scene/screen-layout.h"
@@ -53,11 +54,16 @@ zn_output_repaint_timer_handler(void *data)
 }
 
 static void
+send_frame_done_callback(struct wlr_surface *surface, void *data)
+{
+  wlr_surface_send_frame_done(surface, data);
+}
+
+static void
 zn_output_damage_frame_handler(struct wl_listener *listener, void *data)
 {
   struct zn_output *self =
       zn_container_of(listener, self, damage_frame_listener);
-  struct zn_view *view;
   struct timespec now;
   UNUSED(data);
 
@@ -68,9 +74,8 @@ zn_output_damage_frame_handler(struct wl_listener *listener, void *data)
   zn_output_repaint_timer_handler(self);
 
   clock_gettime(CLOCK_MONOTONIC, &now);
-
-  wl_list_for_each(view, &self->screen->views, link)
-      wlr_surface_send_frame_done(view->impl->get_wlr_surface(view), &now);
+  zn_screen_for_each_visible_surface(
+      self->screen, send_frame_done_callback, &now);
 }
 
 struct zn_output *

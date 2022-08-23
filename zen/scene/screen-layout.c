@@ -5,10 +5,27 @@
 
 #include "zen-common.h"
 #include "zen/scene/screen.h"
+#include "zen/wlr/box.h"
+
+static void
+zn_screen_layout_rearrange(struct zn_screen_layout* self)
+{
+  int x = 0;
+  struct zn_screen* screen;
+  struct wlr_fbox box;
+
+  wl_list_for_each(screen, &self->screens, link)
+  {
+    zn_screen_get_fbox(screen, &box);
+    screen->x = x;
+    screen->y = 0;
+    x += box.width;
+  }
+}
 
 struct zn_screen*
-zn_screen_layout_get_closest_screen(
-    struct zn_screen_layout* self, int x, int y, int* dst_x, int* dst_y)
+zn_screen_layout_get_closest_screen(struct zn_screen_layout* self, double x,
+    double y, double* dst_x, double* dst_y)
 {
   double closest_x = 0, closest_y = 0, closest_distance = DBL_MAX;
   struct zn_screen* closest_screen = NULL;
@@ -17,9 +34,10 @@ zn_screen_layout_get_closest_screen(
   wl_list_for_each(screen, &self->screens, link)
   {
     double current_closest_x, current_closest_y, current_closest_distance;
-    struct wlr_box box;
-    zn_screen_get_box(screen, &box);
-    wlr_box_closest_point(&box, x, y, &current_closest_x, &current_closest_y);
+    struct wlr_fbox box;
+    zn_screen_get_fbox(screen, &box);
+    zn_wlr_fbox_closest_point(
+        &box, x, y, &current_closest_x, &current_closest_y);
     current_closest_distance =
         pow(x - current_closest_x, 2) + pow(y - current_closest_y, 2);
     if (current_closest_distance < closest_distance) {
@@ -39,31 +57,23 @@ void
 zn_screen_layout_add(
     struct zn_screen_layout* self, struct zn_screen* new_screen)
 {
-  int x = 0;
-  struct zn_screen* screen;
-  struct wlr_box box;
-
   wl_list_insert(&self->screens, &new_screen->link);
-  wl_list_for_each(screen, &self->screens, link)
-  {
-    zn_screen_get_box(screen, &box);
-    screen->x = x;
-    screen->y = 0;
-    x += box.width;
-  }
-
+  zn_screen_layout_rearrange(self);
   wl_signal_emit(&self->events.new_screen, new_screen);
+
+  zn_scene_reassign_boards(self->scene);
 }
 
 void
 zn_screen_layout_remove(struct zn_screen_layout* self, struct zn_screen* screen)
 {
-  UNUSED(self);
   wl_list_remove(&screen->link);
+  zn_screen_layout_rearrange(self);
+  zn_scene_reassign_boards(self->scene);
 }
 
 struct zn_screen_layout*
-zn_screen_layout_create(void)
+zn_screen_layout_create(struct zn_scene* scene)
 {
   struct zn_screen_layout* self;
   self = zalloc(sizeof *self);
@@ -73,6 +83,7 @@ zn_screen_layout_create(void)
     goto err;
   }
 
+  self->scene = scene;
   wl_list_init(&self->screens);
   wl_signal_init(&self->events.new_screen);
 

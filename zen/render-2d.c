@@ -4,11 +4,11 @@
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_surface.h>
 
-#include "zen-common.h"
+#include "zen/input/seat.h"
 #include "zen/output.h"
+#include "zen/scene/board.h"
 #include "zen/scene/screen.h"
 #include "zen/scene/view.h"
-#include "zen/seat.h"
 
 typedef void (*zn_surface_iterator_func_t)(struct wlr_surface *surface,
     struct wlr_renderer *renderer, const struct wlr_fbox *box);
@@ -93,15 +93,26 @@ static void
 zn_render_2d_cursor(struct zn_cursor *cursor, struct zn_screen *screen,
     struct wlr_renderer *renderer)
 {
+  struct wlr_texture *texture;
   float transform[9] = {
       1, 0, 0,  //
       0, 1, 0,  //
       0, 0, 1   //
   };
 
-  if (cursor->screen == screen && cursor->texture) {
-    wlr_render_texture(
-        renderer, cursor->texture, transform, cursor->x, cursor->y, 1.f);
+  if (!cursor->visible || cursor->screen != screen) {
+    return;
+  }
+
+  if (cursor->surface != NULL) {
+    texture = wlr_surface_get_texture(cursor->surface);
+  } else {
+    texture = cursor->texture;
+  }
+
+  if (texture != NULL) {
+    wlr_render_texture(renderer, texture, transform,
+        cursor->x - cursor->hotspot_x, cursor->y - cursor->hotspot_y, 1.f);
   }
 }
 
@@ -111,8 +122,9 @@ zn_render_2d_screen(struct zn_screen *screen, struct wlr_renderer *renderer)
   struct zn_view *view;
   struct zn_server *server = zn_server_get_singleton();
   struct zn_cursor *cursor = server->input_manager->seat->cursor;
+  struct zn_board *board = zn_screen_get_current_board(screen);
 
-  wl_list_for_each(view, &screen->views, link)
+  wl_list_for_each(view, &board->view_list, link)
       zn_render_2d_view(view, renderer);
 
   zn_render_2d_cursor(cursor, screen, renderer);
