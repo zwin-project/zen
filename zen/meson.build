@@ -21,6 +21,8 @@ _zen_desktop_srcs = [
   'scene/screen-layout.c',
   'scene/view.c',
 
+  'wlr/box.c',
+
   protocols['xdg-shell']['private-code'],
   protocols['xdg-shell']['server-header'],
   protocols['zen-desktop']['private-code'],

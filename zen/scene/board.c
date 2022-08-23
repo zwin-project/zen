@@ -43,12 +43,12 @@ zn_board_assign_to_screen(struct zn_board *self, struct zn_screen *screen)
   }
 
   if (screen) {
-    struct wlr_box box;
+    struct wlr_fbox box;
 
     wl_list_insert(screen->board_list.prev, &self->screen_link);
     wl_signal_add(&screen->events.destroy, &self->screen_destroy_listener);
 
-    zn_screen_get_box(screen, &box);
+    zn_screen_get_fbox(screen, &box);
     zn_board_resize(self, box.width, box.height);
   }
 
