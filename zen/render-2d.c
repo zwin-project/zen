@@ -1,6 +1,5 @@
 #include "zen/render-2d.h"
 
-#include <string.h>
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_surface.h>
 
