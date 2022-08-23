@@ -22,7 +22,7 @@ wlr_fbox_closest_point(const struct wlr_fbox* box, double x, double y,
   if (x < box->x) {
     *dest_x = box->x;
   } else if (x >= box->x + box->width) {
-    *dest_x = box->x + box->width - 1;
+    *dest_x = box->x + box->width;
   } else {
     *dest_x = x;
   }
@@ -31,7 +31,7 @@ wlr_fbox_closest_point(const struct wlr_fbox* box, double x, double y,
   if (y < box->y) {
     *dest_y = box->y;
   } else if (y >= box->y + box->height) {
-    *dest_y = box->y + box->height - 1;
+    *dest_y = box->y + box->height;
   } else {
     *dest_y = y;
   }
