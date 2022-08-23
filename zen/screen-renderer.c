@@ -1,4 +1,4 @@
-#include "zen/render-2d.h"
+#include "zen/screen-renderer.h"
 
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_matrix.h>
@@ -25,7 +25,8 @@ struct surface_iterator_data {
 };
 
 static void
-zn_render_2d_scissor_output(struct zn_output *output, pixman_box32_t *rect)
+zn_screen_renderer_scissor_output(
+    struct zn_output *output, pixman_box32_t *rect)
 {
   struct wlr_output *wlr_output = output->wlr_output;
   struct wlr_renderer *renderer = wlr_output->renderer;
@@ -47,8 +48,9 @@ zn_render_2d_scissor_output(struct zn_output *output, pixman_box32_t *rect)
 }
 
 static void
-zn_render_2d_get_surface_fbox(struct wlr_surface *surface, struct zn_view *view,
-    int surface_x, int surface_y, struct wlr_fbox *surface_box)
+zn_screen_renderer_get_surface_fbox(struct wlr_surface *surface,
+    struct zn_view *view, int surface_x, int surface_y,
+    struct wlr_fbox *surface_box)
 {
   surface_box->x = view->x + surface_x;
   surface_box->y = view->y + surface_y;
@@ -57,13 +59,13 @@ zn_render_2d_get_surface_fbox(struct wlr_surface *surface, struct zn_view *view,
 }
 
 static void
-zn_render_2d_for_each_surface_iterator(
+zn_screen_renderer_for_each_surface_iterator(
     struct wlr_surface *surface, int surface_x, int surface_y, void *user_data)
 {
   struct surface_iterator_data *data = user_data;
   struct wlr_fbox surface_box;
 
-  zn_render_2d_get_surface_fbox(
+  zn_screen_renderer_get_surface_fbox(
       surface, data->view, surface_x, surface_y, &surface_box);
 
   data->iterator(
@@ -71,7 +73,7 @@ zn_render_2d_for_each_surface_iterator(
 }
 
 static void
-zn_render_2d_render_surface_iterator(struct zn_screen *screen,
+zn_screen_renderer_render_surface_iterator(struct zn_screen *screen,
     struct wlr_surface *surface, struct wlr_renderer *renderer,
     struct wlr_fbox *fbox, pixman_region32_t *screen_damage)
 {
@@ -100,7 +102,7 @@ zn_render_2d_render_surface_iterator(struct zn_screen *screen,
 
   rects = pixman_region32_rectangles(&render_damage, &rect_count);
   for (int i = 0; i < rect_count; i++) {
-    zn_render_2d_scissor_output(output, &rects[i]);
+    zn_screen_renderer_scissor_output(output, &rects[i]);
     wlr_render_texture_with_matrix(renderer, texture, matrix, 1.0f);
   }
 
@@ -109,11 +111,12 @@ render_damage_finish:
 }
 
 static void
-zn_render_2d_view_popups(struct zn_screen *screen, struct zn_view *view,
-    struct wlr_renderer *renderer, pixman_region32_t *screen_damage)
+zn_screen_renderer_render_view_popups(struct zn_screen *screen,
+    struct zn_view *view, struct wlr_renderer *renderer,
+    pixman_region32_t *screen_damage)
 {
   struct surface_iterator_data data = {
-      .iterator = zn_render_2d_render_surface_iterator,
+      .iterator = zn_screen_renderer_render_surface_iterator,
       .screen = screen,
       .view = view,
       .renderer = renderer,
@@ -122,17 +125,17 @@ zn_render_2d_view_popups(struct zn_screen *screen, struct zn_view *view,
 
   if (view->impl->for_each_popup_surface) {
     view->impl->for_each_popup_surface(
-        view, zn_render_2d_for_each_surface_iterator, &data);
+        view, zn_screen_renderer_for_each_surface_iterator, &data);
   }
 }
 
 static void
-zn_render_2d_view(struct zn_screen *screen, struct zn_view *view,
+zn_screen_renderer_render_view(struct zn_screen *screen, struct zn_view *view,
     struct wlr_renderer *renderer, pixman_region32_t *screen_damage)
 {
   struct wlr_surface *wlr_surface = view->impl->get_wlr_surface(view);
   struct surface_iterator_data data = {
-      .iterator = zn_render_2d_render_surface_iterator,
+      .iterator = zn_screen_renderer_render_surface_iterator,
       .screen = screen,
       .view = view,
       .renderer = renderer,
@@ -140,15 +143,16 @@ zn_render_2d_view(struct zn_screen *screen, struct zn_view *view,
   };
 
   wlr_surface_for_each_surface(
-      wlr_surface, zn_render_2d_for_each_surface_iterator, &data);
+      wlr_surface, zn_screen_renderer_for_each_surface_iterator, &data);
 
   // TODO: render popups only focused view
-  zn_render_2d_view_popups(screen, view, renderer, screen_damage);
+  zn_screen_renderer_render_view_popups(screen, view, renderer, screen_damage);
 }
 
 static void
-zn_render_2d_cursor(struct zn_screen *screen, struct zn_cursor *cursor,
-    struct wlr_renderer *renderer, pixman_region32_t *screen_damage)
+zn_screen_renderer_render_cursor(struct zn_screen *screen,
+    struct zn_cursor *cursor, struct wlr_renderer *renderer,
+    pixman_region32_t *screen_damage)
 {
   struct wlr_texture *texture;
   struct wlr_fbox fbox;
@@ -192,7 +196,7 @@ zn_render_2d_cursor(struct zn_screen *screen, struct zn_cursor *cursor,
 
   rects = pixman_region32_rectangles(&render_damage, &rect_count);
   for (int i = 0; i < rect_count; i++) {
-    zn_render_2d_scissor_output(screen->output, &rects[i]);
+    zn_screen_renderer_scissor_output(screen->output, &rects[i]);
     wlr_render_texture_with_matrix(renderer, texture, matrix, 1.0f);
   }
 
@@ -201,8 +205,8 @@ render_damage_finish:
 }
 
 void
-zn_render_2d_screen(struct zn_screen *screen, struct wlr_renderer *renderer,
-    pixman_region32_t *damage)
+zn_screen_renderer_render(struct zn_screen *screen,
+    struct wlr_renderer *renderer, pixman_region32_t *damage)
 {
   struct zn_view *view;
   struct zn_server *server = zn_server_get_singleton();
@@ -229,14 +233,14 @@ zn_render_2d_screen(struct zn_screen *screen, struct wlr_renderer *renderer,
 
   rects = pixman_region32_rectangles(&screen_damage, &rect_count);
   for (int i = 0; i < rect_count; i++) {
-    zn_render_2d_scissor_output(output, &rects[i]);
+    zn_screen_renderer_scissor_output(output, &rects[i]);
     wlr_renderer_clear(renderer, (float[]){0.2, 0.3, 0.2, 1});
   }
 
   wl_list_for_each(view, &board->view_list, link)
-      zn_render_2d_view(screen, view, renderer, &screen_damage);
+      zn_screen_renderer_render_view(screen, view, renderer, &screen_damage);
 
-  zn_render_2d_cursor(screen, cursor, renderer, &screen_damage);
+  zn_screen_renderer_render_cursor(screen, cursor, renderer, &screen_damage);
 
 out_commit:
   wlr_renderer_end(renderer);

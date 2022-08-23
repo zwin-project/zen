@@ -7,11 +7,11 @@
 
 #include "zen-common.h"
 #include "zen/input/seat.h"
-#include "zen/render-2d.h"
 #include "zen/scene/scene.h"
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/screen.h"
 #include "zen/scene/view.h"
+#include "zen/screen-renderer.h"
 
 static void zn_output_destroy(struct zn_output *self);
 
@@ -67,7 +67,7 @@ zn_output_repaint_timer_handler(void *data)
   }
 
   if (needs_frame) {
-    zn_render_2d_screen(self->screen, renderer, &damage);
+    zn_screen_renderer_render(self->screen, renderer, &damage);
   } else {
     wlr_output_rollback(self->wlr_output);
   }

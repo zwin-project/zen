@@ -4,7 +4,7 @@ _zen_desktop_srcs = [
   'display-system.c',
   'main.c',
   'output.c',
-  'render-2d.c',
+  'screen-renderer.c',
   'server.c',
   'xdg-toplevel-view.c',
   'xwayland-view.c',
