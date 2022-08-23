@@ -5,6 +5,7 @@
 #include "zen/scene/board.h"
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/view.h"
+#include "zen/wlr/box.h"
 
 void
 zn_screen_for_each_visible_surface(struct zn_screen *self,
@@ -37,8 +38,7 @@ zn_screen_get_view_at(
   {
     zn_view_get_fbox(view, &fbox);
 
-    if (fbox.x <= x && x < fbox.x + fbox.width && fbox.y <= y &&
-        y < fbox.y + fbox.height) {
+    if (zn_wlr_fbox_contains_point(&fbox, x, y)) {
       *view_x = x - view->x;
       *view_y = y - view->y;
       return view;
@@ -188,8 +188,7 @@ void
 zn_screen_get_fbox(struct zn_screen *self, struct wlr_fbox *box)
 {
   int width, height;
-  wlr_output_effective_resolution(
-      self->output->wlr_output, &width, &height);
+  wlr_output_effective_resolution(self->output->wlr_output, &width, &height);
   box->x = self->x;
   box->y = self->y;
   box->width = width;
