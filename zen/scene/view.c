@@ -39,6 +39,7 @@ zn_view_focus(struct zn_view *self)
   if (self != NULL) {
     self->impl->focus(self);
   }
+
   zn_scene_set_active_view(scene, self);
 }
 
@@ -51,6 +52,7 @@ zn_view_unfocus(struct zn_view *self)
   if (self != NULL) {
     self->impl->unfocus(self);
   }
+
   zn_scene_set_active_view(scene, NULL);
 }
 
