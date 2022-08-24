@@ -9,21 +9,83 @@
 #include "zen/scene/screen.h"
 #include "zen/scene/view.h"
 
-static void
-zn_render_2d_view(struct zn_view *view, struct wlr_renderer *renderer)
-{
-  struct wlr_surface *wlr_surface = view->impl->get_wlr_surface(view);
-  struct wlr_texture *texture = wlr_surface_get_texture(wlr_surface);
-  struct wlr_fbox fbox;
+typedef void (*surface_iterator_func_t)(struct wlr_surface *surface,
+    struct wlr_renderer *renderer, const struct wlr_fbox *box);
 
+struct surface_iterator_data {
+  surface_iterator_func_t iterator;
+
+  struct zn_view *view;
+  struct wlr_renderer *renderer;
+};
+
+static void
+zn_render_2d_get_surface_fbox(struct wlr_surface *surface, struct zn_view *view,
+    int surface_x, int surface_y, struct wlr_fbox *surface_box)
+{
+  surface_box->x = view->x + surface_x;
+  surface_box->y = view->y + surface_y;
+  surface_box->width = surface->current.width;
+  surface_box->height = surface->current.height;
+}
+
+static void
+zn_render_2d_for_each_surface_iterator(
+    struct wlr_surface *surface, int surface_x, int surface_y, void *user_data)
+{
+  struct surface_iterator_data *data = user_data;
+  struct wlr_fbox surface_box;
+
+  zn_render_2d_get_surface_fbox(
+      surface, data->view, surface_x, surface_y, &surface_box);
+
+  data->iterator(surface, data->renderer, &surface_box);
+}
+
+static void
+zn_render_2d_render_surface_iterator(struct wlr_surface *surface,
+    struct wlr_renderer *renderer, const struct wlr_fbox *box)
+{
+  struct wlr_texture *texture = wlr_surface_get_texture(surface);
   float transform[9] = {
       1, 0, 0,  //
       0, 1, 0,  //
       0, 0, 1   //
   };
 
-  zn_view_get_fbox(view, &fbox);
-  wlr_render_texture(renderer, texture, transform, fbox.x, fbox.y, 1);
+  wlr_render_texture(renderer, texture, transform, box->x, box->y, 1.f);
+}
+
+static void
+zn_render_2d_view_popups(struct zn_view *view, struct wlr_renderer *renderer)
+{
+  struct surface_iterator_data data = {
+      .iterator = zn_render_2d_render_surface_iterator,
+      .view = view,
+      .renderer = renderer,
+  };
+
+  if (view->impl->for_each_popup_surface) {
+    view->impl->for_each_popup_surface(
+        view, zn_render_2d_for_each_surface_iterator, &data);
+  }
+}
+
+static void
+zn_render_2d_view(struct zn_view *view, struct wlr_renderer *renderer)
+{
+  struct wlr_surface *wlr_surface = view->impl->get_wlr_surface(view);
+  struct surface_iterator_data data = {
+      .iterator = zn_render_2d_render_surface_iterator,
+      .view = view,
+      .renderer = renderer,
+  };
+
+  wlr_surface_for_each_surface(
+      wlr_surface, zn_render_2d_for_each_surface_iterator, &data);
+
+  // TODO: render popups only focused view
+  zn_render_2d_view_popups(view, renderer);
 }
 
 static void
