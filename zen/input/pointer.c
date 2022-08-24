@@ -58,7 +58,7 @@ zn_pointer_handle_button(struct wl_listener* listener, void* data)
     view =
         zn_screen_get_view_at(cursor->screen, cursor->x, cursor->y, NULL, NULL);
     if (view != NULL) {
-      view->impl->focus(view);
+      zn_view_focus(view);
     }
   }
 }

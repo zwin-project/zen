@@ -8,6 +8,8 @@
 struct zn_scene {
   struct zn_screen_layout* screen_layout;
 
+  struct zn_view* active_view;
+
   struct wl_list board_list;  // zn_board::link, non empty
 };
 

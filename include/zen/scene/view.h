@@ -12,6 +12,7 @@ struct zn_view;
 struct zn_view_impl {
   struct wlr_surface *(*get_wlr_surface)(struct zn_view *view);
   void (*focus)(struct zn_view *view);
+  void (*unfocus)(struct zn_view *view);
 };
 
 enum zn_view_type {
@@ -30,6 +31,8 @@ struct zn_view {
 };
 
 void zn_view_get_fbox(struct zn_view *self, struct wlr_fbox *fbox);
+
+void zn_view_focus(struct zn_view *self);
 
 bool zn_view_is_mapped(struct zn_view *self);
 

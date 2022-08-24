@@ -27,6 +27,20 @@ zn_view_is_mapped(struct zn_view *self)
 }
 
 void
+zn_view_focus(struct zn_view *self)
+{
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_scene *scene = server->scene;
+
+  if (scene->active_view != NULL) {
+    self->impl->unfocus(scene->active_view);
+  }
+
+  scene->active_view = self;
+  self->impl->focus(self);
+}
+
+void
 zn_view_map_to_scene(struct zn_view *self, struct zn_scene *scene)
 {
   struct zn_board *board;
@@ -51,7 +65,7 @@ zn_view_map_to_scene(struct zn_view *self, struct zn_scene *scene)
   self->y = (board->height - fbox.height) / 2;
 
   wl_list_insert(&board->view_list, &self->link);
-  self->impl->focus(self);
+  zn_view_focus(self);
 }
 
 void
