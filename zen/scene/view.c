@@ -36,8 +36,8 @@ zn_view_focus(struct zn_view *self)
     zn_view_unfocus(scene->active_view);
   }
 
-  scene->active_view = self;
   self->impl->focus(self);
+  zn_scene_set_active_view(scene, self);
 }
 
 void
@@ -47,7 +47,7 @@ zn_view_unfocus(struct zn_view *self)
   struct zn_scene *scene = server->scene;
 
   self->impl->unfocus(self);
-  scene->active_view = NULL;
+  zn_scene_set_active_view(scene, NULL);
 }
 
 void
@@ -91,11 +91,13 @@ zn_view_init(struct zn_view *self, enum zn_view_type type,
 {
   self->type = type;
   self->impl = impl;
+  wl_signal_init(&self->events.destroy);
   wl_list_init(&self->link);
 }
 
 void
 zn_view_fini(struct zn_view *self)
 {
+  wl_signal_emit(&self->events.destroy, NULL);
   wl_list_remove(&self->link);
 }

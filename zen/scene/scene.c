@@ -6,6 +6,17 @@
 #include "zen/scene/board.h"
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/screen.h"
+#include "zen/scene/view.h"
+
+static void
+zn_scene_destroy_active_view_handler(struct wl_listener* listener, void* data)
+{
+  UNUSED(data);
+  struct zn_scene* self =
+      zn_container_of(listener, self, destroy_active_view_listener);
+
+  zn_scene_set_active_view(self, NULL);
+}
 
 /**
  * @return struct zn_screen* can be NULL
@@ -55,6 +66,25 @@ zn_scene_new_board_binding_handler(uint32_t time_msec, uint32_t key, void* data)
 
   zn_board_assign_to_screen(board, screen);
   zn_screen_set_current_board(screen, board);
+}
+
+void
+zn_scene_set_active_view(struct zn_scene* self, struct zn_view* view)
+{
+  if (view == self->active_view) {
+    return;
+  }
+
+  if (self->active_view != NULL) {
+    wl_list_remove(&self->destroy_active_view_listener.link);
+    wl_list_init(&self->destroy_active_view_listener.link);
+  }
+
+  if (view != NULL) {
+    wl_signal_add(&view->events.destroy, &self->destroy_active_view_listener);
+  }
+
+  self->active_view = view;
 }
 
 struct zn_board*
@@ -167,6 +197,9 @@ zn_scene_create(void)
     goto err_screen_layout;
   }
 
+  self->destroy_active_view_listener.notify =
+      zn_scene_destroy_active_view_handler;
+
   return self;
 
 err_screen_layout:
@@ -190,6 +223,8 @@ zn_scene_destroy(struct zn_scene* self)
   }
 
   zn_screen_layout_destroy(self->screen_layout);
+
+  wl_list_remove(&self->destroy_active_view_listener.link);
 
   free(self);
 }

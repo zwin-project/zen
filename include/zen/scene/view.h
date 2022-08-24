@@ -28,6 +28,10 @@ struct zn_view {
   const struct zn_view_impl *impl;
 
   struct wl_list link;  // zn_board::view_list;
+
+  struct {
+    struct wl_signal destroy;
+  } events;
 };
 
 void zn_view_get_fbox(struct zn_view *self, struct wlr_fbox *fbox);
