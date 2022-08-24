@@ -33,11 +33,21 @@ zn_view_focus(struct zn_view *self)
   struct zn_scene *scene = server->scene;
 
   if (scene->active_view != NULL) {
-    self->impl->unfocus(scene->active_view);
+    zn_view_unfocus(scene->active_view);
   }
 
   scene->active_view = self;
   self->impl->focus(self);
+}
+
+void
+zn_view_unfocus(struct zn_view *self)
+{
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_scene *scene = server->scene;
+
+  self->impl->unfocus(self);
+  scene->active_view = NULL;
 }
 
 void

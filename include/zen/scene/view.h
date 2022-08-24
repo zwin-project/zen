@@ -34,6 +34,8 @@ void zn_view_get_fbox(struct zn_view *self, struct wlr_fbox *fbox);
 
 void zn_view_focus(struct zn_view *self);
 
+void zn_view_unfocus(struct zn_view *self);
+
 bool zn_view_is_mapped(struct zn_view *self);
 
 void zn_view_map_to_scene(struct zn_view *self, struct zn_scene *scene);
