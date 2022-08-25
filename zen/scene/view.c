@@ -37,7 +37,7 @@ zn_view_focus(struct zn_view *self)
   }
 
   if (self != NULL) {
-    self->impl->focus(self);
+    self->impl->set_activated(self, true);
   }
 
   zn_scene_set_focused_view(scene, self);
@@ -50,7 +50,7 @@ zn_view_unfocus(struct zn_view *self)
   struct zn_scene *scene = server->scene;
 
   if (self != NULL) {
-    self->impl->unfocus(self);
+    self->impl->set_activated(self, false);
   }
 
   zn_scene_set_focused_view(scene, NULL);
