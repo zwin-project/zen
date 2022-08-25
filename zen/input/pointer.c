@@ -47,21 +47,15 @@ zn_pointer_handle_button(struct wl_listener* listener, void* data)
   UNUSED(listener);
   struct wlr_event_pointer_button* event = data;
   struct zn_server* server = zn_server_get_singleton();
+  struct zn_scene* scene = server->scene;
   struct zn_cursor* cursor = server->input_manager->seat->cursor;
   struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
-  struct zn_view* focused_view = server->scene->focused_view;
   struct zn_view* view;
 
   if (event->state == WLR_BUTTON_PRESSED) {
     view =
         zn_screen_get_view_at(cursor->screen, cursor->x, cursor->y, NULL, NULL);
-    if (view == NULL) {
-      if (focused_view != NULL) {
-        zn_view_unfocus(focused_view);
-      }
-    } else {
-      zn_view_focus(view);
-    }
+    zn_scene_set_focused_view(scene, view);
   }
 
   wlr_seat_pointer_notify_button(
