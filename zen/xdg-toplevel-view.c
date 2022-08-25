@@ -60,9 +60,26 @@ zn_xdg_toplevel_view_impl_get_wlr_surface(struct zn_view* view)
   return self->wlr_xdg_toplevel->base->surface;
 }
 
+static void
+zn_xdg_toplevel_view_impl_for_each_popup_surface(
+    struct zn_view* view, wlr_surface_iterator_func_t iterator, void* user_data)
+{
+  struct zn_xdg_toplevel_view* self;
+
+  if (!zn_assert(
+          view->type == ZN_VIEW_XDG_TOPLEVEL, "Expected xdg toplevel view"))
+    return;
+
+  self = zn_container_of(view, self, base);
+
+  wlr_xdg_surface_for_each_popup_surface(
+      self->wlr_xdg_toplevel->base, iterator, user_data);
+}
+
 static const struct zn_view_impl zn_xdg_toplevel_view_impl = {
     .get_wlr_surface = zn_xdg_toplevel_view_impl_get_wlr_surface,
     .set_activated = zn_xdg_toplevel_view_impl_set_activated,
+    .for_each_popup_surface = zn_xdg_toplevel_view_impl_for_each_popup_surface,
 };
 
 struct zn_xdg_toplevel_view*
