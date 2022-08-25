@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 #include <wayland-server.h>
+#include <wlr/render/glew.h>
 #include <zen-desktop-protocol.h>
 
 #include "zen-common/log.h"
@@ -163,6 +164,7 @@ zn_server_create(struct wl_display *display)
   struct zn_server *self;
   char socket_name_candidate[16];
   char *xdg;
+  int drm_fd = -1;
 
   if (!zn_assert(server_singleton == NULL,
           "Tried to create zn_server multiple times")) {
@@ -186,7 +188,13 @@ zn_server_create(struct wl_display *display)
     goto err_free;
   }
 
-  self->renderer = wlr_renderer_autocreate(self->backend);
+  drm_fd = wlr_backend_get_drm_fd(self->backend);
+  if (drm_fd < 0) {
+    zn_error("Failed to get drm fd");
+    goto err_free;
+  }
+
+  self->renderer = wlr_glew_renderer_create_with_drm_fd(drm_fd);
   if (self->renderer == NULL) {
     zn_error("Failed to create renderer");
     goto err_backend;
