@@ -12,7 +12,7 @@ struct zn_scene {
 
   struct wl_list board_list;  // zn_board::link, non empty
 
-  struct wl_listener destroy_focused_view_listener;
+  struct wl_listener unmap_focused_view_listener;
 };
 
 void zn_scene_set_focused_view(struct zn_scene* self, struct zn_view* view);

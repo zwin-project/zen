@@ -29,7 +29,7 @@ struct zn_view {
   struct wl_list link;  // zn_board::view_list;
 
   struct {
-    struct wl_signal destroy;
+    struct wl_signal unmap;
   } events;
 };
 

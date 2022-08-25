@@ -87,6 +87,7 @@ zn_view_map_to_scene(struct zn_view *self, struct zn_scene *scene)
 void
 zn_view_unmap(struct zn_view *self)
 {
+  wl_signal_emit(&self->events.unmap, NULL);
   wl_list_remove(&self->link);
   wl_list_init(&self->link);
 }
@@ -97,13 +98,12 @@ zn_view_init(struct zn_view *self, enum zn_view_type type,
 {
   self->type = type;
   self->impl = impl;
-  wl_signal_init(&self->events.destroy);
+  wl_signal_init(&self->events.unmap);
   wl_list_init(&self->link);
 }
 
 void
 zn_view_fini(struct zn_view *self)
 {
-  wl_signal_emit(&self->events.destroy, NULL);
   wl_list_remove(&self->link);
 }
