@@ -36,9 +36,7 @@ zn_view_focus(struct zn_view *self)
     zn_view_unfocus(scene->focused_view);
   }
 
-  if (self != NULL) {
-    self->impl->set_activated(self, true);
-  }
+  self->impl->set_activated(self, true);
 
   zn_scene_set_focused_view(scene, self);
 }
@@ -49,9 +47,7 @@ zn_view_unfocus(struct zn_view *self)
   struct zn_server *server = zn_server_get_singleton();
   struct zn_scene *scene = server->scene;
 
-  if (self != NULL) {
-    self->impl->set_activated(self, false);
-  }
+  self->impl->set_activated(self, false);
 
   zn_scene_set_focused_view(scene, NULL);
 }
