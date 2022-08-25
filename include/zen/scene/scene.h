@@ -8,14 +8,14 @@
 struct zn_scene {
   struct zn_screen_layout* screen_layout;
 
-  struct zn_view* active_view;
+  struct zn_view* focused_view;
 
   struct wl_list board_list;  // zn_board::link, non empty
 
-  struct wl_listener destroy_active_view_listener;
+  struct wl_listener destroy_focused_view_listener;
 };
 
-void zn_scene_set_active_view(struct zn_scene* self, struct zn_view* view);
+void zn_scene_set_focused_view(struct zn_scene* self, struct zn_view* view);
 
 struct zn_board* zn_scene_get_focus_board(struct zn_scene* self);
 

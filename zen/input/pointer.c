@@ -49,7 +49,7 @@ zn_pointer_handle_button(struct wl_listener* listener, void* data)
   struct zn_server* server = zn_server_get_singleton();
   struct zn_cursor* cursor = server->input_manager->seat->cursor;
   struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
-  struct zn_view* active_view = server->scene->active_view;
+  struct zn_view* focused_view = server->scene->focused_view;
   struct zn_view* view;
 
   wlr_seat_pointer_notify_button(
@@ -59,7 +59,7 @@ zn_pointer_handle_button(struct wl_listener* listener, void* data)
     view =
         zn_screen_get_view_at(cursor->screen, cursor->x, cursor->y, NULL, NULL);
     if (view == NULL) {
-      zn_view_unfocus(active_view);
+      zn_view_unfocus(focused_view);
     } else {
       zn_view_focus(view);
     }
