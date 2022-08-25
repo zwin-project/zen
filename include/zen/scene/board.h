@@ -27,7 +27,6 @@ struct zn_board {
   struct zn_screen *screen;    // nullable, screen which this board belongs.
 
   struct wl_listener screen_destroy_listener;
-  struct wl_listener focus_listener;
 
   struct {
     struct wl_signal
