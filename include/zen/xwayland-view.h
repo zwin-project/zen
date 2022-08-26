@@ -16,6 +16,7 @@ struct zn_xwayland_view {
   struct wl_listener map_listener;
   struct wl_listener unmap_listener;
   struct wl_listener wlr_xwayland_surface_destroy_listener;
+  struct wl_listener wlr_surface_commit_listener;
 };
 
 struct zn_xwayland_view *zn_xwayland_view_create(

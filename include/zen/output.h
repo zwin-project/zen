@@ -22,6 +22,15 @@ struct zn_output {
   struct wl_listener damage_frame_listener;
 };
 
+/**
+ * @param fbox in effective coordinate
+ */
+void zn_output_add_damage_box(
+    struct zn_output *self, struct wlr_fbox *effective_box);
+
+void zn_output_box_effective_to_transformed_coords(struct zn_output *self,
+    struct wlr_fbox *effective, struct wlr_box *transformed);
+
 void zn_output_update_global(struct zn_output *self);
 
 struct zn_output *zn_output_create(
