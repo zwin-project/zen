@@ -16,6 +16,7 @@ struct zn_xdg_toplevel_view {
   struct wl_listener map_listener;
   struct wl_listener unmap_listener;
   struct wl_listener wlr_xdg_surface_destroy_listener;
+  struct wl_listener wlr_surface_commit_listener;
 };
 
 struct zn_xdg_toplevel_view *zn_xdg_toplevel_view_create(

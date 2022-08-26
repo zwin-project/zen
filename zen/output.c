@@ -1,5 +1,6 @@
 #include "zen/output.h"
 
+#include <math.h>
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_output_damage.h>
 #include <wlr/types/wlr_surface.h>
@@ -14,6 +15,23 @@
 
 static void zn_output_destroy(struct zn_output *self);
 
+static inline int
+scale_length(float length, float offset, float scale)
+{
+  return round((offset + length) * scale) - round(offset * scale);
+}
+
+void
+zn_output_box_effective_to_transformed_coords(struct zn_output *self,
+    struct wlr_fbox *effective, struct wlr_box *transformed)
+{
+  float scale = self->wlr_output->scale;
+  transformed->x = round(effective->x * scale);
+  transformed->y = round(effective->y * scale);
+  transformed->width = scale_length(effective->width, effective->x, scale);
+  transformed->height = scale_length(effective->height, effective->y, scale);
+}
+
 static void
 zn_output_wlr_output_destroy_handler(struct wl_listener *listener, void *data)
 {
@@ -22,6 +40,14 @@ zn_output_wlr_output_destroy_handler(struct wl_listener *listener, void *data)
   UNUSED(data);
 
   zn_output_destroy(self);
+}
+
+void
+zn_output_add_damage_box(struct zn_output *self, struct wlr_fbox *effective_box)
+{
+  struct wlr_box box;
+  zn_output_box_effective_to_transformed_coords(self, effective_box, &box);
+  wlr_output_damage_add_box(self->damage, &box);
 }
 
 static int
@@ -36,20 +62,18 @@ zn_output_repaint_timer_handler(void *data)
 
   pixman_region32_init(&damage);
 
-  wlr_output_damage_attach_render(self->damage, &needs_frame, &damage);
+  if (!wlr_output_damage_attach_render(self->damage, &needs_frame, &damage)) {
+    goto damage_finish;
+  }
 
-  wlr_renderer_begin(
-      renderer, self->wlr_output->width, self->wlr_output->height);
+  if (needs_frame) {
+    zn_render_2d_screen(self->screen, renderer, &damage);
+  } else {
+    wlr_output_rollback(self->wlr_output);
+  }
 
-  wlr_renderer_clear(renderer, (float[]){0.2, 0.3, 0.2, 1});
-
-  zn_render_2d_screen(self->screen, renderer);
-
-  wlr_renderer_end(renderer);
+damage_finish:
   pixman_region32_fini(&damage);
-
-  wlr_output_commit(self->wlr_output);
-
   return 0;
 }
 

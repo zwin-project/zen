@@ -4,6 +4,14 @@ XR Desktop Environment
 
 == Build & Install
 
+=== Preparation
+
+1. Build & Install wlr-glew-renderer
+
+See https://github.com/zigen-project/wlr-glew-renderer[github.com/zigen-project/wlr-glew-renderer]
+
+=== Build & Install
+
 [source, shell]
 ----
 $ git clone https://github.com/zigen-project/zen.git

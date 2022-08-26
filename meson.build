@@ -72,6 +72,7 @@ openvr_req = '>= 1.12.5'
 wayland_protocols_req = '>= 1.24'
 wayland_server_req = '>= 1.18.0'
 wlroots_req = ['>= 0.15', '< 0.16']
+wlr_glew_renderer_req = wlroots_req
 
 # dependencies
 
@@ -82,6 +83,7 @@ wayland_protocols_dep = dependency('wayland-protocols', version: wayland_protoco
 wayland_scanner_dep = dependency('wayland-scanner')
 wayland_server_dep = dependency('wayland-server', version: wayland_server_req)
 wlroots_dep = dependency('wlroots', version: wlroots_req)
+wlr_glew_renderer_dep = dependency('wlr-glew-renderer', version: wlr_glew_renderer_req)
 xkbcommon_dep = dependency('xkbcommon')
 if get_option('cui-client')
   wayland_client_dep = dependency('wayland-client')

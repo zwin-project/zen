@@ -8,6 +8,17 @@
 static void zn_xdg_toplevel_view_destroy(struct zn_xdg_toplevel_view* self);
 
 static void
+zn_xdg_toplevel_view_wlr_surface_commit_handler(
+    struct wl_listener* listener, void* data)
+{
+  struct zn_xdg_toplevel_view* self =
+      zn_container_of(listener, self, wlr_surface_commit_listener);
+  UNUSED(data);
+
+  zn_view_damage(&self->base);
+}
+
+static void
 zn_xdg_toplevel_view_map(struct wl_listener* listener, void* data)
 {
   struct zn_xdg_toplevel_view* self =
@@ -19,6 +30,9 @@ zn_xdg_toplevel_view_map(struct wl_listener* listener, void* data)
     return;
 
   zn_view_map_to_scene(&self->base, scene);
+
+  wl_signal_add(&self->wlr_xdg_toplevel->base->surface->events.commit,
+      &self->wlr_surface_commit_listener);
 }
 
 static void
@@ -33,6 +47,9 @@ zn_xdg_toplevel_view_unmap(struct wl_listener* listener, void* data)
     return;
 
   zn_view_unmap(&self->base);
+
+  wl_list_remove(&self->wlr_surface_commit_listener.link);
+  wl_list_init(&self->wlr_surface_commit_listener.link);
 }
 
 static void
@@ -113,6 +130,10 @@ zn_xdg_toplevel_view_create(
   wl_signal_add(&wlr_xdg_toplevel->base->events.destroy,
       &self->wlr_xdg_surface_destroy_listener);
 
+  self->wlr_surface_commit_listener.notify =
+      zn_xdg_toplevel_view_wlr_surface_commit_handler;
+  wl_list_init(&self->wlr_surface_commit_listener.link);
+
   return self;
 
 err:
@@ -123,6 +144,7 @@ static void
 zn_xdg_toplevel_view_destroy(struct zn_xdg_toplevel_view* self)
 {
   wl_list_remove(&self->wlr_xdg_surface_destroy_listener.link);
+  wl_list_remove(&self->wlr_surface_commit_listener.link);
   wl_list_remove(&self->map_listener.link);
   wl_list_remove(&self->unmap_listener.link);
   zn_view_fini(&self->base);
