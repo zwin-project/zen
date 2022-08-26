@@ -152,6 +152,9 @@ zn_screen_has_board(struct zn_screen *self, struct zn_board *target_board)
 void
 zn_screen_set_current_board(struct zn_screen *self, struct zn_board *board)
 {
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_view *view;
+
   if (self->current_board == board) {
     return;
   }
@@ -169,6 +172,11 @@ zn_screen_set_current_board(struct zn_screen *self, struct zn_board *board)
     }
     wl_signal_add(&board->events.screen_assigned,
         &self->current_board_screen_assigned_listener);
+
+    if (!wl_list_empty(&board->view_list)) {
+      view = zn_container_of(board->view_list.next, view, link);
+      zn_scene_set_focused_view(server->scene, view);
+    }
   }
 
   self->current_board = board;
