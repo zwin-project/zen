@@ -28,11 +28,9 @@ struct zn_view {
 
   const struct zn_view_impl *impl;
 
-  struct wl_list link;  // zn_board::view_list;
-  
   struct wl_list link;     // zn_board::view_list;
   struct zn_board *board;  // non null, when mapped
-  
+
   struct {
     struct wl_signal unmap;
   } events;
