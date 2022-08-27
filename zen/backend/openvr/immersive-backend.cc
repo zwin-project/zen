@@ -4,7 +4,7 @@
 
 #include "vr-system.h"
 #include "zen-common.h"
-#include "zen-immersive-backend.h"
+#include "zen/backend/immersive.h"
 
 struct zn_openvr_immersive_backend {
   struct zn_immersive_backend base;

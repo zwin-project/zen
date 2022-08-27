@@ -93,7 +93,6 @@ zen_inc = include_directories('include')
 
 subdir('protocols')
 subdir('common')
-subdir('immersive-backend')
 subdir('zen')
 if get_option('cui-client')
   subdir('cui-client')

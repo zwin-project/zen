@@ -10,7 +10,7 @@
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/xwayland.h>
 
-#include "zen-immersive-backend.h"
+#include "zen/backend/immersive.h"
 #include "zen/display-system.h"
 #include "zen/input/input-manager.h"
 #include "zen/scene/scene.h"
