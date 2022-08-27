@@ -11,6 +11,7 @@ struct zn_view;
 
 struct zn_view_impl {
   struct wlr_surface *(*get_wlr_surface)(struct zn_view *view);
+  void (*get_geometry)(struct zn_view *view, struct wlr_box *box);
   void (*configure)(struct zn_view *view, double x, double y);
   void (*for_each_popup_surface)(struct zn_view *view,
       wlr_surface_iterator_func_t iterator, void *user_data);
@@ -40,7 +41,9 @@ void zn_view_damage(struct zn_view *self);
 
 void zn_view_damage_whole(struct zn_view *self);
 
-void zn_view_get_fbox(struct zn_view *self, struct wlr_fbox *fbox);
+void zn_view_get_surface_fbox(struct zn_view *self, struct wlr_fbox *fbox);
+
+void zn_view_get_window_fbox(struct zn_view *self, struct wlr_fbox *fbox);
 
 bool zn_view_is_mapped(struct zn_view *self);
 
