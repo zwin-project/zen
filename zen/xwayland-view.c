@@ -68,8 +68,20 @@ zn_xwayland_view_impl_get_wlr_surface(struct zn_view* view)
   return self->wlr_xwayland_surface->surface;
 }
 
+static void
+zn_xwayland_view_impl_configure(struct zn_view* view, double x, double y)
+{
+  struct zn_xwayland_view* self = zn_container_of(view, self, base);
+  struct wlr_fbox box;
+
+  zn_view_get_fbox(view, &box);
+  wlr_xwayland_surface_configure(
+      self->wlr_xwayland_surface, x, y, box.width, box.height);
+}
+
 static const struct zn_view_impl zn_xwayland_view_impl = {
     .get_wlr_surface = zn_xwayland_view_impl_get_wlr_surface,
+    .configure = zn_xwayland_view_impl_configure,
 };
 
 struct zn_xwayland_view*

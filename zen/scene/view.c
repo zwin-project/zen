@@ -9,6 +9,17 @@
 #include "zen/xdg-toplevel-view.h"
 #include "zen/xwayland-view.h"
 
+static void
+zn_view_move(struct zn_view *self, double x, double y)
+{
+  self->x = x;
+  self->y = y;
+
+  if (self->impl->configure) {
+    self->impl->configure(self, x, y);
+  }
+}
+
 void
 zn_view_damage(struct zn_view *self)
 {
@@ -70,8 +81,8 @@ zn_view_map_to_scene(struct zn_view *self, struct zn_scene *scene)
   // TODO: handle board destruction
 
   zn_view_get_fbox(self, &fbox);
-  self->x = (board->width - fbox.width) / 2;
-  self->y = (board->height - fbox.height) / 2;
+  zn_view_move(
+      self, (board->width - fbox.width) / 2, (board->height - fbox.height) / 2);
 
   self->board = board;
   wl_list_insert(&board->view_list, &self->link);
