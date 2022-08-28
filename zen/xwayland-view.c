@@ -69,7 +69,7 @@ zn_xwayland_view_impl_get_wlr_surface(struct zn_view* view)
 }
 
 static void
-zn_xwayland_view_impl_set_position(struct zn_view* view, double x, double y)
+zn_xwayland_view_impl_configure(struct zn_view* view, double x, double y)
 {
   struct zn_xwayland_view* self = zn_container_of(view, self, base);
   struct wlr_fbox box;
@@ -81,7 +81,7 @@ zn_xwayland_view_impl_set_position(struct zn_view* view, double x, double y)
 
 static const struct zn_view_impl zn_xwayland_view_impl = {
     .get_wlr_surface = zn_xwayland_view_impl_get_wlr_surface,
-    .set_position = zn_xwayland_view_impl_set_position,
+    .configure = zn_xwayland_view_impl_configure,
 };
 
 struct zn_xwayland_view*

@@ -15,8 +15,8 @@ zn_view_move(struct zn_view *self, double x, double y)
   self->x = x;
   self->y = y;
 
-  if (self->impl->set_position) {
-    self->impl->set_position(self, x, y);
+  if (self->impl->configure) {
+    self->impl->configure(self, x, y);
   }
 }
 
