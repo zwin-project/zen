@@ -10,22 +10,16 @@
 #include "zen/server.h"
 
 static void
-zn_pointer_handle_motion(struct wl_listener* listener, void* data)
+default_grab_motion(
+    struct zn_pointer_grab* grab, struct wlr_event_pointer_motion* event)
 {
-  UNUSED(listener);
-  struct wlr_event_pointer_motion* event = data;
+  UNUSED(grab);
   struct zn_server* server = zn_server_get_singleton();
   struct zn_cursor* cursor = server->input_manager->seat->cursor;
   struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
   struct wlr_surface* surface;
   struct zn_view* view;
   double view_x, view_y;
-
-  if (cursor->screen == NULL) {
-    return;
-  }
-
-  zn_cursor_move_relative(cursor, event->delta_x, event->delta_y);
 
   view = zn_screen_get_view_at(
       cursor->screen, cursor->x, cursor->y, &view_x, &view_y);
@@ -37,24 +31,55 @@ zn_pointer_handle_motion(struct wl_listener* listener, void* data)
   }
 
   if (surface) {
-    wlr_seat_pointer_notify_enter(seat, surface, view_x, view_y);
-    wlr_seat_pointer_notify_motion(seat, event->time_msec, view_x, view_y);
+    wlr_seat_pointer_enter(seat, surface, view_x, view_y);
+    wlr_seat_pointer_send_motion(seat, event->time_msec, view_x, view_y);
   } else {
     zn_cursor_reset_surface(cursor);
-    wlr_seat_pointer_notify_clear_focus(seat);
+    wlr_seat_pointer_clear_focus(seat);
   }
+}
+
+static void
+default_grab_button(
+    struct zn_pointer_grab* grab, struct wlr_event_pointer_button* event)
+{
+  UNUSED(grab);
+  struct zn_server* server = zn_server_get_singleton();
+  struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
+
+  wlr_seat_pointer_send_button(
+      seat, event->time_msec, event->button, event->state);
+}
+
+static const struct zn_pointer_grab_interface default_grab_interface = {
+    .motion = default_grab_motion,
+    .button = default_grab_button,
+};
+
+static void
+zn_pointer_handle_motion(struct wl_listener* listener, void* data)
+{
+  struct zn_pointer* self = zn_container_of(listener, self, motion_listener);
+  struct wlr_event_pointer_motion* event = data;
+  struct zn_server* server = zn_server_get_singleton();
+  struct zn_cursor* cursor = server->input_manager->seat->cursor;
+
+  if (cursor->screen == NULL) {
+    return;
+  }
+
+  zn_cursor_move_relative(cursor, event->delta_x, event->delta_y);
+  self->grab->interface->motion(self->grab, event);
 }
 
 static void
 zn_pointer_handle_button(struct wl_listener* listener, void* data)
 {
   UNUSED(listener);
+  struct zn_pointer* self = zn_container_of(listener, self, button_listener);
   struct wlr_event_pointer_button* event = data;
-  struct zn_server* server = zn_server_get_singleton();
-  struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
 
-  wlr_seat_pointer_notify_button(
-      seat, event->time_msec, event->button, event->state);
+  self->grab->interface->button(self->grab, event);
 }
 
 static void
@@ -64,7 +89,7 @@ zn_pointer_handle_axis(struct wl_listener* listener, void* data)
   struct wlr_event_pointer_axis* event = data;
   struct zn_server* server = zn_server_get_singleton();
   struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
-  wlr_seat_pointer_notify_axis(seat, event->time_msec, event->orientation,
+  wlr_seat_pointer_send_axis(seat, event->time_msec, event->orientation,
       event->delta, event->delta_discrete, event->source);
 }
 
@@ -75,7 +100,7 @@ zn_pointer_handle_frame(struct wl_listener* listener, void* data)
   UNUSED(data);
   struct zn_server* server = zn_server_get_singleton();
   struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
-  wlr_seat_pointer_notify_frame(seat);
+  wlr_seat_pointer_send_frame(seat);
 }
 
 struct zn_pointer*
@@ -94,6 +119,10 @@ zn_pointer_create(struct wlr_input_device* wlr_input_device)
     zn_error("Failed to allocate memory");
     goto err;
   }
+
+  self->grab_default.interface = &default_grab_interface;
+  self->grab_default.pointer = self;
+  self->grab = &self->grab_default;
 
   self->motion_listener.notify = zn_pointer_handle_motion;
   wl_signal_add(
