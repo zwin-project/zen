@@ -38,13 +38,13 @@ zn_view_damage_whole(struct zn_view *self)
     return;
   }
 
-  zn_view_get_fbox(self, &fbox);
+  zn_view_get_surface_fbox(self, &fbox);
 
   zn_output_add_damage_box(screen->output, &fbox);
 }
 
 void
-zn_view_get_fbox(struct zn_view *self, struct wlr_fbox *fbox)
+zn_view_get_surface_fbox(struct zn_view *self, struct wlr_fbox *fbox)
 {
   struct wlr_surface *surface = self->impl->get_wlr_surface(self);
 
@@ -52,6 +52,18 @@ zn_view_get_fbox(struct zn_view *self, struct wlr_fbox *fbox)
   fbox->y = self->y;
   fbox->width = surface->current.width;
   fbox->height = surface->current.height;
+}
+
+void
+zn_view_get_window_fbox(struct zn_view *self, struct wlr_fbox *fbox)
+{
+  struct wlr_box view_geometry;
+  self->impl->get_geometry(self, &view_geometry);
+
+  fbox->x = view_geometry.x + self->x;
+  fbox->y = view_geometry.y + self->y;
+  fbox->width = view_geometry.width;
+  fbox->height = view_geometry.height;
 }
 
 bool
@@ -80,7 +92,7 @@ zn_view_map_to_scene(struct zn_view *self, struct zn_scene *scene)
 
   // TODO: handle board destruction
 
-  zn_view_get_fbox(self, &fbox);
+  zn_view_get_window_fbox(self, &fbox);
   zn_view_move(
       self, (board->width - fbox.width) / 2, (board->height - fbox.height) / 2);
 

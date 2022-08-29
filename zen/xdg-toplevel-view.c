@@ -71,6 +71,14 @@ zn_xdg_toplevel_view_impl_get_wlr_surface(struct zn_view* view)
 }
 
 static void
+zn_xdg_toplevel_view_impl_get_geometry(
+    struct zn_view* view, struct wlr_box* box)
+{
+  struct zn_xdg_toplevel_view* self = zn_container_of(view, self, base);
+  wlr_xdg_surface_get_geometry(self->wlr_xdg_toplevel->base, box);
+}
+
+static void
 zn_xdg_toplevel_view_impl_for_each_popup_surface(
     struct zn_view* view, wlr_surface_iterator_func_t iterator, void* user_data)
 {
@@ -88,6 +96,7 @@ zn_xdg_toplevel_view_impl_for_each_popup_surface(
 
 static const struct zn_view_impl zn_xdg_toplevel_view_impl = {
     .get_wlr_surface = zn_xdg_toplevel_view_impl_get_wlr_surface,
+    .get_geometry = zn_xdg_toplevel_view_impl_get_geometry,
     .for_each_popup_surface = zn_xdg_toplevel_view_impl_for_each_popup_surface,
 };
 

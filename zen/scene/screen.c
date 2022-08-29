@@ -36,7 +36,7 @@ zn_screen_get_view_at(
 
   wl_list_for_each_reverse(view, &board->view_list, link)
   {
-    zn_view_get_fbox(view, &fbox);
+    zn_view_get_window_fbox(view, &fbox);
 
     if (zn_wlr_fbox_contains_point(&fbox, x, y)) {
       *view_x = x - view->x;
