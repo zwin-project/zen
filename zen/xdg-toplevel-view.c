@@ -4,8 +4,19 @@
 #include "zen/scene/scene.h"
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/view.h"
+#include "zen/xdg-popup.h"
 
 static void zn_xdg_toplevel_view_destroy(struct zn_xdg_toplevel_view* self);
+
+static void
+zn_xdg_toplevel_view_new_popup(struct wl_listener* listener, void* data)
+{
+  struct zn_xdg_toplevel_view* self =
+      zn_container_of(listener, self, new_popup_listener);
+  struct wlr_xdg_popup* wlr_xdg_popup = data;
+
+  (void)zn_xdg_popup_create(wlr_xdg_popup);
+}
 
 static void
 zn_xdg_toplevel_view_wlr_surface_commit_handler(
@@ -125,6 +136,10 @@ zn_xdg_toplevel_view_create(
   self->wlr_surface_commit_listener.notify =
       zn_xdg_toplevel_view_wlr_surface_commit_handler;
   wl_list_init(&self->wlr_surface_commit_listener.link);
+
+  self->new_popup_listener.notify = zn_xdg_toplevel_view_new_popup;
+  wl_signal_add(
+      &wlr_xdg_toplevel->base->events.new_popup, &self->new_popup_listener);
 
   return self;
 
