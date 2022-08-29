@@ -6,6 +6,17 @@
 #include "zen/scene/board.h"
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/screen.h"
+#include "zen/scene/view.h"
+
+static void
+zn_scene_unmap_focused_view_handler(struct wl_listener* listener, void* data)
+{
+  UNUSED(data);
+  struct zn_scene* self =
+      zn_container_of(listener, self, unmap_focused_view_listener);
+
+  zn_scene_set_focused_view(self, NULL);
+}
 
 /**
  * @return struct zn_screen* can be NULL
@@ -55,6 +66,27 @@ zn_scene_new_board_binding_handler(uint32_t time_msec, uint32_t key, void* data)
 
   zn_board_assign_to_screen(board, screen);
   zn_screen_set_current_board(screen, board);
+}
+
+void
+zn_scene_set_focused_view(struct zn_scene* self, struct zn_view* view)
+{
+  if (view == self->focused_view) {
+    return;
+  }
+
+  if (self->focused_view != NULL) {
+    self->focused_view->impl->set_activated(self->focused_view, false);
+    wl_list_remove(&self->unmap_focused_view_listener.link);
+    wl_list_init(&self->unmap_focused_view_listener.link);
+  }
+
+  if (view != NULL) {
+    view->impl->set_activated(view, true);
+    wl_signal_add(&view->events.unmap, &self->unmap_focused_view_listener);
+  }
+
+  self->focused_view = view;
 }
 
 struct zn_board*
@@ -167,6 +199,9 @@ zn_scene_create(void)
     goto err_screen_layout;
   }
 
+  self->unmap_focused_view_listener.notify =
+      zn_scene_unmap_focused_view_handler;
+
   return self;
 
 err_screen_layout:
@@ -190,6 +225,8 @@ zn_scene_destroy(struct zn_scene* self)
   }
 
   zn_screen_layout_destroy(self->screen_layout);
+
+  wl_list_remove(&self->unmap_focused_view_listener.link);
 
   free(self);
 }

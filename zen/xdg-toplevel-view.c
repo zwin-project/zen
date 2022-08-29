@@ -63,6 +63,13 @@ zn_xdg_toplevel_view_wlr_xdg_surface_destroy_handler(
   zn_xdg_toplevel_view_destroy(self);
 }
 
+static void
+zn_xdg_toplevel_view_impl_set_activated(struct zn_view* view, bool active)
+{
+  struct zn_xdg_toplevel_view* self = zn_container_of(view, self, base);
+  wlr_xdg_toplevel_set_activated(self->wlr_xdg_toplevel->base, active);
+}
+
 static struct wlr_surface*
 zn_xdg_toplevel_view_impl_get_wlr_surface(struct zn_view* view)
 {
@@ -97,6 +104,7 @@ zn_xdg_toplevel_view_impl_for_each_popup_surface(
 static const struct zn_view_impl zn_xdg_toplevel_view_impl = {
     .get_wlr_surface = zn_xdg_toplevel_view_impl_get_wlr_surface,
     .get_geometry = zn_xdg_toplevel_view_impl_get_geometry,
+    .set_activated = zn_xdg_toplevel_view_impl_set_activated,
     .for_each_popup_surface = zn_xdg_toplevel_view_impl_for_each_popup_surface,
 };
 
