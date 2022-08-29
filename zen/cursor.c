@@ -165,11 +165,8 @@ zn_cursor_move_relative(struct zn_cursor* self, double dx, double dy)
 void
 zn_cursor_get_fbox(struct zn_cursor* self, struct wlr_fbox* fbox)
 {
-  int hotspot_x = self->surface ? self->hotspot_x : self->default_hotspot_x;
-  int hotspot_y = self->surface ? self->hotspot_y : self->default_hotspot_y;
-
-  fbox->x = self->x - hotspot_x;
-  fbox->y = self->y - hotspot_y;
+  fbox->x = self->x - self->hotspot_x;
+  fbox->y = self->y - self->hotspot_y;
   fbox->width = self->width;
   fbox->height = self->height;
 }
@@ -246,8 +243,8 @@ zn_cursor_create(void)
   }
   image = xcursor->images[0];
 
-  self->hotspot_x = self->default_hotspot_x = image->hotspot_x;
-  self->hotspot_y = self->default_hotspot_y = image->hotspot_y;
+  self->hotspot_x = image->hotspot_x;
+  self->hotspot_y = image->hotspot_y;
   self->texture = wlr_texture_from_pixels(server->renderer, DRM_FORMAT_ARGB8888,
       image->width * 4, image->width, image->height, image->buffer);
 
