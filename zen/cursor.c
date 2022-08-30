@@ -73,6 +73,7 @@ static void
 default_grab_axis(
     struct zn_cursor_grab* grab, struct wlr_event_pointer_axis* event)
 {
+  UNUSED(grab);
   struct zn_server* server = zn_server_get_singleton();
   struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
 
