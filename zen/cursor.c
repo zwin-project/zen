@@ -17,10 +17,9 @@ static void
 default_grab_motion(
     struct zn_cursor_grab* grab, struct wlr_event_pointer_motion* event)
 {
-  UNUSED(grab);
   struct zn_server* server = zn_server_get_singleton();
-  struct zn_cursor* cursor = server->input_manager->seat->cursor;
   struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
+  struct zn_cursor* cursor = grab->cursor;
   struct wlr_surface* surface;
   struct zn_view* view;
   double view_x, view_y;
@@ -51,10 +50,9 @@ static void
 default_grab_button(
     struct zn_cursor_grab* grab, struct wlr_event_pointer_button* event)
 {
-  UNUSED(grab);
   struct zn_server* server = zn_server_get_singleton();
   struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
-  struct zn_cursor* cursor = server->input_manager->seat->cursor;
+  struct zn_cursor* cursor = grab->cursor;
   struct zn_view* view;
 
   if (cursor->screen == NULL) {
@@ -206,7 +204,8 @@ zn_cursor_start_grab(struct zn_cursor* self, struct zn_cursor_grab* grab)
   self->grab = grab;
 }
 
-void zn_cursor_end_grab(struct zn_cursor* self)
+void
+zn_cursor_end_grab(struct zn_cursor* self)
 {
   self->grab = &self->grab_default;
 }
