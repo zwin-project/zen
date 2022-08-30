@@ -222,6 +222,18 @@ zn_cursor_handle_surface_destroy(struct wl_listener* listener, void* data)
 }
 
 void
+zn_cursor_start_grab(struct zn_cursor* self, struct zn_cursor_grab* grab)
+{
+  self->grab = grab;
+}
+
+void
+zn_cursor_end_grab(struct zn_cursor* self)
+{
+  self->grab = &self->grab_default;
+}
+
+void
 zn_cursor_move_relative(struct zn_cursor* self, double dx, double dy)
 {
   struct zn_server* server = zn_server_get_singleton();

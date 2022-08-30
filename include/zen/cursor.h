@@ -32,6 +32,10 @@ struct zn_cursor {
   struct wl_listener surface_destroy_listener;
 };
 
+void zn_cursor_start_grab(struct zn_cursor* self, struct zn_cursor_grab* grab);
+
+void zn_cursor_end_grab(struct zn_cursor* self);
+
 void zn_cursor_move_relative(struct zn_cursor* self, double dx, double dy);
 
 void zn_cursor_get_fbox(struct zn_cursor* self, struct wlr_fbox* fbox);
