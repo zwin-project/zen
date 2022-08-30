@@ -51,6 +51,14 @@ zn_xwayland_view_unmap(struct wl_listener* listener, void* data)
 }
 
 static void
+zn_xwayland_view_move_handler(struct wl_listener* listener, void* data)
+{
+  UNUSED(data);
+  struct zn_xwayland_view* self =
+      zn_container_of(listener, self, move_listener);
+}
+
+static void
 zn_xwayland_view_wlr_xwayland_surface_destroy_handler(
     struct wl_listener* listener, void* data)
 {
@@ -130,6 +138,10 @@ zn_xwayland_view_create(
   self->unmap_listener.notify = zn_xwayland_view_unmap;
   wl_signal_add(
       &self->wlr_xwayland_surface->events.unmap, &self->unmap_listener);
+
+  self->move_listener.notify = zn_xwayland_view_move_handler;
+  wl_signal_add(
+      &self->wlr_xwayland_surface->events.request_move, &self->move_listener);
 
   self->wlr_xwayland_surface_destroy_listener.notify =
       zn_xwayland_view_wlr_xwayland_surface_destroy_handler;
