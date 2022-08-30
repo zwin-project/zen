@@ -2,9 +2,11 @@
 #define ZEN_CURSOR_H
 
 #include <wayland-server.h>
+#include <wlr/interfaces/wlr_pointer.h>
 #include <wlr/render/wlr_texture.h>
 #include <wlr/types/wlr_xcursor_manager.h>
 
+#include "zen/input/cursor-grab.h"
 #include "zen/input/input-device.h"
 #include "zen/input/seat.h"
 #include "zen/scene/screen.h"
@@ -20,6 +22,9 @@ struct zn_cursor {
   struct wlr_texture* texture;
   struct wlr_surface* surface;
   struct wlr_xcursor_manager* xcursor_manager;
+
+  struct zn_cursor_grab* grab;
+  struct zn_cursor_grab grab_default;
 
   struct wl_listener new_screen_listener;
   struct wl_listener screen_destroy_listener;
