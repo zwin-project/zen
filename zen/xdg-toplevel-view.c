@@ -1,6 +1,7 @@
 #include "zen/xdg-toplevel-view.h"
 
 #include "zen-common.h"
+#include "zen/input/cursor-grab-move.h"
 #include "zen/scene/scene.h"
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/view.h"
@@ -50,6 +51,18 @@ zn_xdg_toplevel_view_unmap(struct wl_listener* listener, void* data)
 
   wl_list_remove(&self->wlr_surface_commit_listener.link);
   wl_list_init(&self->wlr_surface_commit_listener.link);
+}
+
+static void
+zn_xdg_toplevel_view_move_handler(struct wl_listener* listener, void* data)
+{
+  UNUSED(data);
+  struct zn_xdg_toplevel_view* self =
+      zn_container_of(listener, self, move_listener);
+  struct zn_server* server = zn_server_get_singleton();
+  struct zn_cursor* cursor = server->input_manager->seat->cursor;
+
+  zn_cursor_grab_move_start(cursor, &self->base);
 }
 
 static void
@@ -133,6 +146,10 @@ zn_xdg_toplevel_view_create(
   self->unmap_listener.notify = zn_xdg_toplevel_view_unmap;
   wl_signal_add(
       &self->wlr_xdg_toplevel->base->events.unmap, &self->unmap_listener);
+
+  self->move_listener.notify = zn_xdg_toplevel_view_move_handler;
+  wl_signal_add(
+      &self->wlr_xdg_toplevel->events.request_move, &self->move_listener);
 
   self->wlr_xdg_surface_destroy_listener.notify =
       zn_xdg_toplevel_view_wlr_xdg_surface_destroy_handler;
