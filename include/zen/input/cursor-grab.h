@@ -14,6 +14,8 @@ struct zn_cursor_grab_interface {
       struct zn_cursor_grab* grab, struct wlr_event_pointer_motion* event);
   void (*button)(
       struct zn_cursor_grab* grab, struct wlr_event_pointer_button* event);
+  void (*axis)(
+      struct zn_cursor_grab* grab, struct wlr_event_pointer_axis* event);
 };
 
 struct zn_cursor_grab {
