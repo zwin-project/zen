@@ -11,6 +11,7 @@ _zen_desktop_srcs = [
   'xdg-toplevel-view.c',
   'xwayland-view.c',
 
+  'input/cursor-grab-move.c',
   'input/input-device.c',
   'input/input-manager.c',
   'input/keyboard.c',
