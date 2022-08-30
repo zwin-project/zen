@@ -28,6 +28,8 @@ struct zn_output {
 void zn_output_add_damage_box(
     struct zn_output *self, struct wlr_fbox *effective_box);
 
+void zn_output_add_damage_whole(struct zn_output *self);
+
 void zn_output_box_effective_to_transformed_coords(struct zn_output *self,
     struct wlr_fbox *effective, struct wlr_box *transformed);
 
