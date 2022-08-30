@@ -15,7 +15,7 @@ struct zn_view_impl {
   void (*configure)(struct zn_view *view, double x, double y);
   void (*for_each_popup_surface)(struct zn_view *view,
       wlr_surface_iterator_func_t iterator, void *user_data);
-  void (*set_activated)(struct zn_view *view, bool activate);
+  void (*set_activated)(struct zn_view *view, bool activate);  // nullable
 };
 
 enum zn_view_type {
