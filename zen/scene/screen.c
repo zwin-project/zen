@@ -168,6 +168,10 @@ zn_screen_set_current_board(struct zn_screen *self, struct zn_board *board)
   }
 
   self->current_board = board;
+
+  // TODO: rebase pointer
+
+  zn_output_add_damage_whole(self->output);
 }
 
 struct zn_board *

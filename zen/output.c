@@ -50,6 +50,12 @@ zn_output_add_damage_box(struct zn_output *self, struct wlr_fbox *effective_box)
   wlr_output_damage_add_box(self->damage, &box);
 }
 
+void
+zn_output_add_damage_whole(struct zn_output *self)
+{
+  wlr_output_damage_add_whole(self->damage);
+}
+
 static int
 zn_output_repaint_timer_handler(void *data)
 {
