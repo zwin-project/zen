@@ -17,10 +17,6 @@ zn_pointer_handle_motion(struct wl_listener* listener, void* data)
   struct zn_cursor* cursor = server->input_manager->seat->cursor;
   struct wlr_event_pointer_motion* event = data;
 
-  if (cursor->screen == NULL) {
-    return;
-  }
-
   zn_cursor_move_relative(cursor, event->delta_x, event->delta_y);
   cursor->grab->interface->motion(cursor->grab, event);
 }
