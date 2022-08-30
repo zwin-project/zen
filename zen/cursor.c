@@ -81,10 +81,21 @@ default_grab_axis(
       event->delta, event->delta_discrete, event->source);
 }
 
+static void
+default_grab_frame(struct zn_cursor_grab* grab)
+{
+  UNUSED(grab);
+  struct zn_server* server = zn_server_get_singleton();
+  struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
+
+  wlr_seat_pointer_send_frame(seat);
+}
+
 static const struct zn_cursor_grab_interface default_grab_interface = {
     .motion = default_grab_motion,
     .button = default_grab_button,
     .axis = default_grab_axis,
+    .frame = default_grab_frame,
 };
 
 static void

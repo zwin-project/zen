@@ -49,8 +49,9 @@ zn_pointer_handle_frame(struct wl_listener* listener, void* data)
   UNUSED(listener);
   UNUSED(data);
   struct zn_server* server = zn_server_get_singleton();
-  struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
-  wlr_seat_pointer_send_frame(seat);
+  struct zn_cursor* cursor = server->input_manager->seat->cursor;
+
+  cursor->grab->interface->frame(cursor->grab);
 }
 
 struct zn_pointer*
