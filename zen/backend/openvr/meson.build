@@ -1,5 +1,6 @@
 _zen_openvr_immersive_backend_srcs =[
   'immersive-backend.cc',
+  'openvr.cc',
   'vr-system.cc',
 ]
 
