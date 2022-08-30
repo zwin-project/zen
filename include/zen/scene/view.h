@@ -12,9 +12,10 @@ struct zn_view;
 struct zn_view_impl {
   struct wlr_surface *(*get_wlr_surface)(struct zn_view *view);
   void (*get_geometry)(struct zn_view *view, struct wlr_box *box);
-  void (*configure)(struct zn_view *view, double x, double y);
+  void (*configure)(struct zn_view *view, double x, double y);  // nullable
   void (*for_each_popup_surface)(struct zn_view *view,
-      wlr_surface_iterator_func_t iterator, void *user_data);
+      wlr_surface_iterator_func_t iterator, void *user_data);  // nullable
+  void (*set_activated)(struct zn_view *view, bool activate);
 };
 
 enum zn_view_type {
@@ -31,6 +32,10 @@ struct zn_view {
 
   struct wl_list link;     // zn_board::view_list;
   struct zn_board *board;  // non null, when mapped
+
+  struct {
+    struct wl_signal unmap;
+  } events;
 };
 
 /**

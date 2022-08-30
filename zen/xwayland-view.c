@@ -61,6 +61,13 @@ zn_xwayland_view_wlr_xwayland_surface_destroy_handler(
   zn_xwayland_view_destroy(self);
 }
 
+static void
+zn_xwayland_view_impl_set_activated(struct zn_view* view, bool active)
+{
+  struct zn_xwayland_view* self = zn_container_of(view, self, base);
+  wlr_xwayland_surface_activate(self->wlr_xwayland_surface, active);
+}
+
 static struct wlr_surface*
 zn_xwayland_view_impl_get_wlr_surface(struct zn_view* view)
 {
@@ -94,6 +101,7 @@ zn_xwayland_view_impl_configure(struct zn_view* view, double x, double y)
 static const struct zn_view_impl zn_xwayland_view_impl = {
     .get_wlr_surface = zn_xwayland_view_impl_get_wlr_surface,
     .get_geometry = zn_xwayland_view_impl_get_geometry,
+    .set_activated = zn_xwayland_view_impl_set_activated,
     .configure = zn_xwayland_view_impl_configure,
 };
 

@@ -2,7 +2,7 @@
 #define ZEN_POINTER_H
 
 #include <wayland-server.h>
-#include <wlr/interfaces/wlr_pointer.h>
+#include <wlr/types/wlr_input_device.h>
 
 struct zn_pointer {
   struct wl_listener button_listener;

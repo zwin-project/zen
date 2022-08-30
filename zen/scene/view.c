@@ -98,6 +98,7 @@ zn_view_map_to_scene(struct zn_view *self, struct zn_scene *scene)
 
   self->board = board;
   wl_list_insert(&board->view_list, &self->link);
+  zn_scene_set_focused_view(scene, self);
 
   zn_view_damage_whole(self);
 }
@@ -105,9 +106,12 @@ zn_view_map_to_scene(struct zn_view *self, struct zn_scene *scene)
 void
 zn_view_unmap(struct zn_view *self)
 {
+  wl_signal_emit(&self->events.unmap, NULL);
+
   zn_view_damage_whole(self);
 
   self->board = NULL;
+
   wl_list_remove(&self->link);
   wl_list_init(&self->link);
 }
@@ -118,8 +122,9 @@ zn_view_init(struct zn_view *self, enum zn_view_type type,
 {
   self->type = type;
   self->impl = impl;
-
   self->board = NULL;
+
+  wl_signal_init(&self->events.unmap);
   wl_list_init(&self->link);
 }
 

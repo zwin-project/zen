@@ -13,59 +13,34 @@ static void
 zn_pointer_handle_motion(struct wl_listener* listener, void* data)
 {
   UNUSED(listener);
-  struct wlr_event_pointer_motion* event = data;
   struct zn_server* server = zn_server_get_singleton();
   struct zn_cursor* cursor = server->input_manager->seat->cursor;
-  struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
-  struct wlr_surface* surface;
-  struct zn_view* view;
-  double view_x, view_y;
-
-  if (cursor->screen == NULL) {
-    return;
-  }
+  struct wlr_event_pointer_motion* event = data;
 
   zn_cursor_move_relative(cursor, event->delta_x, event->delta_y);
-
-  view = zn_screen_get_view_at(
-      cursor->screen, cursor->x, cursor->y, &view_x, &view_y);
-
-  if (view != NULL) {
-    surface = view->impl->get_wlr_surface(view);
-  } else {
-    surface = NULL;
-  }
-
-  if (surface) {
-    wlr_seat_pointer_notify_enter(seat, surface, view_x, view_y);
-    wlr_seat_pointer_notify_motion(seat, event->time_msec, view_x, view_y);
-  } else {
-    zn_cursor_reset_surface(cursor);
-    wlr_seat_pointer_notify_clear_focus(seat);
-  }
+  cursor->grab->interface->motion(cursor->grab, event);
 }
 
 static void
 zn_pointer_handle_button(struct wl_listener* listener, void* data)
 {
   UNUSED(listener);
-  struct wlr_event_pointer_button* event = data;
   struct zn_server* server = zn_server_get_singleton();
-  struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
+  struct zn_cursor* cursor = server->input_manager->seat->cursor;
+  struct wlr_event_pointer_button* event = data;
 
-  wlr_seat_pointer_notify_button(
-      seat, event->time_msec, event->button, event->state);
+  cursor->grab->interface->button(cursor->grab, event);
 }
 
 static void
 zn_pointer_handle_axis(struct wl_listener* listener, void* data)
 {
-  struct zn_pointer* self = zn_container_of(listener, self, axis_listener);
-  struct wlr_event_pointer_axis* event = data;
+  UNUSED(listener);
   struct zn_server* server = zn_server_get_singleton();
-  struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
-  wlr_seat_pointer_notify_axis(seat, event->time_msec, event->orientation,
-      event->delta, event->delta_discrete, event->source);
+  struct zn_cursor* cursor = server->input_manager->seat->cursor;
+  struct wlr_event_pointer_axis* event = data;
+
+  cursor->grab->interface->axis(cursor->grab, event);
 }
 
 static void
@@ -74,8 +49,9 @@ zn_pointer_handle_frame(struct wl_listener* listener, void* data)
   UNUSED(listener);
   UNUSED(data);
   struct zn_server* server = zn_server_get_singleton();
-  struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
-  wlr_seat_pointer_notify_frame(seat);
+  struct zn_cursor* cursor = server->input_manager->seat->cursor;
+
+  cursor->grab->interface->frame(cursor->grab);
 }
 
 struct zn_pointer*
