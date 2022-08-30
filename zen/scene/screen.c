@@ -174,7 +174,7 @@ zn_screen_set_current_board(struct zn_screen *self, struct zn_board *board)
         &self->current_board_screen_assigned_listener);
 
     if (!wl_list_empty(&board->view_list)) {
-      view = zn_container_of(board->view_list.next, view, link);
+      view = zn_container_of(board->view_list.prev, view, link);
       zn_scene_set_focused_view(server->scene, view);
     }
   }
