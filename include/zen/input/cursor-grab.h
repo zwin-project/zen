@@ -2,6 +2,7 @@
 #define ZEN_CURSOR_GRUB_H
 
 #include <wayland-server.h>
+#include <wlr/interfaces/wlr_pointer.h>
 #include <wlr/types/wlr_cursor.h>
 
 #include "zen/cursor.h"

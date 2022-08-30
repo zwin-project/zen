@@ -2,7 +2,6 @@
 #define ZEN_CURSOR_H
 
 #include <wayland-server.h>
-#include <wlr/interfaces/wlr_pointer.h>
 #include <wlr/render/wlr_texture.h>
 #include <wlr/types/wlr_xcursor_manager.h>
 
