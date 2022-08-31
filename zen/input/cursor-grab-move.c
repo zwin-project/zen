@@ -8,8 +8,11 @@ static void
 move_grab_motion(
     struct zn_cursor_grab* grab, struct wlr_event_pointer_motion* event)
 {
-  UNUSED(grab);
   UNUSED(event);
+  struct zn_cursor_grab_move* self = zn_container_of(grab, self, base);
+
+  zn_view_move(self->view, grab->cursor->x + self->diff_x,
+      grab->cursor->y + self->diff_y);
 }
 
 static void
@@ -54,6 +57,7 @@ zn_cursor_grab_move_end(struct zn_cursor_grab_move* self)
 void
 zn_cursor_grab_move_start(struct zn_cursor* cursor, struct zn_view* view)
 {
+  struct wlr_fbox cursor_box, view_box;
   struct zn_cursor_grab_move* self;
   self = zalloc(sizeof *self);
 
@@ -62,6 +66,10 @@ zn_cursor_grab_move_start(struct zn_cursor* cursor, struct zn_view* view)
     return;
   }
 
+  zn_cursor_get_fbox(cursor, &cursor_box);
+  zn_view_get_surface_fbox(view, &view_box);
+  self->diff_x = view_box.x - cursor_box.x;
+  self->diff_y = view_box.y - cursor_box.y;
   self->view = view;
   self->base.interface = &move_grab_interface;
   self->base.cursor = cursor;

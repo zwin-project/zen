@@ -38,6 +38,8 @@ struct zn_view {
   } events;
 };
 
+void zn_view_move(struct zn_view *self, double x, double y);
+
 /**
  * Add the damage of all surfaces associated with the view to the output where
  * the view id displayed.
