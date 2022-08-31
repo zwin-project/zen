@@ -1,12 +1,11 @@
 #ifndef ZEN_OPENVR_BACKEND_VR_SYSTEM_H
 #define ZEN_OPENVR_BACKEND_VR_SYSTEM_H
 
-#include <openvr/openvr.h>
 #include <wayland-server-core.h>
 
 #include <functional>
-#include <thread>
 
+#include "openvr.h"
 #include "zen-common.h"
 
 namespace zen {
@@ -28,18 +27,10 @@ class VrSystem
   } callbacks;
 
  private:
-  enum class PollInThreadResult : uint8_t {
-    kReadyForNextRepaint = 0,
-    kShouldStopOpenVr = 1,
-  };
+  void HandlePollResult(OpenVr::PollResult *result);
 
-  int HandlePollInThreadResult();
-  void PollInThread();
-  void StopRepaintLoop();
-
+  OpenVr openvr_;
   bool is_repaint_loop_running_ = false;
-  int pipe_[2];  // use pipe_[0] in main thread, pipe_[1] in polling thread
-  std::thread poll_thread_;
 };
 
 }  // namespace zen
