@@ -237,7 +237,7 @@ zn_screen_renderer_render(struct zn_screen *screen,
     wlr_renderer_clear(renderer, (float[]){0.2, 0.3, 0.2, 1});
   }
 
-  wl_list_for_each(view, &board->view_list, link)
+  wl_list_for_each_reverse(view, &board->view_list, link)
       zn_screen_renderer_render_view(screen, view, renderer, &screen_damage);
 
   zn_screen_renderer_render_cursor(screen, cursor, renderer, &screen_damage);
