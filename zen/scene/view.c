@@ -9,15 +9,19 @@
 #include "zen/xdg-toplevel-view.h"
 #include "zen/xwayland-view.h"
 
-static void
+void
 zn_view_move(struct zn_view *self, double x, double y)
 {
+  zn_view_damage_whole(self);
+
   self->x = x;
   self->y = y;
 
   if (self->impl->configure) {
     self->impl->configure(self, x, y);
   }
+
+  zn_view_damage_whole(self);
 }
 
 static void
