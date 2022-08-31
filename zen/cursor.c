@@ -252,11 +252,8 @@ zn_cursor_move_relative(struct zn_cursor* self, double dx, double dy)
 void
 zn_cursor_get_fbox(struct zn_cursor* self, struct wlr_fbox* fbox)
 {
-  int hotspot_x = self->surface ? self->hotspot_x : self->default_hotspot_x;
-  int hotspot_y = self->surface ? self->hotspot_y : self->default_hotspot_y;
-
-  fbox->x = self->x - hotspot_x;
-  fbox->y = self->y - hotspot_y;
+  fbox->x = self->x - self->hotspot_x;
+  fbox->y = self->y - self->hotspot_y;
   fbox->width = self->width;
   fbox->height = self->height;
 }
@@ -275,6 +272,8 @@ zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface,
   if (surface != NULL) {
     wl_signal_add(&surface->events.destroy, &self->surface_destroy_listener);
     wl_signal_add(&surface->events.commit, &self->surface_commit_listener);
+  } else {
+    zn_cursor_set_xcursor(self, "grab");
   }
 
   zn_cursor_damage_whole(self);
@@ -296,6 +295,7 @@ zn_cursor_reset_surface(struct zn_cursor* self)
     zn_cursor_set_surface(self, NULL, 0, 0);
   }
 
+  zn_cursor_set_xcursor(self, "left_ptr");
   self->visible = true;
 
   zn_cursor_update_size(self);
@@ -303,13 +303,36 @@ zn_cursor_reset_surface(struct zn_cursor* self)
   zn_cursor_damage_whole(self);
 }
 
+void
+zn_cursor_set_xcursor(struct zn_cursor* self, char* name)
+{
+  struct zn_server* server = zn_server_get_singleton();
+  struct wlr_xcursor* xcursor;
+  struct wlr_xcursor_image* image;
+
+  if (self->texture != NULL) {
+    wlr_texture_destroy(self->texture);
+  }
+
+  xcursor = wlr_xcursor_manager_get_xcursor(self->xcursor_manager, name, 1.f);
+  if (xcursor == NULL) {
+    zn_error("Failed to get xcursor");
+    self->texture = NULL;
+    return;
+  }
+  image = xcursor->images[0];
+
+  self->hotspot_x = image->hotspot_x;
+  self->hotspot_y = image->hotspot_y;
+  self->texture = wlr_texture_from_pixels(server->renderer, DRM_FORMAT_ARGB8888,
+      image->width * 4, image->width, image->height, image->buffer);
+}
+
 struct zn_cursor*
 zn_cursor_create(void)
 {
   struct zn_server* server = zn_server_get_singleton();
   struct zn_screen_layout* screen_layout = server->scene->screen_layout;
-  struct wlr_xcursor* xcursor;
-  struct wlr_xcursor_image* image;
   struct zn_cursor* self;
 
   self = zalloc(sizeof *self);
@@ -325,18 +348,7 @@ zn_cursor_create(void)
   }
   wlr_xcursor_manager_load(self->xcursor_manager, 1.f);
 
-  xcursor =
-      wlr_xcursor_manager_get_xcursor(self->xcursor_manager, "left_ptr", 1.f);
-  if (xcursor == NULL) {
-    zn_error("Failed to get xcursor");
-    goto err_wlr_xcursor_manager;
-  }
-  image = xcursor->images[0];
-
-  self->hotspot_x = self->default_hotspot_x = image->hotspot_x;
-  self->hotspot_y = self->default_hotspot_y = image->hotspot_y;
-  self->texture = wlr_texture_from_pixels(server->renderer, DRM_FORMAT_ARGB8888,
-      image->width * 4, image->width, image->height, image->buffer);
+  zn_cursor_set_xcursor(self, "left_ptr");
 
   self->new_screen_listener.notify = zn_cursor_handle_new_screen;
   wl_signal_add(&screen_layout->events.new_screen, &self->new_screen_listener);
@@ -359,9 +371,6 @@ zn_cursor_create(void)
 
   return self;
 
-err_wlr_xcursor_manager:
-  wlr_xcursor_manager_destroy(self->xcursor_manager);
-
 err_free:
   free(self);
 
@@ -376,7 +385,9 @@ zn_cursor_destroy(struct zn_cursor* self)
   wl_list_remove(&self->screen_destroy_listener.link);
   wl_list_remove(&self->surface_commit_listener.link);
   wl_list_remove(&self->surface_destroy_listener.link);
-  wlr_texture_destroy(self->texture);
+  if (self->texture != NULL) {
+    wlr_texture_destroy(self->texture);
+  }
   wlr_xcursor_manager_destroy(self->xcursor_manager);
   free(self);
 }

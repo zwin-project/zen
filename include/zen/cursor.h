@@ -14,7 +14,6 @@ struct zn_cursor {
   double x, y;
   uint32_t width, height;
   int hotspot_x, hotspot_y;
-  int default_hotspot_x, default_hotspot_y;
   bool visible;
 
   struct zn_screen* screen;  // nullable
@@ -39,6 +38,8 @@ void zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface,
     int hotspot_x, int hotspot_y);
 
 void zn_cursor_reset_surface(struct zn_cursor* self);
+
+void zn_cursor_set_xcursor(struct zn_cursor* self, char* name);
 
 struct zn_cursor* zn_cursor_create(void);
 
