@@ -273,7 +273,7 @@ zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface,
     wl_signal_add(&surface->events.destroy, &self->surface_destroy_listener);
     wl_signal_add(&surface->events.commit, &self->surface_commit_listener);
   } else {
-    zn_cursor_set_xcursor(self, "grab");
+    zn_cursor_set_xcursor(self, "left_ptr");
   }
 
   zn_cursor_damage_whole(self);
