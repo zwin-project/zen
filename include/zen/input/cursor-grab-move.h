@@ -8,6 +8,7 @@
 struct zn_cursor_grab_move {
   struct zn_cursor_grab base;
   struct zn_view* view;
+  struct zn_screen* prev_screen;
 
   double diff_x, diff_y;
 };

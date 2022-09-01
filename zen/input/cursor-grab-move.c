@@ -11,8 +11,13 @@ move_grab_motion(
   UNUSED(event);
   struct zn_cursor_grab_move* self = zn_container_of(grab, self, base);
 
+  if (grab->cursor->screen != self->prev_screen) {
+    zn_view_change_board(self->view, grab->cursor->screen->current_board);
+  }
+
   zn_view_move(self->view, grab->cursor->x + self->diff_x,
       grab->cursor->y + self->diff_y);
+  self->prev_screen = grab->cursor->screen;
 }
 
 static void
@@ -71,6 +76,7 @@ zn_cursor_grab_move_start(struct zn_cursor* cursor, struct zn_view* view)
   self->diff_x = view_box.x - cursor_box.x;
   self->diff_y = view_box.y - cursor_box.y;
   self->view = view;
+  self->prev_screen = cursor->screen;
   self->base.interface = &move_grab_interface;
   self->base.cursor = cursor;
 
