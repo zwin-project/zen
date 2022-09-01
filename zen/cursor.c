@@ -102,20 +102,13 @@ static const struct zn_cursor_grab_interface default_grab_interface = {
 static void
 zn_cursor_update_size(struct zn_cursor* self)
 {
-  if (self->visible == false) {
+  if (self->texture) {
+    self->width = self->texture->width;
+    self->height = self->texture->height;
+  } else {
     self->width = 0;
     self->height = 0;
-    return;
   }
-
-  if (self->surface != NULL) {
-    self->width = self->surface->current.width;
-    self->height = self->surface->current.height;
-    return;
-  }
-
-  self->width = self->texture->width;
-  self->height = self->texture->height;
 }
 
 // screen_x and screen_y must be less than screen->width/height
@@ -207,8 +200,6 @@ zn_cursor_handle_surface_commit(struct wl_listener* listener, void* data)
     return;
   }
 
-  self->visible = wlr_surface_has_buffer(self->surface);
-
   zn_cursor_damage_whole(self);
 
   zn_cursor_update_size(self);
@@ -267,6 +258,10 @@ void
 zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface,
     int hotspot_x, int hotspot_y)
 {
+  if (self->texture && !self->surface) {
+    wlr_texture_destroy(self->texture);
+  }
+
   if (self->surface != NULL) {
     wl_list_remove(&self->surface_destroy_listener.link);
     wl_list_init(&self->surface_destroy_listener.link);
@@ -274,34 +269,22 @@ zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface,
     wl_list_init(&self->surface_commit_listener.link);
   }
 
+  zn_cursor_damage_whole(self);
+
   if (surface != NULL) {
     wl_signal_add(&surface->events.destroy, &self->surface_destroy_listener);
     wl_signal_add(&surface->events.commit, &self->surface_commit_listener);
+
+    self->hotspot_x = hotspot_x;
+    self->hotspot_y = hotspot_y;
+    self->texture = wlr_surface_get_texture(surface);
   } else {
-    zn_cursor_set_xcursor(self, "left_ptr");
+    self->hotspot_x = 0;
+    self->hotspot_y = 0;
+    self->texture = NULL;
   }
 
-  zn_cursor_damage_whole(self);
-
-  self->hotspot_x = hotspot_x;
-  self->hotspot_y = hotspot_y;
-  self->visible = surface != NULL;
   self->surface = surface;
-
-  zn_cursor_update_size(self);
-
-  zn_cursor_damage_whole(self);
-}
-
-void
-zn_cursor_reset_surface(struct zn_cursor* self)
-{
-  if (self->surface != NULL) {
-    zn_cursor_set_surface(self, NULL, 0, 0);
-  }
-
-  zn_cursor_set_xcursor(self, "left_ptr");
-  self->visible = true;
 
   zn_cursor_update_size(self);
 
@@ -362,7 +345,6 @@ zn_cursor_create(void)
   self->grab_default.cursor = self;
   self->grab = &self->grab_default;
   self->screen = NULL;
-  self->visible = true;
 
   zn_cursor_set_xcursor(self, "left_ptr");
   zn_cursor_update_size(self);
@@ -395,7 +377,7 @@ zn_cursor_destroy(struct zn_cursor* self)
   wl_list_remove(&self->screen_destroy_listener.link);
   wl_list_remove(&self->surface_commit_listener.link);
   wl_list_remove(&self->surface_destroy_listener.link);
-  if (self->texture != NULL) {
+  if (self->texture && !self->surface) {
     wlr_texture_destroy(self->texture);
   }
   wlr_xcursor_manager_destroy(self->xcursor_manager);

@@ -154,7 +154,6 @@ zn_screen_renderer_render_cursor(struct zn_screen *screen,
     struct zn_cursor *cursor, struct wlr_renderer *renderer,
     pixman_region32_t *screen_damage)
 {
-  struct wlr_texture *texture;
   struct wlr_fbox fbox;
   struct wlr_box transformed_box;
   struct zn_output *output = screen->output;
@@ -163,7 +162,7 @@ zn_screen_renderer_render_cursor(struct zn_screen *screen,
   int rect_count;
   float matrix[9];
 
-  if (!cursor->visible || cursor->screen != screen) {
+  if (!cursor->texture || cursor->screen != screen) {
     return;
   }
 
@@ -181,23 +180,13 @@ zn_screen_renderer_render_cursor(struct zn_screen *screen,
     goto render_damage_finish;
   }
 
-  if (cursor->surface != NULL) {
-    texture = wlr_surface_get_texture(cursor->surface);
-  } else {
-    texture = cursor->texture;
-  }
-
-  if (texture == NULL) {
-    goto render_damage_finish;
-  }
-
   wlr_matrix_project_box(matrix, &transformed_box, WL_OUTPUT_TRANSFORM_NORMAL,
       0, output->wlr_output->transform_matrix);
 
   rects = pixman_region32_rectangles(&render_damage, &rect_count);
   for (int i = 0; i < rect_count; i++) {
     zn_screen_renderer_scissor_output(screen->output, &rects[i]);
-    wlr_render_texture_with_matrix(renderer, texture, matrix, 1.0f);
+    wlr_render_texture_with_matrix(renderer, cursor->texture, matrix, 1.0f);
   }
 
 render_damage_finish:
