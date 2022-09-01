@@ -99,6 +99,19 @@ zn_view_get_window_fbox(struct zn_view *self, struct wlr_fbox *fbox)
   fbox->height = view_geometry.height;
 }
 
+void
+zn_view_change_board(struct zn_view *self, struct zn_board *new_board)
+{
+  zn_view_damage_whole(self);
+
+  wl_list_remove(&self->link);
+  wl_list_init(&self->link);
+  wl_list_insert(new_board->view_list.prev, &self->link);
+  self->board = new_board;
+
+  zn_view_damage_whole(self);
+}
+
 bool
 zn_view_is_mapped(struct zn_view *self)
 {
