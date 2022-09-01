@@ -144,8 +144,11 @@ static void
 zn_cursor_damage_whole(struct zn_cursor* self)
 {
   struct wlr_fbox fbox;
-  zn_cursor_get_fbox(self, &fbox);
-  zn_output_add_damage_box(self->screen->output, &fbox);
+
+  if (self->screen) {
+    zn_cursor_get_fbox(self, &fbox);
+    zn_output_add_damage_box(self->screen->output, &fbox);
+  }
 }
 
 static void
@@ -310,7 +313,7 @@ zn_cursor_set_xcursor(struct zn_cursor* self, char* name)
   struct wlr_xcursor* xcursor;
   struct wlr_xcursor_image* image;
 
-  if (self->texture != NULL) {
+  if (self->texture && !self->surface) {
     wlr_texture_destroy(self->texture);
   }
 
@@ -322,10 +325,15 @@ zn_cursor_set_xcursor(struct zn_cursor* self, char* name)
   }
   image = xcursor->images[0];
 
+  zn_cursor_damage_whole(self);
+
   self->hotspot_x = image->hotspot_x;
   self->hotspot_y = image->hotspot_y;
   self->texture = wlr_texture_from_pixels(server->renderer, DRM_FORMAT_ARGB8888,
       image->width * 4, image->width, image->height, image->buffer);
+  zn_cursor_update_size(self);
+
+  zn_cursor_damage_whole(self);
 }
 
 struct zn_cursor*
@@ -348,7 +356,14 @@ zn_cursor_create(void)
   }
   wlr_xcursor_manager_load(self->xcursor_manager, 1.f);
 
+  self->grab_default.interface = &default_grab_interface;
+  self->grab_default.cursor = self;
+  self->grab = &self->grab_default;
+  self->screen = NULL;
+  self->visible = true;
+
   zn_cursor_set_xcursor(self, "left_ptr");
+  zn_cursor_update_size(self);
 
   self->new_screen_listener.notify = zn_cursor_handle_new_screen;
   wl_signal_add(&screen_layout->events.new_screen, &self->new_screen_listener);
@@ -361,13 +376,6 @@ zn_cursor_create(void)
 
   self->surface_destroy_listener.notify = zn_cursor_handle_surface_destroy;
   wl_list_init(&self->surface_destroy_listener.link);
-
-  self->grab_default.interface = &default_grab_interface;
-  self->grab_default.cursor = self;
-  self->grab = &self->grab_default;
-  self->screen = NULL;
-  self->visible = true;
-  zn_cursor_update_size(self);
 
   return self;
 
