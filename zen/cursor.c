@@ -41,7 +41,8 @@ default_grab_motion(
     wlr_seat_pointer_enter(seat, surface, view_x, view_y);
     wlr_seat_pointer_send_motion(seat, event->time_msec, view_x, view_y);
   } else {
-    zn_cursor_reset_surface(cursor);
+    zn_cursor_set_surface(cursor, NULL, 0, 0);
+    zn_cursor_set_xcursor(cursor, "left_ptr");
     wlr_seat_pointer_clear_focus(seat);
   }
 }
@@ -223,6 +224,7 @@ zn_cursor_handle_surface_destroy(struct wl_listener* listener, void* data)
       zn_container_of(listener, self, surface_destroy_listener);
 
   zn_cursor_set_surface(self, NULL, 0, 0);
+  zn_cursor_set_xcursor(self, "left_ptr");
 }
 
 void
