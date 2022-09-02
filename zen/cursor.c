@@ -301,7 +301,6 @@ zn_cursor_set_xcursor(struct zn_cursor* self, char* name)
   xcursor = wlr_xcursor_manager_get_xcursor(self->xcursor_manager, name, 1.f);
   if (xcursor == NULL) {
     zn_error("Failed to get xcursor");
-    self->texture = NULL;
     return;
   }
   image = xcursor->images[0];
