@@ -2,6 +2,7 @@
 
 #include <drm/drm_fourcc.h>
 #include <linux/input.h>
+#include <string.h>
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_output_damage.h>
 #include <wlr/types/wlr_seat.h>
@@ -293,11 +294,15 @@ zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface,
 }
 
 void
-zn_cursor_set_xcursor(struct zn_cursor* self, char* name)
+zn_cursor_set_xcursor(struct zn_cursor* self, const char* name)
 {
   struct zn_server* server = zn_server_get_singleton();
   struct wlr_xcursor* xcursor;
   struct wlr_xcursor_image* image;
+
+  if (self->prev_name && strcmp(self->prev_name, name) == 0) {
+    return;
+  }
 
   zn_cursor_set_surface(self, NULL, 0, 0);
 
@@ -310,6 +315,7 @@ zn_cursor_set_xcursor(struct zn_cursor* self, char* name)
 
   zn_cursor_damage_whole(self);
 
+  self->prev_name = name;
   self->hotspot_x = image->hotspot_x;
   self->hotspot_y = image->hotspot_y;
   self->texture = wlr_texture_from_pixels(server->renderer, DRM_FORMAT_ARGB8888,

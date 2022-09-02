@@ -15,6 +15,7 @@ struct zn_cursor {
   uint32_t width, height;
   int hotspot_x, hotspot_y;
 
+  const char* prev_name;
   struct zn_screen* screen;     // nullable
   struct wlr_surface* surface;  // nullable
   // if surface is not NULL, this is the texture of that surface.
@@ -37,7 +38,7 @@ void zn_cursor_get_fbox(struct zn_cursor* self, struct wlr_fbox* fbox);
 void zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface,
     int hotspot_x, int hotspot_y);
 
-void zn_cursor_set_xcursor(struct zn_cursor* self, char* name);
+void zn_cursor_set_xcursor(struct zn_cursor* self, const char* name);
 
 struct zn_cursor* zn_cursor_create(void);
 
