@@ -162,7 +162,9 @@ zn_screen_renderer_render_cursor(struct zn_screen *screen,
   int rect_count;
   float matrix[9];
 
-  if (!cursor->texture || cursor->screen != screen) {
+  if (!cursor->texture ||
+      (cursor->surface && !wlr_surface_has_buffer(cursor->surface)) ||
+      cursor->screen != screen) {
     return;
   }
 
