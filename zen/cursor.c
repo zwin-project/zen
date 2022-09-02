@@ -101,12 +101,15 @@ static const struct zn_cursor_grab_interface default_grab_interface = {
 static void
 zn_cursor_update_size(struct zn_cursor* self)
 {
-  if (self->texture) {
-    self->width = self->texture->width;
-    self->height = self->texture->height;
-  } else {
+  if (!self->texture) {
     self->width = 0;
     self->height = 0;
+  } else if (self->surface) {
+    self->width = self->surface->current.width;
+    self->height = self->surface->current.height;
+  } else {
+    self->width = self->texture->width;
+    self->height = self->texture->height;
   }
 }
 
