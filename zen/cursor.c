@@ -266,7 +266,7 @@ zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface,
     wlr_texture_destroy(self->texture);
   }
 
-  self->prev_name = NULL;
+  self->xcursor_name = NULL;
 
   if (self->surface != NULL) {
     wl_list_remove(&self->surface_destroy_listener.link);
@@ -302,7 +302,7 @@ zn_cursor_set_xcursor(struct zn_cursor* self, const char* name)
   struct wlr_xcursor* xcursor;
   struct wlr_xcursor_image* image;
 
-  if (self->prev_name && strcmp(self->prev_name, name) == 0) {
+  if (self->xcursor_name && strcmp(self->xcursor_name, name) == 0) {
     return;
   }
 
@@ -317,7 +317,7 @@ zn_cursor_set_xcursor(struct zn_cursor* self, const char* name)
 
   zn_cursor_damage_whole(self);
 
-  self->prev_name = name;
+  self->xcursor_name = name;
   self->hotspot_x = image->hotspot_x;
   self->hotspot_y = image->hotspot_y;
   self->texture = wlr_texture_from_pixels(server->renderer, DRM_FORMAT_ARGB8888,
