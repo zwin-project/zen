@@ -266,6 +266,8 @@ zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface,
     wlr_texture_destroy(self->texture);
   }
 
+  self->prev_name = NULL;
+
   if (self->surface != NULL) {
     wl_list_remove(&self->surface_destroy_listener.link);
     wl_list_init(&self->surface_destroy_listener.link);
