@@ -98,6 +98,21 @@ static const struct zn_cursor_grab_interface default_grab_interface = {
     .frame = default_grab_frame,
 };
 
+static void
+zn_cursor_update_size(struct zn_cursor* self)
+{
+  if (!self->texture) {
+    self->width = 0;
+    self->height = 0;
+  } else if (self->surface) {
+    self->width = self->surface->current.width;
+    self->height = self->surface->current.height;
+  } else {
+    self->width = self->texture->width;
+    self->height = self->texture->height;
+  }
+}
+
 // screen_x and screen_y must be less than screen->width/height
 static void
 zn_cursor_update_position(struct zn_cursor* self, struct zn_screen* screen,
@@ -189,6 +204,8 @@ zn_cursor_handle_surface_commit(struct wl_listener* listener, void* data)
 
   zn_cursor_damage_whole(self);
 
+  zn_cursor_update_size(self);
+
   zn_cursor_damage_whole(self);
 }
 
@@ -234,17 +251,8 @@ zn_cursor_get_fbox(struct zn_cursor* self, struct wlr_fbox* fbox)
 {
   fbox->x = self->x - self->hotspot_x;
   fbox->y = self->y - self->hotspot_y;
-
-  if (!self->texture) {
-    fbox->width = 0;
-    fbox->height = 0;
-  } else if (self->surface) {
-    fbox->width = self->surface->current.width;
-    fbox->height = self->surface->current.height;
-  } else {
-    fbox->width = self->texture->width;
-    fbox->height = self->texture->height;
-  }
+  fbox->width = self->width;
+  fbox->height = self->height;
 }
 
 void
@@ -279,6 +287,8 @@ zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface,
 
   self->surface = surface;
 
+  zn_cursor_update_size(self);
+
   zn_cursor_damage_whole(self);
 }
 
@@ -304,6 +314,8 @@ zn_cursor_set_xcursor(struct zn_cursor* self, char* name)
   self->hotspot_y = image->hotspot_y;
   self->texture = wlr_texture_from_pixels(server->renderer, DRM_FORMAT_ARGB8888,
       image->width * 4, image->width, image->height, image->buffer);
+
+  zn_cursor_update_size(self);
 
   zn_cursor_damage_whole(self);
 }
@@ -334,6 +346,7 @@ zn_cursor_create(void)
   self->screen = NULL;
 
   zn_cursor_set_xcursor(self, "left_ptr");
+  zn_cursor_update_size(self);
 
   self->new_screen_listener.notify = zn_cursor_handle_new_screen;
   wl_signal_add(&screen_layout->events.new_screen, &self->new_screen_listener);

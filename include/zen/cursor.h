@@ -12,6 +12,7 @@
 
 struct zn_cursor {
   double x, y;
+  uint32_t width, height;
   int hotspot_x, hotspot_y;
 
   struct zn_screen* screen;     // nullable
