@@ -12,12 +12,11 @@
 
 struct zn_cursor {
   double x, y;
-  uint32_t width, height;
   int hotspot_x, hotspot_y;
 
   struct zn_screen* screen;     // nullable
   struct wlr_surface* surface;  // nullable
-  // if surface is not NULL, this is the texture of that surface. 
+  // if surface is not NULL, this is the texture of that surface.
   struct wlr_texture* texture;  // nullable
   struct wlr_xcursor_manager* xcursor_manager;
 
