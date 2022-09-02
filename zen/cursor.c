@@ -251,6 +251,8 @@ void
 zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface,
     int hotspot_x, int hotspot_y)
 {
+  zn_cursor_damage_whole(self);
+
   if (self->texture && !self->surface) {
     wlr_texture_destroy(self->texture);
   }
@@ -261,8 +263,6 @@ zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface,
     wl_list_remove(&self->surface_commit_listener.link);
     wl_list_init(&self->surface_commit_listener.link);
   }
-
-  zn_cursor_damage_whole(self);
 
   if (surface != NULL) {
     wl_signal_add(&surface->events.destroy, &self->surface_destroy_listener);
