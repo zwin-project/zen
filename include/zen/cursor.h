@@ -18,7 +18,7 @@ struct zn_cursor {
   bool visible;
 
   struct zn_screen* screen;  // nullable
-  struct wlr_texture* texture;
+  struct wlr_texture* xcursor_texture;
   struct wlr_surface* surface;
   struct wlr_xcursor_manager* xcursor_manager;
 

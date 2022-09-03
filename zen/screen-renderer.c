@@ -184,7 +184,7 @@ zn_screen_renderer_render_cursor(struct zn_screen *screen,
   if (cursor->surface != NULL) {
     texture = wlr_surface_get_texture(cursor->surface);
   } else {
-    texture = cursor->texture;
+    texture = cursor->xcursor_texture;
   }
 
   if (texture == NULL) {

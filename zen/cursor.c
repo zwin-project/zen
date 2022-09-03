@@ -113,8 +113,8 @@ zn_cursor_update_size(struct zn_cursor* self)
     return;
   }
 
-  self->width = self->texture->width;
-  self->height = self->texture->height;
+  self->width = self->xcursor_texture->width;
+  self->height = self->xcursor_texture->height;
 }
 
 // screen_x and screen_y must be less than screen->width/height
@@ -335,8 +335,9 @@ zn_cursor_create(void)
 
   self->hotspot_x = self->default_hotspot_x = image->hotspot_x;
   self->hotspot_y = self->default_hotspot_y = image->hotspot_y;
-  self->texture = wlr_texture_from_pixels(server->renderer, DRM_FORMAT_ARGB8888,
-      image->width * 4, image->width, image->height, image->buffer);
+  self->xcursor_texture =
+      wlr_texture_from_pixels(server->renderer, DRM_FORMAT_ARGB8888,
+          image->width * 4, image->width, image->height, image->buffer);
 
   self->new_screen_listener.notify = zn_cursor_handle_new_screen;
   wl_signal_add(&screen_layout->events.new_screen, &self->new_screen_listener);
@@ -376,7 +377,7 @@ zn_cursor_destroy(struct zn_cursor* self)
   wl_list_remove(&self->screen_destroy_listener.link);
   wl_list_remove(&self->surface_commit_listener.link);
   wl_list_remove(&self->surface_destroy_listener.link);
-  wlr_texture_destroy(self->texture);
+  wlr_texture_destroy(self->xcursor_texture);
   wlr_xcursor_manager_destroy(self->xcursor_manager);
   free(self);
 }
