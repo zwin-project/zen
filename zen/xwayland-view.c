@@ -2,6 +2,7 @@
 
 #include "zen-common.h"
 #include "zen/input/cursor-grab-move.h"
+#include "zen/input/cursor-grab-resize.h"
 #include "zen/scene/scene.h"
 #include "zen/scene/view.h"
 
@@ -67,6 +68,19 @@ zn_xwayland_view_handle_move(struct wl_listener* listener, void* data)
   struct zn_cursor* cursor = server->input_manager->seat->cursor;
 
   zn_cursor_grab_move_start(cursor, &self->base);
+}
+
+static void
+zn_xwayland_view_resize_handler(struct wl_listener* listener, void* data)
+{
+  UNUSED(data);
+  struct zn_xwayland_view* self =
+      zn_container_of(listener, self, resize_listener);
+  struct wlr_xwayland_resize_event* event = data;
+  struct zn_server* server = zn_server_get_singleton();
+  struct zn_cursor* cursor = server->input_manager->seat->cursor;
+
+  zn_cursor_grab_resize_start(cursor, &self->base, event->edges);
 }
 
 static void
@@ -160,6 +174,10 @@ zn_xwayland_view_create(
 
   self->move_listener.notify = zn_xwayland_view_handle_move;
   wl_list_init(&self->move_listener.link);
+
+  self->resize_listener.notify = zn_xwayland_view_resize_handler;
+  wl_signal_add(&self->wlr_xwayland_surface->events.request_resize,
+      &self->resize_listener);
 
   self->wlr_xwayland_surface_destroy_listener.notify =
       zn_xwayland_view_handle_wlr_xwayland_surface_destroy;
