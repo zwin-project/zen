@@ -144,8 +144,11 @@ static void
 zn_cursor_damage_whole(struct zn_cursor* self)
 {
   struct wlr_fbox fbox;
-  zn_cursor_get_fbox(self, &fbox);
-  zn_output_add_damage_box(self->screen->output, &fbox);
+
+  if (self->screen) {
+    zn_cursor_get_fbox(self, &fbox);
+    zn_output_add_damage_box(self->screen->output, &fbox);
+  }
 }
 
 static void
