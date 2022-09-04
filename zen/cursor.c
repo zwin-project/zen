@@ -13,8 +13,6 @@
 #include "zen/scene/view.h"
 #include "zen/server.h"
 
-static void zn_cursor_set_xcursor(struct zn_cursor* self, const char* name);
-
 static void
 default_grab_motion(
     struct zn_cursor_grab* grab, struct wlr_event_pointer_motion* event)
@@ -223,58 +221,6 @@ zn_cursor_handle_surface_destroy(struct wl_listener* listener, void* data)
   zn_cursor_set_surface(self, NULL, 0, 0);
 }
 
-static void
-zn_cursor_set_xcursor(struct zn_cursor* self, const char* name)
-{
-  struct zn_server* server = zn_server_get_singleton();
-  struct wlr_xcursor* xcursor;
-  struct wlr_xcursor_image* image;
-  bool requested_new_texture = false;
-
-  if (!name) {
-    return;
-  }
-
-  if (!self->xcursor_name) {
-    requested_new_texture = true;
-  } else {
-    requested_new_texture = strcmp(self->xcursor_name, name) != 0;
-  }
-
-  zn_cursor_damage_whole(self);
-
-  if (self->surface) {
-    zn_cursor_set_surface(self, NULL, 0, 0);
-  }
-
-  if (self->xcursor_texture && requested_new_texture) {
-    wlr_texture_destroy(self->xcursor_texture);
-    self->xcursor_texture = NULL;
-  }
-
-  xcursor = wlr_xcursor_manager_get_xcursor(self->xcursor_manager, name, 1.f);
-  if (xcursor == NULL) {
-    zn_error("Failed to get xcursor");
-    return;
-  }
-  image = xcursor->images[0];
-
-  if (requested_new_texture) {
-    self->xcursor_texture =
-        wlr_texture_from_pixels(server->renderer, DRM_FORMAT_ARGB8888,
-            image->width * 4, image->width, image->height, image->buffer);
-  }
-
-  self->xcursor_name = name;
-  self->hotspot_x = image->hotspot_x;
-  self->hotspot_y = image->hotspot_y;
-  self->visible = self->xcursor_texture != NULL;
-
-  zn_cursor_update_size(self);
-
-  zn_cursor_damage_whole(self);
-}
-
 void
 zn_cursor_move_relative(struct zn_cursor* self, double dx, double dy)
 {
@@ -333,6 +279,58 @@ zn_cursor_set_surface(struct zn_cursor* self, struct wlr_surface* surface,
   self->hotspot_y = hotspot_y;
   self->visible = surface != NULL;
   self->surface = surface;
+
+  zn_cursor_update_size(self);
+
+  zn_cursor_damage_whole(self);
+}
+
+void
+zn_cursor_set_xcursor(struct zn_cursor* self, const char* name)
+{
+  struct zn_server* server = zn_server_get_singleton();
+  struct wlr_xcursor* xcursor;
+  struct wlr_xcursor_image* image;
+  bool requested_new_texture = false;
+
+  if (!name) {
+    return;
+  }
+
+  if (!self->xcursor_name) {
+    requested_new_texture = true;
+  } else {
+    requested_new_texture = strcmp(self->xcursor_name, name) != 0;
+  }
+
+  zn_cursor_damage_whole(self);
+
+  if (self->surface) {
+    zn_cursor_set_surface(self, NULL, 0, 0);
+  }
+
+  if (self->xcursor_texture && requested_new_texture) {
+    wlr_texture_destroy(self->xcursor_texture);
+    self->xcursor_texture = NULL;
+  }
+
+  xcursor = wlr_xcursor_manager_get_xcursor(self->xcursor_manager, name, 1.f);
+  if (xcursor == NULL) {
+    zn_error("Failed to get xcursor");
+    return;
+  }
+  image = xcursor->images[0];
+
+  if (requested_new_texture) {
+    self->xcursor_texture =
+        wlr_texture_from_pixels(server->renderer, DRM_FORMAT_ARGB8888,
+            image->width * 4, image->width, image->height, image->buffer);
+  }
+
+  self->xcursor_name = name;
+  self->hotspot_x = image->hotspot_x;
+  self->hotspot_y = image->hotspot_y;
+  self->visible = self->xcursor_texture != NULL;
 
   zn_cursor_update_size(self);
 
