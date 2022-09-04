@@ -45,11 +45,20 @@ move_grab_frame(struct zn_cursor_grab* grab)
   UNUSED(grab);
 }
 
+static void
+move_grab_cancel(struct zn_cursor_grab* grab)
+{
+  struct zn_cursor_grab_move* self = zn_container_of(grab, self, base);
+  zn_view_move(self->view, self->init_x, self->init_y);
+  zn_cursor_grab_move_end(self);
+}
+
 static const struct zn_cursor_grab_interface move_grab_interface = {
     .motion = move_grab_motion,
     .button = move_grab_button,
     .axis = move_grab_axis,
     .frame = move_grab_frame,
+    .cancel = move_grab_cancel,
 };
 
 void
@@ -74,6 +83,8 @@ zn_cursor_grab_move_start(struct zn_cursor* cursor, struct zn_view* view)
 
   zn_cursor_get_fbox(cursor, &cursor_box);
   zn_view_get_surface_fbox(view, &view_box);
+  self->init_x = view_box.x;
+  self->init_y = view_box.y;
   self->diff_x = view_box.x - cursor_box.x;
   self->diff_y = view_box.y - cursor_box.y;
   self->view = view;
