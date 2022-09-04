@@ -55,6 +55,7 @@ static const struct zn_cursor_grab_interface move_grab_interface = {
 void
 zn_cursor_grab_move_end(struct zn_cursor_grab_move* self)
 {
+  zn_cursor_set_xcursor(self->base.cursor, "left_ptr");
   zn_cursor_end_grab(self->base.cursor);
   free(self);
 }
@@ -80,5 +81,6 @@ zn_cursor_grab_move_start(struct zn_cursor* cursor, struct zn_view* view)
   self->base.interface = &move_grab_interface;
   self->base.cursor = cursor;
 
+  zn_cursor_set_xcursor(cursor, "grabbing");
   zn_cursor_start_grab(cursor, &self->base);
 }
