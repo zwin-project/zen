@@ -91,11 +91,18 @@ default_grab_frame(struct zn_cursor_grab* grab)
   wlr_seat_pointer_send_frame(seat);
 }
 
+static void
+default_grab_cancel(struct zn_cursor_grab* grab)
+{
+  UNUSED(grab);
+}
+
 static const struct zn_cursor_grab_interface default_grab_interface = {
     .motion = default_grab_motion,
     .button = default_grab_button,
     .axis = default_grab_axis,
     .frame = default_grab_frame,
+    .cancel = default_grab_cancel,
 };
 
 static void
