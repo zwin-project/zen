@@ -97,7 +97,7 @@ zn_view_map_to_scene(struct zn_view *self, struct zn_scene *scene)
       self, (board->width - fbox.width) / 2, (board->height - fbox.height) / 2);
 
   self->board = board;
-  wl_list_insert(&board->view_list, &self->link);
+  wl_list_insert((&board->view_list)->prev, &self->link);
   zn_scene_set_focused_view(scene, self);
 
   zn_view_damage_whole(self);
