@@ -14,12 +14,13 @@ struct zn_cursor {
   double x, y;
   uint32_t width, height;
   int hotspot_x, hotspot_y;
-  int default_hotspot_x, default_hotspot_y;
   bool visible;
 
   struct zn_screen* screen;  // nullable
-  struct wlr_texture* xcursor_texture;
-  struct wlr_surface* surface;
+
+  struct wlr_surface* surface;          // nullable
+  const char* xcursor_name;             // nullable
+  struct wlr_texture* xcursor_texture;  // nullable
   struct wlr_xcursor_manager* xcursor_manager;
 
   struct zn_cursor_grab* grab;
