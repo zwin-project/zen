@@ -1,6 +1,7 @@
 #include "zen/xwayland-view.h"
 
 #include "zen-common.h"
+#include "zen/input/cursor-grab-move.h"
 #include "zen/scene/scene.h"
 #include "zen/scene/view.h"
 
@@ -56,6 +57,10 @@ zn_xwayland_view_move_handler(struct wl_listener* listener, void* data)
   UNUSED(data);
   struct zn_xwayland_view* self =
       zn_container_of(listener, self, move_listener);
+  struct zn_server* server = zn_server_get_singleton();
+  struct zn_cursor* cursor = server->input_manager->seat->cursor;
+
+  zn_cursor_grab_move_start(cursor, &self->base);
 }
 
 static void
