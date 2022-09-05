@@ -193,6 +193,7 @@ zn_cursor_handle_screen_destroy(struct wl_listener* listener, void* data)
     zn_cursor_update_position(self, screen, box.width / 2, box.height / 2);
     zn_cursor_damage_whole(self);
   } else {
+    self->grab->interface->cancel(self->grab);
     zn_cursor_update_position(self, NULL, 0, 0);
   }
 }
