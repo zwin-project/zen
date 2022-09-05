@@ -61,9 +61,19 @@ static const struct zn_cursor_grab_interface move_grab_interface = {
     .cancel = move_grab_cancel,
 };
 
+static void
+zn_cursor_grab_move_handle_view_unmap(struct wl_listener* listener, void* data)
+{
+  UNUSED(data);
+  struct zn_cursor_grab_move* self =
+      zn_container_of(listener, self, view_unmap_listener);
+  zn_cursor_grab_move_end(self);
+}
+
 void
 zn_cursor_grab_move_end(struct zn_cursor_grab_move* self)
 {
+  wl_list_remove(&self->view_unmap_listener.link);
   zn_cursor_set_xcursor(self->base.cursor, "left_ptr");
   zn_cursor_end_grab(self->base.cursor);
   free(self);
@@ -92,6 +102,9 @@ zn_cursor_grab_move_start(struct zn_cursor* cursor, struct zn_view* view)
   self->view = view;
   self->base.interface = &move_grab_interface;
   self->base.cursor = cursor;
+
+  self->view_unmap_listener.notify = zn_cursor_grab_move_handle_view_unmap;
+  wl_signal_add(&view->events.unmap, &self->view_unmap_listener);
 
   zn_cursor_set_xcursor(cursor, "grabbing");
   wlr_seat_pointer_notify_clear_focus(seat);
