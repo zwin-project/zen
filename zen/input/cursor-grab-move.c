@@ -84,7 +84,7 @@ zn_cursor_grab_move_start(struct zn_cursor* cursor, struct zn_view* view)
 {
   struct zn_server* server = zn_server_get_singleton();
   struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
-  struct wlr_fbox cursor_box, view_box;
+  struct wlr_fbox view_box;
   struct zn_cursor_grab_move* self;
   self = zalloc(sizeof *self);
 
@@ -93,12 +93,11 @@ zn_cursor_grab_move_start(struct zn_cursor* cursor, struct zn_view* view)
     return;
   }
 
-  zn_cursor_get_fbox(cursor, &cursor_box);
   zn_view_get_surface_fbox(view, &view_box);
   self->init_x = view_box.x;
   self->init_y = view_box.y;
-  self->diff_x = view_box.x - cursor_box.x;
-  self->diff_y = view_box.y - cursor_box.y;
+  self->diff_x = view_box.x - cursor->x;
+  self->diff_y = view_box.y - cursor->y;
   self->view = view;
   self->base.interface = &move_grab_interface;
   self->base.cursor = cursor;
