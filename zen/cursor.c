@@ -13,35 +13,45 @@
 #include "zen/scene/view.h"
 #include "zen/server.h"
 
+// fetch view's surface corresponding to cursor's pos
+// expect cursor::surface is non-NULL
+static struct wlr_surface*
+get_surface_of_view_at_cursor_pos(double* view_x, double* view_y)
+{
+  struct zn_server* server = zn_server_get_singleton();
+  struct zn_cursor* cursor = server->input_manager->seat->cursor;
+  struct zn_view* view;
+
+  view = zn_screen_get_view_at(
+      cursor->screen, cursor->x, cursor->y, view_x, view_y);
+
+  if (view) {
+    return view->impl->get_wlr_surface(view);
+  }
+
+  return NULL;
+}
+
 static void
 default_grab_motion(
     struct zn_cursor_grab* grab, struct wlr_event_pointer_motion* event)
 {
   struct zn_server* server = zn_server_get_singleton();
   struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
-  struct zn_cursor* cursor = grab->cursor;
-  struct wlr_surface* surface;
-  struct zn_view* view;
+  struct zn_cursor* cursor = server->input_manager->seat->cursor;
   double view_x, view_y;
+  struct wlr_surface* surface =
+      get_surface_of_view_at_cursor_pos(&view_x, &view_y);
 
-  if (cursor->screen == NULL) {
+  if (!cursor->screen) {
     return;
-  }
-
-  view = zn_screen_get_view_at(
-      cursor->screen, cursor->x, cursor->y, &view_x, &view_y);
-
-  if (view != NULL) {
-    surface = view->impl->get_wlr_surface(view);
-  } else {
-    surface = NULL;
   }
 
   if (surface) {
     wlr_seat_pointer_enter(seat, surface, view_x, view_y);
     wlr_seat_pointer_send_motion(seat, event->time_msec, view_x, view_y);
   } else {
-    zn_cursor_set_xcursor(cursor, "left_ptr");
+    zn_cursor_set_xcursor(grab->cursor, "left_ptr");
     wlr_seat_pointer_clear_focus(seat);
   }
 }
@@ -238,7 +248,25 @@ zn_cursor_start_grab(struct zn_cursor* self, struct zn_cursor_grab* grab)
 void
 zn_cursor_end_grab(struct zn_cursor* self)
 {
+  struct zn_server* server = zn_server_get_singleton();
+  struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
+  struct zn_cursor* cursor = server->input_manager->seat->cursor;
+  double view_x, view_y;
+  struct wlr_surface* surface;
+
   self->grab = &self->grab_default;
+
+  if (!cursor->screen) {
+    return;
+  }
+
+  surface = get_surface_of_view_at_cursor_pos(&view_x, &view_y);
+
+  if (surface) {
+    wlr_seat_pointer_enter(seat, surface, view_x, view_y);
+  } else {
+    zn_cursor_set_xcursor(cursor, "left_ptr");
+  }
 }
 
 void
