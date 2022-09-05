@@ -105,6 +105,19 @@ install_data(
   install_dir: join_paths(datadir, 'wayland-sessions')
 )
 
+if get_option('default-wallpaper')
+  wallpaper_files = files(
+    'assets/Zen_Wallpaper_Blue_3840x2160.png',
+    'assets/Zen_Wallpaper_Logo_3840x2160.png',
+    'assets/Zen_Wallpaper_Tricolor_3840x2160.png',
+    'assets/Zen_Wallpaper_Gray_3840x2160.png',
+    'assets/Zen_Wallpaper_Main_3840x2160.png',
+  )
+  wallpaper_install_dir = join_paths(datadir, 'backgrounds', 'zen')
+
+  install_data(wallpaper_files, install_dir: wallpaper_install_dir)
+endif
+
 if get_option('tests')
   subdir('tests')
 endif
