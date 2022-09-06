@@ -1,6 +1,6 @@
 #include "zen/cursor.h"
 
-#include <drm/drm_fourcc.h>
+#include <drm_fourcc.h>
 #include <linux/input.h>
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_output_damage.h>
