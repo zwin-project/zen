@@ -40,10 +40,10 @@ zn_screen_get_view_at(
 
     if (zn_wlr_fbox_contains_point(&fbox, x, y)) {
       if (view_x != NULL) {
-        *view_x = x - view->x;
+        *view_x = x - view->surface_x;
       }
       if (view_y != NULL) {
-        *view_y = y - view->y;
+        *view_y = y - view->surface_y;
       }
       return view;
     }

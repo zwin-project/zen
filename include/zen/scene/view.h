@@ -24,7 +24,7 @@ enum zn_view_type {
 };
 
 struct zn_view {
-  double x, y;
+  double surface_x, surface_y;
 
   enum zn_view_type type;
 

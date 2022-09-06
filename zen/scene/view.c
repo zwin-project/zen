@@ -9,19 +9,19 @@
 #include "zen/xdg-toplevel-view.h"
 #include "zen/xwayland-view.h"
 
-static void
-zn_view_move(struct zn_view *self, double x, double y)
+void
+zn_view_move(struct zn_view *self, double window_x, double window_y)
 {
   struct wlr_box view_geometry;
 
   zn_view_damage_whole(self);
 
   self->impl->get_geometry(self, &view_geometry);
-  self->x = x - view_geometry.x;
-  self->y = y - view_geometry.y;
+  self->surface_x = window_x - view_geometry.x;
+  self->surface_y = window_y - view_geometry.y;
 
   if (self->impl->configure) {
-    self->impl->configure(self, x, y);
+    self->impl->configure(self, window_x, window_y);
   }
 }
 
@@ -53,8 +53,8 @@ zn_view_get_surface_fbox(struct zn_view *self, struct wlr_fbox *fbox)
 {
   struct wlr_surface *surface = self->impl->get_wlr_surface(self);
 
-  fbox->x = self->x;
-  fbox->y = self->y;
+  fbox->x = self->surface_x;
+  fbox->y = self->surface_y;
   fbox->width = surface->current.width;
   fbox->height = surface->current.height;
 }
@@ -65,8 +65,8 @@ zn_view_get_window_fbox(struct zn_view *self, struct wlr_fbox *fbox)
   struct wlr_box view_geometry;
   self->impl->get_geometry(self, &view_geometry);
 
-  fbox->x = view_geometry.x + self->x;
-  fbox->y = view_geometry.y + self->y;
+  fbox->x = view_geometry.x + self->surface_x;
+  fbox->y = view_geometry.y + self->surface_y;
   fbox->width = view_geometry.width;
   fbox->height = view_geometry.height;
 }

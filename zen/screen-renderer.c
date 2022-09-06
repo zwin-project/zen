@@ -52,8 +52,8 @@ zn_screen_renderer_get_surface_fbox(struct wlr_surface *surface,
     struct zn_view *view, int surface_x, int surface_y,
     struct wlr_fbox *surface_box)
 {
-  surface_box->x = view->x + surface_x;
-  surface_box->y = view->y + surface_y;
+  surface_box->x = view->surface_x + surface_x;
+  surface_box->y = view->surface_y + surface_y;
   surface_box->width = surface->current.width;
   surface_box->height = surface->current.height;
 }
