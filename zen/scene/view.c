@@ -12,8 +12,13 @@
 static void
 zn_view_move(struct zn_view *self, double x, double y)
 {
-  self->x = x;
-  self->y = y;
+  struct wlr_box view_geometry;
+
+  zn_view_damage_whole(self);
+
+  self->impl->get_geometry(self, &view_geometry);
+  self->x = x - view_geometry.x;
+  self->y = y - view_geometry.y;
 
   if (self->impl->configure) {
     self->impl->configure(self, x, y);
