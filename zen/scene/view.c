@@ -36,8 +36,28 @@ zn_view_add_damage_fbox(struct zn_view *self, struct wlr_fbox *effective_box)
 void
 zn_view_damage(struct zn_view *self)
 {
-  // FIXME: iterate all surfaces, and add damage more precisely
-  zn_view_damage_whole(self);
+  struct wlr_surface *surface = self->impl->get_wlr_surface(self);
+  struct wlr_fbox damage_box;
+  pixman_region32_t damage;
+  pixman_box32_t *rects;
+  int rect_count;
+
+  pixman_region32_init(&damage);
+
+  wlr_surface_get_effective_damage(surface, &damage);
+  rects = pixman_region32_rectangles(&damage, &rect_count);
+
+  for (int i = 0; i < rect_count; ++i) {
+    damage_box = (struct wlr_fbox){
+        .x = self->x + rects[i].x1,
+        .y = self->y + rects[i].y1,
+        .width = rects[i].x2 - rects[i].x1,
+        .height = rects[i].y2 - rects[i].y1,
+    };
+    zn_view_add_damage_fbox(self, &damage_box);
+  }
+
+  pixman_region32_fini(&damage);
 }
 
 void
