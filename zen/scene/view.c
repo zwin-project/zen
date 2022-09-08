@@ -20,6 +20,19 @@ zn_view_move(struct zn_view *self, double x, double y)
   }
 }
 
+static void
+zn_view_add_damage_fbox(struct zn_view *self, struct wlr_fbox *effective_box)
+{
+  struct zn_board *board = self->board;
+  struct zn_screen *screen = board ? board->screen : NULL;
+
+  if (screen == NULL) {
+    return;
+  }
+
+  zn_output_add_damage_box(screen->output, effective_box);
+}
+
 void
 zn_view_damage(struct zn_view *self)
 {
@@ -31,16 +44,10 @@ void
 zn_view_damage_whole(struct zn_view *self)
 {
   struct wlr_fbox fbox;
-  struct zn_board *board = self->board;
-  struct zn_screen *screen = board ? board->screen : NULL;
-
-  if (screen == NULL) {
-    return;
-  }
 
   zn_view_get_surface_fbox(self, &fbox);
 
-  zn_output_add_damage_box(screen->output, &fbox);
+  zn_view_add_damage_fbox(self, &fbox);
 }
 
 void
