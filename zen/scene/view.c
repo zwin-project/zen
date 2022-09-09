@@ -20,7 +20,6 @@ zn_view_move(
       wl_list_remove(&self->link);
       wl_list_init(&self->link);
     }
-    // new_board is NULL only when unmapping
     if (new_board) {
       wl_list_insert(new_board->view_list.prev, &self->link);
     }
