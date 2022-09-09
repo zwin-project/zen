@@ -264,8 +264,6 @@ zn_cursor_end_grab(struct zn_cursor* self)
 
   if (surface) {
     wlr_seat_pointer_enter(seat, surface, view_x, view_y);
-  } else {
-    zn_cursor_set_xcursor(cursor, "left_ptr");
   }
 }
 
