@@ -130,6 +130,7 @@ static void
 zn_cursor_grab_move_destroy(struct zn_cursor_grab_move* self)
 {
   wl_list_remove(&self->view_unmap_listener.link);
+  wl_list_remove(&self->prev_screen_destroy_listener.link);
   free(self);
 }
 
