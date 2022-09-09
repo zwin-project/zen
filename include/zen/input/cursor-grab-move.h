@@ -14,6 +14,7 @@ struct zn_cursor_grab_move {
   double init_x, init_y;
   double diff_x, diff_y;
 
+  struct wl_listener prev_screen_destroy_listener;
   struct wl_listener view_unmap_listener;
 };
 

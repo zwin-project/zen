@@ -16,13 +16,19 @@ move_grab_motion(
     return;
   }
 
-  if (grab->cursor->screen != self->prev_screen) {
-    board = grab->cursor->screen->current_board;
+  if (self->prev_screen) {
+    if (grab->cursor->screen != self->prev_screen) {
+      board = grab->cursor->screen->current_board;
+    }
+    wl_list_remove(&self->prev_screen_destroy_listener.link);
   }
 
   zn_view_move(self->view, grab->cursor->x + self->diff_x,
       grab->cursor->y + self->diff_y, board);
+
   self->prev_screen = grab->cursor->screen;
+  wl_signal_add(&grab->cursor->screen->events.destroy,
+      &self->prev_screen_destroy_listener);
 }
 
 static void
@@ -75,6 +81,18 @@ zn_cursor_grab_move_handle_view_unmap(struct wl_listener* listener, void* data)
   zn_cursor_grab_move_end(self);
 }
 
+static void
+zn_cursor_grab_move_handle_prev_screen_destroy(
+    struct wl_listener* listener, void* data)
+{
+  UNUSED(data);
+  struct zn_cursor_grab_move* self =
+      zn_container_of(listener, self, view_unmap_listener);
+  wl_list_remove(&self->prev_screen_destroy_listener.link);
+  wl_list_init(&self->prev_screen_destroy_listener.link);
+  self->prev_screen = NULL;
+}
+
 static struct zn_cursor_grab_move*
 zn_cursor_grab_move_create(struct zn_cursor* cursor, struct zn_view* view)
 {
@@ -100,6 +118,10 @@ zn_cursor_grab_move_create(struct zn_cursor* cursor, struct zn_view* view)
 
   self->view_unmap_listener.notify = zn_cursor_grab_move_handle_view_unmap;
   wl_signal_add(&view->events.unmap, &self->view_unmap_listener);
+
+  self->prev_screen_destroy_listener.notify =
+      zn_cursor_grab_move_handle_prev_screen_destroy;
+  wl_list_init(&self->prev_screen_destroy_listener.link);
 }
 
 static void
