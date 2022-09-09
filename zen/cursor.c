@@ -13,24 +13,8 @@
 #include "zen/scene/view.h"
 #include "zen/server.h"
 
-// fetch view's surface corresponding to cursor's pos
-// expect cursor::surface is non-NULL
-static struct wlr_surface*
-get_surface_of_view_at_cursor_pos(double* view_x, double* view_y)
-{
-  struct zn_server* server = zn_server_get_singleton();
-  struct zn_cursor* cursor = server->input_manager->seat->cursor;
-  struct zn_view* view;
-
-  view = zn_screen_get_view_at(
-      cursor->screen, cursor->x, cursor->y, view_x, view_y);
-
-  if (view) {
-    return view->impl->get_wlr_surface(view);
-  }
-
-  return NULL;
-}
+static struct wlr_surface* zn_cursor_get_surface_at_cursor_pos(
+    struct zn_cursor* self, double* view_x, double* view_y);
 
 static void
 default_grab_motion(
@@ -39,12 +23,13 @@ default_grab_motion(
   struct zn_server* server = zn_server_get_singleton();
   struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
   double view_x, view_y;
-  struct wlr_surface* surface =
-      get_surface_of_view_at_cursor_pos(&view_x, &view_y);
+  struct wlr_surface* surface;
 
   if (!grab->cursor->screen) {
     return;
   }
+
+  surface = zn_cursor_get_surface_at_cursor_pos(grab->cursor, &view_x, &view_y);
 
   if (surface) {
     wlr_seat_pointer_enter(seat, surface, view_x, view_y);
@@ -113,6 +98,23 @@ static const struct zn_cursor_grab_interface default_grab_interface = {
     .frame = default_grab_frame,
     .cancel = default_grab_cancel,
 };
+
+// fetch view's surface corresponding to cursor's pos
+// expect cursor::screen is non-NULL
+static struct wlr_surface*
+zn_cursor_get_surface_at_cursor_pos(
+    struct zn_cursor* self, double* view_x, double* view_y)
+{
+  struct zn_view* view;
+
+  view = zn_screen_get_view_at(self->screen, self->x, self->y, view_x, view_y);
+
+  if (view) {
+    return view->impl->get_wlr_surface(view);
+  }
+
+  return NULL;
+}
 
 static void
 zn_cursor_update_size(struct zn_cursor* self)
@@ -249,17 +251,16 @@ zn_cursor_end_grab(struct zn_cursor* self)
 {
   struct zn_server* server = zn_server_get_singleton();
   struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
-  struct zn_cursor* cursor = server->input_manager->seat->cursor;
   double view_x, view_y;
   struct wlr_surface* surface;
 
   self->grab = &self->grab_default;
 
-  if (!cursor->screen) {
+  if (!self->screen) {
     return;
   }
 
-  surface = get_surface_of_view_at_cursor_pos(&view_x, &view_y);
+  surface = zn_cursor_get_surface_at_cursor_pos(self, &view_x, &view_y);
 
   if (surface) {
     wlr_seat_pointer_enter(seat, surface, view_x, view_y);
