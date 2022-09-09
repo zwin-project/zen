@@ -38,6 +38,10 @@ struct zn_view {
   } events;
 };
 
+/**
+ * @param board must not be NULL except when this view is unmapped with
+ * `zn_view_unmap`
+ */
 void zn_view_move(
     struct zn_view *self, double x, double y, struct zn_board *new_board);
 
