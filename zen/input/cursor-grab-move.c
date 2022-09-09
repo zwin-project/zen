@@ -95,6 +95,7 @@ zn_cursor_grab_move_start(struct zn_cursor* cursor, struct zn_view* view)
   }
 
   zn_view_get_surface_fbox(view, &view_box);
+  self->prev_screen = cursor->screen;
   self->init_board = view->board;
   self->init_x = view_box.x;
   self->init_y = view_box.y;
