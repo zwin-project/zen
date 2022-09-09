@@ -56,6 +56,7 @@ zn_xwayland_view_unmap(struct wl_listener* listener, void* data)
 static void
 zn_xwayland_view_move_handler(struct wl_listener* listener, void* data)
 {
+  // FIXME: pointer/button/serial validation
   UNUSED(data);
   struct zn_xwayland_view* self =
       zn_container_of(listener, self, move_listener);

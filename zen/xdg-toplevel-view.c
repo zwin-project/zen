@@ -58,6 +58,7 @@ zn_xdg_toplevel_view_unmap(struct wl_listener* listener, void* data)
 static void
 zn_xdg_toplevel_view_move_handler(struct wl_listener* listener, void* data)
 {
+  // FIXME: pointer/button/serial validation
   UNUSED(data);
   struct zn_xdg_toplevel_view* self =
       zn_container_of(listener, self, move_listener);
