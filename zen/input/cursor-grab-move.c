@@ -108,6 +108,6 @@ zn_cursor_grab_move_start(struct zn_cursor* cursor, struct zn_view* view)
   wl_signal_add(&view->events.unmap, &self->view_unmap_listener);
 
   zn_cursor_set_xcursor(cursor, "grabbing");
-  wlr_seat_pointer_notify_clear_focus(seat);
+  wlr_seat_pointer_clear_focus(seat);
   zn_cursor_start_grab(cursor, &self->base);
 }
