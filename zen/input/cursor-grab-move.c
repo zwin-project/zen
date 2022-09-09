@@ -71,20 +71,9 @@ zn_cursor_grab_move_handle_view_unmap(struct wl_listener* listener, void* data)
   zn_cursor_grab_move_end(self);
 }
 
-void
-zn_cursor_grab_move_end(struct zn_cursor_grab_move* self)
+static struct zn_cursor_grab_move*
+zn_cursor_grab_move_create(struct zn_cursor* cursor, struct zn_view* view)
 {
-  wl_list_remove(&self->view_unmap_listener.link);
-  zn_cursor_set_xcursor(self->base.cursor, "left_ptr");
-  zn_cursor_end_grab(self->base.cursor);
-  free(self);
-}
-
-void
-zn_cursor_grab_move_start(struct zn_cursor* cursor, struct zn_view* view)
-{
-  struct zn_server* server = zn_server_get_singleton();
-  struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
   struct wlr_fbox view_box;
   struct zn_cursor_grab_move* self;
   self = zalloc(sizeof *self);
@@ -107,6 +96,32 @@ zn_cursor_grab_move_start(struct zn_cursor* cursor, struct zn_view* view)
 
   self->view_unmap_listener.notify = zn_cursor_grab_move_handle_view_unmap;
   wl_signal_add(&view->events.unmap, &self->view_unmap_listener);
+}
+
+static void
+zn_cursor_grab_move_destroy(struct zn_cursor_grab_move* self)
+{
+  wl_list_remove(&self->view_unmap_listener.link);
+  free(self);
+}
+
+static void
+zn_cursor_grab_move_end(struct zn_cursor_grab_move* self)
+{
+  zn_cursor_set_xcursor(self->base.cursor, "left_ptr");
+  zn_cursor_end_grab(self->base.cursor);
+  zn_cursor_grab_move_destroy(self);
+}
+
+void
+zn_cursor_grab_move_start(struct zn_cursor* cursor, struct zn_view* view)
+{
+  struct zn_server* server = zn_server_get_singleton();
+  struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
+  struct zn_cursor_grab_move* self = zn_cursor_grab_move_create(cursor, view);
+  if (!self) {
+    return;
+  }
 
   zn_cursor_set_xcursor(cursor, "grabbing");
   wlr_seat_pointer_clear_focus(seat);
