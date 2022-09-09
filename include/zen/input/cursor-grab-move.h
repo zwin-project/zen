@@ -10,6 +10,7 @@ struct zn_cursor_grab_move {
   struct zn_view* view;
   struct zn_screen* prev_screen;
 
+  struct zn_board* init_board;
   double init_x, init_y;
   double diff_x, diff_y;
 

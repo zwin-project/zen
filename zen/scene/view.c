@@ -10,9 +10,21 @@
 #include "zen/xwayland-view.h"
 
 void
-zn_view_move(struct zn_view *self, double x, double y)
+zn_view_move(
+    struct zn_view *self, double x, double y, struct zn_board *new_board)
 {
   zn_view_damage_whole(self);
+
+  if (new_board != self->board) {
+    if (self->board) {
+      wl_list_remove(&self->link);
+      wl_list_init(&self->link);
+    }
+    if (new_board) {
+      wl_list_insert(new_board->view_list.prev, &self->link);
+    }
+    self->board = new_board;
+  }
 
   self->x = x;
   self->y = y;
@@ -99,19 +111,6 @@ zn_view_get_window_fbox(struct zn_view *self, struct wlr_fbox *fbox)
   fbox->height = view_geometry.height;
 }
 
-void
-zn_view_change_board(struct zn_view *self, struct zn_board *new_board)
-{
-  zn_view_damage_whole(self);
-
-  wl_list_remove(&self->link);
-  wl_list_init(&self->link);
-  wl_list_insert(new_board->view_list.prev, &self->link);
-  self->board = new_board;
-
-  zn_view_damage_whole(self);
-}
-
 bool
 zn_view_is_mapped(struct zn_view *self)
 {
@@ -139,8 +138,8 @@ zn_view_map_to_scene(struct zn_view *self, struct zn_scene *scene)
   // TODO: handle board destruction
 
   zn_view_get_window_fbox(self, &fbox);
-  zn_view_move(
-      self, (board->width - fbox.width) / 2, (board->height - fbox.height) / 2);
+  zn_view_move(self, (board->width - fbox.width) / 2,
+      (board->height - fbox.height) / 2, self->board);
 
   self->board = board;
   wl_list_insert(board->view_list.prev, &self->link);

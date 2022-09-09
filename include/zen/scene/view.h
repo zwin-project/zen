@@ -38,7 +38,8 @@ struct zn_view {
   } events;
 };
 
-void zn_view_move(struct zn_view *self, double x, double y);
+void zn_view_move(
+    struct zn_view *self, double x, double y, struct zn_board *new_board);
 
 /**
  * Add the damage of all surfaces associated with the view to the output where
