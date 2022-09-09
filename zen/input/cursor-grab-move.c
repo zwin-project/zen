@@ -2,7 +2,7 @@
 
 #include "zen-common.h"
 
-void zn_cursor_grab_move_end(struct zn_cursor_grab_move* self);
+static void zn_cursor_grab_move_end(struct zn_cursor_grab_move* self);
 
 static void
 move_grab_motion(
@@ -102,7 +102,7 @@ zn_cursor_grab_move_create(struct zn_cursor* cursor, struct zn_view* view)
 
   if (self == NULL) {
     zn_error("Failed to allocate memory");
-    return;
+    return NULL;
   }
 
   zn_view_get_surface_fbox(view, &view_box);
@@ -122,6 +122,8 @@ zn_cursor_grab_move_create(struct zn_cursor* cursor, struct zn_view* view)
   self->prev_screen_destroy_listener.notify =
       zn_cursor_grab_move_handle_prev_screen_destroy;
   wl_list_init(&self->prev_screen_destroy_listener.link);
+
+  return self;
 }
 
 static void
