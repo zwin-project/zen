@@ -17,6 +17,7 @@ struct zn_cursor_grab_interface {
   void (*axis)(
       struct zn_cursor_grab* grab, struct wlr_event_pointer_axis* event);
   void (*frame)(struct zn_cursor_grab* grab);
+  // called when zn_cursor::screen is assigned NULL
   void (*cancel)(struct zn_cursor_grab* grab);
 };
 

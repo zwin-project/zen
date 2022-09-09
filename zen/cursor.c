@@ -147,11 +147,14 @@ zn_cursor_update_position(struct zn_cursor* self, struct zn_screen* screen,
     wl_list_remove(&self->screen_destroy_listener.link);
     wl_list_init(&self->screen_destroy_listener.link);
   }
-  if (screen != NULL) {
-    wl_signal_add(&screen->events.destroy, &self->screen_destroy_listener);
-  }
 
   self->screen = screen;
+
+  if (screen) {
+    wl_signal_add(&screen->events.destroy, &self->screen_destroy_listener);
+  } else {
+    self->grab->interface->cancel(self->grab);
+  }
 }
 
 static void
@@ -204,7 +207,6 @@ zn_cursor_handle_screen_destroy(struct wl_listener* listener, void* data)
     zn_cursor_update_position(self, screen, box.width / 2, box.height / 2);
     zn_cursor_damage_whole(self);
   } else {
-    self->grab->interface->cancel(self->grab);
     zn_cursor_update_position(self, NULL, 0, 0);
   }
 }
