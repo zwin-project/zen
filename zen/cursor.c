@@ -38,12 +38,11 @@ default_grab_motion(
 {
   struct zn_server* server = zn_server_get_singleton();
   struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
-  struct zn_cursor* cursor = server->input_manager->seat->cursor;
   double view_x, view_y;
   struct wlr_surface* surface =
       get_surface_of_view_at_cursor_pos(&view_x, &view_y);
 
-  if (!cursor->screen) {
+  if (!grab->cursor->screen) {
     return;
   }
 
