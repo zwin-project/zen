@@ -138,6 +138,8 @@ zn_view_map_to_scene(struct zn_view *self, struct zn_scene *scene)
 
   // TODO: handle board destruction
 
+  self->board = board;
+
   zn_view_get_window_fbox(self, &fbox);
   zn_view_move(self, (board->width - fbox.width) / 2,
       (board->height - fbox.height) / 2, self->board);
