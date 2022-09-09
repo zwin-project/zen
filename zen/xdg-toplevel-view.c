@@ -32,6 +32,8 @@ zn_xdg_toplevel_view_map(struct wl_listener* listener, void* data)
 
   zn_view_map_to_scene(&self->base, scene);
 
+  wl_signal_add(
+      &self->wlr_xdg_toplevel->events.request_move, &self->move_listener);
   wl_signal_add(&self->wlr_xdg_toplevel->base->surface->events.commit,
       &self->wlr_surface_commit_listener);
 }
@@ -148,8 +150,7 @@ zn_xdg_toplevel_view_create(
       &self->wlr_xdg_toplevel->base->events.unmap, &self->unmap_listener);
 
   self->move_listener.notify = zn_xdg_toplevel_view_move_handler;
-  wl_signal_add(
-      &self->wlr_xdg_toplevel->events.request_move, &self->move_listener);
+  wl_list_init(&self->move_listener.link);
 
   self->wlr_xdg_surface_destroy_listener.notify =
       zn_xdg_toplevel_view_wlr_xdg_surface_destroy_handler;
