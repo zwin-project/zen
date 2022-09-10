@@ -11,22 +11,16 @@ move_grab_motion(
   UNUSED(event);
   struct zn_cursor_grab_move* self = zn_container_of(grab, self, base);
   struct zn_board* board = self->view->board;
+  const struct zn_screen* prev_screen = grab->cursor->screen;
 
   zn_cursor_move_relative(grab->cursor, event->delta_x, event->delta_y);
 
-  if (self->prev_screen) {
-    if (grab->cursor->screen != self->prev_screen) {
-      board = grab->cursor->screen->current_board;
-    }
-    wl_list_remove(&self->prev_screen_destroy_listener.link);
+  if (grab->cursor->screen != prev_screen) {
+    board = grab->cursor->screen->current_board;
   }
 
   zn_view_move(self->view, board, grab->cursor->x + self->diff_x,
       grab->cursor->y + self->diff_y);
-
-  self->prev_screen = grab->cursor->screen;
-  wl_signal_add(&grab->cursor->screen->events.destroy,
-      &self->prev_screen_destroy_listener);
 }
 
 static void
@@ -79,18 +73,6 @@ zn_cursor_grab_move_handle_view_unmap(struct wl_listener* listener, void* data)
   zn_cursor_grab_move_end(self);
 }
 
-static void
-zn_cursor_grab_move_handle_prev_screen_destroy(
-    struct wl_listener* listener, void* data)
-{
-  UNUSED(data);
-  struct zn_cursor_grab_move* self =
-      zn_container_of(listener, self, view_unmap_listener);
-  wl_list_remove(&self->prev_screen_destroy_listener.link);
-  wl_list_init(&self->prev_screen_destroy_listener.link);
-  self->prev_screen = NULL;
-}
-
 static struct zn_cursor_grab_move*
 zn_cursor_grab_move_create(struct zn_cursor* cursor, struct zn_view* view)
 {
@@ -104,7 +86,6 @@ zn_cursor_grab_move_create(struct zn_cursor* cursor, struct zn_view* view)
   }
 
   zn_view_get_surface_fbox(view, &view_box);
-  self->prev_screen = cursor->screen;
   self->init_board = view->board;
   self->init_x = view_box.x;
   self->init_y = view_box.y;
@@ -117,10 +98,6 @@ zn_cursor_grab_move_create(struct zn_cursor* cursor, struct zn_view* view)
   self->view_unmap_listener.notify = zn_cursor_grab_move_handle_view_unmap;
   wl_signal_add(&view->events.unmap, &self->view_unmap_listener);
 
-  self->prev_screen_destroy_listener.notify =
-      zn_cursor_grab_move_handle_prev_screen_destroy;
-  wl_list_init(&self->prev_screen_destroy_listener.link);
-
   return self;
 }
 
@@ -128,7 +105,6 @@ static void
 zn_cursor_grab_move_destroy(struct zn_cursor_grab_move* self)
 {
   wl_list_remove(&self->view_unmap_listener.link);
-  wl_list_remove(&self->prev_screen_destroy_listener.link);
   free(self);
 }
 
