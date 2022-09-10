@@ -19,8 +19,8 @@ move_grab_motion(
     wl_list_remove(&self->prev_screen_destroy_listener.link);
   }
 
-  zn_view_move(self->view, grab->cursor->x + self->diff_x,
-      grab->cursor->y + self->diff_y, board);
+  zn_view_move(self->view, board, grab->cursor->x + self->diff_x,
+      grab->cursor->y + self->diff_y);
 
   self->prev_screen = grab->cursor->screen;
   wl_signal_add(&grab->cursor->screen->events.destroy,
@@ -56,7 +56,7 @@ static void
 move_grab_cancel(struct zn_cursor_grab* grab)
 {
   struct zn_cursor_grab_move* self = zn_container_of(grab, self, base);
-  zn_view_move(self->view, self->init_x, self->init_y, self->init_board);
+  zn_view_move(self->view, self->init_board, self->init_x, self->init_y);
   zn_cursor_grab_move_end(self);
 }
 

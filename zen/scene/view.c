@@ -10,8 +10,8 @@
 #include "zen/xwayland-view.h"
 
 void
-zn_view_move(
-    struct zn_view *self, double x, double y, struct zn_board *new_board)
+zn_view_move(struct zn_view *self, struct zn_board *new_board, double board_x,
+    double board_y)
 {
   zn_view_damage_whole(self);
 
@@ -26,11 +26,11 @@ zn_view_move(
     self->board = new_board;
   }
 
-  self->x = x;
-  self->y = y;
+  self->x = board_x;
+  self->y = board_y;
 
   if (self->impl->configure) {
-    self->impl->configure(self, x, y);
+    self->impl->configure(self, board_x, board_y);
   }
 
   zn_view_damage_whole(self);
@@ -140,8 +140,8 @@ zn_view_map_to_scene(struct zn_view *self, struct zn_scene *scene)
   self->board = board;
 
   zn_view_get_window_fbox(self, &fbox);
-  zn_view_move(self, (board->width - fbox.width) / 2,
-      (board->height - fbox.height) / 2, self->board);
+  zn_view_move(self, self->board, (board->width - fbox.width) / 2,
+      (board->height - fbox.height) / 2);
 
   self->board = board;
   wl_list_insert(board->view_list.prev, &self->link);
@@ -157,7 +157,7 @@ zn_view_unmap(struct zn_view *self)
 
   zn_view_damage_whole(self);
 
-  zn_view_move(self, 0, 0, NULL);
+  zn_view_move(self, NULL, 0, 0);
 }
 
 void
