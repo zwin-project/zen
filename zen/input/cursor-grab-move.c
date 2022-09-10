@@ -3,6 +3,7 @@
 #include "zen-common.h"
 
 static void zn_cursor_grab_move_end(struct zn_cursor_grab_move* self);
+static void move_grab_cancel(struct zn_cursor_grab* grab);
 
 static void
 move_grab_motion(
@@ -49,6 +50,13 @@ move_grab_frame(struct zn_cursor_grab* grab)
 }
 
 static void
+move_grab_rebase(struct zn_cursor_grab* grab)
+{
+  // the board which the view is located is changed
+  move_grab_cancel(grab);
+}
+
+static void
 move_grab_cancel(struct zn_cursor_grab* grab)
 {
   struct zn_cursor_grab_move* self = zn_container_of(grab, self, base);
@@ -61,6 +69,7 @@ static const struct zn_cursor_grab_interface move_grab_interface = {
     .button = move_grab_button,
     .axis = move_grab_axis,
     .frame = move_grab_frame,
+    .rebase = move_grab_rebase,
     .cancel = move_grab_cancel,
 };
 

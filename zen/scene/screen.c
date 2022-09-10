@@ -153,6 +153,7 @@ void
 zn_screen_set_current_board(struct zn_screen *self, struct zn_board *board)
 {
   struct zn_server *server = zn_server_get_singleton();
+  struct zn_cursor *cursor = server->input_manager->seat->cursor;
   struct zn_view *view;
 
   if (self->current_board == board) {
@@ -181,7 +182,9 @@ zn_screen_set_current_board(struct zn_screen *self, struct zn_board *board)
 
   self->current_board = board;
 
-  // TODO: rebase pointer
+  if (self == cursor->screen) {
+    cursor->grab->interface->rebase(cursor->grab);
+  }
 
   zn_output_add_damage_whole(self->output);
 }

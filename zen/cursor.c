@@ -89,6 +89,13 @@ default_grab_frame(struct zn_cursor_grab* grab)
 }
 
 static void
+default_grab_rebase(struct zn_cursor_grab* grab)
+{
+  UNUSED(grab);
+  // TODO: implement rebase
+}
+
+static void
 default_grab_cancel(struct zn_cursor_grab* grab)
 {
   UNUSED(grab);
@@ -99,6 +106,7 @@ static const struct zn_cursor_grab_interface default_grab_interface = {
     .button = default_grab_button,
     .axis = default_grab_axis,
     .frame = default_grab_frame,
+    .rebase = default_grab_rebase,
     .cancel = default_grab_cancel,
 };
 
