@@ -29,7 +29,8 @@ default_grab_motion(
     return;
   }
 
-  surface = zn_cursor_get_pointing_surface(grab->cursor, &surface_x, &surface_y);
+  surface =
+      zn_cursor_get_pointing_surface(grab->cursor, &surface_x, &surface_y);
 
   if (surface) {
     wlr_seat_pointer_enter(seat, surface, surface_x, surface_y);
@@ -107,7 +108,8 @@ zn_cursor_get_pointing_surface(
 {
   struct zn_view* view;
 
-  view = zn_screen_get_view_at(self->screen, self->x, self->y, surface_x, surface_y);
+  view = zn_screen_get_view_at(
+      self->screen, self->x, self->y, surface_x, surface_y);
 
   if (view) {
     return view->impl->get_wlr_surface(view);
@@ -148,13 +150,13 @@ zn_cursor_update_position(struct zn_cursor* self, struct zn_screen* screen,
     wl_list_init(&self->screen_destroy_listener.link);
   }
 
-  self->screen = screen;
-
   if (screen) {
     wl_signal_add(&screen->events.destroy, &self->screen_destroy_listener);
   } else {
     self->grab->interface->cancel(self->grab);
   }
+
+  self->screen = screen;
 }
 
 static void
@@ -245,6 +247,10 @@ zn_cursor_handle_surface_destroy(struct wl_listener* listener, void* data)
 void
 zn_cursor_start_grab(struct zn_cursor* self, struct zn_cursor_grab* grab)
 {
+  if (!self->screen) {
+    return;
+  }
+
   self->grab = grab;
 }
 

@@ -23,6 +23,9 @@ struct zn_cursor {
   struct wlr_texture* xcursor_texture;  // nullable
   struct wlr_xcursor_manager* xcursor_manager;
 
+  /**
+   * While a **non-default** grab is in use, zn_cursor::screen will not be NULL
+   */
   struct zn_cursor_grab* grab;
   struct zn_cursor_grab grab_default;
 
