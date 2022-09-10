@@ -73,6 +73,16 @@ zn_cursor_grab_move_handle_view_unmap(struct wl_listener* listener, void* data)
   zn_cursor_grab_move_end(self);
 }
 
+static void
+zn_cursor_grab_move_handle_init_board_destroy(
+    struct wl_listener* listener, void* data)
+{
+  UNUSED(data);
+  struct zn_cursor_grab_move* self =
+      zn_container_of(listener, self, view_unmap_listener);
+  move_grab_cancel(&self->base);
+}
+
 static struct zn_cursor_grab_move*
 zn_cursor_grab_move_create(struct zn_cursor* cursor, struct zn_view* view)
 {
@@ -98,6 +108,11 @@ zn_cursor_grab_move_create(struct zn_cursor* cursor, struct zn_view* view)
   self->view_unmap_listener.notify = zn_cursor_grab_move_handle_view_unmap;
   wl_signal_add(&view->events.unmap, &self->view_unmap_listener);
 
+  self->init_board_destroy_listener.notify =
+      zn_cursor_grab_move_handle_init_board_destroy;
+  wl_signal_add(
+      &view->board->events.destroy, &self->init_board_destroy_listener);
+
   return self;
 }
 
@@ -105,6 +120,7 @@ static void
 zn_cursor_grab_move_destroy(struct zn_cursor_grab_move* self)
 {
   wl_list_remove(&self->view_unmap_listener.link);
+  wl_list_remove(&self->init_board_destroy_listener.link);
   free(self);
 }
 
