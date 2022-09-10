@@ -12,10 +12,6 @@ move_grab_motion(
   struct zn_cursor_grab_move* self = zn_container_of(grab, self, base);
   struct zn_board* board = self->view->board;
 
-  if (!grab->cursor->screen) {
-    return;
-  }
-
   if (self->prev_screen) {
     if (grab->cursor->screen != self->prev_screen) {
       board = grab->cursor->screen->current_board;
