@@ -7,7 +7,7 @@
 
 struct zn_cursor_grab_move {
   struct zn_cursor_grab base;
-  struct zn_view* view;
+  struct zn_view* view;  // nonnull
 
   struct zn_board* init_board;
   double init_x, init_y;

@@ -118,6 +118,7 @@ zn_cursor_get_pointing_surface(
 {
   struct zn_view* view;
 
+  // FIXME: take subsurfaces/popups into account
   view = zn_screen_get_view_at(
       self->screen, self->x, self->y, surface_x, surface_y);
 
