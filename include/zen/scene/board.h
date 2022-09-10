@@ -30,7 +30,8 @@ struct zn_board {
 
   struct {
     struct wl_signal
-        screen_assigned;  // (struct *zn_board_screen_assigned_event)
+        screen_assigned;       // (struct *zn_board_screen_assigned_event)
+    struct wl_signal destroy;  // (NULL)
   } events;
 };
 

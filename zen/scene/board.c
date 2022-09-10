@@ -87,6 +87,7 @@ zn_board_create(struct zn_scene *scene)
   wl_list_init(&self->screen_destroy_listener.link);
 
   wl_signal_init(&self->events.screen_assigned);
+  wl_signal_init(&self->events.destroy);
 
   return self;
 
@@ -97,6 +98,7 @@ err:
 void
 zn_board_destroy(struct zn_board *self)
 {
+  wl_signal_emit(&self->events.destroy, NULL);
   zn_board_assign_to_screen(self, NULL);
   wl_list_remove(&self->view_list);
   wl_list_remove(&self->link);
