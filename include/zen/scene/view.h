@@ -42,8 +42,8 @@ struct zn_view {
  * @param board must not be NULL except when this view is unmapped with
  * `zn_view_unmap`
  */
-void zn_view_move(
-    struct zn_view *self, double x, double y, struct zn_board *new_board);
+void zn_view_move(struct zn_view *self, struct zn_board *new_board,
+    double board_x, double board_y);
 
 /**
  * Add the damage of all surfaces associated with the view to the output where
