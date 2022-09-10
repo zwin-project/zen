@@ -25,6 +25,8 @@ default_grab_motion(
   double surface_x, surface_y;
   struct wlr_surface* surface;
 
+  zn_cursor_move_relative(grab->cursor, event->delta_x, event->delta_y);
+
   if (!grab->cursor->screen) {
     return;
   }
