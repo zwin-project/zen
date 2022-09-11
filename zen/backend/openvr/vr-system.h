@@ -1,5 +1,4 @@
-#ifndef ZEN_OPENVR_BACKEND_VR_SYSTEM_H
-#define ZEN_OPENVR_BACKEND_VR_SYSTEM_H
+#pragma once
 
 #include <openvr/openvr.h>
 #include <wayland-server-core.h>
@@ -43,5 +42,3 @@ class VrSystem
 };
 
 }  // namespace zen
-
-#endif  //  ZEN_OPENVR_BACKEND_VR_SYSTEM_H

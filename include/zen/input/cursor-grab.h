@@ -1,5 +1,4 @@
-#ifndef ZEN_CURSOR_GRUB_H
-#define ZEN_CURSOR_GRUB_H
+#pragma once
 
 #include <wayland-server.h>
 #include <wlr/interfaces/wlr_pointer.h>
@@ -25,5 +24,3 @@ struct zn_cursor_grab {
   const struct zn_cursor_grab_interface* interface;
   struct zn_cursor* cursor;
 };
-
-#endif  // ZEN_CURSOR_GRUB_H

@@ -1,5 +1,4 @@
-#ifndef ZEN_OUTPUT_H
-#define ZEN_OUTPUT_H
+#pragma once
 
 #include <wlr/types/wlr_output.h>
 
@@ -37,5 +36,3 @@ void zn_output_update_global(struct zn_output *self);
 
 struct zn_output *zn_output_create(
     struct wlr_output *wlr_output, struct zn_server *server);
-
-#endif  //  ZEN_OUTPUT_H

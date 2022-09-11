@@ -1,5 +1,4 @@
-#ifndef ZEN_SERVER_H
-#define ZEN_SERVER_H
+#pragma once
 
 #include <wayland-server-core.h>
 #include <wlr/backend.h>
@@ -55,5 +54,3 @@ void zn_server_terminate(struct zn_server *self, int exit_code);
 struct zn_server *zn_server_create(struct wl_display *display);
 
 void zn_server_destroy(struct zn_server *self);
-
-#endif  //  ZEN_SERVER_H

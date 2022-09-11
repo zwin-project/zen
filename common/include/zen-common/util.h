@@ -1,5 +1,4 @@
-#ifndef ZEN_UTIL_H
-#define ZEN_UTIL_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,5 +48,3 @@ zalloc(size_t size)
 #ifdef __cplusplus
 }
 #endif
-
-#endif  //  ZEN_UTIL_H

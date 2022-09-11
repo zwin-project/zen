@@ -1,5 +1,4 @@
-#ifndef ZEN_BINDING_H
-#define ZEN_BINDING_H
+#pragma once
 
 #include <wayland-server.h>
 
@@ -28,5 +27,3 @@ struct zn_binding *zn_binding_create(uint32_t key, uint32_t modifiers,
     zn_key_binding_handler_t handler, void *data);
 
 void zn_binding_destroy(struct zn_binding *self);
-
-#endif  //  ZEN_BINDING_H

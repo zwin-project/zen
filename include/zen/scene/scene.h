@@ -1,5 +1,4 @@
-#ifndef ZEN_SCENE_H
-#define ZEN_SCENE_H
+#pragma once
 
 #include <wayland-server-core.h>
 
@@ -26,5 +25,3 @@ void zn_scene_setup_bindings(struct zn_scene* self);
 struct zn_scene* zn_scene_create(void);
 
 void zn_scene_destroy(struct zn_scene* self);
-
-#endif  //  ZEN_SCENE_H

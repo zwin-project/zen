@@ -1,5 +1,4 @@
-#ifndef ZEN_TIMESPEC_UTIL_H
-#define ZEN_TIMESPEC_UTIL_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,5 +40,3 @@ timespec_to_nsec(const struct timespec *a)
 #ifdef __cplusplus
 }
 #endif
-
-#endif  //  ZEN_TIMESPEC_UTIL_H

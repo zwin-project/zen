@@ -1,5 +1,4 @@
-#ifndef ZEN_KEYBOARD_H
-#define ZEN_KEYBOARD_H
+#pragma once
 
 #include <wayland-server.h>
 
@@ -17,5 +16,3 @@ struct zn_keyboard* zn_keyboard_create(
     struct zn_input_device* input_device, struct zn_seat* seat);
 
 void zn_keyboard_destroy(struct zn_keyboard* self);
-
-#endif  // ZEN_KEYBOARD_H

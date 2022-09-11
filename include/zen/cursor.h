@@ -1,5 +1,4 @@
-#ifndef ZEN_CURSOR_H
-#define ZEN_CURSOR_H
+#pragma once
 
 #include <wayland-server.h>
 #include <wlr/render/wlr_texture.h>
@@ -51,5 +50,3 @@ void zn_cursor_set_xcursor(struct zn_cursor* self, const char* name);
 struct zn_cursor* zn_cursor_create(void);
 
 void zn_cursor_destroy(struct zn_cursor* self);
-
-#endif  // ZEN_CURSOR_H

@@ -1,5 +1,4 @@
-#ifndef ZEN_SCREEN_LAYOUT_H
-#define ZEN_SCREEN_LAYOUT_H
+#pragma once
 
 #include <wayland-server-core.h>
 
@@ -33,5 +32,3 @@ void zn_screen_layout_remove(
 struct zn_screen_layout* zn_screen_layout_create(struct zn_scene* scene);
 
 void zn_screen_layout_destroy(struct zn_screen_layout* self);
-
-#endif  //  ZEN_SCREEN_LAYOUT_H
