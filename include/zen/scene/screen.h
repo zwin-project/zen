@@ -1,5 +1,4 @@
-#ifndef ZEN_SCREEN_H
-#define ZEN_SCREEN_H
+#pragma once
 
 #include <wayland-server-core.h>
 #include <wlr/types/wlr_surface.h>
@@ -57,5 +56,3 @@ struct zn_screen *zn_screen_create(
     struct zn_screen_layout *screen_layout, struct zn_output *output);
 
 void zn_screen_destroy(struct zn_screen *self);
-
-#endif  //  ZEN_SCREEN_H

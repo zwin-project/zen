@@ -1,5 +1,4 @@
-#ifndef ZEN_XWAYLAND_VIEW_H
-#define ZEN_XWAYLAND_VIEW_H
+#pragma once
 
 #include <wlr/xwayland.h>
 
@@ -22,5 +21,3 @@ struct zn_xwayland_view {
 
 struct zn_xwayland_view *zn_xwayland_view_create(
     struct wlr_xwayland_surface *xwayland_surface, struct zn_server *server);
-
-#endif  //  ZEN_XWAYLAND_VIEW_H

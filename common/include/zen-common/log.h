@@ -1,5 +1,4 @@
-#ifndef ZEN_LOG_H
-#define ZEN_LOG_H
+#pragma once
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,5 +63,3 @@ bool _zn_assert(bool condition, const char *format, ...) ATTRIB_PRINTF(2, 3);
 #ifdef __cplusplus
 }
 #endif
-
-#endif  //  ZEN_LOG_H

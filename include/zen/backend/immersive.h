@@ -1,5 +1,4 @@
-#ifndef ZEN_IMMERSIVE_BACKEND_H
-#define ZEN_IMMERSIVE_BACKEND_H
+#pragma once
 
 #include <wayland-server-core.h>
 
@@ -27,5 +26,3 @@ void zn_immersive_backend_destroy(struct zn_immersive_backend* self);
 #ifdef __cplusplus
 }
 #endif
-
-#endif  //  ZEN_IMMERSIVE_BACKEND_H

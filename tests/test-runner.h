@@ -1,5 +1,4 @@
-#ifndef TEST_RUNNDER_H
-#define TEST_RUNNDER_H
+#pragma once
 
 struct test {
   const char *name;
@@ -23,5 +22,3 @@ struct test {
       __attribute__((used, section("test_section"))) = {#name, name, 0}; \
                                                                          \
   static void name(void)
-
-#endif  //  TEST_RUNNDER_H

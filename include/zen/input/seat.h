@@ -1,5 +1,4 @@
-#ifndef ZEN_SEAT_H
-#define ZEN_SEAT_H
+#pragma once
 
 #include <wayland-server.h>
 
@@ -30,5 +29,3 @@ struct zn_seat* zn_seat_create(
     struct wl_display* display, const char* seat_name);
 
 void zn_seat_destroy(struct zn_seat* self);
-
-#endif  // ZEN_SEAT_H

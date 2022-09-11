@@ -1,5 +1,4 @@
-#ifndef ZEN_DISPLAY_SYSTEM_H
-#define ZEN_DISPLAY_SYSTEM_H
+#pragma once
 
 #include <wayland-server-core.h>
 #include <zen-desktop-protocol.h>
@@ -25,5 +24,3 @@ void zn_display_system_applied(
 struct zn_display_system* zn_display_system_create(struct wl_display* display);
 
 void zn_display_system_destroy(struct zn_display_system* self);
-
-#endif  //  ZEN_DISPLAY_SYSTEM_H

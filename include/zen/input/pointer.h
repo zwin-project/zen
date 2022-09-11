@@ -1,5 +1,4 @@
-#ifndef ZEN_POINTER_H
-#define ZEN_POINTER_H
+#pragma once
 
 #include <wayland-server.h>
 #include <wlr/types/wlr_input_device.h>
@@ -14,5 +13,3 @@ struct zn_pointer {
 struct zn_pointer* zn_pointer_create(struct wlr_input_device* input_device);
 
 void zn_pointer_destroy(struct zn_pointer* self);
-
-#endif  // ZEN_POINTER_H

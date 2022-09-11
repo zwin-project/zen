@@ -1,5 +1,4 @@
-#ifndef ZEN_BOARD_H
-#define ZEN_BOARD_H
+#pragma once
 
 #include <wayland-server-core.h>
 
@@ -42,5 +41,3 @@ void zn_board_assign_to_screen(struct zn_board *self, struct zn_screen *screen);
 struct zn_board *zn_board_create(struct zn_scene *scene);
 
 void zn_board_destroy(struct zn_board *self);
-
-#endif  //  ZEN_BOARD_H
