@@ -1,5 +1,7 @@
 #include "zen/scene/scene.h"
 
+#include <cairo.h>
+#include <drm_fourcc.h>
 #include <linux/input.h>
 
 #include "zen-common.h"
@@ -7,6 +9,9 @@
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/screen.h"
 #include "zen/scene/view.h"
+
+static const char* DEFAULT_BACKGROUND_PNG =
+    "/usr/local/share/backgrounds/zen/Zen_Wallpaper_Main_3840x2160.png";
 
 static void
 zn_scene_unmap_focused_view_handler(struct wl_listener* listener, void* data)
@@ -174,6 +179,31 @@ zn_scene_setup_bindings(struct zn_scene* self)
       zn_scene_new_board_binding_handler, self);
 }
 
+void
+zn_scene_setup_background(struct zn_scene* self, const char* background_png)
+{
+  cairo_surface_t* surface =
+      cairo_image_surface_create_from_png(background_png);
+
+  if (surface == NULL) {
+    zn_error("Background image not loaded");
+    return;
+  }
+  cairo_format_t format = cairo_image_surface_get_format(surface);
+  if (format != CAIRO_FORMAT_ARGB32) {
+    zn_error("Image format not supported");
+    return;
+  }
+  unsigned char* data = cairo_image_surface_get_data(surface);
+  int stride = cairo_image_surface_get_stride(surface);
+  int width = cairo_image_surface_get_width(surface);
+  int height = cairo_image_surface_get_height(surface);
+
+  struct zn_server* server = zn_server_get_singleton();
+  self->bg_texture = wlr_texture_from_pixels(
+      server->renderer, DRM_FORMAT_ARGB8888, stride, width, height, data);
+}
+
 struct zn_scene*
 zn_scene_create(void)
 {
@@ -199,6 +229,8 @@ zn_scene_create(void)
     zn_error("Failed to create a initial board");
     goto err_screen_layout;
   }
+
+  zn_scene_setup_background(self, DEFAULT_BACKGROUND_PNG);
 
   self->unmap_focused_view_listener.notify =
       zn_scene_unmap_focused_view_handler;

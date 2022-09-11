@@ -85,6 +85,8 @@ wayland_server_dep = dependency('wayland-server', version: wayland_server_req)
 wlroots_dep = dependency('wlroots', version: wlroots_req)
 wlr_glew_renderer_dep = dependency('wlr-glew-renderer', version: wlr_glew_renderer_req)
 xkbcommon_dep = dependency('xkbcommon')
+cairo_dep = dependency('cairo')
+
 if get_option('cui-client')
   wayland_client_dep = dependency('wayland-client')
 endif
