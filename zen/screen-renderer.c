@@ -25,6 +25,46 @@ struct surface_iterator_data {
 };
 
 static void
+zn_screen_renderer_get_background_box(struct wlr_box *box,
+    struct wlr_texture *bg_texture, int output_width, int output_height)
+{
+  double output_ratio = (double)output_height / (double)output_width;
+  double texture_ratio = (double)bg_texture->height / (double)bg_texture->width;
+
+  if (output_ratio > texture_ratio) {
+    // Fit the height of the texture to that of the output
+    box->y = 0;
+    box->height = output_height;
+    box->width =
+        (int)(bg_texture->width * output_height / (double)bg_texture->height);
+    box->x = (output_width - box->width) / 2;
+  } else {
+    // Fit the width of the texture to that of the output
+    box->x = 0;
+    box->width = output_width;
+    box->height =
+        (int)(bg_texture->height * output_width / (double)bg_texture->width);
+    box->y = (output_height - box->height) / 2;
+  }
+}
+
+static void
+zn_screen_renderer_render_background(struct zn_screen *screen,
+    struct wlr_renderer *renderer, struct wlr_texture *bg_texture)
+{
+  struct wlr_box box;
+  float matrix[9];
+  int output_width, output_height;
+  struct wlr_output *wlr_output = screen->output->wlr_output;
+  wlr_output_transformed_resolution(wlr_output, &output_width, &output_height);
+  zn_screen_renderer_get_background_box(
+      &box, bg_texture, output_width, output_height);
+  wlr_matrix_project_box(matrix, &box, WL_OUTPUT_TRANSFORM_NORMAL, 0,
+      wlr_output->transform_matrix);
+  wlr_render_texture_with_matrix(renderer, bg_texture, matrix, 1.0f);
+}
+
+static void
 zn_screen_renderer_scissor_output(
     struct zn_output *output, pixman_box32_t *rect)
 {
@@ -234,9 +274,10 @@ zn_screen_renderer_render(struct zn_screen *screen,
   rects = pixman_region32_rectangles(&screen_damage, &rect_count);
   for (int i = 0; i < rect_count; i++) {
     zn_screen_renderer_scissor_output(output, &rects[i]);
-    wlr_renderer_clear(renderer, (float[]){0.2, 0.3, 0.2, 1});
+    wlr_renderer_clear(renderer, (float[]){1.0, 1.0, 10, 1});
+    zn_screen_renderer_render_background(
+        screen, renderer, server->scene->bg_texture);
   }
-
   wl_list_for_each(view, &board->view_list, link)
       zn_screen_renderer_render_view(screen, view, renderer, &screen_damage);
 

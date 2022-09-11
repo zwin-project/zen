@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wayland-server-core.h>
+#include <wlr/render/wlr_texture.h>
 
 #include "zen/scene/screen-layout.h"
 
@@ -12,6 +13,8 @@ struct zn_scene {
   struct wl_list board_list;  // zn_board::link, non empty
 
   struct wl_listener unmap_focused_view_listener;
+
+  struct wlr_texture* bg_texture;
 };
 
 void zn_scene_set_focused_view(struct zn_scene* self, struct zn_view* view);
