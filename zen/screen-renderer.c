@@ -52,6 +52,7 @@ static void
 zn_screen_renderer_render_background(struct zn_screen *screen,
     struct wlr_renderer *renderer, struct wlr_texture *bg_texture)
 {
+  if (bg_texture == NULL) return;
   struct wlr_box box;
   float matrix[9];
   int output_width, output_height;
