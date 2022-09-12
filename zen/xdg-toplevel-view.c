@@ -51,6 +51,9 @@ zn_xdg_toplevel_view_unmap(struct wl_listener* listener, void* data)
 
   zn_view_unmap(&self->base);
 
+  wl_list_remove(&self->move_listener.link);
+  wl_list_init(&self->move_listener.link);
+
   wl_list_remove(&self->wlr_surface_commit_listener.link);
   wl_list_init(&self->wlr_surface_commit_listener.link);
 }
@@ -173,6 +176,7 @@ zn_xdg_toplevel_view_destroy(struct zn_xdg_toplevel_view* self)
 {
   wl_list_remove(&self->wlr_xdg_surface_destroy_listener.link);
   wl_list_remove(&self->wlr_surface_commit_listener.link);
+  wl_list_remove(&self->move_listener.link);
   wl_list_remove(&self->map_listener.link);
   wl_list_remove(&self->unmap_listener.link);
   zn_view_fini(&self->base);
