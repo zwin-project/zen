@@ -57,8 +57,6 @@ void zn_view_get_surface_fbox(struct zn_view *self, struct wlr_fbox *fbox);
 
 void zn_view_get_window_fbox(struct zn_view *self, struct wlr_fbox *fbox);
 
-void zn_view_change_board(struct zn_view *self, struct zn_board *new_board);
-
 bool zn_view_is_mapped(struct zn_view *self);
 
 void zn_view_map_to_scene(struct zn_view *self, struct zn_scene *scene);
