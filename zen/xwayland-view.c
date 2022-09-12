@@ -117,11 +117,20 @@ zn_xwayland_view_impl_configure(struct zn_view* view, double x, double y)
       self->wlr_xwayland_surface, x, y, box.width, box.height);
 }
 
+static void
+zn_xwayland_view_impl_restack(struct zn_view* view, enum xcb_stack_mode_t mode)
+{
+  struct zn_xwayland_view* self = zn_container_of(view, self, base);
+  wlr_xwayland_surface_restack(
+      self->wlr_xwayland_surface, NULL, mode);
+}
+
 static const struct zn_view_impl zn_xwayland_view_impl = {
     .get_wlr_surface = zn_xwayland_view_impl_get_wlr_surface,
     .get_geometry = zn_xwayland_view_impl_get_geometry,
     .set_activated = zn_xwayland_view_impl_set_activated,
     .configure = zn_xwayland_view_impl_configure,
+    .restack = zn_xwayland_view_impl_restack,
 };
 
 struct zn_xwayland_view*
