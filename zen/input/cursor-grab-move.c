@@ -56,7 +56,6 @@ move_grab_rebase(struct zn_cursor_grab* grab)
   struct zn_board* board = zn_screen_get_current_board(grab->cursor->screen);
   zn_view_move(self->view, board, grab->cursor->x + self->diff_x,
       grab->cursor->y + self->diff_y);
-  zn_cursor_grab_move_end(self);
 }
 
 static void
