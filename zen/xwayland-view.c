@@ -30,6 +30,9 @@ zn_xwayland_view_map(struct wl_listener* listener, void* data)
 
   zn_view_map_to_scene(&self->base, scene);
 
+  wl_list_remove(&self->move_listener.link);
+  wl_list_init(&self->move_listener.link);
+
   wl_signal_add(
       &self->wlr_xwayland_surface->events.request_move, &self->move_listener);
   wl_signal_add(&self->wlr_xwayland_surface->surface->events.commit,
@@ -170,6 +173,7 @@ zn_xwayland_view_destroy(struct zn_xwayland_view* self)
 {
   wl_list_remove(&self->wlr_xwayland_surface_destroy_listener.link);
   wl_list_remove(&self->wlr_surface_commit_listener.link);
+  wl_list_remove(&self->move_listener.link);
   wl_list_remove(&self->map_listener.link);
   wl_list_remove(&self->unmap_listener.link);
   zn_view_fini(&self->base);
