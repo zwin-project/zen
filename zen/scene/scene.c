@@ -83,6 +83,7 @@ zn_scene_set_focused_view(struct zn_scene* self, struct zn_view* view)
 
   if (view != NULL) {
     view->impl->set_activated(view, true);
+    zn_view_bring_to_front(view);
     wl_signal_add(&view->events.unmap, &self->unmap_focused_view_listener);
   }
 

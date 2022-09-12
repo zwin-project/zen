@@ -4,6 +4,7 @@
 #include <wayland-server.h>
 #include <wlr/types/wlr_surface.h>
 #include <wlr/types/wlr_xdg_shell.h>
+#include <xcb/xproto.h>
 
 #include "zen/scene/scene.h"
 
@@ -16,6 +17,8 @@ struct zn_view_impl {
   void (*for_each_popup_surface)(struct zn_view *view,
       wlr_surface_iterator_func_t iterator, void *user_data);  // nullable
   void (*set_activated)(struct zn_view *view, bool activate);
+  void (*restack)(
+      struct zn_view *view, enum xcb_stack_mode_t mode);  // nullable
 };
 
 enum zn_view_type {
@@ -37,6 +40,8 @@ struct zn_view {
     struct wl_signal unmap;
   } events;
 };
+
+void zn_view_bring_to_front(struct zn_view *self);
 
 /**
  * @param board must not be NULL except when this view is unmapped with

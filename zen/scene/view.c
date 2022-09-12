@@ -10,6 +10,19 @@
 #include "zen/xwayland-view.h"
 
 void
+zn_view_bring_to_front(struct zn_view *self)
+{
+  wl_list_remove(&self->link);
+  wl_list_insert(self->board->view_list.prev, &self->link);
+
+  if (self->impl->restack) {
+    self->impl->restack(self, XCB_STACK_MODE_ABOVE);
+  }
+
+  zn_view_damage_whole(self);
+}
+
+void
 zn_view_move(struct zn_view *self, struct zn_board *new_board, double board_x,
     double board_y)
 {
@@ -150,6 +163,10 @@ void
 zn_view_unmap(struct zn_view *self)
 {
   wl_signal_emit(&self->events.unmap, NULL);
+
+  if (self->impl->restack) {
+    self->impl->restack(self, XCB_STACK_MODE_BELOW);
+  }
 
   zn_view_damage_whole(self);
 
