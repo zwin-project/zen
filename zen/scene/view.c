@@ -164,10 +164,6 @@ zn_view_unmap(struct zn_view *self)
 {
   wl_signal_emit(&self->events.unmap, NULL);
 
-  if (self->impl->restack) {
-    self->impl->restack(self, XCB_STACK_MODE_BELOW);
-  }
-
   zn_view_damage_whole(self);
 
   zn_view_move(self, NULL, 0, 0);
