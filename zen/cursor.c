@@ -110,7 +110,7 @@ static const struct zn_cursor_grab_interface default_grab_interface = {
     .cancel = default_grab_cancel,
 };
 
-// fetch view's surface corresponding to cursor's pos
+// get the surface that is just under the cursor
 // expect cursor::screen is non-NULL
 static struct wlr_surface*
 zn_cursor_get_pointing_surface(
