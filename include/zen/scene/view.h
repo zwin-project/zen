@@ -37,6 +37,7 @@ struct zn_view {
 
   struct {
     struct wl_signal unmap;
+    struct wl_signal destroy;
   } events;
 };
 
