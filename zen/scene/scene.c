@@ -179,7 +179,7 @@ zn_scene_setup_bindings(struct zn_scene* self)
       zn_scene_new_board_binding_handler, self);
 }
 
-void
+static void
 zn_scene_setup_background(struct zn_scene* self, const char* background_png)
 {
   cairo_surface_t* surface =
