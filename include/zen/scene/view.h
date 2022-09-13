@@ -44,11 +44,10 @@ struct zn_view {
 
 void zn_view_bring_to_front(struct zn_view *self);
 
-// set position and size by fbox
 // box::x, y          -> surface's pos (corresponding to view::x, y)
 // box::width, height -> window's size
 //                      (corresponding to the result of view_get_window_fbox)
-void zn_view_configure_by_fbox(struct zn_view *self, struct wlr_fbox *box);
+void zn_view_configure(struct zn_view *self, struct wlr_fbox *box);
 
 /**
  * @param board must not be NULL except when this view is unmapped with

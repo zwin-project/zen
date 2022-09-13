@@ -23,7 +23,7 @@ zn_view_bring_to_front(struct zn_view *self)
 }
 
 void
-zn_view_configure_by_fbox(struct zn_view *self, struct wlr_fbox *box)
+zn_view_configure(struct zn_view *self, struct wlr_fbox *box)
 {
   zn_view_damage_whole(self);
 
@@ -55,7 +55,7 @@ zn_view_move(struct zn_view *self, struct zn_board *new_board, double board_x,
   box.x = board_x;
   box.y = board_y;
 
-  zn_view_configure_by_fbox(self, &box);
+  zn_view_configure(self, &box);
 }
 
 static void
