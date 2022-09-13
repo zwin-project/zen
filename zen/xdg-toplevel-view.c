@@ -5,6 +5,7 @@
 #include "zen/scene/scene.h"
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/view.h"
+#include "zen/xdg-popup.h"
 
 static void zn_xdg_toplevel_view_destroy(struct zn_xdg_toplevel_view* self);
 
@@ -32,6 +33,8 @@ zn_xdg_toplevel_view_map(struct wl_listener* listener, void* data)
 
   zn_view_map_to_scene(&self->base, scene);
 
+  wl_signal_add(&self->wlr_xdg_toplevel->base->events.new_popup,
+      &self->new_popup_listener);
   wl_signal_add(
       &self->wlr_xdg_toplevel->events.request_move, &self->move_listener);
   wl_signal_add(&self->wlr_xdg_toplevel->base->surface->events.commit,
@@ -51,11 +54,24 @@ zn_xdg_toplevel_view_unmap(struct wl_listener* listener, void* data)
 
   zn_view_unmap(&self->base);
 
+  wl_list_remove(&self->new_popup_listener.link);
+  wl_list_init(&self->new_popup_listener.link);
+
   wl_list_remove(&self->move_listener.link);
   wl_list_init(&self->move_listener.link);
 
   wl_list_remove(&self->wlr_surface_commit_listener.link);
   wl_list_init(&self->wlr_surface_commit_listener.link);
+}
+
+static void
+zn_xdg_toplevel_view_new_popup(struct wl_listener* listener, void* data)
+{
+  struct zn_xdg_toplevel_view* self =
+      zn_container_of(listener, self, new_popup_listener);
+  struct wlr_xdg_popup* wlr_xdg_popup = data;
+
+  (void)zn_xdg_popup_create(wlr_xdg_popup, &self->base);
 }
 
 static void
@@ -153,6 +169,9 @@ zn_xdg_toplevel_view_create(
   wl_signal_add(
       &self->wlr_xdg_toplevel->base->events.unmap, &self->unmap_listener);
 
+  self->new_popup_listener.notify = zn_xdg_toplevel_view_new_popup;
+  wl_list_init(&self->new_popup_listener.link);
+
   self->move_listener.notify = zn_xdg_toplevel_view_move_handler;
   wl_list_init(&self->move_listener.link);
 
@@ -174,11 +193,12 @@ err:
 static void
 zn_xdg_toplevel_view_destroy(struct zn_xdg_toplevel_view* self)
 {
-  wl_list_remove(&self->wlr_xdg_surface_destroy_listener.link);
   wl_list_remove(&self->wlr_surface_commit_listener.link);
+  wl_list_remove(&self->wlr_xdg_surface_destroy_listener.link);
   wl_list_remove(&self->move_listener.link);
-  wl_list_remove(&self->map_listener.link);
+  wl_list_remove(&self->new_popup_listener.link);
   wl_list_remove(&self->unmap_listener.link);
+  wl_list_remove(&self->map_listener.link);
   zn_view_fini(&self->base);
   free(self);
 }

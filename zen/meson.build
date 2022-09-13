@@ -8,6 +8,7 @@ _zen_desktop_srcs = [
   'output.c',
   'screen-renderer.c',
   'server.c',
+  'xdg-popup.c',
   'xdg-toplevel-view.c',
   'xwayland-view.c',
 
@@ -22,6 +23,7 @@ _zen_desktop_srcs = [
   'scene/scene.c',
   'scene/screen.c',
   'scene/screen-layout.c',
+  'scene/view-child.c',
   'scene/view.c',
 
   'wlr/box.c',

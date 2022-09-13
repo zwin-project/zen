@@ -88,7 +88,7 @@ zn_view_damage(struct zn_view *self)
 
   pixman_region32_fini(&damage);
 
-  // FIXME: add damages of synced subsurfaces and popups
+  // FIXME: add damages of synced subsurfaces
 }
 
 void
