@@ -43,7 +43,7 @@ zn_screen_renderer_get_background_box(struct wlr_box *box,
     box->x = 0;
     box->width = output_width;
     box->height =
-        (int)(bg_texture->height * output_width / (double)bg_texture->width);
+        bg_texture->height * output_width / bg_texture->width;
     box->y = (output_height - box->height) / 2;
   }
 }
