@@ -36,6 +36,8 @@ zn_xwayland_view_handle_map(struct wl_listener* listener, void* data)
 
   wl_signal_add(
       &self->wlr_xwayland_surface->events.request_move, &self->move_listener);
+  wl_signal_add(&self->wlr_xwayland_surface->events.request_resize,
+      &self->resize_listener);
   wl_signal_add(&self->wlr_xwayland_surface->surface->events.commit,
       &self->wlr_surface_commit_listener);
 }
@@ -53,6 +55,10 @@ zn_xwayland_view_handle_unmap(struct wl_listener* listener, void* data)
 
   zn_view_unmap(&self->base);
 
+  wl_list_remove(&self->move_listener.link);
+  wl_list_init(&self->move_listener.link);
+  wl_list_remove(&self->resize_listener.link);
+  wl_list_init(&self->resize_listener.link);
   wl_list_remove(&self->wlr_surface_commit_listener.link);
   wl_list_init(&self->wlr_surface_commit_listener.link);
 }
@@ -174,8 +180,7 @@ zn_xwayland_view_create(
   wl_list_init(&self->move_listener.link);
 
   self->resize_listener.notify = zn_xwayland_view_resize_handler;
-  wl_signal_add(&self->wlr_xwayland_surface->events.request_resize,
-      &self->resize_listener);
+  wl_list_init(&self->resize_listener.link);
 
   self->wlr_xwayland_surface_destroy_listener.notify =
       zn_xwayland_view_handle_wlr_xwayland_surface_destroy;
@@ -198,6 +203,7 @@ zn_xwayland_view_destroy(struct zn_xwayland_view* self)
   wl_list_remove(&self->wlr_xwayland_surface_destroy_listener.link);
   wl_list_remove(&self->wlr_surface_commit_listener.link);
   wl_list_remove(&self->move_listener.link);
+  wl_list_remove(&self->resize_listener.link);
   wl_list_remove(&self->map_listener.link);
   wl_list_remove(&self->unmap_listener.link);
   zn_view_fini(&self->base);
