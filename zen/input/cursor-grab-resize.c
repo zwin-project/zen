@@ -41,6 +41,25 @@ resize_grab_motion(
   }
 
   zn_view_configure_by_fbox(self->view, &box);
+
+  struct wlr_fbox configured_box;
+  zn_view_get_window_fbox(self->view, &configured_box);
+  const bool x_restricted = self->edges & WLR_EDGE_LEFT &&
+                            (int)box.width != (int)configured_box.width;
+  const bool y_restricted = self->edges & WLR_EDGE_TOP &&
+                            (int)box.height != (int)configured_box.height;
+
+  if (!x_restricted && !y_restricted) {
+    return;
+  }
+
+  if (x_restricted) {
+    box.x -= configured_box.width - box.width;
+  }
+  if (y_restricted) {
+    box.y -= configured_box.height - box.height;
+  }
+  zn_view_configure_by_fbox(self->view, &box);
 }
 
 static void
