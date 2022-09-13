@@ -186,7 +186,7 @@ zn_scene_setup_background(struct zn_scene* self, const char* background_png)
       cairo_image_surface_create_from_png(background_png);
 
   if (surface == NULL) {
-    zn_error("Background image not loaded");
+    zn_warn("Background image not loaded");
     return;
   }
   cairo_format_t format = cairo_image_surface_get_format(surface);
