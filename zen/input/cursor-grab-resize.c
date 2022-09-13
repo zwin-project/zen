@@ -10,6 +10,37 @@ resize_grab_motion(
 {
   UNUSED(event);
   struct zn_cursor_grab_resize* self = zn_container_of(grab, self, base);
+
+  zn_cursor_move_relative(grab->cursor, event->delta_x, event->delta_y);
+
+  struct wlr_box view_geometry;
+  self->view->impl->get_geometry(self->view, &view_geometry);
+  const double width = grab->cursor->x - self->init_cursor_x;
+  const double height = grab->cursor->y - self->init_cursor_y;
+
+  struct wlr_fbox box = {
+      .x = self->init_view_box.x,
+      .y = self->init_view_box.y,
+      .width = self->init_view_box.width,
+      .height = self->init_view_box.height,
+  };
+
+  if (self->edges & WLR_EDGE_LEFT) {
+    box.x = grab->cursor->x - view_geometry.x - self->diff_x;
+    box.width -= width;
+  }
+  if (self->edges & WLR_EDGE_RIGHT) {
+    box.width += width;
+  }
+  if (self->edges & WLR_EDGE_TOP) {
+    box.y = grab->cursor->y - view_geometry.y - self->diff_y;
+    box.height -= height;
+  }
+  if (self->edges & WLR_EDGE_BOTTOM) {
+    box.height += height;
+  }
+
+  zn_view_configure_by_fbox(self->view, &box);
 }
 
 static void
@@ -40,14 +71,16 @@ resize_grab_frame(struct zn_cursor_grab* grab)
 static void
 resize_grab_rebase(struct zn_cursor_grab* grab)
 {
-  UNUSED(grab);
+  struct zn_cursor_grab_resize* self = zn_container_of(grab, self, base);
+  struct zn_board* board = zn_screen_get_current_board(grab->cursor->screen);
+  zn_view_move(self->view, board, grab->cursor->x, grab->cursor->y);
 }
 
 static void
 resize_grab_cancel(struct zn_cursor_grab* grab)
 {
   struct zn_cursor_grab_resize* self = zn_container_of(grab, self, base);
-  zn_view_configure_by_fbox(self->view, &self->init_box);
+  zn_view_configure_by_fbox(self->view, &self->init_view_box);
   zn_cursor_grab_resize_end(self);
 }
 
@@ -82,7 +115,16 @@ zn_cursor_grab_resize_create(
     return NULL;
   }
 
-  zn_view_get_window_fbox(view, &self->init_box);
+  zn_view_get_window_fbox(view, &self->init_view_box);
+
+  self->diff_x = cursor->x - self->init_view_box.x;
+  self->diff_y = cursor->y - self->init_view_box.y;
+
+  self->init_cursor_x = cursor->x;
+  self->init_cursor_y = cursor->y;
+
+  self->init_view_box.x = view->x;
+  self->init_view_box.y = view->y;
 
   self->view = view;
   self->edges = edges;
