@@ -44,7 +44,7 @@ resize_grab_motion(
     box.height += height;
   }
 
-  zn_view_configure_by_fbox(self->view, &box);
+  zn_view_configure(self->view, &box);
 
   struct wlr_fbox configured_box;
   zn_view_get_window_fbox(self->view, &configured_box);
@@ -63,7 +63,7 @@ resize_grab_motion(
   if (y_restricted) {
     box.y -= configured_box.height - box.height;
   }
-  zn_view_configure_by_fbox(self->view, &box);
+  zn_view_configure(self->view, &box);
 }
 
 static void
@@ -103,7 +103,7 @@ static void
 resize_grab_cancel(struct zn_cursor_grab* grab)
 {
   struct zn_cursor_grab_resize* self = zn_container_of(grab, self, base);
-  zn_view_configure_by_fbox(self->view, &self->init_view_box);
+  zn_view_configure(self->view, &self->init_view_box);
   zn_cursor_grab_resize_end(self);
 }
 
