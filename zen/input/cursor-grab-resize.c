@@ -13,6 +13,10 @@ resize_grab_motion(
 
   zn_cursor_move_relative(grab->cursor, event->delta_x, event->delta_y);
 
+  if (self->view->board->screen != grab->cursor->screen) {
+    return;
+  }
+
   struct wlr_box view_geometry;
   self->view->impl->get_geometry(self->view, &view_geometry);
   const double width = grab->cursor->x - self->init_cursor_x;
