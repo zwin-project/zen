@@ -5,13 +5,11 @@
 #include <linux/input.h>
 
 #include "zen-common.h"
+#include "zen-config.h"
 #include "zen/scene/board.h"
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/screen.h"
 #include "zen/scene/view.h"
-
-static const char* DEFAULT_BACKGROUND_PNG =
-    "/usr/local/share/backgrounds/zen/Zen_Wallpaper_Main_3840x2160.png";
 
 static void
 zn_scene_unmap_focused_view_handler(struct wl_listener* listener, void* data)
@@ -230,7 +228,7 @@ zn_scene_create(void)
     goto err_screen_layout;
   }
 
-  zn_scene_setup_background(self, DEFAULT_BACKGROUND_PNG);
+  zn_scene_setup_background(self, DEFAULT_WALLPAPER);
 
   self->unmap_focused_view_listener.notify =
       zn_scene_unmap_focused_view_handler;

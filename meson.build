@@ -91,7 +91,30 @@ if get_option('cui-client')
   wayland_client_dep = dependency('wayland-client')
 endif
 
-zen_inc = include_directories('include')
+cdata = configuration_data()
+
+if get_option('default-wallpaper')
+  wallpaper_files = files(
+    'assets/Zen_Wallpaper_Blue_3840x2160.png',
+    'assets/Zen_Wallpaper_Logo_3840x2160.png',
+    'assets/Zen_Wallpaper_Tricolor_3840x2160.png',
+    'assets/Zen_Wallpaper_Gray_3840x2160.png',
+    'assets/Zen_Wallpaper_Main_3840x2160.png',
+  )
+  wallpaper_install_dir = join_paths(datadir, 'backgrounds', 'zen')
+
+  install_data(wallpaper_files, install_dir: wallpaper_install_dir)
+  default_wallpaper = join_paths('/usr/local', wallpaper_install_dir, 'Zen_Wallpaper_Main_3840x2160.png')
+  cdata.set_quoted('DEFAULT_WALLPAPER', default_wallpaper)
+endif
+
+config_h = configure_file(
+  input: 'zen-config.h.meson',
+  output: 'zen-config.h',
+  configuration: cdata
+)
+
+zen_inc = include_directories('include', '.')
 
 subdir('protocols')
 subdir('common')
@@ -107,18 +130,6 @@ install_data(
   install_dir: join_paths(datadir, 'wayland-sessions')
 )
 
-if get_option('default-wallpaper')
-  wallpaper_files = files(
-    'assets/Zen_Wallpaper_Blue_3840x2160.png',
-    'assets/Zen_Wallpaper_Logo_3840x2160.png',
-    'assets/Zen_Wallpaper_Tricolor_3840x2160.png',
-    'assets/Zen_Wallpaper_Gray_3840x2160.png',
-    'assets/Zen_Wallpaper_Main_3840x2160.png',
-  )
-  wallpaper_install_dir = join_paths(datadir, 'backgrounds', 'zen')
-
-  install_data(wallpaper_files, install_dir: wallpaper_install_dir)
-endif
 
 if get_option('tests')
   subdir('tests')
