@@ -121,14 +121,12 @@ zn_xwayland_view_impl_get_geometry(struct zn_view* view, struct wlr_box* box)
 }
 
 static void
-zn_xwayland_view_impl_configure(struct zn_view* view, double x, double y)
+zn_xwayland_view_impl_configure(struct zn_view* view, struct wlr_fbox* box)
 {
   struct zn_xwayland_view* self = zn_container_of(view, self, base);
-  struct wlr_fbox box;
 
-  zn_view_get_window_fbox(view, &box);
   wlr_xwayland_surface_configure(
-      self->wlr_xwayland_surface, x, y, box.width, box.height);
+      self->wlr_xwayland_surface, box->x, box->y, box->width, box->height);
 }
 
 static void
