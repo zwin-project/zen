@@ -8,8 +8,12 @@
 struct zn_cursor_grab_resize {
   struct zn_cursor_grab base;
   struct zn_view* view;
-  struct wlr_fbox init_box;
   uint32_t edges;
+
+  struct wlr_fbox init_view_box;
+  double init_cursor_x, init_cursor_y;
+  // distance between cursor's pos and window's pos
+  double diff_x, diff_y;
 
   struct wl_listener view_unmap_listener;
 };
