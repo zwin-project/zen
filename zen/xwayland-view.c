@@ -121,8 +121,7 @@ static void
 zn_xwayland_view_impl_restack(struct zn_view* view, enum xcb_stack_mode_t mode)
 {
   struct zn_xwayland_view* self = zn_container_of(view, self, base);
-  wlr_xwayland_surface_restack(
-      self->wlr_xwayland_surface, NULL, mode);
+  wlr_xwayland_surface_restack(self->wlr_xwayland_surface, NULL, mode);
 }
 
 static const struct zn_view_impl zn_xwayland_view_impl = {
