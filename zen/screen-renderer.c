@@ -35,15 +35,13 @@ zn_screen_renderer_get_background_box(struct wlr_box *box,
     // Fit the height of the texture to that of the output
     box->y = 0;
     box->height = output_height;
-    box->width =
-        (int)(bg_texture->width * output_height / (double)bg_texture->height);
+    box->width = bg_texture->width * output_height / bg_texture->height;
     box->x = (output_width - box->width) / 2;
   } else {
     // Fit the width of the texture to that of the output
     box->x = 0;
     box->width = output_width;
-    box->height =
-        bg_texture->height * output_width / bg_texture->width;
+    box->height = bg_texture->height * output_width / bg_texture->width;
     box->y = (output_height - box->height) / 2;
   }
 }
