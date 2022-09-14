@@ -1,4 +1,4 @@
-name: editorconfig_linting
+name: Formatting Check
 
 on:
   push:
@@ -9,11 +9,12 @@ on:
       - main
 
 jobs:
-  lint:
+  clang-foramt-check:
+    name: ClangFormat Check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Editorconfig Checker
-        uses: editorconfig-checker/action-editorconfig-checker@v1
+      - name: ClangFormat Check
+        run: find . -regex ".*\.\(c\|h\|cc\)" | xargs clang-format --dry-run -Werror
