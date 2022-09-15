@@ -23,14 +23,11 @@ zn_view_bring_to_front(struct zn_view *self)
 }
 
 void
-zn_view_configure(struct zn_view *self, struct wlr_fbox *box)
+zn_view_set_size(struct zn_view *self, double width, double height)
 {
   zn_view_damage_whole(self);
 
-  self->x = box->x;
-  self->y = box->y;
-
-  self->impl->configure(self, box);
+  self->impl->set_size(self, width, height);
 
   zn_view_damage_whole(self);
 }
@@ -39,6 +36,8 @@ void
 zn_view_move(struct zn_view *self, struct zn_board *new_board, double board_x,
     double board_y)
 {
+  zn_view_damage_whole(self);
+
   if (new_board != self->board) {
     if (self->board) {
       wl_list_remove(&self->link);
@@ -50,12 +49,14 @@ zn_view_move(struct zn_view *self, struct zn_board *new_board, double board_x,
     self->board = new_board;
   }
 
-  struct wlr_fbox box;
-  zn_view_get_window_fbox(self, &box);
-  box.x = board_x;
-  box.y = board_y;
+  self->x = board_x;
+  self->y = board_y;
 
-  zn_view_configure(self, &box);
+  if (self->impl->set_position) {
+    self->impl->set_position(self, board_x, board_y);
+  }
+
+  zn_view_damage_whole(self);
 }
 
 static void
