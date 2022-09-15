@@ -112,6 +112,10 @@ zn_xdg_toplevel_view_wlr_xdg_surface_ack_configure_handler(
     return;
   }
 
+  if (self->base.resize_status.serial != event->serial) {
+    return;
+  }
+
   if (!(self->base.resize_status.edges & (WLR_EDGE_LEFT | WLR_EDGE_TOP))) {
     return;
   }
@@ -159,13 +163,13 @@ zn_xdg_toplevel_view_impl_get_geometry(
   wlr_xdg_surface_get_geometry(self->wlr_xdg_toplevel->base, box);
 }
 
-static void
+static uint32_t
 zn_xdg_toplevel_view_impl_set_size(
     struct zn_view* view, double width, double height)
 {
   struct zn_xdg_toplevel_view* self = zn_container_of(view, self, base);
 
-  wlr_xdg_toplevel_set_size(self->wlr_xdg_toplevel->base, width, height);
+  return wlr_xdg_toplevel_set_size(self->wlr_xdg_toplevel->base, width, height);
 }
 
 static void

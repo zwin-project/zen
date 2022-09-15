@@ -22,14 +22,12 @@ zn_view_bring_to_front(struct zn_view *self)
   zn_view_damage_whole(self);
 }
 
-void
+uint32_t
 zn_view_set_size(struct zn_view *self, double width, double height)
 {
   zn_view_damage_whole(self);
 
-  self->impl->set_size(self, width, height);
-
-  zn_view_damage_whole(self);
+  return self->impl->set_size(self, width, height);
 }
 
 void
