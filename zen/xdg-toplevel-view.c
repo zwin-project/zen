@@ -134,12 +134,12 @@ zn_xdg_toplevel_view_impl_get_geometry(
 }
 
 static void
-zn_xdg_toplevel_view_impl_configure(struct zn_view* view, struct wlr_fbox* box)
+zn_xdg_toplevel_view_impl_set_size(
+    struct zn_view* view, double width, double height)
 {
   struct zn_xdg_toplevel_view* self = zn_container_of(view, self, base);
 
-  wlr_xdg_toplevel_set_size(
-      self->wlr_xdg_toplevel->base, box->width, box->height);
+  wlr_xdg_toplevel_set_size(self->wlr_xdg_toplevel->base, width, height);
 }
 
 static void
@@ -172,7 +172,7 @@ zn_xdg_toplevel_view_impl_close_popups(struct zn_view* view)
 static const struct zn_view_impl zn_xdg_toplevel_view_impl = {
     .get_wlr_surface = zn_xdg_toplevel_view_impl_get_wlr_surface,
     .get_geometry = zn_xdg_toplevel_view_impl_get_geometry,
-    .configure = zn_xdg_toplevel_view_impl_configure,
+    .set_size = zn_xdg_toplevel_view_impl_set_size,
     .set_activated = zn_xdg_toplevel_view_impl_set_activated,
     .for_each_popup_surface = zn_xdg_toplevel_view_impl_for_each_popup_surface,
     .close_popups = zn_xdg_toplevel_view_impl_close_popups,

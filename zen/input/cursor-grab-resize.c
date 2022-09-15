@@ -17,53 +17,25 @@ resize_grab_motion(
     return;
   }
 
-  struct wlr_box view_geometry;
-  self->view->impl->get_geometry(self->view, &view_geometry);
-  const double width = grab->cursor->x - self->init_cursor_x;
-  const double height = grab->cursor->y - self->init_cursor_y;
-
-  struct wlr_fbox box = {
-      .x = self->init_view_box.x,
-      .y = self->init_view_box.y,
-      .width = self->init_view_box.width,
-      .height = self->init_view_box.height,
-  };
+  const double delta_width = grab->cursor->x - self->init_cursor_x;
+  const double delta_height = grab->cursor->y - self->init_cursor_y;
+  double width = self->init_view_box.width;
+  double height = self->init_view_box.height;
 
   if (self->edges & WLR_EDGE_LEFT) {
-    box.x = grab->cursor->x - view_geometry.x - self->diff_x;
-    box.width -= width;
+    width -= delta_width;
   }
   if (self->edges & WLR_EDGE_RIGHT) {
-    box.width += width;
+    width += delta_width;
   }
   if (self->edges & WLR_EDGE_TOP) {
-    box.y = grab->cursor->y - view_geometry.y - self->diff_y;
-    box.height -= height;
+    height -= delta_height;
   }
   if (self->edges & WLR_EDGE_BOTTOM) {
-    box.height += height;
+    height += delta_height;
   }
 
-  zn_view_configure(self->view, &box);
-
-  struct wlr_fbox configured_box;
-  zn_view_get_window_fbox(self->view, &configured_box);
-  const bool x_restricted = self->edges & WLR_EDGE_LEFT &&
-                            (int)box.width != (int)configured_box.width;
-  const bool y_restricted = self->edges & WLR_EDGE_TOP &&
-                            (int)box.height != (int)configured_box.height;
-
-  if (!x_restricted && !y_restricted) {
-    return;
-  }
-
-  if (x_restricted) {
-    box.x -= configured_box.width - box.width;
-  }
-  if (y_restricted) {
-    box.y -= configured_box.height - box.height;
-  }
-  zn_view_configure(self->view, &box);
+  zn_view_set_size(self->view, width, height);
 }
 
 static void
@@ -103,7 +75,7 @@ static void
 resize_grab_cancel(struct zn_cursor_grab* grab)
 {
   struct zn_cursor_grab_resize* self = zn_container_of(grab, self, base);
-  zn_view_configure(self->view, &self->init_view_box);
+  // zn_view_set_size(self->view, &self->init_view_box);
   zn_cursor_grab_resize_end(self);
 }
 

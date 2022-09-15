@@ -12,9 +12,10 @@ struct zn_view;
 struct zn_view_impl {
   struct wlr_surface *(*get_wlr_surface)(struct zn_view *view);
   void (*get_geometry)(struct zn_view *view, struct wlr_box *box);
-  void (*configure)(struct zn_view *view, struct wlr_fbox *box);
   void (*for_each_popup_surface)(struct zn_view *view,
       wlr_surface_iterator_func_t iterator, void *user_data);  // nullable
+  void (*set_size)(struct zn_view *view, double width, double height);
+  void (*set_position)(struct zn_view *view, double x, double y);  // nulable
   void (*set_activated)(struct zn_view *view, bool activate);
   void (*restack)(
       struct zn_view *view, enum xcb_stack_mode_t mode);  // nullable
@@ -44,10 +45,8 @@ struct zn_view {
 
 void zn_view_bring_to_front(struct zn_view *self);
 
-// box::x, y          -> surface's pos (corresponding to view::x, y)
-// box::width, height -> window's size
-//                      (corresponding to the result of view_get_window_fbox)
-void zn_view_configure(struct zn_view *self, struct wlr_fbox *box);
+// set window's size (corresponding to the result of view_get_window_fbox)
+void zn_view_set_size(struct zn_view *self, double width, double height);
 
 /**
  * @param board must not be NULL except when this view is unmapped with
