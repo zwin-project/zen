@@ -14,7 +14,7 @@ struct zn_view_impl {
   void (*get_geometry)(struct zn_view *view, struct wlr_box *box);
   void (*for_each_popup_surface)(struct zn_view *view,
       wlr_surface_iterator_func_t iterator, void *user_data);  // nullable
-  void (*set_size)(struct zn_view *view, double width, double height);
+  uint32_t (*set_size)(struct zn_view *view, double width, double height);
   void (*set_position)(struct zn_view *view, double x, double y);  // nulable
   void (*set_activated)(struct zn_view *view, bool activate);
   void (*restack)(
@@ -40,6 +40,7 @@ struct zn_view {
   struct {
     bool resizing;
     uint32_t edges;
+    uint32_t serial;
     struct wlr_fbox requested_box;
   } resize_status;
 
@@ -51,8 +52,10 @@ struct zn_view {
 
 void zn_view_bring_to_front(struct zn_view *self);
 
-// set window's size (corresponding to the result of view_get_window_fbox)
-void zn_view_set_size(struct zn_view *self, double width, double height);
+/** set window's size (corresponding to the result of view_get_window_fbox)
+ * @retval serial for resize event
+ */
+uint32_t zn_view_set_size(struct zn_view *self, double width, double height);
 
 /**
  * @param board must not be NULL except when this view is unmapped with

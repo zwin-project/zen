@@ -126,7 +126,7 @@ zn_xwayland_view_impl_get_geometry(struct zn_view* view, struct wlr_box* box)
   box->height = surface->current.height;
 }
 
-static void
+static uint32_t
 zn_xwayland_view_impl_set_size(
     struct zn_view* view, double width, double height)
 {
@@ -135,6 +135,8 @@ zn_xwayland_view_impl_set_size(
   wlr_xwayland_surface_configure(self->wlr_xwayland_surface,
       self->wlr_xwayland_surface->x, self->wlr_xwayland_surface->y, width,
       height);
+
+  return 0;
 }
 
 static void

@@ -46,7 +46,8 @@ resize_grab_motion(
     box->height += height;
   }
 
-  zn_view_set_size(self->view, box->width, box->height);
+  self->view->resize_status.serial =
+      zn_view_set_size(self->view, box->width, box->height);
 }
 
 static void
