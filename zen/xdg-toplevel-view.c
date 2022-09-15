@@ -101,6 +101,32 @@ zn_xdg_toplevel_view_resize_handler(struct wl_listener* listener, void* data)
 }
 
 static void
+zn_xdg_toplevel_view_wlr_xdg_surface_ack_configure_handler(
+    struct wl_listener* listener, void* data)
+{
+  struct zn_xdg_toplevel_view* self =
+      zn_container_of(listener, self, wlr_xdg_surface_ack_configure_listener);
+  struct wlr_xdg_surface_configure* event = data;
+
+  if (!self->base.resize_status.resizing) {
+    return;
+  }
+
+  if (!(self->base.resize_status.edges & (WLR_EDGE_LEFT | WLR_EDGE_TOP))) {
+    return;
+  }
+
+  double dx = self->base.resize_status.requested_box.width -
+              event->surface->pending.geometry.width;
+  double dy = self->base.resize_status.requested_box.height -
+              event->surface->pending.geometry.height;
+
+  zn_view_move(&self->base, self->base.board,
+      self->base.resize_status.requested_box.x + dx,
+      self->base.resize_status.requested_box.y + dy);
+}
+
+static void
 zn_xdg_toplevel_view_handle_wlr_xdg_surface_destroy(
     struct wl_listener* listener, void* data)
 {
@@ -214,6 +240,11 @@ zn_xdg_toplevel_view_create(
   wl_signal_add(
       &self->wlr_xdg_toplevel->events.request_resize, &self->resize_listener);
 
+  self->wlr_xdg_surface_ack_configure_listener.notify =
+      zn_xdg_toplevel_view_wlr_xdg_surface_ack_configure_handler;
+  wl_signal_add(&wlr_xdg_toplevel->base->events.ack_configure,
+      &self->wlr_xdg_surface_ack_configure_listener);
+
   self->wlr_xdg_surface_destroy_listener.notify =
       zn_xdg_toplevel_view_handle_wlr_xdg_surface_destroy;
   wl_signal_add(&wlr_xdg_toplevel->base->events.destroy,
@@ -233,6 +264,7 @@ static void
 zn_xdg_toplevel_view_destroy(struct zn_xdg_toplevel_view* self)
 {
   wl_list_remove(&self->wlr_surface_commit_listener.link);
+  wl_list_remove(&self->wlr_xdg_surface_ack_configure_listener.link);
   wl_list_remove(&self->wlr_xdg_surface_destroy_listener.link);
   wl_list_remove(&self->move_listener.link);
   wl_list_remove(&self->new_popup_listener.link);
