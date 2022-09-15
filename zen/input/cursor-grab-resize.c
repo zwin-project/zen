@@ -17,25 +17,36 @@ resize_grab_motion(
     return;
   }
 
-  const double delta_width = grab->cursor->x - self->init_cursor_x;
-  const double delta_height = grab->cursor->y - self->init_cursor_y;
-  double width = self->init_view_box.width;
-  double height = self->init_view_box.height;
+  struct wlr_box view_geometry;
+  self->view->impl->get_geometry(self->view, &view_geometry);
+  const double width = grab->cursor->x - self->init_cursor_x;
+  const double height = grab->cursor->y - self->init_cursor_y;
+
+  // alias
+  struct wlr_fbox* box = &self->view->resize_status.requested_box;
+  *box = (struct wlr_fbox){
+      .x = self->init_view_box.x,
+      .y = self->init_view_box.y,
+      .width = self->init_view_box.width,
+      .height = self->init_view_box.height,
+  };
 
   if (self->edges & WLR_EDGE_LEFT) {
-    width -= delta_width;
+    box->x = grab->cursor->x - view_geometry.x - self->diff_x;
+    box->width -= width;
   }
   if (self->edges & WLR_EDGE_RIGHT) {
-    width += delta_width;
+    box->width += width;
   }
   if (self->edges & WLR_EDGE_TOP) {
-    height -= delta_height;
+    box->y = grab->cursor->y - view_geometry.y - self->diff_y;
+    box->height -= height;
   }
   if (self->edges & WLR_EDGE_BOTTOM) {
-    height += delta_height;
+    box->height += height;
   }
 
-  zn_view_set_size(self->view, width, height);
+  zn_view_set_size(self->view, box->width, box->height);
 }
 
 static void
@@ -126,6 +137,8 @@ zn_cursor_grab_resize_create(
   self->base.interface = &resize_grab_interface;
   self->base.cursor = cursor;
 
+  view->resize_status.edges = edges;
+
   self->view_unmap_listener.notify = zn_cursor_grab_resize_handle_view_unmap;
   wl_signal_add(&view->events.unmap, &self->view_unmap_listener);
 
@@ -142,6 +155,7 @@ zn_cursor_grab_resize_destroy(struct zn_cursor_grab_resize* self)
 static void
 zn_cursor_grab_resize_end(struct zn_cursor_grab_resize* self)
 {
+  self->view->resize_status.resizing = false;
   zn_cursor_end_grab(self->base.cursor);
   zn_cursor_grab_resize_destroy(self);
 }
@@ -170,6 +184,7 @@ zn_cursor_grab_resize_start(
       [WLR_EDGE_BOTTOM | WLR_EDGE_RIGHT] = "se-resize",
   };
 
+  view->resize_status.resizing = true;
   wlr_seat_pointer_clear_focus(seat);
   zn_cursor_set_xcursor(cursor, xcursor_name[edges]);
   zn_cursor_start_grab(cursor, &self->base);

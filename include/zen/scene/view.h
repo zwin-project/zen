@@ -38,6 +38,12 @@ struct zn_view {
   struct zn_board *board;  // non null, when mapped
 
   struct {
+    bool resizing;
+    uint32_t edges;
+    struct wlr_fbox requested_box;
+  } resize_status;
+
+  struct {
     struct wl_signal unmap;
     struct wl_signal destroy;
   } events;
