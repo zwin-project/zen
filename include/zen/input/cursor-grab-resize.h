@@ -1,5 +1,4 @@
-#ifndef ZN_CURSOR_GRAB_RESIZE_H
-#define ZN_CURSOR_GRAB_RESIZE_H
+#pragma once
 
 #include "zen/cursor.h"
 #include "zen/input/cursor-grab.h"
@@ -20,5 +19,3 @@ struct zn_cursor_grab_resize {
 
 void zn_cursor_grab_resize_start(
     struct zn_cursor* cursor, struct zn_view* view, uint32_t edges);
-
-#endif  //  ZN_CURSOR_GRAB_RESIZE_H
