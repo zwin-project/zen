@@ -19,6 +19,13 @@ zn_xdg_toplevel_view_handle_wlr_surface_commit(
   UNUSED(data);
 
   zn_view_damage(&self->base);
+
+  if (self->base.resize_status.resizing && self->base.resize_status.acked) {
+    zn_view_move(&self->base, self->base.board,
+        self->base.resize_status.requested_box.x,
+        self->base.resize_status.requested_box.y);
+    self->base.resize_status.acked = false;
+  }
 }
 
 static void
@@ -127,9 +134,9 @@ zn_xdg_toplevel_view_wlr_xdg_surface_ack_configure_handler(
   double dy = self->base.resize_status.requested_box.height -
               event->surface->pending.geometry.height;
 
-  zn_view_move(&self->base, self->base.board,
-      self->base.resize_status.requested_box.x + dx,
-      self->base.resize_status.requested_box.y + dy);
+  self->base.resize_status.requested_box.x += dx;
+  self->base.resize_status.requested_box.y += dy;
+  self->base.resize_status.acked = true;
 }
 
 static void
