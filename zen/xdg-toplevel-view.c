@@ -38,6 +38,8 @@ zn_xdg_toplevel_view_handle_map(struct wl_listener* listener, void* data)
       &self->new_popup_listener);
   wl_signal_add(
       &self->wlr_xdg_toplevel->events.request_move, &self->move_listener);
+  wl_signal_add(
+      &self->wlr_xdg_toplevel->events.request_resize, &self->resize_listener);
   wl_signal_add(&self->wlr_xdg_toplevel->base->surface->events.commit,
       &self->wlr_surface_commit_listener);
 }
@@ -241,8 +243,7 @@ zn_xdg_toplevel_view_create(
   wl_list_init(&self->move_listener.link);
 
   self->resize_listener.notify = zn_xdg_toplevel_view_resize_handler;
-  wl_signal_add(
-      &self->wlr_xdg_toplevel->events.request_resize, &self->resize_listener);
+  wl_list_init(&self->resize_listener.link);
 
   self->wlr_xdg_surface_ack_configure_listener.notify =
       zn_xdg_toplevel_view_wlr_xdg_surface_ack_configure_handler;
