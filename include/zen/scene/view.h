@@ -53,12 +53,6 @@ struct zn_view {
 void zn_view_bring_to_front(struct zn_view *self);
 
 /**
- * set window's size (corresponding to the result of view_get_window_fbox)
- * @retval serial for resize event
- */
-uint32_t zn_view_set_size(struct zn_view *self, double width, double height);
-
-/**
  * @param board must not be NULL except when this view is unmapped with
  * `zn_view_unmap`
  */
