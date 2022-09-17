@@ -14,7 +14,7 @@ struct zn_scene {
 
   struct wl_listener unmap_focused_view_listener;
 
-  struct wlr_texture* bg_texture; // nullable
+  struct wlr_texture* bg_texture;  // nullable
 };
 
 void zn_scene_set_focused_view(struct zn_scene* self, struct zn_view* view);
