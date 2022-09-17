@@ -25,6 +25,29 @@ struct surface_iterator_data {
 };
 
 static void
+zn_screen_renderer_scissor_output(
+    struct zn_output *output, pixman_box32_t *rect)
+{
+  struct wlr_output *wlr_output = output->wlr_output;
+  struct wlr_renderer *renderer = wlr_output->renderer;
+  int output_width, output_height;
+  enum wl_output_transform transform;
+  struct wlr_box box = {
+      .x = rect->x1,
+      .y = rect->y1,
+      .width = rect->x2 - rect->x1,
+      .height = rect->y2 - rect->y1,
+  };
+
+  wlr_output_transformed_resolution(wlr_output, &output_width, &output_height);
+
+  transform = wlr_output_transform_invert(wlr_output->transform);
+  wlr_box_transform(&box, &box, transform, output_width, output_height);
+
+  wlr_renderer_scissor(renderer, &box);
+}
+
+static void
 zn_screen_renderer_get_background_box(struct wlr_box *box,
     struct wlr_texture *bg_texture, int output_width, int output_height)
 {
@@ -47,43 +70,27 @@ zn_screen_renderer_get_background_box(struct wlr_box *box,
 }
 
 static void
-zn_screen_renderer_render_background(struct zn_screen *screen,
-    struct wlr_renderer *renderer, struct wlr_texture *bg_texture)
+zn_screen_renderer_render_background(struct zn_output *output,
+    struct wlr_renderer *renderer, struct wlr_texture *bg_texture,
+    pixman_region32_t *screen_damage)
 {
   if (bg_texture == NULL) return;
+  int output_width, output_height, rect_count;
   struct wlr_box box;
   float matrix[9];
-  int output_width, output_height;
-  struct wlr_output *wlr_output = screen->output->wlr_output;
+  pixman_box32_t *rects;
+  struct wlr_output *wlr_output = output->wlr_output;
   wlr_output_transformed_resolution(wlr_output, &output_width, &output_height);
   zn_screen_renderer_get_background_box(
       &box, bg_texture, output_width, output_height);
   wlr_matrix_project_box(matrix, &box, WL_OUTPUT_TRANSFORM_NORMAL, 0,
       wlr_output->transform_matrix);
-  wlr_render_texture_with_matrix(renderer, bg_texture, matrix, 1.0f);
-}
-
-static void
-zn_screen_renderer_scissor_output(
-    struct zn_output *output, pixman_box32_t *rect)
-{
-  struct wlr_output *wlr_output = output->wlr_output;
-  struct wlr_renderer *renderer = wlr_output->renderer;
-  int output_width, output_height;
-  enum wl_output_transform transform;
-  struct wlr_box box = {
-      .x = rect->x1,
-      .y = rect->y1,
-      .width = rect->x2 - rect->x1,
-      .height = rect->y2 - rect->y1,
-  };
-
-  wlr_output_transformed_resolution(wlr_output, &output_width, &output_height);
-
-  transform = wlr_output_transform_invert(wlr_output->transform);
-  wlr_box_transform(&box, &box, transform, output_width, output_height);
-
-  wlr_renderer_scissor(renderer, &box);
+  rects = pixman_region32_rectangles(screen_damage, &rect_count);
+  for (int i = 0; i < rect_count; i++) {
+    zn_screen_renderer_scissor_output(output, &rects[i]);
+    wlr_renderer_clear(renderer, (float[]){1.0, 1.0, 1.0, 1});
+    wlr_render_texture_with_matrix(renderer, bg_texture, matrix, 1.0f);
+  }
 }
 
 static void
@@ -254,8 +261,7 @@ zn_screen_renderer_render(struct zn_screen *screen,
   struct zn_board *board = zn_screen_get_current_board(screen);
   struct wlr_output *wlr_output = output->wlr_output;
   pixman_region32_t screen_damage;
-  pixman_box32_t *rects;
-  int output_width, output_height, rect_count;
+  int output_width, output_height;
 
   wlr_renderer_begin(renderer, wlr_output->width, wlr_output->height);
 
@@ -270,13 +276,8 @@ zn_screen_renderer_render(struct zn_screen *screen,
     goto out_commit;
   }
 
-  rects = pixman_region32_rectangles(&screen_damage, &rect_count);
-  for (int i = 0; i < rect_count; i++) {
-    zn_screen_renderer_scissor_output(output, &rects[i]);
-    wlr_renderer_clear(renderer, (float[]){1.0, 1.0, 10, 1});
-    zn_screen_renderer_render_background(
-        screen, renderer, server->scene->bg_texture);
-  }
+  zn_screen_renderer_render_background(
+      output, renderer, server->scene->bg_texture, &screen_damage);
   wl_list_for_each(view, &board->view_list, link)
       zn_screen_renderer_render_view(screen, view, renderer, &screen_damage);
 
