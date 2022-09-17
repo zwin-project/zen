@@ -22,14 +22,6 @@ zn_view_bring_to_front(struct zn_view *self)
   zn_view_damage_whole(self);
 }
 
-uint32_t
-zn_view_set_size(struct zn_view *self, double width, double height)
-{
-  zn_view_damage_whole(self);
-
-  return self->impl->set_size(self, width, height);
-}
-
 void
 zn_view_move(struct zn_view *self, struct zn_board *new_board, double board_x,
     double board_y)
