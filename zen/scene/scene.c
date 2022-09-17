@@ -203,6 +203,8 @@ zn_scene_setup_background(struct zn_scene* self, const char* background_png)
   struct zn_server* server = zn_server_get_singleton();
   self->bg_texture = wlr_texture_from_pixels(
       server->renderer, DRM_FORMAT_ARGB8888, stride, width, height, data);
+  cairo_surface_destroy(surface);
+  cairo_destroy(cr);
 }
 
 struct zn_scene*
@@ -257,6 +259,8 @@ zn_scene_destroy(struct zn_scene* self)
   {
     zn_board_destroy(board);
   }
+
+  wlr_texture_destroy(self->bg_texture);
 
   zn_screen_layout_destroy(self->screen_layout);
 
