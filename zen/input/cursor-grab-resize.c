@@ -17,6 +17,10 @@ resize_grab_motion(
     return;
   }
 
+  if (self->view->resize_status.acked) {
+    return;
+  }
+
   struct wlr_box view_geometry;
   self->view->impl->get_geometry(self->view, &view_geometry);
   const double width = grab->cursor->x - self->init_cursor_x;
