@@ -17,6 +17,8 @@ zn_xwayland_view_handle_wlr_surface_commit(
   UNUSED(data);
 
   zn_view_damage(&self->base);
+
+  // FIXME: when resizing, adjust the position of the view
 }
 
 static void
