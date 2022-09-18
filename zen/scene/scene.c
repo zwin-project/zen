@@ -9,7 +9,7 @@
 #include "zen/scene/view.h"
 
 static void
-zn_scene_unmap_focused_view_handler(struct wl_listener* listener, void* data)
+zn_scene_handle_unmap_focused_view(struct wl_listener* listener, void* data)
 {
   UNUSED(data);
   struct zn_scene* self =
@@ -202,8 +202,7 @@ zn_scene_create(void)
     goto err_screen_layout;
   }
 
-  self->unmap_focused_view_listener.notify =
-      zn_scene_unmap_focused_view_handler;
+  self->unmap_focused_view_listener.notify = zn_scene_handle_unmap_focused_view;
 
   return self;
 

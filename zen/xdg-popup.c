@@ -6,7 +6,7 @@
 static void zn_xdg_popup_destroy(struct zn_xdg_popup* self);
 
 static void
-zn_xdg_popup_map(struct wl_listener* listener, void* data)
+zn_xdg_popup_handle_map(struct wl_listener* listener, void* data)
 {
   struct zn_xdg_popup* self = zn_container_of(listener, self, map_listener);
   UNUSED(data);
@@ -18,7 +18,7 @@ zn_xdg_popup_map(struct wl_listener* listener, void* data)
 }
 
 static void
-zn_xdg_popup_unmap(struct wl_listener* listener, void* data)
+zn_xdg_popup_handle_unmap(struct wl_listener* listener, void* data)
 {
   struct zn_xdg_popup* self = zn_container_of(listener, self, unmap_listener);
   UNUSED(data);
@@ -30,8 +30,7 @@ zn_xdg_popup_unmap(struct wl_listener* listener, void* data)
 }
 
 static void
-zn_xdg_popup_wlr_surface_commit_handler(
-    struct wl_listener* listener, void* data)
+zn_xdg_popup_handle_wlr_surface_commit(struct wl_listener* listener, void* data)
 {
   struct zn_xdg_popup* self =
       zn_container_of(listener, self, wlr_surface_commit_listener);
@@ -60,7 +59,7 @@ zn_xdg_popup_view_child_impl_get_view_coords(
 }
 
 static void
-zn_xdg_popup_wlr_xdg_surface_destroy_handler(
+zn_xdg_popup_handle_wlr_xdg_surface_destroy(
     struct wl_listener* listener, void* data)
 {
   struct zn_xdg_popup* self =
@@ -91,20 +90,20 @@ zn_xdg_popup_create(struct wlr_xdg_popup* wlr_xdg_popup, struct zn_view* view)
 
   self->wlr_xdg_popup = wlr_xdg_popup;
 
-  self->map_listener.notify = zn_xdg_popup_map;
+  self->map_listener.notify = zn_xdg_popup_handle_map;
   wl_signal_add(&self->wlr_xdg_popup->base->events.map, &self->map_listener);
 
-  self->unmap_listener.notify = zn_xdg_popup_unmap;
+  self->unmap_listener.notify = zn_xdg_popup_handle_unmap;
   wl_signal_add(
       &self->wlr_xdg_popup->base->events.unmap, &self->unmap_listener);
 
   self->wlr_xdg_surface_destroy_listener.notify =
-      zn_xdg_popup_wlr_xdg_surface_destroy_handler;
+      zn_xdg_popup_handle_wlr_xdg_surface_destroy;
   wl_signal_add(&wlr_xdg_popup->base->events.destroy,
       &self->wlr_xdg_surface_destroy_listener);
 
   self->wlr_surface_commit_listener.notify =
-      zn_xdg_popup_wlr_surface_commit_handler;
+      zn_xdg_popup_handle_wlr_surface_commit;
   wl_list_init(&self->wlr_surface_commit_listener.link);
 
   return self;

@@ -10,7 +10,7 @@
 static void zn_xdg_toplevel_view_destroy(struct zn_xdg_toplevel_view* self);
 
 static void
-zn_xdg_toplevel_view_wlr_surface_commit_handler(
+zn_xdg_toplevel_view_handle_wlr_surface_commit(
     struct wl_listener* listener, void* data)
 {
   struct zn_xdg_toplevel_view* self =
@@ -21,7 +21,7 @@ zn_xdg_toplevel_view_wlr_surface_commit_handler(
 }
 
 static void
-zn_xdg_toplevel_view_map(struct wl_listener* listener, void* data)
+zn_xdg_toplevel_view_handle_map(struct wl_listener* listener, void* data)
 {
   struct zn_xdg_toplevel_view* self =
       zn_container_of(listener, self, map_listener);
@@ -42,7 +42,7 @@ zn_xdg_toplevel_view_map(struct wl_listener* listener, void* data)
 }
 
 static void
-zn_xdg_toplevel_view_unmap(struct wl_listener* listener, void* data)
+zn_xdg_toplevel_view_handle_unmap(struct wl_listener* listener, void* data)
 {
   struct zn_xdg_toplevel_view* self =
       zn_container_of(listener, self, unmap_listener);
@@ -65,7 +65,7 @@ zn_xdg_toplevel_view_unmap(struct wl_listener* listener, void* data)
 }
 
 static void
-zn_xdg_toplevel_view_new_popup(struct wl_listener* listener, void* data)
+zn_xdg_toplevel_view_handle_new_popup(struct wl_listener* listener, void* data)
 {
   struct zn_xdg_toplevel_view* self =
       zn_container_of(listener, self, new_popup_listener);
@@ -75,7 +75,7 @@ zn_xdg_toplevel_view_new_popup(struct wl_listener* listener, void* data)
 }
 
 static void
-zn_xdg_toplevel_view_move_handler(struct wl_listener* listener, void* data)
+zn_xdg_toplevel_view_handle_move(struct wl_listener* listener, void* data)
 {
   // FIXME: pointer/button/serial validation
   UNUSED(data);
@@ -88,7 +88,7 @@ zn_xdg_toplevel_view_move_handler(struct wl_listener* listener, void* data)
 }
 
 static void
-zn_xdg_toplevel_view_wlr_xdg_surface_destroy_handler(
+zn_xdg_toplevel_view_handle_wlr_xdg_surface_destroy(
     struct wl_listener* listener, void* data)
 {
   struct zn_xdg_toplevel_view* self =
@@ -174,26 +174,26 @@ zn_xdg_toplevel_view_create(
 
   self->wlr_xdg_toplevel = wlr_xdg_toplevel;
 
-  self->map_listener.notify = zn_xdg_toplevel_view_map;
+  self->map_listener.notify = zn_xdg_toplevel_view_handle_map;
   wl_signal_add(&self->wlr_xdg_toplevel->base->events.map, &self->map_listener);
 
-  self->unmap_listener.notify = zn_xdg_toplevel_view_unmap;
+  self->unmap_listener.notify = zn_xdg_toplevel_view_handle_unmap;
   wl_signal_add(
       &self->wlr_xdg_toplevel->base->events.unmap, &self->unmap_listener);
 
-  self->new_popup_listener.notify = zn_xdg_toplevel_view_new_popup;
+  self->new_popup_listener.notify = zn_xdg_toplevel_view_handle_new_popup;
   wl_list_init(&self->new_popup_listener.link);
 
-  self->move_listener.notify = zn_xdg_toplevel_view_move_handler;
+  self->move_listener.notify = zn_xdg_toplevel_view_handle_move;
   wl_list_init(&self->move_listener.link);
 
   self->wlr_xdg_surface_destroy_listener.notify =
-      zn_xdg_toplevel_view_wlr_xdg_surface_destroy_handler;
+      zn_xdg_toplevel_view_handle_wlr_xdg_surface_destroy;
   wl_signal_add(&wlr_xdg_toplevel->base->events.destroy,
       &self->wlr_xdg_surface_destroy_listener);
 
   self->wlr_surface_commit_listener.notify =
-      zn_xdg_toplevel_view_wlr_surface_commit_handler;
+      zn_xdg_toplevel_view_handle_wlr_surface_commit;
   wl_list_init(&self->wlr_surface_commit_listener.link);
 
   return self;

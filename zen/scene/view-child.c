@@ -25,7 +25,7 @@ zn_view_child_is_mapped(struct zn_view_child *self)
 }
 
 static void
-zn_view_child_view_unmap_handler(struct wl_listener *listener, void *data)
+zn_view_child_handle_view_unmap(struct wl_listener *listener, void *data)
 {
   struct zn_view_child *self =
       zn_container_of(listener, self, view_unmap_listener);
@@ -34,7 +34,7 @@ zn_view_child_view_unmap_handler(struct wl_listener *listener, void *data)
 }
 
 static void
-zn_view_child_view_destroy_handler(struct wl_listener *listener, void *data)
+zn_view_child_handle_view_destroy(struct wl_listener *listener, void *data)
 {
   struct zn_view_child *self =
       zn_container_of(listener, self, view_destroy_listener);
@@ -103,9 +103,9 @@ zn_view_child_init(struct zn_view_child *self,
 
   self->mapped = false;
 
-  self->view_unmap_listener.notify = zn_view_child_view_unmap_handler;
+  self->view_unmap_listener.notify = zn_view_child_handle_view_unmap;
   wl_signal_add(&self->view->events.unmap, &self->view_unmap_listener);
-  self->view_destroy_listener.notify = zn_view_child_view_destroy_handler;
+  self->view_destroy_listener.notify = zn_view_child_handle_view_destroy;
   wl_signal_add(&self->view->events.destroy, &self->view_destroy_listener);
 }
 
