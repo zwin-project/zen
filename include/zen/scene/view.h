@@ -39,10 +39,7 @@ struct zn_view {
 
   struct {
     bool resizing;
-    bool acked;
     uint32_t edges;
-    uint32_t serial;
-    struct wlr_fbox requested_box;
   } resize_status;
 
   struct {

@@ -17,7 +17,6 @@ struct zn_xdg_toplevel_view {
   struct wl_listener new_popup_listener;
   struct wl_listener move_listener;
   struct wl_listener resize_listener;
-  struct wl_listener wlr_xdg_surface_ack_configure_listener;
   struct wl_listener wlr_xdg_surface_destroy_listener;
   struct wl_listener wlr_surface_commit_listener;
 };
