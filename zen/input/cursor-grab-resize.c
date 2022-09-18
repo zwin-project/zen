@@ -146,6 +146,7 @@ zn_cursor_grab_resize_destroy(struct zn_cursor_grab_resize* self)
 static void
 zn_cursor_grab_resize_end(struct zn_cursor_grab_resize* self)
 {
+  zn_cursor_set_xcursor(self->base.cursor, "left_ptr");
   zn_cursor_end_grab(self->base.cursor);
   zn_cursor_grab_resize_destroy(self);
 }
