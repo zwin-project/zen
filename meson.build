@@ -104,17 +104,13 @@ if get_option('default-wallpaper')
   wallpaper_install_dir = join_paths(datadir, 'backgrounds', 'zen')
 
   install_data(wallpaper_files, install_dir: wallpaper_install_dir)
-  default_wallpaper = join_paths('/usr/local', wallpaper_install_dir, 'Zen_Wallpaper_Main_3840x2160.png')
+  default_wallpaper = join_paths(get_option('prefix'), wallpaper_install_dir, 'Zen_Wallpaper_Main_3840x2160.png')
   cdata.set_quoted('DEFAULT_WALLPAPER', default_wallpaper)
+else
+  cdata.set_quoted('DEFAULT_WALLPAPER', '')
 endif
 
-config_h = configure_file(
-  input: 'zen-config.h.meson',
-  output: 'zen-config.h',
-  configuration: cdata
-)
-
-zen_inc = include_directories('include', '.')
+zen_inc = include_directories('include')
 
 subdir('protocols')
 subdir('common')
