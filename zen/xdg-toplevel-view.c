@@ -136,11 +136,23 @@ zn_xdg_toplevel_view_impl_for_each_popup_surface(
       self->wlr_xdg_toplevel->base, iterator, user_data);
 }
 
+static void
+zn_xdg_toplevel_view_impl_close_popups(struct zn_view* view)
+{
+  struct zn_xdg_toplevel_view* self = zn_container_of(view, self, base);
+  struct wlr_xdg_popup *popup, *tmp;
+  wl_list_for_each_safe(popup, tmp, &self->wlr_xdg_toplevel->base->popups, link)
+  {
+    wlr_xdg_popup_destroy(popup->base);
+  }
+}
+
 static const struct zn_view_impl zn_xdg_toplevel_view_impl = {
     .get_wlr_surface = zn_xdg_toplevel_view_impl_get_wlr_surface,
     .get_geometry = zn_xdg_toplevel_view_impl_get_geometry,
     .set_activated = zn_xdg_toplevel_view_impl_set_activated,
     .for_each_popup_surface = zn_xdg_toplevel_view_impl_for_each_popup_surface,
+    .close_popups = zn_xdg_toplevel_view_impl_close_popups,
 };
 
 struct zn_xdg_toplevel_view*
