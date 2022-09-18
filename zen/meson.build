@@ -23,8 +23,8 @@ _zen_desktop_srcs = [
   'scene/scene.c',
   'scene/screen.c',
   'scene/screen-layout.c',
-  'scene/view-child.c',
   'scene/view.c',
+  'scene/view-child.c',
 
   'wlr/box.c',
 

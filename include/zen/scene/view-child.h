@@ -28,8 +28,6 @@ struct zn_view_child {
 
 void zn_view_child_damage(struct zn_view_child *self);
 
-bool zn_view_child_is_mapped(struct zn_view_child *self);
-
 void zn_view_child_map(struct zn_view_child *self);
 
 void zn_view_child_unmap(struct zn_view_child *self);
