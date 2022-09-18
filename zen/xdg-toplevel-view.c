@@ -28,8 +28,13 @@ zn_xdg_toplevel_view_handle_wlr_surface_commit(
   }
 
   struct wlr_surface* surface = data;
-  const int dx = surface->previous.width - surface->current.width;
-  const int dy = surface->previous.height - surface->current.height;
+  int dx = 0, dy = 0;
+  if (self->base.resize_status.edges & WLR_EDGE_LEFT) {
+    dx = surface->previous.width - surface->current.width;
+  }
+  if (self->base.resize_status.edges & WLR_EDGE_TOP) {
+    dy = surface->previous.height - surface->current.height;
+  }
   zn_view_move(
       &self->base, self->base.board, self->base.x + dx, self->base.y + dy);
 }
