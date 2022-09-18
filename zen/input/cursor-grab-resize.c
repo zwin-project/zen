@@ -17,41 +17,25 @@ resize_grab_motion(
     return;
   }
 
-  if (self->view->resize_status.acked) {
-    return;
-  }
-
-  struct wlr_box view_geometry;
-  self->view->impl->get_geometry(self->view, &view_geometry);
-  const double width = grab->cursor->x - self->init_cursor_x;
-  const double height = grab->cursor->y - self->init_cursor_y;
-
-  // alias
-  struct wlr_fbox* box = &self->view->resize_status.requested_box;
-  *box = (struct wlr_fbox){
-      .x = self->init_view_box.x,
-      .y = self->init_view_box.y,
-      .width = self->init_view_box.width,
-      .height = self->init_view_box.height,
-  };
+  double width = self->init_view_width;
+  double height = self->init_view_height;
+  const double diff_width = grab->cursor->x - self->init_cursor_x;
+  const double diff_height = grab->cursor->y - self->init_cursor_y;
 
   if (self->edges & WLR_EDGE_LEFT) {
-    box->x = grab->cursor->x - view_geometry.x - self->diff_x;
-    box->width -= width;
+    width -= diff_width;
   }
   if (self->edges & WLR_EDGE_RIGHT) {
-    box->width += width;
+    width += diff_width;
   }
   if (self->edges & WLR_EDGE_TOP) {
-    box->y = grab->cursor->y - view_geometry.y - self->diff_y;
-    box->height -= height;
+    height -= diff_height;
   }
   if (self->edges & WLR_EDGE_BOTTOM) {
-    box->height += height;
+    height += diff_height;
   }
 
-  self->view->resize_status.serial =
-      self->view->impl->set_size(self->view, box->width, box->height);
+  self->view->impl->set_size(self->view, width, height);
 }
 
 static void
@@ -126,16 +110,15 @@ zn_cursor_grab_resize_create(
     return NULL;
   }
 
-  zn_view_get_window_fbox(view, &self->init_view_box);
+  struct wlr_fbox box;
+  zn_view_get_window_fbox(view, &box);
 
-  self->diff_x = cursor->x - self->init_view_box.x;
-  self->diff_y = cursor->y - self->init_view_box.y;
-
+  self->init_view_x = view->x;
+  self->init_view_y = view->y;
+  self->init_view_width = box.width;
+  self->init_view_height = box.height;
   self->init_cursor_x = cursor->x;
   self->init_cursor_y = cursor->y;
-
-  self->init_view_box.x = view->x;
-  self->init_view_box.y = view->y;
 
   self->view = view;
   self->edges = edges;

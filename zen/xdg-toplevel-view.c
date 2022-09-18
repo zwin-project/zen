@@ -16,16 +16,22 @@ zn_xdg_toplevel_view_handle_wlr_surface_commit(
 {
   struct zn_xdg_toplevel_view* self =
       zn_container_of(listener, self, wlr_surface_commit_listener);
-  UNUSED(data);
 
   zn_view_damage(&self->base);
 
-  if (self->base.resize_status.resizing && self->base.resize_status.acked) {
-    zn_view_move(&self->base, self->base.board,
-        self->base.resize_status.requested_box.x,
-        self->base.resize_status.requested_box.y);
-    self->base.resize_status.acked = false;
+  if (!self->base.resize_status.resizing) {
+    return;
   }
+
+  if (!(self->base.resize_status.edges & (WLR_EDGE_LEFT | WLR_EDGE_TOP))) {
+    return;
+  }
+
+  struct wlr_surface* surface = data;
+  const int dx = surface->previous.width - surface->current.width;
+  const int dy = surface->previous.height - surface->current.height;
+  zn_view_move(
+      &self->base, self->base.board, self->base.x + dx, self->base.y + dy);
 }
 
 static void
@@ -107,36 +113,6 @@ zn_xdg_toplevel_view_resize_handler(struct wl_listener* listener, void* data)
   struct zn_cursor* cursor = server->input_manager->seat->cursor;
 
   zn_cursor_grab_resize_start(cursor, &self->base, event->edges);
-}
-
-static void
-zn_xdg_toplevel_view_wlr_xdg_surface_ack_configure_handler(
-    struct wl_listener* listener, void* data)
-{
-  struct zn_xdg_toplevel_view* self =
-      zn_container_of(listener, self, wlr_xdg_surface_ack_configure_listener);
-  struct wlr_xdg_surface_configure* event = data;
-
-  if (!self->base.resize_status.resizing) {
-    return;
-  }
-
-  if (self->base.resize_status.serial != event->serial) {
-    return;
-  }
-
-  if (!(self->base.resize_status.edges & (WLR_EDGE_LEFT | WLR_EDGE_TOP))) {
-    return;
-  }
-
-  double dx = self->base.resize_status.requested_box.width -
-              event->surface->pending.geometry.width;
-  double dy = self->base.resize_status.requested_box.height -
-              event->surface->pending.geometry.height;
-
-  self->base.resize_status.requested_box.x += dx;
-  self->base.resize_status.requested_box.y += dy;
-  self->base.resize_status.acked = true;
 }
 
 static void
@@ -252,11 +228,6 @@ zn_xdg_toplevel_view_create(
   self->resize_listener.notify = zn_xdg_toplevel_view_resize_handler;
   wl_list_init(&self->resize_listener.link);
 
-  self->wlr_xdg_surface_ack_configure_listener.notify =
-      zn_xdg_toplevel_view_wlr_xdg_surface_ack_configure_handler;
-  wl_signal_add(&wlr_xdg_toplevel->base->events.ack_configure,
-      &self->wlr_xdg_surface_ack_configure_listener);
-
   self->wlr_xdg_surface_destroy_listener.notify =
       zn_xdg_toplevel_view_handle_wlr_xdg_surface_destroy;
   wl_signal_add(&wlr_xdg_toplevel->base->events.destroy,
@@ -276,7 +247,6 @@ static void
 zn_xdg_toplevel_view_destroy(struct zn_xdg_toplevel_view* self)
 {
   wl_list_remove(&self->wlr_surface_commit_listener.link);
-  wl_list_remove(&self->wlr_xdg_surface_ack_configure_listener.link);
   wl_list_remove(&self->wlr_xdg_surface_destroy_listener.link);
   wl_list_remove(&self->move_listener.link);
   wl_list_remove(&self->new_popup_listener.link);
