@@ -75,7 +75,10 @@ static void
 resize_grab_cancel(struct zn_cursor_grab* grab)
 {
   struct zn_cursor_grab_resize* self = zn_container_of(grab, self, base);
-  // zn_view_set_size(self->view, &self->init_view_box);
+  zn_view_move(
+      self->view, self->view->board, self->init_view_x, self->init_view_y);
+  self->view->impl->set_size(
+      self->view, self->init_view_width, self->init_view_height);
   zn_cursor_grab_resize_end(self);
 }
 
