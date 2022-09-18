@@ -20,13 +20,19 @@ struct zn_view_child {
   struct zn_view *view;          // nullable
   struct zn_view_child *parent;  // nullable
 
-  // struct wl_listener view_unmap_listener; // TODO: handle root view unmap
+  bool mapped;
+
+  struct wl_listener view_unmap_listener;
   struct wl_listener view_destroy_listener;
 };
 
 void zn_view_child_damage(struct zn_view_child *self);
 
-void zn_view_child_damage_whole(struct zn_view_child *self);
+bool zn_view_child_is_mapped(struct zn_view_child *self);
+
+void zn_view_child_map(struct zn_view_child *self);
+
+void zn_view_child_unmap(struct zn_view_child *self);
 
 void zn_view_child_init(struct zn_view_child *self,
     const struct zn_view_child_impl *impl, struct zn_view *view);

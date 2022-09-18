@@ -11,9 +11,7 @@ zn_xdg_popup_map(struct wl_listener* listener, void* data)
   struct zn_xdg_popup* self = zn_container_of(listener, self, map_listener);
   UNUSED(data);
 
-  // TODO: !zn_view_child_is_mapped check
-
-  zn_view_child_damage(&self->base);
+  zn_view_child_map(&self->base);
 
   wl_signal_add(&self->wlr_xdg_popup->base->surface->events.commit,
       &self->wlr_surface_commit_listener);
@@ -25,9 +23,7 @@ zn_xdg_popup_unmap(struct wl_listener* listener, void* data)
   struct zn_xdg_popup* self = zn_container_of(listener, self, unmap_listener);
   UNUSED(data);
 
-  // TODO: zn_view_child_is_mapped check
-
-  zn_view_child_damage(&self->base);
+  zn_view_child_unmap(&self->base);
 
   wl_list_remove(&self->wlr_surface_commit_listener.link);
   wl_list_init(&self->wlr_surface_commit_listener.link);

@@ -6,28 +6,9 @@
 #include "zen/output.h"
 
 static void
-zn_view_child_get_surface_fbox(
-    struct zn_view_child *self, struct wlr_fbox *fbox)
-{
-  struct wlr_surface *surface = self->impl->get_wlr_surface(self);
-
-  if (self->view == NULL) return;
-  // TODO: handle the cace that self->view is NULL and view_child remains
-
-  fbox->x = self->view->x + surface->sx;
-  fbox->y = self->view->y + surface->sy;
-  fbox->width = surface->current.width;
-  fbox->height = surface->current.height;
-}
-
-static void
 zn_view_child_add_damage_fbox(
     struct zn_view_child *self, struct wlr_fbox *effective_box)
 {
-  if (self->view == NULL || self->view->board == NULL ||
-      self->view->board->screen == NULL)
-    return;
-
   zn_output_add_damage_box(self->view->board->screen->output, effective_box);
 }
 
@@ -41,12 +22,16 @@ zn_view_child_damage(struct zn_view_child *self)
   int rect_count;
   int sx, sy;
 
+  if (!zn_view_child_is_mapped(self) || self->view == NULL ||
+      self->view->board == NULL || self->view->board->screen == NULL)
+    return;
+
   pixman_region32_init(&damage);
 
   wlr_surface_get_effective_damage(surface, &damage);
   rects = pixman_region32_rectangles(&damage, &rect_count);
 
-  self->impl->get_view_coords(self, &sx, &sy);  // TODO: may pickup surface
+  self->impl->get_view_coords(self, &sx, &sy);
 
   for (int i = 0; i < rect_count; ++i) {
     damage_box = (struct wlr_fbox){
@@ -61,14 +46,40 @@ zn_view_child_damage(struct zn_view_child *self)
   pixman_region32_fini(&damage);
 }
 
-void
-zn_view_child_damage_whole(struct zn_view_child *self)
+bool
+zn_view_child_is_mapped(struct zn_view_child *self)
 {
-  struct wlr_fbox fbox;
+  struct zn_view_child *child = self;
+  while (child) {
+    if (!child->mapped) return false;
 
-  zn_view_child_get_surface_fbox(self, &fbox);
+    child = child->parent;
+  }
+  return true;
+}
 
-  zn_view_child_add_damage_fbox(self, &fbox);
+void
+zn_view_child_map(struct zn_view_child *self)
+{
+  self->mapped = true;
+  zn_view_child_damage(self);
+}
+
+void
+zn_view_child_unmap(struct zn_view_child *self)
+{
+  zn_view_child_damage(self);
+  self->mapped = false;
+}
+
+static void
+zn_view_child_view_unmap_handler(struct wl_listener *listener, void *data)
+{
+  struct zn_view_child *self =
+      zn_container_of(listener, self, view_unmap_listener);
+  UNUSED(data);
+  zn_view_child_damage(self);
+  self->mapped = false;
 }
 
 static void
@@ -78,6 +89,8 @@ zn_view_child_view_destroy_handler(struct wl_listener *listener, void *data)
       zn_container_of(listener, self, view_destroy_listener);
   UNUSED(data);
 
+  zn_view_child_damage(self);
+  self->mapped = false;
   self->view = NULL;
 }
 
@@ -87,8 +100,13 @@ zn_view_child_init(struct zn_view_child *self,
 {
   self->impl = impl;
   self->view = view;
-  self->parent = NULL;  // TODO: handle if view_child's parent exists.
+  self->parent =
+      NULL;  // TODO: handle if view_child's parent(view_child) exists.
 
+  self->mapped = false;
+
+  self->view_unmap_listener.notify = zn_view_child_view_unmap_handler;
+  wl_signal_add(&self->view->events.unmap, &self->view_unmap_listener);
   self->view_destroy_listener.notify = zn_view_child_view_destroy_handler;
   wl_signal_add(&self->view->events.destroy, &self->view_destroy_listener);
 }
@@ -96,5 +114,7 @@ zn_view_child_init(struct zn_view_child *self,
 void
 zn_view_child_fini(struct zn_view_child *self)
 {
+  if (zn_view_child_is_mapped(self)) zn_view_child_damage(self);
+  wl_list_remove(&self->view_unmap_listener.link);
   wl_list_remove(&self->view_destroy_listener.link);
 }
