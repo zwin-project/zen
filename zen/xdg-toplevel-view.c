@@ -116,7 +116,7 @@ zn_xdg_toplevel_view_handle_move(struct wl_listener* listener, void* data)
 }
 
 static void
-zn_xdg_toplevel_view_resize_handler(struct wl_listener* listener, void* data)
+zn_xdg_toplevel_view_handle_resize(struct wl_listener* listener, void* data)
 {
   struct zn_xdg_toplevel_view* self =
       zn_container_of(listener, self, resize_listener);
@@ -237,7 +237,7 @@ zn_xdg_toplevel_view_create(
   self->move_listener.notify = zn_xdg_toplevel_view_handle_move;
   wl_list_init(&self->move_listener.link);
 
-  self->resize_listener.notify = zn_xdg_toplevel_view_resize_handler;
+  self->resize_listener.notify = zn_xdg_toplevel_view_handle_resize;
   wl_list_init(&self->resize_listener.link);
 
   self->wlr_xdg_surface_destroy_listener.notify =
@@ -261,6 +261,7 @@ zn_xdg_toplevel_view_destroy(struct zn_xdg_toplevel_view* self)
   wl_list_remove(&self->wlr_surface_commit_listener.link);
   wl_list_remove(&self->wlr_xdg_surface_destroy_listener.link);
   wl_list_remove(&self->move_listener.link);
+  wl_list_remove(&self->resize_listener.link);
   wl_list_remove(&self->new_popup_listener.link);
   wl_list_remove(&self->unmap_listener.link);
   wl_list_remove(&self->map_listener.link);

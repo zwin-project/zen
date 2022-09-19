@@ -79,7 +79,7 @@ zn_xwayland_view_handle_move(struct wl_listener* listener, void* data)
 }
 
 static void
-zn_xwayland_view_resize_handler(struct wl_listener* listener, void* data)
+zn_xwayland_view_handle_resize(struct wl_listener* listener, void* data)
 {
   UNUSED(data);
   struct zn_xwayland_view* self =
@@ -195,7 +195,7 @@ zn_xwayland_view_create(
   self->move_listener.notify = zn_xwayland_view_handle_move;
   wl_list_init(&self->move_listener.link);
 
-  self->resize_listener.notify = zn_xwayland_view_resize_handler;
+  self->resize_listener.notify = zn_xwayland_view_handle_resize;
   wl_list_init(&self->resize_listener.link);
 
   self->wlr_xwayland_surface_destroy_listener.notify =
