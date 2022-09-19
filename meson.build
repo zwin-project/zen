@@ -76,6 +76,7 @@ wlr_glew_renderer_req = wlroots_req
 
 # dependencies
 
+cairo_dep = dependency('cairo')
 m_dep = cc.find_library('m')
 openvr_dep = dependency('openvr', version: openvr_req)
 pixman_dep = dependency('pixman-1')
@@ -85,8 +86,28 @@ wayland_server_dep = dependency('wayland-server', version: wayland_server_req)
 wlroots_dep = dependency('wlroots', version: wlroots_req)
 wlr_glew_renderer_dep = dependency('wlr-glew-renderer', version: wlr_glew_renderer_req)
 xkbcommon_dep = dependency('xkbcommon')
+
 if get_option('cui-client')
   wayland_client_dep = dependency('wayland-client')
+endif
+
+cdata = configuration_data()
+
+if get_option('default-wallpaper')
+  wallpaper_files = files(
+    'assets/Zen_Wallpaper_Blue_3840x2160.png',
+    'assets/Zen_Wallpaper_Logo_3840x2160.png',
+    'assets/Zen_Wallpaper_Tricolor_3840x2160.png',
+    'assets/Zen_Wallpaper_Gray_3840x2160.png',
+    'assets/Zen_Wallpaper_Main_3840x2160.png',
+  )
+  wallpaper_install_dir = join_paths(datadir, 'backgrounds', 'zen')
+
+  install_data(wallpaper_files, install_dir: wallpaper_install_dir)
+  default_wallpaper = join_paths(get_option('prefix'), wallpaper_install_dir, 'Zen_Wallpaper_Main_3840x2160.png')
+  cdata.set_quoted('DEFAULT_WALLPAPER', default_wallpaper)
+else
+  cdata.set_quoted('DEFAULT_WALLPAPER', '')
 endif
 
 zen_inc = include_directories('include')
@@ -104,6 +125,7 @@ install_data(
   'zen.desktop',
   install_dir: join_paths(datadir, 'wayland-sessions')
 )
+
 
 if get_option('tests')
   subdir('tests')

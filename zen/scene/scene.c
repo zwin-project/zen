@@ -1,8 +1,11 @@
 #include "zen/scene/scene.h"
 
+#include <cairo.h>
+#include <drm_fourcc.h>
 #include <linux/input.h>
 
 #include "zen-common.h"
+#include "zen-config.h"
 #include "zen/scene/board.h"
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/screen.h"
@@ -176,6 +179,35 @@ zn_scene_setup_bindings(struct zn_scene* self)
       zn_scene_new_board_binding_handler, self);
 }
 
+static void
+zn_scene_setup_background(struct zn_scene* self, const char* background_png)
+{
+  cairo_surface_t* surface =
+      cairo_image_surface_create_from_png(background_png);
+  cairo_t* cr = cairo_create(surface);
+  cairo_status_t status = cairo_status(cr);
+  if (status != CAIRO_STATUS_SUCCESS) {
+    zn_warn("Background image not loaded");
+    goto err;
+  }
+  cairo_format_t format = cairo_image_surface_get_format(surface);
+  if (format != CAIRO_FORMAT_ARGB32) {
+    zn_error("Image format not supported");
+    goto err;
+  }
+  unsigned char* data = cairo_image_surface_get_data(surface);
+  int stride = cairo_image_surface_get_stride(surface);
+  int width = cairo_image_surface_get_width(surface);
+  int height = cairo_image_surface_get_height(surface);
+
+  struct zn_server* server = zn_server_get_singleton();
+  self->bg_texture = wlr_texture_from_pixels(
+      server->renderer, DRM_FORMAT_ARGB8888, stride, width, height, data);
+err:
+  cairo_surface_destroy(surface);
+  cairo_destroy(cr);
+}
+
 struct zn_scene*
 zn_scene_create(void)
 {
@@ -202,6 +234,8 @@ zn_scene_create(void)
     goto err_screen_layout;
   }
 
+  zn_scene_setup_background(self, DEFAULT_WALLPAPER);
+
   self->unmap_focused_view_listener.notify = zn_scene_handle_unmap_focused_view;
 
   return self;
@@ -225,6 +259,8 @@ zn_scene_destroy(struct zn_scene* self)
   {
     zn_board_destroy(board);
   }
+
+  if (self->bg_texture != NULL) wlr_texture_destroy(self->bg_texture);
 
   zn_screen_layout_destroy(self->screen_layout);
 

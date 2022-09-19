@@ -6,3 +6,7 @@ option('cui-client',
   description: 'Comiple cui client',
   type: 'boolean',
   value: 'true')
+option('default-wallpaper',
+  description: 'Install the default wallpapers',
+  type: 'boolean',
+  value: 'true')

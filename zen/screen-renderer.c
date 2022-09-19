@@ -48,6 +48,54 @@ zn_screen_renderer_scissor_output(
 }
 
 static void
+zn_screen_renderer_bg_projection_matrix(struct wlr_texture *bg_texture,
+    struct wlr_output *output, float matrix[static 9])
+{
+  if (bg_texture == NULL) return;
+  int output_width, output_height;
+  struct wlr_box box;
+  wlr_output_transformed_resolution(output, &output_width, &output_height);
+  double output_ratio = (double)output_height / (double)output_width;
+  double texture_ratio = (double)bg_texture->height / (double)bg_texture->width;
+
+  if (output_ratio > texture_ratio) {
+    // Fit the height of the texture to that of the output
+    box.y = 0;
+    box.height = output_height;
+    box.width = bg_texture->width * output_height / bg_texture->height;
+    box.x = (output_width - box.width) / 2;
+  } else {
+    // Fit the width of the texture to that of the output
+    box.x = 0;
+    box.width = output_width;
+    box.height = bg_texture->height * output_width / bg_texture->width;
+    box.y = (output_height - box.height) / 2;
+  }
+  wlr_matrix_project_box(
+      matrix, &box, WL_OUTPUT_TRANSFORM_NORMAL, 0, output->transform_matrix);
+}
+
+static void
+zn_screen_renderer_render_background(struct zn_output *output,
+    struct wlr_renderer *renderer, struct wlr_texture *bg_texture,
+    pixman_region32_t *screen_damage)
+{
+  int rect_count;
+  float matrix[9];
+  pixman_box32_t *rects;
+  zn_screen_renderer_bg_projection_matrix(
+      bg_texture, output->wlr_output, matrix);
+  rects = pixman_region32_rectangles(screen_damage, &rect_count);
+
+  for (int i = 0; i < rect_count; i++) {
+    zn_screen_renderer_scissor_output(output, &rects[i]);
+    wlr_renderer_clear(renderer, (float[]){1.0, 1.0, 1.0, 1});
+    if (bg_texture != NULL)
+      wlr_render_texture_with_matrix(renderer, bg_texture, matrix, 1.0f);
+  }
+}
+
+static void
 zn_screen_renderer_get_surface_fbox(struct wlr_surface *surface,
     struct zn_view *view, int surface_x, int surface_y,
     struct wlr_fbox *surface_box)
@@ -215,8 +263,7 @@ zn_screen_renderer_render(struct zn_screen *screen,
   struct zn_board *board = zn_screen_get_current_board(screen);
   struct wlr_output *wlr_output = output->wlr_output;
   pixman_region32_t screen_damage;
-  pixman_box32_t *rects;
-  int output_width, output_height, rect_count;
+  int output_width, output_height;
 
   wlr_renderer_begin(renderer, wlr_output->width, wlr_output->height);
 
@@ -231,12 +278,8 @@ zn_screen_renderer_render(struct zn_screen *screen,
     goto out_commit;
   }
 
-  rects = pixman_region32_rectangles(&screen_damage, &rect_count);
-  for (int i = 0; i < rect_count; i++) {
-    zn_screen_renderer_scissor_output(output, &rects[i]);
-    wlr_renderer_clear(renderer, (float[]){0.2, 0.3, 0.2, 1});
-  }
-
+  zn_screen_renderer_render_background(
+      output, renderer, server->scene->bg_texture, &screen_damage);
   wl_list_for_each(view, &board->view_list, link)
       zn_screen_renderer_render_view(screen, view, renderer, &screen_damage);
 

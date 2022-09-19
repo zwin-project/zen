@@ -1,6 +1,14 @@
 subdir('backend')
 
+config_h = configure_file(
+  input: 'zen-config.h.meson',
+  output: 'zen-config.h',
+  configuration: cdata
+)
+
 _zen_desktop_srcs = [
+  config_h,
+
   'binding.c',
   'cursor.c',
   'display-system.c',
@@ -35,6 +43,7 @@ _zen_desktop_srcs = [
 ]
 
 _zen_desktop_deps = [
+  cairo_dep,
   m_dep,
   pixman_dep,
   wayland_server_dep,
