@@ -22,16 +22,16 @@ resize_grab_motion(
   const double diff_width = grab->cursor->x - self->init_cursor_x;
   const double diff_height = grab->cursor->y - self->init_cursor_y;
 
-  if (self->edges & WLR_EDGE_LEFT) {
+  if (self->view->resize_status.edges & WLR_EDGE_LEFT) {
     width -= diff_width;
   }
-  if (self->edges & WLR_EDGE_RIGHT) {
+  if (self->view->resize_status.edges & WLR_EDGE_RIGHT) {
     width += diff_width;
   }
-  if (self->edges & WLR_EDGE_TOP) {
+  if (self->view->resize_status.edges & WLR_EDGE_TOP) {
     height -= diff_height;
   }
-  if (self->edges & WLR_EDGE_BOTTOM) {
+  if (self->view->resize_status.edges & WLR_EDGE_BOTTOM) {
     height += diff_height;
   }
 
@@ -75,10 +75,9 @@ static void
 resize_grab_cancel(struct zn_cursor_grab* grab)
 {
   struct zn_cursor_grab_resize* self = zn_container_of(grab, self, base);
-  zn_view_move(
-      self->view, self->view->board, self->init_view_x, self->init_view_y);
   self->view->impl->set_size(
       self->view, self->init_view_width, self->init_view_height);
+  self->view->resize_status.mode = Canceled;
   zn_cursor_grab_resize_end(self);
 }
 
@@ -124,7 +123,6 @@ zn_cursor_grab_resize_create(
   self->init_cursor_y = cursor->y;
 
   self->view = view;
-  self->edges = edges;
   self->base.interface = &resize_grab_interface;
   self->base.cursor = cursor;
 
@@ -146,7 +144,9 @@ zn_cursor_grab_resize_destroy(struct zn_cursor_grab_resize* self)
 static void
 zn_cursor_grab_resize_end(struct zn_cursor_grab_resize* self)
 {
-  self->view->resize_status.resizing = false;
+  if (self->view->resize_status.mode != Canceled) {
+    self->view->resize_status.mode = None;
+  }
   zn_cursor_set_xcursor(self->base.cursor, "left_ptr");
   zn_cursor_end_grab(self->base.cursor);
   zn_cursor_grab_resize_destroy(self);
@@ -176,7 +176,7 @@ zn_cursor_grab_resize_start(
       [WLR_EDGE_BOTTOM | WLR_EDGE_RIGHT] = "se-resize",
   };
 
-  view->resize_status.resizing = true;
+  view->resize_status.mode = Resizing;
   wlr_seat_pointer_clear_focus(seat);
   zn_cursor_set_xcursor(cursor, xcursor_name[edges]);
   zn_cursor_start_grab(cursor, &self->base);

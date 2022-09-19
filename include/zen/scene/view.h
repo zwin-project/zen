@@ -38,7 +38,7 @@ struct zn_view {
   struct zn_board *board;  // non null, when mapped
 
   struct {
-    bool resizing;
+    enum { None, Resizing, Canceled } mode;
     uint32_t edges;
   } resize_status;
 
