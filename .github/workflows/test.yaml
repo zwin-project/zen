@@ -54,7 +54,7 @@ jobs:
           path: tomlc99
 
       - name: Build tomlc99
-        run: make install
+        run: sudo make install
         working-directory: ./tomlc99
         env:
           CC: gcc
