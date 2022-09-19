@@ -7,6 +7,7 @@
 
 #include "zen-common/log.h"
 #include "zen-common/util.h"
+#include "zen/config.h"
 #include "zen/output.h"
 #include "zen/xdg-toplevel-view.h"
 #include "zen/xwayland-view.h"
@@ -175,6 +176,12 @@ zn_server_create(struct wl_display *display)
     goto err;
   }
 
+  self->config = zn_config_create();
+  if (self->config == NULL) {
+    zn_error("Failed to create a config object");
+    goto err_free;
+  }
+
   server_singleton = self;
   self->display = display;
   self->exit_code = EXIT_FAILURE;
@@ -183,13 +190,13 @@ zn_server_create(struct wl_display *display)
   self->backend = wlr_backend_autocreate(self->display);
   if (self->backend == NULL) {
     zn_error("Failed to create a backend");
-    goto err_free;
+    goto err_config;
   }
 
   drm_fd = wlr_backend_get_drm_fd(self->backend);
   if (drm_fd < 0) {
     zn_error("Failed to get drm fd");
-    goto err_free;
+    goto err_config;
   }
 
   self->renderer = wlr_glew_renderer_create_with_drm_fd(drm_fd);
@@ -221,7 +228,7 @@ zn_server_create(struct wl_display *display)
     goto err_allocator;
   }
 
-  self->scene = zn_scene_create();
+  self->scene = zn_scene_create(self->config);
   if (self->scene == NULL) {
     zn_error("Failed to create zn_scene");
     goto err_allocator;
@@ -326,6 +333,9 @@ err_renderer:
 err_backend:
   wlr_backend_destroy(self->backend);
 
+err_config:
+  zn_config_destroy(self->config);
+
 err_free:
   free(self);
 
@@ -336,6 +346,7 @@ err:
 void
 zn_server_destroy(struct zn_server *self)
 {
+  zn_config_destroy(self->config);
   wlr_xwayland_destroy(self->xwayland);
   zn_input_manager_destroy(self->input_manager);
   zn_display_system_destroy(self->display_system);

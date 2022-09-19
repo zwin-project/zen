@@ -10,6 +10,7 @@
 #include <wlr/xwayland.h>
 
 #include "zen/backend/immersive.h"
+#include "zen/config.h"
 #include "zen/display-system.h"
 #include "zen/input/input-manager.h"
 #include "zen/scene/scene.h"
@@ -26,6 +27,7 @@ struct zn_server {
   struct wlr_compositor *w_compositor;
   struct wlr_xdg_shell *xdg_shell;
 
+  struct zn_config *config;
   struct zn_display_system *display_system;
   struct zn_input_manager *input_manager;
   struct zn_immersive_backend *immersive_backend;

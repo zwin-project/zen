@@ -44,6 +44,21 @@ jobs:
           name: wlr-glew-renderer-build-log
           path: wlr-glew-renderer/build/meson-logs/
 
+      - name: create /usr/local/lib/pkgconfig
+        run: sudo mkdir /usr/local/lib/pkgconfig
+
+      - name: Clone tomlc99
+        uses: actions/checkout@v2
+        with:
+          repository: cktan/tomlc99
+          path: tomlc99
+
+      - name: Build tomlc99
+        run: make install
+        working-directory: ./tomlc99
+        env:
+          CC: gcc
+
       - name: Update PKG_CONFIG_PATH
         run: |
           echo "PKG_CONFIG_PATH=$GITHUB_WORKSPACE/$WLR_GLEW_RENDERER_PKGCONFIG" >> $GITHUB_ENV
