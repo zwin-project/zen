@@ -7,7 +7,6 @@
 struct zn_cursor_grab_resize {
   struct zn_cursor_grab base;
   struct zn_view* view;
-  uint32_t edges;
 
   double init_view_x, init_view_y;
   double init_view_width, init_view_height;

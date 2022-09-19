@@ -19,7 +19,7 @@ zn_xdg_toplevel_view_handle_wlr_surface_commit(
 
   zn_view_damage(&self->base);
 
-  if (!self->base.resize_status.resizing) {
+  if (self->base.resize_status.mode == None) {
     return;
   }
 
@@ -37,6 +37,10 @@ zn_xdg_toplevel_view_handle_wlr_surface_commit(
   }
   zn_view_move(
       &self->base, self->base.board, self->base.x + dx, self->base.y + dy);
+
+  if (self->base.resize_status.mode == Canceled) {
+    self->base.resize_status.mode = None;
+  }
 }
 
 static void
