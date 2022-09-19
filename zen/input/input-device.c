@@ -8,7 +8,7 @@
 #include "zen/input/seat.h"
 
 static void
-zn_input_device_seat_destroy_handler(struct wl_listener* listener, void* data)
+zn_input_device_handle_seat_destroy(struct wl_listener* listener, void* data)
 {
   UNUSED(data);
   struct zn_input_device* self =
@@ -17,7 +17,7 @@ zn_input_device_seat_destroy_handler(struct wl_listener* listener, void* data)
 }
 
 static void
-zn_input_device_wlr_input_destroy_handler(
+zn_input_device_handle_wlr_input_destroy(
     struct wl_listener* listener, void* data)
 {
   UNUSED(data);
@@ -63,10 +63,10 @@ zn_input_device_create(struct zn_seat* seat, struct wlr_input_device* wlr_input)
   }
 
   self->wlr_input_destroy_listener.notify =
-      zn_input_device_wlr_input_destroy_handler;
+      zn_input_device_handle_wlr_input_destroy;
   wl_signal_add(&wlr_input->events.destroy, &self->wlr_input_destroy_listener);
 
-  self->seat_destroy_listener.notify = zn_input_device_seat_destroy_handler;
+  self->seat_destroy_listener.notify = zn_input_device_handle_seat_destroy;
   wl_signal_add(&seat->events.destroy, &self->seat_destroy_listener);
 
   zn_seat_add_device(self->seat, self);

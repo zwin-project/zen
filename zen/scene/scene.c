@@ -12,7 +12,7 @@
 #include "zen/scene/view.h"
 
 static void
-zn_scene_unmap_focused_view_handler(struct wl_listener* listener, void* data)
+zn_scene_handle_unmap_focused_view(struct wl_listener* listener, void* data)
 {
   UNUSED(data);
   struct zn_scene* self =
@@ -80,6 +80,8 @@ zn_scene_set_focused_view(struct zn_scene* self, struct zn_view* view)
 
   if (self->focused_view != NULL) {
     self->focused_view->impl->set_activated(self->focused_view, false);
+    if (self->focused_view->impl->close_popups)
+      self->focused_view->impl->close_popups(self->focused_view);
     wl_list_remove(&self->unmap_focused_view_listener.link);
     wl_list_init(&self->unmap_focused_view_listener.link);
   }
@@ -234,8 +236,7 @@ zn_scene_create(void)
 
   zn_scene_setup_background(self, DEFAULT_WALLPAPER);
 
-  self->unmap_focused_view_listener.notify =
-      zn_scene_unmap_focused_view_handler;
+  self->unmap_focused_view_listener.notify = zn_scene_handle_unmap_focused_view;
 
   return self;
 

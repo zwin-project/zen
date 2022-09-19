@@ -3,7 +3,7 @@
 #include "zen-common.h"
 
 static void
-zn_board_screen_destroy_handler(struct wl_listener *listener, void *data)
+zn_board_handle_screen_destroy(struct wl_listener *listener, void *data)
 {
   struct zn_board *self =
       zn_container_of(listener, self, screen_destroy_listener);
@@ -83,7 +83,7 @@ zn_board_create(struct zn_scene *scene)
   wl_list_init(&self->screen_link);
   self->screen = NULL;
 
-  self->screen_destroy_listener.notify = zn_board_screen_destroy_handler;
+  self->screen_destroy_listener.notify = zn_board_handle_screen_destroy;
   wl_list_init(&self->screen_destroy_listener.link);
 
   wl_signal_init(&self->events.screen_assigned);

@@ -14,7 +14,7 @@
 static struct zn_server *server_singleton = NULL;
 
 static void
-zn_server_new_input_handler(struct wl_listener *listener, void *data)
+zn_server_handle_new_input(struct wl_listener *listener, void *data)
 {
   struct zn_server *self = zn_container_of(listener, self, new_input_listener);
   struct wlr_input_device *wlr_input = data;
@@ -22,7 +22,7 @@ zn_server_new_input_handler(struct wl_listener *listener, void *data)
 }
 
 static void
-zn_server_new_output_handler(struct wl_listener *listener, void *data)
+zn_server_handle_new_output(struct wl_listener *listener, void *data)
 {
   struct zn_server *self = zn_container_of(listener, self, new_output_listener);
   struct wlr_output *wlr_output = data;
@@ -52,8 +52,7 @@ zn_server_new_output_handler(struct wl_listener *listener, void *data)
 }
 
 static void
-zn_server_xdg_shell_new_surface_handler(
-    struct wl_listener *listener, void *data)
+zn_server_handle_xdg_shell_new_surface(struct wl_listener *listener, void *data)
 {
   struct wlr_xdg_surface *xdg_surface = data;
   struct zn_server *self =
@@ -72,7 +71,7 @@ zn_server_xdg_shell_new_surface_handler(
 }
 
 static void
-zn_server_immersive_backend_disconnected_handler(
+zn_server_handle_immersive_backend_disconnected(
     struct wl_listener *listener, void *data)
 {
   struct zn_server *self =
@@ -88,8 +87,7 @@ zn_server_immersive_backend_disconnected_handler(
 }
 
 static void
-zn_server_display_system_switch_handler(
-    struct wl_listener *listener, void *data)
+zn_server_handle_display_system_switch(struct wl_listener *listener, void *data)
 {
   struct zn_server *self =
       zn_container_of(listener, self, display_system_switch_listener);
@@ -118,7 +116,7 @@ zn_server_display_system_switch_handler(
 }
 
 static void
-zn_server_xwayland_new_surface_handler(struct wl_listener *listener, void *data)
+zn_server_handle_xwayland_new_surface(struct wl_listener *listener, void *data)
 {
   struct wlr_xwayland_surface *xwayland_surface = data;
   struct zn_server *self =
@@ -276,29 +274,29 @@ zn_server_create(struct wl_display *display)
 
   zn_scene_setup_bindings(self->scene);
 
-  self->new_input_listener.notify = zn_server_new_input_handler;
+  self->new_input_listener.notify = zn_server_handle_new_input;
   wl_signal_add(&self->backend->events.new_input, &self->new_input_listener);
 
-  self->new_output_listener.notify = zn_server_new_output_handler;
+  self->new_output_listener.notify = zn_server_handle_new_output;
   wl_signal_add(&self->backend->events.new_output, &self->new_output_listener);
 
   self->xdg_shell_new_surface_listener.notify =
-      zn_server_xdg_shell_new_surface_handler;
+      zn_server_handle_xdg_shell_new_surface;
   wl_signal_add(&self->xdg_shell->events.new_surface,
       &self->xdg_shell_new_surface_listener);
 
   self->display_system_switch_listener.notify =
-      zn_server_display_system_switch_handler;
+      zn_server_handle_display_system_switch;
   wl_signal_add(&self->display_system->switch_signal,
       &self->display_system_switch_listener);
 
   self->immersive_backend_disconnected_listener.notify =
-      zn_server_immersive_backend_disconnected_handler;
+      zn_server_handle_immersive_backend_disconnected;
   wl_signal_add(&self->immersive_backend->events.disconnected,
       &self->immersive_backend_disconnected_listener);
 
   self->xwayland_new_surface_listener.notify =
-      zn_server_xwayland_new_surface_handler;
+      zn_server_handle_xwayland_new_surface;
   wl_signal_add(&self->xwayland->events.new_surface,
       &self->xwayland_new_surface_listener);
 

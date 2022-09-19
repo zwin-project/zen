@@ -115,7 +115,7 @@ zn_screen_switch_to_prev_board(struct zn_screen *self)
 }
 
 static void
-zn_screen_current_board_screen_assigned_handler(
+zn_screen_handle_current_board_screen_assigned(
     struct wl_listener *listener, void *data)
 {
   struct zn_screen *self =
@@ -232,7 +232,7 @@ zn_screen_create(
   wl_list_init(&self->board_list);
   self->current_board = NULL;
   self->current_board_screen_assigned_listener.notify =
-      zn_screen_current_board_screen_assigned_handler;
+      zn_screen_handle_current_board_screen_assigned;
   wl_list_init(&self->current_board_screen_assigned_listener.link);
 
   zn_screen_layout_add(screen_layout, self);

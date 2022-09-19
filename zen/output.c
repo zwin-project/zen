@@ -33,7 +33,7 @@ zn_output_box_effective_to_transformed_coords(struct zn_output *self,
 }
 
 static void
-zn_output_wlr_output_destroy_handler(struct wl_listener *listener, void *data)
+zn_output_handle_wlr_output_destroy(struct wl_listener *listener, void *data)
 {
   struct zn_output *self =
       zn_container_of(listener, self, wlr_output_destroy_listener);
@@ -90,7 +90,7 @@ send_frame_done_callback(struct wlr_surface *surface, void *data)
 }
 
 static void
-zn_output_damage_frame_handler(struct wl_listener *listener, void *data)
+zn_output_handle_damage_frame(struct wl_listener *listener, void *data)
 {
   struct zn_output *self =
       zn_container_of(listener, self, damage_frame_listener);
@@ -134,11 +134,11 @@ zn_output_create(struct wlr_output *wlr_output, struct zn_server *server)
   }
 
   self->wlr_output_destroy_listener.notify =
-      zn_output_wlr_output_destroy_handler;
+      zn_output_handle_wlr_output_destroy;
   wl_signal_add(
       &self->wlr_output->events.destroy, &self->wlr_output_destroy_listener);
 
-  self->damage_frame_listener.notify = zn_output_damage_frame_handler;
+  self->damage_frame_listener.notify = zn_output_handle_damage_frame;
   wl_signal_add(&self->damage->events.frame, &self->damage_frame_listener);
 
   self->repaint_timer =

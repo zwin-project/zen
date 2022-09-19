@@ -8,7 +8,7 @@
 static void zn_xwayland_view_destroy(struct zn_xwayland_view* self);
 
 static void
-zn_xwayland_view_wlr_surface_commit_handler(
+zn_xwayland_view_handle_wlr_surface_commit(
     struct wl_listener* listener, void* data)
 {
   struct zn_xwayland_view* self =
@@ -19,7 +19,7 @@ zn_xwayland_view_wlr_surface_commit_handler(
 }
 
 static void
-zn_xwayland_view_map(struct wl_listener* listener, void* data)
+zn_xwayland_view_handle_map(struct wl_listener* listener, void* data)
 {
   struct zn_xwayland_view* self = zn_container_of(listener, self, map_listener);
   struct zn_scene* scene = self->server->scene;
@@ -40,7 +40,7 @@ zn_xwayland_view_map(struct wl_listener* listener, void* data)
 }
 
 static void
-zn_xwayland_view_unmap(struct wl_listener* listener, void* data)
+zn_xwayland_view_handle_unmap(struct wl_listener* listener, void* data)
 {
   struct zn_xwayland_view* self =
       zn_container_of(listener, self, unmap_listener);
@@ -57,7 +57,7 @@ zn_xwayland_view_unmap(struct wl_listener* listener, void* data)
 }
 
 static void
-zn_xwayland_view_move_handler(struct wl_listener* listener, void* data)
+zn_xwayland_view_handle_move(struct wl_listener* listener, void* data)
 {
   // FIXME: pointer/button/serial validation
   UNUSED(data);
@@ -70,7 +70,7 @@ zn_xwayland_view_move_handler(struct wl_listener* listener, void* data)
 }
 
 static void
-zn_xwayland_view_wlr_xwayland_surface_destroy_handler(
+zn_xwayland_view_handle_wlr_xwayland_surface_destroy(
     struct wl_listener* listener, void* data)
 {
   struct zn_xwayland_view* self =
@@ -151,23 +151,23 @@ zn_xwayland_view_create(
 
   self->wlr_xwayland_surface = xwayland_surface;
 
-  self->map_listener.notify = zn_xwayland_view_map;
+  self->map_listener.notify = zn_xwayland_view_handle_map;
   wl_signal_add(&self->wlr_xwayland_surface->events.map, &self->map_listener);
 
-  self->unmap_listener.notify = zn_xwayland_view_unmap;
+  self->unmap_listener.notify = zn_xwayland_view_handle_unmap;
   wl_signal_add(
       &self->wlr_xwayland_surface->events.unmap, &self->unmap_listener);
 
-  self->move_listener.notify = zn_xwayland_view_move_handler;
+  self->move_listener.notify = zn_xwayland_view_handle_move;
   wl_list_init(&self->move_listener.link);
 
   self->wlr_xwayland_surface_destroy_listener.notify =
-      zn_xwayland_view_wlr_xwayland_surface_destroy_handler;
+      zn_xwayland_view_handle_wlr_xwayland_surface_destroy;
   wl_signal_add(&self->wlr_xwayland_surface->events.destroy,
       &self->wlr_xwayland_surface_destroy_listener);
 
   self->wlr_surface_commit_listener.notify =
-      zn_xwayland_view_wlr_surface_commit_handler;
+      zn_xwayland_view_handle_wlr_surface_commit;
   wl_list_init(&self->wlr_surface_commit_listener.link);
 
   return self;

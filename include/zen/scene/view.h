@@ -18,6 +18,7 @@ struct zn_view_impl {
   void (*set_activated)(struct zn_view *view, bool activate);
   void (*restack)(
       struct zn_view *view, enum xcb_stack_mode_t mode);  // nullable
+  void (*close_popups)(struct zn_view *view);             // nullable
 };
 
 enum zn_view_type {
@@ -37,6 +38,7 @@ struct zn_view {
 
   struct {
     struct wl_signal unmap;
+    struct wl_signal destroy;
   } events;
 };
 
