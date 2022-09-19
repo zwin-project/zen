@@ -53,6 +53,10 @@ jobs:
           repository: cktan/tomlc99
           path: tomlc99
 
+      - name: Rename "libtoml.pc.sample" to "libtoml.pc" 
+        run: mv libtoml.pc.sample libtoml.pc
+        working-directory: ./tomlc99
+
       - name: Build tomlc99
         run: sudo make install
         working-directory: ./tomlc99
