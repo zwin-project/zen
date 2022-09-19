@@ -10,7 +10,7 @@ XR Desktop Environment
 See https://github.com/zigen-project/wlr-glew-renderer[github.com/zigen-project/wlr-glew-renderer] to build and install.
 2. tomlc99 +
 See https://github.com/cktan/tomlc99[cktan/tomlc99] to build and install. +
-Note that `make install` tries to install `libtoml.pc` under `/usr/local/lib/pkgconfig`. You need to manually create the directory before runnning `make`.
+Note that `make install` tries to install `libtoml.pc` to `/usr/local/lib/pkgconfig`. You need to rename `libtoml.pc.sample` in the tomlc99 project root to `libtoml.pc` and manually create `/usr/local/lib/pkgconfig` before runnning `make install`.
 3. Other dependencies +
 For Ubuntu, other dependencies can be installed with `apt-get`. See `.github/workflows/test.yaml` for the list of the required packages.
 
