@@ -37,8 +37,10 @@ struct zn_view {
   struct wl_list link;     // zn_board::view_list;
   struct zn_board *board;  // non null, when mapped
 
-  // when this isn't 0, the view is resized by grab
-  uint32_t resize_edges;
+  struct {
+    bool resizing;
+    uint32_t edges;
+  } resize_status;
 
   struct {
     struct wl_signal unmap;
