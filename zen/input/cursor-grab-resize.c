@@ -35,7 +35,9 @@ resize_grab_motion(
     height += diff_height;
   }
 
-  self->view->impl->set_size(self->view, width, height);
+  self->view->resize_status.resizing = true;
+  self->view->resize_status.last_serial =
+      self->view->impl->set_size(self->view, width, height);
 }
 
 static void
@@ -75,9 +77,9 @@ static void
 resize_grab_cancel(struct zn_cursor_grab* grab)
 {
   struct zn_cursor_grab_resize* self = zn_container_of(grab, self, base);
-  self->view->impl->set_size(
+  self->view->resize_status.resizing = true;
+  self->view->resize_status.last_serial = self->view->impl->set_size(
       self->view, self->init_view_width, self->init_view_height);
-  self->view->resize_status.mode = Canceled;
   zn_cursor_grab_resize_end(self);
 }
 
@@ -144,9 +146,6 @@ zn_cursor_grab_resize_destroy(struct zn_cursor_grab_resize* self)
 static void
 zn_cursor_grab_resize_end(struct zn_cursor_grab_resize* self)
 {
-  if (self->view->resize_status.mode != Canceled) {
-    self->view->resize_status.mode = None;
-  }
   zn_cursor_set_xcursor(self->base.cursor, "left_ptr");
   zn_cursor_end_grab(self->base.cursor);
   zn_cursor_grab_resize_destroy(self);
@@ -176,7 +175,6 @@ zn_cursor_grab_resize_start(
       [WLR_EDGE_BOTTOM | WLR_EDGE_RIGHT] = "se-resize",
   };
 
-  view->resize_status.mode = Resizing;
   wlr_seat_pointer_clear_focus(seat);
   zn_cursor_set_xcursor(cursor, xcursor_name[edges]);
   zn_cursor_start_grab(cursor, &self->base);

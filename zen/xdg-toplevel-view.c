@@ -19,7 +19,9 @@ zn_xdg_toplevel_view_handle_wlr_surface_commit(
 
   zn_view_damage(&self->base);
 
-  if (self->base.resize_status.mode == None) {
+  zn_debug("%d %d %d", self->base.resize_status.resizing,
+      self->base.resize_status.edges, self->base.resize_status.last_serial);
+  if (!self->base.resize_status.resizing) {
     return;
   }
 
@@ -38,8 +40,9 @@ zn_xdg_toplevel_view_handle_wlr_surface_commit(
   zn_view_move(
       &self->base, self->base.board, self->base.x + dx, self->base.y + dy);
 
-  if (self->base.resize_status.mode == Canceled) {
-    self->base.resize_status.mode = None;
+  if (self->wlr_xdg_toplevel->base->current.configure_serial ==
+      self->base.resize_status.last_serial) {
+    self->base.resize_status.resizing = false;
   }
 }
 
