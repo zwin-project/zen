@@ -336,7 +336,6 @@ err:
 void
 zn_server_destroy(struct zn_server *self)
 {
-  zn_scene_set_focused_view(self->scene, NULL);
   wlr_xwayland_destroy(self->xwayland);
   zn_input_manager_destroy(self->input_manager);
   zn_display_system_destroy(self->display_system);
