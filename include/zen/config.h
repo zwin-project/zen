@@ -1,7 +1,7 @@
 #pragma once
 
 struct zn_config {
-  char* bg_image_file;
+  char* bg_image_file;  // can be empty string but cannot be null
 };
 
 struct zn_config* zn_config_create(void);

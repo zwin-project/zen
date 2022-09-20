@@ -346,7 +346,6 @@ err:
 void
 zn_server_destroy(struct zn_server *self)
 {
-  zn_config_destroy(self->config);
   wlr_xwayland_destroy(self->xwayland);
   zn_input_manager_destroy(self->input_manager);
   zn_display_system_destroy(self->display_system);
@@ -357,5 +356,6 @@ zn_server_destroy(struct zn_server *self)
   wlr_renderer_destroy(self->renderer);
   zn_scene_destroy(self->scene);
   server_singleton = NULL;
+  zn_config_destroy(self->config);
   free(self);
 }
