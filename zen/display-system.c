@@ -65,8 +65,8 @@ zn_display_system_applied(
   if (self->type == type) return;
   self->type = type;
 
-  wl_resource_for_each(resource, &self->resources)
-      zen_display_system_send_applied(resource, type);
+  wl_resource_for_each (resource, &self->resources)
+    zen_display_system_send_applied(resource, type);
 }
 
 struct zn_display_system *
@@ -106,8 +106,8 @@ zn_display_system_destroy(struct zn_display_system *self)
 {
   struct wl_resource *resource, *tmp;
 
-  wl_resource_for_each_safe(resource, tmp, &self->resources)
-      wl_resource_destroy(resource);
+  wl_resource_for_each_safe (resource, tmp, &self->resources)
+    wl_resource_destroy(resource);
 
   wl_global_destroy(self->global);
   free(self);
