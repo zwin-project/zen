@@ -19,8 +19,6 @@ zn_xdg_toplevel_view_handle_wlr_surface_commit(
 
   zn_view_damage(&self->base);
 
-  zn_debug("%d %d %d", self->base.resize_status.resizing,
-      self->base.resize_status.edges, self->base.resize_status.last_serial);
   if (!self->base.resize_status.resizing) {
     return;
   }
