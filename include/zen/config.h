@@ -5,4 +5,5 @@ struct zn_config {
 };
 
 struct zn_config* zn_config_create(void);
+
 void zn_config_destroy(struct zn_config* self);
