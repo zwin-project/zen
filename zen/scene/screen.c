@@ -6,23 +6,51 @@
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/view.h"
 #include "zen/wlr/box.h"
+#include "zen/xdg-toplevel-view.h"
+
+static void
+send_frame_done(struct wlr_surface *surface, void *data)
+{
+  wlr_surface_send_frame_done(surface, data);
+}
+
+static void
+zn_screen_for_each_visible_surface_iterator(
+    struct wlr_surface *surface, int sx, int sy, void *data)
+{
+  UNUSED(sx);
+  UNUSED(sy);
+
+  send_frame_done(surface, data);
+}
 
 void
-zn_screen_for_each_visible_surface(struct zn_screen *self,
-    zn_screen_for_each_visible_surface_callback_t callback, void *data)
+zn_screen_send_frame_done_for_each_visible_surface(struct zn_screen *self)
 {
   struct zn_server *server = zn_server_get_singleton();
   struct zn_cursor *cursor = server->input_manager->seat->cursor;
   struct zn_board *board = zn_screen_get_current_board(self);
   struct zn_view *view;
+  struct timespec now;
+
+  clock_gettime(CLOCK_MONOTONIC, &now);
 
   wl_list_for_each(view, &board->view_list, link)
   {
-    callback(view->impl->get_wlr_surface(view), data);
+    send_frame_done(view->impl->get_wlr_surface(view), &now);
+
+    if (view->type == ZN_VIEW_XDG_TOPLEVEL) {
+      struct zn_xdg_toplevel_view *xdg_toplevel_view =
+          zn_container_of(view, xdg_toplevel_view, base);
+
+      wlr_xdg_surface_for_each_popup_surface(
+          xdg_toplevel_view->wlr_xdg_toplevel->base,
+          zn_screen_for_each_visible_surface_iterator, &now);
+    }
   }
 
   if (cursor->screen == self && cursor->surface != NULL) {
-    callback(cursor->surface, data);
+    send_frame_done(cursor->surface, &now);
   }
 }
 

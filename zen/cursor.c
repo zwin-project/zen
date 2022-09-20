@@ -12,6 +12,7 @@
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/view.h"
 #include "zen/server.h"
+#include "zen/xdg-toplevel-view.h"
 
 static struct wlr_surface* zn_cursor_get_pointing_surface(
     struct zn_cursor* self, double* surface_x, double* surface_y);
@@ -117,16 +118,31 @@ zn_cursor_get_pointing_surface(
     struct zn_cursor* self, double* surface_x, double* surface_y)
 {
   struct zn_view* view;
+  double view_sx, view_sy;
 
-  // FIXME: take subsurfaces/popups into account
-  view = zn_screen_get_view_at(
-      self->screen, self->x, self->y, surface_x, surface_y);
+  // FIXME: take subsurfaces into account
+  view =
+      zn_screen_get_view_at(self->screen, self->x, self->y, &view_sx, &view_sy);
 
-  if (view) {
-    return view->impl->get_wlr_surface(view);
+  if (view == NULL) {
+    *surface_x = view_sx;
+    *surface_y = view_sy;
+    return NULL;
   }
 
-  return NULL;
+  struct wlr_surface* surface = NULL;
+  if (view->type == ZN_VIEW_XDG_TOPLEVEL) {
+    struct zn_xdg_toplevel_view* xdg_toplevel_view =
+        zn_container_of(view, xdg_toplevel_view, base);
+    surface =
+        wlr_xdg_surface_surface_at(xdg_toplevel_view->wlr_xdg_toplevel->base,
+            view_sx, view_sy, surface_x, surface_y);
+  } else if (view->type == ZN_VIEW_XWAYLAND) {
+    surface = wlr_surface_surface_at(view->impl->get_wlr_surface(view), view_sx,
+        view_sy, surface_x, surface_y);
+  }
+
+  return surface;
 }
 
 static void

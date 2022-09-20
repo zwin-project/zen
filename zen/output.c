@@ -84,17 +84,10 @@ damage_finish:
 }
 
 static void
-send_frame_done_callback(struct wlr_surface *surface, void *data)
-{
-  wlr_surface_send_frame_done(surface, data);
-}
-
-static void
 zn_output_handle_damage_frame(struct wl_listener *listener, void *data)
 {
   struct zn_output *self =
       zn_container_of(listener, self, damage_frame_listener);
-  struct timespec now;
   UNUSED(data);
 
   if (self->wlr_output->enabled == false) return;
@@ -102,10 +95,7 @@ zn_output_handle_damage_frame(struct wl_listener *listener, void *data)
   // TODO: add delay to call zn_output_repaint_timer_handler
 
   zn_output_repaint_timer_handler(self);
-
-  clock_gettime(CLOCK_MONOTONIC, &now);
-  zn_screen_for_each_visible_surface(
-      self->screen, send_frame_done_callback, &now);
+  zn_screen_send_frame_done_for_each_visible_surface(self->screen);
 }
 
 struct zn_output *

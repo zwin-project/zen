@@ -25,11 +25,29 @@ zn_view_child_is_mapped(struct zn_view_child *self)
 }
 
 static void
+zn_view_child_get_surface_fbox(
+    struct zn_view_child *self, struct wlr_fbox *fbox)
+{
+  struct wlr_surface *surface = self->impl->get_wlr_surface(self);
+  int sx, sy;
+
+  if (self->view == NULL) return;
+
+  self->impl->get_view_coords(self, &sx, &sy);
+
+  fbox->x = self->view->x + sx;
+  fbox->y = self->view->y + sy;
+  fbox->width = surface->current.width;
+  fbox->height = surface->current.height;
+}
+
+static void
 zn_view_child_handle_view_unmap(struct wl_listener *listener, void *data)
 {
   struct zn_view_child *self =
       zn_container_of(listener, self, view_unmap_listener);
   UNUSED(data);
+
   zn_view_child_unmap(self);
 }
 
@@ -42,6 +60,19 @@ zn_view_child_handle_view_destroy(struct wl_listener *listener, void *data)
 
   zn_view_child_unmap(self);
   self->view = NULL;
+}
+
+static void
+zn_view_child_damage_whole(struct zn_view_child *self)
+{
+  struct wlr_fbox fbox;
+
+  if (!zn_view_child_is_mapped(self) || self->view == NULL ||
+      self->view->board->screen == NULL)
+    return;
+
+  zn_view_child_get_surface_fbox(self, &fbox);
+  zn_view_child_add_damage_fbox(self, &fbox);
 }
 
 void
@@ -82,13 +113,13 @@ void
 zn_view_child_map(struct zn_view_child *self)
 {
   self->mapped = true;
-  zn_view_child_damage(self);
+  zn_view_child_damage_whole(self);
 }
 
 void
 zn_view_child_unmap(struct zn_view_child *self)
 {
-  zn_view_child_damage(self);
+  zn_view_child_damage_whole(self);
   self->mapped = false;
 }
 
