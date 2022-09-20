@@ -13,23 +13,35 @@
 static struct toml_table_t *
 zn_config_get_toml_table(void)
 {
-  char *config_home;
-  config_home = getenv("XDG_CONFIG_HOME");
-  if (config_home == NULL) {
-    char *homedir = getenv("HOME");
-    if (homedir == NULL) homedir = getpwuid(getuid())->pw_dir;
-    if (homedir == NULL) {
+  const char *config_dir_partial_path = "/.config";
+  const char *toml_file_partial_path = "/zen-desktop/config.toml";
+  char *config_home_env, *config_home;
+  config_home_env = getenv("XDG_CONFIG_HOME");
+  if (config_home_env == NULL) {
+    char *homedir_env = getenv("HOME");
+    if (homedir_env == NULL) homedir_env = getpwuid(getuid())->pw_dir;
+    if (homedir_env == NULL) {
       zn_warn("Could not find the home directory");
       return NULL;
     }
-    config_home = strcat(homedir, "/.config");
+
+    zn_warn("homedir_env: %s, strlen: %zu", homedir_env, strlen(homedir_env));
+    config_home =
+        (char *)malloc(strlen(homedir_env) + strlen(config_dir_partial_path) +
+                       strlen(toml_file_partial_path) + 1);
+    strcpy(config_home, homedir_env);
+    strcat(config_home, config_dir_partial_path);
+  } else {
+    config_home = (char *)malloc(
+        strlen(config_home_env) + strlen(toml_file_partial_path) + 1);
+    strcpy(config_home, config_home_env);
   }
 
-  char *config_filename = strcat(config_home, "/zen-desktop/config.toml");
+  strcat(config_home, toml_file_partial_path);
   char errbuf[200];
-  FILE *fp = fopen(config_filename, "r");
+  FILE *fp = fopen(config_home, "r");
   if (fp == NULL) {
-    zn_warn("config.toml not found in %s\n", config_filename);
+    zn_warn("config.toml not found in %s\n", config_home);
     return NULL;
   }
   toml_table_t *tbl = toml_parse_file(fp, errbuf, sizeof(errbuf));
@@ -42,7 +54,9 @@ zn_config_get_toml_table(void)
 static void
 zn_config_set_default(struct zn_config *self)
 {
-  self->bg_image_file = DEFAULT_WALLPAPER;
+  // It is freed in zen_config_destroy so DEFAULT_WALLPAPER
+  // should not be passed directly.
+  self->bg_image_file = strdup(DEFAULT_WALLPAPER);
 }
 
 struct zn_config *
@@ -80,5 +94,6 @@ err:
 void
 zn_config_destroy(struct zn_config *self)
 {
+  free(self->bg_image_file);
   free(self);
 }
