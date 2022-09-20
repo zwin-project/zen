@@ -78,6 +78,12 @@ zn_scene_switch_vt_handler(uint32_t time_msec, uint32_t key, void* data)
 {
   UNUSED(data);
   UNUSED(time_msec);
+
+  if (!zn_assert(KEY_F1 <= key && key <= KEY_F10,
+          "Don't assign this keybind to outside F1-F10")) {
+    return;
+  }
+
   const unsigned int vt = key - KEY_F1 + 1;
   struct zn_server* server = zn_server_get_singleton();
   struct wlr_session* session = wlr_backend_get_session(server->backend);
