@@ -120,8 +120,7 @@ static struct zn_board*
 zn_scene_ensure_dangling_board(struct zn_scene* self)
 {
   struct zn_board* board;
-  wl_list_for_each(board, &self->board_list, link)
-  {
+  wl_list_for_each (board, &self->board_list, link) {
     if (zn_board_is_dangling(board)) {
       return board;
     }
@@ -138,8 +137,7 @@ zn_scene_reassign_boards(struct zn_scene* self)
   struct zn_board* board;
 
   // assign a board to a screen without board
-  wl_list_for_each(screen, &self->screen_layout->screens, link)
-  {
+  wl_list_for_each (screen, &self->screen_layout->screens, link) {
     struct zn_board* board;
     if (!wl_list_empty(&screen->board_list)) {
       continue;
@@ -162,8 +160,7 @@ zn_scene_reassign_boards(struct zn_scene* self)
   }
 
   if (screen) {
-    wl_list_for_each(board, &self->board_list, link)
-    {
+    wl_list_for_each (board, &self->board_list, link) {
       if (zn_board_is_dangling(board)) {
         zn_board_assign_to_screen(board, screen);
       }
@@ -264,8 +261,7 @@ zn_scene_destroy(struct zn_scene* self)
 {
   struct zn_board *board, *tmp;
 
-  wl_list_for_each_safe(board, tmp, &self->board_list, link)
-  {
+  wl_list_for_each_safe (board, tmp, &self->board_list, link) {
     zn_board_destroy(board);
   }
 
