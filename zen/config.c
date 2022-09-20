@@ -49,27 +49,34 @@ struct zn_config *
 zn_config_create(void)
 {
   struct zn_config *self;
+
   self = zalloc(sizeof *self);
   if (self == NULL) {
     zn_error("Failed to allocate memory");
     goto err;
   }
+
   zn_config_set_default(self);
+
   toml_table_t *tbl = zn_config_get_toml_table();
   if (!tbl) {
     zn_warn("Could not get the toml table");
     return self;
   }
+
   toml_table_t *bg = toml_table_in(tbl, "background");
   if (bg != NULL) {
     toml_datum_t image = toml_string_in(bg, "image");
     self->bg_image_file = image.u.s;
   }
+
   toml_free(tbl);
   return self;
+
 err:
   return NULL;
 }
+
 void
 zn_config_destroy(struct zn_config *self)
 {

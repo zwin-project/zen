@@ -19,6 +19,8 @@ struct zn_output {
 
   struct wl_listener wlr_output_destroy_listener;
   struct wl_listener damage_frame_listener;
+  enum wl_output_transform output_transform;
+  double output_scale;
 };
 
 /**
