@@ -3,6 +3,8 @@
 #include <cairo.h>
 #include <drm_fourcc.h>
 #include <linux/input.h>
+#include <wlr/backend/drm.h>
+#include <wlr/backend/multi.h>
 
 #include "zen-common.h"
 #include "zen-config.h"
@@ -69,6 +71,22 @@ zn_scene_new_board_binding_handler(uint32_t time_msec, uint32_t key, void* data)
 
   zn_board_assign_to_screen(board, screen);
   zn_screen_set_current_board(screen, board);
+}
+
+static void
+zn_scene_switch_vt_handler(uint32_t time_msec, uint32_t key, void* data)
+{
+  UNUSED(data);
+  UNUSED(time_msec);
+  const unsigned int vt = key - KEY_F1 + 1;
+  struct zn_server* server = zn_server_get_singleton();
+  struct wlr_session* session = wlr_backend_get_session(server->backend);
+
+  if (!session) {
+    return;
+  }
+
+  wlr_session_change_vt(session, vt);
 }
 
 void
@@ -186,6 +204,14 @@ zn_scene_setup_bindings(struct zn_scene* self)
   zn_input_manager_add_key_binding(server->input_manager, KEY_N,
       WLR_MODIFIER_LOGO | WLR_MODIFIER_SHIFT,
       zn_scene_new_board_binding_handler, self);
+
+  if (wlr_backend_is_multi(server->backend)) {
+    for (int i = KEY_F1; i <= KEY_F10; ++i) {
+      zn_input_manager_add_key_binding(server->input_manager, i,
+          WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, zn_scene_switch_vt_handler,
+          NULL);
+    }
+  }
 }
 
 static void
