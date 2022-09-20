@@ -15,8 +15,7 @@ zn_input_manager_bindings_notify_key(struct zn_input_manager* self,
 {
   struct zn_binding *binding, *tmp;
 
-  wl_list_for_each_safe(binding, tmp, &self->key_binding_list, link)
-  {
+  wl_list_for_each_safe (binding, tmp, &self->key_binding_list, link) {
     if (zn_binding_notify_key(binding, time_msec, key, state, keyboard)) {
       return true;
     }
@@ -88,8 +87,7 @@ zn_input_manager_destroy(struct zn_input_manager* self)
 {
   struct zn_binding *binding, *tmp;
 
-  wl_list_for_each_safe(binding, tmp, &self->key_binding_list, link)
-  {
+  wl_list_for_each_safe (binding, tmp, &self->key_binding_list, link) {
     zn_binding_destroy(binding);
   }
 

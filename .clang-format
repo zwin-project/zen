@@ -8,3 +8,4 @@ BraceWrapping:
   SplitEmptyRecord: false
 AlwaysBreakAfterReturnType: TopLevelDefinitions
 AlignAfterOpenBracket: DontAlign
+ForEachMacros: ['wl_list_for_each', 'wl_list_for_each_safe', 'wl_list_for_each_reverse']

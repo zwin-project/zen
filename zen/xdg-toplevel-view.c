@@ -141,8 +141,8 @@ zn_xdg_toplevel_view_impl_close_popups(struct zn_view* view)
 {
   struct zn_xdg_toplevel_view* self = zn_container_of(view, self, base);
   struct wlr_xdg_popup *popup, *tmp;
-  wl_list_for_each_safe(popup, tmp, &self->wlr_xdg_toplevel->base->popups, link)
-  {
+  wl_list_for_each_safe (
+      popup, tmp, &self->wlr_xdg_toplevel->base->popups, link) {
     wlr_xdg_popup_destroy(popup->base);
   }
 }

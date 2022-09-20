@@ -16,8 +16,7 @@ zn_screen_for_each_visible_surface(struct zn_screen *self,
   struct zn_board *board = zn_screen_get_current_board(self);
   struct zn_view *view;
 
-  wl_list_for_each(view, &board->view_list, link)
-  {
+  wl_list_for_each (view, &board->view_list, link) {
     callback(view->impl->get_wlr_surface(view), data);
   }
 
@@ -34,8 +33,7 @@ zn_screen_get_view_at(
   struct zn_view *view;
   struct zn_board *board = zn_screen_get_current_board(self);
 
-  wl_list_for_each_reverse(view, &board->view_list, link)
-  {
+  wl_list_for_each_reverse (view, &board->view_list, link) {
     zn_view_get_window_fbox(view, &fbox);
 
     if (zn_wlr_fbox_contains_point(&fbox, x, y)) {
@@ -59,8 +57,7 @@ zn_screen_switch_to_next_board(struct zn_screen *self)
                           *current_board = zn_screen_get_current_board(self);
   bool found = false;
 
-  wl_list_for_each(board, &self->board_list, screen_link)
-  {
+  wl_list_for_each (board, &self->board_list, screen_link) {
     if (next_board == NULL) {
       next_board = board;
     }
@@ -90,8 +87,7 @@ zn_screen_switch_to_prev_board(struct zn_screen *self)
                           *current_board = zn_screen_get_current_board(self);
   bool found = false;
 
-  wl_list_for_each_reverse(board, &self->board_list, screen_link)
-  {
+  wl_list_for_each_reverse (board, &self->board_list, screen_link) {
     if (next_board == NULL) {
       next_board = board;
     }
@@ -140,8 +136,7 @@ static bool
 zn_screen_has_board(struct zn_screen *self, struct zn_board *target_board)
 {
   struct zn_board *board;
-  wl_list_for_each(board, &self->board_list, screen_link)
-  {
+  wl_list_for_each (board, &self->board_list, screen_link) {
     if (board == target_board) {
       return true;
     }
