@@ -37,7 +37,7 @@ zn_screen_for_each_visible_surface(struct zn_screen *self,
       .user_data = user_data,
   };
 
-  wl_list_for_each(view, &board->view_list, link) {
+  wl_list_for_each (view, &board->view_list, link) {
     callback(view->impl->get_wlr_surface(view), user_data);
 
     if (view->type == ZN_VIEW_XDG_TOPLEVEL) {
@@ -64,7 +64,7 @@ zn_screen_get_surface_at(struct zn_screen *self, double x, double y,
   double view_sx, view_sy;
   struct wlr_surface *surface;
 
-  wl_list_for_each_reverse(view, &board->view_list, link) {
+  wl_list_for_each_reverse (view, &board->view_list, link) {
     view_sx = x - view->x;
     view_sy = y - view->y;
 
@@ -84,7 +84,7 @@ zn_screen_get_view_at(
   struct zn_board *board = zn_screen_get_current_board(self);
   double view_sx, view_sy;
 
-  wl_list_for_each_reverse(view, &board->view_list, link) {
+  wl_list_for_each_reverse (view, &board->view_list, link) {
     view_sx = x - view->x;
     view_sy = y - view->y;
 
