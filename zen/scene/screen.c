@@ -6,7 +6,6 @@
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/view.h"
 #include "zen/wlr/box.h"
-#include "zen/xdg-toplevel-view.h"
 
 struct surface_callback_data {
   zn_screen_for_each_visible_surface_callback_t callback;

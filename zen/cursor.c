@@ -12,7 +12,6 @@
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/view.h"
 #include "zen/server.h"
-#include "zen/xdg-toplevel-view.h"
 
 static struct wlr_surface* zn_cursor_get_pointing_surface(
     struct zn_cursor* self, double* surface_x, double* surface_y);
