@@ -11,6 +11,8 @@ struct zn_view;
 
 struct zn_view_impl {
   struct wlr_surface *(*get_wlr_surface)(struct zn_view *view);
+  struct wlr_surface *(*get_wlr_surface_at)(struct zn_view *view,
+      double view_sx, double view_sy, double *surface_x, double *surface_y);
   void (*get_geometry)(struct zn_view *view, struct wlr_box *box);
   void (*configure)(struct zn_view *view, double x, double y);  // nullable
   void (*for_each_popup_surface)(struct zn_view *view,

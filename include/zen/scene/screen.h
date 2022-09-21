@@ -29,6 +29,8 @@ struct zn_screen {
 void zn_screen_for_each_visible_surface(struct zn_screen *self,
     zn_screen_for_each_visible_surface_callback_t callback, void *data);
 
+struct wlr_surface *zn_screen_get_surface_at(struct zn_screen *self, double x, double y, double *surface_x, double *surface_y);
+
 struct zn_view *zn_screen_get_view_at(
     struct zn_screen *self, double x, double y, double *view_x, double *view_y);
 

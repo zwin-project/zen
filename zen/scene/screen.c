@@ -56,24 +56,48 @@ zn_screen_for_each_visible_surface(struct zn_screen *self,
   }
 }
 
+struct wlr_surface *
+zn_screen_get_surface_at(struct zn_screen *self, double x, double y,
+    double *surface_x, double *surface_y)
+{
+  struct zn_view *view;
+  struct zn_board *board = zn_screen_get_current_board(self);
+  double view_sx, view_sy;
+  struct wlr_surface *surface;
+
+  wl_list_for_each_reverse(view, &board->view_list, link)
+  {
+    view_sx = x - view->x;
+    view_sy = y - view->y;
+
+    surface = view->impl->get_wlr_surface_at(
+        view, view_sx, view_sy, surface_x, surface_y);
+    if (surface != NULL) return surface;
+  }
+
+  return NULL;
+}
+
 struct zn_view *
 zn_screen_get_view_at(
     struct zn_screen *self, double x, double y, double *view_x, double *view_y)
 {
-  struct wlr_fbox fbox;
   struct zn_view *view;
   struct zn_board *board = zn_screen_get_current_board(self);
+  double view_sx, view_sy;
 
   wl_list_for_each_reverse(view, &board->view_list, link)
   {
-    zn_view_get_window_fbox(view, &fbox);
+    view_sx = x - view->x;
+    view_sy = y - view->y;
 
-    if (zn_wlr_fbox_contains_point(&fbox, x, y)) {
+    if (view->impl->get_wlr_surface_at(view, view_sx, view_sy, NULL, NULL) !=
+        NULL) {
       if (view_x != NULL) {
-        *view_x = x - view->x;
+        *view_x = view_sx;
       }
       if (view_y != NULL) {
-        *view_y = y - view->y;
+        *view_y = view_sy;
       }
       return view;
     }

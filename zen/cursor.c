@@ -117,32 +117,8 @@ static struct wlr_surface*
 zn_cursor_get_pointing_surface(
     struct zn_cursor* self, double* surface_x, double* surface_y)
 {
-  struct zn_view* view;
-  double view_sx, view_sy;
-
-  // FIXME: take subsurfaces into account
-  view =
-      zn_screen_get_view_at(self->screen, self->x, self->y, &view_sx, &view_sy);
-
-  if (view == NULL) {
-    *surface_x = view_sx;
-    *surface_y = view_sy;
-    return NULL;
-  }
-
-  struct wlr_surface* surface = NULL;
-  if (view->type == ZN_VIEW_XDG_TOPLEVEL) {
-    struct zn_xdg_toplevel_view* xdg_toplevel_view =
-        zn_container_of(view, xdg_toplevel_view, base);
-    surface =
-        wlr_xdg_surface_surface_at(xdg_toplevel_view->wlr_xdg_toplevel->base,
-            view_sx, view_sy, surface_x, surface_y);
-  } else if (view->type == ZN_VIEW_XWAYLAND) {
-    surface = wlr_surface_surface_at(view->impl->get_wlr_surface(view), view_sx,
-        view_sy, surface_x, surface_y);
-  }
-
-  return surface;
+  return zn_screen_get_surface_at(
+      self->screen, self->x, self->y, surface_x, surface_y);
 }
 
 static void
