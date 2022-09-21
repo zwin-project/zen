@@ -40,14 +40,9 @@ zn_screen_for_each_visible_surface(struct zn_screen *self,
   wl_list_for_each (view, &board->view_list, link) {
     callback(view->impl->get_wlr_surface(view), user_data);
 
-    if (view->type == ZN_VIEW_XDG_TOPLEVEL) {
-      struct zn_xdg_toplevel_view *xdg_toplevel_view =
-          zn_container_of(view, xdg_toplevel_view, base);
-
-      wlr_xdg_surface_for_each_popup_surface(
-          xdg_toplevel_view->wlr_xdg_toplevel->base,
-          zn_screen_for_each_visible_surface_callback, &data);
-    }
+    if (view->impl->for_each_popup_surface)
+      view->impl->for_each_popup_surface(
+          view, zn_screen_for_each_visible_surface_callback, &data);
   }
 
   if (cursor->screen == self && cursor->surface != NULL) {
