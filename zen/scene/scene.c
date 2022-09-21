@@ -73,28 +73,6 @@ zn_scene_new_board_binding_handler(uint32_t time_msec, uint32_t key, void* data)
   zn_screen_set_current_board(screen, board);
 }
 
-static void
-zn_scene_switch_vt_handler(uint32_t time_msec, uint32_t key, void* data)
-{
-  UNUSED(data);
-  UNUSED(time_msec);
-
-  if (!zn_assert(KEY_F1 <= key && key <= KEY_F10,
-          "Don't assign this keybind to outside F1-F10")) {
-    return;
-  }
-
-  const unsigned int vt = key - KEY_F1 + 1;
-  struct zn_server* server = zn_server_get_singleton();
-  struct wlr_session* session = wlr_backend_get_session(server->backend);
-
-  if (!session) {
-    return;
-  }
-
-  wlr_session_change_vt(session, vt);
-}
-
 void
 zn_scene_set_focused_view(struct zn_scene* self, struct zn_view* view)
 {
@@ -210,14 +188,6 @@ zn_scene_setup_bindings(struct zn_scene* self)
   zn_input_manager_add_key_binding(server->input_manager, KEY_N,
       WLR_MODIFIER_LOGO | WLR_MODIFIER_SHIFT,
       zn_scene_new_board_binding_handler, self);
-
-  if (wlr_backend_is_multi(server->backend)) {
-    for (int i = KEY_F1; i <= KEY_F10; ++i) {
-      zn_input_manager_add_key_binding(server->input_manager, i,
-          WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, zn_scene_switch_vt_handler,
-          NULL);
-    }
-  }
 }
 
 static void
