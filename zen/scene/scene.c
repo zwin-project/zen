@@ -3,8 +3,6 @@
 #include <cairo.h>
 #include <drm_fourcc.h>
 #include <linux/input.h>
-#include <wlr/backend/drm.h>
-#include <wlr/backend/multi.h>
 
 #include "zen-common.h"
 #include "zen-config.h"
