@@ -21,6 +21,7 @@ _zen_desktop_srcs = [
   'xwayland-view.c',
 
   'input/cursor-grab-move.c',
+  'input/cursor-grab-resize.c',
   'input/input-device.c',
   'input/input-manager.c',
   'input/keyboard.c',

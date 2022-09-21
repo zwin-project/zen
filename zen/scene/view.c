@@ -42,8 +42,8 @@ zn_view_move(struct zn_view *self, struct zn_board *new_board, double board_x,
   self->x = board_x;
   self->y = board_y;
 
-  if (self->impl->configure) {
-    self->impl->configure(self, board_x, board_y);
+  if (self->impl->set_position) {
+    self->impl->set_position(self, board_x, board_y);
   }
 
   zn_view_damage_whole(self);

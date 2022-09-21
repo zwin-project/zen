@@ -280,8 +280,8 @@ zn_screen_renderer_render(struct zn_screen *screen,
 
   zn_screen_renderer_render_background(
       output, renderer, server->scene->bg_texture, &screen_damage);
-  wl_list_for_each(view, &board->view_list, link)
-      zn_screen_renderer_render_view(screen, view, renderer, &screen_damage);
+  wl_list_for_each (view, &board->view_list, link)
+    zn_screen_renderer_render_view(screen, view, renderer, &screen_damage);
 
   zn_screen_renderer_render_cursor(screen, cursor, renderer, &screen_damage);
 

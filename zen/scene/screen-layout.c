@@ -14,8 +14,7 @@ zn_screen_layout_rearrange(struct zn_screen_layout* self)
   struct zn_screen* screen;
   struct wlr_fbox box;
 
-  wl_list_for_each(screen, &self->screens, link)
-  {
+  wl_list_for_each (screen, &self->screens, link) {
     zn_screen_get_fbox(screen, &box);
     screen->x = x;
     screen->y = 0;
@@ -31,8 +30,7 @@ zn_screen_layout_get_closest_screen(struct zn_screen_layout* self, double x,
   struct zn_screen* closest_screen = NULL;
   struct zn_screen* screen;
 
-  wl_list_for_each(screen, &self->screens, link)
-  {
+  wl_list_for_each (screen, &self->screens, link) {
     double current_closest_x, current_closest_y, current_closest_distance;
     struct wlr_fbox box;
     zn_screen_get_fbox(screen, &box);

@@ -14,9 +14,10 @@ struct zn_view_impl {
   struct wlr_surface *(*get_wlr_surface_at)(struct zn_view *view,
       double view_sx, double view_sy, double *surface_x, double *surface_y);
   void (*get_geometry)(struct zn_view *view, struct wlr_box *box);
-  void (*configure)(struct zn_view *view, double x, double y);  // nullable
   void (*for_each_popup_surface)(struct zn_view *view,
       wlr_surface_iterator_func_t iterator, void *user_data);  // nullable
+  uint32_t (*set_size)(struct zn_view *view, double width, double height);
+  void (*set_position)(struct zn_view *view, double x, double y);  // nulable
   void (*set_activated)(struct zn_view *view, bool activate);
   void (*restack)(
       struct zn_view *view, enum xcb_stack_mode_t mode);  // nullable
@@ -37,6 +38,12 @@ struct zn_view {
 
   struct wl_list link;     // zn_board::view_list;
   struct zn_board *board;  // non null, when mapped
+
+  struct {
+    bool resizing;
+    uint32_t edges;
+    uint32_t last_serial;
+  } resize_status;
 
   struct {
     struct wl_signal unmap;

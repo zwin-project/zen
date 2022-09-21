@@ -30,8 +30,7 @@ zn_seat_update_capabilities(struct zn_seat* self)
   uint32_t caps = 0;
 
   struct zn_input_device* input_device;
-  wl_list_for_each(input_device, &self->devices, link)
-  {
+  wl_list_for_each (input_device, &self->devices, link) {
     switch (input_device->wlr_input->type) {
       case WLR_INPUT_DEVICE_KEYBOARD:
         caps |= WL_SEAT_CAPABILITY_KEYBOARD;

@@ -199,8 +199,7 @@ zn_cursor_handle_screen_destroy(struct wl_listener* listener, void* data)
   struct wlr_fbox box = {0};
   bool found = false;
 
-  wl_list_for_each(screen, &screen_layout->screens, link)
-  {
+  wl_list_for_each (screen, &screen_layout->screens, link) {
     if (screen != self->screen) {
       found = true;
       break;

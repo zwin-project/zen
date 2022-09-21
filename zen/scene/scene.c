@@ -74,6 +74,9 @@ zn_scene_new_board_binding_handler(uint32_t time_msec, uint32_t key, void* data)
 void
 zn_scene_set_focused_view(struct zn_scene* self, struct zn_view* view)
 {
+  struct zn_server* server = zn_server_get_singleton();
+  struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
+
   if (view == self->focused_view) {
     return;
   }
@@ -84,12 +87,18 @@ zn_scene_set_focused_view(struct zn_scene* self, struct zn_view* view)
       self->focused_view->impl->close_popups(self->focused_view);
     wl_list_remove(&self->unmap_focused_view_listener.link);
     wl_list_init(&self->unmap_focused_view_listener.link);
+
+    wlr_seat_keyboard_notify_clear_focus(seat);
   }
 
   if (view != NULL) {
     view->impl->set_activated(view, true);
     zn_view_bring_to_front(view);
     wl_signal_add(&view->events.unmap, &self->unmap_focused_view_listener);
+
+    struct wlr_keyboard* keyboard = wlr_seat_get_keyboard(seat);
+    wlr_seat_keyboard_notify_enter(seat, view->impl->get_wlr_surface(view),
+        keyboard->keycodes, keyboard->num_keycodes, &keyboard->modifiers);
   }
 
   self->focused_view = view;
@@ -111,8 +120,7 @@ static struct zn_board*
 zn_scene_ensure_dangling_board(struct zn_scene* self)
 {
   struct zn_board* board;
-  wl_list_for_each(board, &self->board_list, link)
-  {
+  wl_list_for_each (board, &self->board_list, link) {
     if (zn_board_is_dangling(board)) {
       return board;
     }
@@ -129,8 +137,7 @@ zn_scene_reassign_boards(struct zn_scene* self)
   struct zn_board* board;
 
   // assign a board to a screen without board
-  wl_list_for_each(screen, &self->screen_layout->screens, link)
-  {
+  wl_list_for_each (screen, &self->screen_layout->screens, link) {
     struct zn_board* board;
     if (!wl_list_empty(&screen->board_list)) {
       continue;
@@ -153,8 +160,7 @@ zn_scene_reassign_boards(struct zn_scene* self)
   }
 
   if (screen) {
-    wl_list_for_each(board, &self->board_list, link)
-    {
+    wl_list_for_each (board, &self->board_list, link) {
       if (zn_board_is_dangling(board)) {
         zn_board_assign_to_screen(board, screen);
       }
@@ -255,8 +261,7 @@ zn_scene_destroy(struct zn_scene* self)
 {
   struct zn_board *board, *tmp;
 
-  wl_list_for_each_safe(board, tmp, &self->board_list, link)
-  {
+  wl_list_for_each_safe (board, tmp, &self->board_list, link) {
     zn_board_destroy(board);
   }
 

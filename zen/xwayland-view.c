@@ -2,6 +2,7 @@
 
 #include "zen-common.h"
 #include "zen/input/cursor-grab-move.h"
+#include "zen/input/cursor-grab-resize.h"
 #include "zen/scene/scene.h"
 #include "zen/scene/view.h"
 
@@ -16,6 +17,8 @@ zn_xwayland_view_handle_wlr_surface_commit(
   UNUSED(data);
 
   zn_view_damage(&self->base);
+
+  // FIXME: when resizing, adjust the position of the view
 }
 
 static void
@@ -35,6 +38,8 @@ zn_xwayland_view_handle_map(struct wl_listener* listener, void* data)
 
   wl_signal_add(
       &self->wlr_xwayland_surface->events.request_move, &self->move_listener);
+  wl_signal_add(&self->wlr_xwayland_surface->events.request_resize,
+      &self->resize_listener);
   wl_signal_add(&self->wlr_xwayland_surface->surface->events.commit,
       &self->wlr_surface_commit_listener);
 }
@@ -52,6 +57,10 @@ zn_xwayland_view_handle_unmap(struct wl_listener* listener, void* data)
 
   zn_view_unmap(&self->base);
 
+  wl_list_remove(&self->move_listener.link);
+  wl_list_init(&self->move_listener.link);
+  wl_list_remove(&self->resize_listener.link);
+  wl_list_init(&self->resize_listener.link);
   wl_list_remove(&self->wlr_surface_commit_listener.link);
   wl_list_init(&self->wlr_surface_commit_listener.link);
 }
@@ -67,6 +76,19 @@ zn_xwayland_view_handle_move(struct wl_listener* listener, void* data)
   struct zn_cursor* cursor = server->input_manager->seat->cursor;
 
   zn_cursor_grab_move_start(cursor, &self->base);
+}
+
+static void
+zn_xwayland_view_handle_resize(struct wl_listener* listener, void* data)
+{
+  UNUSED(data);
+  struct zn_xwayland_view* self =
+      zn_container_of(listener, self, resize_listener);
+  struct wlr_xwayland_resize_event* event = data;
+  struct zn_server* server = zn_server_get_singleton();
+  struct zn_cursor* cursor = server->input_manager->seat->cursor;
+
+  zn_cursor_grab_resize_start(cursor, &self->base, event->edges);
 }
 
 static void
@@ -116,15 +138,26 @@ zn_xwayland_view_impl_get_geometry(struct zn_view* view, struct wlr_box* box)
   box->height = surface->current.height;
 }
 
-static void
-zn_xwayland_view_impl_configure(struct zn_view* view, double x, double y)
+static uint32_t
+zn_xwayland_view_impl_set_size(
+    struct zn_view* view, double width, double height)
 {
   struct zn_xwayland_view* self = zn_container_of(view, self, base);
-  struct wlr_fbox box;
 
-  zn_view_get_window_fbox(view, &box);
-  wlr_xwayland_surface_configure(
-      self->wlr_xwayland_surface, x, y, box.width, box.height);
+  wlr_xwayland_surface_configure(self->wlr_xwayland_surface,
+      self->wlr_xwayland_surface->x, self->wlr_xwayland_surface->y, width,
+      height);
+
+  return 0;
+}
+
+static void
+zn_xwayland_view_impl_set_position(struct zn_view* view, double x, double y)
+{
+  struct zn_xwayland_view* self = zn_container_of(view, self, base);
+
+  wlr_xwayland_surface_configure(self->wlr_xwayland_surface, x, y,
+      self->wlr_xwayland_surface->width, self->wlr_xwayland_surface->height);
 }
 
 static void
@@ -139,7 +172,8 @@ static const struct zn_view_impl zn_xwayland_view_impl = {
     .get_wlr_surface_at = zn_xwayland_view_impl_get_wlr_surface_at,
     .get_geometry = zn_xwayland_view_impl_get_geometry,
     .set_activated = zn_xwayland_view_impl_set_activated,
-    .configure = zn_xwayland_view_impl_configure,
+    .set_size = zn_xwayland_view_impl_set_size,
+    .set_position = zn_xwayland_view_impl_set_position,
     .restack = zn_xwayland_view_impl_restack,
 };
 
@@ -172,6 +206,9 @@ zn_xwayland_view_create(
   self->move_listener.notify = zn_xwayland_view_handle_move;
   wl_list_init(&self->move_listener.link);
 
+  self->resize_listener.notify = zn_xwayland_view_handle_resize;
+  wl_list_init(&self->resize_listener.link);
+
   self->wlr_xwayland_surface_destroy_listener.notify =
       zn_xwayland_view_handle_wlr_xwayland_surface_destroy;
   wl_signal_add(&self->wlr_xwayland_surface->events.destroy,
@@ -193,6 +230,7 @@ zn_xwayland_view_destroy(struct zn_xwayland_view* self)
   wl_list_remove(&self->wlr_xwayland_surface_destroy_listener.link);
   wl_list_remove(&self->wlr_surface_commit_listener.link);
   wl_list_remove(&self->move_listener.link);
+  wl_list_remove(&self->resize_listener.link);
   wl_list_remove(&self->map_listener.link);
   wl_list_remove(&self->unmap_listener.link);
   zn_view_fini(&self->base);
