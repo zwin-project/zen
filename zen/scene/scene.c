@@ -258,6 +258,14 @@ err:
 }
 
 void
+zn_scene_destroy_resources(struct zn_scene* self)
+{
+  if (self->bg_texture != NULL) {
+    wlr_texture_destroy(self->bg_texture);
+  }
+}
+
+void
 zn_scene_destroy(struct zn_scene* self)
 {
   struct zn_board *board, *tmp;
@@ -265,8 +273,6 @@ zn_scene_destroy(struct zn_scene* self)
   wl_list_for_each_safe (board, tmp, &self->board_list, link) {
     zn_board_destroy(board);
   }
-
-  if (self->bg_texture != NULL) wlr_texture_destroy(self->bg_texture);
 
   zn_screen_layout_destroy(self->screen_layout);
 

@@ -344,6 +344,16 @@ err:
 }
 
 void
+zn_server_destroy_resources(struct zn_server *self)
+{
+  wlr_backend_destroy(self->backend);
+  wl_display_destroy_clients(self->display);
+
+  zn_cursor_destroy_resources(self->input_manager->seat->cursor);
+  zn_scene_destroy_resources(self->scene);
+}
+
+void
 zn_server_destroy(struct zn_server *self)
 {
   wlr_xwayland_destroy(self->xwayland);
@@ -351,7 +361,6 @@ zn_server_destroy(struct zn_server *self)
   zn_display_system_destroy(self->display_system);
   zn_immersive_backend_destroy(self->immersive_backend);
   free(self->socket);
-  wlr_backend_destroy(self->backend);
   wlr_allocator_destroy(self->allocator);
   wlr_renderer_destroy(self->renderer);
   zn_scene_destroy(self->scene);

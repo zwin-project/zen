@@ -219,6 +219,7 @@ main(int argc, char *argv[])
   }
 
   exit_status = zn_server_run(server);
+  zn_server_destroy_resources(server);
 
 err_server:
   zn_server_destroy(server);

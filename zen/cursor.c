@@ -429,15 +429,20 @@ err:
 }
 
 void
+zn_cursor_destroy_resources(struct zn_cursor* self)
+{
+  if (self->xcursor_texture) {
+    wlr_texture_destroy(self->xcursor_texture);
+  }
+}
+
+void
 zn_cursor_destroy(struct zn_cursor* self)
 {
   wl_list_remove(&self->new_screen_listener.link);
   wl_list_remove(&self->screen_destroy_listener.link);
   wl_list_remove(&self->surface_commit_listener.link);
   wl_list_remove(&self->surface_destroy_listener.link);
-  if (self->xcursor_texture) {
-    wlr_texture_destroy(self->xcursor_texture);
-  }
   wlr_xcursor_manager_destroy(self->xcursor_manager);
   free(self);
 }

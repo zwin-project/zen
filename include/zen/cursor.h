@@ -49,4 +49,6 @@ void zn_cursor_set_xcursor(struct zn_cursor* self, const char* name);
 
 struct zn_cursor* zn_cursor_create(void);
 
+void zn_cursor_destroy_resources(struct zn_cursor* self);
+
 void zn_cursor_destroy(struct zn_cursor* self);

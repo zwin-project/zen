@@ -28,4 +28,6 @@ void zn_scene_setup_bindings(struct zn_scene* self);
 
 struct zn_scene* zn_scene_create(struct zn_config* config);
 
+void zn_scene_destroy_resources(struct zn_scene* self);
+
 void zn_scene_destroy(struct zn_scene* self);
