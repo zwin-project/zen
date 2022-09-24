@@ -243,6 +243,7 @@ zn_scene_create(void)
   zn_scene_setup_background(self, DEFAULT_WALLPAPER);
 
   self->unmap_focused_view_listener.notify = zn_scene_handle_unmap_focused_view;
+  wl_list_init(&self->unmap_focused_view_listener.link);
 
   return self;
 
