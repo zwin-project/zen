@@ -25,7 +25,6 @@ zn_config_get_toml_table(void)
       return NULL;
     }
 
-    zn_warn("homedir_env: %s, strlen: %zu", homedir_env, strlen(homedir_env));
     config_home =
         (char *)malloc(strlen(homedir_env) + strlen(config_dir_partial_path) +
                        strlen(toml_file_partial_path) + 1);
