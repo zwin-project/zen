@@ -244,6 +244,7 @@ zn_scene_create(struct zn_config* config)
   zn_scene_setup_background(self, config->bg_image_file);
 
   self->unmap_focused_view_listener.notify = zn_scene_handle_unmap_focused_view;
+  wl_list_init(&self->unmap_focused_view_listener.link);
 
   return self;
 
