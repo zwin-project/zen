@@ -36,12 +36,14 @@ zn_config_get_toml_table(void)
     sprintf(config_home, "%s%s", config_home_env, toml_file_partial_path);
   }
 
-  char errbuf[200];
   FILE *fp = fopen(config_home, "r");
+  free(config_home);
   if (fp == NULL) {
     zn_warn("config.toml not found in %s\n", config_home);
     return NULL;
   }
+
+  char errbuf[200];
   toml_table_t *tbl = toml_parse_file(fp, errbuf, sizeof(errbuf));
   fclose(fp);
 
