@@ -28,15 +28,14 @@ zn_config_get_toml_table(void)
     config_home =
         (char *)malloc(strlen(homedir_env) + strlen(config_dir_partial_path) +
                        strlen(toml_file_partial_path) + 1);
-    strcpy(config_home, homedir_env);
-    strcat(config_home, config_dir_partial_path);
+    sprintf(config_home, "%s%s%s", homedir_env, config_dir_partial_path,
+        toml_file_partial_path);
   } else {
     config_home = (char *)malloc(
         strlen(config_home_env) + strlen(toml_file_partial_path) + 1);
-    strcpy(config_home, config_home_env);
+    sprintf(config_home, "%s%s", config_home_env, toml_file_partial_path);
   }
 
-  strcat(config_home, toml_file_partial_path);
   char errbuf[200];
   FILE *fp = fopen(config_home, "r");
   if (fp == NULL) {
