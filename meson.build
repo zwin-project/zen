@@ -3,7 +3,7 @@ project(
   version: '0.0.1-dev',
   license: 'MIT',
   meson_version: '>= 0.58.0',
-  default_options: [ 'warning_level=3', 'werror=true', 'optimization=2', 'c_std=gnu11', 'cpp_std=gnu++14' ],
+  default_options: [ 'warning_level=3', 'werror=true', 'optimization=2', 'c_std=gnu11', 'cpp_std=gnu++17' ],
 )
 
 cc = meson.get_compiler('c')
@@ -66,6 +66,22 @@ endif
 
 datadir = get_option('datadir')
 
+# remote display system project
+
+cmake = import('cmake')
+remote_display_system_option = cmake.subproject_options()
+remote_display_system_option.add_cmake_defines({
+  'REQUIRED_ZEN_REMOTE_DISPLAY_SYSTEM_VERSION': '0.1.0.1',
+})
+remote_display_system_option.append_compile_args(
+  'cpp', 
+  '-fmacro-prefix-map=@0@subprojects/remote-display-system/='.format(relative_source_dir)
+)
+remote_display_system_proj = cmake.subproject(
+  'remote-display-system',
+  options: remote_display_system_option,
+)
+
 # generic version requirements
 
 openvr_req = '>= 1.12.5'
@@ -78,8 +94,8 @@ wlr_glew_renderer_req = wlroots_req
 
 cairo_dep = dependency('cairo')
 m_dep = cc.find_library('m')
-openvr_dep = dependency('openvr', version: openvr_req)
 pixman_dep = dependency('pixman-1')
+zen_remote_display_system_server_dep = remote_display_system_proj.dependency('zen_remote_display_system_server')
 wayland_protocols_dep = dependency('wayland-protocols', version: wayland_protocols_req)
 wayland_scanner_dep = dependency('wayland-scanner')
 wayland_server_dep = dependency('wayland-server', version: wayland_server_req)

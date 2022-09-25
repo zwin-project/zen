@@ -1,0 +1,5 @@
+[wrap-git]
+
+url = https://github.com/zigen-project/zen-remote-display-system.git
+revision = main
+depth = 1

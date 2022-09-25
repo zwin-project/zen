@@ -52,7 +52,7 @@ _zen_desktop_deps = [
   wlr_glew_renderer_dep,
   xkbcommon_dep,
   zen_common_dep,
-  zen_openvr_immersive_backend_dep,
+  zen_remote_immersive_backend_dep,
 ]
 
 executable(
