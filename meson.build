@@ -95,11 +95,11 @@ cdata = configuration_data()
 
 if get_option('default-wallpaper')
   wallpaper_files = files(
-    'assets/Zen_Wallpaper_Blue_3840x2160.png',
-    'assets/Zen_Wallpaper_Logo_3840x2160.png',
-    'assets/Zen_Wallpaper_Tricolor_3840x2160.png',
-    'assets/Zen_Wallpaper_Gray_3840x2160.png',
+    'assets/Zen_Wallpaper_Dark_3840x2160.png',
+    'assets/Zen_Wallpaper_Gradient_3840x2160.png',
+    'assets/Zen_Wallpaper_Light_3840x2160.png',
     'assets/Zen_Wallpaper_Main_3840x2160.png',
+    'assets/Zen_Wallpaper_Mosaic_3840x2160.png',
   )
   wallpaper_install_dir = join_paths(datadir, 'backgrounds', 'zen')
 
