@@ -1,1 +1,1 @@
-subdir('openvr')
+subdir('remote')
