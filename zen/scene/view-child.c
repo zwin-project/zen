@@ -47,7 +47,6 @@ zn_view_child_handle_view_unmap(struct wl_listener *listener, void *data)
   struct zn_view_child *self =
       zn_container_of(listener, self, view_unmap_listener);
   UNUSED(data);
-
   zn_view_child_unmap(self);
 }
 
