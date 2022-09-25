@@ -37,11 +37,12 @@ zn_config_get_toml_table(void)
   }
 
   FILE *fp = fopen(config_home, "r");
-  free(config_home);
   if (fp == NULL) {
     zn_warn("Failed to open %s\n", config_home);
+    free(config_home);
     return NULL;
   }
+  free(config_home);
 
   char errbuf[200];
   toml_table_t *tbl = toml_parse_file(fp, errbuf, sizeof(errbuf));
@@ -81,6 +82,7 @@ zn_config_create(void)
   toml_table_t *bg = toml_table_in(tbl, "background");
   if (bg != NULL) {
     toml_datum_t image = toml_string_in(bg, "image");
+    free(self->bg_image_file);
     self->bg_image_file = image.u.s;
   }
 
