@@ -39,7 +39,7 @@ zn_config_get_toml_table(void)
   FILE *fp = fopen(config_home, "r");
   free(config_home);
   if (fp == NULL) {
-    zn_warn("config.toml not found in %s\n", config_home);
+    zn_warn("Failed to open %s\n", config_home);
     return NULL;
   }
 
@@ -74,7 +74,7 @@ zn_config_create(void)
 
   toml_table_t *tbl = zn_config_get_toml_table();
   if (!tbl) {
-    zn_warn("Could not get the toml table");
+    zn_warn("Failed to get the toml table");
     return self;
   }
 
