@@ -51,46 +51,25 @@ zn_screen_for_each_visible_surface(struct zn_screen *self,
 
 struct wlr_surface *
 zn_screen_get_surface_at(struct zn_screen *self, double x, double y,
-    double *surface_x, double *surface_y)
+    double *surface_x, double *surface_y, struct zn_view **view)
 {
-  struct zn_view *view;
+  struct zn_view *view_iterator;
   struct zn_board *board = zn_screen_get_current_board(self);
   double view_sx, view_sy;
   struct wlr_surface *surface;
 
-  wl_list_for_each_reverse (view, &board->view_list, link) {
-    view_sx = x - view->x;
-    view_sy = y - view->y;
+  wl_list_for_each_reverse (view_iterator, &board->view_list, link) {
+    double sx, sy;
+    view_sx = x - view_iterator->x;
+    view_sy = y - view_iterator->y;
 
-    surface = view->impl->get_wlr_surface_at(
-        view, view_sx, view_sy, surface_x, surface_y);
-    if (surface != NULL) return surface;
-  }
-
-  return NULL;
-}
-
-struct zn_view *
-zn_screen_get_view_at(
-    struct zn_screen *self, double x, double y, double *view_x, double *view_y)
-{
-  struct zn_view *view;
-  struct zn_board *board = zn_screen_get_current_board(self);
-  double view_sx, view_sy;
-
-  wl_list_for_each_reverse (view, &board->view_list, link) {
-    view_sx = x - view->x;
-    view_sy = y - view->y;
-
-    if (view->impl->get_wlr_surface_at(view, view_sx, view_sy, NULL, NULL) !=
-        NULL) {
-      if (view_x != NULL) {
-        *view_x = view_sx;
-      }
-      if (view_y != NULL) {
-        *view_y = view_sy;
-      }
-      return view;
+    surface = view_iterator->impl->get_wlr_surface_at(
+        view_iterator, view_sx, view_sy, &sx, &sy);
+    if (surface != NULL) {
+      if (surface_x) *surface_x = sx;
+      if (surface_y) *surface_y = sy;
+      if (view) *view = view_iterator;
+      return surface;
     }
   }
 

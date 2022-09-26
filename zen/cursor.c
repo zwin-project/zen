@@ -50,7 +50,7 @@ default_grab_button(
   struct zn_server* server = zn_server_get_singleton();
   struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
   struct zn_cursor* cursor = grab->cursor;
-  struct zn_view* view;
+  struct zn_view* view = NULL;
 
   if (cursor->screen == NULL) {
     return;
@@ -60,8 +60,8 @@ default_grab_button(
       seat, event->time_msec, event->button, event->state);
 
   if (event->state == WLR_BUTTON_PRESSED) {
-    view =
-        zn_screen_get_view_at(cursor->screen, cursor->x, cursor->y, NULL, NULL);
+    zn_screen_get_surface_at(
+        cursor->screen, cursor->x, cursor->y, NULL, NULL, &view);
     zn_scene_set_focused_view(server->scene, view);
   }
 }
@@ -117,7 +117,7 @@ zn_cursor_get_pointing_surface(
     struct zn_cursor* self, double* surface_x, double* surface_y)
 {
   return zn_screen_get_surface_at(
-      self->screen, self->x, self->y, surface_x, surface_y);
+      self->screen, self->x, self->y, surface_x, surface_y, NULL);
 }
 
 static void
