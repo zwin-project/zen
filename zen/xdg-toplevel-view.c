@@ -232,6 +232,7 @@ zn_xdg_toplevel_view_create(
   zn_view_init(&self->base, ZN_VIEW_XDG_TOPLEVEL, &zn_xdg_toplevel_view_impl);
 
   self->wlr_xdg_toplevel = wlr_xdg_toplevel;
+  wlr_xdg_toplevel->base->data = &self->base;
 
   self->map_listener.notify = zn_xdg_toplevel_view_handle_map;
   wl_signal_add(&self->wlr_xdg_toplevel->base->events.map, &self->map_listener);

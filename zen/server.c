@@ -259,6 +259,12 @@ zn_server_create(struct wl_display *display)
     goto err_immersive_backend;
   }
 
+  self->decoration_manager = zn_decoration_manager_create(self->display);
+  if (self->decoration_manager == NULL) {
+    zn_error("Failed to create server decoration");
+    goto err_socket;
+  }
+
   setenv("WAYLAND_DISPLAY", self->socket, true);
   xdg = getenv("XDG_RUNTIME_DIR");
   zn_debug("WAYLAND_DISPLAY=%s", self->socket);
@@ -267,7 +273,7 @@ zn_server_create(struct wl_display *display)
   self->input_manager = zn_input_manager_create(self->display);
   if (self->input_manager == NULL) {
     zn_error("Failed to create input manager");
-    goto err_socket;
+    goto err_server_decoration;
   }
 
   self->xwayland = wlr_xwayland_create(self->display, self->w_compositor, true);
@@ -312,6 +318,9 @@ zn_server_create(struct wl_display *display)
 err_input_manager:
   zn_input_manager_destroy(self->input_manager);
 
+err_server_decoration:
+  zn_decoration_manager_destroy(self->decoration_manager);
+
 err_socket:
   free(self->socket);
 
@@ -347,6 +356,7 @@ void
 zn_server_destroy(struct zn_server *self)
 {
   wlr_xwayland_destroy(self->xwayland);
+  zn_decoration_manager_destroy(self->decoration_manager);
   zn_input_manager_destroy(self->input_manager);
   zn_display_system_destroy(self->display_system);
   zn_immersive_backend_destroy(self->immersive_backend);
