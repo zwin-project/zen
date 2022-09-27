@@ -178,6 +178,64 @@ zn_screen_renderer_render_view_popups(struct zn_screen *screen,
 }
 
 static void
+zn_screen_renderer_render_decoration(struct zn_screen *screen,
+    struct zn_view *view, struct wlr_renderer *renderer,
+    pixman_region32_t *screen_damage)
+{
+  struct zn_output *output = screen->output;
+  struct wlr_box transformed_box;
+  pixman_region32_t render_damage;
+  pixman_box32_t *rects;
+  float matrix[9];
+  int rect_count;
+  struct wlr_fbox fbox;
+
+  zn_view_get_decoration_fbox(view, &fbox);
+
+  zn_output_box_effective_to_transformed_coords(
+      output, &fbox, &transformed_box);
+
+  pixman_region32_init(&render_damage);
+  pixman_region32_union_rect(&render_damage, &render_damage, transformed_box.x,
+      transformed_box.y, transformed_box.width, transformed_box.height);
+
+  pixman_region32_intersect(&render_damage, &render_damage, screen_damage);
+
+  {
+    pixman_region32_t region;
+    struct wlr_fbox fbox;
+    zn_view_get_window_fbox(view, &fbox);
+    pixman_region32_init_rect(&region, fbox.x, fbox.y, fbox.width, fbox.height);
+    pixman_region32_subtract(&render_damage, &render_damage, &region);
+    pixman_region32_fini(&region);
+  }
+
+  if (!pixman_region32_not_empty(&render_damage)) {
+    goto render_damage_finish;
+  }
+
+  wlr_matrix_project_box(matrix, &transformed_box, WL_OUTPUT_TRANSFORM_NORMAL,
+      0, output->wlr_output->transform_matrix);
+
+  rects = pixman_region32_rectangles(&render_damage, &rect_count);
+
+  struct wlr_box decoration_box = {
+      .x = 0,
+      .y = 0,
+      .width = fbox.width,
+      .height = fbox.height,
+  };
+  for (int i = 0; i < rect_count; i++) {
+    zn_screen_renderer_scissor_output(output, &rects[i]);
+    wlr_render_rect(
+        renderer, &decoration_box, (float[4]){0.06, 0.12, 0.3, 1}, matrix);
+  }
+
+render_damage_finish:
+  pixman_region32_fini(&render_damage);
+}
+
+static void
 zn_screen_renderer_render_view(struct zn_screen *screen, struct zn_view *view,
     struct wlr_renderer *renderer, pixman_region32_t *screen_damage)
 {
@@ -189,6 +247,10 @@ zn_screen_renderer_render_view(struct zn_screen *screen, struct zn_view *view,
       .renderer = renderer,
       .screen_damage = screen_damage,
   };
+
+  if (!zn_view_has_client_decoration(view)) {
+    zn_screen_renderer_render_decoration(screen, view, renderer, screen_damage);
+  }
 
   wlr_surface_for_each_surface(
       wlr_surface, zn_screen_renderer_for_each_surface_iterator, &data);

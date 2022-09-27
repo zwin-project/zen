@@ -109,6 +109,9 @@ zn_xwayland_view_handle_wlr_xwayland_surface_set_decorations(
   struct zn_xwayland_view* self = zn_container_of(
       listener, self, wlr_xwayland_surface_set_decorations_listener);
   UNUSED(data);
+  self->base.requested_client_decoration =
+      self->wlr_xwayland_surface->decorations !=
+      WLR_XWAYLAND_SURFACE_DECORATIONS_ALL;
 }
 
 static void

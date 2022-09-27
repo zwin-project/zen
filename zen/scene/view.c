@@ -96,7 +96,11 @@ zn_view_damage_whole(struct zn_view *self)
 {
   struct wlr_fbox fbox;
 
-  zn_view_get_surface_fbox(self, &fbox);
+  if (zn_view_has_client_decoration(self)) {
+    zn_view_get_surface_fbox(self, &fbox);
+  } else {
+    zn_view_get_decoration_fbox(self, &fbox);
+  }
 
   zn_view_add_damage_fbox(self, &fbox);
 }
@@ -122,6 +126,24 @@ zn_view_get_window_fbox(struct zn_view *self, struct wlr_fbox *fbox)
   fbox->y = view_geometry.y + self->y;
   fbox->width = view_geometry.width;
   fbox->height = view_geometry.height;
+}
+
+void
+zn_view_get_decoration_fbox(struct zn_view *self, struct wlr_fbox *fbox)
+{
+  zn_view_get_surface_fbox(self, fbox);
+  fbox->x -= VIEW_DECORATION_BORDER;
+  fbox->y -= VIEW_DECORATION_BORDER + VIEW_DECORATION_TITLEBAR;
+  fbox->width += VIEW_DECORATION_BORDER * 2;
+  fbox->height += VIEW_DECORATION_BORDER * 2 + VIEW_DECORATION_TITLEBAR;
+}
+
+bool
+zn_view_has_client_decoration(struct zn_view *self)
+{
+  struct wlr_box box;
+  self->impl->get_geometry(self, &box);
+  return (box.x != 0 || box.y != 0) || self->requested_client_decoration;
 }
 
 bool
