@@ -61,6 +61,6 @@ zn_decoration_manager_destroy(struct zn_decoration_manager* self)
   wl_list_for_each_safe (deco, tmp, &self->xdg_decoration_list, link) {
     zn_xdg_decoration_destory(deco);
   }
-  
+
   free(self);
 }
