@@ -13,9 +13,6 @@
 #include "zen/scene/view.h"
 #include "zen/server.h"
 
-static struct wlr_surface* zn_cursor_get_pointing_surface(
-    struct zn_cursor* self, double* surface_x, double* surface_y);
-
 static void
 default_grab_motion(
     struct zn_cursor_grab* grab, struct wlr_event_pointer_motion* event)
@@ -31,8 +28,8 @@ default_grab_motion(
     return;
   }
 
-  surface =
-      zn_cursor_get_pointing_surface(grab->cursor, &surface_x, &surface_y);
+  surface = zn_screen_get_surface_at(grab->cursor->screen, grab->cursor->x,
+      grab->cursor->y, &surface_x, &surface_y, NULL);
 
   if (surface) {
     wlr_seat_pointer_enter(seat, surface, surface_x, surface_y);
@@ -109,16 +106,6 @@ static const struct zn_cursor_grab_interface default_grab_interface = {
     .rebase = default_grab_rebase,
     .cancel = default_grab_cancel,
 };
-
-// get the surface that is just under the cursor
-// expect cursor::screen is non-NULL
-static struct wlr_surface*
-zn_cursor_get_pointing_surface(
-    struct zn_cursor* self, double* surface_x, double* surface_y)
-{
-  return zn_screen_get_surface_at(
-      self->screen, self->x, self->y, surface_x, surface_y, NULL);
-}
 
 static void
 zn_cursor_update_size(struct zn_cursor* self)
@@ -269,7 +256,8 @@ zn_cursor_end_grab(struct zn_cursor* self)
     return;
   }
 
-  surface = zn_cursor_get_pointing_surface(self, &surface_x, &surface_y);
+  surface = zn_screen_get_surface_at(
+      self->screen, self->x, self->y, &surface_x, &surface_y, NULL);
 
   if (surface) {
     wlr_seat_pointer_enter(seat, surface, surface_x, surface_y);
