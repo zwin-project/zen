@@ -11,6 +11,7 @@
 
 #include "zen/backend/immersive.h"
 #include "zen/config.h"
+#include "zen/decoration-manager.h"
 #include "zen/display-system.h"
 #include "zen/input/input-manager.h"
 #include "zen/scene/scene.h"
@@ -26,6 +27,7 @@ struct zn_server {
   // these objects will be automatically destroyed when wl_display is destroyed
   struct wlr_compositor *w_compositor;
   struct wlr_xdg_shell *xdg_shell;
+  struct zn_decoration_manager *decoration_manager;
 
   struct zn_config *config;
   struct zn_display_system *display_system;
