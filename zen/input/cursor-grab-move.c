@@ -155,5 +155,6 @@ zn_cursor_grab_move_start(struct zn_cursor* cursor, struct zn_view* view)
 
   zn_cursor_set_xcursor(cursor, "grabbing");
   wlr_seat_pointer_clear_focus(seat);
+  if (view->impl->close_popups) view->impl->close_popups(view);
   zn_cursor_start_grab(cursor, &self->base);
 }

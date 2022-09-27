@@ -1,13 +1,5 @@
 #include "zen/wlr/box.h"
 
-// from wlroots::wlr_box_contains_point
-bool
-zn_wlr_fbox_contains_point(const struct wlr_fbox* box, double x, double y)
-{
-  return box->x <= x && x < box->x + box->width && box->y <= y &&
-         y < box->y + box->height;
-}
-
 // from wlroots::wlr_box_closest_point
 void
 zn_wlr_fbox_closest_point(const struct wlr_fbox* box, double x, double y,

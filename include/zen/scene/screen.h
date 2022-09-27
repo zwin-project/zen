@@ -8,7 +8,7 @@
 #include "zen/scene/screen-layout.h"
 
 typedef void (*zn_screen_for_each_visible_surface_callback_t)(
-    struct wlr_surface *surface, void *data);
+    struct wlr_surface *surface, void *user_data);
 
 struct zn_screen {
   double x, y;
@@ -29,8 +29,13 @@ struct zn_screen {
 void zn_screen_for_each_visible_surface(struct zn_screen *self,
     zn_screen_for_each_visible_surface_callback_t callback, void *data);
 
-struct zn_view *zn_screen_get_view_at(
-    struct zn_screen *self, double x, double y, double *view_x, double *view_y);
+/**
+ * @param surface_x can be NULL
+ * @param surface_y can be NULL
+ * @param view can be NULL
+ */
+struct wlr_surface *zn_screen_get_surface_at(struct zn_screen *self, double x,
+    double y, double *surface_x, double *surface_y, struct zn_view **view);
 
 void zn_screen_switch_to_next_board(struct zn_screen *self);
 

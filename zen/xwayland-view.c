@@ -116,6 +116,16 @@ zn_xwayland_view_impl_get_wlr_surface(struct zn_view* view)
   return self->wlr_xwayland_surface->surface;
 }
 
+static struct wlr_surface*
+zn_xwayland_view_impl_get_wlr_surface_at(struct zn_view* view, double view_sx,
+    double view_sy, double* surface_x, double* surface_y)
+{
+  struct zn_xwayland_view* self = zn_container_of(view, self, base);
+
+  return wlr_surface_surface_at(self->wlr_xwayland_surface->surface, view_sx,
+      view_sy, surface_x, surface_y);
+}
+
 static void
 zn_xwayland_view_impl_get_geometry(struct zn_view* view, struct wlr_box* box)
 {
@@ -159,6 +169,7 @@ zn_xwayland_view_impl_restack(struct zn_view* view, enum xcb_stack_mode_t mode)
 
 static const struct zn_view_impl zn_xwayland_view_impl = {
     .get_wlr_surface = zn_xwayland_view_impl_get_wlr_surface,
+    .get_wlr_surface_at = zn_xwayland_view_impl_get_wlr_surface_at,
     .get_geometry = zn_xwayland_view_impl_get_geometry,
     .set_activated = zn_xwayland_view_impl_set_activated,
     .set_size = zn_xwayland_view_impl_set_size,

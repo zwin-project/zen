@@ -7,43 +7,69 @@
 #include "zen/scene/view.h"
 #include "zen/wlr/box.h"
 
+struct surface_callback_data {
+  zn_screen_for_each_visible_surface_callback_t callback;
+  void *user_data;
+};
+
+static void
+zn_screen_for_each_visible_surface_callback(
+    struct wlr_surface *surface, int sx, int sy, void *_data)
+{
+  UNUSED(sx);
+  UNUSED(sy);
+  struct surface_callback_data *data = _data;
+
+  data->callback(surface, data->user_data);
+}
+
 void
 zn_screen_for_each_visible_surface(struct zn_screen *self,
-    zn_screen_for_each_visible_surface_callback_t callback, void *data)
+    zn_screen_for_each_visible_surface_callback_t callback, void *user_data)
 {
   struct zn_server *server = zn_server_get_singleton();
   struct zn_cursor *cursor = server->input_manager->seat->cursor;
   struct zn_board *board = zn_screen_get_current_board(self);
   struct zn_view *view;
+  struct surface_callback_data data = {
+      .callback = callback,
+      .user_data = user_data,
+  };
 
   wl_list_for_each (view, &board->view_list, link) {
-    callback(view->impl->get_wlr_surface(view), data);
+    callback(view->impl->get_wlr_surface(view), user_data);
+
+    if (view->impl->for_each_popup_surface)
+      view->impl->for_each_popup_surface(
+          view, zn_screen_for_each_visible_surface_callback, &data);
   }
 
   if (cursor->screen == self && cursor->surface != NULL) {
-    callback(cursor->surface, data);
+    callback(cursor->surface, user_data);
   }
 }
 
-struct zn_view *
-zn_screen_get_view_at(
-    struct zn_screen *self, double x, double y, double *view_x, double *view_y)
+struct wlr_surface *
+zn_screen_get_surface_at(struct zn_screen *self, double x, double y,
+    double *surface_x, double *surface_y, struct zn_view **view)
 {
-  struct wlr_fbox fbox;
-  struct zn_view *view;
+  struct zn_view *view_iterator;
   struct zn_board *board = zn_screen_get_current_board(self);
+  double view_sx, view_sy;
+  struct wlr_surface *surface;
 
-  wl_list_for_each_reverse (view, &board->view_list, link) {
-    zn_view_get_window_fbox(view, &fbox);
+  wl_list_for_each_reverse (view_iterator, &board->view_list, link) {
+    double sx, sy;
+    view_sx = x - view_iterator->x;
+    view_sy = y - view_iterator->y;
 
-    if (zn_wlr_fbox_contains_point(&fbox, x, y)) {
-      if (view_x != NULL) {
-        *view_x = x - view->x;
-      }
-      if (view_y != NULL) {
-        *view_y = y - view->y;
-      }
-      return view;
+    surface = view_iterator->impl->get_wlr_surface_at(
+        view_iterator, view_sx, view_sy, &sx, &sy);
+    if (surface != NULL) {
+      if (surface_x) *surface_x = sx;
+      if (surface_y) *surface_y = sy;
+      if (view) *view = view_iterator;
+      return surface;
     }
   }
 

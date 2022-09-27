@@ -13,9 +13,6 @@
 #include "zen/scene/view.h"
 #include "zen/server.h"
 
-static struct wlr_surface* zn_cursor_get_pointing_surface(
-    struct zn_cursor* self, double* surface_x, double* surface_y);
-
 static void
 default_grab_motion(
     struct zn_cursor_grab* grab, struct wlr_event_pointer_motion* event)
@@ -31,8 +28,8 @@ default_grab_motion(
     return;
   }
 
-  surface =
-      zn_cursor_get_pointing_surface(grab->cursor, &surface_x, &surface_y);
+  surface = zn_screen_get_surface_at(grab->cursor->screen, grab->cursor->x,
+      grab->cursor->y, &surface_x, &surface_y, NULL);
 
   if (surface) {
     wlr_seat_pointer_enter(seat, surface, surface_x, surface_y);
@@ -50,7 +47,7 @@ default_grab_button(
   struct zn_server* server = zn_server_get_singleton();
   struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
   struct zn_cursor* cursor = grab->cursor;
-  struct zn_view* view;
+  struct zn_view* view = NULL;
 
   if (cursor->screen == NULL) {
     return;
@@ -60,8 +57,8 @@ default_grab_button(
       seat, event->time_msec, event->button, event->state);
 
   if (event->state == WLR_BUTTON_PRESSED) {
-    view =
-        zn_screen_get_view_at(cursor->screen, cursor->x, cursor->y, NULL, NULL);
+    zn_screen_get_surface_at(
+        cursor->screen, cursor->x, cursor->y, NULL, NULL, &view);
     zn_scene_set_focused_view(server->scene, view);
   }
 }
@@ -109,25 +106,6 @@ static const struct zn_cursor_grab_interface default_grab_interface = {
     .rebase = default_grab_rebase,
     .cancel = default_grab_cancel,
 };
-
-// get the surface that is just under the cursor
-// expect cursor::screen is non-NULL
-static struct wlr_surface*
-zn_cursor_get_pointing_surface(
-    struct zn_cursor* self, double* surface_x, double* surface_y)
-{
-  struct zn_view* view;
-
-  // FIXME: take subsurfaces/popups into account
-  view = zn_screen_get_view_at(
-      self->screen, self->x, self->y, surface_x, surface_y);
-
-  if (view) {
-    return view->impl->get_wlr_surface(view);
-  }
-
-  return NULL;
-}
 
 static void
 zn_cursor_update_size(struct zn_cursor* self)
@@ -278,7 +256,8 @@ zn_cursor_end_grab(struct zn_cursor* self)
     return;
   }
 
-  surface = zn_cursor_get_pointing_surface(self, &surface_x, &surface_y);
+  surface = zn_screen_get_surface_at(
+      self->screen, self->x, self->y, &surface_x, &surface_y, NULL);
 
   if (surface) {
     wlr_seat_pointer_enter(seat, surface, surface_x, surface_y);

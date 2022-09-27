@@ -84,9 +84,9 @@ damage_finish:
 }
 
 static void
-send_frame_done_callback(struct wlr_surface *surface, void *data)
+send_frame_done_callback(struct wlr_surface *surface, void *user_data)
 {
-  wlr_surface_send_frame_done(surface, data);
+  wlr_surface_send_frame_done(surface, user_data);
 }
 
 static void
