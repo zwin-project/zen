@@ -17,6 +17,7 @@ struct zn_xwayland_view {
   struct wl_listener move_listener;
   struct wl_listener resize_listener;
   struct wl_listener wlr_xwayland_surface_destroy_listener;
+  struct wl_listener wlr_xwayland_surface_set_decorations_listener;
   struct wl_listener wlr_surface_commit_listener;
 };
 
