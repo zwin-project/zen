@@ -4,8 +4,9 @@
 #include <drm_fourcc.h>
 #include <linux/input.h>
 
+#include "build-config.h"
 #include "zen-common.h"
-#include "zen-config.h"
+#include "zen/config.h"
 #include "zen/scene/board.h"
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/screen.h"
@@ -215,7 +216,7 @@ err:
 }
 
 struct zn_scene*
-zn_scene_create(void)
+zn_scene_create(struct zn_config* config)
 {
   struct zn_scene* self;
   struct zn_board* board;
@@ -240,7 +241,7 @@ zn_scene_create(void)
     goto err_screen_layout;
   }
 
-  zn_scene_setup_background(self, DEFAULT_WALLPAPER);
+  zn_scene_setup_background(self, config->bg_image_file);
 
   self->unmap_focused_view_listener.notify = zn_scene_handle_unmap_focused_view;
 

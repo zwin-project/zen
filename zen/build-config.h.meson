@@ -1,2 +1,3 @@
+#pragma once
 /* Path to the installed default wallpaper image */
 #mesondefine DEFAULT_WALLPAPER
