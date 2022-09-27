@@ -7,6 +7,9 @@
 
 #include "zen/scene/scene.h"
 
+#define VIEW_DECORATION_BORDER 3
+#define VIEW_DECORATION_TITLEBAR 27
+
 struct zn_view;
 
 struct zn_view_impl {
@@ -38,6 +41,8 @@ struct zn_view {
 
   struct wl_list link;     // zn_board::view_list;
   struct zn_board *board;  // non null, when mapped
+
+  bool requested_client_decoration;
 
   struct {
     bool resizing;
@@ -71,6 +76,10 @@ void zn_view_damage_whole(struct zn_view *self);
 void zn_view_get_surface_fbox(struct zn_view *self, struct wlr_fbox *fbox);
 
 void zn_view_get_window_fbox(struct zn_view *self, struct wlr_fbox *fbox);
+
+void zn_view_get_decoration_fbox(struct zn_view *self, struct wlr_fbox *fbox);
+
+bool zn_view_has_client_decoration(struct zn_view *self);
 
 bool zn_view_is_mapped(struct zn_view *self);
 
