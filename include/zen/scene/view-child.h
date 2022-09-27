@@ -17,13 +17,10 @@ struct zn_view_child_impl {
 struct zn_view_child {
   const struct zn_view_child_impl *impl;
 
-  struct zn_view *view;          // nullable
+  struct zn_view *view;
   struct zn_view_child *parent;  // nullable
 
   bool mapped;
-
-  struct wl_listener view_unmap_listener;
-  struct wl_listener view_destroy_listener;
 };
 
 void zn_view_child_damage(struct zn_view_child *self);
@@ -34,5 +31,3 @@ void zn_view_child_unmap(struct zn_view_child *self);
 
 void zn_view_child_init(struct zn_view_child *self,
     const struct zn_view_child_impl *impl, struct zn_view *view);
-
-void zn_view_child_fini(struct zn_view_child *self);

@@ -131,8 +131,8 @@ zn_xdg_popup_destroy(struct zn_xdg_popup* self)
 {
   wl_list_remove(&self->wlr_surface_commit_listener.link);
   wl_list_remove(&self->wlr_xdg_surface_destroy_listener.link);
+  wl_list_remove(&self->new_popup_listener.link);
   wl_list_remove(&self->unmap_listener.link);
   wl_list_remove(&self->map_listener.link);
-  zn_view_child_fini(&self->base);
   free(self);
 }
