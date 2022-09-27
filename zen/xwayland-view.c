@@ -103,6 +103,15 @@ zn_xwayland_view_handle_wlr_xwayland_surface_destroy(
 }
 
 static void
+zn_xwayland_view_handle_wlr_xwayland_surface_set_decorations(
+    struct wl_listener* listener, void* data)
+{
+  struct zn_xwayland_view* self = zn_container_of(
+      listener, self, wlr_xwayland_surface_set_decorations_listener);
+  UNUSED(data);
+}
+
+static void
 zn_xwayland_view_impl_set_activated(struct zn_view* view, bool active)
 {
   struct zn_xwayland_view* self = zn_container_of(view, self, base);
@@ -214,6 +223,11 @@ zn_xwayland_view_create(
   wl_signal_add(&self->wlr_xwayland_surface->events.destroy,
       &self->wlr_xwayland_surface_destroy_listener);
 
+  self->wlr_xwayland_surface_set_decorations_listener.notify =
+      zn_xwayland_view_handle_wlr_xwayland_surface_set_decorations;
+  wl_signal_add(&self->wlr_xwayland_surface->events.set_decorations,
+      &self->wlr_xwayland_surface_set_decorations_listener);
+
   self->wlr_surface_commit_listener.notify =
       zn_xwayland_view_handle_wlr_surface_commit;
   wl_list_init(&self->wlr_surface_commit_listener.link);
@@ -228,6 +242,7 @@ static void
 zn_xwayland_view_destroy(struct zn_xwayland_view* self)
 {
   wl_list_remove(&self->wlr_xwayland_surface_destroy_listener.link);
+  wl_list_remove(&self->wlr_xwayland_surface_set_decorations_listener.link);
   wl_list_remove(&self->wlr_surface_commit_listener.link);
   wl_list_remove(&self->move_listener.link);
   wl_list_remove(&self->resize_listener.link);
