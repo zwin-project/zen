@@ -97,7 +97,7 @@ zn_xdg_toplevel_view_handle_new_popup(struct wl_listener* listener, void* data)
       zn_container_of(listener, self, new_popup_listener);
   struct wlr_xdg_popup* wlr_xdg_popup = data;
 
-  (void)zn_xdg_popup_create(wlr_xdg_popup, &self->base);
+  zn_xdg_popup_create(wlr_xdg_popup, &self->base);
 }
 
 static void

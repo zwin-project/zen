@@ -31,8 +31,6 @@ zn_view_child_get_surface_fbox(
   struct wlr_surface *surface = self->impl->get_wlr_surface(self);
   int sx, sy;
 
-  if (self->view == NULL) return;
-
   self->impl->get_view_coords(self, &sx, &sy);
 
   fbox->x = self->view->x + sx;
@@ -42,32 +40,11 @@ zn_view_child_get_surface_fbox(
 }
 
 static void
-zn_view_child_handle_view_unmap(struct wl_listener *listener, void *data)
-{
-  struct zn_view_child *self =
-      zn_container_of(listener, self, view_unmap_listener);
-  UNUSED(data);
-  zn_view_child_unmap(self);
-}
-
-static void
-zn_view_child_handle_view_destroy(struct wl_listener *listener, void *data)
-{
-  struct zn_view_child *self =
-      zn_container_of(listener, self, view_destroy_listener);
-  UNUSED(data);
-
-  zn_view_child_unmap(self);
-  self->view = NULL;
-}
-
-static void
 zn_view_child_damage_whole(struct zn_view_child *self)
 {
   struct wlr_fbox fbox;
 
-  if (!zn_view_child_is_mapped(self) || self->view == NULL ||
-      self->view->board->screen == NULL)
+  if (!zn_view_child_is_mapped(self) || self->view->board->screen == NULL)
     return;
 
   zn_view_child_get_surface_fbox(self, &fbox);
@@ -84,8 +61,7 @@ zn_view_child_damage(struct zn_view_child *self)
   int rect_count;
   int sx, sy;
 
-  if (!zn_view_child_is_mapped(self) || self->view == NULL ||
-      self->view->board->screen == NULL)
+  if (!zn_view_child_is_mapped(self) || self->view->board->screen == NULL)
     return;
 
   pixman_region32_init(&damage);
@@ -128,20 +104,8 @@ zn_view_child_init(struct zn_view_child *self,
 {
   self->impl = impl;
   self->view = view;
-  self->parent =
-      NULL;  // TODO: handle if view_child's parent(view_child) exists.
+
+  self->parent = NULL;  // TODO: handle subsurface
 
   self->mapped = false;
-
-  self->view_unmap_listener.notify = zn_view_child_handle_view_unmap;
-  wl_signal_add(&self->view->events.unmap, &self->view_unmap_listener);
-  self->view_destroy_listener.notify = zn_view_child_handle_view_destroy;
-  wl_signal_add(&self->view->events.destroy, &self->view_destroy_listener);
-}
-
-void
-zn_view_child_fini(struct zn_view_child *self)
-{
-  wl_list_remove(&self->view_unmap_listener.link);
-  wl_list_remove(&self->view_destroy_listener.link);
 }

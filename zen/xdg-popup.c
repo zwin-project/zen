@@ -30,6 +30,16 @@ zn_xdg_popup_handle_unmap(struct wl_listener* listener, void* data)
 }
 
 static void
+zn_xdg_popup_handle_new_popup(struct wl_listener* listener, void* data)
+{
+  struct zn_xdg_popup* self =
+      zn_container_of(listener, self, new_popup_listener);
+  struct wlr_xdg_popup* wlr_xdg_popup = data;
+
+  zn_xdg_popup_create(wlr_xdg_popup, self->base.view);
+}
+
+static void
 zn_xdg_popup_handle_wlr_surface_commit(struct wl_listener* listener, void* data)
 {
   struct zn_xdg_popup* self =
@@ -97,6 +107,10 @@ zn_xdg_popup_create(struct wlr_xdg_popup* wlr_xdg_popup, struct zn_view* view)
   wl_signal_add(
       &self->wlr_xdg_popup->base->events.unmap, &self->unmap_listener);
 
+  self->new_popup_listener.notify = zn_xdg_popup_handle_new_popup;
+  wl_signal_add(
+      &self->wlr_xdg_popup->base->events.new_popup, &self->new_popup_listener);
+
   self->wlr_xdg_surface_destroy_listener.notify =
       zn_xdg_popup_handle_wlr_xdg_surface_destroy;
   wl_signal_add(&wlr_xdg_popup->base->events.destroy,
@@ -117,8 +131,8 @@ zn_xdg_popup_destroy(struct zn_xdg_popup* self)
 {
   wl_list_remove(&self->wlr_surface_commit_listener.link);
   wl_list_remove(&self->wlr_xdg_surface_destroy_listener.link);
+  wl_list_remove(&self->new_popup_listener.link);
   wl_list_remove(&self->unmap_listener.link);
   wl_list_remove(&self->map_listener.link);
-  zn_view_child_fini(&self->base);
   free(self);
 }
