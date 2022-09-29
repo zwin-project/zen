@@ -43,6 +43,11 @@ zn_xdg_decoration_handle_decoration_destroy(
 struct zn_xdg_decoration*
 zn_xdg_decoration_create(struct wlr_xdg_toplevel_decoration_v1* decoration)
 {
+  if (!zn_assert(decoration->surface->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL,
+          "decoration's surface role isn't toplevel")) {
+    goto err;
+  }
+
   struct zn_xdg_decoration* self;
   self = zalloc(sizeof *self);
   if (self == NULL) {
