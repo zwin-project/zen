@@ -27,7 +27,7 @@ zn_xdg_decoration_handle_view_destroy(struct wl_listener* listener, void* data)
   struct zn_xdg_decoration* self =
       zn_container_of(listener, self, view_destroy_listener);
   UNUSED(data);
-  zn_xdg_decoration_destory(self);
+  zn_xdg_decoration_destroy(self);
 }
 
 static void
@@ -37,12 +37,11 @@ zn_xdg_decoration_handle_decoration_destroy(
   struct zn_xdg_decoration* self =
       zn_container_of(listener, self, decoration_destroy_listener);
   UNUSED(data);
-  zn_xdg_decoration_destory(self);
+  zn_xdg_decoration_destroy(self);
 }
 
 struct zn_xdg_decoration*
-zn_xdg_decoration_create(struct zn_decoration_manager* manager,
-    struct wlr_xdg_toplevel_decoration_v1* decoration)
+zn_xdg_decoration_create(struct wlr_xdg_toplevel_decoration_v1* decoration)
 {
   struct zn_xdg_decoration* self;
   self = zalloc(sizeof *self);
@@ -53,8 +52,6 @@ zn_xdg_decoration_create(struct zn_decoration_manager* manager,
 
   self->view = decoration->surface->data;
   self->wlr_decoration = decoration;
-
-  wl_list_insert(&manager->xdg_decoration_list, &self->link);
 
   wlr_xdg_toplevel_decoration_v1_set_mode(
       self->wlr_decoration, WLR_XDG_TOPLEVEL_DECORATION_V1_MODE_CLIENT_SIDE);
@@ -79,9 +76,8 @@ err:
 }
 
 void
-zn_xdg_decoration_destory(struct zn_xdg_decoration* self)
+zn_xdg_decoration_destroy(struct zn_xdg_decoration* self)
 {
-  wl_list_remove(&self->link);
   wl_list_remove(&self->request_mode_listener.link);
   wl_list_remove(&self->view_destroy_listener.link);
   wl_list_remove(&self->decoration_destroy_listener.link);
