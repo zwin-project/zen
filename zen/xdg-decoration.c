@@ -10,6 +10,8 @@ zn_xdg_decoration_set_view_decoration(struct zn_xdg_decoration* self)
   self->view->requested_client_decoration =
       self->wlr_decoration->requested_mode !=
       WLR_XDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE;
+  wlr_xdg_toplevel_decoration_v1_set_mode(
+      self->wlr_decoration, WLR_XDG_TOPLEVEL_DECORATION_V1_MODE_CLIENT_SIDE);
 }
 
 static void
@@ -57,9 +59,6 @@ zn_xdg_decoration_create(struct wlr_xdg_toplevel_decoration_v1* decoration)
 
   self->view = decoration->surface->data;
   self->wlr_decoration = decoration;
-
-  wlr_xdg_toplevel_decoration_v1_set_mode(
-      self->wlr_decoration, WLR_XDG_TOPLEVEL_DECORATION_V1_MODE_CLIENT_SIDE);
 
   zn_xdg_decoration_set_view_decoration(self);
 
