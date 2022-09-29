@@ -9,8 +9,6 @@ struct zn_decoration_manager {
   struct wlr_server_decoration_manager* decoration_manager;
   struct wlr_xdg_decoration_manager_v1* xdg_decoration_manager;
 
-  struct wl_list xdg_decoration_list;  // zn_xdg_decoration::link
-
   struct wl_listener new_xdg_decoration_listener;
 };
 

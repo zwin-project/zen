@@ -10,7 +10,7 @@ zn_decoration_manager_handle_new_xdg_decoration(
   struct zn_decoration_manager* self =
       zn_container_of(listener, self, new_xdg_decoration_listener);
   struct wlr_xdg_toplevel_decoration_v1* decoration = data;
-  zn_xdg_decoration_create(self, decoration);
+  zn_xdg_decoration_create(decoration);
 }
 
 struct zn_decoration_manager*
@@ -38,8 +38,6 @@ zn_decoration_manager_create(struct wl_display* display)
   wlr_server_decoration_manager_set_default_mode(
       self->decoration_manager, WLR_SERVER_DECORATION_MANAGER_MODE_CLIENT);
 
-  wl_list_init(&self->xdg_decoration_list);
-
   self->new_xdg_decoration_listener.notify =
       zn_decoration_manager_handle_new_xdg_decoration;
   wl_signal_add(&self->xdg_decoration_manager->events.new_toplevel_decoration,
@@ -57,10 +55,5 @@ err:
 void
 zn_decoration_manager_destroy(struct zn_decoration_manager* self)
 {
-  struct zn_xdg_decoration *deco, *tmp;
-  wl_list_for_each_safe (deco, tmp, &self->xdg_decoration_list, link) {
-    zn_xdg_decoration_destory(deco);
-  }
-
   free(self);
 }
