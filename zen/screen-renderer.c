@@ -204,9 +204,16 @@ zn_screen_renderer_render_decoration(struct zn_screen *screen,
   {
     pixman_region32_t region;
     struct wlr_fbox fbox;
+    struct wlr_box transformed_box;
+
     zn_view_get_window_fbox(view, &fbox);
-    pixman_region32_init_rect(&region, fbox.x, fbox.y, fbox.width, fbox.height);
+    zn_output_box_effective_to_transformed_coords(
+        output, &fbox, &transformed_box);
+
+    pixman_region32_init_rect(&region, transformed_box.x, transformed_box.y,
+        transformed_box.width, transformed_box.height);
     pixman_region32_subtract(&render_damage, &render_damage, &region);
+
     pixman_region32_fini(&region);
   }
 
