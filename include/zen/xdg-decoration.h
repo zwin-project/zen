@@ -7,8 +7,8 @@
 #include "zen/scene/view.h"
 
 struct zn_xdg_decoration {
-  struct wlr_xdg_toplevel_decoration_v1* wlr_decoration;
-  struct zn_view* view;
+  struct wlr_xdg_toplevel_decoration_v1* wlr_decoration;  // nonnull
+  struct zn_view* view;                                   // nonnull
 
   struct wl_listener request_mode_listener;
   struct wl_listener view_destroy_listener;
