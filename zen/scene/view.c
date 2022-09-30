@@ -66,10 +66,12 @@ void
 zn_view_damage(struct zn_view *self)
 {
   struct wlr_surface *surface = self->impl->get_wlr_surface(self);
-  struct wlr_fbox damage_box;
+  struct wlr_fbox damage_box, surface_box;
   pixman_region32_t damage;
   pixman_box32_t *rects;
   int rect_count;
+
+  zn_view_get_surface_fbox(self, &surface_box);
 
   pixman_region32_init(&damage);
 
@@ -78,8 +80,8 @@ zn_view_damage(struct zn_view *self)
 
   for (int i = 0; i < rect_count; ++i) {
     damage_box = (struct wlr_fbox){
-        .x = self->x + rects[i].x1,
-        .y = self->y + rects[i].y1,
+        .x = surface_box.x + rects[i].x1,
+        .y = surface_box.y + rects[i].y1,
         .width = rects[i].x2 - rects[i].x1,
         .height = rects[i].y2 - rects[i].y1,
     };
@@ -109,11 +111,18 @@ void
 zn_view_get_surface_fbox(struct zn_view *self, struct wlr_fbox *fbox)
 {
   struct wlr_surface *surface = self->impl->get_wlr_surface(self);
+  struct wlr_box view_geometry;
+  self->impl->get_geometry(self, &view_geometry);
 
-  fbox->x = self->x;
-  fbox->y = self->y;
+  fbox->x = self->x - view_geometry.x;
+  fbox->y = self->y - view_geometry.y;
   fbox->width = surface->current.width;
   fbox->height = surface->current.height;
+
+  if (!zn_view_has_client_decoration(self)) {
+    fbox->x += VIEW_DECORATION_BORDER;
+    fbox->y += VIEW_DECORATION_BORDER + VIEW_DECORATION_TITLEBAR;
+  }
 }
 
 void
@@ -122,10 +131,15 @@ zn_view_get_window_fbox(struct zn_view *self, struct wlr_fbox *fbox)
   struct wlr_box view_geometry;
   self->impl->get_geometry(self, &view_geometry);
 
-  fbox->x = view_geometry.x + self->x;
-  fbox->y = view_geometry.y + self->y;
+  fbox->x = self->x;
+  fbox->y = self->y;
   fbox->width = view_geometry.width;
   fbox->height = view_geometry.height;
+
+  if (!zn_view_has_client_decoration(self)) {
+    fbox->width += VIEW_DECORATION_BORDER * 2;
+    fbox->height += VIEW_DECORATION_BORDER * 2 + VIEW_DECORATION_TITLEBAR;
+  }
 }
 
 void

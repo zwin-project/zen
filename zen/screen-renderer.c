@@ -100,8 +100,11 @@ zn_screen_renderer_get_surface_fbox(struct wlr_surface *surface,
     struct zn_view *view, int surface_x, int surface_y,
     struct wlr_fbox *surface_box)
 {
-  surface_box->x = view->x + surface_x;
-  surface_box->y = view->y + surface_y;
+  struct wlr_fbox fbox;
+  zn_view_get_surface_fbox(view, &fbox);
+
+  surface_box->x = fbox.x + surface_x;
+  surface_box->y = fbox.y + surface_y;
   surface_box->width = surface->current.width;
   surface_box->height = surface->current.height;
 }
@@ -190,7 +193,7 @@ zn_screen_renderer_render_decoration(struct zn_screen *screen,
   int rect_count;
   struct wlr_fbox fbox;
 
-  zn_view_get_decoration_fbox(view, &fbox);
+  zn_view_get_window_fbox(view, &fbox);
 
   zn_output_box_effective_to_transformed_coords(
       output, &fbox, &transformed_box);
@@ -203,12 +206,12 @@ zn_screen_renderer_render_decoration(struct zn_screen *screen,
 
   {
     pixman_region32_t region;
-    struct wlr_fbox window_fbox;
+    struct wlr_fbox surface_fbox;
     struct wlr_box transformed_window_box;
 
-    zn_view_get_window_fbox(view, &window_fbox);
+    zn_view_get_surface_fbox(view, &surface_fbox);
     zn_output_box_effective_to_transformed_coords(
-        output, &window_fbox, &transformed_window_box);
+        output, &surface_fbox, &transformed_window_box);
 
     pixman_region32_init_rect(&region, transformed_window_box.x,
         transformed_window_box.y, transformed_window_box.width,

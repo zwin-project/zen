@@ -59,10 +59,12 @@ zn_screen_get_surface_at(struct zn_screen *self, double x, double y,
   struct wlr_surface *surface;
 
   wl_list_for_each_reverse (view_iterator, &board->view_list, link) {
-    double sx, sy;
-    view_sx = x - view_iterator->x;
-    view_sy = y - view_iterator->y;
+    struct wlr_fbox fbox;
+    zn_view_get_surface_fbox(view_iterator, &fbox);
+    view_sx = x - fbox.x;
+    view_sy = y - fbox.y;
 
+    double sx, sy;
     surface = view_iterator->impl->get_wlr_surface_at(
         view_iterator, view_sx, view_sy, &sx, &sy);
     if (surface != NULL) {
