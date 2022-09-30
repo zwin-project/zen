@@ -10,7 +10,8 @@ zn_xdg_decoration_set_view_decoration(struct zn_xdg_decoration* self)
   enum wlr_xdg_toplevel_decoration_v1_mode mode =
       WLR_XDG_TOPLEVEL_DECORATION_V1_MODE_CLIENT_SIDE;
 
-  if (self->wlr_decoration->requested_mode) {
+  if (self->wlr_decoration->requested_mode !=
+      WLR_XDG_TOPLEVEL_DECORATION_V1_MODE_NONE) {
     mode = self->wlr_decoration->requested_mode;
   }
 
