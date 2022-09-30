@@ -7,11 +7,17 @@
 static void
 zn_xdg_decoration_set_view_decoration(struct zn_xdg_decoration* self)
 {
+  enum wlr_xdg_toplevel_decoration_v1_mode mode =
+      WLR_XDG_TOPLEVEL_DECORATION_V1_MODE_CLIENT_SIDE;
+
+  if (self->wlr_decoration->requested_mode) {
+    mode = self->wlr_decoration->requested_mode;
+  }
+
   self->view->requested_client_decoration =
-      self->wlr_decoration->requested_mode !=
-      WLR_XDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE;
-  wlr_xdg_toplevel_decoration_v1_set_mode(
-      self->wlr_decoration, WLR_XDG_TOPLEVEL_DECORATION_V1_MODE_CLIENT_SIDE);
+      mode == WLR_XDG_TOPLEVEL_DECORATION_V1_MODE_CLIENT_SIDE;
+
+  wlr_xdg_toplevel_decoration_v1_set_mode(self->wlr_decoration, mode);
 }
 
 static void
