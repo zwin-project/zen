@@ -106,7 +106,7 @@ zn_cursor_grab_move_create(struct zn_cursor* cursor, struct zn_view* view)
     return NULL;
   }
 
-  zn_view_get_surface_fbox(view, &view_box);
+  zn_view_get_view_fbox(view, &view_box);
   self->init_board = view->board;
   self->init_x = view_box.x;
   self->init_y = view_box.y;
