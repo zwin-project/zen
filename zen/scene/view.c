@@ -126,7 +126,7 @@ zn_view_get_surface_fbox(struct zn_view *self, struct wlr_fbox *fbox)
 }
 
 void
-zn_view_get_window_fbox(struct zn_view *self, struct wlr_fbox *fbox)
+zn_view_get_view_fbox(struct zn_view *self, struct wlr_fbox *fbox)
 {
   struct wlr_box view_geometry;
   self->impl->get_geometry(self, &view_geometry);
@@ -186,7 +186,7 @@ zn_view_map_to_scene(struct zn_view *self, struct zn_scene *scene)
 
   // TODO: handle board destruction
 
-  zn_view_get_window_fbox(self, &fbox);
+  zn_view_get_view_fbox(self, &fbox);
   zn_view_move(self, board, (board->width - fbox.width) / 2,
       (board->height - fbox.height) / 2);
 

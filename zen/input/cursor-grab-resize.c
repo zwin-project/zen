@@ -115,7 +115,7 @@ zn_cursor_grab_resize_create(
   }
 
   struct wlr_fbox box;
-  zn_view_get_window_fbox(view, &box);
+  zn_view_get_view_fbox(view, &box);
 
   self->init_view_x = view->x;
   self->init_view_y = view->y;

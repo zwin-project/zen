@@ -75,7 +75,7 @@ void zn_view_damage_whole(struct zn_view *self);
 
 void zn_view_get_surface_fbox(struct zn_view *self, struct wlr_fbox *fbox);
 
-void zn_view_get_window_fbox(struct zn_view *self, struct wlr_fbox *fbox);
+void zn_view_get_view_fbox(struct zn_view *self, struct wlr_fbox *fbox);
 
 void zn_view_get_decoration_fbox(struct zn_view *self, struct wlr_fbox *fbox);
 
