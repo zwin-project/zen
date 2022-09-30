@@ -193,7 +193,7 @@ zn_screen_renderer_render_decoration(struct zn_screen *screen,
   int rect_count;
   struct wlr_fbox fbox;
 
-  zn_view_get_window_fbox(view, &fbox);
+  zn_view_get_view_fbox(view, &fbox);
 
   zn_output_box_effective_to_transformed_coords(
       output, &fbox, &transformed_box);
