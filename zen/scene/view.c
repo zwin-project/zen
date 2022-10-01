@@ -101,7 +101,7 @@ zn_view_damage_whole(struct zn_view *self)
   if (zn_view_has_client_decoration(self)) {
     zn_view_get_surface_fbox(self, &fbox);
   } else {
-    zn_view_get_decoration_fbox(self, &fbox);
+    zn_view_get_view_fbox(self, &fbox);
   }
 
   zn_view_add_damage_fbox(self, &fbox);
@@ -140,16 +140,6 @@ zn_view_get_view_fbox(struct zn_view *self, struct wlr_fbox *fbox)
     fbox->width += VIEW_DECORATION_BORDER * 2;
     fbox->height += VIEW_DECORATION_BORDER * 2 + VIEW_DECORATION_TITLEBAR;
   }
-}
-
-void
-zn_view_get_decoration_fbox(struct zn_view *self, struct wlr_fbox *fbox)
-{
-  zn_view_get_surface_fbox(self, fbox);
-  fbox->x -= VIEW_DECORATION_BORDER;
-  fbox->y -= VIEW_DECORATION_BORDER + VIEW_DECORATION_TITLEBAR;
-  fbox->width += VIEW_DECORATION_BORDER * 2;
-  fbox->height += VIEW_DECORATION_BORDER * 2 + VIEW_DECORATION_TITLEBAR;
 }
 
 bool
