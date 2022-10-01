@@ -29,12 +29,15 @@ zn_view_child_get_surface_fbox(
     struct zn_view_child *self, struct wlr_fbox *fbox)
 {
   struct wlr_surface *surface = self->impl->get_wlr_surface(self);
-  int sx, sy;
 
+  struct wlr_fbox view_fbox;
+  zn_view_get_surface_fbox(self->view, &view_fbox);
+
+  int sx, sy;
   self->impl->get_view_coords(self, &sx, &sy);
 
-  fbox->x = self->view->x + sx;
-  fbox->y = self->view->y + sy;
+  fbox->x = view_fbox.x + sx;
+  fbox->y = view_fbox.y + sy;
   fbox->width = surface->current.width;
   fbox->height = surface->current.height;
 }
@@ -71,10 +74,13 @@ zn_view_child_damage(struct zn_view_child *self)
 
   self->impl->get_view_coords(self, &sx, &sy);
 
+  struct wlr_fbox fbox;
+  zn_view_get_surface_fbox(self->view, &fbox);
+
   for (int i = 0; i < rect_count; ++i) {
     damage_box = (struct wlr_fbox){
-        .x = self->view->x + sx + rects[i].x1,
-        .y = self->view->y + sy + rects[i].y1,
+        .x = fbox.x + sx + rects[i].x1,
+        .y = fbox.y + sy + rects[i].y1,
         .width = rects[i].x2 - rects[i].x1,
         .height = rects[i].y2 - rects[i].y1,
     };
