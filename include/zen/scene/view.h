@@ -77,8 +77,6 @@ void zn_view_get_surface_fbox(struct zn_view *self, struct wlr_fbox *fbox);
 
 void zn_view_get_view_fbox(struct zn_view *self, struct wlr_fbox *fbox);
 
-void zn_view_get_decoration_fbox(struct zn_view *self, struct wlr_fbox *fbox);
-
 bool zn_view_has_client_decoration(struct zn_view *self);
 
 bool zn_view_is_mapped(struct zn_view *self);
