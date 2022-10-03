@@ -30,14 +30,14 @@ zn_view_child_get_surface_fbox(
 {
   struct wlr_surface *surface = self->impl->get_wlr_surface(self);
 
-  struct wlr_fbox view_fbox;
-  zn_view_get_surface_fbox(self->view, &view_fbox);
+  struct wlr_fbox surface_fbox;
+  zn_view_get_surface_fbox(self->view, &surface_fbox);
 
   int sx, sy;
   self->impl->get_view_coords(self, &sx, &sy);
 
-  fbox->x = view_fbox.x + sx;
-  fbox->y = view_fbox.y + sy;
+  fbox->x = surface_fbox.x + sx;
+  fbox->y = surface_fbox.y + sy;
   fbox->width = surface->current.width;
   fbox->height = surface->current.height;
 }
