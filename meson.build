@@ -71,7 +71,7 @@ datadir = get_option('datadir')
 cmake = import('cmake')
 remote_display_system_option = cmake.subproject_options()
 remote_display_system_option.add_cmake_defines({
-  'REQUIRED_ZEN_REMOTE_DISPLAY_SYSTEM_VERSION': '0.1.0.1',
+  'REQUIRED_ZEN_REMOTE_DISPLAY_SYSTEM_VERSION': '0.1.0.2',
 })
 remote_display_system_option.append_compile_args(
   'cpp', 

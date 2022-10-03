@@ -1,6 +1,7 @@
 _zen_remote_immersive_backend_srcs =[
   'immersive-backend.cc',
   'log-sink.cc',
+  'loop.cc',
 ]
 
 _zen_remote_immersive_backend_deps =[

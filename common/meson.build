@@ -2,6 +2,7 @@ _zen_common_inc = include_directories('include')
 
 _zen_common_srcs = [
   'log.c',
+  'terminate.c',
 ]
 
 _zen_common_lib = static_library(
