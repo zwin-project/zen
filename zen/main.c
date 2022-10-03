@@ -34,21 +34,22 @@ handle_wlr_log(
 }
 
 static void
-zn_terminate(int exit_code)
+zn_terminate_func(int exit_code, void *data)
 {
   struct zn_server *server = zn_server_get_singleton();
+  UNUSED(data);
+
   zn_server_terminate(server, exit_code);
 }
 
 static void
 zn_terminate_binding_handler(uint32_t time_msec, uint32_t key, void *data)
 {
-  struct zn_server *server = zn_server_get_singleton();
   UNUSED(time_msec);
   UNUSED(key);
   UNUSED(data);
 
-  zn_server_terminate(server, EXIT_SUCCESS);
+  zn_terminate(EXIT_SUCCESS);
 }
 
 static void
@@ -76,11 +77,10 @@ zn_switch_vt_handler(uint32_t time_msec, uint32_t key, void *data)
 static int
 on_term_signal(int signal_number, void *data)
 {
-  struct zn_server *server = zn_server_get_singleton();
   UNUSED(data);
 
   zn_info("Caught signal %d", signal_number);
-  zn_server_terminate(server, EXIT_FAILURE);
+  zn_terminate(EXIT_FAILURE);
 
   return 1;
 }
@@ -88,7 +88,6 @@ on_term_signal(int signal_number, void *data)
 static int
 on_signal_child(int signal_number, void *data)
 {
-  struct zn_server *server = zn_server_get_singleton();
   pid_t pid;
   int status;
   UNUSED(data);
@@ -97,7 +96,7 @@ on_signal_child(int signal_number, void *data)
   while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
     if (startup_command_pid != -1 && pid == startup_command_pid) {
       zn_debug("Startup command exited");
-      zn_server_terminate(server, EXIT_SUCCESS);
+      zn_terminate(EXIT_SUCCESS);
     }
   }
 
@@ -174,6 +173,7 @@ main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
+  zn_set_terminate_func(zn_terminate_func, NULL);
   zn_log_init(ZEN_DEBUG, zn_terminate);
   wlr_log_init(WLR_DEBUG, handle_wlr_log);
 
