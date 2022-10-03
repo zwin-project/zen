@@ -52,6 +52,51 @@ zn_scene_move_board_binding_handler(
 }
 
 static void
+zn_scene_align_focused_view_binding_handler(
+    uint32_t time_msec, uint32_t key, void* data)
+{
+  struct zn_scene* scene = data;
+  UNUSED(time_msec);
+
+  if (scene->focused_view == NULL) return;
+  struct zn_board* board = scene->focused_view->board;
+
+  double new_x, new_y, new_width, new_height;
+  if (key == KEY_UP) {
+    new_width = board->width;
+    new_height = board->height / 2;
+    new_x = 0.;
+    new_y = 0.;
+  } else if (key == KEY_DOWN) {
+    new_width = board->width;
+    new_height = board->height / 2;
+    new_x = 0.;
+    new_y = board->height / 2;
+  } else if (key == KEY_RIGHT) {
+    new_width = board->width / 2;
+    new_height = board->height;
+    new_x = board->width / 2;
+    new_y = 0.;
+  } else if (key == KEY_LEFT) {
+    new_width = board->width / 2;
+    new_height = board->height;
+    new_x = 0.;
+    new_y = 0.;
+  } else if (key == KEY_F) {
+    new_width = board->width;
+    new_height = board->height;
+    new_x = 0.;
+    new_y = 0.;
+  } else {
+    zn_error("Invalid key: %u", key);
+    return;
+  }
+  zn_view_move(scene->focused_view, scene->focused_view->board, new_x, new_y);
+  scene->focused_view->impl->set_size(
+      scene->focused_view, new_width, new_height);
+}
+
+static void
 zn_scene_new_board_binding_handler(uint32_t time_msec, uint32_t key, void* data)
 {
   struct zn_scene* self = data;
@@ -184,6 +229,13 @@ zn_scene_setup_bindings(struct zn_scene* self)
   zn_input_manager_add_key_binding(server->input_manager, KEY_N,
       WLR_MODIFIER_LOGO | WLR_MODIFIER_SHIFT,
       zn_scene_new_board_binding_handler, self);
+
+  char aligning_keys[5] = {KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_F};
+  for (int i = 0; i < 5; i++) {
+    zn_input_manager_add_key_binding(server->input_manager, aligning_keys[i],
+        WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT,
+        zn_scene_align_focused_view_binding_handler, self);
+  }
 }
 
 static void
