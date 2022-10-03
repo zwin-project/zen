@@ -75,10 +75,10 @@ remote_display_system_option.add_cmake_defines({
 })
 remote_display_system_option.append_compile_args(
   'cpp', 
-  '-fmacro-prefix-map=@0@subprojects/remote-display-system/='.format(relative_source_dir)
+  '-fmacro-prefix-map=@0@subprojects/zen-remote-display-system/='.format(relative_source_dir)
 )
 remote_display_system_proj = cmake.subproject(
-  'remote-display-system',
+  'zen-remote-display-system',
   options: remote_display_system_option,
 )
 
