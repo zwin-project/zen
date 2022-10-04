@@ -72,51 +72,6 @@ zn_server_handle_xdg_shell_new_surface(struct wl_listener *listener, void *data)
 }
 
 static void
-zn_server_handle_immersive_backend_disconnected(
-    struct wl_listener *listener, void *data)
-{
-  struct zn_server *self =
-      zn_container_of(listener, self, immersive_backend_disconnected_listener);
-  UNUSED(data);
-
-  if (self->display_system->type == ZEN_DISPLAY_SYSTEM_TYPE_SCREEN) return;
-
-  // TODO: switch display system into "screen" type
-
-  zn_display_system_applied(
-      self->display_system, ZEN_DISPLAY_SYSTEM_TYPE_SCREEN);
-}
-
-static void
-zn_server_handle_display_system_switch(struct wl_listener *listener, void *data)
-{
-  struct zn_server *self =
-      zn_container_of(listener, self, display_system_switch_listener);
-  struct zn_display_system_switch_event *event = data;
-
-  if (self->display_system->type == event->type) return;
-
-  if (event->type == ZEN_DISPLAY_SYSTEM_TYPE_IMMERSIVE) {
-    if (zn_immersive_backend_connect(self->immersive_backend) == false) {
-      zen_display_system_send_warning(event->issuer,
-          ZEN_DISPLAY_SYSTEM_WARNING_NO_IMMERSIVE_DEVICE,
-          "No available immersive device found");
-      zn_warn("Failed to connect to a immersive backend");
-      return;
-    }
-    zn_immersive_backend_start_repaint_loop(self->immersive_backend);
-  } else {
-    // zn_server_immersive_backend_disconnected_handler will be called
-    zn_immersive_backend_disconnect(self->immersive_backend);
-    return;
-  }
-
-  // TODO: switch display system
-
-  zn_display_system_applied(self->display_system, event->type);
-}
-
-static void
 zn_server_handle_xwayland_new_surface(struct wl_listener *listener, void *data)
 {
   struct wlr_xwayland_surface *xwayland_surface = data;
@@ -234,18 +189,6 @@ zn_server_create(struct wl_display *display)
     goto err_allocator;
   }
 
-  self->display_system = zn_display_system_create(self->display);
-  if (self->display_system == NULL) {
-    zn_error("Failed to create display system");
-    goto err_scene;
-  }
-
-  self->immersive_backend = zn_immersive_backend_create(self->loop);
-  if (self->immersive_backend == NULL) {
-    zn_error("Failed to create a immersive backend");
-    goto err_display_system;
-  }
-
   for (int i = 1; i <= 32; i++) {
     sprintf(socket_name_candidate, "wayland-%d", i);
     if (wl_display_add_socket(self->display, socket_name_candidate) >= 0) {
@@ -256,7 +199,7 @@ zn_server_create(struct wl_display *display)
 
   if (self->socket == NULL) {
     zn_error("Failed to open wayland socket");
-    goto err_immersive_backend;
+    goto err_scene;
   }
 
   self->decoration_manager = zn_decoration_manager_create(self->display);
@@ -298,16 +241,6 @@ zn_server_create(struct wl_display *display)
   wl_signal_add(&self->xdg_shell->events.new_surface,
       &self->xdg_shell_new_surface_listener);
 
-  self->display_system_switch_listener.notify =
-      zn_server_handle_display_system_switch;
-  wl_signal_add(&self->display_system->switch_signal,
-      &self->display_system_switch_listener);
-
-  self->immersive_backend_disconnected_listener.notify =
-      zn_server_handle_immersive_backend_disconnected;
-  wl_signal_add(&self->immersive_backend->events.disconnected,
-      &self->immersive_backend_disconnected_listener);
-
   self->xwayland_new_surface_listener.notify =
       zn_server_handle_xwayland_new_surface;
   wl_signal_add(&self->xwayland->events.new_surface,
@@ -323,12 +256,6 @@ err_server_decoration:
 
 err_socket:
   free(self->socket);
-
-err_immersive_backend:
-  zn_immersive_backend_destroy(self->immersive_backend);
-
-err_display_system:
-  zn_display_system_destroy(self->display_system);
 
 err_scene:
   zn_scene_destroy(self->scene);
@@ -368,8 +295,6 @@ zn_server_destroy(struct zn_server *self)
   wlr_xwayland_destroy(self->xwayland);
   zn_decoration_manager_destroy(self->decoration_manager);
   zn_input_manager_destroy(self->input_manager);
-  zn_display_system_destroy(self->display_system);
-  zn_immersive_backend_destroy(self->immersive_backend);
   free(self->socket);
   wlr_allocator_destroy(self->allocator);
   wlr_renderer_destroy(self->renderer);
