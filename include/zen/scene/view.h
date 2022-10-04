@@ -58,6 +58,8 @@ struct zn_view {
 
 void zn_view_bring_to_front(struct zn_view *self);
 
+void zn_view_bring_to_back(struct zn_view *self);
+
 /**
  * @param board must not be NULL except when this view is unmapped with
  * `zn_view_unmap`
