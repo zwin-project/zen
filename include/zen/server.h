@@ -9,10 +9,8 @@
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/xwayland.h>
 
-#include "zen/backend/immersive.h"
 #include "zen/config.h"
 #include "zen/decoration-manager.h"
-#include "zen/display-system.h"
 #include "zen/input/input-manager.h"
 #include "zen/scene/scene.h"
 
@@ -30,9 +28,7 @@ struct zn_server {
   struct zn_decoration_manager *decoration_manager;
 
   struct zn_config *config;
-  struct zn_display_system *display_system;
   struct zn_input_manager *input_manager;
-  struct zn_immersive_backend *immersive_backend;
 
   struct zn_scene *scene;
 
@@ -41,8 +37,6 @@ struct zn_server {
   struct wl_listener new_input_listener;
   struct wl_listener new_output_listener;
   struct wl_listener xdg_shell_new_surface_listener;
-  struct wl_listener display_system_switch_listener;
-  struct wl_listener immersive_backend_disconnected_listener;
   struct wl_listener xwayland_new_surface_listener;
 
   int exit_code;

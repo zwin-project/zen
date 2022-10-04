@@ -1,5 +1,3 @@
-subdir('backend')
-
 build_config_h = configure_file(
   input: 'build-config.h.meson',
   output: 'build-config.h',
@@ -13,7 +11,6 @@ _zen_desktop_srcs = [
   'config.c',
   'cursor.c',
   'decoration-manager.c',
-  'display-system.c',
   'main.c',
   'output.c',
   'screen-renderer.c',
@@ -56,7 +53,6 @@ _zen_desktop_deps = [
   wlr_glew_renderer_dep,
   xkbcommon_dep,
   zen_common_dep,
-  zen_remote_immersive_backend_dep,
 ]
 
 executable(
