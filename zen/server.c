@@ -15,6 +15,26 @@
 static struct zn_server *server_singleton = NULL;
 
 static void
+zn_server_handle_immersive_activate(struct wl_listener *listener, void *data)
+{
+  struct zn_server *self =
+      zn_container_of(listener, self, immersive_activate_listener);
+  UNUSED(data);
+
+  self->display_system = ZEN_DISPLAY_SYSTEM_TYPE_IMMERSIVE;
+}
+
+static void
+zn_server_handle_immersive_deactivated(struct wl_listener *listener, void *data)
+{
+  struct zn_server *self =
+      zn_container_of(listener, self, immersive_deactivated_listener);
+  UNUSED(data);
+
+  self->display_system = ZEN_DISPLAY_SYSTEM_TYPE_SCREEN;
+}
+
+static void
 zn_server_handle_new_input(struct wl_listener *listener, void *data)
 {
   struct zn_server *self = zn_container_of(listener, self, new_input_listener);
@@ -141,6 +161,7 @@ zn_server_create(struct wl_display *display)
   self->display = display;
   self->exit_code = EXIT_FAILURE;
   self->loop = wl_display_get_event_loop(display);
+  self->display_system = ZEN_DISPLAY_SYSTEM_TYPE_SCREEN;
 
   self->backend = wlr_backend_autocreate(self->display);
   if (self->backend == NULL) {
@@ -219,16 +240,39 @@ zn_server_create(struct wl_display *display)
     goto err_server_decoration;
   }
 
+  self->immersive_renderer = zn_immersive_renderer_create(self->scene);
+  if (self->immersive_renderer == NULL) {
+    zn_error("Failed to create an immersive renderer");
+    goto err_input_manager;
+  }
+
+  self->immersive_display_system = zn_immersive_display_system_create(
+      self->display, self->immersive_renderer);
+  if (self->immersive_display_system == NULL) {
+    zn_error("Failed to create immersive display system");
+    goto err_immersive_renderer;
+  }
+
   self->xwayland = wlr_xwayland_create(self->display, self->w_compositor, true);
   if (self->xwayland == NULL) {
     zn_error("Failed to create xwayland");
-    goto err_input_manager;
+    goto err_immersive_display_system;
   }
 
   setenv("DISPLAY", self->xwayland->display_name, true);
   zn_debug("DISPLAY=%s", self->xwayland->display_name);
 
   zn_scene_setup_bindings(self->scene);
+
+  self->immersive_activate_listener.notify =
+      zn_server_handle_immersive_activate;
+  wl_signal_add(&self->immersive_display_system->events.activate,
+      &self->immersive_activate_listener);
+
+  self->immersive_deactivated_listener.notify =
+      zn_server_handle_immersive_deactivated;
+  wl_signal_add(&self->immersive_display_system->events.deactivated,
+      &self->immersive_deactivated_listener);
 
   self->new_input_listener.notify = zn_server_handle_new_input;
   wl_signal_add(&self->backend->events.new_input, &self->new_input_listener);
@@ -247,6 +291,12 @@ zn_server_create(struct wl_display *display)
       &self->xwayland_new_surface_listener);
 
   return self;
+
+err_immersive_display_system:
+  zn_immersive_display_system_destroy(self->immersive_display_system);
+
+err_immersive_renderer:
+  zn_immersive_renderer_destroy(self->immersive_renderer);
 
 err_input_manager:
   zn_input_manager_destroy(self->input_manager);
@@ -293,12 +343,14 @@ void
 zn_server_destroy(struct zn_server *self)
 {
   wlr_xwayland_destroy(self->xwayland);
-  zn_decoration_manager_destroy(self->decoration_manager);
+  zn_immersive_display_system_destroy(self->immersive_display_system);
+  zn_immersive_renderer_destroy(self->immersive_renderer);
   zn_input_manager_destroy(self->input_manager);
+  zn_decoration_manager_destroy(self->decoration_manager);
   free(self->socket);
+  zn_scene_destroy(self->scene);
   wlr_allocator_destroy(self->allocator);
   wlr_renderer_destroy(self->renderer);
-  zn_scene_destroy(self->scene);
   server_singleton = NULL;
   zn_config_destroy(self->config);
   free(self);
