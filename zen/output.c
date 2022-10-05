@@ -94,10 +94,16 @@ zn_output_handle_damage_frame(struct wl_listener *listener, void *data)
 {
   struct zn_output *self =
       zn_container_of(listener, self, damage_frame_listener);
+  struct zn_server *server = zn_server_get_singleton();
   struct timespec now;
   UNUSED(data);
 
   if (self->wlr_output->enabled == false) return;
+
+  if (server->display_system == ZEN_DISPLAY_SYSTEM_TYPE_IMMERSIVE) {
+    // TODO: Display an indication that an immersive display system is in use.
+    return;
+  }
 
   // TODO: add delay to call zn_output_repaint_timer_handler
 

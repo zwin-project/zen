@@ -17,7 +17,11 @@ zn_pointer_handle_motion(struct wl_listener* listener, void* data)
   struct zn_cursor* cursor = server->input_manager->seat->cursor;
   struct wlr_event_pointer_motion* event = data;
 
-  cursor->grab->interface->motion(cursor->grab, event);
+  if (server->display_system == ZEN_DISPLAY_SYSTEM_TYPE_SCREEN) {
+    cursor->grab->interface->motion(cursor->grab, event);
+  } else {
+    // TODO: ray
+  }
 }
 
 static void
@@ -28,7 +32,11 @@ zn_pointer_handle_button(struct wl_listener* listener, void* data)
   struct zn_cursor* cursor = server->input_manager->seat->cursor;
   struct wlr_event_pointer_button* event = data;
 
-  cursor->grab->interface->button(cursor->grab, event);
+  if (server->display_system == ZEN_DISPLAY_SYSTEM_TYPE_SCREEN) {
+    cursor->grab->interface->button(cursor->grab, event);
+  } else {
+    // TODO: ray
+  }
 }
 
 static void
@@ -39,7 +47,11 @@ zn_pointer_handle_axis(struct wl_listener* listener, void* data)
   struct zn_cursor* cursor = server->input_manager->seat->cursor;
   struct wlr_event_pointer_axis* event = data;
 
-  cursor->grab->interface->axis(cursor->grab, event);
+  if (server->display_system == ZEN_DISPLAY_SYSTEM_TYPE_SCREEN) {
+    cursor->grab->interface->axis(cursor->grab, event);
+  } else {
+    // TODO: ray
+  }
 }
 
 static void
@@ -50,7 +62,11 @@ zn_pointer_handle_frame(struct wl_listener* listener, void* data)
   struct zn_server* server = zn_server_get_singleton();
   struct zn_cursor* cursor = server->input_manager->seat->cursor;
 
-  cursor->grab->interface->frame(cursor->grab);
+  if (server->display_system == ZEN_DISPLAY_SYSTEM_TYPE_SCREEN) {
+    cursor->grab->interface->frame(cursor->grab);
+  } else {
+    // TODO: ray
+  }
 }
 
 struct zn_pointer*
