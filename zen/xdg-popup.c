@@ -57,15 +57,19 @@ zn_xdg_popup_view_child_impl_get_wlr_surface(struct zn_view_child* child)
 }
 
 static void
-zn_xdg_popup_view_child_impl_get_view_coords(
-    struct zn_view_child* child, int* sx, int* sy)
+zn_xdg_popup_view_child_impl_get_toplevel_coords(struct zn_view_child* child,
+    double popup_sx, double popup_sy, double* toplevel_sx, double* toplevel_sy)
 {
   struct zn_xdg_popup* self = zn_container_of(child, self, base);
   struct wlr_xdg_surface* surface = self->wlr_xdg_popup->base;
 
+  int sx, sy;
   wlr_xdg_popup_get_toplevel_coords(surface->popup,
       surface->popup->geometry.x - surface->current.geometry.x,
-      surface->popup->geometry.y - surface->current.geometry.y, sx, sy);
+      surface->popup->geometry.y - surface->current.geometry.y, &sx, &sy);
+
+  *toplevel_sx = sx + popup_sx;
+  *toplevel_sy = sy + popup_sy;
 }
 
 static void
@@ -81,7 +85,7 @@ zn_xdg_popup_handle_wlr_xdg_surface_destroy(
 
 static const struct zn_view_child_impl zn_xdg_popup_view_child_impl = {
     .get_wlr_surface = zn_xdg_popup_view_child_impl_get_wlr_surface,
-    .get_view_coords = zn_xdg_popup_view_child_impl_get_view_coords,
+    .get_toplevel_coords = zn_xdg_popup_view_child_impl_get_toplevel_coords,
 };
 
 struct zn_xdg_popup*
