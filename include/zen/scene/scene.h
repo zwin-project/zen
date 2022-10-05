@@ -16,6 +16,10 @@ struct zn_scene {
   struct wl_listener unmap_focused_view_listener;
 
   struct wlr_texture* bg_texture;  // nullable
+
+  struct {
+    struct wl_signal new_board;  // (struct zn_board*)
+  } signals;
 };
 
 void zn_scene_set_focused_view(struct zn_scene* self, struct zn_view* view);
