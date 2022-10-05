@@ -33,8 +33,8 @@ zn_view_child_get_surface_fbox(
   struct wlr_fbox surface_fbox;
   zn_view_get_surface_fbox(self->view, &surface_fbox);
 
-  int sx, sy;
-  self->impl->get_view_coords(self, &sx, &sy);
+  double sx, sy;
+  self->impl->get_toplevel_coords(self, 0, 0, &sx, &sy);
 
   fbox->x = surface_fbox.x + sx;
   fbox->y = surface_fbox.y + sy;
@@ -62,7 +62,6 @@ zn_view_child_damage(struct zn_view_child *self)
   pixman_region32_t damage;
   pixman_box32_t *rects;
   int rect_count;
-  int sx, sy;
 
   if (!zn_view_child_is_mapped(self) || self->view->board->screen == NULL)
     return;
@@ -72,7 +71,8 @@ zn_view_child_damage(struct zn_view_child *self)
   wlr_surface_get_effective_damage(surface, &damage);
   rects = pixman_region32_rectangles(&damage, &rect_count);
 
-  self->impl->get_view_coords(self, &sx, &sy);
+  double sx, sy;
+  self->impl->get_toplevel_coords(self, 0, 0, &sx, &sy);
 
   struct wlr_fbox fbox;
   zn_view_get_surface_fbox(self->view, &fbox);
