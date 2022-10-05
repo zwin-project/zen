@@ -13,8 +13,6 @@ struct zn_board_screen_assigned_event {
 struct zn_board {
   double width, height;
 
-  struct zn_scene *scene;
-
   // List of mapped zn_view in z-order, from bottom to top
   struct wl_list view_list;  // zn_view::link
 
@@ -38,6 +36,6 @@ bool zn_board_is_dangling(struct zn_board *self);
 
 void zn_board_assign_to_screen(struct zn_board *self, struct zn_screen *screen);
 
-struct zn_board *zn_board_create(struct zn_scene *scene);
+struct zn_board *zn_board_create(void);
 
 void zn_board_destroy(struct zn_board *self);

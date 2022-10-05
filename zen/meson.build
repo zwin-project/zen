@@ -20,6 +20,11 @@ _zen_desktop_srcs = [
   'xdg-toplevel-view.c',
   'xwayland-view.c',
 
+  'immersive/remote/display-system.c',
+  'immersive/remote/object/board.c',
+  'immersive/remote/renderer.c',
+  'immersive/remote/scene.c',
+
   'input/cursor-grab-move.c',
   'input/cursor-grab-resize.c',
   'input/input-device.c',
