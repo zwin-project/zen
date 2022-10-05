@@ -61,7 +61,7 @@ zn_board_assign_to_screen(struct zn_board *self, struct zn_screen *screen)
 }
 
 struct zn_board *
-zn_board_create(struct zn_scene *scene)
+zn_board_create(void)
 {
   struct zn_board *self;
 
@@ -74,11 +74,7 @@ zn_board_create(struct zn_scene *scene)
   self->width = 1920;
   self->height = 1080;
 
-  self->scene = scene;
-
   wl_list_init(&self->view_list);
-
-  wl_list_insert(scene->board_list.prev, &self->link);
 
   wl_list_init(&self->screen_link);
   self->screen = NULL;
