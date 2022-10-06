@@ -96,28 +96,23 @@ zn_screen_renderer_render_background(struct zn_output *output,
 }
 
 static void
-zn_screen_renderer_get_surface_fbox(struct wlr_surface *surface,
-    struct zn_view *view, int surface_x, int surface_y,
-    struct wlr_fbox *surface_box)
-{
-  struct wlr_fbox fbox;
-  zn_view_get_surface_fbox(view, &fbox);
-
-  surface_box->x = fbox.x + surface_x;
-  surface_box->y = fbox.y + surface_y;
-  surface_box->width = surface->current.width;
-  surface_box->height = surface->current.height;
-}
-
-static void
 zn_screen_renderer_for_each_surface_iterator(
     struct wlr_surface *surface, int surface_x, int surface_y, void *user_data)
 {
   struct surface_iterator_data *data = user_data;
   struct wlr_fbox surface_box;
 
-  zn_screen_renderer_get_surface_fbox(
-      surface, data->view, surface_x, surface_y, &surface_box);
+  {
+    struct wlr_fbox fbox;
+    zn_view_get_surface_fbox(data->view, &fbox);
+
+    surface_box = (struct wlr_fbox){
+        .x = fbox.x + surface_x,
+        .y = fbox.y + surface_y,
+        .width = surface->current.width,
+        .height = surface->current.height,
+    };
+  }
 
   data->iterator(
       data->screen, surface, data->renderer, &surface_box, data->screen_damage);
