@@ -98,6 +98,7 @@ zn_view_damage_whole(struct zn_view *self)
 {
   struct wlr_fbox fbox;
 
+  // TODO: handle moving subsurface
   if (zn_view_has_client_decoration(self)) {
     zn_view_get_surface_fbox(self, &fbox);
   } else {
