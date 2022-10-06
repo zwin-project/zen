@@ -176,7 +176,7 @@ zn_screen_renderer_render_view_popups(struct zn_screen *screen,
 }
 
 static void
-zn_screen_renderer_render_decoration(struct zn_screen *screen,
+zn_screen_renderer_render_server_decoration(struct zn_screen *screen,
     struct zn_view *view, struct wlr_renderer *renderer,
     pixman_region32_t *screen_damage)
 {
@@ -202,15 +202,15 @@ zn_screen_renderer_render_decoration(struct zn_screen *screen,
   {
     pixman_region32_t region;
     struct wlr_fbox surface_fbox;
-    struct wlr_box transformed_window_box;
+    struct wlr_box transformed_surface_box;
 
     zn_view_get_surface_fbox(view, &surface_fbox);
     zn_output_box_effective_to_transformed_coords(
-        output, &surface_fbox, &transformed_window_box);
+        output, &surface_fbox, &transformed_surface_box);
 
-    pixman_region32_init_rect(&region, transformed_window_box.x,
-        transformed_window_box.y, transformed_window_box.width,
-        transformed_window_box.height);
+    pixman_region32_init_rect(&region, transformed_surface_box.x,
+        transformed_surface_box.y, transformed_surface_box.width,
+        transformed_surface_box.height);
     pixman_region32_subtract(&render_damage, &render_damage, &region);
 
     pixman_region32_fini(&region);
@@ -255,7 +255,8 @@ zn_screen_renderer_render_view(struct zn_screen *screen, struct zn_view *view,
   };
 
   if (!zn_view_has_client_decoration(view)) {
-    zn_screen_renderer_render_decoration(screen, view, renderer, screen_damage);
+    zn_screen_renderer_render_server_decoration(
+        screen, view, renderer, screen_damage);
   }
 
   wlr_surface_for_each_surface(
