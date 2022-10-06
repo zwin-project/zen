@@ -58,7 +58,7 @@ zn_xdg_popup_view_child_impl_get_wlr_surface(struct zn_view_child* child)
 
 static void
 zn_xdg_popup_view_child_impl_get_toplevel_coords(struct zn_view_child* child,
-    double popup_sx, double popup_sy, double* toplevel_sx, double* toplevel_sy)
+    double child_sx, double child_sy, double* toplevel_sx, double* toplevel_sy)
 {
   struct zn_xdg_popup* self = zn_container_of(child, self, base);
   struct wlr_xdg_surface* surface = self->wlr_xdg_popup->base;
@@ -68,8 +68,8 @@ zn_xdg_popup_view_child_impl_get_toplevel_coords(struct zn_view_child* child,
       surface->popup->geometry.x - surface->current.geometry.x,
       surface->popup->geometry.y - surface->current.geometry.y, &sx, &sy);
 
-  *toplevel_sx = sx + popup_sx;
-  *toplevel_sy = sy + popup_sy;
+  *toplevel_sx = sx + child_sx;
+  *toplevel_sy = sy + child_sy;
 }
 
 static void

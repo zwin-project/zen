@@ -8,8 +8,8 @@ struct zn_view_child;
 
 struct zn_view_child_impl {
   struct wlr_surface *(*get_wlr_surface)(struct zn_view_child *child);
-  void (*get_toplevel_coords)(struct zn_view_child *child, double popup_sx,
-      double popup_sy, double *toplevel_sx, double *toplevel_sy);
+  void (*get_toplevel_coords)(struct zn_view_child *child, double child_sx,
+      double child_sy, double *toplevel_sx, double *toplevel_sy);
 };
 
 /*
