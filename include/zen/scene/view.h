@@ -32,6 +32,17 @@ enum zn_view_type {
   ZN_VIEW_XWAYLAND,
 };
 
+enum zn_view_area_type {
+  ZN_VIEW_AREA_TYPE_INVALID = 0,
+  ZN_VIEW_AREA_TYPE_SURFACE = 1 << 0,
+  ZN_VIEW_AREA_TYPE_TITLEBAR = 1 << 1,
+
+  ZN_VIEW_AREA_TYPE_BORDER_TOP = 1 << 2,
+  ZN_VIEW_AREA_TYPE_BORDER_BOTTOM = 1 << 3,
+  ZN_VIEW_AREA_TYPE_BORDER_LEFT = 1 << 4,
+  ZN_VIEW_AREA_TYPE_BORDER_RIGHT = 1 << 5,
+};
+
 struct zn_view {
   double x, y;
 

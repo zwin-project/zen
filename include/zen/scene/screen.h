@@ -6,6 +6,7 @@
 #include "zen/output.h"
 #include "zen/scene/board.h"
 #include "zen/scene/screen-layout.h"
+#include "zen/scene/view.h"
 
 typedef void (*zn_screen_for_each_visible_surface_callback_t)(
     struct wlr_surface *surface, void *user_data);
@@ -28,6 +29,13 @@ struct zn_screen {
 
 void zn_screen_for_each_visible_surface(struct zn_screen *self,
     zn_screen_for_each_visible_surface_callback_t callback, void *data);
+
+/**
+ * @param view can be NULL
+ * @retval bits sum of enum zn_view_area_type
+ */
+uint32_t zn_screen_get_view_area_type_at(
+    struct zn_screen *self, double x, double y, struct zn_view **view);
 
 /**
  * @param surface_x can be NULL

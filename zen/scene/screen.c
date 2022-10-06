@@ -49,6 +49,88 @@ zn_screen_for_each_visible_surface(struct zn_screen *self,
   }
 }
 
+uint32_t
+zn_screen_get_view_area_type_at(
+    struct zn_screen *self, double x, double y, struct zn_view **view)
+{
+  struct zn_view *view_iterator;
+  struct zn_board *board = zn_screen_get_current_board(self);
+
+  wl_list_for_each_reverse (view_iterator, &board->view_list, link) {
+    struct wlr_fbox fbox;
+    zn_view_get_view_fbox(view_iterator, &fbox);
+    if (!zn_wlr_fbox_contains_point(&fbox, x, y)) {
+      continue;
+    }
+    const double view_width = fbox.width;
+    const double view_height = fbox.height;
+
+    if (view) {
+      *view = view_iterator;
+    }
+
+    zn_view_get_surface_fbox(view_iterator, &fbox);
+    if (zn_wlr_fbox_contains_point(&fbox, x, y)) {
+      return ZN_VIEW_AREA_TYPE_SURFACE;
+    }
+
+    fbox = (struct wlr_fbox){
+        .x = view_iterator->x + VIEW_DECORATION_BORDER,
+        .y = view_iterator->y + VIEW_DECORATION_BORDER,
+        .width = fbox.width,
+        .height = VIEW_DECORATION_TITLEBAR,
+    };
+    if (zn_wlr_fbox_contains_point(&fbox, x, y)) {
+      return ZN_VIEW_AREA_TYPE_TITLEBAR;
+    }
+
+    uint32_t edges = 0;
+    uint32_t iter[4] = {
+        ZN_VIEW_AREA_TYPE_BORDER_TOP,
+        ZN_VIEW_AREA_TYPE_BORDER_BOTTOM,
+        ZN_VIEW_AREA_TYPE_BORDER_LEFT,
+        ZN_VIEW_AREA_TYPE_BORDER_RIGHT,
+    };
+
+    for (int i = 0; i < 4; ++i) {
+      /** w == view width, h == view height
+       *  B == VIEW_DECORATION_BORDER
+       *  box.? |  x  |  y  | w | h
+       * =======+=====+=====+===+===
+       *    Top |  0  |  0  | w | B
+       * Bottom |  0  | h-B | w | B
+       *   Left |  0  |  0  | B | h
+       *  Right | w-B |  0  | B | h
+       */
+      fbox = (struct wlr_fbox){
+          .x = view_iterator->x + ((iter[i] == ZN_VIEW_AREA_TYPE_BORDER_RIGHT)
+                                          ? view_width - VIEW_DECORATION_BORDER
+                                          : 0),
+          .y = view_iterator->y + ((iter[i] == ZN_VIEW_AREA_TYPE_BORDER_BOTTOM)
+                                          ? view_height - VIEW_DECORATION_BORDER
+                                          : 0),
+          .width = (iter[i] <= ZN_VIEW_AREA_TYPE_BORDER_BOTTOM)
+                       ? view_width
+                       : VIEW_DECORATION_BORDER,
+          .height = (iter[i] <= ZN_VIEW_AREA_TYPE_BORDER_BOTTOM)
+                        ? VIEW_DECORATION_BORDER
+                        : view_height,
+      };
+
+      if (zn_wlr_fbox_contains_point(&fbox, x, y)) {
+        edges |= iter[i];
+      }
+    }
+
+    return edges;
+  }
+
+  if (view) {
+    *view = NULL;
+  }
+  return ZN_VIEW_AREA_TYPE_INVALID;
+}
+
 struct wlr_surface *
 zn_screen_get_surface_at(struct zn_screen *self, double x, double y,
     double *surface_x, double *surface_y, struct zn_view **view)
