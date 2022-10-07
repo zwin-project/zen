@@ -91,12 +91,10 @@ default_grab_button(
       seat, event->time_msec, event->button, event->state);
 
   if (event->state == WLR_BUTTON_PRESSED) {
-    zn_screen_get_surface_at(
-        cursor->screen, cursor->x, cursor->y, NULL, NULL, &view);
-    zn_scene_set_focused_view(server->scene, view);
-
     const uint32_t type = zn_screen_get_view_area_type_at(
         grab->cursor->screen, grab->cursor->x, grab->cursor->y, &view);
+    zn_scene_set_focused_view(server->scene, view);
+
     if (type == ZN_VIEW_AREA_TYPE_TITLEBAR) {
       zn_cursor_grab_move_start(cursor, view);
     }
