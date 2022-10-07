@@ -8,6 +8,8 @@
 #include <wlr/xcursor.h>
 
 #include "zen-common.h"
+#include "zen/input/cursor-grab-move.h"
+#include "zen/input/cursor-grab-resize.h"
 #include "zen/input/cursor-grab.h"
 #include "zen/scene/screen-layout.h"
 #include "zen/scene/view.h"
@@ -34,10 +36,42 @@ default_grab_motion(
   if (surface) {
     wlr_seat_pointer_enter(seat, surface, surface_x, surface_y);
     wlr_seat_pointer_send_motion(seat, event->time_msec, surface_x, surface_y);
-  } else {
+    return;
+  }
+
+  const uint32_t type = zn_screen_get_view_area_type_at(
+      grab->cursor->screen, grab->cursor->x, grab->cursor->y, NULL);
+  if (type < ZN_VIEW_AREA_TYPE_BORDER_TOP) {
     zn_cursor_set_xcursor(grab->cursor, "left_ptr");
     wlr_seat_pointer_clear_focus(seat);
+    return;
   }
+
+  char vertical = '\0', horizontal = '\0';
+  if (type & ZN_VIEW_AREA_TYPE_BORDER_LEFT) {
+    horizontal = 'w';
+  }
+  if (type & ZN_VIEW_AREA_TYPE_BORDER_RIGHT) {
+    horizontal = 'e';
+  }
+  if (type & ZN_VIEW_AREA_TYPE_BORDER_TOP) {
+    vertical = 'n';
+  }
+  if (type & ZN_VIEW_AREA_TYPE_BORDER_BOTTOM) {
+    vertical = 's';
+  }
+
+  /// [ns][we]-resize
+  char cursor_name[10] = "xx-resize", *p = cursor_name + 2;
+  if (horizontal) {
+    --p;
+    *p = horizontal;
+  }
+  if (vertical) {
+    --p;
+    *p = vertical;
+  }
+  zn_cursor_set_xcursor(grab->cursor, p);
 }
 
 static void
@@ -60,6 +94,17 @@ default_grab_button(
     zn_screen_get_surface_at(
         cursor->screen, cursor->x, cursor->y, NULL, NULL, &view);
     zn_scene_set_focused_view(server->scene, view);
+
+    const uint32_t type = zn_screen_get_view_area_type_at(
+        grab->cursor->screen, grab->cursor->x, grab->cursor->y, &view);
+    if (type == ZN_VIEW_AREA_TYPE_TITLEBAR) {
+      zn_cursor_grab_move_start(cursor, view);
+    }
+    if (type >= ZN_VIEW_AREA_TYPE_BORDER_TOP) {
+      // WLR_EDGE_TOP                 == 1 << 0
+      // ZN_VIEW_AREA_TYPE_BORDER_TOP == 1 << 2
+      zn_cursor_grab_resize_start(cursor, view, type >> 2);
+    }
   }
 }
 
