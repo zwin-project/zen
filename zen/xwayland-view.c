@@ -18,7 +18,13 @@ zn_xwayland_view_handle_wlr_surface_commit(
 
   zn_view_damage(&self->base);
 
-  // FIXME: when resizing, adjust the position of the view
+  if (!self->base.resize_status.resizing) {
+    return;
+  }
+
+  zn_view_update_pos_on_resizing(&self->base, data);
+
+  self->base.resize_status.resizing = false;
 }
 
 static void
