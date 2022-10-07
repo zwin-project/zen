@@ -168,7 +168,6 @@ zn_cursor_grab_resize_start(
     return;
   }
 
-  zn_debug(">> edge: %d", edges);
   const char* xcursor_name[] = {
       [WLR_EDGE_TOP] = "n-resize",
       [WLR_EDGE_BOTTOM] = "s-resize",
