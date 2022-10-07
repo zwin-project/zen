@@ -35,6 +35,13 @@ resize_grab_motion(
     height += diff_height;
   }
 
+  if (width <= 0) {
+    width = 1;
+  }
+  if (height <= 0) {
+    height = 1;
+  }
+
   self->view->resize_status.resizing = true;
   self->view->resize_status.last_serial =
       self->view->impl->set_size(self->view, width, height);
