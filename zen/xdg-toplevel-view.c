@@ -23,20 +23,7 @@ zn_xdg_toplevel_view_handle_wlr_surface_commit(
     return;
   }
 
-  if (!(self->base.resize_status.edges & (WLR_EDGE_LEFT | WLR_EDGE_TOP))) {
-    return;
-  }
-
-  struct wlr_surface* surface = data;
-  int dx = 0, dy = 0;
-  if (self->base.resize_status.edges & WLR_EDGE_LEFT) {
-    dx = surface->previous.width - surface->current.width;
-  }
-  if (self->base.resize_status.edges & WLR_EDGE_TOP) {
-    dy = surface->previous.height - surface->current.height;
-  }
-  zn_view_move(
-      &self->base, self->base.board, self->base.x + dx, self->base.y + dy);
+  zn_view_update_pos_on_resizing(&self->base, data);
 
   if (self->wlr_xdg_toplevel->base->current.configure_serial ==
       self->base.resize_status.last_serial) {

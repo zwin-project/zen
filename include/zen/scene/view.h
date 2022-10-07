@@ -67,15 +67,6 @@ struct zn_view {
   } events;
 };
 
-void zn_view_bring_to_front(struct zn_view *self);
-
-/**
- * @param board must not be NULL except when this view is unmapped with
- * `zn_view_unmap`
- */
-void zn_view_move(struct zn_view *self, struct zn_board *new_board,
-    double board_x, double board_y);
-
 /**
  * Add the damage of all surfaces associated with the view to the output where
  * the view id displayed.
@@ -83,6 +74,18 @@ void zn_view_move(struct zn_view *self, struct zn_board *new_board,
 void zn_view_damage(struct zn_view *self);
 
 void zn_view_damage_whole(struct zn_view *self);
+
+void zn_view_bring_to_front(struct zn_view *self);
+
+void zn_view_update_pos_on_resizing(
+    struct zn_view *self, struct wlr_surface *surface);
+
+/**
+ * @param board must not be NULL except when this view is unmapped with
+ * `zn_view_unmap`
+ */
+void zn_view_move(struct zn_view *self, struct zn_board *new_board,
+    double board_x, double board_y);
 
 void zn_view_get_surface_fbox(struct zn_view *self, struct wlr_fbox *fbox);
 
