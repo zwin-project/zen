@@ -122,6 +122,12 @@ zn_cursor_grab_resize_create(
   self->init_cursor_x = cursor->x;
   self->init_cursor_y = cursor->y;
 
+  if (!zn_view_has_client_decoration(view)) {
+    self->init_view_width -= VIEW_DECORATION_BORDER * 2;
+    self->init_view_height -=
+        VIEW_DECORATION_BORDER * 2 + VIEW_DECORATION_TITLEBAR;
+  }
+
   self->view = view;
   self->base.interface = &resize_grab_interface;
   self->base.cursor = cursor;
