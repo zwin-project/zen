@@ -58,6 +58,7 @@ _zen_desktop_deps = [
   wlr_glew_renderer_dep,
   xkbcommon_dep,
   zen_common_dep,
+  znr_dep,
 ]
 
 executable(
