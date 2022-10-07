@@ -36,29 +36,29 @@ void _zn_abort(const char *format, ...) ATTRIB_PRINTF(1, 2);
 bool _zn_assert(bool condition, const char *format, ...) ATTRIB_PRINTF(2, 3);
 
 #define zn_log(verb, fmt, ...) \
-  _zn_log(verb, "[%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
+  _zn_log(verb, "[zen] [%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 
 #define zn_error(fmt, ...) \
-  _zn_log(ZEN_ERROR, "[%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
+  _zn_log(ZEN_ERROR, "[zen] [%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 
 #define zn_warn(fmt, ...) \
-  _zn_log(ZEN_WARN, "[%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
+  _zn_log(ZEN_WARN, "[zen] [%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 
 #define zn_info(fmt, ...) \
-  _zn_log(ZEN_INFO, "[%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
+  _zn_log(ZEN_INFO, "[zen] [%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 
 #define zn_debug(fmt, ...) \
-  _zn_log(ZEN_DEBUG, "[%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
+  _zn_log(ZEN_DEBUG, "[zen] [%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 
 #define zn_log_errno(verb, fmt, ...) \
-  zn_log(verb, fmt ": %s", ##__VA_ARGS__, strerror(errno))
+  zn_log(verb, "[zen] " fmt ": %s", ##__VA_ARGS__, strerror(errno))
 
 #define zn_abort(fmt, ...) \
-  _zn_abort("[%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
+  _zn_abort("[zen] [%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 
-#define zn_assert(cond, fmt, ...) \
-  _zn_assert(                     \
-      cond, "[%s:%d] %s: " fmt, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define zn_assert(cond, fmt, ...)                                          \
+  _zn_assert(cond, "[zen] [%s:%d] %s: " fmt, __FILE__, __LINE__, __func__, \
+      ##__VA_ARGS__)
 
 #ifdef __cplusplus
 }
