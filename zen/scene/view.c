@@ -88,6 +88,17 @@ zn_view_update_pos_on_resizing(
 {
   assert(self->resize_status.resizing);
 
+  {
+    struct wlr_fbox damage_box = {
+        .x = self->x,
+        .y = self->y,
+        .width = 1 + surface->previous.width + VIEW_DECORATION_BORDER * 2,
+        .height = 1 + surface->previous.height + VIEW_DECORATION_BORDER * 2 +
+                  VIEW_DECORATION_TITLEBAR,
+    };
+    zn_view_add_damage_fbox(self, &damage_box);
+  }
+
   if (!(self->resize_status.edges & (WLR_EDGE_LEFT | WLR_EDGE_TOP))) {
     return;
   }
