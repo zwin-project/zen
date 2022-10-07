@@ -4,3 +4,5 @@
 # Other
 build/
 
+subprojects/*
+!subprojects/zen-remote

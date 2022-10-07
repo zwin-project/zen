@@ -1,6 +1,7 @@
 #include "zen/immersive/remote/display-system.h"
 
 #include <wayland-server-core.h>
+#include <znr/log.h>
 
 #include "zen-common.h"
 
@@ -33,7 +34,9 @@ zn_remote_display_system_protocol_switch_type(
   if (type == ZEN_DISPLAY_SYSTEM_TYPE_IMMERSIVE) {
     wl_signal_emit(&self->base.events.activate, NULL);
     zn_remote_immersive_renderer_activate(self->renderer);
+    znr_remote_start(self->remote);
   } else {
+    znr_remote_stop(self->remote);
     zn_remote_immersive_renderer_deactivate(self->renderer);
     wl_signal_emit(&self->base.events.deactivated, NULL);
   }
@@ -83,6 +86,8 @@ zn_immersive_display_system_create(
 {
   struct zn_remote_display_system* self;
 
+  znr_log_init();
+
   self = zalloc(sizeof *self);
   if (self == NULL) {
     zn_error("Failed to allocate memory");
@@ -96,6 +101,7 @@ zn_immersive_display_system_create(
   wl_list_init(&self->resources);
 
   self->renderer = zn_container_of(renderer, self->renderer, base);
+  self->remote = znr_remote_create(display);
 
   wl_signal_init(&self->base.events.activate);
   wl_signal_init(&self->base.events.deactivated);
@@ -110,6 +116,8 @@ void
 zn_immersive_display_system_destroy(struct zn_immersive_display_system* parent)
 {
   struct zn_remote_display_system* self = zn_container_of(parent, self, base);
+
+  znr_remote_destroy(self->remote);
 
   wl_global_destroy(self->global);
   wl_list_remove(&self->resources);
