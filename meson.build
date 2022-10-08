@@ -66,14 +66,6 @@ endif
 
 datadir = get_option('datadir')
 
-# zen remote project
-
-zen_remote_proj = subproject(
-  'zen-remote',
-  required: true,
-  version: '0.1.0.3',
-)
-
 # generic version requirements
 
 openvr_req = '>= 1.12.5'
@@ -81,6 +73,7 @@ wayland_protocols_req = '>= 1.24'
 wayland_server_req = '>= 1.18.0'
 wlroots_req = ['>= 0.15', '< 0.16']
 wlr_glew_renderer_req = wlroots_req
+zen_remote_server_req = '0.1.0.4'
 
 # dependencies
 
@@ -94,7 +87,7 @@ wayland_server_dep = dependency('wayland-server', version: wayland_server_req)
 wlroots_dep = dependency('wlroots', version: wlroots_req)
 wlr_glew_renderer_dep = dependency('wlr-glew-renderer', version: wlr_glew_renderer_req)
 xkbcommon_dep = dependency('xkbcommon')
-zen_remote_server_dep = zen_remote_proj.get_variable('zen_remote_server_dep')
+zen_remote_server_dep = dependency('zen-remote-server', version: zen_remote_server_req)
 
 if get_option('cui-client')
   wayland_client_dep = dependency('wayland-client')
@@ -135,7 +128,6 @@ install_data(
   'zen.desktop',
   install_dir: join_paths(datadir, 'wayland-sessions')
 )
-
 
 if get_option('tests')
   subdir('tests')
