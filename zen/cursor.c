@@ -22,7 +22,6 @@ default_grab_motion(
   struct zn_server* server = zn_server_get_singleton();
   struct wlr_seat* seat = server->input_manager->seat->wlr_seat;
   double surface_x, surface_y;
-  struct wlr_surface* surface;
 
   zn_cursor_move_relative(grab->cursor, event->delta_x, event->delta_y);
 
@@ -30,17 +29,21 @@ default_grab_motion(
     return;
   }
 
-  surface = zn_screen_get_surface_at(grab->cursor->screen, grab->cursor->x,
-      grab->cursor->y, &surface_x, &surface_y, NULL);
-
-  if (surface) {
-    wlr_seat_pointer_enter(seat, surface, surface_x, surface_y);
-    wlr_seat_pointer_send_motion(seat, event->time_msec, surface_x, surface_y);
-    return;
-  }
-
   const uint32_t type = zn_screen_get_view_area_type_at(
       grab->cursor->screen, grab->cursor->x, grab->cursor->y, NULL);
+
+  if (type == ZN_VIEW_AREA_TYPE_SURFACE) {
+    struct wlr_surface* surface = zn_screen_get_surface_at(grab->cursor->screen,
+        grab->cursor->x, grab->cursor->y, &surface_x, &surface_y, NULL);
+
+    if (surface) {
+      wlr_seat_pointer_enter(seat, surface, surface_x, surface_y);
+      wlr_seat_pointer_send_motion(
+          seat, event->time_msec, surface_x, surface_y);
+      return;
+    }
+  }
+
   if (type < ZN_VIEW_AREA_TYPE_BORDER_TOP) {
     zn_cursor_set_xcursor(grab->cursor, "left_ptr");
     wlr_seat_pointer_clear_focus(seat);
@@ -61,7 +64,7 @@ default_grab_motion(
     vertical = 's';
   }
 
-  /// [ns][we]-resize
+  // [ns][we]-resize
   char cursor_name[10] = "xx-resize", *p = cursor_name + 2;
   if (horizontal) {
     --p;
