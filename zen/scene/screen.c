@@ -85,16 +85,17 @@ zn_screen_get_view_area_type_at(
     }
 
     uint32_t edges = 0;
-    uint32_t iter[4] = {
+    uint32_t borders[4] = {
         ZN_VIEW_AREA_TYPE_BORDER_TOP,
         ZN_VIEW_AREA_TYPE_BORDER_BOTTOM,
         ZN_VIEW_AREA_TYPE_BORDER_LEFT,
         ZN_VIEW_AREA_TYPE_BORDER_RIGHT,
     };
 
-    for (int i = 0; i < 4; ++i) {
-      /** w == view width, h == view height
-       *  B == VIEW_DECORATION_BORDER
+    for (unsigned long int i = 0; i < ARRAY_LENGTH(borders); ++i) {
+      /**
+       * w == view width, h == view height
+       * B == VIEW_DECORATION_BORDER
        *  box.? |  x  |  y  | w | h
        * =======+=====+=====+===+===
        *    Top |  0  |  0  | w | B
@@ -103,22 +104,26 @@ zn_screen_get_view_area_type_at(
        *  Right | w-B |  0  | B | h
        */
       fbox = (struct wlr_fbox){
-          .x = view_iterator->x + ((iter[i] == ZN_VIEW_AREA_TYPE_BORDER_RIGHT)
-                                          ? view_width - VIEW_DECORATION_BORDER
-                                          : 0),
-          .y = view_iterator->y + ((iter[i] == ZN_VIEW_AREA_TYPE_BORDER_BOTTOM)
-                                          ? view_height - VIEW_DECORATION_BORDER
-                                          : 0),
-          .width = (iter[i] <= ZN_VIEW_AREA_TYPE_BORDER_BOTTOM)
-                       ? view_width
-                       : VIEW_DECORATION_BORDER,
-          .height = (iter[i] <= ZN_VIEW_AREA_TYPE_BORDER_BOTTOM)
+          .x = view_iterator->x +  //
+               ((borders[i] == ZN_VIEW_AREA_TYPE_BORDER_RIGHT)
+                       ? view_width - VIEW_DECORATION_BORDER
+                       : 0),
+          .y = view_iterator->y +  //
+               ((borders[i] == ZN_VIEW_AREA_TYPE_BORDER_BOTTOM)
+                       ? view_height - VIEW_DECORATION_BORDER
+                       : 0),
+          .width = (borders[i] & (ZN_VIEW_AREA_TYPE_BORDER_LEFT |
+                                     ZN_VIEW_AREA_TYPE_BORDER_RIGHT))
+                       ? VIEW_DECORATION_BORDER
+                       : view_width,
+          .height = (borders[i] & (ZN_VIEW_AREA_TYPE_BORDER_TOP |
+                                      ZN_VIEW_AREA_TYPE_BORDER_BOTTOM))
                         ? VIEW_DECORATION_BORDER
                         : view_height,
       };
 
       if (zn_wlr_fbox_contains_point(&fbox, x, y)) {
-        edges |= iter[i];
+        edges |= borders[i];
       }
     }
 
