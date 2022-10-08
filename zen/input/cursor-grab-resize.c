@@ -175,18 +175,7 @@ zn_cursor_grab_resize_start(
     return;
   }
 
-  const char* xcursor_name[] = {
-      [WLR_EDGE_TOP] = "n-resize",
-      [WLR_EDGE_BOTTOM] = "s-resize",
-      [WLR_EDGE_LEFT] = "w-resize",
-      [WLR_EDGE_RIGHT] = "e-resize",
-      [WLR_EDGE_TOP | WLR_EDGE_LEFT] = "nw-resize",
-      [WLR_EDGE_TOP | WLR_EDGE_RIGHT] = "ne-resize",
-      [WLR_EDGE_BOTTOM | WLR_EDGE_LEFT] = "sw-resize",
-      [WLR_EDGE_BOTTOM | WLR_EDGE_RIGHT] = "se-resize",
-  };
-
   wlr_seat_pointer_clear_focus(seat);
-  zn_cursor_set_xcursor(cursor, xcursor_name[edges]);
+  zn_cursor_set_xcursor(cursor, zn_cursor_get_resize_xcursor_name(edges));
   zn_cursor_start_grab(cursor, &self->base);
 }

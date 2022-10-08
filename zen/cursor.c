@@ -50,31 +50,8 @@ default_grab_motion(
     return;
   }
 
-  char vertical = '\0', horizontal = '\0';
-  if (type & ZN_VIEW_AREA_TYPE_BORDER_LEFT) {
-    horizontal = 'w';
-  }
-  if (type & ZN_VIEW_AREA_TYPE_BORDER_RIGHT) {
-    horizontal = 'e';
-  }
-  if (type & ZN_VIEW_AREA_TYPE_BORDER_TOP) {
-    vertical = 'n';
-  }
-  if (type & ZN_VIEW_AREA_TYPE_BORDER_BOTTOM) {
-    vertical = 's';
-  }
-
-  // [ns][we]-resize
-  char cursor_name[10] = "xx-resize", *p = cursor_name + 2;
-  if (horizontal) {
-    --p;
-    *p = horizontal;
-  }
-  if (vertical) {
-    --p;
-    *p = vertical;
-  }
-  zn_cursor_set_xcursor(grab->cursor, p);
+  zn_cursor_set_xcursor(
+      grab->cursor, zn_cursor_get_resize_xcursor_name(type >> 2));
 }
 
 static void
@@ -308,6 +285,26 @@ zn_cursor_end_grab(struct zn_cursor* self)
   if (surface) {
     wlr_seat_pointer_enter(seat, surface, surface_x, surface_y);
   }
+}
+
+/**
+ * @param edges bits sum of enum wlr_edges
+ */
+const char*
+zn_cursor_get_resize_xcursor_name(uint32_t edges)
+{
+  const char* xcursor_name[] = {
+      [WLR_EDGE_TOP] = "top_side",
+      [WLR_EDGE_BOTTOM] = "bottom_side",
+      [WLR_EDGE_LEFT] = "left_side",
+      [WLR_EDGE_RIGHT] = "right_side",
+      [WLR_EDGE_TOP | WLR_EDGE_LEFT] = "top_left_corner",
+      [WLR_EDGE_TOP | WLR_EDGE_RIGHT] = "top_right_corner",
+      [WLR_EDGE_BOTTOM | WLR_EDGE_LEFT] = "bottom_left_corner",
+      [WLR_EDGE_BOTTOM | WLR_EDGE_RIGHT] = "bottom_right_corner",
+  };
+
+  return xcursor_name[edges];
 }
 
 void
