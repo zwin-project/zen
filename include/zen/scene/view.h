@@ -7,7 +7,7 @@
 
 #include "zen/scene/scene.h"
 
-#define VIEW_DECORATION_BORDER 3
+#define VIEW_DECORATION_BORDER 8
 #define VIEW_DECORATION_TITLEBAR 27
 
 struct zn_view;
