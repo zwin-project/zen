@@ -232,6 +232,25 @@ zn_view_unmap(struct zn_view *self)
   zn_view_move(self, NULL, 0, 0);
 }
 
+uint32_t
+zn_view_convert_area_type_to_wlr_edges(uint32_t type)
+{
+  uint32_t edges = 0;
+  if (type & ZN_VIEW_AREA_TYPE_BORDER_TOP) {
+    edges |= WLR_EDGE_TOP;
+  }
+  if (type & ZN_VIEW_AREA_TYPE_BORDER_BOTTOM) {
+    edges |= WLR_EDGE_BOTTOM;
+  }
+  if (type & ZN_VIEW_AREA_TYPE_BORDER_LEFT) {
+    edges |= WLR_EDGE_LEFT;
+  }
+  if (type & ZN_VIEW_AREA_TYPE_BORDER_RIGHT) {
+    edges |= WLR_EDGE_RIGHT;
+  }
+  return edges;
+}
+
 void
 zn_view_init(struct zn_view *self, enum zn_view_type type,
     const struct zn_view_impl *impl)

@@ -50,8 +50,8 @@ default_grab_motion(
     return;
   }
 
-  zn_cursor_set_xcursor(
-      grab->cursor, zn_cursor_get_resize_xcursor_name(type >> 2));
+  const uint32_t edges = zn_view_convert_area_type_to_wlr_edges(type);
+  zn_cursor_set_xcursor(grab->cursor, zn_cursor_get_resize_xcursor_name(edges));
 }
 
 static void
@@ -79,9 +79,8 @@ default_grab_button(
       zn_cursor_grab_move_start(cursor, view);
     }
     if (type >= ZN_VIEW_AREA_TYPE_BORDER_TOP) {
-      // WLR_EDGE_TOP                 == 1 << 0
-      // ZN_VIEW_AREA_TYPE_BORDER_TOP == 1 << 2
-      zn_cursor_grab_resize_start(cursor, view, type >> 2);
+      const uint32_t edges = zn_view_convert_area_type_to_wlr_edges(type);
+      zn_cursor_grab_resize_start(cursor, view, edges);
     }
   }
 }

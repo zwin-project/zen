@@ -99,6 +99,12 @@ void zn_view_map_to_scene(struct zn_view *self, struct zn_scene *scene);
 
 void zn_view_unmap(struct zn_view *self);
 
+/**
+ * @retval bits sum of enum wlr_edges
+ * @param type bits sum of enum zn_view_area_type
+ */
+uint32_t zn_view_convert_area_type_to_wlr_edges(uint32_t type);
+
 void zn_view_init(struct zn_view *self, enum zn_view_type type,
     const struct zn_view_impl *impl);
 
