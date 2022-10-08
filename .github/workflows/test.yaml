@@ -17,14 +17,12 @@ jobs:
           sudo apt-get update &&
           sudo apt-get install \
             libwayland-dev libwlroots-dev libpixman-1-dev libxml2-dev \
-            libopenvr-dev libxkbcommon-dev libglu1-mesa-dev libglew-dev weston
+            libopenvr-dev libxkbcommon-dev libglu1-mesa-dev libglew-dev weston \
+            meson
 
       - uses: actions/setup-python@v1
         with:
           python-version: "3.x"
-
-      - name: Install meson & ninja
-        run: pip install meson ninja
 
       - name: Clone wlr-glew-renderer
         uses: actions/checkout@v2
@@ -33,19 +31,26 @@ jobs:
           path: wlr-glew-renderer
 
       - name: Build wlr-glew-renderer
-        run: meson --prefix=$(pwd)/target build && meson install -C build --skip-subprojects
+        run: |
+          meson build
+          sudo meson install -C build --skip-subprojects
         working-directory: ./wlr-glew-renderer
         env:
           CC: gcc
 
-      - uses: actions/upload-artifact@v3
-        if: failure()
+      - name: Clone zen-remote
+        uses: actions/checkout@v2
         with:
-          name: wlr-glew-renderer-build-log
-          path: wlr-glew-renderer/build/meson-logs/
-
-      - name: create /usr/local/lib/pkgconfig
-        run: sudo mkdir /usr/local/lib/pkgconfig
+          repository: zigen-project/zen-remote
+          path: zen-remote
+          submodules: recursive
+      
+      - name: Build zen-remote
+        working-directory: ./zen-remote
+        run: |
+          cmake -B build
+          cmake --build build -j
+          sudo cmake --install build
 
       - name: Clone tomlc99
         uses: actions/checkout@v2
@@ -58,25 +63,22 @@ jobs:
         working-directory: ./tomlc99
 
       - name: Build tomlc99
-        run: sudo make install
+        run: |
+          sudo mkdir -p /usr/local/lib/pkgconfig
+          sudo make install
         working-directory: ./tomlc99
         env:
           CC: gcc
-
-      - name: Update PKG_CONFIG_PATH
-        run: |
-          echo "PKG_CONFIG_PATH=$GITHUB_WORKSPACE/$WLR_GLEW_RENDERER_PKGCONFIG" >> $GITHUB_ENV
-        env:
-          WLR_GLEW_RENDERER_PKGCONFIG: wlr-glew-renderer/target/lib/x86_64-linux-gnu/pkgconfig
 
       - name: Checkout
         uses: actions/checkout@v2
         with:
           path: main
-          submodules: true
 
       - name: Build & Test
-        run: meson build && ninja -C build test
+        run: |
+          meson build
+          ninja -C build test
         working-directory: ./main
         env:
           CC: gcc
