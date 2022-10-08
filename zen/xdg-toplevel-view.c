@@ -23,7 +23,7 @@ zn_xdg_toplevel_view_handle_wlr_surface_commit(
     return;
   }
 
-  zn_view_update_pos_on_resizing(&self->base, data);
+  wl_signal_emit(&self->base.events.surface_resized, data);
 
   if (self->wlr_xdg_toplevel->base->current.configure_serial ==
       self->base.resize_status.last_serial) {

@@ -55,6 +55,8 @@ struct zn_view {
 
   bool requested_client_decoration;
 
+  struct wl_listener surface_resized_listener;
+
   struct {
     bool resizing;
     uint32_t edges;
@@ -62,6 +64,7 @@ struct zn_view {
   } resize_status;
 
   struct {
+    struct wl_signal surface_resized;
     struct wl_signal unmap;
     struct wl_signal destroy;
   } events;
@@ -76,9 +79,6 @@ void zn_view_damage(struct zn_view *self);
 void zn_view_damage_whole(struct zn_view *self);
 
 void zn_view_bring_to_front(struct zn_view *self);
-
-void zn_view_update_pos_on_resizing(
-    struct zn_view *self, struct wlr_surface *surface);
 
 /**
  * @param board must not be NULL except when this view is unmapped with

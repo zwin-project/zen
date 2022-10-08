@@ -14,7 +14,6 @@ zn_xwayland_view_handle_wlr_surface_commit(
 {
   struct zn_xwayland_view* self =
       zn_container_of(listener, self, wlr_surface_commit_listener);
-  UNUSED(data);
 
   zn_view_damage(&self->base);
 
@@ -22,7 +21,7 @@ zn_xwayland_view_handle_wlr_surface_commit(
     return;
   }
 
-  zn_view_update_pos_on_resizing(&self->base, data);
+  wl_signal_emit(&self->base.events.surface_resized, data);
 
   self->base.resize_status.resizing = false;
 }

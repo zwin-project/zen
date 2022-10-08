@@ -10,6 +10,41 @@
 #include "zen/xdg-toplevel-view.h"
 #include "zen/xwayland-view.h"
 
+static void zn_view_add_damage_fbox(
+    struct zn_view *self, struct wlr_fbox *effective_box);
+
+static void
+zn_view_handle_surface_resized(struct wl_listener *listener, void *data)
+{
+  struct zn_view *self =
+      zn_container_of(listener, self, surface_resized_listener);
+  struct wlr_surface *surface = data;
+  assert(self->resize_status.resizing);
+  {
+    struct wlr_fbox damage_box = {
+        .x = self->x,
+        .y = self->y,
+        .width = 1 + surface->previous.width + VIEW_DECORATION_BORDER * 2,
+        .height = 1 + surface->previous.height + VIEW_DECORATION_BORDER * 2 +
+                  VIEW_DECORATION_TITLEBAR,
+    };
+    zn_view_add_damage_fbox(self, &damage_box);
+  }
+
+  if (!(self->resize_status.edges & (WLR_EDGE_LEFT | WLR_EDGE_TOP))) {
+    return;
+  }
+
+  int dx = 0, dy = 0;
+  if (self->resize_status.edges & WLR_EDGE_LEFT) {
+    dx = surface->previous.width - surface->current.width;
+  }
+  if (self->resize_status.edges & WLR_EDGE_TOP) {
+    dy = surface->previous.height - surface->current.height;
+  }
+  zn_view_move(self, self->board, self->x + dx, self->y + dy);
+}
+
 static void
 zn_view_add_damage_fbox(struct zn_view *self, struct wlr_fbox *effective_box)
 {
@@ -80,37 +115,6 @@ zn_view_bring_to_front(struct zn_view *self)
   }
 
   zn_view_damage_whole(self);
-}
-
-void
-zn_view_update_pos_on_resizing(
-    struct zn_view *self, struct wlr_surface *surface)
-{
-  assert(self->resize_status.resizing);
-
-  {
-    struct wlr_fbox damage_box = {
-        .x = self->x,
-        .y = self->y,
-        .width = 1 + surface->previous.width + VIEW_DECORATION_BORDER * 2,
-        .height = 1 + surface->previous.height + VIEW_DECORATION_BORDER * 2 +
-                  VIEW_DECORATION_TITLEBAR,
-    };
-    zn_view_add_damage_fbox(self, &damage_box);
-  }
-
-  if (!(self->resize_status.edges & (WLR_EDGE_LEFT | WLR_EDGE_TOP))) {
-    return;
-  }
-
-  int dx = 0, dy = 0;
-  if (self->resize_status.edges & WLR_EDGE_LEFT) {
-    dx = surface->previous.width - surface->current.width;
-  }
-  if (self->resize_status.edges & WLR_EDGE_TOP) {
-    dy = surface->previous.height - surface->current.height;
-  }
-  zn_view_move(self, self->board, self->x + dx, self->y + dy);
 }
 
 void
@@ -236,9 +240,13 @@ zn_view_init(struct zn_view *self, enum zn_view_type type,
   self->impl = impl;
   self->board = NULL;
 
+  wl_signal_init(&self->events.surface_resized);
   wl_signal_init(&self->events.unmap);
   wl_signal_init(&self->events.destroy);
   wl_list_init(&self->link);
+
+  self->surface_resized_listener.notify = zn_view_handle_surface_resized;
+  wl_signal_add(&self->events.surface_resized, &self->surface_resized_listener);
 }
 
 void
@@ -246,4 +254,5 @@ zn_view_fini(struct zn_view *self)
 {
   wl_signal_emit(&self->events.destroy, NULL);
   wl_list_remove(&self->link);
+  wl_list_remove(&self->surface_resized_listener.link);
 }
