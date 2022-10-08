@@ -33,16 +33,25 @@ jobs:
           path: wlr-glew-renderer
 
       - name: Build wlr-glew-renderer
-        run: meson --prefix=$(pwd)/target build && meson install -C build --skip-subprojects
+        run: |
+          meson build
+          sudo meson install -C build --skip-subprojects
         working-directory: ./wlr-glew-renderer
         env:
           CC: gcc
 
-      - uses: actions/upload-artifact@v3
-        if: failure()
+      - name: Clone zen-remote
+        uses: actions/checkout@v2
         with:
-          name: wlr-glew-renderer-build-log
-          path: wlr-glew-renderer/build/meson-logs/
+          repository: zigen-project/zen-remote
+          path: zen-remote
+      
+      - name: Build zen-remote
+        working-directory: ./zen-remote
+        run: |
+          cmake -B build
+          cmake --build build -j
+          sudo cmake --install build
 
       - name: create /usr/local/lib/pkgconfig
         run: sudo mkdir /usr/local/lib/pkgconfig
@@ -63,12 +72,6 @@ jobs:
         env:
           CC: gcc
 
-      - name: Update PKG_CONFIG_PATH
-        run: |
-          echo "PKG_CONFIG_PATH=$GITHUB_WORKSPACE/$WLR_GLEW_RENDERER_PKGCONFIG" >> $GITHUB_ENV
-        env:
-          WLR_GLEW_RENDERER_PKGCONFIG: wlr-glew-renderer/target/lib/x86_64-linux-gnu/pkgconfig
-
       - name: Checkout
         uses: actions/checkout@v2
         with:
@@ -76,7 +79,9 @@ jobs:
           submodules: true
 
       - name: Build & Test
-        run: meson build && ninja -C build test
+        run: |
+          meson build
+          ninja -C build test
         working-directory: ./main
         env:
           CC: gcc
