@@ -45,6 +45,46 @@ zn_view_handle_surface_resized(struct wl_listener *listener, void *data)
   zn_view_move(self, self->board, self->x + dx, self->y + dy);
 }
 
+void
+zn_view_bring_to_front(struct zn_view *self)
+{
+  wl_list_remove(&self->link);
+  wl_list_insert(self->board->view_list.prev, &self->link);
+
+  if (self->impl->restack) {
+    self->impl->restack(self, XCB_STACK_MODE_ABOVE);
+  }
+
+  zn_view_damage_whole(self);
+}
+
+void
+zn_view_move(struct zn_view *self, struct zn_board *new_board, double board_x,
+    double board_y)
+{
+  zn_view_damage_whole(self);
+
+  if (new_board != self->board) {
+    if (self->board) {
+      wl_list_remove(&self->link);
+      wl_list_init(&self->link);
+    }
+    if (new_board) {
+      wl_list_insert(new_board->view_list.prev, &self->link);
+    }
+    self->board = new_board;
+  }
+
+  self->x = board_x;
+  self->y = board_y;
+
+  if (self->impl->set_position) {
+    self->impl->set_position(self, board_x, board_y);
+  }
+
+  zn_view_damage_whole(self);
+}
+
 static void
 zn_view_add_damage_fbox(struct zn_view *self, struct wlr_fbox *effective_box)
 {
@@ -102,46 +142,6 @@ zn_view_damage_whole(struct zn_view *self)
   }
 
   zn_view_add_damage_fbox(self, &fbox);
-}
-
-void
-zn_view_bring_to_front(struct zn_view *self)
-{
-  wl_list_remove(&self->link);
-  wl_list_insert(self->board->view_list.prev, &self->link);
-
-  if (self->impl->restack) {
-    self->impl->restack(self, XCB_STACK_MODE_ABOVE);
-  }
-
-  zn_view_damage_whole(self);
-}
-
-void
-zn_view_move(struct zn_view *self, struct zn_board *new_board, double board_x,
-    double board_y)
-{
-  zn_view_damage_whole(self);
-
-  if (new_board != self->board) {
-    if (self->board) {
-      wl_list_remove(&self->link);
-      wl_list_init(&self->link);
-    }
-    if (new_board) {
-      wl_list_insert(new_board->view_list.prev, &self->link);
-    }
-    self->board = new_board;
-  }
-
-  self->x = board_x;
-  self->y = board_y;
-
-  if (self->impl->set_position) {
-    self->impl->set_position(self, board_x, board_y);
-  }
-
-  zn_view_damage_whole(self);
 }
 
 void
