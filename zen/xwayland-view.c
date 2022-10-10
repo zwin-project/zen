@@ -23,7 +23,10 @@ zn_xwayland_view_handle_wlr_surface_commit(
 
   wl_signal_emit(&self->base.events.surface_resized, data);
 
-  self->base.resize_status.resizing = false;
+  ++self->current_resize_serial;
+  if (self->current_resize_serial == self->base.resize_status.last_serial) {
+    self->base.resize_status.resizing = false;
+  }
 }
 
 static void
@@ -161,6 +164,7 @@ zn_xwayland_view_impl_set_size(
 {
   struct zn_xwayland_view* self = zn_container_of(view, self, base);
 
+  ++view->resize_status.last_serial;
   wlr_xwayland_surface_configure(self->wlr_xwayland_surface,
       self->wlr_xwayland_surface->x, self->wlr_xwayland_surface->y, width,
       height);

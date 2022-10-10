@@ -10,6 +10,9 @@ struct zn_xwayland_view {
   struct zn_view base;
   struct wlr_xwayland_surface *wlr_xwayland_surface;  // nonnull
 
+  /** last handled serial */
+  uint64_t current_resize_serial;
+
   struct zn_server *server;
 
   struct wl_listener map_listener;
