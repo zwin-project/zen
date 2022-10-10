@@ -267,7 +267,7 @@ zn_scene_setup_background(struct zn_scene* self, const char* background_png)
     goto err;
   }
   cairo_format_t format = cairo_image_surface_get_format(surface);
-  if (format != CAIRO_FORMAT_ARGB32) {
+  if (format != CAIRO_FORMAT_ARGB32 && format != CAIRO_FORMAT_RGB24) {
     zn_error("Image format not supported");
     goto err;
   }
