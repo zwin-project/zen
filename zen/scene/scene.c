@@ -66,28 +66,22 @@ zn_scene_switch_focused_view_binding_handler(
     return;
   }
   if (wl_list_length(&focused_board->view_list) == 1) {
-    zn_error("Only 1 view");
+    zn_warn("Only 1 view");
     return;
   }
 
   struct zn_view* new_focused_view;
-  if (key == KEY_H) {
-    // bring next to front (should be the first)
-    new_focused_view =
-        zn_container_of(focused_board->view_list.next, new_focused_view, link);
-    zn_scene_set_focused_view(scene, new_focused_view);
-  } else if (key == KEY_L) {
-    // bring prev to front (should be the second last)
-    // put the current focused_view to the last
-    new_focused_view = zn_container_of(
-        focused_board->view_list.prev->prev, new_focused_view, link);
-    struct zn_view* original_focused_view = scene->focused_view;
-    zn_scene_set_focused_view(scene, new_focused_view);
-    zn_view_bring_to_back(original_focused_view);
-  } else {
+  if (key != KEY_TAB) {
     zn_error("Invalid key: %u", key);
     return;
   }
+  // bring prev to front (should be the second last)
+  // put the current focused_view to the last
+  new_focused_view = zn_container_of(
+      focused_board->view_list.prev->prev, new_focused_view, link);
+  struct zn_view* original_focused_view = scene->focused_view;
+  zn_scene_set_focused_view(scene, new_focused_view);
+  zn_view_bring_to_back(original_focused_view);
 }
 
 static void
@@ -101,31 +95,13 @@ zn_scene_align_focused_view_binding_handler(
   struct zn_board* board = scene->focused_view->board;
 
   double new_x, new_y, new_width, new_height;
-  if (key == KEY_UP) {
-    new_width = board->width;
-    new_height = board->height / 2;
-    new_x = 0.;
-    new_y = 0.;
-  } else if (key == KEY_DOWN) {
-    new_width = board->width;
-    new_height = board->height / 2;
-    new_x = 0.;
-    new_y = board->height / 2;
-  } else if (key == KEY_RIGHT) {
-    new_width = board->width / 2;
-    new_height = board->height;
+  new_width = board->width / 2;
+  new_height = board->height;
+  new_y = 0.;
+  if (key == KEY_RIGHT) {
     new_x = board->width / 2;
-    new_y = 0.;
   } else if (key == KEY_LEFT) {
-    new_width = board->width / 2;
-    new_height = board->height;
     new_x = 0.;
-    new_y = 0.;
-  } else if (key == KEY_F) {
-    new_width = board->width;
-    new_height = board->height;
-    new_x = 0.;
-    new_y = 0.;
   } else {
     zn_error("Invalid key: %u", key);
     return;
@@ -269,19 +245,14 @@ zn_scene_setup_bindings(struct zn_scene* self)
       WLR_MODIFIER_LOGO | WLR_MODIFIER_SHIFT,
       zn_scene_new_board_binding_handler, self);
 
-  char aligning_keys[5] = {KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT, KEY_F};
-  for (int i = 0; i < 5; i++) {
+  char aligning_keys[2] = {KEY_LEFT, KEY_RIGHT};
+  for (int i = 0; i < 2; i++) {
     zn_input_manager_add_key_binding(server->input_manager, aligning_keys[i],
-        WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT,
-        zn_scene_align_focused_view_binding_handler, self);
+        WLR_MODIFIER_LOGO, zn_scene_align_focused_view_binding_handler, self);
   }
 
-  char switching_keys[2] = {KEY_H, KEY_L};
-  for (int i = 0; i < 2; i++) {
-    zn_input_manager_add_key_binding(server->input_manager, switching_keys[i],
-        WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT,
-        zn_scene_switch_focused_view_binding_handler, self);
-  }
+  zn_input_manager_add_key_binding(server->input_manager, KEY_TAB,
+      WLR_MODIFIER_LOGO, zn_scene_switch_focused_view_binding_handler, self);
 }
 
 static void

@@ -73,22 +73,13 @@ We cannot customize these bindings for now.
 |<alt> + <ctrl> + f
 |Make the focused view full screen
 
-|<alt> + <ctrl> + ←
+|<mod> + ←
+|Put the focused view to the left half of the board
+
+|<mod> + →
 |Put the focused view to the right half of the board
 
-|<alt> + <ctrl> + ↓
-|Put the focused view to the bottom half of the board
-
-|<alt> + <ctrl> + ↑
-|Put the focused view to the top half of the board
-
-|<alt> + <ctrl> + →
-|Put the focused view to the right half of the board
-
-|<alt> + <ctrl> + h
-|Focus on the bottom view
-
-|<alt> + <ctrl> + l
+|<mod> + <tab>
 |Focus on the second-top view
 
 |===
