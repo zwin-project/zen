@@ -64,7 +64,7 @@ struct zn_view {
   } resize_status;
 
   struct {
-    struct wl_signal surface_resized;
+    struct wl_signal surface_resized;  // (struct wlr_surface)
     struct wl_signal unmap;
     struct wl_signal destroy;
   } events;
