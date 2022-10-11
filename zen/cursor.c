@@ -48,9 +48,10 @@ default_grab_motion(
     }
   }
 
+  wlr_seat_pointer_clear_focus(seat);
+
   if (type == ZN_VIEW_AREA_TYPE_INVALID || type == ZN_VIEW_AREA_TYPE_TITLEBAR) {
     zn_cursor_set_xcursor(grab->cursor, "left_ptr");
-    wlr_seat_pointer_clear_focus(seat);
     return;
   }
 
