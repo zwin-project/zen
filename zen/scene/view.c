@@ -16,10 +16,12 @@ static void zn_view_add_damage_fbox(
 static void
 zn_view_handle_surface_resized(struct wl_listener *listener, void *data)
 {
+  UNUSED(data);
   struct zn_view *self =
       zn_container_of(listener, self, surface_resized_listener);
-  struct wlr_surface *surface = data;
+  struct wlr_surface *surface = self->impl->get_wlr_surface(self);
   assert(self->resize_status.resizing);
+
   {
     struct wlr_fbox damage_box = {
         .x = self->x,

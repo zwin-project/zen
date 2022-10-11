@@ -12,6 +12,7 @@ static void
 zn_xwayland_view_handle_wlr_surface_commit(
     struct wl_listener* listener, void* data)
 {
+  UNUSED(data);
   struct zn_xwayland_view* self =
       zn_container_of(listener, self, wlr_surface_commit_listener);
 
@@ -21,7 +22,7 @@ zn_xwayland_view_handle_wlr_surface_commit(
     return;
   }
 
-  wl_signal_emit(&self->base.events.surface_resized, data);
+  wl_signal_emit(&self->base.events.surface_resized, NULL);
 
   ++self->current_resize_serial;
   if (self->current_resize_serial == self->base.resize_status.last_serial) {

@@ -14,6 +14,7 @@ static void
 zn_xdg_toplevel_view_handle_wlr_surface_commit(
     struct wl_listener* listener, void* data)
 {
+  UNUSED(data);
   struct zn_xdg_toplevel_view* self =
       zn_container_of(listener, self, wlr_surface_commit_listener);
 
@@ -23,7 +24,7 @@ zn_xdg_toplevel_view_handle_wlr_surface_commit(
     return;
   }
 
-  wl_signal_emit(&self->base.events.surface_resized, data);
+  wl_signal_emit(&self->base.events.surface_resized, NULL);
 
   if (self->wlr_xdg_toplevel->base->current.configure_serial ==
       self->base.resize_status.last_serial) {
