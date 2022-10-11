@@ -72,7 +72,7 @@ struct zn_view {
 
 /**
  * Add the damage of all surfaces associated with the view to the output where
- * the view id displayed.
+ * the view is displayed.
  */
 void zn_view_damage(struct zn_view *self);
 
