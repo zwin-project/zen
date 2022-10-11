@@ -29,6 +29,10 @@ default_grab_motion(
     return;
   }
 
+  if (!grab->cursor->surface) {
+    zn_cursor_set_xcursor(grab->cursor, "left_ptr");
+  }
+
   const uint32_t type = zn_screen_get_view_area_type_at(
       grab->cursor->screen, grab->cursor->x, grab->cursor->y, NULL);
 
