@@ -165,12 +165,11 @@ zn_xwayland_view_impl_set_size(
 {
   struct zn_xwayland_view* self = zn_container_of(view, self, base);
 
-  ++view->resize_status.last_serial;
   wlr_xwayland_surface_configure(self->wlr_xwayland_surface,
       self->wlr_xwayland_surface->x, self->wlr_xwayland_surface->y, width,
       height);
 
-  return 0;
+  return view->resize_status.last_serial + 1;
 }
 
 static void
