@@ -38,6 +38,20 @@ jobs:
         env:
           CC: gcc
 
+      - name: Clone grpc-dev
+        uses: actions/checkout@v2
+        with:
+          repository: zigen-project/grpc-dev
+          path: grpc-dev
+          submodules: recursive
+          ref: 'v1.49.1' 
+      
+      - name: Build grpc-dev
+        working-directory: ./grpc-dev
+        run: |
+          touch local.mk
+          make native
+
       - name: Clone zen-remote
         uses: actions/checkout@v2
         with:
@@ -48,8 +62,8 @@ jobs:
       - name: Build zen-remote
         working-directory: ./zen-remote
         run: |
-          cmake -B build
-          cmake --build build -j
+          cmake -B build -DZEN_REMOTE_GRPC_SYSROOT=$GITHUB_WORKSPACE/grpc-dev/native/Debug -GNinja
+          cmake --build build
           sudo cmake --install build
 
       - name: Clone tomlc99
