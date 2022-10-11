@@ -17,8 +17,8 @@ resize_grab_motion(
     return;
   }
 
-  double width = self->init_view_width;
-  double height = self->init_view_height;
+  double width = self->init_width;
+  double height = self->init_height;
   const double diff_width = grab->cursor->x - self->init_cursor_x;
   const double diff_height = grab->cursor->y - self->init_cursor_y;
 
@@ -86,7 +86,7 @@ resize_grab_cancel(struct zn_cursor_grab* grab)
   struct zn_cursor_grab_resize* self = zn_container_of(grab, self, base);
   self->view->resize_status.resizing = true;
   self->view->resize_status.last_serial = self->view->impl->set_size(
-      self->view, self->init_view_width, self->init_view_height);
+      self->view, self->init_width, self->init_height);
   zn_cursor_grab_resize_end(self);
 }
 
@@ -124,15 +124,14 @@ zn_cursor_grab_resize_create(
   struct wlr_fbox box;
   zn_view_get_view_fbox(view, &box);
 
-  self->init_view_width = box.width;
-  self->init_view_height = box.height;
+  self->init_width = box.width;
+  self->init_height = box.height;
   self->init_cursor_x = cursor->x;
   self->init_cursor_y = cursor->y;
 
   if (!zn_view_has_client_decoration(view)) {
-    self->init_view_width -= VIEW_DECORATION_BORDER * 2;
-    self->init_view_height -=
-        VIEW_DECORATION_BORDER * 2 + VIEW_DECORATION_TITLEBAR;
+    self->init_width -= VIEW_DECORATION_BORDER * 2;
+    self->init_height -= VIEW_DECORATION_BORDER * 2 + VIEW_DECORATION_TITLEBAR;
   }
 
   self->view = view;

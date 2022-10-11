@@ -8,7 +8,7 @@ struct zn_cursor_grab_resize {
   struct zn_cursor_grab base;
   struct zn_view* view;
 
-  double init_view_width, init_view_height;
+  double init_width, init_height;
   double init_cursor_x, init_cursor_y;
 
   struct wl_listener view_unmap_listener;
