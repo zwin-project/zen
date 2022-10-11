@@ -72,9 +72,6 @@ default_grab_button(
     return;
   }
 
-  wlr_seat_pointer_send_button(
-      seat, event->time_msec, event->button, event->state);
-
   if (event->state == WLR_BUTTON_PRESSED) {
     const uint32_t type = zn_screen_get_view_area_type_at(
         grab->cursor->screen, grab->cursor->x, grab->cursor->y, &view);
@@ -82,12 +79,17 @@ default_grab_button(
 
     if (type == ZN_VIEW_AREA_TYPE_TITLEBAR) {
       zn_cursor_grab_move_start(cursor, view);
+      return;
     }
     if (type >= ZN_VIEW_AREA_TYPE_BORDER_TOP) {
       const uint32_t edges = zn_view_convert_area_type_to_wlr_edges(type);
       zn_cursor_grab_resize_start(cursor, view, edges);
+      return;
     }
   }
+
+  wlr_seat_pointer_send_button(
+      seat, event->time_msec, event->button, event->state);
 }
 
 static void
