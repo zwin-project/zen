@@ -176,6 +176,6 @@ zn_cursor_grab_resize_start(
   }
 
   wlr_seat_pointer_clear_focus(seat);
-  zn_cursor_set_xcursor(cursor, zn_cursor_get_resize_xcursor_name(edges));
+  zn_cursor_set_resizing_cursor(cursor, edges);
   zn_cursor_start_grab(cursor, &self->base);
 }

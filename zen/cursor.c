@@ -51,7 +51,7 @@ default_grab_motion(
   }
 
   const uint32_t edges = zn_view_convert_area_type_to_wlr_edges(type);
-  zn_cursor_set_xcursor(grab->cursor, zn_cursor_get_resize_xcursor_name(edges));
+  zn_cursor_set_resizing_cursor(grab->cursor, edges);
 }
 
 static void
@@ -289,8 +289,8 @@ zn_cursor_end_grab(struct zn_cursor* self)
 /**
  * @param edges bits sum of enum wlr_edges
  */
-const char*
-zn_cursor_get_resize_xcursor_name(uint32_t edges)
+void
+zn_cursor_set_resizing_cursor(struct zn_cursor* self, uint32_t edges)
 {
   const char* xcursor_name[] = {
       [WLR_EDGE_TOP] = "top_side",
@@ -303,7 +303,7 @@ zn_cursor_get_resize_xcursor_name(uint32_t edges)
       [WLR_EDGE_BOTTOM | WLR_EDGE_RIGHT] = "bottom_right_corner",
   };
 
-  return xcursor_name[edges];
+  zn_cursor_set_xcursor(self, xcursor_name[edges]);
 }
 
 void
