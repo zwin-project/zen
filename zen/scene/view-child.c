@@ -4,6 +4,7 @@
 
 #include "zen-common.h"
 #include "zen/output.h"
+#include "zen/scene/subsurface.h"
 
 static void
 zn_view_child_add_damage_fbox(
@@ -39,7 +40,7 @@ zn_view_child_get_surface_fbox(
   fbox->height = surface->current.height;
 }
 
-static void
+void
 zn_view_child_damage_whole(struct zn_view_child *self)
 {
   struct wlr_fbox fbox;
@@ -98,14 +99,46 @@ zn_view_child_unmap(struct zn_view_child *self)
   self->mapped = false;
 }
 
+static void
+zn_view_child_init_subsurfaces(
+    struct zn_view_child *self, struct wlr_surface *surface)
+{
+  struct wlr_subsurface *subsurface;
+  wl_list_for_each (
+      subsurface, &surface->current.subsurfaces_below, current.link) {
+    zn_subsurface_create(self->view, self, subsurface);
+  }
+  wl_list_for_each (
+      subsurface, &surface->current.subsurfaces_above, current.link) {
+    zn_subsurface_create(self->view, self, subsurface);
+  }
+}
+
+static void
+zn_view_child_handle_new_subsurface(struct wl_listener *listener, void *data)
+{
+  struct zn_view_child *self =
+      zn_container_of(listener, self, new_subsurface_listener);
+  struct wlr_subsurface *subsurface = data;
+
+  zn_subsurface_create(self->view, self, subsurface);
+}
+
 void
-zn_view_child_init(struct zn_view_child *self,
-    const struct zn_view_child_impl *impl, struct zn_view *view)
+zn_view_child_init(struct zn_view_child *self, struct zn_view_child *parent,
+    const struct zn_view_child_impl *impl, struct zn_view *view,
+    struct wlr_surface *surface)
 {
   self->impl = impl;
   self->view = view;
 
-  self->parent = NULL;  // TODO: handle subsurface
+  self->parent = parent;
 
   self->mapped = false;
+
+  wl_signal_add(&surface->events.new_subsurface,  // TODO: wlr_surface
+      &self->new_subsurface_listener);
+  self->new_subsurface_listener.notify = zn_view_child_handle_new_subsurface;
+
+  zn_view_child_init_subsurfaces(self, surface);
 }

@@ -54,6 +54,10 @@ struct zn_view {
     struct wl_signal unmap;
     struct wl_signal destroy;
   } events;
+
+  struct wl_listener new_subsurface_listener;
+
+  struct wl_list subsurface_list;  // zn_subsurface::link
 };
 
 void zn_view_bring_to_front(struct zn_view *self);
@@ -88,6 +92,6 @@ void zn_view_map_to_scene(struct zn_view *self, struct zn_scene *scene);
 void zn_view_unmap(struct zn_view *self);
 
 void zn_view_init(struct zn_view *self, enum zn_view_type type,
-    const struct zn_view_impl *impl);
+    const struct zn_view_impl *impl, struct wlr_surface *surface);
 
 void zn_view_fini(struct zn_view *self);

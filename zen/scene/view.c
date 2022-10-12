@@ -6,6 +6,7 @@
 #include "zen-common.h"
 #include "zen/input/seat.h"
 #include "zen/scene/board.h"
+#include "zen/scene/subsurface.h"
 #include "zen/xdg-toplevel-view.h"
 #include "zen/xwayland-view.h"
 
@@ -88,6 +89,11 @@ zn_view_damage(struct zn_view *self)
 
   pixman_region32_fini(&damage);
 
+  struct zn_subsurface *subsurface;
+  wl_list_for_each (subsurface, &self->subsurface_list, link) {
+    zn_view_child_damage_whole(&subsurface->base);
+  }
+
   // FIXME: add damages of synced subsurfaces
 }
 
@@ -100,6 +106,11 @@ zn_view_damage_whole(struct zn_view *self)
     zn_view_get_surface_fbox(self, &fbox);
   } else {
     zn_view_get_decoration_fbox(self, &fbox);
+  }
+
+  struct zn_subsurface *subsurface;
+  wl_list_for_each (subsurface, &self->subsurface_list, link) {
+    zn_view_child_damage_whole(&subsurface->base);
   }
 
   zn_view_add_damage_fbox(self, &fbox);
@@ -136,6 +147,16 @@ zn_view_get_decoration_fbox(struct zn_view *self, struct wlr_fbox *fbox)
   fbox->y -= VIEW_DECORATION_BORDER + VIEW_DECORATION_TITLEBAR;
   fbox->width += VIEW_DECORATION_BORDER * 2;
   fbox->height += VIEW_DECORATION_BORDER * 2 + VIEW_DECORATION_TITLEBAR;
+}
+
+static void
+zn_view_handle_new_subsurface(struct wl_listener *listener, void *data)
+{
+  struct zn_view *self =
+      zn_container_of(listener, self, new_subsurface_listener);
+  struct wlr_subsurface *subsurface = data;
+
+  zn_subsurface_create(self, NULL, subsurface);
 }
 
 bool
@@ -193,8 +214,9 @@ zn_view_unmap(struct zn_view *self)
 
 void
 zn_view_init(struct zn_view *self, enum zn_view_type type,
-    const struct zn_view_impl *impl)
+    const struct zn_view_impl *impl, struct wlr_surface *surface)
 {
+  zn_info("view init!!");
   self->type = type;
   self->impl = impl;
   self->board = NULL;
@@ -202,6 +224,12 @@ zn_view_init(struct zn_view *self, enum zn_view_type type,
   wl_signal_init(&self->events.unmap);
   wl_signal_init(&self->events.destroy);
   wl_list_init(&self->link);
+
+  wl_signal_add(
+      &surface->events.new_subsurface, &self->new_subsurface_listener);
+  self->new_subsurface_listener.notify = zn_view_handle_new_subsurface;
+
+  wl_list_init(&self->subsurface_list);
 }
 
 void
@@ -209,4 +237,6 @@ zn_view_fini(struct zn_view *self)
 {
   wl_signal_emit(&self->events.destroy, NULL);
   wl_list_remove(&self->link);
+  wl_list_remove(&self->new_subsurface_listener.link);
+  wl_list_remove(&self->subsurface_list);
 }

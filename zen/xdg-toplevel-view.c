@@ -229,7 +229,8 @@ zn_xdg_toplevel_view_create(
 
   self->server = server;
 
-  zn_view_init(&self->base, ZN_VIEW_XDG_TOPLEVEL, &zn_xdg_toplevel_view_impl);
+  zn_view_init(&self->base, ZN_VIEW_XDG_TOPLEVEL, &zn_xdg_toplevel_view_impl,
+      wlr_xdg_toplevel->base->surface);
 
   self->wlr_xdg_toplevel = wlr_xdg_toplevel;
   wlr_xdg_toplevel->base->data = &self->base;

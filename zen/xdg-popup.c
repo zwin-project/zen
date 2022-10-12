@@ -96,7 +96,8 @@ zn_xdg_popup_create(struct wlr_xdg_popup* wlr_xdg_popup, struct zn_view* view)
     goto err;
   }
 
-  zn_view_child_init(&self->base, &zn_xdg_popup_view_child_impl, view);
+  zn_view_child_init(&self->base, NULL, &zn_xdg_popup_view_child_impl, view,
+      wlr_xdg_popup->base->surface);
 
   self->wlr_xdg_popup = wlr_xdg_popup;
 

@@ -4,6 +4,7 @@
 #include "zen/input/seat.h"
 #include "zen/scene/board.h"
 #include "zen/scene/screen-layout.h"
+#include "zen/scene/subsurface.h"
 #include "zen/scene/view.h"
 #include "zen/wlr/box.h"
 
@@ -31,6 +32,7 @@ zn_screen_for_each_visible_surface(struct zn_screen *self,
   struct zn_cursor *cursor = server->input_manager->seat->cursor;
   struct zn_board *board = zn_screen_get_current_board(self);
   struct zn_view *view;
+  struct zn_subsurface *subsurface;
   struct surface_callback_data data = {
       .callback = callback,
       .user_data = user_data,
@@ -42,6 +44,10 @@ zn_screen_for_each_visible_surface(struct zn_screen *self,
     if (view->impl->for_each_popup_surface)
       view->impl->for_each_popup_surface(
           view, zn_screen_for_each_visible_surface_callback, &data);
+
+    wl_list_for_each (subsurface, &view->subsurface_list, link)
+      callback(
+          subsurface->base.impl->get_wlr_surface(&subsurface->base), user_data);
   }
 
   if (cursor->screen == self && cursor->surface != NULL) {

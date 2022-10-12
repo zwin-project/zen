@@ -204,7 +204,8 @@ zn_xwayland_view_create(
 
   self->server = server;
 
-  zn_view_init(&self->base, ZN_VIEW_XWAYLAND, &zn_xwayland_view_impl);
+  zn_view_init(&self->base, ZN_VIEW_XWAYLAND, &zn_xwayland_view_impl,
+      xwayland_surface->surface);
 
   self->wlr_xwayland_surface = xwayland_surface;
 

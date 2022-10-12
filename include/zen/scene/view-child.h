@@ -21,7 +21,11 @@ struct zn_view_child {
   struct zn_view_child *parent;  // nullable
 
   bool mapped;
+
+  struct wl_listener new_subsurface_listener;
 };
+
+void zn_view_child_damage_whole(struct zn_view_child *self);
 
 void zn_view_child_damage(struct zn_view_child *self);
 
@@ -30,4 +34,5 @@ void zn_view_child_map(struct zn_view_child *self);
 void zn_view_child_unmap(struct zn_view_child *self);
 
 void zn_view_child_init(struct zn_view_child *self,
-    const struct zn_view_child_impl *impl, struct zn_view *view);
+    struct zn_view_child *parent, const struct zn_view_child_impl *impl,
+    struct zn_view *view, struct wlr_surface *surface);
