@@ -240,17 +240,24 @@ zn_server_create(struct wl_display *display)
     goto err_server_decoration;
   }
 
-  self->immersive_renderer = zn_immersive_renderer_create(self->scene);
-  if (self->immersive_renderer == NULL) {
-    zn_error("Failed to create an immersive renderer");
+  self->remote = znr_remote_create(self->display);
+  if (self->remote == NULL) {
+    zn_error("Failed to create znr_remote");
     goto err_input_manager;
   }
 
-  self->immersive_display_system = zn_immersive_display_system_create(
-      self->display, self->immersive_renderer);
+  self->remote_renderer =
+      zn_remote_immersive_renderer_create(self->scene, self->remote);
+  if (self->remote_renderer == NULL) {
+    zn_error("Failed to create a remote immersive renderer");
+    goto err_remote;
+  }
+
+  self->immersive_display_system = zn_remote_immersive_display_system_create(
+      self->display, self->remote_renderer, self->remote);
   if (self->immersive_display_system == NULL) {
-    zn_error("Failed to create immersive display system");
-    goto err_immersive_renderer;
+    zn_error("Failed to create remote immersive display system");
+    goto err_remote_renderer;
   }
 
   self->xwayland = wlr_xwayland_create(self->display, self->w_compositor, true);
@@ -293,10 +300,13 @@ zn_server_create(struct wl_display *display)
   return self;
 
 err_immersive_display_system:
-  zn_immersive_display_system_destroy(self->immersive_display_system);
+  zn_remote_immersive_display_system_destroy(self->immersive_display_system);
 
-err_immersive_renderer:
-  zn_immersive_renderer_destroy(self->immersive_renderer);
+err_remote_renderer:
+  zn_remote_immersive_renderer_destroy(self->remote_renderer);
+
+err_remote:
+  znr_remote_destroy(self->remote);
 
 err_input_manager:
   zn_input_manager_destroy(self->input_manager);
@@ -337,14 +347,17 @@ zn_server_destroy_resources(struct zn_server *self)
 
   zn_cursor_destroy_resources(self->input_manager->seat->cursor);
   zn_scene_destroy_resources(self->scene);
+
+  znr_remote_stop(self->remote);
 }
 
 void
 zn_server_destroy(struct zn_server *self)
 {
   wlr_xwayland_destroy(self->xwayland);
-  zn_immersive_display_system_destroy(self->immersive_display_system);
-  zn_immersive_renderer_destroy(self->immersive_renderer);
+  zn_remote_immersive_display_system_destroy(self->immersive_display_system);
+  zn_remote_immersive_renderer_destroy(self->remote_renderer);
+  znr_remote_destroy(self->remote);
   zn_input_manager_destroy(self->input_manager);
   zn_decoration_manager_destroy(self->decoration_manager);
   free(self->socket);

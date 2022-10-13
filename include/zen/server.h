@@ -9,10 +9,12 @@
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/xwayland.h>
 #include <zen-desktop-protocol.h>
+#include <znr/remote.h>
 
 #include "zen/config.h"
 #include "zen/decoration-manager.h"
-#include "zen/immersive/display-system.h"
+#include "zen/immersive/remote/display-system.h"
+#include "zen/immersive/remote/renderer.h"
 #include "zen/input/input-manager.h"
 #include "zen/scene/scene.h"
 
@@ -31,7 +33,8 @@ struct zn_server {
 
   struct zn_config *config;
   struct zn_input_manager *input_manager;
-  struct zn_immersive_renderer *immersive_renderer;
+  struct znr_remote *remote;
+  struct zn_remote_immersive_renderer *remote_renderer;
   struct zn_immersive_display_system *immersive_display_system;
 
   struct zn_scene *scene;
