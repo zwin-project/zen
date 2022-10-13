@@ -1,5 +1,7 @@
 #include "zen/immersive/remote/renderer.h"
 
+#include <znr/remote.h>
+
 #include "zen-common.h"
 #include "zen/immersive/remote/object/board.h"
 
@@ -16,8 +18,9 @@ zn_remote_immersive_renderer_deactivate(
   zn_remote_scene_stop_sync(self->remote_scene);
 }
 
-struct zn_immersive_renderer*
-zn_immersive_renderer_create(struct zn_scene* scene)
+struct zn_remote_immersive_renderer*
+zn_remote_immersive_renderer_create(
+    struct zn_scene* scene, struct znr_remote* remote)
 {
   struct zn_remote_immersive_renderer* self;
 
@@ -27,13 +30,13 @@ zn_immersive_renderer_create(struct zn_scene* scene)
     goto err;
   }
 
-  self->remote_scene = zn_remote_scene_create(scene);
+  self->remote_scene = zn_remote_scene_create(scene, remote);
   if (self->remote_scene == NULL) {
     zn_error("Failed to create a remote scene");
     goto err_free;
   }
 
-  return &self->base;
+  return self;
 
 err_free:
   free(self);
@@ -43,11 +46,8 @@ err:
 }
 
 void
-zn_immersive_renderer_destroy(struct zn_immersive_renderer* parent)
+zn_remote_immersive_renderer_destroy(struct zn_remote_immersive_renderer* self)
 {
-  struct zn_remote_immersive_renderer* self =
-      zn_container_of(parent, self, base);
-
   zn_remote_scene_destroy(self->remote_scene);
   free(self);
 }

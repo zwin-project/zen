@@ -7,25 +7,20 @@
 #include <memory>
 
 #include "loop.h"
-
-struct znr_remote_impl {
-  struct znr_remote base;
-
-  std::unique_ptr<zen::remote::IRemote> remote;
-};
+#include "remote.h"
 
 void
 znr_remote_start(struct znr_remote* parent)
 {
   znr_remote_impl* self = zn_container_of(parent, self, base);
-  self->remote->Start();
+  self->proxy->Start();
 }
 
 void
 znr_remote_stop(struct znr_remote* parent)
 {
   znr_remote_impl* self = zn_container_of(parent, self, base);
-  self->remote->Stop();
+  self->proxy->Stop();
 }
 
 znr_remote*
@@ -39,7 +34,7 @@ znr_remote_create(struct wl_display* display)
     goto err;
   }
 
-  self->remote = zen::remote::CreateRemote(std::make_unique<Loop>(loop));
+  self->proxy = zen::remote::CreateRemote(std::make_unique<Loop>(loop));
 
   return &self->base;
 
@@ -51,6 +46,6 @@ void
 znr_remote_destroy(struct znr_remote* parent)
 {
   znr_remote_impl* self = zn_container_of(parent, self, base);
-  self->remote.reset();
+  self->proxy.reset();
   free(self);
 }
