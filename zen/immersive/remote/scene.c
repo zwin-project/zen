@@ -54,7 +54,7 @@ zn_remote_scene_stop_sync(struct zn_remote_scene* self)
 }
 
 struct zn_remote_scene*
-zn_remote_scene_create(struct zn_scene* scene)
+zn_remote_scene_create(struct zn_scene* scene, struct znr_remote* remote)
 {
   struct zn_remote_scene* self;
 
@@ -65,6 +65,7 @@ zn_remote_scene_create(struct zn_scene* scene)
   }
 
   self->scene = scene;
+  self->remote = remote;
 
   wl_list_init(&self->board_object_list);
 
