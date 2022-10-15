@@ -4,6 +4,7 @@ _znr_srcs = [
   'src/log.cc',
   'src/loop.cc',
   'src/remote.cc',
+  'src/rendering-unit.cc',
 ]
 
 _znr_deps = [
