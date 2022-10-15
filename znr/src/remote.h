@@ -1,6 +1,6 @@
 #pragma once
 
-#include <zen-remote/remote.h>
+#include <zen-remote/server/remote.h>
 
 #include <memory>
 
@@ -9,5 +9,5 @@
 struct znr_remote_impl {
   znr_remote base;
 
-  std::shared_ptr<zen::remote::IRemote> proxy;
+  std::shared_ptr<zen::remote::server::IRemote> proxy;
 };

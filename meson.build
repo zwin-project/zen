@@ -68,16 +68,18 @@ datadir = get_option('datadir')
 
 # generic version requirements
 
+cglm_req = '>= 0.8.5'
 openvr_req = '>= 1.12.5'
 wayland_protocols_req = '>= 1.24'
 wayland_server_req = '>= 1.18.0'
 wlroots_req = ['>= 0.15', '< 0.16']
 wlr_glew_renderer_req = wlroots_req
-zen_remote_server_req = '0.1.0.5'
+zen_remote_server_req = '0.1.0.6'
 
 # dependencies
 
 cairo_dep = dependency('cairo')
+cglm_dep = dependency('cglm')
 m_dep = cc.find_library('m')
 pixman_dep = dependency('pixman-1')
 toml_dep = dependency('libtoml')
