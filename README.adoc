@@ -7,19 +7,23 @@ XR Desktop Environment
 === Dependencies
 
 . wlr-glew-renderer +
-See https://github.com/zigen-project/wlr-glew-renderer[github.com/zigen-project/wlr-glew-renderer]
+Please see https://github.com/zigen-project/wlr-glew-renderer[zigen-project/wlr-glew-renderer]
 to build and install.
 . zen-remote +
-See https://github.com/zigen-project/zen-remote[github.com/zigen-project/zen-remote]
+Please see https://github.com/zigen-project/zen-remote[zigen-project/zen-remote]
 to build and install.
 . tomlc99 +
-See https://github.com/cktan/tomlc99[cktan/tomlc99] to build and install. +
+Please see https://github.com/cktan/tomlc99[cktan/tomlc99] to build and install. +
 Note that `make install` tries to install `libtoml.pc` to `/usr/local/lib/pkgconfig`.
-You neel to rename `libtoml.pc.sample` in the tomlc99 project root to `libtoml.pc`
-and manually create `/usr/local/lib/pkgconfig` before runnning `make install`.
+You need to rename `libtoml.pc.sample` in the tomlc99 project root to `libtoml.pc`
+and manually create `/usr/local/lib/pkgconfig` before running `make install`.
+. cglm +
+Please see https://github.com/recp/cglm[recp/cglm] and install cglm of the
+version listed in `meson.build`. Basically, the latest version is fine.
 . Other dependencies +
 For Ubuntu, other dependencies can be installed with `apt-get`.
-See `.github/workflows/test.yaml` for the list of the required packages.
+See `.github/workflows/test.yaml` and `meson.build` for the list of the
+required packages.
 
 === Build & Install
 

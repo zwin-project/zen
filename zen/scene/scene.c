@@ -64,7 +64,7 @@ zn_scene_new_board(struct zn_scene* self)
 
   wl_list_insert(self->board_list.prev, &board->link);
 
-  wl_signal_emit(&self->signals.new_board, board);
+  wl_signal_emit(&self->events.new_board, board);
 
   return board;
 }
@@ -147,6 +147,24 @@ zn_scene_new_board_binding_handler(uint32_t time_msec, uint32_t key, void* data)
 
   zn_board_assign_to_screen(board, screen);
   zn_screen_set_current_board(screen, board);
+}
+
+struct zn_ray*
+zn_scene_ensure_ray(struct zn_scene* self)
+{
+  if (self->ray == NULL) {
+    self->ray = zn_ray_create();
+    wl_signal_emit(&self->events.new_ray, NULL);
+  }
+
+  return self->ray;
+}
+
+void
+zn_scene_destroy_ray(struct zn_scene* self)
+{
+  if (self->ray) zn_ray_destroy(self->ray);
+  self->ray = NULL;
 }
 
 void
@@ -326,7 +344,8 @@ zn_scene_create(struct zn_config* config)
   self->unmap_focused_view_listener.notify = zn_scene_handle_unmap_focused_view;
   wl_list_init(&self->unmap_focused_view_listener.link);
 
-  wl_signal_init(&self->signals.new_board);
+  wl_signal_init(&self->events.new_board);
+  wl_signal_init(&self->events.new_ray);
 
   board = zn_scene_new_board(self);
   if (board == NULL) {
@@ -368,7 +387,8 @@ zn_scene_destroy(struct zn_scene* self)
 
   zn_screen_layout_destroy(self->screen_layout);
 
-  wl_list_remove(&self->signals.new_board.listener_list);
+  wl_list_remove(&self->events.new_board.listener_list);
+  wl_list_remove(&self->events.new_ray.listener_list);
   wl_list_remove(&self->unmap_focused_view_listener.link);
 
   free(self);
