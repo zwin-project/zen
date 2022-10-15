@@ -1,7 +1,7 @@
 #include "znr/remote.h"
 
 #include <zen-common.h>
-#include <zen-remote/remote.h>
+#include <zen-remote/server/remote.h>
 
 #include <cstdlib>
 #include <memory>
@@ -34,7 +34,7 @@ znr_remote_create(struct wl_display* display)
     goto err;
   }
 
-  self->proxy = zen::remote::CreateRemote(std::make_unique<Loop>(loop));
+  self->proxy = zen::remote::server::CreateRemote(std::make_unique<Loop>(loop));
 
   return &self->base;
 

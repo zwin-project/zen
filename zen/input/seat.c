@@ -28,6 +28,7 @@ static void
 zn_seat_update_capabilities(struct zn_seat* self)
 {
   uint32_t caps = 0;
+  struct zn_server* server = zn_server_get_singleton();
 
   struct zn_input_device* input_device;
   wl_list_for_each (input_device, &self->devices, link) {
@@ -46,6 +47,12 @@ zn_seat_update_capabilities(struct zn_seat* self)
       case WLR_INPUT_DEVICE_SWITCH:
         break;
     }
+  }
+
+  if (caps & WL_SEAT_CAPABILITY_POINTER) {
+    zn_scene_ensure_ray(server->scene);
+  } else {
+    zn_scene_destroy_ray(server->scene);
   }
 
   wlr_seat_set_capabilities(self->wlr_seat, caps);
