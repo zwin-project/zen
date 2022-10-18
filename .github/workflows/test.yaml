@@ -24,6 +24,20 @@ jobs:
         with:
           python-version: "3.x"
 
+      - name: Clone cglm
+        uses: actions/checkout@v2
+        with:
+          repository: recp/cglm
+          path: cglm
+
+      - name: Build cglm
+        run: |
+          meson build
+          sudo ninja -C build install
+        working-directory: ./cglm
+        env:
+          CC: gcc
+
       - name: Clone wlr-glew-renderer
         uses: actions/checkout@v2
         with:
