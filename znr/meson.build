@@ -1,10 +1,12 @@
 _znr_inc = include_directories('include')
 
 _znr_srcs = [
+  'src/gl-buffer.cc',
   'src/log.cc',
   'src/loop.cc',
   'src/remote.cc',
   'src/rendering-unit.cc',
+  'src/virtual-object.cc',
 ]
 
 _znr_deps = [
