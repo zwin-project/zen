@@ -29,7 +29,7 @@ znr_remote_create(struct wl_display* display)
   znr_remote_impl* self;
   wl_event_loop* loop = wl_display_get_event_loop(display);
 
-  self = static_cast<znr_remote_impl*>(zalloc(sizeof *self));
+  self = new znr_remote_impl();
   if (self == nullptr) {
     goto err;
   }
@@ -47,5 +47,5 @@ znr_remote_destroy(struct znr_remote* parent)
 {
   znr_remote_impl* self = zn_container_of(parent, self, base);
   self->proxy.reset();
-  free(self);
+  delete self;
 }

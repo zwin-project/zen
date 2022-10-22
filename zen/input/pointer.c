@@ -6,6 +6,7 @@
 
 #include "zen-common.h"
 #include "zen/cursor.h"
+#include "zen/scene/ray.h"
 #include "zen/scene/view.h"
 #include "zen/server.h"
 
@@ -20,7 +21,19 @@ zn_pointer_handle_motion(struct wl_listener* listener, void* data)
   if (server->display_system == ZEN_DISPLAY_SYSTEM_TYPE_SCREEN) {
     cursor->grab->interface->motion(cursor->grab, event);
   } else {
-    // TODO: ray
+    struct zn_ray* ray = zn_scene_ensure_ray(server->scene);
+
+    float polar = ray->angle.polar + event->delta_x * 0.01;
+    if (polar < 0)
+      polar = 0;
+    else if (polar > M_PI)
+      polar = M_PI;
+
+    float azimuthal = ray->angle.azimuthal + event->delta_y * 0.01;
+    while (azimuthal >= 2 * M_PI) azimuthal -= 2 * M_PI;
+    while (azimuthal < 0) azimuthal += 2 * M_PI;
+
+    zn_ray_move(ray, polar, azimuthal);
   }
 }
 

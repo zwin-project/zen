@@ -1,6 +1,7 @@
 _znr_inc = include_directories('include')
 
 _znr_srcs = [
+  'src/buffer.cc',
   'src/gl-buffer.cc',
   'src/log.cc',
   'src/loop.cc',

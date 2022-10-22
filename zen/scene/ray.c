@@ -2,6 +2,15 @@
 
 #include "zen-common.h"
 
+void
+zn_ray_move(struct zn_ray* self, float polar, float azimuthal)
+{
+  self->angle.polar = polar;
+  self->angle.azimuthal = azimuthal;
+
+  wl_signal_emit(&self->events.motion, NULL);
+}
+
 struct zn_ray*
 zn_ray_create(void)
 {
@@ -19,6 +28,7 @@ zn_ray_create(void)
   self->angle.azimuthal = GLM_PI * 1.3;
 
   wl_signal_init(&self->events.destroy);
+  wl_signal_init(&self->events.motion);
 
   return self;
 
@@ -30,5 +40,7 @@ void
 zn_ray_destroy(struct zn_ray* self)
 {
   wl_signal_emit(&self->events.destroy, NULL);
+  wl_list_remove(&self->events.destroy.listener_list);
+  wl_list_remove(&self->events.motion.listener_list);
   free(self);
 }
