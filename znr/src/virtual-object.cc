@@ -17,7 +17,7 @@ znr_virtual_object_create(struct znr_remote* remote)
   znr_virtual_object_impl* self;
   znr_remote_impl* remote_impl = zn_container_of(remote, remote_impl, base);
 
-  self = static_cast<znr_virtual_object_impl*>(zalloc(sizeof *self));
+  self = new znr_virtual_object_impl();
   if (self == nullptr) {
     zn_error("Failed to allocate memory");
     goto err;
@@ -34,7 +34,7 @@ znr_virtual_object_create(struct znr_remote* remote)
   return &self->base;
 
 err_free:
-  free(self);
+  delete self;
 
 err:
   return nullptr;
@@ -45,5 +45,5 @@ znr_virtual_object_destroy(struct znr_virtual_object* parent)
 {
   znr_virtual_object_impl* self = zn_container_of(parent, self, base);
   self->proxy.reset();
-  free(self);
+  delete self;
 }

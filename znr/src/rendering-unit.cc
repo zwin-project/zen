@@ -40,7 +40,7 @@ znr_rendering_unit_create(struct znr_remote* remote, uint64_t virtual_object_id)
   znr_rendering_unit_impl* self;
   znr_remote_impl* remote_impl = zn_container_of(remote, remote_impl, base);
 
-  self = static_cast<znr_rendering_unit_impl*>(zalloc(sizeof *self));
+  self = new znr_rendering_unit_impl();
   if (self == NULL) {
     zn_error("Failed to allocate memory");
     goto err;
@@ -56,7 +56,7 @@ znr_rendering_unit_create(struct znr_remote* remote, uint64_t virtual_object_id)
   return &self->base;
 
 err_free:
-  free(self);
+  delete self;
 
 err:
   return nullptr;
@@ -67,5 +67,5 @@ znr_rendering_unit_destroy(struct znr_rendering_unit* parent)
 {
   znr_rendering_unit_impl* self = zn_container_of(parent, self, base);
   self->proxy.reset();
-  free(self);
+  delete self;
 }
