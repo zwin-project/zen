@@ -25,6 +25,7 @@ _zen_desktop_srcs = [
   'immersive/remote/object/ray.c',
   'immersive/remote/renderer.c',
   'immersive/remote/scene.c',
+  'immersive/remote/mem-buffer.c',
 
   'input/cursor-grab-move.c',
   'input/cursor-grab-resize.c',

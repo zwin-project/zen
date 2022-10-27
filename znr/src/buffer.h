@@ -11,6 +11,7 @@ struct znr_buffer_impl {
 
   struct znr_remote_impl* remote;
   void* data;
+  uint32_t ref;
 };
 
 std::unique_ptr<zen::remote::server::IBuffer> znr_buffer_impl_use(
