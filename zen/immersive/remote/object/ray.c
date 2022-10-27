@@ -5,15 +5,18 @@
 #include "zen-common.h"
 #include "zen/immersive/remote/scene.h"
 
+#define VERTEX_COUNT 2
+#define VERTICES_SIZE sizeof(vec3) * VERTEX_COUNT
+
 static void
 zn_ray_remote_object_update_vertices(struct zn_ray_remote_object* self)
 {
-  glm_vec3_copy(self->ray->origin, self->vertices[0]);
-  glm_vec3_copy((vec3){0, 1, 0}, self->vertices[1]);
-  glm_vec3_rotate(self->vertices[1], self->ray->angle.polar, (vec3){0, 0, -1});
-  glm_vec3_rotate(
-      self->vertices[1], self->ray->angle.azimuthal, (vec3){0, 1, 0});
-  glm_vec3_add(self->ray->origin, self->vertices[1], self->vertices[1]);
+  vec3* vertices = self->vertex_buffer->data;
+  glm_vec3_copy(self->ray->origin, vertices[0]);
+  glm_vec3_copy((vec3){0, 1, 0}, vertices[1]);
+  glm_vec3_rotate(vertices[1], self->ray->angle.polar, (vec3){0, 0, -1});
+  glm_vec3_rotate(vertices[1], self->ray->angle.azimuthal, (vec3){0, 1, 0});
+  glm_vec3_add(self->ray->origin, vertices[1], vertices[1]);
 }
 
 static void
@@ -38,8 +41,8 @@ zn_ray_remote_object_handle_ray_motion(struct wl_listener* listener, void* data)
 
   zn_ray_remote_object_update_vertices(self);
 
-  znr_gl_buffer_gl_buffer_data(self->gl_buffer, self->vertex_buffer,
-      sizeof(self->vertices), GL_DYNAMIC_DRAW);
+  znr_gl_buffer_gl_buffer_data(self->gl_buffer, self->vertex_buffer->znr_buffer,
+      VERTICES_SIZE, GL_DYNAMIC_DRAW);
 
   znr_virtual_object_commit(self->virtual_object);
 }
@@ -77,16 +80,18 @@ zn_ray_remote_object_create(
     goto err_rendering_unit;
   }
 
-  self->vertex_buffer = znr_buffer_create(self->vertices, remote_scene->remote);
+  self->vertex_buffer =
+      zn_remote_mem_buffer_create(VERTICES_SIZE, remote_scene->remote);
   if (self->vertex_buffer == NULL) {
     zn_error("Failed to create a vertex buffer for ray");
     goto err_gl_buffer;
   }
+  zn_remote_mem_buffer_ref(self->vertex_buffer);
 
   zn_ray_remote_object_update_vertices(self);
 
-  znr_gl_buffer_gl_buffer_data(self->gl_buffer, self->vertex_buffer,
-      sizeof(self->vertices), GL_DYNAMIC_DRAW);
+  znr_gl_buffer_gl_buffer_data(self->gl_buffer, self->vertex_buffer->znr_buffer,
+      VERTICES_SIZE, GL_DYNAMIC_DRAW);
 
   znr_rendering_unit_gl_enable_vertex_attrib_array(self->rendering_unit, 1);
   znr_rendering_unit_gl_vertex_attrib_pointer(
@@ -124,7 +129,7 @@ err:
 void
 zn_ray_remote_object_destroy(struct zn_ray_remote_object* self)
 {
-  znr_buffer_destroy(self->vertex_buffer);
+  zn_remote_mem_buffer_unref(self->vertex_buffer);
   znr_gl_buffer_destroy(self->gl_buffer);
   znr_rendering_unit_destroy(self->rendering_unit);
   znr_virtual_object_destroy(self->virtual_object);

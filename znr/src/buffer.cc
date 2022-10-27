@@ -4,12 +4,31 @@
 
 #include "remote.h"
 
+static void
+znr_buffer_impl_ref(struct znr_buffer_impl* self)
+{
+  self->ref++;
+  struct znr_buffer_ref_event event;
+  event.count = self->ref;
+  wl_signal_emit(&self->base.events.ref, &event);
+}
+
+static void
+znr_buffer_impl_unref(struct znr_buffer_impl* self)
+{
+  self->ref--;
+  struct znr_buffer_ref_event event;
+  event.count = self->ref;
+  wl_signal_emit(&self->base.events.ref, &event);
+}
+
 std::unique_ptr<zen::remote::server::IBuffer>
 znr_buffer_impl_use(struct znr_buffer_impl* self)
 {
+  znr_buffer_impl_ref(self);
+
   return zen::remote::server::CreateBuffer(
-      self->data,
-      [self]() { wl_signal_emit(&self->base.events.release, nullptr); },
+      self->data, [self]() { znr_buffer_impl_unref(self); },
       self->remote->proxy);
 }
 
@@ -25,9 +44,10 @@ znr_buffer_create(void* data, struct znr_remote* remote)
     goto err;
   }
 
-  wl_signal_init(&self->base.events.release);
+  wl_signal_init(&self->base.events.ref);
   self->remote = remote_impl;
   self->data = data;
+  self->ref = 0;
 
   return &self->base;
 
