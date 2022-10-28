@@ -7,13 +7,14 @@
 
 void
 znr_gl_buffer_gl_buffer_data(struct znr_gl_buffer* parent,
-    struct znr_buffer* buffer, size_t size, uint64_t usage)
+    struct znr_buffer* buffer, uint64_t target, size_t size, uint64_t usage)
 {
   znr_gl_buffer_impl* self = zn_container_of(parent, self, base);
 
   znr_buffer_impl* buffer_impl = zn_container_of(buffer, buffer_impl, base);
 
-  self->proxy->GlBufferData(znr_buffer_impl_use(buffer_impl), size, usage);
+  self->proxy->GlBufferData(
+      znr_buffer_impl_use(buffer_impl), target, size, usage);
 }
 
 struct znr_gl_buffer*
