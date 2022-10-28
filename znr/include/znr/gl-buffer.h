@@ -16,7 +16,7 @@ struct znr_gl_buffer {
  * delete the contents until the release event fires.
  */
 void znr_gl_buffer_gl_buffer_data(struct znr_gl_buffer* self,
-    struct znr_buffer* buffer, size_t size, uint64_t usage);
+    struct znr_buffer* buffer, uint64_t target, size_t size, uint64_t usage);
 
 struct znr_gl_buffer* znr_gl_buffer_create(struct znr_remote* remote);
 

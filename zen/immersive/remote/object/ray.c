@@ -42,7 +42,7 @@ zn_ray_remote_object_handle_ray_motion(struct wl_listener* listener, void* data)
   zn_ray_remote_object_update_vertices(self);
 
   znr_gl_buffer_gl_buffer_data(self->gl_buffer, self->vertex_buffer->znr_buffer,
-      VERTICES_SIZE, GL_DYNAMIC_DRAW);
+      GL_ARRAY_BUFFER, VERTICES_SIZE, GL_DYNAMIC_DRAW);
 
   znr_virtual_object_commit(self->virtual_object);
 }
@@ -91,11 +91,11 @@ zn_ray_remote_object_create(
   zn_ray_remote_object_update_vertices(self);
 
   znr_gl_buffer_gl_buffer_data(self->gl_buffer, self->vertex_buffer->znr_buffer,
-      VERTICES_SIZE, GL_DYNAMIC_DRAW);
+      GL_ARRAY_BUFFER, VERTICES_SIZE, GL_DYNAMIC_DRAW);
 
-  znr_rendering_unit_gl_enable_vertex_attrib_array(self->rendering_unit, 1);
+  znr_rendering_unit_gl_enable_vertex_attrib_array(self->rendering_unit, 0);
   znr_rendering_unit_gl_vertex_attrib_pointer(
-      self->rendering_unit, 1, self->gl_buffer->id, 3, GL_FLOAT, false, 0, 0);
+      self->rendering_unit, 0, self->gl_buffer->id, 3, GL_FLOAT, false, 0, 0);
 
   znr_virtual_object_commit(self->virtual_object);
 
