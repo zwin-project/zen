@@ -23,13 +23,13 @@ zn_pointer_handle_motion(struct wl_listener* listener, void* data)
   } else {
     struct zn_ray* ray = zn_scene_ensure_ray(server->scene);
 
-    float polar = ray->angle.polar + event->delta_x * 0.01;
+    float polar = ray->angle.polar + event->delta_y * 0.001;
     if (polar < 0)
       polar = 0;
     else if (polar > M_PI)
       polar = M_PI;
 
-    float azimuthal = ray->angle.azimuthal + event->delta_y * 0.01;
+    float azimuthal = ray->angle.azimuthal - event->delta_x * 0.001;
     while (azimuthal >= 2 * M_PI) azimuthal -= 2 * M_PI;
     while (azimuthal < 0) azimuthal += 2 * M_PI;
 
