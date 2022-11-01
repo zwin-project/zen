@@ -6,6 +6,7 @@ BraceWrapping:
   AfterFunction: true
   AfterClass: true
   SplitEmptyRecord: false
+  SplitEmptyFunction: false
 AlwaysBreakAfterReturnType: TopLevelDefinitions
 AlignAfterOpenBracket: DontAlign
 ForEachMacros: [

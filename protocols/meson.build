@@ -1,10 +1,12 @@
 _wayland_protocols_dir = wayland_protocols_dep.get_variable('pkgdatadir')
+_zigen_protocols_dir = zigen_protocols_dep.get_variable('pkgdatadir')
 _scanner_path = wayland_scanner_dep.get_variable('wayland_scanner')
 _wayland_scanner = find_program(_scanner_path)
 
 
 _protocols = {
   'xdg-shell': join_paths(_wayland_protocols_dir, 'stable/xdg-shell/xdg-shell.xml'),
+  'zigen': join_paths(_zigen_protocols_dir, 'zigen.xml'),
   'zen-desktop': 'zen-desktop.xml',
 }
 

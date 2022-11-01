@@ -65,7 +65,7 @@ zn_switch_vt_handler(uint32_t time_msec, uint32_t key, void *data)
 
   const unsigned int vt = key - KEY_F1 + 1;
   struct zn_server *server = zn_server_get_singleton();
-  struct wlr_session *session = wlr_backend_get_session(server->backend);
+  struct wlr_session *session = wlr_backend_get_session(server->wlr_backend);
 
   if (!session) {
     return;

@@ -2,6 +2,10 @@ option('tests',
   description: 'Compile tests',
   type: 'boolean',
   value: 'true')
+option('clients',
+  description: 'Comiple sample clients',
+  type: 'boolean',
+  value: 'true')
 option('cui-client',
   description: 'Comiple cui client',
   type: 'boolean',

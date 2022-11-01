@@ -4,11 +4,13 @@
 #include <wayland-server.h>
 #include <wlr/render/glew.h>
 #include <zen-desktop-protocol.h>
+#include <zgnr/virtual-object.h>
 
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 #include "zen/config.h"
 #include "zen/output.h"
+#include "zen/scene/virtual-object.h"
 #include "zen/xdg-toplevel-view.h"
 #include "zen/xwayland-view.h"
 
@@ -105,6 +107,16 @@ zn_server_handle_xwayland_new_surface(struct wl_listener *listener, void *data)
   (void)zn_xwayland_view_create(xwayland_surface, self);
 }
 
+static void
+zn_server_handle_new_virtual_object(struct wl_listener *listener, void *data)
+{
+  struct zn_server *self =
+      zn_container_of(listener, self, new_virtual_object_listener);
+  struct zgnr_virtual_object *zgnr_virtual_object = data;
+
+  (void)zn_virtual_object_create(zgnr_virtual_object, self->scene);
+}
+
 struct zn_server *
 zn_server_get_singleton(void)
 {
@@ -116,7 +128,7 @@ zn_server_get_singleton(void)
 int
 zn_server_run(struct zn_server *self)
 {
-  if (!wlr_backend_start(self->backend)) {
+  if (!wlr_backend_start(self->wlr_backend)) {
     zn_error("Failed to start backend");
     return EXIT_FAILURE;
   }
@@ -163,22 +175,28 @@ zn_server_create(struct wl_display *display)
   self->loop = wl_display_get_event_loop(display);
   self->display_system = ZEN_DISPLAY_SYSTEM_TYPE_SCREEN;
 
-  self->backend = wlr_backend_autocreate(self->display);
-  if (self->backend == NULL) {
-    zn_error("Failed to create a backend");
+  self->zgnr_backend = zgnr_backend_create(self->display);
+  if (self->zgnr_backend == NULL) {
+    zn_error("Failed to create a zgnr_backend");
     goto err_config;
   }
 
-  drm_fd = wlr_backend_get_drm_fd(self->backend);
+  self->wlr_backend = wlr_backend_autocreate(self->display);
+  if (self->wlr_backend == NULL) {
+    zn_error("Failed to create a wlr_backend");
+    goto err_zgnr_backend;
+  }
+
+  drm_fd = wlr_backend_get_drm_fd(self->wlr_backend);
   if (drm_fd < 0) {
     zn_error("Failed to get drm fd");
-    goto err_config;
+    goto err_wlr_backend;
   }
 
   self->renderer = wlr_glew_renderer_create_with_drm_fd(drm_fd);
   if (self->renderer == NULL) {
     zn_error("Failed to create renderer");
-    goto err_backend;
+    goto err_wlr_backend;
   }
 
   if (wlr_renderer_init_wl_display(self->renderer, self->display) == false) {
@@ -186,7 +204,7 @@ zn_server_create(struct wl_display *display)
     goto err_renderer;
   }
 
-  self->allocator = wlr_allocator_autocreate(self->backend, self->renderer);
+  self->allocator = wlr_allocator_autocreate(self->wlr_backend, self->renderer);
   if (self->allocator == NULL) {
     zn_error("Failed to create allocator");
     goto err_renderer;
@@ -282,10 +300,12 @@ zn_server_create(struct wl_display *display)
       &self->immersive_deactivated_listener);
 
   self->new_input_listener.notify = zn_server_handle_new_input;
-  wl_signal_add(&self->backend->events.new_input, &self->new_input_listener);
+  wl_signal_add(
+      &self->wlr_backend->events.new_input, &self->new_input_listener);
 
   self->new_output_listener.notify = zn_server_handle_new_output;
-  wl_signal_add(&self->backend->events.new_output, &self->new_output_listener);
+  wl_signal_add(
+      &self->wlr_backend->events.new_output, &self->new_output_listener);
 
   self->xdg_shell_new_surface_listener.notify =
       zn_server_handle_xdg_shell_new_surface;
@@ -296,6 +316,14 @@ zn_server_create(struct wl_display *display)
       zn_server_handle_xwayland_new_surface;
   wl_signal_add(&self->xwayland->events.new_surface,
       &self->xwayland_new_surface_listener);
+
+  self->new_virtual_object_listener.notify =
+      zn_server_handle_new_virtual_object;
+  wl_signal_add(&self->zgnr_backend->events.new_virtual_object,
+      &self->new_virtual_object_listener);
+
+  // REMOVE ME LATER:
+  zgnr_backend_activate(self->zgnr_backend);
 
   return self;
 
@@ -326,8 +354,11 @@ err_allocator:
 err_renderer:
   wlr_renderer_destroy(self->renderer);
 
-err_backend:
-  wlr_backend_destroy(self->backend);
+err_wlr_backend:
+  wlr_backend_destroy(self->wlr_backend);
+
+err_zgnr_backend:
+  zgnr_backend_destroy(self->zgnr_backend);
 
 err_config:
   zn_config_destroy(self->config);
@@ -342,7 +373,7 @@ err:
 void
 zn_server_destroy_resources(struct zn_server *self)
 {
-  wlr_backend_destroy(self->backend);
+  wlr_backend_destroy(self->wlr_backend);
   wl_display_destroy_clients(self->display);
 
   zn_cursor_destroy_resources(self->input_manager->seat->cursor);
@@ -364,6 +395,7 @@ zn_server_destroy(struct zn_server *self)
   zn_scene_destroy(self->scene);
   wlr_allocator_destroy(self->allocator);
   wlr_renderer_destroy(self->renderer);
+  zgnr_backend_destroy(self->zgnr_backend);
   server_singleton = NULL;
   zn_config_destroy(self->config);
   free(self);

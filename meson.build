@@ -71,7 +71,7 @@ datadir = get_option('datadir')
 cglm_req = '>= 0.8.5'
 openvr_req = '>= 1.12.5'
 wayland_protocols_req = '>= 1.24'
-wayland_server_req = '>= 1.18.0'
+wayland_req = '>= 1.18.0'
 wlroots_req = ['>= 0.15', '< 0.16']
 wlr_glew_renderer_req = wlroots_req
 zen_remote_server_req = '0.1.0.9'
@@ -85,14 +85,15 @@ pixman_dep = dependency('pixman-1')
 toml_dep = dependency('libtoml')
 wayland_protocols_dep = dependency('wayland-protocols', version: wayland_protocols_req)
 wayland_scanner_dep = dependency('wayland-scanner')
-wayland_server_dep = dependency('wayland-server', version: wayland_server_req)
+wayland_server_dep = dependency('wayland-server', version: wayland_req)
 wlroots_dep = dependency('wlroots', version: wlroots_req)
 wlr_glew_renderer_dep = dependency('wlr-glew-renderer', version: wlr_glew_renderer_req)
 xkbcommon_dep = dependency('xkbcommon')
 zen_remote_server_dep = dependency('zen-remote-server', version: zen_remote_server_req)
+zigen_protocols_dep = dependency('zigen-protocols')
 
-if get_option('cui-client')
-  wayland_client_dep = dependency('wayland-client')
+if get_option('cui-client') or get_option('clients')
+  wayland_client_dep = dependency('wayland-client', version: wayland_req)
 endif
 
 cdata = configuration_data()
@@ -119,7 +120,11 @@ zen_inc = include_directories('include')
 subdir('protocols')
 subdir('common')
 subdir('znr')
+subdir('zgnroot')
 subdir('zen')
+if get_option('clients')
+  subdir('clients')
+endif
 if get_option('cui-client')
   subdir('cui-client')
 endif
