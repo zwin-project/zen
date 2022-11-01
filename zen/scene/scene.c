@@ -269,6 +269,7 @@ zn_scene_create(struct zn_config* config)
   }
 
   wl_list_init(&self->board_list);
+  wl_list_init(&self->virtual_object_list);
 
   zn_scene_setup_background(self, config->bg_image_file);
 
@@ -315,6 +316,8 @@ zn_scene_destroy(struct zn_scene* self)
   wl_list_for_each_safe (board, tmp, &self->board_list, link) {
     zn_board_destroy(board);
   }
+
+  wl_list_remove(&self->virtual_object_list);
 
   zn_screen_layout_destroy(self->screen_layout);
 

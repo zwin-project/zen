@@ -12,7 +12,8 @@ struct zn_scene {
 
   struct zn_view* focused_view;  // nullable
 
-  struct wl_list board_list;  // zn_board::link, non empty
+  struct wl_list board_list;           // zn_board::link, non empty
+  struct wl_list virtual_object_list;  // zn_virtual_object::link
 
   // create or get zn_scene::ray via zn_scene_ensure_ray
   struct zn_ray* ray;  // null if no pointing device exists

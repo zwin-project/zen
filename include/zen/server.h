@@ -9,6 +9,7 @@
 #include <wlr/types/wlr_xdg_shell.h>
 #include <wlr/xwayland.h>
 #include <zen-desktop-protocol.h>
+#include <zgnr/backend.h>
 #include <znr/remote.h>
 
 #include "zen/config.h"
@@ -21,7 +22,8 @@
 struct zn_server {
   struct wl_display *display;
   struct wl_event_loop *loop;
-  struct wlr_backend *backend;
+  struct wlr_backend *wlr_backend;
+  struct zgnr_backend *zgnr_backend;
   struct wlr_renderer *renderer;
   struct wlr_allocator *allocator;
   struct wlr_xwayland *xwayland;
@@ -49,6 +51,7 @@ struct zn_server {
   struct wl_listener new_output_listener;
   struct wl_listener xdg_shell_new_surface_listener;
   struct wl_listener xwayland_new_surface_listener;
+  struct wl_listener new_virtual_object_listener;
 
   int exit_code;
 };
