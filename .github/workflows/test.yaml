@@ -98,6 +98,20 @@ jobs:
         env:
           CC: gcc
 
+      - name: Clone zigen
+        uses: actions/checkout@v2
+        with:
+          repository: zigen-project/zigen
+          path: zigen
+      
+      - name: Build zigen
+        working-directory: ./zigen
+        run: |
+          meson build
+          sudo ninja -C build install
+        env:
+          CC: gcc
+
       - name: Checkout
         uses: actions/checkout@v2
         with:

@@ -42,6 +42,7 @@ _zen_desktop_srcs = [
   'scene/screen-layout.c',
   'scene/view.c',
   'scene/view-child.c',
+  'scene/virtual-object.c',
 
   'wlr/box.c',
 
@@ -63,6 +64,7 @@ _zen_desktop_deps = [
   xkbcommon_dep,
   zen_common_dep,
   znr_dep,
+  zgnr_dep,
 ]
 
 executable(
