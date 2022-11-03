@@ -80,11 +80,18 @@ zn_ray_remote_object_create(
     goto err_rendering_unit;
   }
 
+  self->gl_base_technique = znr_gl_base_technique_create(
+      remote_scene->remote, self->rendering_unit->id);
+  if (self->gl_base_technique == NULL) {
+    zn_error("Failed to create a GL base technique");
+    goto err_gl_buffer;
+  }
+
   self->vertex_buffer =
       zn_remote_mem_buffer_create(VERTICES_SIZE, remote_scene->remote);
   if (self->vertex_buffer == NULL) {
     zn_error("Failed to create a vertex buffer for ray");
-    goto err_gl_buffer;
+    goto err_gl_base_technique;
   }
   zn_remote_mem_buffer_ref(self->vertex_buffer);
 
@@ -96,6 +103,7 @@ zn_ray_remote_object_create(
   znr_rendering_unit_gl_enable_vertex_attrib_array(self->rendering_unit, 0);
   znr_rendering_unit_gl_vertex_attrib_pointer(
       self->rendering_unit, 0, self->gl_buffer->id, 3, GL_FLOAT, false, 0, 0);
+  znr_gl_base_technique_gl_draw_arrays(self->gl_base_technique, GL_LINES, 0, 2);
 
   znr_virtual_object_commit(self->virtual_object);
 
@@ -109,6 +117,9 @@ zn_ray_remote_object_create(
   remote_scene->ray_remote_object = self;
 
   return self;
+
+err_gl_base_technique:
+  znr_gl_base_technique_destroy(self->gl_base_technique);
 
 err_gl_buffer:
   znr_gl_buffer_destroy(self->gl_buffer);
@@ -130,6 +141,7 @@ void
 zn_ray_remote_object_destroy(struct zn_ray_remote_object* self)
 {
   zn_remote_mem_buffer_unref(self->vertex_buffer);
+  znr_gl_base_technique_destroy(self->gl_base_technique);
   znr_gl_buffer_destroy(self->gl_buffer);
   znr_rendering_unit_destroy(self->rendering_unit);
   znr_virtual_object_destroy(self->virtual_object);

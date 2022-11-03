@@ -6,10 +6,9 @@ extern "C" {
 
 #include "znr/remote.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-struct znr_rendering_unit {};
-#pragma GCC diagnostic pop
+struct znr_rendering_unit {
+  uint64_t id;
+};
 
 struct znr_rendering_unit* znr_rendering_unit_create(
     struct znr_remote* remote, uint64_t virtual_object_id);

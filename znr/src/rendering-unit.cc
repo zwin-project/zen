@@ -53,6 +53,8 @@ znr_rendering_unit_create(struct znr_remote* remote, uint64_t virtual_object_id)
     goto err_free;
   }
 
+  self->base.id = self->proxy->id();
+
   return &self->base;
 
 err_free:

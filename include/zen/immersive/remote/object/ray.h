@@ -2,6 +2,7 @@
 
 #include <cglm/cglm.h>
 #include <wayland-server-core.h>
+#include <znr/gl-base-technique.h>
 #include <znr/gl-buffer.h>
 #include <znr/rendering-unit.h>
 #include <znr/virtual-object.h>
@@ -18,6 +19,7 @@ struct zn_ray_remote_object {
   struct znr_virtual_object* virtual_object;
   struct znr_rendering_unit* rendering_unit;
   struct znr_gl_buffer* gl_buffer;
+  struct znr_gl_base_technique* gl_base_technique;
   struct zn_remote_mem_buffer* vertex_buffer;
 
   struct wl_listener ray_destroy_listener;
