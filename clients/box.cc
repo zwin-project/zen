@@ -1,6 +1,7 @@
 #include <wayland-client.h>
 
 #include "application.h"
+#include "rendering-unit.h"
 #include "virtual-object.h"
 
 using namespace zen::client;
@@ -15,6 +16,9 @@ main(void)
 
   auto vo = CreateVirtualObject(&app);
   if (!vo) return EXIT_FAILURE;
+
+  auto unit = CreateRenderingUnit(&app, vo.get());
+  if (!unit) return EXIT_FAILURE;
 
   return app.Run();
 }

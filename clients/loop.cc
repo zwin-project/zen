@@ -69,6 +69,7 @@ Loop::AddFd(int fd, uint32_t mask, EventSource::Callback callback, void* data)
   source->callback = callback;
   source->loop = this;
 
+  ep.events = 0;
   if (mask & kEventReadable) ep.events |= EPOLLIN;
   if (mask & kEventWritable) ep.events |= EPOLLOUT;
   ep.data.ptr = source;
