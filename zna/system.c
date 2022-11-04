@@ -4,6 +4,7 @@
 #include <zgnr/rendering-unit.h>
 
 #include "scene/virtual-object/rendering-unit.h"
+#include "zen/renderer/system.h"
 
 static void
 zna_system_handle_new_rendering_unit(struct wl_listener* listener, void* data)
@@ -15,7 +16,7 @@ zna_system_handle_new_rendering_unit(struct wl_listener* listener, void* data)
 }
 
 struct zna_system*
-zna_system_create(struct wl_display* display)
+zna_system_create(struct wl_display* display, struct znr_system* renderer)
 {
   struct zna_system* self;
 
@@ -26,6 +27,7 @@ zna_system_create(struct wl_display* display)
   }
 
   self->display = display;
+  self->renderer = renderer;
 
   self->gles = zgnr_gles_v32_create(self->display);
   if (self->gles == NULL) {
