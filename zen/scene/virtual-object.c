@@ -31,8 +31,7 @@ zn_virtual_object_create(
     goto err;
   }
 
-  self->appearance =
-      zn_virtual_object_appearance_create(self, server->appearance);
+  self->appearance = zna_virtual_object_create(self, server->appearance_system);
   if (self->appearance == NULL) {
     goto err_free;
   }
@@ -60,6 +59,6 @@ zn_virtual_object_destroy(struct zn_virtual_object* self)
 {
   wl_list_remove(&self->link);
   wl_list_remove(&self->zgnr_virtual_object_destroy_listener.link);
-  zn_virtual_object_appearance_destroy(self->appearance);
+  zna_virtual_object_destroy(self->appearance);
   free(self);
 }

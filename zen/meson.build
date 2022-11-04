@@ -13,19 +13,13 @@ _zen_desktop_srcs = [
   'decoration-manager.c',
   'main.c',
   'output.c',
+  'remote.c',
   'screen-renderer.c',
   'server.c',
   'xdg-decoration.c',
   'xdg-popup.c',
   'xdg-toplevel-view.c',
   'xwayland-view.c',
-
-  'immersive/remote/display-system.c',
-  'immersive/remote/object/board.c',
-  'immersive/remote/object/ray.c',
-  'immersive/remote/renderer.c',
-  'immersive/remote/scene.c',
-  'immersive/remote/mem-buffer.c',
 
   'input/cursor-grab-move.c',
   'input/cursor-grab-resize.c',
@@ -64,7 +58,7 @@ _zen_desktop_deps = [
   xkbcommon_dep,
   zen_appearance_dep,
   zen_common_dep,
-  znr_dep,
+  znr_remote_dep,
   zgnr_dep,
 ]
 

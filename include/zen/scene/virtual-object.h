@@ -5,12 +5,12 @@
 
 #include "zen/scene/scene.h"
 
-struct zn_virtual_object_appearance;
+struct zna_virtual_object;
 
 struct zn_virtual_object {
   struct zgnr_virtual_object *zgnr_virtual_object;  // nonnull, reference
-  struct wl_list link;  // zn_scene::virtual_object_list
-  struct zn_virtual_object_appearance *appearance;  // nonnull, owning
+  struct wl_list link;                    // zn_scene::virtual_object_list
+  struct zna_virtual_object *appearance;  // nonnull, owning
 
   vec3 position;
 

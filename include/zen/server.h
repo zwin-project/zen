@@ -10,14 +10,12 @@
 #include <wlr/xwayland.h>
 #include <zen-desktop-protocol.h>
 #include <zgnr/backend.h>
-#include <znr/remote.h>
 
-#include "zen/appearance/appearance.h"
+#include "zen/appearance/system.h"
 #include "zen/config.h"
 #include "zen/decoration-manager.h"
-#include "zen/immersive/remote/display-system.h"
-#include "zen/immersive/remote/renderer.h"
 #include "zen/input/input-manager.h"
+#include "zen/remote.h"
 #include "zen/scene/scene.h"
 
 struct zn_server {
@@ -36,10 +34,8 @@ struct zn_server {
 
   struct zn_config *config;
   struct zn_input_manager *input_manager;
-  struct znr_remote *remote;
-  struct zn_remote_immersive_renderer *remote_renderer;  // (duplicated)
-  struct zn_appearance *appearance;
-  struct zn_immersive_display_system *immersive_display_system;
+  struct zna_system *appearance_system;
+  struct zn_remote *remote;
 
   struct zn_scene *scene;
 
@@ -47,8 +43,6 @@ struct zn_server {
 
   char *socket;
 
-  struct wl_listener immersive_activate_listener;
-  struct wl_listener immersive_deactivated_listener;
   struct wl_listener new_input_listener;
   struct wl_listener new_output_listener;
   struct wl_listener xdg_shell_new_surface_listener;
