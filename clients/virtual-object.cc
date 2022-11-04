@@ -7,8 +7,8 @@ namespace zen::client {
 bool
 VirtualObject::Init()
 {
-  proxy = zgn_compositor_create_virtual_object(app_->compositor());
-  if (proxy == nullptr) {
+  proxy_ = zgn_compositor_create_virtual_object(app_->compositor());
+  if (proxy_ == nullptr) {
     LOG_ERROR("Failed to create virtual object proxy");
     return false;
   }
@@ -20,8 +20,8 @@ VirtualObject::VirtualObject(Application *app) : app_(app) {}
 
 VirtualObject::~VirtualObject()
 {
-  if (proxy) {
-    zgn_virtual_object_destroy(proxy);
+  if (proxy_) {
+    zgn_virtual_object_destroy(proxy_);
   }
 }
 
@@ -29,7 +29,11 @@ std::unique_ptr<VirtualObject>
 CreateVirtualObject(Application *app)
 {
   auto virtual_object = std::make_unique<VirtualObject>(app);
-  virtual_object->Init();
+
+  if (!virtual_object->Init()) {
+    return std::unique_ptr<VirtualObject>();
+  }
+
   return virtual_object;
 }
 

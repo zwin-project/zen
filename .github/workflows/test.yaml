@@ -58,7 +58,7 @@ jobs:
           repository: zigen-project/grpc-dev
           path: grpc-dev
           submodules: recursive
-          ref: 'v1.49.1' 
+          ref: 'v1.49.1'
       
       - name: Build grpc-dev
         working-directory: ./grpc-dev
@@ -103,6 +103,7 @@ jobs:
         with:
           repository: zigen-project/zigen
           path: zigen
+          ref: draft
       
       - name: Build zigen
         working-directory: ./zigen

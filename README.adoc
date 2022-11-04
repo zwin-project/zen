@@ -6,6 +6,10 @@ XR Desktop Environment
 
 === Dependencies
 
+. zigen protocols +
+Please see https://github.com/zigen-project/zigen[zigen-project/zigen]
+to build and install. +
+[yellow]#***__important__**#: Please use `draft` branch.
 . wlr-glew-renderer +
 Please see https://github.com/zigen-project/wlr-glew-renderer[zigen-project/wlr-glew-renderer]
 to build and install.

@@ -18,11 +18,18 @@ class VirtualObject
   ~VirtualObject();
 
   bool Init();
+  inline zgn_virtual_object *proxy();
 
  private:
   Application *app_;
-  zgn_virtual_object *proxy = nullptr;
+  zgn_virtual_object *proxy_ = nullptr;  // nonnull after initialization
 };
+
+inline zgn_virtual_object *
+VirtualObject::proxy()
+{
+  return proxy_;
+}
 
 std::unique_ptr<VirtualObject> CreateVirtualObject(Application *app);
 

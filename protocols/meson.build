@@ -7,6 +7,7 @@ _wayland_scanner = find_program(_scanner_path)
 _protocols = {
   'xdg-shell': join_paths(_wayland_protocols_dir, 'stable/xdg-shell/xdg-shell.xml'),
   'zigen': join_paths(_zigen_protocols_dir, 'zigen.xml'),
+  'zigen-gles-v32': join_paths(_zigen_protocols_dir, 'zigen-gles-v32.xml'),
   'zen-desktop': 'zen-desktop.xml',
 }
 

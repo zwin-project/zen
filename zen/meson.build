@@ -62,6 +62,7 @@ _zen_desktop_deps = [
   wlroots_dep,
   wlr_glew_renderer_dep,
   xkbcommon_dep,
+  zen_appearance_dep,
   zen_common_dep,
   znr_dep,
   zgnr_dep,

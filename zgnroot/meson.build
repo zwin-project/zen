@@ -3,10 +3,14 @@ _zgnr_inc = include_directories('include')
 _zgnr_srcs = [
   'src/backend.c',
   'src/compositor.c',
+  'src/gles-v32.c',
+  'src/rendering-unit.c',
   'src/virtual-object.c',
 
   protocols['zigen']['private-code'],
   protocols['zigen']['server-header'],
+  protocols['zigen-gles-v32']['private-code'],
+  protocols['zigen-gles-v32']['server-header'],
 ]
 
 _zgnr_deps = [

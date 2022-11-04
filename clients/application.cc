@@ -14,6 +14,9 @@ Application::GlobalRegistry(void* data, struct wl_registry* registry,
   if (std::strcmp(interface, "zgn_compositor") == 0) {
     app->zgn_compositor_ = static_cast<zgn_compositor*>(
         wl_registry_bind(registry, id, &zgn_compositor_interface, version));
+  } else if (std::strcmp(interface, "zgn_gles_v32") == 0) {
+    app->zgn_gles_v32_ = static_cast<zgn_gles_v32*>(
+        wl_registry_bind(registry, id, &zgn_gles_v32_interface, version));
   }
 }
 
@@ -54,8 +57,8 @@ Application::Connect(const char* socket)
 
   wl_display_roundtrip(display_);
 
-  if (zgn_compositor_ == nullptr) {
-    LOG_ERROR("Unsupported server");
+  if (zgn_compositor_ == nullptr || zgn_gles_v32_ == nullptr) {
+    LOG_ERROR("Server does not support zigen protocols");
     goto err_globals;
   }
 
@@ -63,10 +66,11 @@ Application::Connect(const char* socket)
       wl_display_get_fd(display_), Loop::kEventReadable,
       [](int /*fd*/, uint32_t mask, void* data) {
         auto app = static_cast<Application*>(data);
-        if (mask == Loop::kEventReadable) {
-          app->Poll();
-        } else if (mask == Loop::kEventError || mask == Loop::kEventHangUp) {
+        if (mask & Loop::kEventError || mask & Loop::kEventHangUp) {
+          LOG_ERROR("Disconnected from wayland server");
           app->loop()->Terminate(EXIT_FAILURE);
+        } else if (mask == Loop::kEventReadable) {
+          app->Poll();
         }
       },
       this);
@@ -74,6 +78,9 @@ Application::Connect(const char* socket)
   return true;
 
 err_globals:
+  if (zgn_gles_v32_) zgn_gles_v32_destroy(zgn_gles_v32_);
+  zgn_gles_v32_ = nullptr;
+
   if (zgn_compositor_) zgn_compositor_destroy(zgn_compositor_);
   zgn_compositor_ = nullptr;
 
@@ -115,11 +122,13 @@ Application::Poll()
 int
 Application::Run()
 {
+  wl_display_flush(display_);
   return loop_.Run();
 }
 
 Application::~Application()
 {
+  if (zgn_gles_v32_) zgn_gles_v32_destroy(zgn_gles_v32_);
   if (zgn_compositor_) zgn_compositor_destroy(zgn_compositor_);
   if (registry_) wl_registry_destroy(registry_);
   if (display_) wl_display_disconnect(display_);
