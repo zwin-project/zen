@@ -1,5 +1,4 @@
-#ifndef ZGNR_BACKEND_H
-#define ZGNR_BACKEND_H
+#pragma once
 
 #include <wayland-server-core.h>
 
@@ -32,5 +31,3 @@ void zgnr_backend_destroy(struct zgnr_backend *self);
 #ifdef __cplusplus
 }
 #endif
-
-#endif  // ZGNR_BACKEND_H

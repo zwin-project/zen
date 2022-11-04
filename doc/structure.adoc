@@ -1,0 +1,18 @@
+.Components
+[%autowidth.stretch]
+|===
+|prefix|description
+
+|zn_
+|Core component
+
+|zna_
+|Appearance of objects in immersive display system
+
+|znr_
+|Rendering backend for immersive display system
+
+|zgnr_
+|zgnroot: thin library of zigen protocol
+
+|===

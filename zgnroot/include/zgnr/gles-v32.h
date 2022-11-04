@@ -1,5 +1,4 @@
-#ifndef ZGNR_GLES_V32_H
-#define ZGNR_GLES_V32_H
+#pragma once
 
 #include <wayland-server-core.h>
 
@@ -20,5 +19,3 @@ void zgnr_gles_v32_destroy(struct zgnr_gles_v32* self);
 #ifdef __cplusplus
 }
 #endif
-
-#endif  // ZGNR_GLES_V32_H
