@@ -7,7 +7,7 @@
 struct znr_session_impl {
   znr_session base;
 
-  std::unique_ptr<zen::remote::server::ISession> proxy;
+  std::shared_ptr<zen::remote::server::ISession> proxy;
 };
 
 znr_session_impl* znr_session_create(

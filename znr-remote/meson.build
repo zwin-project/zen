@@ -5,6 +5,7 @@ _znr_remote_srcs = [
   'src/peer.cc',
   'src/remote.cc',
   'src/session.cc',
+  'src/virtual-object.cc',
 ]
 
 _znr_remote_deps = [

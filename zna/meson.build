@@ -1,3 +1,5 @@
+_zen_appearance_inc = include_directories('.')
+
 _zen_appearance_srcs = [
   'system.c',
   'scene/virtual-object.c',
@@ -13,7 +15,7 @@ _zen_appearance_deps = [
 _zen_appearance_lib = static_library(
   'zen-appearance',
   _zen_appearance_srcs,
-  include_directories: zen_inc,
+  include_directories: [zen_inc, _zen_appearance_inc],
   dependencies: _zen_appearance_deps,
   install: false,
 )
