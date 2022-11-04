@@ -8,7 +8,7 @@
 
 #include "zen-common/log.h"
 #include "zen-common/util.h"
-#include "zen/appearance/appearance.h"
+#include "zen/appearance/system.h"
 #include "zen/config.h"
 #include "zen/output.h"
 #include "zen/scene/virtual-object.h"
@@ -16,26 +16,6 @@
 #include "zen/xwayland-view.h"
 
 static struct zn_server *server_singleton = NULL;
-
-static void
-zn_server_handle_immersive_activate(struct wl_listener *listener, void *data)
-{
-  struct zn_server *self =
-      zn_container_of(listener, self, immersive_activate_listener);
-  UNUSED(data);
-
-  self->display_system = ZEN_DISPLAY_SYSTEM_TYPE_IMMERSIVE;
-}
-
-static void
-zn_server_handle_immersive_deactivated(struct wl_listener *listener, void *data)
-{
-  struct zn_server *self =
-      zn_container_of(listener, self, immersive_deactivated_listener);
-  UNUSED(data);
-
-  self->display_system = ZEN_DISPLAY_SYSTEM_TYPE_SCREEN;
-}
 
 static void
 zn_server_handle_new_input(struct wl_listener *listener, void *data)
@@ -259,52 +239,28 @@ zn_server_create(struct wl_display *display)
     goto err_server_decoration;
   }
 
-  self->remote = znr_remote_create(self->display);
-  if (self->remote == NULL) {
-    zn_error("Failed to create znr_remote");
+  self->appearance_system = zna_system_create(self->display);
+  if (self->appearance_system == NULL) {
+    zn_error("Failed to create a zn_appearance");
     goto err_input_manager;
   }
 
-  self->remote_renderer =
-      zn_remote_immersive_renderer_create(self->scene, self->remote);
-  if (self->remote_renderer == NULL) {
-    zn_error("Failed to create a remote immersive renderer");
-    goto err_remote;
-  }
-
-  self->appearance = zn_appearance_create(self->display);
-  if (self->appearance == NULL) {
-    zn_error("Failed to create a zn_appearance");
-    goto err_remote_renderer;
-  }
-
-  self->immersive_display_system = zn_remote_immersive_display_system_create(
-      self->display, self->remote_renderer, self->remote);
-  if (self->immersive_display_system == NULL) {
-    zn_error("Failed to create remote immersive display system");
+  self->remote = zn_remote_create(self->display);
+  if (self->remote == NULL) {
+    zn_error("Failed to create a znr_remote");
     goto err_appearance;
   }
 
   self->xwayland = wlr_xwayland_create(self->display, self->w_compositor, true);
   if (self->xwayland == NULL) {
     zn_error("Failed to create xwayland");
-    goto err_immersive_display_system;
+    goto err_remote;
   }
 
   setenv("DISPLAY", self->xwayland->display_name, true);
   zn_debug("DISPLAY=%s", self->xwayland->display_name);
 
   zn_scene_setup_bindings(self->scene);
-
-  self->immersive_activate_listener.notify =
-      zn_server_handle_immersive_activate;
-  wl_signal_add(&self->immersive_display_system->events.activate,
-      &self->immersive_activate_listener);
-
-  self->immersive_deactivated_listener.notify =
-      zn_server_handle_immersive_deactivated;
-  wl_signal_add(&self->immersive_display_system->events.deactivated,
-      &self->immersive_deactivated_listener);
 
   self->new_input_listener.notify = zn_server_handle_new_input;
   wl_signal_add(
@@ -334,17 +290,11 @@ zn_server_create(struct wl_display *display)
 
   return self;
 
-err_immersive_display_system:
-  zn_remote_immersive_display_system_destroy(self->immersive_display_system);
+err_remote:
+  zn_remote_destroy(self->remote);
 
 err_appearance:
-  zn_appearance_destroy(self->appearance);
-
-err_remote_renderer:
-  zn_remote_immersive_renderer_destroy(self->remote_renderer);
-
-err_remote:
-  znr_remote_destroy(self->remote);
+  zna_system_destroy(self->appearance_system);
 
 err_input_manager:
   zn_input_manager_destroy(self->input_manager);
@@ -388,18 +338,14 @@ zn_server_destroy_resources(struct zn_server *self)
 
   zn_cursor_destroy_resources(self->input_manager->seat->cursor);
   zn_scene_destroy_resources(self->scene);
-
-  znr_remote_stop(self->remote);
 }
 
 void
 zn_server_destroy(struct zn_server *self)
 {
   wlr_xwayland_destroy(self->xwayland);
-  zn_remote_immersive_display_system_destroy(self->immersive_display_system);
-  zn_appearance_destroy(self->appearance);
-  zn_remote_immersive_renderer_destroy(self->remote_renderer);
-  znr_remote_destroy(self->remote);
+  zn_remote_destroy(self->remote);
+  zna_system_destroy(self->appearance_system);
   zn_input_manager_destroy(self->input_manager);
   zn_decoration_manager_destroy(self->decoration_manager);
   free(self->socket);

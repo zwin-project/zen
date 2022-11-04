@@ -1,12 +1,11 @@
 #pragma once
 
-#include "zen/appearance/appearance.h"
+#include "zen/appearance/system.h"
 #include "zen/scene/virtual-object.h"
 
-struct zn_virtual_object_appearance;
+struct zna_virtual_object;
 
-struct zn_virtual_object_appearance* zn_virtual_object_appearance_create(
-    struct zn_virtual_object* virtual_object, struct zn_appearance* appearance);
+struct zna_virtual_object* zna_virtual_object_create(
+    struct zn_virtual_object* virtual_object, struct zna_system* system);
 
-void zn_virtual_object_appearance_destroy(
-    struct zn_virtual_object_appearance* self);
+void zna_virtual_object_destroy(struct zna_virtual_object* self);

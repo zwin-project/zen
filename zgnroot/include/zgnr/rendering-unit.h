@@ -1,5 +1,4 @@
-#ifndef ZGNR_RENDERING_UNIT_H
-#define ZGNR_RENDERING_UNIT_H
+#pragma once
 
 #include <wayland-server-core.h>
 #include <zgnr/virtual-object.h>
@@ -19,5 +18,3 @@ struct zgnr_rendering_unit {
 #ifdef __cplusplus
 }
 #endif
-
-#endif  // ZGNR_RENDERING_UNIT_H
