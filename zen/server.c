@@ -8,6 +8,7 @@
 
 #include "zen-common/log.h"
 #include "zen-common/util.h"
+#include "zen/appearance/appearance.h"
 #include "zen/config.h"
 #include "zen/output.h"
 #include "zen/scene/virtual-object.h"
@@ -271,11 +272,17 @@ zn_server_create(struct wl_display *display)
     goto err_remote;
   }
 
+  self->appearance = zn_appearance_create(self->display);
+  if (self->appearance == NULL) {
+    zn_error("Failed to create a zn_appearance");
+    goto err_remote_renderer;
+  }
+
   self->immersive_display_system = zn_remote_immersive_display_system_create(
       self->display, self->remote_renderer, self->remote);
   if (self->immersive_display_system == NULL) {
     zn_error("Failed to create remote immersive display system");
-    goto err_remote_renderer;
+    goto err_appearance;
   }
 
   self->xwayland = wlr_xwayland_create(self->display, self->w_compositor, true);
@@ -329,6 +336,9 @@ zn_server_create(struct wl_display *display)
 
 err_immersive_display_system:
   zn_remote_immersive_display_system_destroy(self->immersive_display_system);
+
+err_appearance:
+  zn_appearance_destroy(self->appearance);
 
 err_remote_renderer:
   zn_remote_immersive_renderer_destroy(self->remote_renderer);
@@ -387,6 +397,7 @@ zn_server_destroy(struct zn_server *self)
 {
   wlr_xwayland_destroy(self->xwayland);
   zn_remote_immersive_display_system_destroy(self->immersive_display_system);
+  zn_appearance_destroy(self->appearance);
   zn_remote_immersive_renderer_destroy(self->remote_renderer);
   znr_remote_destroy(self->remote);
   zn_input_manager_destroy(self->input_manager);

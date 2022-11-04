@@ -39,7 +39,7 @@ zgnr_compositor_bind(
       wl_resource_create(client, &zgn_compositor_interface, version, id);
   if (resource == NULL) {
     zn_error("Failed to create a wl_resource");
-    wl_resource_post_no_memory(resource);
+    wl_client_post_no_memory(client);
     return;
   }
 
