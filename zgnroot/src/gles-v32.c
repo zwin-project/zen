@@ -84,12 +84,13 @@ zgnr_gles_v32_protocol_create_gl_vertex_array(
 }
 
 static void
-zgnr_gles_v32_protocol_create_gl_base_technique(
-    struct wl_client* client, struct wl_resource* resource, uint32_t id)
+zgnr_gles_v32_protocol_create_gl_base_technique(struct wl_client* client,
+    struct wl_resource* resource, uint32_t id, struct wl_resource* unit)
 {
   UNUSED(client);
   UNUSED(resource);
   UNUSED(id);
+  UNUSED(unit);
 }
 
 static const struct zgn_gles_v32_interface interface = {
