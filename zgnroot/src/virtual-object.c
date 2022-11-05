@@ -8,7 +8,7 @@ static void zgnr_virtual_object_destroy(struct zgnr_virtual_object_impl* self);
 static void
 zgnr_virtual_object_handle_destroy(struct wl_resource* resource)
 {
-  struct zgnr_virtual_object_impl* self = resource->data;
+  struct zgnr_virtual_object_impl* self = wl_resource_get_user_data(resource);
   zgnr_virtual_object_destroy(self);
 }
 

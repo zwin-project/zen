@@ -19,10 +19,10 @@ zgnr_gles_v32_protocol_create_rendering_unit(struct wl_client* client,
     struct wl_resource* resource, uint32_t id,
     struct wl_resource* virtual_object_resource)
 {
-  struct zgnr_gles_v32_impl* self = resource->data;
+  struct zgnr_gles_v32_impl* self = wl_resource_get_user_data(resource);
   struct zgnr_rendering_unit_impl* unit;
   struct zgnr_virtual_object_impl* virtual_object =
-      virtual_object_resource->data;
+      wl_resource_get_user_data(virtual_object_resource);
 
   unit = zgnr_rendering_unit_create(client, id, virtual_object);
   if (unit == NULL) {

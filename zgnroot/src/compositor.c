@@ -11,7 +11,7 @@ static void
 zgnr_compositor_protocol_create_virtual_object(
     struct wl_client* client, struct wl_resource* resource, uint32_t id)
 {
-  struct zgnr_compositor* self = resource->data;
+  struct zgnr_compositor* self = wl_resource_get_user_data(resource);
   struct zgnr_virtual_object_impl* virtual_object =
       zgnr_virtual_object_create(client, id);
 
