@@ -4,6 +4,7 @@ _znr_remote_srcs = [
   'src/loop.cc',
   'src/peer.cc',
   'src/remote.cc',
+  'src/rendering-unit.cc',
   'src/session.cc',
   'src/virtual-object.cc',
 ]

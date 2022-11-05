@@ -9,10 +9,11 @@
 static void
 zna_system_handle_new_rendering_unit(struct wl_listener* listener, void* data)
 {
-  UNUSED(listener);
+  struct zna_system* self =
+      zn_container_of(listener, self, new_rendering_unit_listener);
   struct zgnr_rendering_unit* unit = data;
 
-  (void)zna_rendering_unit_create(unit);
+  (void)zna_rendering_unit_create(unit, self);
 }
 
 struct zna_system*
