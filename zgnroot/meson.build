@@ -6,6 +6,7 @@ _zgnr_srcs = [
   'src/gles-v32.c',
   'src/gl-base-technique.c',
   'src/rendering-unit.c',
+  'src/shm.c',
   'src/virtual-object.c',
 
   protocols['zigen']['private-code'],
@@ -22,6 +23,7 @@ _zgnr_deps = [
 _zgnr_lib = static_library(
   'zgnr',
   _zgnr_srcs,
+  c_args: ['-include', 'config.h'],
   include_directories: _zgnr_inc,
   dependencies: _zgnr_deps,
   install: false,
