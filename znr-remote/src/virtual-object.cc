@@ -18,8 +18,15 @@ znr_virtual_object_create(znr_session* session_base)
   session = zn_container_of(session_base, session, base);
 
   self->proxy = zen::remote::server::CreateVirtualObject(session->proxy);
+  if (!self->proxy) {
+    zn_error("Failed to create remote virtual object");
+    goto err_delete;
+  }
 
   return self;
+
+err_delete:
+  delete self;
 
 err:
   return nullptr;

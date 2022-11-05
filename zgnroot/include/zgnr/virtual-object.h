@@ -10,6 +10,8 @@ struct zgnr_virtual_object {
   struct {
     struct wl_signal destroy;  // (NULL)
   } events;
+
+  void *user_data;
 };
 
 #ifdef __cplusplus
