@@ -1,6 +1,7 @@
 _zen_box_client_srcs = [
   'application.cc',
   'box.cc',
+  'gl-base-technique.cc',
   'loop.cc',
   'rendering-unit.cc',
   'virtual-object.cc',
