@@ -4,6 +4,7 @@ _zgnr_srcs = [
   'src/backend.c',
   'src/compositor.c',
   'src/gles-v32.c',
+  'src/gl-base-technique.c',
   'src/rendering-unit.c',
   'src/virtual-object.c',
 
