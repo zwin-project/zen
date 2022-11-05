@@ -12,6 +12,7 @@ global_args = []
 global_args_maybe = [
   '-D_GNU_SOURCE',
   '-DWLR_USE_UNSTABLE',
+  '-DWL_HIDE_DEPRECATED',
   '-fvisibility=hidden',
   '-Wstrict-prototypes',
 ]

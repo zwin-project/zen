@@ -11,7 +11,7 @@ static void zgnr_rendering_unit_inert(struct zgnr_rendering_unit_impl* self);
 static void
 zgnr_rendering_unit_handle_destroy(struct wl_resource* resource)
 {
-  struct zgnr_rendering_unit_impl* self = resource->data;
+  struct zgnr_rendering_unit_impl* self = wl_resource_get_user_data(resource);
   zgnr_rendering_unit_destroy(self);
 }
 
