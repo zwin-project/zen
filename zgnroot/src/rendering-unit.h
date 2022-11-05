@@ -2,9 +2,8 @@
 
 #include <wayland-server-core.h>
 
+#include "virtual-object.h"
 #include "zgnr/rendering-unit.h"
-
-struct zgnr_virtual_object_impl;
 
 /**
  * When the associated virtual object is destroyed, this object is destroyed and

@@ -1,14 +1,14 @@
 #pragma once
 
 #include <wayland-server-core.h>
-#include <zgnr/virtual-object.h>
+#include <zgnr/rendering-unit.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct zgnr_rendering_unit {
-  struct zgnr_virtual_object *virtual_object;  // nonnull
+struct zgnr_gl_base_technique {
+  struct zgnr_rendering_unit *unit;  // nonnull
 
   struct {
     struct wl_signal destroy;  // (NULL)

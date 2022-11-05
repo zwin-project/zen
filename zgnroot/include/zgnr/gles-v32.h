@@ -8,7 +8,8 @@ extern "C" {
 
 struct zgnr_gles_v32 {
   struct {
-    struct wl_signal new_rendering_unit;  // (struct zgnr_rendering_unit*)
+    struct wl_signal new_rendering_unit;     // (struct zgnr_rendering_unit*)
+    struct wl_signal new_gl_base_technique;  // (struct zgnr_gl_base_technique*)
   } events;
 };
 

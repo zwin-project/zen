@@ -1,6 +1,7 @@
 #include <wayland-client.h>
 
 #include "application.h"
+#include "gl-base-technique.h"
 #include "rendering-unit.h"
 #include "virtual-object.h"
 
@@ -19,6 +20,9 @@ main(void)
 
   auto unit = CreateRenderingUnit(&app, vo.get());
   if (!unit) return EXIT_FAILURE;
+
+  auto technique = CreateGlBaseTechnique(&app, unit.get());
+  if (!technique) return EXIT_FAILURE;
 
   return app.Run();
 }
