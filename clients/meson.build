@@ -19,6 +19,7 @@ _zen_box_client_deps = [
 executable(
   'zen-box',
   _zen_box_client_srcs,
+  cpp_args: ['-include', 'config.h'],
   install: false,
   dependencies: _zen_box_client_deps,
 )

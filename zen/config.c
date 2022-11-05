@@ -6,7 +6,6 @@
 #include <toml.h>
 #include <unistd.h>
 
-#include "build-config.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 

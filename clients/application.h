@@ -27,6 +27,7 @@ class Application
   inline Loop* loop();
   inline zgn_compositor* compositor();
   inline zgn_gles_v32* gles_v32();
+  inline zgn_shm* shm();
 
  private:
   static const struct wl_registry_listener registry_listener_;
@@ -41,6 +42,7 @@ class Application
   wl_registry* registry_ = nullptr;
   zgn_compositor* zgn_compositor_ = nullptr;
   zgn_gles_v32* zgn_gles_v32_ = nullptr;
+  zgn_shm* zgn_shm_ = nullptr;
   Loop loop_;
   std::unique_ptr<EventSource> event_source_;
 };
@@ -61,6 +63,12 @@ inline zgn_gles_v32*
 Application::gles_v32()
 {
   return zgn_gles_v32_;
+}
+
+inline zgn_shm*
+Application::shm()
+{
+  return zgn_shm_;
 }
 
 }  // namespace zen::client

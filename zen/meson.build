@@ -1,12 +1,4 @@
-build_config_h = configure_file(
-  input: 'build-config.h.meson',
-  output: 'build-config.h',
-  configuration: cdata
-)
-
 _zen_desktop_srcs = [
-  build_config_h,
-
   'binding.c',
   'config.c',
   'cursor.c',
@@ -66,6 +58,7 @@ executable(
   'zen-desktop',
   _zen_desktop_srcs,
   install: true,
+  c_args: ['-include', 'config.h'],
   dependencies: _zen_desktop_deps,
   include_directories: zen_inc,
 )
