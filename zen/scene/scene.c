@@ -4,7 +4,6 @@
 #include <drm_fourcc.h>
 #include <linux/input.h>
 
-#include "build-config.h"
 #include "zen-common.h"
 #include "zen/config.h"
 #include "zen/scene/board.h"

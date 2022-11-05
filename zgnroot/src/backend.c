@@ -3,6 +3,7 @@
 #include <zen-common.h>
 
 #include "compositor.h"
+#include "shm.h"
 
 int
 zgnr_backend_activate(struct zgnr_backend *parent)
@@ -30,6 +31,8 @@ zgnr_backend_create(struct wl_display *display)
   }
 
   self->display = display;
+
+  zgn_shm_init(display);
 
   self->compositor = zgnr_compositor_create(self->display, self);
   if (self->compositor == NULL) {

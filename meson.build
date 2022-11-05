@@ -7,6 +7,8 @@ project(
 )
 
 cc = meson.get_compiler('c')
+cxx = meson.get_compiler('cpp')
+cdata = configuration_data()
 
 global_args = []
 global_args_maybe = [
@@ -23,6 +25,23 @@ foreach arg : global_args_maybe
   endif
 endforeach
 add_project_arguments(global_args, language: 'c')
+
+global_args = []
+foreach arg : global_args_maybe
+  if cxx.has_argument(arg)
+    global_args += arg
+  endif
+endforeach
+add_project_arguments(global_args, language: 'cpp')
+
+have_funcs = [
+  'memfd_create',
+  'posix_fallocate',
+]
+
+foreach func : have_funcs
+  cdata.set('HAVE_' + func.underscorify().to_upper(), cc.has_function(func))
+endforeach
 
 # Compute the relative path from build_root to source_root
 
@@ -97,8 +116,6 @@ if get_option('cui-client') or get_option('clients')
   wayland_client_dep = dependency('wayland-client', version: wayland_req)
 endif
 
-cdata = configuration_data()
-
 if get_option('default-wallpaper')
   wallpaper_files = files(
     'assets/Zen_Wallpaper_Dark_3840x2160.png',
@@ -115,6 +132,11 @@ if get_option('default-wallpaper')
 else
   cdata.set_quoted('DEFAULT_WALLPAPER', '')
 endif
+
+configure_file(
+  output: 'config.h',
+  configuration: cdata,
+)
 
 zen_inc = include_directories('include')
 
