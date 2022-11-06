@@ -4,6 +4,7 @@
 #include <zigen-gles-v32-protocol.h>
 
 #include "gl-base-technique.h"
+#include "gl-buffer.h"
 #include "rendering-unit.h"
 #include "virtual-object.h"
 
@@ -29,6 +30,7 @@ zgnr_gles_v32_protocol_create_rendering_unit(struct wl_client* client,
   if (unit == NULL) {
     zn_error("Failed to create a rendering unit");
     wl_client_post_no_memory(client);
+    return;
   }
 
   wl_signal_emit(&self->base.events.new_rendering_unit, &unit->base);
@@ -38,9 +40,15 @@ static void
 zgnr_gles_v32_protocol_create_gl_buffer(
     struct wl_client* client, struct wl_resource* resource, uint32_t id)
 {
-  UNUSED(client);
-  UNUSED(resource);
-  UNUSED(id);
+  struct zgnr_gles_v32_impl* self = wl_resource_get_user_data(resource);
+  struct zgnr_gl_buffer_impl* buffer = zgnr_gl_buffer_create(client, id);
+  if (buffer == NULL) {
+    zn_error("Failed to create a gl buffer");
+    wl_client_post_no_memory(client);
+    return;
+  }
+
+  wl_signal_emit(&self->base.events.new_gl_buffer, &buffer->base);
 }
 
 static void
@@ -98,12 +106,13 @@ zgnr_gles_v32_protocol_create_gl_base_technique(struct wl_client* client,
   if (technique == NULL) {
     zn_error("Failed to create a gl base technique");
     wl_client_post_no_memory(client);
+    return;
   }
 
   wl_signal_emit(&self->base.events.new_gl_base_technique, &technique->base);
 }
 
-static const struct zgn_gles_v32_interface interface = {
+static const struct zgn_gles_v32_interface implementation = {
     .destroy = zgnr_gles_v32_protocol_destroy,
     .create_rendering_unit = zgnr_gles_v32_protocol_create_rendering_unit,
     .create_gl_buffer = zgnr_gles_v32_protocol_create_gl_buffer,
@@ -128,7 +137,7 @@ zgnr_gles_v32_bind(
     return;
   }
 
-  wl_resource_set_implementation(resource, &interface, self, NULL);
+  wl_resource_set_implementation(resource, &implementation, self, NULL);
 }
 
 struct zgnr_gles_v32*
@@ -144,6 +153,7 @@ zgnr_gles_v32_create(struct wl_display* display)
 
   wl_signal_init(&self->base.events.new_rendering_unit);
   wl_signal_init(&self->base.events.new_gl_base_technique);
+  wl_signal_init(&self->base.events.new_gl_buffer);
   self->display = display;
 
   self->global = wl_global_create(
@@ -169,6 +179,7 @@ zgnr_gles_v32_destroy(struct zgnr_gles_v32* parent)
 
   wl_global_destroy(self->global);
 
+  wl_list_remove(&self->base.events.new_gl_buffer.listener_list);
   wl_list_remove(&self->base.events.new_gl_base_technique.listener_list);
   wl_list_remove(&self->base.events.new_rendering_unit.listener_list);
 

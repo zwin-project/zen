@@ -113,7 +113,7 @@ zgnr_gl_base_technique_protocol_draw_elements(struct wl_client *client,
 }
 
 /** Be careful, resource can be inert. */
-static const struct zgn_gl_base_technique_interface interface = {
+static const struct zgn_gl_base_technique_interface implementation = {
     .destroy = zgnr_gl_base_technique_protocol_destroy,
     .bind_program = zgnr_gl_base_technique_protocol_bind_program,
     .bind_vertex_array = zgnr_gl_base_technique_protocol_bind_vertex_array,
@@ -164,8 +164,8 @@ zgnr_gl_base_technique_create(struct wl_client *client, uint32_t id,
     goto err_free;
   }
 
-  wl_resource_set_implementation(
-      self->resource, &interface, self, zgnr_gl_base_technique_handle_destroy);
+  wl_resource_set_implementation(self->resource, &implementation, self,
+      zgnr_gl_base_technique_handle_destroy);
 
   self->base.unit = &unit->base;
 

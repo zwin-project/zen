@@ -1,5 +1,6 @@
 #pragma once
 
+#include "zen/renderer/session.h"
 #include "zen/renderer/virtual-object.h"
 
 #ifdef __cplusplus

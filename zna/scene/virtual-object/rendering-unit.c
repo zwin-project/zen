@@ -59,6 +59,7 @@ zna_rendering_unit_create(
   }
 
   self->zgnr_rendering_unit = zgnr_rendering_unit;
+  zgnr_rendering_unit->user_data = self;
   self->system = system;
   self->znr_rendering_unit = NULL;
 

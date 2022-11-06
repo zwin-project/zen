@@ -39,7 +39,7 @@ zgnr_virtual_object_protocol_frame(
   UNUSED(callback);
 }
 
-static const struct zgn_virtual_object_interface interface = {
+static const struct zgn_virtual_object_interface implementation = {
     .destroy = zgnr_virtual_object_protocol_destroy,
     .commit = zgnr_virtual_object_protocol_commit,
     .frame = zgnr_virtual_object_protocol_frame,
@@ -64,7 +64,7 @@ zgnr_virtual_object_create(struct wl_client* client, uint32_t id)
   }
 
   wl_resource_set_implementation(
-      resource, &interface, self, zgnr_virtual_object_handle_destroy);
+      resource, &implementation, self, zgnr_virtual_object_handle_destroy);
 
   wl_signal_init(&self->base.events.destroy);
 

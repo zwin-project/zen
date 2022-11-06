@@ -25,7 +25,7 @@ zgnr_compositor_protocol_create_virtual_object(
       &self->backend->base.events.new_virtual_object, virtual_object);
 }
 
-static const struct zgn_compositor_interface interface = {
+static const struct zgn_compositor_interface implementation = {
     .create_virtual_object = zgnr_compositor_protocol_create_virtual_object,
 };
 
@@ -43,7 +43,7 @@ zgnr_compositor_bind(
     return;
   }
 
-  wl_resource_set_implementation(resource, &interface, self, NULL);
+  wl_resource_set_implementation(resource, &implementation, self, NULL);
 }
 
 int
