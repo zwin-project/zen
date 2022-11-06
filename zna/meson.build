@@ -3,6 +3,7 @@ _zen_appearance_inc = include_directories('.')
 _zen_appearance_srcs = [
   'system.c',
   'scene/virtual-object.c',
+  'scene/virtual-object/gl-buffer.c',
   'scene/virtual-object/rendering-unit.c',
 ]
 

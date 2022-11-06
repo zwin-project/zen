@@ -24,7 +24,7 @@ zgnr_rendering_unit_protocol_destroy(
 }
 
 /** Be careful, resource can be inert. */
-static const struct zgn_rendering_unit_interface interface = {
+static const struct zgn_rendering_unit_interface implementation = {
     .destroy = zgnr_rendering_unit_protocol_destroy,
 };
 
@@ -67,8 +67,8 @@ zgnr_rendering_unit_create(struct wl_client* client, uint32_t id,
     goto err_free;
   }
 
-  wl_resource_set_implementation(
-      self->resource, &interface, self, zgnr_rendering_unit_handle_destroy);
+  wl_resource_set_implementation(self->resource, &implementation, self,
+      zgnr_rendering_unit_handle_destroy);
 
   self->base.virtual_object = &virtual_object->base;
 

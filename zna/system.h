@@ -10,4 +10,5 @@ struct zna_system {
   struct znr_system *renderer;  // nonnull, reference
 
   struct wl_listener new_rendering_unit_listener;
+  struct wl_listener new_gl_buffer_listener;
 };

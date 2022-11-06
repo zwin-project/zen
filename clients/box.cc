@@ -4,6 +4,7 @@
 #include "application.h"
 #include "fd.h"
 #include "gl-base-technique.h"
+#include "gl-buffer.h"
 #include "rendering-unit.h"
 #include "virtual-object.h"
 
@@ -36,6 +37,9 @@ main(void)
   zgn_shm_pool *pool = zgn_shm_create_pool(app.shm(), fd, sizeof(vertices));
   zgn_buffer *buffer = zgn_shm_pool_create_buffer(pool, 0, sizeof(vertices));
   (void)buffer;
+
+  auto gl_buffer = CreateGlBuffer(&app);
+  if (!gl_buffer) return EXIT_FAILURE;
 
   return app.Run();
 }
