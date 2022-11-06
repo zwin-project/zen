@@ -87,9 +87,6 @@ We cannot customize these bindings for now.
 |<alt> + q
 |Terminate ZEN Desktop (for development convenience)
 
-|<alt> + <ctrl> + f
-|Make the focused view full screen
-
 |<mod> + ←
 |Put the focused view to the left half of the board
 

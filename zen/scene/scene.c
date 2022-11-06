@@ -34,8 +34,7 @@ zn_scene_get_focus_screen(struct zn_scene* self)
 }
 
 static void
-zn_scene_move_board_binding_handler(
-    uint32_t time_msec, uint32_t key, void* data)
+zn_scene_handle_move_board_binding(uint32_t time_msec, uint32_t key, void* data)
 {
   struct zn_scene* scene = data;
   struct zn_screen* screen = zn_scene_get_focus_screen(scene);
@@ -69,30 +68,22 @@ zn_scene_new_board(struct zn_scene* self)
 }
 
 static void
-zn_scene_switch_focused_view_binding_handler(
+zn_scene_handle_switch_focused_view_binding(
     uint32_t time_msec, uint32_t key, void* data)
 {
   struct zn_scene* scene = data;
   UNUSED(time_msec);
 
-  if (scene->focused_view == NULL) return;
-  // Should be mapped
-  struct zn_board* focused_board = scene->focused_view->board;
-  if (focused_board == NULL) {
-    zn_error("Something went wrong");
+  struct zn_board* focused_board = zn_scene_get_focus_board(scene);
+
+  if (focused_board == NULL || wl_list_length(&focused_board->view_list) == 1)
     return;
-  }
-  if (wl_list_length(&focused_board->view_list) == 1) {
-    zn_warn("Only 1 view");
-    return;
-  }
 
   struct zn_view* new_focused_view;
-  if (key != KEY_TAB) {
-    zn_error("Invalid key: %u", key);
+  if (!zn_assert(key == KEY_TAB, "Invalid key: %u", key)) {
     return;
   }
-  // bring prev to front (should be the second last)
+  // bring prev to front
   // put the current focused_view to the last
   new_focused_view = zn_container_of(
       focused_board->view_list.prev->prev, new_focused_view, link);
@@ -102,14 +93,14 @@ zn_scene_switch_focused_view_binding_handler(
 }
 
 static void
-zn_scene_align_focused_view_binding_handler(
+zn_scene_handle_align_focused_view_binding(
     uint32_t time_msec, uint32_t key, void* data)
 {
   struct zn_scene* scene = data;
   UNUSED(time_msec);
 
-  if (scene->focused_view == NULL) return;
-  struct zn_board* board = scene->focused_view->board;
+  struct zn_board* board = zn_scene_get_focus_board(scene);
+  if (board == NULL) return;
 
   double new_x, new_y, new_width, new_height;
   new_width = board->width / 2;
@@ -120,7 +111,7 @@ zn_scene_align_focused_view_binding_handler(
   } else if (key == KEY_LEFT) {
     new_x = 0.;
   } else {
-    zn_error("Invalid key: %u", key);
+    zn_assert(false, "Invalid key: %u", key);
     return;
   }
   zn_view_move(scene->focused_view, scene->focused_view->board, new_x, new_y);
@@ -129,7 +120,7 @@ zn_scene_align_focused_view_binding_handler(
 }
 
 static void
-zn_scene_new_board_binding_handler(uint32_t time_msec, uint32_t key, void* data)
+zn_scene_handle_new_board_binding(uint32_t time_msec, uint32_t key, void* data)
 {
   struct zn_scene* self = data;
   struct zn_screen* screen = zn_scene_get_focus_screen(self);
@@ -269,24 +260,24 @@ zn_scene_setup_bindings(struct zn_scene* self)
   struct zn_server* server = zn_server_get_singleton();
   zn_input_manager_add_key_binding(server->input_manager, KEY_RIGHT,
       WLR_MODIFIER_SHIFT | WLR_MODIFIER_LOGO,
-      zn_scene_move_board_binding_handler, self);
+      zn_scene_handle_move_board_binding, self);
 
   zn_input_manager_add_key_binding(server->input_manager, KEY_LEFT,
       WLR_MODIFIER_SHIFT | WLR_MODIFIER_LOGO,
-      zn_scene_move_board_binding_handler, self);
+      zn_scene_handle_move_board_binding, self);
 
   zn_input_manager_add_key_binding(server->input_manager, KEY_N,
-      WLR_MODIFIER_LOGO | WLR_MODIFIER_SHIFT,
-      zn_scene_new_board_binding_handler, self);
+      WLR_MODIFIER_LOGO | WLR_MODIFIER_SHIFT, zn_scene_handle_new_board_binding,
+      self);
 
   char aligning_keys[2] = {KEY_LEFT, KEY_RIGHT};
-  for (int i = 0; i < 2; i++) {
+  for (uint i = 0; i < ARRAY_LENGTH(aligning_keys); i++) {
     zn_input_manager_add_key_binding(server->input_manager, aligning_keys[i],
-        WLR_MODIFIER_LOGO, zn_scene_align_focused_view_binding_handler, self);
+        WLR_MODIFIER_LOGO, zn_scene_handle_align_focused_view_binding, self);
   }
 
   zn_input_manager_add_key_binding(server->input_manager, KEY_TAB,
-      WLR_MODIFIER_LOGO, zn_scene_switch_focused_view_binding_handler, self);
+      WLR_MODIFIER_LOGO, zn_scene_handle_switch_focused_view_binding, self);
 }
 
 static void

@@ -131,7 +131,7 @@ main(int argc, char *argv[])
   struct wl_display *display;
   struct wl_event_loop *loop;
   struct wl_event_source *signal_sources[4];
-  int i, exit_status = EXIT_FAILURE;
+  int exit_status = EXIT_FAILURE;
   char *startup_command = NULL;
   struct zn_server *server;
 
@@ -226,7 +226,7 @@ err_server:
   server = NULL;
 
 err_signal:
-  for (i = ARRAY_LENGTH(signal_sources) - 1; i >= 0; i--)
+  for (int i = ARRAY_LENGTH(signal_sources) - 1; i >= 0; i--)
     if (signal_sources[i]) wl_event_source_remove(signal_sources[i]);
 
   wl_display_destroy_clients(display);
