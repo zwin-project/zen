@@ -18,6 +18,9 @@ class VirtualObject
   ~VirtualObject();
 
   bool Init();
+
+  void Commit();
+
   inline zgn_virtual_object *proxy();
 
  private:

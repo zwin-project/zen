@@ -14,6 +14,10 @@ struct zgnr_gl_base_technique {
     struct wl_signal destroy;  // (NULL)
   } events;
 
+  struct wl_list link;  // zgnr_rendering_unit::current.gl_base_technique_list;
+
+  bool commited;
+
   void *user_data;
 };
 

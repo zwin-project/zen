@@ -24,9 +24,15 @@ static void
 zgnr_virtual_object_protocol_commit(
     struct wl_client* client, struct wl_resource* resource)
 {
-  // TODO:
   UNUSED(client);
-  UNUSED(resource);
+  struct zgnr_virtual_object_impl* self = wl_resource_get_user_data(resource);
+
+  // TODO:
+
+  self->base.committed = true;
+
+  wl_signal_emit(&self->events.on_commit, NULL);
+  wl_signal_emit(&self->base.events.committed, NULL);
 }
 
 static void
@@ -67,6 +73,11 @@ zgnr_virtual_object_create(struct wl_client* client, uint32_t id)
       resource, &implementation, self, zgnr_virtual_object_handle_destroy);
 
   wl_signal_init(&self->base.events.destroy);
+  wl_signal_init(&self->base.events.committed);
+  wl_list_init(&self->base.current.rendering_unit_list);
+  wl_signal_init(&self->events.on_commit);
+
+  self->base.committed = false;
 
   return self;
 
@@ -82,5 +93,8 @@ zgnr_virtual_object_destroy(struct zgnr_virtual_object_impl* self)
 {
   wl_signal_emit(&self->base.events.destroy, NULL);
   wl_list_remove(&self->base.events.destroy.listener_list);
+  wl_list_remove(&self->base.current.rendering_unit_list);
+  wl_list_remove(&self->base.events.committed.listener_list);
+  wl_list_remove(&self->events.on_commit.listener_list);
   free(self);
 }
