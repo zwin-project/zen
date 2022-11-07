@@ -22,7 +22,7 @@ zgnr_compositor_protocol_create_virtual_object(
   }
 
   wl_signal_emit(
-      &self->backend->base.events.new_virtual_object, virtual_object);
+      &self->backend->base.events.new_virtual_object, &virtual_object->base);
 }
 
 static const struct zgn_compositor_interface implementation = {

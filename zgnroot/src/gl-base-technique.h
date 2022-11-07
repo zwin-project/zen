@@ -14,6 +14,7 @@ struct zgnr_gl_base_technique_impl {
 
   struct wl_resource *resource;
   struct wl_listener rendering_unit_destroy_listener;
+  struct wl_listener rendering_unit_commit_listener;
 };
 
 struct zgnr_gl_base_technique_impl *zgnr_gl_base_technique_create(

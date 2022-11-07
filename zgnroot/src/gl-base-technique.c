@@ -125,6 +125,21 @@ static const struct zgn_gl_base_technique_interface implementation = {
 };
 
 static void
+zgnr_gl_base_technique_handle_rendering_unit_commit(
+    struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+  struct zgnr_gl_base_technique_impl *self =
+      zn_container_of(listener, self, rendering_unit_commit_listener);
+  struct zgnr_rendering_unit_impl *unit =
+      zn_container_of(self->base.unit, unit, base);
+
+  self->base.commited = true;
+
+  wl_list_insert(&unit->base.current.gl_base_technique_list, &self->base.link);
+}
+
+static void
 zgnr_gl_base_technique_handle_rendering_unit_destroy(
     struct wl_listener *listener, void *data)
 {
@@ -168,13 +183,19 @@ zgnr_gl_base_technique_create(struct wl_client *client, uint32_t id,
       zgnr_gl_base_technique_handle_destroy);
 
   self->base.unit = &unit->base;
+  self->base.commited = false;
 
   wl_signal_init(&self->base.events.destroy);
+  wl_list_init(&self->base.link);
 
   self->rendering_unit_destroy_listener.notify =
       zgnr_gl_base_technique_handle_rendering_unit_destroy;
   wl_signal_add(
       &unit->base.events.destroy, &self->rendering_unit_destroy_listener);
+
+  self->rendering_unit_commit_listener.notify =
+      zgnr_gl_base_technique_handle_rendering_unit_commit;
+  wl_signal_add(&unit->events.on_commit, &self->rendering_unit_commit_listener);
 
   return self;
 
@@ -190,6 +211,8 @@ zgnr_gl_base_technique_destroy(struct zgnr_gl_base_technique_impl *self)
 {
   wl_signal_emit(&self->base.events.destroy, NULL);
 
+  wl_list_remove(&self->base.link);
+  wl_list_remove(&self->rendering_unit_commit_listener.link);
   wl_list_remove(&self->rendering_unit_destroy_listener.link);
   wl_list_remove(&self->base.events.destroy.listener_list);
   free(self);

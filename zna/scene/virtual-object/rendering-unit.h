@@ -9,15 +9,19 @@ struct zna_rendering_unit {
   struct zgnr_rendering_unit* zgnr_rendering_unit;  // nonnull
   struct zna_system* system;                        // nonnull
 
-  // null when current session does not exist
+  /**
+   * null before the initial commit or when the current session does not exists,
+   * nonnull otherwise
+   */
   struct znr_rendering_unit* znr_rendering_unit;
 
-  struct wl_list link;  // zna_virtual_object::unit_list
-
   struct wl_listener zgnr_rendering_unit_destroy_listener;
+  struct wl_listener session_destroyed_listener;
 };
 
-void zna_rendering_unit_sync(struct zna_rendering_unit* self);
+/** Check that the current session exists before calling this */
+void zna_rendering_unit_apply_commit(
+    struct zna_rendering_unit* self, bool only_damaged);
 
 struct zna_rendering_unit* zna_rendering_unit_create(
     struct zgnr_rendering_unit* zgnr_rendering_unit, struct zna_system* system);

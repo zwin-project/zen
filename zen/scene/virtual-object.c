@@ -31,11 +31,6 @@ zn_virtual_object_create(
     goto err;
   }
 
-  self->appearance = zna_virtual_object_create(self, server->appearance_system);
-  if (self->appearance == NULL) {
-    goto err_free;
-  }
-
   self->zgnr_virtual_object = zgnr_virtual_object;
   zgnr_virtual_object->user_data = self;
 
@@ -45,6 +40,11 @@ zn_virtual_object_create(
       zn_virtual_object_handle_zgnr_virtual_object_destroy;
   wl_signal_add(&self->zgnr_virtual_object->events.destroy,
       &self->zgnr_virtual_object_destroy_listener);
+
+  self->appearance = zna_virtual_object_create(self, server->appearance_system);
+  if (self->appearance == NULL) {
+    goto err_free;
+  }
 
   return self;
 

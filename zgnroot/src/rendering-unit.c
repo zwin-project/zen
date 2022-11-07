@@ -40,6 +40,23 @@ zgnr_rendering_unit_handle_virtual_object_destroy(
 }
 
 static void
+zgnr_rendering_unit_handle_virtual_object_commit(
+    struct wl_listener* listener, void* data)
+{
+  UNUSED(data);
+  struct zgnr_rendering_unit_impl* self =
+      zn_container_of(listener, self, virtual_object_commit_listener);
+
+  if (self->base.committed == false) {
+    wl_list_insert(&self->base.virtual_object->current.rendering_unit_list,
+        &self->base.link);
+    self->base.committed = true;
+  }
+
+  wl_signal_emit(&self->events.on_commit, NULL);
+}
+
+static void
 zgnr_rendering_unit_inert(struct zgnr_rendering_unit_impl* self)
 {
   struct wl_resource* resource = self->resource;
@@ -73,11 +90,20 @@ zgnr_rendering_unit_create(struct wl_client* client, uint32_t id,
   self->base.virtual_object = &virtual_object->base;
 
   wl_signal_init(&self->base.events.destroy);
+  wl_signal_init(&self->events.on_commit);
+  wl_list_init(&self->base.current.gl_base_technique_list);
+  wl_list_init(&self->base.link);
+  self->base.committed = false;
 
   self->virtual_object_destroy_listener.notify =
       zgnr_rendering_unit_handle_virtual_object_destroy;
   wl_signal_add(&virtual_object->base.events.destroy,
       &self->virtual_object_destroy_listener);
+
+  self->virtual_object_commit_listener.notify =
+      zgnr_rendering_unit_handle_virtual_object_commit;
+  wl_signal_add(
+      &virtual_object->events.on_commit, &self->virtual_object_commit_listener);
 
   return self;
 
@@ -93,7 +119,11 @@ zgnr_rendering_unit_destroy(struct zgnr_rendering_unit_impl* self)
 {
   wl_signal_emit(&self->base.events.destroy, NULL);
 
+  wl_list_remove(&self->base.link);
+  wl_list_remove(&self->base.current.gl_base_technique_list);
   wl_list_remove(&self->virtual_object_destroy_listener.link);
   wl_list_remove(&self->base.events.destroy.listener_list);
+  wl_list_remove(&self->virtual_object_commit_listener.link);
+  wl_list_remove(&self->events.on_commit.listener_list);
   free(self);
 }

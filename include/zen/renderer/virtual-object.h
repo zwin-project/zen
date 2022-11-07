@@ -8,6 +8,8 @@ extern "C" {
 
 struct znr_virtual_object;
 
+void znr_virtual_object_commit(struct znr_virtual_object* self);
+
 struct znr_virtual_object* znr_virtual_object_create(
     struct znr_session* session);
 

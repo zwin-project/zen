@@ -13,7 +13,13 @@ struct zgnr_rendering_unit_impl {
   struct zgnr_rendering_unit base;
 
   struct wl_resource* resource;
+
+  struct {
+    struct wl_signal on_commit;
+  } events;
+
   struct wl_listener virtual_object_destroy_listener;
+  struct wl_listener virtual_object_commit_listener;
 };
 
 struct zgnr_rendering_unit_impl* zgnr_rendering_unit_create(

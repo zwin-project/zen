@@ -41,5 +41,7 @@ main(void)
   auto gl_buffer = CreateGlBuffer(&app);
   if (!gl_buffer) return EXIT_FAILURE;
 
+  vo->Commit();
+
   return app.Run();
 }

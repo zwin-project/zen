@@ -4,6 +4,12 @@
 
 #include "session.h"
 
+void
+znr_virtual_object_commit(struct znr_virtual_object* self)
+{
+  self->proxy->Commit();
+}
+
 znr_virtual_object*
 znr_virtual_object_create(znr_session* session_base)
 {

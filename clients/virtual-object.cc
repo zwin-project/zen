@@ -16,6 +16,12 @@ VirtualObject::Init()
   return true;
 }
 
+void
+VirtualObject::Commit()
+{
+  zgn_virtual_object_commit(proxy_);
+}
+
 VirtualObject::VirtualObject(Application *app) : app_(app) {}
 
 VirtualObject::~VirtualObject()
