@@ -3,6 +3,8 @@
 #include <zen-common.h>
 #include <zigen-gles-v32-protocol.h>
 
+#include "gl-vertex-array.h"
+
 static void zgnr_gl_base_technique_destroy(
     struct zgnr_gl_base_technique_impl *self);
 static void zgnr_gl_base_technique_inert(
@@ -15,6 +17,27 @@ zgnr_gl_base_technique_handle_destroy(struct wl_resource *resource)
       wl_resource_get_user_data(resource);
 
   zgnr_gl_base_technique_destroy(self);
+}
+
+/**
+ * @param vertex_array is nullable
+ */
+static void
+zgnr_gl_base_technique_set_current_vertex_array(
+    struct zgnr_gl_base_technique_impl *self,
+    struct zgnr_gl_vertex_array *vertex_array)
+{
+  if (self->base.current.vertex_array) {
+    wl_list_remove(&self->current_vertex_array_destroy_listener.link);
+    wl_list_init(&self->current_vertex_array_destroy_listener.link);
+  }
+
+  if (vertex_array) {
+    wl_signal_add(&vertex_array->events.destroy,
+        &self->current_vertex_array_destroy_listener);
+  }
+
+  self->base.current.vertex_array = vertex_array;
 }
 
 static void
@@ -39,8 +62,11 @@ zgnr_gl_base_technique_protocol_bind_vertex_array(struct wl_client *client,
     struct wl_resource *resource, struct wl_resource *vertex_array)
 {
   UNUSED(client);
-  UNUSED(resource);
-  UNUSED(vertex_array);
+  struct zgnr_gl_base_technique_impl *self =
+      wl_resource_get_user_data(resource);
+  if (self == NULL) return;
+
+  zgnr_weak_resource_link(&self->pending.vertex_array, vertex_array);
 }
 
 static void
@@ -125,6 +151,18 @@ static const struct zgn_gl_base_technique_interface implementation = {
 };
 
 static void
+zgnr_gl_base_technique_handle_current_vertex_array_destroy(
+    struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+
+  struct zgnr_gl_base_technique_impl *self =
+      zn_container_of(listener, self, current_vertex_array_destroy_listener);
+
+  zgnr_gl_base_technique_set_current_vertex_array(self, NULL);
+}
+
+static void
 zgnr_gl_base_technique_handle_rendering_unit_commit(
     struct wl_listener *listener, void *data)
 {
@@ -133,10 +171,19 @@ zgnr_gl_base_technique_handle_rendering_unit_commit(
       zn_container_of(listener, self, rendering_unit_commit_listener);
   struct zgnr_rendering_unit_impl *unit =
       zn_container_of(self->base.unit, unit, base);
+  struct zgnr_gl_vertex_array_impl *vertex_array;
 
   self->base.commited = true;
 
-  wl_list_insert(&unit->base.current.gl_base_technique_list, &self->base.link);
+  vertex_array = zgnr_weak_resource_get_user_data(&self->pending.vertex_array);
+  if (vertex_array) {
+    zgnr_gl_vertex_array_commit(vertex_array);
+    zgnr_gl_base_technique_set_current_vertex_array(self, &vertex_array->base);
+  } else {
+    zgnr_gl_base_technique_set_current_vertex_array(self, NULL);
+  }
+
+  zgnr_rendering_unit_set_current_technique(unit, self);
 }
 
 static void
@@ -184,9 +231,10 @@ zgnr_gl_base_technique_create(struct wl_client *client, uint32_t id,
 
   self->base.unit = &unit->base;
   self->base.commited = false;
+  self->base.current.vertex_array = NULL;
 
   wl_signal_init(&self->base.events.destroy);
-  wl_list_init(&self->base.link);
+  zgnr_weak_resource_init(&self->pending.vertex_array);
 
   self->rendering_unit_destroy_listener.notify =
       zgnr_gl_base_technique_handle_rendering_unit_destroy;
@@ -196,6 +244,10 @@ zgnr_gl_base_technique_create(struct wl_client *client, uint32_t id,
   self->rendering_unit_commit_listener.notify =
       zgnr_gl_base_technique_handle_rendering_unit_commit;
   wl_signal_add(&unit->events.on_commit, &self->rendering_unit_commit_listener);
+
+  self->current_vertex_array_destroy_listener.notify =
+      zgnr_gl_base_technique_handle_current_vertex_array_destroy;
+  wl_list_init(&self->current_vertex_array_destroy_listener.link);
 
   return self;
 
@@ -211,7 +263,8 @@ zgnr_gl_base_technique_destroy(struct zgnr_gl_base_technique_impl *self)
 {
   wl_signal_emit(&self->base.events.destroy, NULL);
 
-  wl_list_remove(&self->base.link);
+  zgnr_weak_resource_unlink(&self->pending.vertex_array);
+  wl_list_remove(&self->current_vertex_array_destroy_listener.link);
   wl_list_remove(&self->rendering_unit_commit_listener.link);
   wl_list_remove(&self->rendering_unit_destroy_listener.link);
   wl_list_remove(&self->base.events.destroy.listener_list);

@@ -3,11 +3,17 @@ _zen_common_inc = include_directories('include')
 _zen_common_srcs = [
   'log.c',
   'terminate.c',
+  'types.c',
+]
+
+_zen_common_deps = [
+  wayland_server_dep.partial_dependency(includes: true),
 ]
 
 _zen_common_lib = static_library(
   'zen-common',
   _zen_common_srcs,
+  dependencies: _zen_common_deps,
   include_directories: _zen_common_inc,
   install: false,
 )

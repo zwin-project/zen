@@ -23,15 +23,15 @@ zgnr_gl_buffer_protocol_destroy(
 
 static void
 zgnr_gl_buffer_protocol_data(struct wl_client *client,
-    struct wl_resource *resource, uint32_t target, struct wl_array *size,
-    struct wl_resource *data, uint32_t usage)
+    struct wl_resource *resource, uint32_t target, struct wl_resource *data,
+    uint32_t usage)
 {
   UNUSED(client);
-  UNUSED(resource);
-  UNUSED(target);
-  UNUSED(size);
-  UNUSED(data);
-  UNUSED(usage);
+  struct zgnr_gl_buffer_impl *self = wl_resource_get_user_data(resource);
+
+  zgnr_weak_resource_link(&self->pending.data, data);
+  self->pending.target = target;
+  self->pending.usage = usage;
 }
 
 static const struct zgn_gl_buffer_interface implementation = {
@@ -61,6 +61,7 @@ zgnr_gl_buffer_create(struct wl_client *client, uint32_t id)
       resource, &implementation, self, zgnr_gl_buffer_handle_destroy);
 
   wl_signal_init(&self->base.events.destroy);
+  zgnr_weak_resource_init(&self->pending.data);
 
   return self;
 
@@ -76,6 +77,7 @@ zgnr_gl_buffer_destroy(struct zgnr_gl_buffer_impl *self)
 {
   wl_signal_emit(&self->base.events.destroy, NULL);
 
+  zgnr_weak_resource_unlink(&self->pending.data);
   wl_list_remove(&self->base.events.destroy.listener_list);
   free(self);
 }

@@ -41,7 +41,7 @@ zalloc(size_t size)
   Class(const Class &) = delete;            \
   Class(Class &&) = delete;                 \
   Class &operator=(const Class &) = delete; \
-  Class &operator=(Class &&) = delete;
+  Class &operator=(Class &&) = delete
 
 #endif
 

@@ -6,7 +6,6 @@
 
 #include <memory>
 
-#include "common.h"
 #include "loop.h"
 
 namespace zen::client {

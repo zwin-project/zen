@@ -1,10 +1,13 @@
 _zen_box_client_srcs = [
   'application.cc',
   'box.cc',
+  'buffer.cc',
   'gl-base-technique.cc',
   'gl-buffer.cc',
+  'gl-vertex-array.cc',
   'loop.cc',
   'rendering-unit.cc',
+  'shm-pool.cc',
   'virtual-object.cc',
 
   protocols['zigen']['private-code'],
@@ -15,6 +18,7 @@ _zen_box_client_srcs = [
 
 _zen_box_client_deps = [
   wayland_client_dep,
+  zen_common_dep,
 ]
 
 executable(

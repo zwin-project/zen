@@ -32,7 +32,7 @@ bool
 Application::Init()
 {
   if (loop_.Init() == false) {
-    LOG_ERROR("Failed to initialize loop");
+    zn_error("Failed to initialize loop");
     return false;
   }
   return true;
@@ -46,13 +46,13 @@ Application::Connect(const char* socket)
 
   display_ = wl_display_connect(socket);
   if (display_ == nullptr) {
-    LOG_ERROR("Failed to connect to wayland server: %s", socket);
+    zn_error("Failed to connect to wayland server: %s", socket);
     goto err;
   }
 
   registry_ = wl_display_get_registry(display_);
   if (registry_ == nullptr) {
-    LOG_ERROR("Failed to connect to wayland server: %s", socket);
+    zn_error("Failed to connect to wayland server: %s", socket);
     goto err_disconnect;
   }
 
@@ -62,7 +62,7 @@ Application::Connect(const char* socket)
 
   if (zgn_compositor_ == nullptr || zgn_gles_v32_ == nullptr ||
       zgn_shm_ == nullptr) {
-    LOG_ERROR("Server does not support zigen protocols");
+    zn_error("Server does not support zigen protocols");
     goto err_globals;
   }
 
@@ -71,7 +71,7 @@ Application::Connect(const char* socket)
       [](int /*fd*/, uint32_t mask, void* data) {
         auto app = static_cast<Application*>(data);
         if (mask & Loop::kEventError || mask & Loop::kEventHangUp) {
-          LOG_ERROR("Disconnected from wayland server");
+          zn_error("Disconnected from wayland server");
           app->loop()->Terminate(EXIT_FAILURE);
         } else if (mask == Loop::kEventReadable) {
           app->Poll();

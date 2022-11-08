@@ -42,12 +42,12 @@
 
 /* This once_t is used to synchronize installing the SIGBUS handler
  * and creating the TLS key. This will be done in the first call
- * zgn_shm_buffer_begin_access which can happen from any thread */
-static pthread_once_t zgn_shm_sigbus_once = PTHREAD_ONCE_INIT;
-static pthread_key_t zgn_shm_sigbus_data_key;
-static struct sigaction zgn_shm_old_sigbus_action;
+ * zgnr_shm_buffer_begin_access which can happen from any thread */
+static pthread_once_t zgnr_shm_sigbus_once = PTHREAD_ONCE_INIT;
+static pthread_key_t zgnr_shm_sigbus_data_key;
+static struct sigaction zgnr_shm_old_sigbus_action;
 
-struct zgn_shm_pool {
+struct zgnr_shm_pool {
   struct wl_resource *resource;
   int internal_refcount;
   int external_refcount;
@@ -60,26 +60,26 @@ struct zgn_shm_pool {
 /**
  * @brief A SHM buffer
  *
- *  zgn_shm_buffer provides a helper for accessing the contents of a zgn_buffer
- * resource created via the zgn_shm interface.
+ *  zgnr_shm_buffer provides a helper for accessing the contents of a zgn_buffer
+ * resource created via the zgnr_shm interface.
  *
- * A zgn_shm_buffer becomes invalid as soon as its wl_resource is destroyed.
+ * A zgnr_shm_buffer becomes invalid as soon as its wl_resource is destroyed.
  */
-struct zgn_shm_buffer {
+struct zgnr_shm_buffer {
   struct wl_resource *resource;
   ssize_t size;
   int offset;
-  struct zgn_shm_pool *pool;
+  struct zgnr_shm_pool *pool;
 };
 
-struct zgn_shm_sigbus_data {
-  struct zgn_shm_pool *current_pool;
+struct zgnr_shm_sigbus_data {
+  struct zgnr_shm_pool *current_pool;
   int access_count;
   int fallback_mapping_used;
 };
 
 static void *
-shm_pool_grow_mapping(struct zgn_shm_pool *pool)
+shm_pool_grow_mapping(struct zgnr_shm_pool *pool)
 {
   void *data;
 
@@ -93,7 +93,7 @@ shm_pool_grow_mapping(struct zgn_shm_pool *pool)
 }
 
 static void
-shm_pool_finish_resize(struct zgn_shm_pool *pool)
+shm_pool_finish_resize(struct zgnr_shm_pool *pool)
 {
   void *data;
 
@@ -111,7 +111,7 @@ shm_pool_finish_resize(struct zgn_shm_pool *pool)
 }
 
 static void
-shm_pool_unref(struct zgn_shm_pool *pool, bool external)
+shm_pool_unref(struct zgnr_shm_pool *pool, bool external)
 {
   if (external) {
     pool->external_refcount--;
@@ -131,7 +131,7 @@ shm_pool_unref(struct zgn_shm_pool *pool, bool external)
 static void
 destroy_buffer(struct wl_resource *resource)
 {
-  struct zgn_shm_buffer *buffer = wl_resource_get_user_data(resource);
+  struct zgnr_shm_buffer *buffer = wl_resource_get_user_data(resource);
 
   shm_pool_unref(buffer->pool, false);
   free(buffer);
@@ -150,14 +150,21 @@ static const struct zgn_buffer_interface shm_buffer_interface = {
 
 static void
 shm_pool_create_buffer(struct wl_client *client, struct wl_resource *resource,
-    uint32_t id, int32_t offset, int32_t size)
+    uint32_t id, struct wl_array *offset_array, struct wl_array *size_array)
 {
-  struct zgn_shm_pool *pool = wl_resource_get_user_data(resource);
-  struct zgn_shm_buffer *buffer;
+  struct zgnr_shm_pool *pool = wl_resource_get_user_data(resource);
+  struct zgnr_shm_buffer *buffer;
+  off_t offset, size;
+
+  if (zn_array_to_off_t(offset_array, &offset) != 0 ||
+      zn_array_to_off_t(size_array, &size) != 0) {
+    wl_resource_post_error(
+        resource, ZGN_SHM_ERROR_INVALID_SIZE, "invalid size");
+  }
 
   if (offset < 0 || size <= 0 || offset > pool->size - size) {
-    wl_resource_post_error(
-        resource, ZGN_SHM_ERROR_INVALID_SIZE, "invalid size (%d)", size);
+    wl_resource_post_error(resource, ZGN_SHM_ERROR_INVALID_SIZE,
+        "invalid size (%ld)", (int64_t)size);
     return;
   }
 
@@ -187,7 +194,7 @@ shm_pool_create_buffer(struct wl_client *client, struct wl_resource *resource,
 static void
 destroy_pool(struct wl_resource *resource)
 {
-  struct zgn_shm_pool *pool = wl_resource_get_user_data(resource);
+  struct zgnr_shm_pool *pool = wl_resource_get_user_data(resource);
 
   shm_pool_unref(pool, false);
 }
@@ -203,7 +210,7 @@ static void
 shm_pool_resize(
     struct wl_client *client, struct wl_resource *resource, int32_t size)
 {
-  struct zgn_shm_pool *pool = wl_resource_get_user_data(resource);
+  struct zgnr_shm_pool *pool = wl_resource_get_user_data(resource);
   UNUSED(client);
 
   if (size < pool->size) {
@@ -230,17 +237,24 @@ static const struct zgn_shm_pool_interface shm_pool_interface = {
 
 static void
 shm_create_pool(struct wl_client *client, struct wl_resource *resource,
-    uint32_t id, int fd, int32_t size)
+    uint32_t id, int fd, struct wl_array *size_array)
 {
-  struct zgn_shm_pool *pool;
+  struct zgnr_shm_pool *pool;
   struct stat statbuf;
   int seals;
   int prot;
   int flags;
+  off_t size;
+
+  if (zn_array_to_off_t(size_array, &size) != 0) {
+    wl_resource_post_error(
+        resource, ZGN_SHM_ERROR_INVALID_SIZE, "invalid size");
+    goto err_close;
+  }
 
   if (size <= 0) {
-    wl_resource_post_error(
-        resource, ZGN_SHM_ERROR_INVALID_SIZE, "invalid size (%d)", size);
+    wl_resource_post_error(resource, ZGN_SHM_ERROR_INVALID_SIZE,
+        "invalid size (%ld)", (int64_t)size);
     goto err_close;
   }
 
@@ -313,7 +327,7 @@ bind_shm(struct wl_client *client, void *data, uint32_t version, uint32_t id)
 }
 
 int
-zgn_shm_init(struct wl_display *display)
+zgnr_shm_init(struct wl_display *display)
 {
   if (!wl_global_create(display, &zgn_shm_interface, 1, NULL, bind_shm)) {
     return -1;
@@ -322,8 +336,8 @@ zgn_shm_init(struct wl_display *display)
   return 0;
 }
 
-struct zgn_shm_buffer *
-zgn_shm_buffer_get(struct wl_resource *resource)
+struct zgnr_shm_buffer *
+zgnr_shm_buffer_get(struct wl_resource *resource)
 {
   if (resource == NULL) return NULL;
 
@@ -335,7 +349,7 @@ zgn_shm_buffer_get(struct wl_resource *resource)
 }
 
 ssize_t
-zgn_shm_buffer_get_size(struct zgn_shm_buffer *buffer)
+zgnr_shm_buffer_get_size(struct zgnr_shm_buffer *buffer)
 {
   return buffer->size;
 }
@@ -352,13 +366,13 @@ zgn_shm_buffer_get_size(struct zgn_shm_buffer *buffer)
  * SIGBUS signals. This can happen if the client claims that the
  * buffer is larger than it is or if something truncates the
  * underlying file. To prevent this signal from causing the compositor
- * to crash you should call zgn_shm_buffer_begin_access and
- * zgn_shm_buffer_end_access around code that reads from the memory.
+ * to crash you should call zgnr_shm_buffer_begin_access and
+ * zgnr_shm_buffer_end_access around code that reads from the memory.
  *
- * \memberof zgn_shm_buffer
+ * \memberof zgnr_shm_buffer
  */
 void *
-zgn_shm_buffer_get_data(struct zgn_shm_buffer *buffer)
+zgnr_shm_buffer_get_data(struct zgnr_shm_buffer *buffer)
 {
   if (buffer->pool->external_refcount &&
       (buffer->pool->size != buffer->pool->new_size))
@@ -376,15 +390,15 @@ zgn_shm_buffer_get_data(struct zgn_shm_buffer *buffer)
  * Returns a pointer to a buffer's zgn_pool and increases the
  * shm_pool refcount.
  *
- * The compositor must remember to call zgn_shm_pool_unref when
+ * The compositor must remember to call zgnr_shm_pool_unref when
  * it no longer needs the reference to ensure proper destruction
  * of the pool.
  *
- * \memberof zgn_shm_buffer
- * \sa zgn_shm_pool_unref
+ * \memberof zgnr_shm_buffer
+ * \sa zgnr_shm_pool_unref
  */
-struct zgn_shm_pool *
-zgn_shm_buffer_ref_pool(struct zgn_shm_buffer *buffer)
+struct zgnr_shm_pool *
+zgnr_shm_buffer_ref_pool(struct zgnr_shm_buffer *buffer)
 {
   assert(buffer->pool->internal_refcount + buffer->pool->external_refcount);
 
@@ -397,17 +411,17 @@ zgn_shm_buffer_ref_pool(struct zgn_shm_buffer *buffer)
  *
  * \param pool The pool object
  *
- * Drops a reference to a zgn_shm_pool object.
+ * Drops a reference to a zgnr_shm_pool object.
  *
  * This is only necessary if the compositor has explicitly
- * taken a reference with zgn_shm_buffer_ref_pool(), otherwise
+ * taken a reference with zgnr_shm_buffer_ref_pool(), otherwise
  * the pool will be automatically destroyed when appropriate.
  *
- * \memberof zgn_shm_pool
- * \sa zgn_shm_buffer_ref_pool
+ * \memberof zgnr_shm_pool
+ * \sa zgnr_shm_buffer_ref_pool
  */
 void
-zgn_shm_pool_unref(struct zgn_shm_pool *pool)
+zgnr_shm_pool_unref(struct zgnr_shm_pool *pool)
 {
   shm_pool_unref(pool, true);
 }
@@ -418,7 +432,7 @@ reraise_sigbus(void)
   /* If SIGBUS is raised for some other reason than accessing
    * the pool then we'll uninstall the signal handler so we can
    * reraise it. This would presumably kill the process */
-  sigaction(SIGBUS, &zgn_shm_old_sigbus_action, NULL);
+  sigaction(SIGBUS, &zgnr_shm_old_sigbus_action, NULL);
   raise(SIGBUS);
 }
 
@@ -427,9 +441,9 @@ sigbus_handler(int signum, siginfo_t *info, void *context)
 {
   UNUSED(signum);
   UNUSED(context);
-  struct zgn_shm_sigbus_data *sigbus_data =
-      pthread_getspecific(zgn_shm_sigbus_data_key);
-  struct zgn_shm_pool *pool;
+  struct zgnr_shm_sigbus_data *sigbus_data =
+      pthread_getspecific(zgnr_shm_sigbus_data_key);
+  struct zgnr_shm_pool *pool;
 
   if (sigbus_data == NULL) {
     reraise_sigbus();
@@ -456,7 +470,7 @@ sigbus_handler(int signum, siginfo_t *info, void *context)
 static void
 destroy_sigbus_data(void *data)
 {
-  struct zgn_shm_sigbus_data *sigbus_data = data;
+  struct zgnr_shm_sigbus_data *sigbus_data = data;
 
   free(sigbus_data);
 }
@@ -471,9 +485,9 @@ init_sigbus_data_key(void)
 
   sigemptyset(&new_action.sa_mask);
 
-  sigaction(SIGBUS, &new_action, &zgn_shm_old_sigbus_action);
+  sigaction(SIGBUS, &new_action, &zgnr_shm_old_sigbus_action);
 
-  pthread_key_create(&zgn_shm_sigbus_data_key, destroy_sigbus_data);
+  pthread_key_create(&zgnr_shm_sigbus_data_key, destroy_sigbus_data);
 }
 
 /**
@@ -488,7 +502,7 @@ init_sigbus_data_key(void)
  * In order to make the compositor robust against clients that change
  * the size of the underlying file or lie about its size, you should
  * protect access to the buffer by calling this function before
- * reading from the memory and call zgn_shm_buffer_end_access
+ * reading from the memory and call zgnr_shm_buffer_end_access
  * afterwards. This will install a signal handler for SIGBUS which
  * will prevent the compositor from crashing.
  *
@@ -499,36 +513,36 @@ init_sigbus_data_key(void)
  *
  * If a SIGBUS signal is received for an address within the range of
  * the SHM pool of the given buffer then the client will be sent an
- * error event when zgn_shm_buffer_end_access is called. If the signal
+ * error event when zgnr_shm_buffer_end_access is called. If the signal
  * is for an address outside that range then the signal handler will
  * reraise the signal which would will likely cause the compositor to
  * terminate.
  *
  * It is safe to nest calls to these functions as long as the nested
  * calls are all accessing the same buffer. The number of calls to
- * zgn_shm_buffer_end_access must match the number of calls to
- * zgn_shm_buffer_begin_access. These functions are thread-safe and it
+ * zgnr_shm_buffer_end_access must match the number of calls to
+ * zgnr_shm_buffer_begin_access. These functions are thread-safe and it
  * is allowed to simultaneously access different buffers or the same
  * buffer from multiple threads.
  *
- * \memberof zgn_shm_buffer
+ * \memberof zgnr_shm_buffer
  */
 void
-zgn_shm_buffer_begin_access(struct zgn_shm_buffer *buffer)
+zgnr_shm_buffer_begin_access(struct zgnr_shm_buffer *buffer)
 {
-  struct zgn_shm_pool *pool = buffer->pool;
-  struct zgn_shm_sigbus_data *sigbus_data;
+  struct zgnr_shm_pool *pool = buffer->pool;
+  struct zgnr_shm_sigbus_data *sigbus_data;
 
   if (pool->sigbuf_is_impossible) return;
 
-  pthread_once(&zgn_shm_sigbus_once, init_sigbus_data_key);
+  pthread_once(&zgnr_shm_sigbus_once, init_sigbus_data_key);
 
-  sigbus_data = pthread_getspecific(zgn_shm_sigbus_data_key);
+  sigbus_data = pthread_getspecific(zgnr_shm_sigbus_data_key);
   if (sigbus_data == NULL) {
     sigbus_data = zalloc(sizeof *sigbus_data);
     if (sigbus_data == NULL) return;
 
-    pthread_setspecific(zgn_shm_sigbus_data_key, sigbus_data);
+    pthread_setspecific(zgnr_shm_sigbus_data_key, sigbus_data);
   }
 
   assert(
@@ -539,26 +553,26 @@ zgn_shm_buffer_begin_access(struct zgn_shm_buffer *buffer)
 }
 
 /**
- * Ends the access to a buffer started by zgn_shm_buffer_begin_access
+ * Ends the access to a buffer started by zgnr_shm_buffer_begin_access
  *
  * \param buffer The SHM buffer
  *
- * This should be called after zgn_shm_buffer_begin_access once the
+ * This should be called after zgnr_shm_buffer_begin_access once the
  * buffer is no longer being accessed. If a SIGBUS signal was
  * generated in-between these two calls then the resource for the
  * given buffer will be sent an error.
  *
- * \memberof zgn_shm_buffer
+ * \memberof zgnr_shm_buffer
  */
 void
-zgn_shm_buffer_end_access(struct zgn_shm_buffer *buffer)
+zgnr_shm_buffer_end_access(struct zgnr_shm_buffer *buffer)
 {
-  struct zgn_shm_pool *pool = buffer->pool;
-  struct zgn_shm_sigbus_data *sigbus_data;
+  struct zgnr_shm_pool *pool = buffer->pool;
+  struct zgnr_shm_sigbus_data *sigbus_data;
 
   if (pool->sigbuf_is_impossible) return;
 
-  sigbus_data = pthread_getspecific(zgn_shm_sigbus_data_key);
+  sigbus_data = pthread_getspecific(zgnr_shm_sigbus_data_key);
   assert(sigbus_data && sigbus_data->access_count >= 1);
 
   if (--sigbus_data->access_count == 0) {

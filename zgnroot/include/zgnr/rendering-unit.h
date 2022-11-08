@@ -7,6 +7,11 @@
 extern "C" {
 #endif
 
+enum zgnr_rendering_unit_technique {
+  ZGNR_TECHNIQUE_NONE,
+  ZGNR_TECHNIQUE_BASE,
+};
+
 struct zgnr_rendering_unit {
   struct zgnr_virtual_object *virtual_object;  // nonnull
 
@@ -18,7 +23,8 @@ struct zgnr_rendering_unit {
   bool committed;
 
   struct {
-    struct wl_list gl_base_technique_list;  // zgnr_gl_base_technique::link
+    struct zgnr_gl_base_technique *technique;  // nullable
+    enum zgnr_rendering_unit_technique type;
   } current;
 
   void *user_data;

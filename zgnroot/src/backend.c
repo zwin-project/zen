@@ -32,7 +32,7 @@ zgnr_backend_create(struct wl_display *display)
 
   self->display = display;
 
-  zgn_shm_init(display);
+  zgnr_shm_init(display);
 
   self->compositor = zgnr_compositor_create(self->display, self);
   if (self->compositor == NULL) {

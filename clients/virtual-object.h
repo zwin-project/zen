@@ -1,10 +1,9 @@
 #pragma once
 
+#include <zen-common.h>
 #include <zigen-client-protocol.h>
 
 #include <memory>
-
-#include "common.h"
 
 namespace zen::client {
 

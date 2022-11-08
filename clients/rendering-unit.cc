@@ -11,7 +11,7 @@ RenderingUnit::Init(VirtualObject* virtual_object)
   proxy_ = zgn_gles_v32_create_rendering_unit(
       app_->gles_v32(), virtual_object->proxy());
   if (proxy_ == nullptr) {
-    LOG_ERROR("Failed to create rendering unit proxy");
+    zn_error("Failed to create rendering unit proxy");
     return false;
   }
 
