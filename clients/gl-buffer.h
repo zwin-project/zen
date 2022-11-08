@@ -1,14 +1,15 @@
 #pragma once
 
+#include <GLES3/gl32.h>
+#include <zen-common.h>
 #include <zigen-gles-v32-client-protocol.h>
 
 #include <memory>
 
-#include "common.h"
-
 namespace zen::client {
 
 class Application;
+class Buffer;
 
 class GlBuffer
 {
@@ -18,6 +19,9 @@ class GlBuffer
   ~GlBuffer();
 
   bool Init();
+
+  void Data(GLenum target, Buffer* buffer, GLenum usage);
+
   inline zgn_gl_buffer* proxy();
 
  private:

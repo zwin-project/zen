@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wayland-server-core.h>
+#include <zgnr/gl-vertex-array.h>
 #include <zgnr/rendering-unit.h>
 
 #ifdef __cplusplus
@@ -14,9 +15,11 @@ struct zgnr_gl_base_technique {
     struct wl_signal destroy;  // (NULL)
   } events;
 
-  struct wl_list link;  // zgnr_rendering_unit::current.gl_base_technique_list;
-
   bool commited;
+
+  struct {
+    struct zgnr_gl_vertex_array *vertex_array;  // nullable
+  } current;
 
   void *user_data;
 };

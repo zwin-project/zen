@@ -1,15 +1,15 @@
 #pragma once
 
+#include <zen-common.h>
 #include <zigen-gles-v32-client-protocol.h>
 
 #include <memory>
-
-#include "common.h"
 
 namespace zen::client {
 
 class Application;
 class RenderingUnit;
+class GlVertexArray;
 
 class GlBaseTechnique
 {
@@ -19,6 +19,8 @@ class GlBaseTechnique
   ~GlBaseTechnique();
 
   bool Init(RenderingUnit *unit);
+
+  void Bind(GlVertexArray *vertex_array);
 
  private:
   Application *app_;

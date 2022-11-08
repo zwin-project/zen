@@ -1,6 +1,7 @@
 #include "gl-buffer.h"
 
 #include "application.h"
+#include "buffer.h"
 
 namespace zen::client {
 
@@ -9,11 +10,17 @@ GlBuffer::Init()
 {
   proxy_ = zgn_gles_v32_create_gl_buffer(app_->gles_v32());
   if (proxy_ == nullptr) {
-    LOG_ERROR("Failed to create gl buffer proxy");
+    zn_error("Failed to create gl buffer proxy");
     return false;
   }
 
   return true;
+}
+
+void
+GlBuffer::Data(GLenum target, Buffer *buffer, GLenum usage)
+{
+  zgn_gl_buffer_data(proxy_, target, buffer->proxy(), usage);
 }
 
 GlBuffer::GlBuffer(Application *app) : app_(app) {}

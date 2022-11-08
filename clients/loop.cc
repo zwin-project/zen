@@ -13,7 +13,7 @@ Loop::Init()
 {
   epoll_fd_ = epoll_create1(EPOLL_CLOEXEC);
   if (epoll_fd_ == -1) {
-    LOG_ERROR("Failed to create epoll instance");
+    zn_error("Failed to create epoll instance");
     return false;
   }
   return true;

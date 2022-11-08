@@ -6,9 +6,12 @@ _zgnr_srcs = [
   'src/gles-v32.c',
   'src/gl-base-technique.c',
   'src/gl-buffer.c',
+  'src/gl-vertex-array.c',
+  'src/gl-vertex-attrib.c',
   'src/rendering-unit.c',
   'src/shm.c',
   'src/virtual-object.c',
+  'src/weak-resource.c',
 
   protocols['zigen']['private-code'],
   protocols['zigen']['server-header'],

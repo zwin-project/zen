@@ -1,9 +1,9 @@
 #pragma once
 
+#include <zen-common.h>
+
 #include <functional>
 #include <memory>
-
-#include "common.h"
 
 namespace zen::client {
 

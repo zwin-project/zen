@@ -3,10 +3,39 @@
 #include <zen-common.h>
 #include <zigen-gles-v32-protocol.h>
 
+#include "gl-base-technique.h"
 #include "virtual-object.h"
 
 static void zgnr_rendering_unit_destroy(struct zgnr_rendering_unit_impl* self);
 static void zgnr_rendering_unit_inert(struct zgnr_rendering_unit_impl* self);
+
+/**
+ * @param technique is nullable
+ */
+void
+zgnr_rendering_unit_set_current_technique(struct zgnr_rendering_unit_impl* self,
+    struct zgnr_gl_base_technique_impl* technique)
+{
+  if (technique && self->base.current.type != ZGNR_TECHNIQUE_NONE) {
+    wl_resource_post_error(technique->resource,
+        ZGN_GL_BASE_TECHNIQUE_ERROR_TECHNIQUE,
+        "rendering_unit must not have any other technique");
+    return;
+  }
+
+  if (self->base.current.technique) {
+    wl_list_remove(&self->current_technique_destroy_listener.link);
+    wl_list_init(&self->current_technique_destroy_listener.link);
+  }
+
+  if (technique) {
+    wl_signal_add(&technique->base.events.destroy,
+        &self->current_technique_destroy_listener);
+  }
+
+  self->base.current.technique = &technique->base;
+  self->base.current.type = ZGNR_TECHNIQUE_BASE;
+}
 
 static void
 zgnr_rendering_unit_handle_destroy(struct wl_resource* resource)
@@ -27,6 +56,18 @@ zgnr_rendering_unit_protocol_destroy(
 static const struct zgn_rendering_unit_interface implementation = {
     .destroy = zgnr_rendering_unit_protocol_destroy,
 };
+
+static void
+zgnr_rendering_unit_handle_current_technique_destroy(
+    struct wl_listener* listener, void* data)
+{
+  UNUSED(data);
+
+  struct zgnr_rendering_unit_impl* self =
+      zn_container_of(listener, self, current_technique_destroy_listener);
+
+  zgnr_rendering_unit_set_current_technique(self, NULL);
+}
 
 static void
 zgnr_rendering_unit_handle_virtual_object_destroy(
@@ -91,9 +132,10 @@ zgnr_rendering_unit_create(struct wl_client* client, uint32_t id,
 
   wl_signal_init(&self->base.events.destroy);
   wl_signal_init(&self->events.on_commit);
-  wl_list_init(&self->base.current.gl_base_technique_list);
   wl_list_init(&self->base.link);
   self->base.committed = false;
+  self->base.current.technique = NULL;
+  self->base.current.type = ZGNR_TECHNIQUE_NONE;
 
   self->virtual_object_destroy_listener.notify =
       zgnr_rendering_unit_handle_virtual_object_destroy;
@@ -104,6 +146,10 @@ zgnr_rendering_unit_create(struct wl_client* client, uint32_t id,
       zgnr_rendering_unit_handle_virtual_object_commit;
   wl_signal_add(
       &virtual_object->events.on_commit, &self->virtual_object_commit_listener);
+
+  self->current_technique_destroy_listener.notify =
+      zgnr_rendering_unit_handle_current_technique_destroy;
+  wl_list_init(&self->current_technique_destroy_listener.link);
 
   return self;
 
@@ -120,7 +166,7 @@ zgnr_rendering_unit_destroy(struct zgnr_rendering_unit_impl* self)
   wl_signal_emit(&self->base.events.destroy, NULL);
 
   wl_list_remove(&self->base.link);
-  wl_list_remove(&self->base.current.gl_base_technique_list);
+  wl_list_remove(&self->current_technique_destroy_listener.link);
   wl_list_remove(&self->virtual_object_destroy_listener.link);
   wl_list_remove(&self->base.events.destroy.listener_list);
   wl_list_remove(&self->virtual_object_commit_listener.link);

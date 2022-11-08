@@ -1,6 +1,7 @@
 #include "gl-base-technique.h"
 
 #include "application.h"
+#include "gl-vertex-array.h"
 #include "rendering-unit.h"
 
 namespace zen::client {
@@ -11,11 +12,17 @@ GlBaseTechnique::Init(RenderingUnit *unit)
   proxy_ =
       zgn_gles_v32_create_gl_base_technique(app_->gles_v32(), unit->proxy());
   if (proxy_ == nullptr) {
-    LOG_ERROR("Failed to create gl base technique object proxy");
+    zn_error("Failed to create gl base technique object proxy");
     return false;
   }
 
   return true;
+}
+
+void
+GlBaseTechnique::Bind(GlVertexArray *vertex_array)
+{
+  zgn_gl_base_technique_bind_vertex_array(proxy_, vertex_array->proxy());
 }
 
 GlBaseTechnique::GlBaseTechnique(Application *app) : app_(app) {}

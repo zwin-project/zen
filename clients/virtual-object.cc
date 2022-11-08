@@ -9,7 +9,7 @@ VirtualObject::Init()
 {
   proxy_ = zgn_compositor_create_virtual_object(app_->compositor());
   if (proxy_ == nullptr) {
-    LOG_ERROR("Failed to create virtual object proxy");
+    zn_error("Failed to create virtual object proxy");
     return false;
   }
 
