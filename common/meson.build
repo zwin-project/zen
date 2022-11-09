@@ -4,6 +4,7 @@ _zen_common_srcs = [
   'log.c',
   'terminate.c',
   'types.c',
+  'weak-resource.c',
 ]
 
 _zen_common_deps = [

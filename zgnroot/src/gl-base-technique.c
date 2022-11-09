@@ -66,7 +66,7 @@ zgnr_gl_base_technique_protocol_bind_vertex_array(struct wl_client *client,
       wl_resource_get_user_data(resource);
   if (self == NULL) return;
 
-  zgnr_weak_resource_link(&self->pending.vertex_array, vertex_array);
+  zn_weak_resource_link(&self->pending.vertex_array, vertex_array);
 }
 
 static void
@@ -173,9 +173,9 @@ zgnr_gl_base_technique_handle_rendering_unit_commit(
       zn_container_of(self->base.unit, unit, base);
   struct zgnr_gl_vertex_array_impl *vertex_array;
 
-  self->base.commited = true;
+  self->base.comitted = true;
 
-  vertex_array = zgnr_weak_resource_get_user_data(&self->pending.vertex_array);
+  vertex_array = zn_weak_resource_get_user_data(&self->pending.vertex_array);
   if (vertex_array) {
     zgnr_gl_vertex_array_commit(vertex_array);
     zgnr_gl_base_technique_set_current_vertex_array(self, &vertex_array->base);
@@ -230,11 +230,11 @@ zgnr_gl_base_technique_create(struct wl_client *client, uint32_t id,
       zgnr_gl_base_technique_handle_destroy);
 
   self->base.unit = &unit->base;
-  self->base.commited = false;
+  self->base.comitted = false;
   self->base.current.vertex_array = NULL;
 
   wl_signal_init(&self->base.events.destroy);
-  zgnr_weak_resource_init(&self->pending.vertex_array);
+  zn_weak_resource_init(&self->pending.vertex_array);
 
   self->rendering_unit_destroy_listener.notify =
       zgnr_gl_base_technique_handle_rendering_unit_destroy;
@@ -263,7 +263,7 @@ zgnr_gl_base_technique_destroy(struct zgnr_gl_base_technique_impl *self)
 {
   wl_signal_emit(&self->base.events.destroy, NULL);
 
-  zgnr_weak_resource_unlink(&self->pending.vertex_array);
+  zn_weak_resource_unlink(&self->pending.vertex_array);
   wl_list_remove(&self->current_vertex_array_destroy_listener.link);
   wl_list_remove(&self->rendering_unit_commit_listener.link);
   wl_list_remove(&self->rendering_unit_destroy_listener.link);

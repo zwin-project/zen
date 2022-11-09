@@ -1,6 +1,5 @@
 #pragma once
 
-#include "weak-resource.h"
 #include "zgnr/gl-vertex-array.h"
 
 struct zgnr_gl_vertex_array_impl {

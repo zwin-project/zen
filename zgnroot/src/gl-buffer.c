@@ -2,6 +2,10 @@
 
 #include <zen-common.h>
 #include <zigen-gles-v32-protocol.h>
+#include <zigen-protocol.h>
+
+#include "mem-storage.h"
+#include "shm.h"
 
 static void zgnr_gl_buffer_destroy(struct zgnr_gl_buffer_impl *self);
 
@@ -29,7 +33,7 @@ zgnr_gl_buffer_protocol_data(struct wl_client *client,
   UNUSED(client);
   struct zgnr_gl_buffer_impl *self = wl_resource_get_user_data(resource);
 
-  zgnr_weak_resource_link(&self->pending.data, data);
+  zn_weak_resource_link(&self->pending.data, data);
   self->pending.target = target;
   self->pending.usage = usage;
 }
@@ -38,6 +42,34 @@ static const struct zgn_gl_buffer_interface implementation = {
     .destroy = zgnr_gl_buffer_protocol_destroy,
     .data = zgnr_gl_buffer_protocol_data,
 };
+
+void
+zgnr_gl_buffer_commit(struct zgnr_gl_buffer_impl *self)
+{
+  if (!self->pending.data.resource) return;  // nothing to commit
+
+  struct zgnr_shm_buffer *buffer =
+      zgnr_shm_buffer_get(self->pending.data.resource);
+
+  if (self->base.current.data) {
+    zgnr_mem_storage_unref(self->base.current.data);
+    self->base.current.data = NULL;
+  }
+
+  void *data = zgnr_shm_buffer_get_data(buffer);
+  ssize_t size = zgnr_shm_buffer_get_size(buffer);
+
+  zgnr_shm_buffer_begin_access(buffer);
+  self->base.current.data = zgnr_mem_storage_create(data, size);
+  zgnr_shm_buffer_end_access(buffer);
+
+  self->base.current.data_damaged = true;
+  self->base.current.target = self->pending.target;
+  self->base.current.usage = self->pending.usage;
+
+  zgn_buffer_send_release(self->pending.data.resource);
+  zn_weak_resource_unlink(&self->pending.data);
+}
 
 struct zgnr_gl_buffer_impl *
 zgnr_gl_buffer_create(struct wl_client *client, uint32_t id)
@@ -61,7 +93,9 @@ zgnr_gl_buffer_create(struct wl_client *client, uint32_t id)
       resource, &implementation, self, zgnr_gl_buffer_handle_destroy);
 
   wl_signal_init(&self->base.events.destroy);
-  zgnr_weak_resource_init(&self->pending.data);
+  zn_weak_resource_init(&self->pending.data);
+  self->base.current.data_damaged = false;
+  self->base.current.data = NULL;
 
   return self;
 
@@ -77,7 +111,10 @@ zgnr_gl_buffer_destroy(struct zgnr_gl_buffer_impl *self)
 {
   wl_signal_emit(&self->base.events.destroy, NULL);
 
-  zgnr_weak_resource_unlink(&self->pending.data);
+  if (self->base.current.data) {
+    zgnr_mem_storage_unref(self->base.current.data);
+  }
+  zn_weak_resource_unlink(&self->pending.data);
   wl_list_remove(&self->base.events.destroy.listener_list);
   free(self);
 }
