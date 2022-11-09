@@ -32,7 +32,7 @@ zna_rendering_unit_handle_session_destroyed(
 
 /**
  * Precondition:
- *  Current session exists && the zgnr_rendering_unit has been commited
+ *  Current session exists && the zgnr_rendering_unit has been committed
  */
 void
 zna_rendering_unit_apply_commit(

@@ -9,7 +9,7 @@
 
 /**
  * Precondition:
- *  current session exists && the zgnr_virtual_object has been commited
+ *  current session exists && the zgnr_virtual_object has been comitted
  */
 static void
 zna_virtual_object_apply_commit(
@@ -26,7 +26,7 @@ zna_virtual_object_apply_commit(
 
   wl_list_for_each (
       unit, &zgnr_virtual_object->current.rendering_unit_list, link) {
-    // Rendering units in current.rendering_unit_list has been commited.
+    // Rendering units in current.rendering_unit_list has been comitted.
     zna_rendering_unit_apply_commit(unit->user_data, only_damaged);
   }
 

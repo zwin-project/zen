@@ -15,7 +15,7 @@ struct zgnr_gl_base_technique {
     struct wl_signal destroy;  // (NULL)
   } events;
 
-  bool commited;
+  bool comitted;
 
   struct {
     struct zgnr_gl_vertex_array *vertex_array;  // nullable

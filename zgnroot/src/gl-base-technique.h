@@ -1,9 +1,9 @@
 #pragma once
 
 #include <wayland-server-core.h>
+#include <zen-common/weak-resource.h>
 
 #include "rendering-unit.h"
-#include "weak-resource.h"
 #include "zgnr/gl-base-technique.h"
 
 /**
@@ -16,7 +16,7 @@ struct zgnr_gl_base_technique_impl {
   struct wl_resource *resource;
 
   struct {
-    struct zgnr_weak_resource vertex_array;  // zgnr_gl_vertex_array_impl
+    struct zn_weak_resource vertex_array;  // zgnr_gl_vertex_array_impl
   } pending;
 
   struct wl_listener rendering_unit_destroy_listener;
