@@ -40,6 +40,12 @@ default_grab_motion(
   }
 }
 
+void
+switch_to_vr(void)
+{
+  zn_warn("VR Mode starting...");
+}
+
 static void
 default_grab_button(
     struct zn_cursor_grab* grab, struct wlr_event_pointer_button* event)
@@ -59,6 +65,10 @@ default_grab_button(
   if (event->state == WLR_BUTTON_PRESSED) {
     zn_screen_get_surface_at(
         cursor->screen, cursor->x, cursor->y, NULL, NULL, &view);
+    if (0. <= cursor->x && cursor->x <= 200. && 0. <= cursor->y &&
+        cursor->y <= 100.) {
+      switch_to_vr();
+    }
     zn_scene_set_focused_view(server->scene, view);
   }
 }
