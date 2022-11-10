@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wayland-server-core.h>
+#include <zen/renderer/session.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,9 +21,7 @@ struct znr_remote {
   } events;
 };
 
-struct znr_system* znr_remote_get_system(struct znr_remote* self);
-
-void znr_remote_request_new_session(
+struct znr_session* znr_remote_create_session(
     struct znr_remote* self, struct znr_remote_peer* peer);
 
 struct znr_remote* znr_remote_create(struct wl_display* display);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <zen-remote/server/session.h>
+#include <zen-remote/signal.h>
 
 #include "zen/renderer/session.h"
 
@@ -8,9 +9,10 @@ struct znr_session_impl {
   znr_session base;
 
   std::shared_ptr<zen::remote::server::ISession> proxy;
+
+  std::unique_ptr<zen::remote::Signal<void()>::Connection>
+      disconnect_signal_connection;
 };
 
 znr_session_impl* znr_session_create(
     std::unique_ptr<zen::remote::server::ISession> proxy);
-
-void znr_session_destroy(znr_session_impl* self);

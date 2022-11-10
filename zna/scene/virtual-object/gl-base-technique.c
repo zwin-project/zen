@@ -57,7 +57,7 @@ zna_gl_base_technique_create(
 
   self->session_destroyed_listener.notify =
       zna_gl_base_technique_handle_session_destroyed;
-  wl_signal_add(&self->system->renderer->events.current_session_destroyed,
+  wl_signal_add(&self->system->events.current_session_destroyed,
       &self->session_destroyed_listener);
 
   return self;

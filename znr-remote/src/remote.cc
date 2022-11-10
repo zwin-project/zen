@@ -7,8 +7,9 @@
 #include "loop.h"
 #include "peer.h"
 
-void
-znr_remote_request_new_session(znr_remote* parent, znr_remote_peer* peer_base)
+struct znr_session*
+znr_remote_create_session(
+    struct znr_remote* parent, struct znr_remote_peer* peer_base)
 {
   znr_remote_impl* self = zn_container_of(parent, self, base);
   znr_remote_peer_impl* peer = zn_container_of(peer_base, peer, base);
@@ -17,29 +18,19 @@ znr_remote_request_new_session(znr_remote* parent, znr_remote_peer* peer_base)
   auto session_proxy = zen::remote::server::CreateSession(
       std::unique_ptr<zen::remote::ILoop>(new Loop(loop)));
 
-  if (session_proxy->Connect(peer->proxy) == false) return;
+  if (session_proxy->Connect(peer->proxy) == false) {
+    zn_warn("Failed to establish session");
+    return nullptr;
+  };
 
   auto session = znr_session_create(std::move(session_proxy));
-  if (!session) return;
+  if (!session) {
+    zn_error("Failed to create a session");
+    zn_terminate(EXIT_FAILURE);
+    return nullptr;
+  };
 
-  if (self->system.current_session) {
-    znr_session_impl* current =
-        zn_container_of(self->system.current_session, current, base);
-    znr_session_destroy(current);
-    self->system.current_session = NULL;
-    wl_signal_emit(&self->system.events.current_session_destroyed, NULL);
-  }
-
-  self->system.current_session = &session->base;
-  wl_signal_emit(&self->system.events.current_session_created, NULL);
-}
-
-struct znr_system*
-znr_remote_get_system(struct znr_remote* parent)
-{
-  znr_remote_impl* self = zn_container_of(parent, self, base);
-
-  return &self->system;
+  return &session->base;
 }
 
 static void
@@ -79,10 +70,7 @@ znr_remote_create(wl_display* display)
   }
 
   self->display = display;
-  self->system.current_session = nullptr;
   wl_signal_init(&self->base.events.new_peer);
-  wl_signal_init(&self->system.events.current_session_destroyed);
-  wl_signal_init(&self->system.events.current_session_created);
   wl_list_init(&self->peer_list);
 
   self->peer_manager = zen::remote::server::CreatePeerManager(
@@ -104,13 +92,6 @@ znr_remote_destroy(znr_remote* parent)
 {
   znr_remote_impl* self = zn_container_of(parent, self, base);
 
-  if (self->system.current_session) {
-    struct znr_session_impl* session =
-        zn_container_of(self->system.current_session, session, base);
-    znr_session_destroy(session);
-  }
-  wl_list_remove(&self->system.events.current_session_created.listener_list);
-  wl_list_remove(&self->system.events.current_session_destroyed.listener_list);
   wl_list_remove(&self->base.events.new_peer.listener_list);
   wl_list_remove(&self->peer_list);
 

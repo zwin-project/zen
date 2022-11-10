@@ -94,7 +94,7 @@ wayland_protocols_req = '>= 1.24'
 wayland_req = '>= 1.18.0'
 wlroots_req = ['>= 0.15', '< 0.16']
 wlr_glew_renderer_req = wlroots_req
-zen_remote_server_req = '0.1.0.9'
+zen_remote_server_req = '0.1.0.10'
 
 # dependencies
 
