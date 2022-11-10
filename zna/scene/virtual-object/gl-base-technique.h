@@ -5,8 +5,8 @@
 #include "system.h"
 
 struct zna_gl_base_technique {
-  struct zgnr_gl_base_technique* zgnr_gl_base_technique;
-  struct zna_system* system;
+  struct zgnr_gl_base_technique* zgnr_gl_base_technique;  // nonnull
+  struct zna_system* system;                              // nonnull
 
   struct wl_listener zgnr_gl_base_technique_destroy_listener;
   struct wl_listener session_destroyed_listener;

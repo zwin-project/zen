@@ -60,8 +60,6 @@ zna_gl_base_technique_create(
   wl_signal_add(&self->system->renderer->events.current_session_destroyed,
       &self->session_destroyed_listener);
 
-  zn_debug("gl-base-technique is created");
-
   return self;
 
 err:
@@ -71,8 +69,6 @@ err:
 static void
 zna_gl_base_technique_destroy(struct zna_gl_base_technique* self)
 {
-  zn_debug("gl-base-technique is destroyed");
-
   wl_list_remove(&self->zgnr_gl_base_technique_destroy_listener.link);
   wl_list_remove(&self->session_destroyed_listener.link);
   free(self);
