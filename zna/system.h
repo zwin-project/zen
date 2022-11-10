@@ -11,4 +11,5 @@ struct zna_system {
 
   struct wl_listener new_rendering_unit_listener;
   struct wl_listener new_gl_buffer_listener;
+  struct wl_listener new_gl_base_technique_listener;
 };

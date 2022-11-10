@@ -4,6 +4,7 @@
 #include <zgnr/virtual-object.h>
 
 #include "scene/virtual-object.h"
+#include "scene/virtual-object/gl-base-technique.h"
 #include "zen/scene/virtual-object.h"
 
 static void zna_rendering_unit_destroy(struct zna_rendering_unit* self);
@@ -30,10 +31,6 @@ zna_rendering_unit_handle_session_destroyed(
   }
 }
 
-/**
- * Precondition:
- *  Current session exists && the zgnr_rendering_unit has been committed
- */
 void
 zna_rendering_unit_apply_commit(
     struct zna_rendering_unit* self, bool only_damaged)
@@ -47,7 +44,11 @@ zna_rendering_unit_apply_commit(
         znr_rendering_unit_create(session, virtual_object->znr_virtual_object);
   }
 
-  UNUSED(only_damaged);
+  if (self->zgnr_rendering_unit->current.technique) {
+    struct zna_gl_base_technique* gl_base_technique =
+        self->zgnr_rendering_unit->current.technique->user_data;
+    zna_gl_base_technique_apply_commit(gl_base_technique, only_damaged);
+  }
 }
 
 static void
