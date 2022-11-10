@@ -35,7 +35,7 @@ void
 zna_rendering_unit_apply_commit(
     struct zna_rendering_unit* self, bool only_damaged)
 {
-  struct znr_session* session = self->system->renderer->current_session;
+  struct znr_session* session = self->system->current_session;
   struct zna_virtual_object* virtual_object =
       zna_rendering_unit_get_virtual_object(self);
 
@@ -86,7 +86,7 @@ zna_rendering_unit_create(
 
   self->session_destroyed_listener.notify =
       zna_rendering_unit_handle_session_destroyed;
-  wl_signal_add(&self->system->renderer->events.current_session_destroyed,
+  wl_signal_add(&self->system->events.current_session_destroyed,
       &self->session_destroyed_listener);
 
   return self;

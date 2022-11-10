@@ -11,7 +11,7 @@ static void zna_gl_buffer_destroy(struct zna_gl_buffer *self);
 static void
 zna_gl_buffer_session_created(struct zna_gl_buffer *self)
 {
-  struct znr_session *session = self->system->renderer->current_session;
+  struct znr_session *session = self->system->current_session;
 
   self->znr_gl_buffer = znr_gl_buffer_create(session);
 }
@@ -74,16 +74,15 @@ zna_gl_buffer_create(
 
   self->session_destroyed_listener.notify =
       zna_gl_buffer_handle_session_destroyed;
-  wl_signal_add(&self->system->renderer->events.current_session_destroyed,
+  wl_signal_add(&self->system->events.current_session_destroyed,
       &self->session_destroyed_listener);
 
   self->session_created_listener.notify = zna_gl_buffer_handle_session_created;
-  wl_signal_add(&self->system->renderer->events.current_session_created,
+  wl_signal_add(&self->system->events.current_session_created,
       &self->session_created_listener);
 
   /** initial logic */
-  if (self->system->renderer->current_session)
-    zna_gl_buffer_session_created(self);
+  if (self->system->current_session) zna_gl_buffer_session_created(self);
 
   return self;
 

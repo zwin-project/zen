@@ -8,9 +8,11 @@ extern "C" {
 
 struct znr_session {
   struct {
-    struct wl_signal destroy;  // (NULL)
+    struct wl_signal disconnected;  // (NULL)
   } events;
 };
+
+void znr_session_destroy(struct znr_session *session);
 
 #ifdef __cplusplus
 }

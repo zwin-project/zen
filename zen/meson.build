@@ -5,7 +5,6 @@ _zen_desktop_srcs = [
   'decoration-manager.c',
   'main.c',
   'output.c',
-  'remote.c',
   'screen-renderer.c',
   'server.c',
   'xdg-decoration.c',

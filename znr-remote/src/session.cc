@@ -2,6 +2,12 @@
 
 #include <zen-common.h>
 
+static void
+znr_session_handle_disconnect(znr_session_impl* self)
+{
+  wl_signal_emit(&self->base.events.disconnected, NULL);
+}
+
 znr_session_impl*
 znr_session_create(std::unique_ptr<zen::remote::server::ISession> proxy)
 {
@@ -12,7 +18,9 @@ znr_session_create(std::unique_ptr<zen::remote::server::ISession> proxy)
   }
 
   self->proxy = std::move(proxy);
-  wl_signal_init(&self->base.events.destroy);
+  wl_signal_init(&self->base.events.disconnected);
+  self->disconnect_signal_connection = self->proxy->on_disconnect.Connect(
+      std::bind(znr_session_handle_disconnect, self));
 
   return self;
 
@@ -21,10 +29,12 @@ err:
 }
 
 void
-znr_session_destroy(znr_session_impl* self)
+znr_session_destroy(znr_session* parent)
 {
-  wl_signal_emit(&self->base.events.destroy, NULL);
+  struct znr_session_impl* self = zn_container_of(parent, self, base);
 
-  wl_list_remove(&self->base.events.destroy.listener_list);
+  self->disconnect_signal_connection->Disconnect();
+
+  wl_list_remove(&self->base.events.disconnected.listener_list);
   delete self;
 }
