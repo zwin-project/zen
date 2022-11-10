@@ -19,7 +19,10 @@ struct zna_rendering_unit {
   struct wl_listener session_destroyed_listener;
 };
 
-/** Check that the current session exists before calling this */
+/**
+ * Precondition:
+ *  Current session exists && the zgnr_rendering_unit has been committed
+ */
 void zna_rendering_unit_apply_commit(
     struct zna_rendering_unit* self, bool only_damaged);
 

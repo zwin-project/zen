@@ -4,6 +4,7 @@
 #include <zgnr/gl-buffer.h>
 #include <zgnr/rendering-unit.h>
 
+#include "scene/virtual-object/gl-base-technique.h"
 #include "scene/virtual-object/gl-buffer.h"
 #include "scene/virtual-object/rendering-unit.h"
 #include "zen/renderer/system.h"
@@ -26,6 +27,17 @@ zna_system_handle_new_gl_buffer(struct wl_listener* listener, void* data)
   struct zgnr_gl_buffer* gl_buffer = data;
 
   (void)zna_gl_buffer_create(gl_buffer, self);
+}
+
+static void
+zna_system_handle_new_gl_base_technique(
+    struct wl_listener* listener, void* data)
+{
+  struct zna_system* self =
+      zn_container_of(listener, self, new_gl_base_technique_listener);
+  struct zgnr_gl_base_technique* gl_base_technique = data;
+
+  (void)zna_gl_base_technique_create(gl_base_technique, self);
 }
 
 struct zna_system*
@@ -57,6 +69,11 @@ zna_system_create(struct wl_display* display, struct znr_system* renderer)
   wl_signal_add(
       &self->gles->events.new_gl_buffer, &self->new_gl_buffer_listener);
 
+  self->new_gl_base_technique_listener.notify =
+      zna_system_handle_new_gl_base_technique;
+  wl_signal_add(&self->gles->events.new_gl_base_technique,
+      &self->new_gl_base_technique_listener);
+
   return self;
 
 err_free:
@@ -71,6 +88,7 @@ zna_system_destroy(struct zna_system* self)
 {
   wl_list_remove(&self->new_rendering_unit_listener.link);
   wl_list_remove(&self->new_gl_buffer_listener.link);
+  wl_list_remove(&self->new_gl_base_technique_listener.link);
   zgnr_gles_v32_destroy(self->gles);
   free(self);
 }
