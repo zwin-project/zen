@@ -1,5 +1,6 @@
 #pragma once
 
+#include <GLES3/gl32.h>
 #include <zen-common.h>
 #include <zigen-gles-v32-client-protocol.h>
 
@@ -19,6 +20,8 @@ class GlBaseTechnique
   ~GlBaseTechnique();
 
   bool Init(RenderingUnit *unit);
+
+  void DrawArrays(GLenum mode, GLint first, GLsizei count);
 
   void Bind(GlVertexArray *vertex_array);
 

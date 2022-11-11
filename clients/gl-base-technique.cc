@@ -25,6 +25,12 @@ GlBaseTechnique::Bind(GlVertexArray *vertex_array)
   zgn_gl_base_technique_bind_vertex_array(proxy_, vertex_array->proxy());
 }
 
+void
+GlBaseTechnique::DrawArrays(GLenum mode, GLint first, GLsizei count)
+{
+  zgn_gl_base_technique_draw_arrays(proxy_, mode, first, count);
+}
+
 GlBaseTechnique::GlBaseTechnique(Application *app) : app_(app) {}
 
 GlBaseTechnique::~GlBaseTechnique()
