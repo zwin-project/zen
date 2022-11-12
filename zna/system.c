@@ -126,6 +126,8 @@ err:
 void
 zna_system_destroy(struct zna_system* self)
 {
+  if (self->current_session) znr_session_destroy(self->current_session);
+
   wl_list_remove(&self->events.current_session_created.listener_list);
   wl_list_remove(&self->events.current_session_destroyed.listener_list);
   wl_list_remove(&self->new_rendering_unit_listener.link);
