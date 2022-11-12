@@ -34,7 +34,15 @@ zna_gl_buffer_apply_commit(struct zna_gl_buffer *self, bool only_damaged)
   UNUSED(only_damaged);
   struct znr_session *session = self->system->current_session;
   if (self->znr_gl_buffer == NULL) {
-    self->znr_gl_buffer = znr_gl_buffer_create(session);
+    self->znr_gl_buffer = znr_gl_buffer_create(session, self->system->display);
+  }
+
+  if (self->zgnr_gl_buffer->current.data_damaged || !only_damaged) {
+    znr_gl_buffer_data(self->znr_gl_buffer,
+        self->zgnr_gl_buffer->current.target,
+        self->zgnr_gl_buffer->current.data,
+        self->zgnr_gl_buffer->current.usage);
+    self->zgnr_gl_buffer->current.data_damaged = false;
   }
 }
 
