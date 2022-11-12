@@ -2,6 +2,9 @@
 
 #include "gl-buffer.h"
 
+/**
+ * @return struct zgnr_gl_buffer* : nullable
+ */
 struct zgnr_gl_buffer*
 zgnr_gl_vertex_attrib_get_gl_buffer(struct zgnr_gl_vertex_attrib* attrib)
 {

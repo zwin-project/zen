@@ -4,28 +4,6 @@
 
 static void zna_gl_buffer_destroy(struct zna_gl_buffer *self);
 
-/**
- * Precondition:
- *  current session exists && self->znr_gl_buffer == NULL
- */
-static void
-zna_gl_buffer_session_created(struct zna_gl_buffer *self)
-{
-  struct znr_session *session = self->system->current_session;
-
-  self->znr_gl_buffer = znr_gl_buffer_create(session);
-}
-
-static void
-zna_gl_buffer_handle_session_created(struct wl_listener *listener, void *data)
-{
-  struct zna_gl_buffer *self =
-      zn_container_of(listener, self, session_created_listener);
-  UNUSED(data);
-
-  zna_gl_buffer_session_created(self);
-}
-
 static void
 zna_gl_buffer_handle_session_destroyed(struct wl_listener *listener, void *data)
 {
@@ -48,6 +26,16 @@ zna_gl_buffer_handle_zgnr_gl_buffer_destroy(
       zn_container_of(listener, self, zgnr_gl_buffer_destroy_listener);
 
   zna_gl_buffer_destroy(self);
+}
+
+void
+zna_gl_buffer_apply_commit(struct zna_gl_buffer *self, bool only_damaged)
+{
+  UNUSED(only_damaged);
+  struct znr_session *session = self->system->current_session;
+  if (self->znr_gl_buffer == NULL) {
+    self->znr_gl_buffer = znr_gl_buffer_create(session);
+  }
 }
 
 struct zna_gl_buffer *
@@ -77,13 +65,6 @@ zna_gl_buffer_create(
   wl_signal_add(&self->system->events.current_session_destroyed,
       &self->session_destroyed_listener);
 
-  self->session_created_listener.notify = zna_gl_buffer_handle_session_created;
-  wl_signal_add(&self->system->events.current_session_created,
-      &self->session_created_listener);
-
-  /** initial logic */
-  if (self->system->current_session) zna_gl_buffer_session_created(self);
-
   return self;
 
 err:
@@ -96,6 +77,5 @@ zna_gl_buffer_destroy(struct zna_gl_buffer *self)
   if (self->znr_gl_buffer) znr_gl_buffer_destroy(self->znr_gl_buffer);
   wl_list_remove(&self->zgnr_gl_buffer_destroy_listener.link);
   wl_list_remove(&self->session_destroyed_listener.link);
-  wl_list_remove(&self->session_created_listener.link);
   free(self);
 }
