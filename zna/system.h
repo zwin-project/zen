@@ -8,7 +8,7 @@ struct zna_system {
   struct wl_display *display;
   struct zgnr_gles_v32 *gles;  // nonnull, owning
 
-  struct znr_session *current_session;  // nullable, reference
+  struct znr_session *current_session;  // nullable, owning
 
   struct {
     // When the current session switches to a new one, current_session_destroyed
