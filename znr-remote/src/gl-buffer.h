@@ -6,4 +6,6 @@
 
 struct znr_gl_buffer {
   std::unique_ptr<zen::remote::server::IGlBuffer> proxy;
+
+  wl_display *display;
 };

@@ -173,6 +173,9 @@ zgnr_gl_base_technique_handle_rendering_unit_commit(
       zn_container_of(self->base.unit, unit, base);
   struct zgnr_gl_vertex_array_impl *vertex_array;
 
+  if (!self->base.comitted)
+    zgnr_rendering_unit_set_current_technique(unit, self);
+
   self->base.comitted = true;
 
   vertex_array = zn_weak_resource_get_user_data(&self->pending.vertex_array);
@@ -182,8 +185,6 @@ zgnr_gl_base_technique_handle_rendering_unit_commit(
   } else {
     zgnr_gl_base_technique_set_current_vertex_array(self, NULL);
   }
-
-  zgnr_rendering_unit_set_current_technique(unit, self);
 }
 
 static void
