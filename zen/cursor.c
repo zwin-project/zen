@@ -10,6 +10,7 @@
 #include "zen-common.h"
 #include "zen/input/cursor-grab.h"
 #include "zen/scene/screen-layout.h"
+#include "zen/scene/ui-node.h"
 #include "zen/scene/view.h"
 #include "zen/server.h"
 
@@ -40,12 +41,6 @@ default_grab_motion(
   }
 }
 
-void
-switch_to_vr(void)
-{
-  zn_warn("VR Mode starting...");
-}
-
 static void
 default_grab_button(
     struct zn_cursor_grab* grab, struct wlr_event_pointer_button* event)
@@ -63,12 +58,14 @@ default_grab_button(
       seat, event->time_msec, event->button, event->state);
 
   if (event->state == WLR_BUTTON_PRESSED) {
+    struct zn_ui_node* node;
+    wl_list_for_each (node, &cursor->screen->ui_nodes, link) {
+      if (wlr_box_contains_point(node->frame, cursor->x, cursor->y)) {
+        node->handler(node, cursor->x, cursor->y);
+      }
+    }
     zn_screen_get_surface_at(
         cursor->screen, cursor->x, cursor->y, NULL, NULL, &view);
-    if (0. <= cursor->x && cursor->x <= 200. && 0. <= cursor->y &&
-        cursor->y <= 100.) {
-      switch_to_vr();
-    }
     zn_scene_set_focused_view(server->scene, view);
   }
 }

@@ -4,6 +4,7 @@
 #include "zen/input/seat.h"
 #include "zen/scene/board.h"
 #include "zen/scene/screen-layout.h"
+#include "zen/scene/ui-node.h"
 #include "zen/scene/view.h"
 #include "zen/wlr/box.h"
 
@@ -241,6 +242,7 @@ struct zn_screen *
 zn_screen_create(
     struct zn_screen_layout *screen_layout, struct zn_output *output)
 {
+  struct zn_server *server = zn_server_get_singleton();
   struct zn_screen *self;
 
   self = zalloc(sizeof *self);
@@ -257,7 +259,9 @@ zn_screen_create(
   self->current_board_screen_assigned_listener.notify =
       zn_screen_handle_current_board_screen_assigned;
   wl_list_init(&self->current_board_screen_assigned_listener.link);
+  wl_list_init(&self->ui_nodes);
 
+  zn_ui_node_setup_default(self, server);
   zn_screen_layout_add(screen_layout, self);
 
   return self;
@@ -269,6 +273,7 @@ err:
 void
 zn_screen_destroy(struct zn_screen *self)
 {
+  wl_list_remove(&self->ui_nodes);
   wl_list_remove(&self->current_board_screen_assigned_listener.link);
   wl_signal_emit(&self->events.destroy, NULL);
 

@@ -1,11 +1,11 @@
 #include "zen/scene/scene.h"
 
 #include <cairo.h>
-#include <drm_fourcc.h>
 #include <linux/input.h>
 
 #include "build-config.h"
 #include "zen-common.h"
+#include "zen/cairo/texture.h"
 #include "zen/config.h"
 #include "zen/scene/board.h"
 #include "zen/scene/screen-layout.h"
@@ -202,14 +202,8 @@ zn_scene_setup_background(struct zn_scene* self, const char* background_png)
     zn_error("Image format not supported");
     goto err;
   }
-  unsigned char* data = cairo_image_surface_get_data(surface);
-  int stride = cairo_image_surface_get_stride(surface);
-  int width = cairo_image_surface_get_width(surface);
-  int height = cairo_image_surface_get_height(surface);
-
   struct zn_server* server = zn_server_get_singleton();
-  self->bg_texture = wlr_texture_from_pixels(
-      server->renderer, DRM_FORMAT_ARGB8888, stride, width, height, data);
+  self->bg_texture = zn_wlr_texture_from_cairo_surface(surface, server);
 err:
   cairo_surface_destroy(surface);
   cairo_destroy(cr);

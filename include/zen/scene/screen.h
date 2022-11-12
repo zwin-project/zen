@@ -19,6 +19,8 @@ struct zn_screen {
   struct zn_board *current_board;  // non null
   struct wl_listener current_board_screen_assigned_listener;
 
+  struct wl_list ui_nodes;  // zn_ui_node::link
+
   struct wl_list link;  // zn_screen_layout::screens;
 
   struct {

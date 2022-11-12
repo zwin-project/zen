@@ -1,7 +1,5 @@
 #include "zen/screen-renderer.h"
 
-#include <cairo.h>
-#include <drm_fourcc.h>
 #include <wlr/render/wlr_renderer.h>
 #include <wlr/types/wlr_matrix.h>
 #include <wlr/types/wlr_surface.h>
@@ -11,6 +9,7 @@
 #include "zen/output.h"
 #include "zen/scene/board.h"
 #include "zen/scene/screen.h"
+#include "zen/scene/ui-node.h"
 #include "zen/scene/view.h"
 
 typedef void (*surface_iterator_func_t)(struct zn_screen *screen,
@@ -98,22 +97,23 @@ zn_screen_renderer_render_background(struct zn_output *output,
 }
 
 static void
-zn_screen_renderer_render_widgets(struct zn_output *output,
-    struct wlr_renderer *renderer, struct wlr_texture *texture,
+zn_screen_renderer_render_ui_nodes(struct zn_output *output,
+    struct wlr_renderer *renderer, struct wl_list *ui_nodes,
     pixman_region32_t *screen_damage)
 {
-  float matrix[9];
-  struct wlr_box box = {0, 0, 200, 100};
-  wlr_matrix_project_box(matrix, &box, WL_OUTPUT_TRANSFORM_NORMAL, 0,
-      output->wlr_output->transform_matrix);
+  struct zn_ui_node *node;
+  wl_list_for_each (node, ui_nodes, link) {
+    float matrix[9];
+    wlr_matrix_project_box(matrix, node->frame, WL_OUTPUT_TRANSFORM_NORMAL, 0,
+        output->wlr_output->transform_matrix);
+    int rect_count;
+    pixman_box32_t *rects =
+        pixman_region32_rectangles(screen_damage, &rect_count);
 
-  int rect_count;
-  pixman_box32_t *rects =
-      pixman_region32_rectangles(screen_damage, &rect_count);
-
-  for (int i = 0; i < rect_count; i++) {
-    zn_screen_renderer_scissor_output(output, &rects[i]);
-    wlr_render_texture_with_matrix(renderer, texture, matrix, 1.0f);
+    for (int i = 0; i < rect_count; i++) {
+      zn_screen_renderer_scissor_output(output, &rects[i]);
+      wlr_render_texture_with_matrix(renderer, node->texture, matrix, 1.0f);
+    }
   }
 }
 
@@ -356,28 +356,6 @@ zn_screen_renderer_render(struct zn_screen *screen,
   pixman_region32_t screen_damage;
   int output_width, output_height;
 
-  cairo_surface_t *surface =
-      cairo_image_surface_create(CAIRO_FORMAT_RGB24, 200, 100);
-
-  unsigned char *data = cairo_image_surface_get_data(surface);
-
-  int stride = cairo_image_surface_get_stride(surface);
-  int width = cairo_image_surface_get_width(surface);
-  int height = cairo_image_surface_get_height(surface);
-
-  cairo_t *cr = cairo_create(surface);
-  cairo_set_source_rgb(cr, 1., 1., 1.);
-  cairo_paint(cr);
-
-  cairo_select_font_face(
-      cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
-  cairo_set_font_size(cr, 13);
-  cairo_set_source_rgb(cr, 0.1, 0.1, 0.1);
-  cairo_move_to(cr, 20, 30);
-  cairo_show_text(cr, "VR");
-  struct wlr_texture *texture = wlr_texture_from_pixels(
-      server->renderer, DRM_FORMAT_ARGB8888, stride, width, height, data);
-
   wlr_renderer_begin(renderer, wlr_output->width, wlr_output->height);
 
   pixman_region32_init(&screen_damage);
@@ -396,7 +374,8 @@ zn_screen_renderer_render(struct zn_screen *screen,
   wl_list_for_each (view, &board->view_list, link)
     zn_screen_renderer_render_view(screen, view, renderer, &screen_damage);
 
-  zn_screen_renderer_render_widgets(output, renderer, texture, &screen_damage);
+  zn_screen_renderer_render_ui_nodes(
+      output, renderer, &screen->ui_nodes, &screen_damage);
 
   zn_screen_renderer_render_cursor(screen, cursor, renderer, &screen_damage);
 

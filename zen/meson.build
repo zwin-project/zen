@@ -19,6 +19,8 @@ _zen_desktop_srcs = [
   'xdg-popup.c',
   'xdg-toplevel-view.c',
   'xwayland-view.c',
+  
+  'cairo/texture.c',
 
   'input/cursor-grab-move.c',
   'input/cursor-grab-resize.c',
@@ -32,6 +34,7 @@ _zen_desktop_srcs = [
   'scene/scene.c',
   'scene/screen.c',
   'scene/screen-layout.c',
+  'scene/ui-node.c',
   'scene/view.c',
   'scene/view-child.c',
 
