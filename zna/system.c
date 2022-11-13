@@ -6,6 +6,7 @@
 
 #include "scene/virtual-object/gl-base-technique.h"
 #include "scene/virtual-object/gl-buffer.h"
+#include "scene/virtual-object/gl-vertex-array.h"
 #include "scene/virtual-object/rendering-unit.h"
 
 void
@@ -73,6 +74,16 @@ zna_system_handle_new_gl_base_technique(
   (void)zna_gl_base_technique_create(gl_base_technique, self);
 }
 
+static void
+zna_system_handle_new_gl_vertex_array(struct wl_listener* listener, void* data)
+{
+  struct zna_system* self =
+      zn_container_of(listener, self, new_gl_vertex_array_listener);
+  struct zgnr_gl_vertex_array* gl_vertex_array = data;
+
+  (void)zna_gl_vertex_array_create(gl_vertex_array, self);
+}
+
 struct zna_system*
 zna_system_create(struct wl_display* display)
 {
@@ -110,6 +121,11 @@ zna_system_create(struct wl_display* display)
   wl_signal_add(&self->gles->events.new_gl_base_technique,
       &self->new_gl_base_technique_listener);
 
+  self->new_gl_vertex_array_listener.notify =
+      zna_system_handle_new_gl_vertex_array;
+  wl_signal_add(&self->gles->events.new_gl_vertex_array,
+      &self->new_gl_vertex_array_listener);
+
   self->current_session_disconnected_listener.notify =
       zna_system_handle_current_session_disconnected;
   wl_list_init(&self->current_session_disconnected_listener.link);
@@ -133,6 +149,7 @@ zna_system_destroy(struct zna_system* self)
   wl_list_remove(&self->new_rendering_unit_listener.link);
   wl_list_remove(&self->new_gl_buffer_listener.link);
   wl_list_remove(&self->new_gl_base_technique_listener.link);
+  wl_list_remove(&self->new_gl_vertex_array_listener.link);
   wl_list_remove(&self->current_session_disconnected_listener.link);
   zgnr_gles_v32_destroy(self->gles);
   free(self);

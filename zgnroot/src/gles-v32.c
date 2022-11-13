@@ -97,7 +97,7 @@ zgnr_gles_v32_protocol_create_gl_vertex_array(
     return;
   }
 
-  wl_signal_emit(&self->base.events.new_gl_vertex_buffer, &vertex_array->base);
+  wl_signal_emit(&self->base.events.new_gl_vertex_array, &vertex_array->base);
 }
 
 static void
@@ -162,7 +162,7 @@ zgnr_gles_v32_create(struct wl_display* display)
   wl_signal_init(&self->base.events.new_rendering_unit);
   wl_signal_init(&self->base.events.new_gl_base_technique);
   wl_signal_init(&self->base.events.new_gl_buffer);
-  wl_signal_init(&self->base.events.new_gl_vertex_buffer);
+  wl_signal_init(&self->base.events.new_gl_vertex_array);
   self->display = display;
 
   self->global = wl_global_create(
@@ -191,7 +191,7 @@ zgnr_gles_v32_destroy(struct zgnr_gles_v32* parent)
   wl_list_remove(&self->base.events.new_gl_buffer.listener_list);
   wl_list_remove(&self->base.events.new_gl_base_technique.listener_list);
   wl_list_remove(&self->base.events.new_rendering_unit.listener_list);
-  wl_list_remove(&self->base.events.new_gl_vertex_buffer.listener_list);
+  wl_list_remove(&self->base.events.new_gl_vertex_array.listener_list);
 
   free(self);
 }
