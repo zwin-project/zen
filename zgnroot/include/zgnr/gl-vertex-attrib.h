@@ -18,6 +18,10 @@ struct zgnr_gl_vertex_attrib {
   bool enable_changed;
   bool gl_buffer_changed;
   struct zn_weak_resource gl_buffer;  // (private)
+
+  // zgnr_gl_vertex_array::current.vertex_attrib_list or
+  // zgnr_gl_vertex_array_impl::pending.vertex_attrib_list (internal use)
+  struct wl_list link;
 };
 
 struct zgnr_gl_buffer* zgnr_gl_vertex_attrib_get_gl_buffer(
