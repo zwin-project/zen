@@ -79,6 +79,8 @@ jobs:
           cmake -B build -DZEN_REMOTE_GRPC_SYSROOT=$GITHUB_WORKSPACE/grpc-dev/native/Debug -GNinja
           cmake --build build
           sudo cmake --install build
+        env:
+          CXX: clang++
 
       - name: Clone tomlc99
         uses: actions/checkout@v2
