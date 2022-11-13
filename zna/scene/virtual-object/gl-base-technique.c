@@ -3,8 +3,18 @@
 #include <zen-common.h>
 
 #include "scene/virtual-object/gl-vertex-array.h"
+#include "scene/virtual-object/rendering-unit.h"
 
 static void zna_gl_base_technique_destroy(struct zna_gl_base_technique* self);
+
+static struct zna_rendering_unit*
+zna_gl_base_technique_get_rendering_unit(struct zna_gl_base_technique* self)
+{
+  struct zna_rendering_unit* unit =
+      self->zgnr_gl_base_technique->unit->user_data;
+
+  return unit;
+}
 
 static void
 zna_gl_base_technique_handle_zgnr_gl_base_technique_destroy(
@@ -23,15 +33,25 @@ zna_gl_base_technique_handle_session_destroyed(
 {
   struct zna_gl_base_technique* self =
       zn_container_of(listener, self, session_destroyed_listener);
-  UNUSED(self);
   UNUSED(data);
+
+  if (self->znr_gl_base_technique) {
+    znr_gl_base_technique_destroy(self->znr_gl_base_technique);
+    self->znr_gl_base_technique = NULL;
+  }
 }
 
 void
 zna_gl_base_technique_apply_commit(
     struct zna_gl_base_technique* self, bool only_damaged)
 {
-  // TODO: Create znr_gl_base_technique;
+  struct znr_session* session = self->system->current_session;
+  struct zna_rendering_unit* unit =
+      zna_gl_base_technique_get_rendering_unit(self);
+  if (self->znr_gl_base_technique == NULL) {
+    self->znr_gl_base_technique =
+        znr_gl_base_technique_create(session, unit->znr_rendering_unit);
+  }
 
   if (self->zgnr_gl_base_technique->current.vertex_array) {
     struct zna_gl_vertex_array* vertex_array =
@@ -79,6 +99,8 @@ err:
 static void
 zna_gl_base_technique_destroy(struct zna_gl_base_technique* self)
 {
+  if (self->znr_gl_base_technique)
+    znr_gl_base_technique_destroy(self->znr_gl_base_technique);
   wl_list_remove(&self->zgnr_gl_base_technique_destroy_listener.link);
   wl_list_remove(&self->session_destroyed_listener.link);
   free(self);

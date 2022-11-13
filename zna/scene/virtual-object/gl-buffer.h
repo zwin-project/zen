@@ -9,7 +9,10 @@ struct zna_gl_buffer {
   struct zgnr_gl_buffer *zgnr_gl_buffer;  // nonnull
   struct zna_system *system;              // nonnull
 
-  // null when current session does not exist, non-null otherwise
+  /**
+   * null before the initial commit or when the current session does not exists,
+   * nonnull otherwise
+   */
   struct znr_gl_buffer *znr_gl_buffer;
 
   struct wl_listener zgnr_gl_buffer_destroy_listener;
