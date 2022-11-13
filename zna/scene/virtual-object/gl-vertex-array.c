@@ -42,8 +42,8 @@ zna_gl_vertex_array_apply_commit(
     self->znr_gl_vertex_array = znr_gl_vertex_array_create(session);
   }
 
-  wl_array_for_each (
-      vertex_attrib, &self->zgnr_gl_vertex_array->current.vertex_attribs) {
+  wl_list_for_each (vertex_attrib,
+      &self->zgnr_gl_vertex_array->current.vertex_attrib_list, link) {
     struct zgnr_gl_buffer* zgnr_gl_buffer =
         zgnr_gl_vertex_attrib_get_gl_buffer(vertex_attrib);
     if (zgnr_gl_buffer == NULL) continue;
@@ -51,7 +51,22 @@ zna_gl_vertex_array_apply_commit(
     struct zna_gl_buffer* gl_buffer = zgnr_gl_buffer->user_data;
     zna_gl_buffer_apply_commit(gl_buffer, only_damage);
 
-    // TODO: apply attribs
+    if (vertex_attrib->enable_changed || !only_damage) {
+      if (vertex_attrib->enabled) {
+        znr_gl_vertex_array_enable_vertex_attrib_array(
+            self->znr_gl_vertex_array, vertex_attrib->index);
+      } else {
+        znr_gl_vertex_array_disable_vertex_attrib_array(
+            self->znr_gl_vertex_array, vertex_attrib->index);
+      }
+    }
+
+    if (vertex_attrib->gl_buffer_changed || !only_damage) {
+      znr_gl_vertex_array_vertex_attrib_pointer(self->znr_gl_vertex_array,
+          vertex_attrib->index, vertex_attrib->size, vertex_attrib->type,
+          vertex_attrib->normalized, vertex_attrib->stride,
+          vertex_attrib->offset, gl_buffer->znr_gl_buffer);
+    }
   }
 }
 

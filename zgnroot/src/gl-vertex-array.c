@@ -1,10 +1,10 @@
 #include "gl-vertex-array.h"
 
 #include <zen-common.h>
-#include <zgnr/gl-vertex-attrib.h>
 #include <zigen-gles-v32-protocol.h>
 
 #include "gl-buffer.h"
+#include "gl-vertex-attrib.h"
 
 static void zgnr_gl_vertex_array_destroy(
     struct zgnr_gl_vertex_array_impl *self);
@@ -29,18 +29,14 @@ zgnr_gl_vertex_array_ensure_vertex_attrib(
     struct zgnr_gl_vertex_array_impl *self, uint32_t index)
 {
   struct zgnr_gl_vertex_attrib *attrib;
-  wl_array_for_each (attrib, &self->pending.vertex_attribs) {
+  wl_list_for_each (attrib, &self->pending.vertex_attrib_list, link) {
     if (attrib->index == index) {
       return attrib;
     }
   }
 
-  attrib = wl_array_add(&self->pending.vertex_attribs, sizeof *attrib);
-  zn_weak_resource_init(&attrib->gl_buffer);
-  attrib->index = index;
-  attrib->enabled = false;
-  attrib->gl_buffer_changed = false;
-  attrib->enable_changed = false;
+  attrib = zgnr_gl_vertex_attrib_create(index);
+  wl_list_insert(&self->pending.vertex_attrib_list, &attrib->link);
 
   return attrib;
 }
@@ -101,25 +97,19 @@ static const struct zgn_gl_vertex_array_interface implementation = {
 void
 zgnr_gl_vertex_array_commit(struct zgnr_gl_vertex_array_impl *self)
 {
-  struct zgnr_gl_vertex_attrib *attrib;
+  struct zgnr_gl_vertex_attrib *attrib, *tmp;
 
-  wl_array_for_each (attrib, &self->base.current.vertex_attribs) {
-    zn_weak_resource_unlink(&attrib->gl_buffer);
+  wl_list_for_each_safe (
+      attrib, tmp, &self->base.current.vertex_attrib_list, link) {
+    zgnr_gl_vertex_attrib_destroy(attrib);
   }
-  wl_array_release(&self->base.current.vertex_attribs);
 
-  wl_array_init(&self->base.current.vertex_attribs);
-
-  wl_array_for_each (attrib, &self->pending.vertex_attribs) {
-    struct zgnr_gl_vertex_attrib *dest;
+  wl_list_for_each (attrib, &self->pending.vertex_attrib_list, link) {
+    struct zgnr_gl_vertex_attrib *copy;
     struct zgnr_gl_buffer_impl *buffer;
 
-    dest = wl_array_add(&self->base.current.vertex_attribs, sizeof *dest);
-
-    memcpy(dest, attrib, sizeof *attrib);
-
-    zn_weak_resource_init(&dest->gl_buffer);
-    zn_weak_resource_link(&dest->gl_buffer, attrib->gl_buffer.resource);
+    copy = zgnr_gl_vertex_attrib_copy(attrib);
+    wl_list_insert(&self->base.current.vertex_attrib_list, &copy->link);
 
     attrib->gl_buffer_changed = false;
     attrib->enable_changed = false;
@@ -144,8 +134,8 @@ zgnr_gl_vertex_array_create(struct wl_client *client, uint32_t id)
   }
 
   wl_signal_init(&self->base.events.destroy);
-  wl_array_init(&self->base.current.vertex_attribs);
-  wl_array_init(&self->pending.vertex_attribs);
+  wl_list_init(&self->base.current.vertex_attrib_list);
+  wl_list_init(&self->pending.vertex_attrib_list);
 
   resource = wl_resource_create(client, &zgn_gl_vertex_array_interface, 1, id);
   if (resource == NULL) {
@@ -169,17 +159,16 @@ static void
 zgnr_gl_vertex_array_destroy(struct zgnr_gl_vertex_array_impl *self)
 {
   wl_signal_emit(&self->base.events.destroy, NULL);
-  struct zgnr_gl_vertex_attrib *attrib;
+  struct zgnr_gl_vertex_attrib *attrib, *tmp;
 
-  wl_array_for_each (attrib, &self->pending.vertex_attribs) {
-    zn_weak_resource_unlink(&attrib->gl_buffer);
+  wl_list_for_each_safe (attrib, tmp, &self->pending.vertex_attrib_list, link) {
+    zgnr_gl_vertex_attrib_destroy(attrib);
   }
-  wl_array_release(&self->pending.vertex_attribs);
 
-  wl_array_for_each (attrib, &self->base.current.vertex_attribs) {
-    zn_weak_resource_unlink(&attrib->gl_buffer);
+  wl_list_for_each_safe (
+      attrib, tmp, &self->base.current.vertex_attrib_list, link) {
+    zgnr_gl_vertex_attrib_destroy(attrib);
   }
-  wl_array_release(&self->base.current.vertex_attribs);
 
   wl_list_remove(&self->base.events.destroy.listener_list);
   free(self);

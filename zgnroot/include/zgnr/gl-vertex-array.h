@@ -14,7 +14,7 @@ struct zgnr_gl_vertex_array {
   } events;
 
   struct {
-    struct wl_array vertex_attribs;  // struct zgnr_gl_vertex_attrib
+    struct wl_list vertex_attrib_list;  // struct zgnr_gl_vertex_attrib::link
   } current;
 
   void* user_data;
