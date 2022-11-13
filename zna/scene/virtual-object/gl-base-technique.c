@@ -2,7 +2,7 @@
 
 #include <zen-common.h>
 
-#include "scene/virtual-object/gl-buffer.h"
+#include "scene/virtual-object/gl-vertex-array.h"
 
 static void zna_gl_base_technique_destroy(struct zna_gl_base_technique* self);
 
@@ -31,19 +31,13 @@ void
 zna_gl_base_technique_apply_commit(
     struct zna_gl_base_technique* self, bool only_damaged)
 {
-  struct zgnr_gl_vertex_array* vertex_array;
+  // TODO: Create znr_gl_base_technique;
 
-  vertex_array = self->zgnr_gl_base_technique->current.vertex_array;
-  if (vertex_array) {
-    struct zgnr_gl_vertex_attrib* vertex_attrib;
-    wl_array_for_each (vertex_attrib, &vertex_array->current.vertex_attribs) {
-      struct zgnr_gl_buffer* zgnr_gl_buffer =
-          zgnr_gl_vertex_attrib_get_gl_buffer(vertex_attrib);
-      if (zgnr_gl_buffer == NULL) continue;
+  if (self->zgnr_gl_base_technique->current.vertex_array) {
+    struct zna_gl_vertex_array* vertex_array =
+        self->zgnr_gl_base_technique->current.vertex_array->user_data;
 
-      struct zna_gl_buffer* gl_buffer = zgnr_gl_buffer->user_data;
-      zna_gl_buffer_apply_commit(gl_buffer, only_damaged);
-    }
+    zna_gl_vertex_array_apply_commit(vertex_array, only_damaged);
   }
 
   // TODO: Apply draw arrays, etc.
