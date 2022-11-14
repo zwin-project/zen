@@ -19,6 +19,7 @@ struct zgnr_gl_base_technique {
 
   struct {
     struct zgnr_gl_vertex_array *vertex_array;  // nullable
+    bool vertex_array_changed;
   } current;
 
   void *user_data;
