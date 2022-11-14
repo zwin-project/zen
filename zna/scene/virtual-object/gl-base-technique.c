@@ -58,6 +58,12 @@ zna_gl_base_technique_apply_commit(
         self->zgnr_gl_base_technique->current.vertex_array->user_data;
 
     zna_gl_vertex_array_apply_commit(vertex_array, only_damaged);
+
+    if (self->zgnr_gl_base_technique->current.vertex_array_changed ||
+        !only_damaged) {
+      znr_gl_base_technique_bind_vertex_array(
+          self->znr_gl_base_technique, vertex_array->znr_gl_vertex_array);
+    }
   }
 
   // TODO: Apply draw arrays, etc.

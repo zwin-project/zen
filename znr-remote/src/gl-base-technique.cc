@@ -2,8 +2,16 @@
 
 #include <zen-common.h>
 
+#include "gl-vertex-array.h"
 #include "rendering-unit.h"
 #include "session.h"
+
+void
+znr_gl_base_technique_bind_vertex_array(struct znr_gl_base_technique* self,
+    struct znr_gl_vertex_array* vertex_array)
+{
+  self->proxy->BindVertexArray(vertex_array->proxy->id());
+}
 
 struct znr_gl_base_technique*
 znr_gl_base_technique_create(

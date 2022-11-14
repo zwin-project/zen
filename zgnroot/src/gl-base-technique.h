@@ -17,6 +17,7 @@ struct zgnr_gl_base_technique_impl {
 
   struct {
     struct zn_weak_resource vertex_array;  // zgnr_gl_vertex_array_impl
+    bool vertex_array_changed;
   } pending;
 
   struct wl_listener rendering_unit_destroy_listener;

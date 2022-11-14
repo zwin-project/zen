@@ -67,6 +67,7 @@ zgnr_gl_base_technique_protocol_bind_vertex_array(struct wl_client *client,
   if (self == NULL) return;
 
   zn_weak_resource_link(&self->pending.vertex_array, vertex_array);
+  self->pending.vertex_array_changed = true;
 }
 
 static void
@@ -178,12 +179,17 @@ zgnr_gl_base_technique_handle_rendering_unit_commit(
 
   self->base.comitted = true;
 
-  vertex_array = zn_weak_resource_get_user_data(&self->pending.vertex_array);
-  if (vertex_array) {
-    zgnr_gl_vertex_array_commit(vertex_array);
-    zgnr_gl_base_technique_set_current_vertex_array(self, &vertex_array->base);
-  } else {
-    zgnr_gl_base_technique_set_current_vertex_array(self, NULL);
+  self->base.current.vertex_array_changed = self->pending.vertex_array_changed;
+  if (self->pending.vertex_array_changed) {
+    vertex_array = zn_weak_resource_get_user_data(&self->pending.vertex_array);
+    if (vertex_array) {
+      zgnr_gl_vertex_array_commit(vertex_array);
+      zgnr_gl_base_technique_set_current_vertex_array(
+          self, &vertex_array->base);
+    } else {
+      zgnr_gl_base_technique_set_current_vertex_array(self, NULL);
+    }
+    self->pending.vertex_array_changed = false;
   }
 }
 
@@ -233,9 +239,12 @@ zgnr_gl_base_technique_create(struct wl_client *client, uint32_t id,
   self->base.unit = &unit->base;
   self->base.comitted = false;
   self->base.current.vertex_array = NULL;
+  self->base.current.vertex_array_changed = false;
 
   wl_signal_init(&self->base.events.destroy);
+
   zn_weak_resource_init(&self->pending.vertex_array);
+  self->pending.vertex_array_changed = false;
 
   self->rendering_unit_destroy_listener.notify =
       zgnr_gl_base_technique_handle_rendering_unit_destroy;

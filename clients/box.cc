@@ -73,9 +73,9 @@ main(void)
 
   gl_buffer->Data(GL_ARRAY_BUFFER, buffer.get(), GL_STATIC_DRAW);
 
-  vertex_array->Enable(1);
+  vertex_array->Enable(0);
   vertex_array->VertexAttribPointer(
-      1, 3, GL_FLOAT, GL_FALSE, 0, 0, gl_buffer.get());
+      0, 3, GL_FLOAT, GL_FALSE, 0, 0, gl_buffer.get());
 
   technique->Bind(vertex_array.get());
 
