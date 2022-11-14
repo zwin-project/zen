@@ -119,10 +119,12 @@ zgnr_gl_base_technique_protocol_draw_arrays(struct wl_client *client,
     struct wl_resource *resource, uint32_t mode, int32_t first, uint32_t count)
 {
   UNUSED(client);
-  UNUSED(resource);
-  UNUSED(mode);
-  UNUSED(first);
-  UNUSED(count);
+  struct zgnr_gl_base_technique_impl *self =
+      wl_resource_get_user_data(resource);
+  self->pending.draw_method = ZGNR_GL_BASE_TECHNIQUE_DRAW_ARRAYS;
+  self->pending.args.arrays.mode = mode;
+  self->pending.args.arrays.first = first;
+  self->pending.args.arrays.count = count;
 }
 
 static void
@@ -178,6 +180,12 @@ zgnr_gl_base_technique_handle_rendering_unit_commit(
     zgnr_rendering_unit_set_current_technique(unit, self);
 
   self->base.comitted = true;
+
+  self->base.current.args = self->pending.args;
+  self->base.current.draw_method = self->pending.draw_method;
+
+  self->base.current.args = self->pending.args;
+  self->base.current.draw_method = self->pending.draw_method;
 
   self->base.current.vertex_array_changed = self->pending.vertex_array_changed;
   if (self->pending.vertex_array_changed) {
@@ -242,7 +250,6 @@ zgnr_gl_base_technique_create(struct wl_client *client, uint32_t id,
   self->base.current.vertex_array_changed = false;
 
   wl_signal_init(&self->base.events.destroy);
-
   zn_weak_resource_init(&self->pending.vertex_array);
   self->pending.vertex_array_changed = false;
 
