@@ -8,6 +8,18 @@
 extern "C" {
 #endif
 
+enum zgnr_gl_base_technique_draw_method {
+  ZGNR_GL_BASE_TECHNIQUE_DRAW_ARRAYS,
+};
+
+union zgnr_gl_base_technique_draw_args {
+  struct {
+    uint32_t mode;
+    int32_t count;
+    int32_t first;
+  } arrays;
+};
+
 struct zgnr_gl_base_technique {
   struct zgnr_rendering_unit *unit;  // nonnull
 
@@ -20,6 +32,9 @@ struct zgnr_gl_base_technique {
   struct {
     struct zgnr_gl_vertex_array *vertex_array;  // nullable
     bool vertex_array_changed;
+
+    enum zgnr_gl_base_technique_draw_method draw_method;
+    union zgnr_gl_base_technique_draw_args args;
   } current;
 
   void *user_data;
