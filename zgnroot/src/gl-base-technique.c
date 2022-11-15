@@ -184,9 +184,6 @@ zgnr_gl_base_technique_handle_rendering_unit_commit(
   self->base.current.args = self->pending.args;
   self->base.current.draw_method = self->pending.draw_method;
 
-  self->base.current.args = self->pending.args;
-  self->base.current.draw_method = self->pending.draw_method;
-
   self->base.current.vertex_array_changed = self->pending.vertex_array_changed;
   if (self->pending.vertex_array_changed) {
     vertex_array = zn_weak_resource_get_user_data(&self->pending.vertex_array);
