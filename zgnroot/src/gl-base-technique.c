@@ -258,6 +258,7 @@ zgnr_gl_base_technique_create(struct wl_client *client, uint32_t id,
   self->base.current.vertex_array_changed = false;
 
   wl_signal_init(&self->base.events.destroy);
+
   zn_weak_resource_init(&self->pending.vertex_array);
   self->pending.vertex_array_changed = false;
 
