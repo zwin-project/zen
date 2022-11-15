@@ -1,4 +1,5 @@
 _libxml_dep = dependency('libxml-2.0')
+_shell_check = find_program('shellcheck')
 
 _wayland_dtd_path = join_paths(wayland_scanner_dep.get_variable('pkgdatadir'), 'wayland.dtd')
 _test_inc = include_directories('.')
@@ -27,4 +28,12 @@ foreach key, args : _tests
   )
 
   test(test_name, bin, env: test_env)
+endforeach
+
+_posix_shell_scripts = [
+  textify,
+]
+
+foreach shell : _posix_shell_scripts
+  test('shellcheck @0@'.format(shell), _shell_check, args: shell)
 endforeach

@@ -2,13 +2,14 @@
 
 #include <zen-common.h>
 #include <zgnr/gl-buffer.h>
+#include <zgnr/gl-shader.h>
 #include <zgnr/rendering-unit.h>
 
 #include "scene/virtual-object/gl-base-technique.h"
 #include "scene/virtual-object/gl-buffer.h"
+#include "scene/virtual-object/gl-shader.h"
 #include "scene/virtual-object/gl-vertex-array.h"
 #include "scene/virtual-object/rendering-unit.h"
-
 void
 zna_system_set_current_session(
     struct zna_system* self, struct znr_session* session)
@@ -84,6 +85,17 @@ zna_system_handle_new_gl_vertex_array(struct wl_listener* listener, void* data)
   (void)zna_gl_vertex_array_create(gl_vertex_array, self);
 }
 
+static void
+zna_system_handle_new_gl_shader(struct wl_listener* listener, void* data)
+{
+  struct zna_system* self =
+      zn_container_of(listener, self, new_gl_shader_listener);
+
+  struct zgnr_gl_shader* shader = data;
+
+  (void)zna_gl_shader_create(shader, self);
+}
+
 struct zna_system*
 zna_system_create(struct wl_display* display)
 {
@@ -126,6 +138,10 @@ zna_system_create(struct wl_display* display)
   wl_signal_add(&self->gles->events.new_gl_vertex_array,
       &self->new_gl_vertex_array_listener);
 
+  self->new_gl_shader_listener.notify = zna_system_handle_new_gl_shader;
+  wl_signal_add(
+      &self->gles->events.new_gl_shader, &self->new_gl_shader_listener);
+
   self->current_session_disconnected_listener.notify =
       zna_system_handle_current_session_disconnected;
   wl_list_init(&self->current_session_disconnected_listener.link);
@@ -150,6 +166,7 @@ zna_system_destroy(struct zna_system* self)
   wl_list_remove(&self->new_gl_buffer_listener.link);
   wl_list_remove(&self->new_gl_base_technique_listener.link);
   wl_list_remove(&self->new_gl_vertex_array_listener.link);
+  wl_list_remove(&self->new_gl_shader_listener.link);
   wl_list_remove(&self->current_session_disconnected_listener.link);
   zgnr_gles_v32_destroy(self->gles);
   free(self);

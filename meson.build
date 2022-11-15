@@ -94,7 +94,7 @@ wayland_protocols_req = '>= 1.24'
 wayland_req = '>= 1.18.0'
 wlroots_req = ['>= 0.15', '< 0.16']
 wlr_glew_renderer_req = wlroots_req
-zen_remote_server_req = '0.1.0.15'
+zen_remote_server_req = '0.1.0.16'
 
 # dependencies
 
@@ -137,6 +137,8 @@ configure_file(
   output: 'config.h',
   configuration: cdata,
 )
+
+textify = files('tools/textify.sh')[0]
 
 zen_inc = include_directories('include')
 

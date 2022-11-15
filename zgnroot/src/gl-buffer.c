@@ -5,7 +5,7 @@
 #include <zigen-protocol.h>
 
 #include "mem-storage.h"
-#include "shm.h"
+#include "zgnr/shm.h"
 
 static void zgnr_gl_buffer_destroy(struct zgnr_gl_buffer_impl *self);
 

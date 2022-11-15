@@ -7,9 +7,11 @@
 
 #include "application.h"
 #include "buffer.h"
+#include "default.vert.h"
 #include "fd.h"
 #include "gl-base-technique.h"
 #include "gl-buffer.h"
+#include "gl-shader.h"
 #include "gl-vertex-array.h"
 #include "rendering-unit.h"
 #include "shm-pool.h"
@@ -70,6 +72,9 @@ main(void)
 
   auto vertex_array = CreateGlVertexArray(&app);
   if (!vertex_array) return EXIT_FAILURE;
+
+  auto vertex_shader = CreateGlShader(&app, default_vertex_shader_source);
+  if (!vertex_shader) return EXIT_FAILURE;
 
   gl_buffer->Data(GL_ARRAY_BUFFER, buffer.get(), GL_STATIC_DRAW);
 
