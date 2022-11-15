@@ -121,6 +121,8 @@ zgnr_gl_base_technique_protocol_draw_arrays(struct wl_client *client,
   UNUSED(client);
   struct zgnr_gl_base_technique_impl *self =
       wl_resource_get_user_data(resource);
+  if (self == NULL) return;
+
   self->pending.draw_method = ZGNR_GL_BASE_TECHNIQUE_DRAW_ARRAYS;
   self->pending.args.arrays.mode = mode;
   self->pending.args.arrays.first = first;
