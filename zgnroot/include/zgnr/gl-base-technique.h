@@ -9,6 +9,7 @@ extern "C" {
 #endif
 
 enum zgnr_gl_base_technique_draw_method {
+  ZGNR_GL_BASE_TECHNIQUE_DRAW_NONE,
   ZGNR_GL_BASE_TECHNIQUE_DRAW_ARRAYS,
 };
 
@@ -35,6 +36,7 @@ struct zgnr_gl_base_technique {
 
     enum zgnr_gl_base_technique_draw_method draw_method;
     union zgnr_gl_base_technique_draw_args args;
+    bool draw_info_changed;
   } current;
 
   void *user_data;

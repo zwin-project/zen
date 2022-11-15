@@ -66,13 +66,16 @@ zna_gl_base_technique_apply_commit(
     }
   }
 
-  switch (self->zgnr_gl_base_technique->current.draw_method) {
-    case ZGNR_GL_BASE_TECHNIQUE_DRAW_ARRAYS:
-      znr_gl_base_technique_draw_arrays(self->znr_gl_base_technique,
-          self->zgnr_gl_base_technique->current.args.arrays.mode,
-          self->zgnr_gl_base_technique->current.args.arrays.first,
-          self->zgnr_gl_base_technique->current.args.arrays.count);
-      break;
+  if (self->zgnr_gl_base_technique->current.draw_info_changed ||
+      !only_damaged) {
+    switch (self->zgnr_gl_base_technique->current.draw_method) {
+      case ZGNR_GL_BASE_TECHNIQUE_DRAW_ARRAYS:
+        znr_gl_base_technique_draw_arrays(self->znr_gl_base_technique,
+            self->zgnr_gl_base_technique->current.args.arrays.mode,
+            self->zgnr_gl_base_technique->current.args.arrays.first,
+            self->zgnr_gl_base_technique->current.args.arrays.count);
+        break;
+    }
   }
 }
 
