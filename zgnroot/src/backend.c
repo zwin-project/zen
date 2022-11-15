@@ -3,7 +3,7 @@
 #include <zen-common.h>
 
 #include "compositor.h"
-#include "shm.h"
+#include "zgnr/shm.h"
 
 int
 zgnr_backend_activate(struct zgnr_backend *parent)

@@ -12,6 +12,7 @@ struct zgnr_gles_v32 {
     struct wl_signal new_gl_base_technique;  // (struct zgnr_gl_base_technique*)
     struct wl_signal new_gl_buffer;          // (struct zgnr_gl_buffer*)
     struct wl_signal new_gl_vertex_array;    // (struct zgnr_gl_vertex_array*)
+    struct wl_signal new_gl_shader;          // (struct zgnr_gl_shader*)
   } events;
 };
 

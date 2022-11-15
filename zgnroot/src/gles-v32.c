@@ -5,9 +5,11 @@
 
 #include "gl-base-technique.h"
 #include "gl-buffer.h"
+#include "gl-shader.h"
 #include "gl-vertex-array.h"
 #include "rendering-unit.h"
 #include "virtual-object.h"
+#include "zgnr/shm.h"
 
 static void
 zgnr_gles_v32_protocol_destroy(
@@ -54,15 +56,18 @@ zgnr_gles_v32_protocol_create_gl_buffer(
 
 static void
 zgnr_gles_v32_protocol_create_gl_shader(struct wl_client* client,
-    struct wl_resource* resource, uint32_t id, int32_t source, uint32_t size,
-    uint32_t type)
+    struct wl_resource* resource, uint32_t id,
+    struct wl_resource* buffer_resource, uint32_t type)
 {
-  UNUSED(client);
-  UNUSED(resource);
-  UNUSED(id);
-  UNUSED(source);
-  UNUSED(size);
-  UNUSED(type);
+  struct zgnr_gles_v32_impl* self = wl_resource_get_user_data(resource);
+  struct zgnr_gl_shader_impl* shader =
+      zgnr_gl_shader_create(client, id, buffer_resource, type);
+  if (shader == NULL) {
+    zn_error("Failed to creat a gl shader");
+    wl_client_post_no_memory(client);
+  }
+
+  wl_signal_emit(&self->base.events.new_gl_shader, &shader->base);
 }
 
 static void
@@ -163,6 +168,7 @@ zgnr_gles_v32_create(struct wl_display* display)
   wl_signal_init(&self->base.events.new_gl_base_technique);
   wl_signal_init(&self->base.events.new_gl_buffer);
   wl_signal_init(&self->base.events.new_gl_vertex_array);
+  wl_signal_init(&self->base.events.new_gl_shader);
   self->display = display;
 
   self->global = wl_global_create(
@@ -192,6 +198,7 @@ zgnr_gles_v32_destroy(struct zgnr_gles_v32* parent)
   wl_list_remove(&self->base.events.new_gl_base_technique.listener_list);
   wl_list_remove(&self->base.events.new_rendering_unit.listener_list);
   wl_list_remove(&self->base.events.new_gl_vertex_array.listener_list);
+  wl_list_remove(&self->base.events.new_gl_shader.listener_list);
 
   free(self);
 }

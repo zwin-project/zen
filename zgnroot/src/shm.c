@@ -28,7 +28,7 @@
  * modified for this project.
  */
 
-#include "shm.h"
+#include "zgnr/shm.h"
 
 #include <assert.h>
 #include <fcntl.h>
@@ -242,8 +242,6 @@ shm_create_pool(struct wl_client *client, struct wl_resource *resource,
   struct zgnr_shm_pool *pool;
   struct stat statbuf;
   int seals;
-  int prot;
-  int flags;
   off_t size;
 
   if (zn_array_to_off_t(size_array, &size) != 0) {
@@ -276,9 +274,7 @@ shm_create_pool(struct wl_client *client, struct wl_resource *resource,
   pool->external_refcount = 0;
   pool->size = size;
   pool->new_size = size;
-  prot = PROT_READ | PROT_WRITE;
-  flags = MAP_SHARED;
-  pool->data = mmap(NULL, size, prot, flags, fd, 0);
+  pool->data = mmap(NULL, size, PROT_READ, MAP_SHARED, fd, 0);
   if (pool->data == MAP_FAILED) {
     wl_resource_post_error(resource, ZGN_SHM_ERROR_INVALID_FD,
         "failed mmap fd %d: %s", fd, strerror(errno));
