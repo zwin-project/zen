@@ -9,8 +9,8 @@ extern "C" {
 #endif
 
 enum zgnr_gl_base_technique_draw_method {
-  ZGNR_GL_BASE_TECHNIQUE_DRAW_NONE,
-  ZGNR_GL_BASE_TECHNIQUE_DRAW_ARRAYS,
+  ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_NONE,
+  ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ARRAYS,
 };
 
 union zgnr_gl_base_technique_draw_args {
