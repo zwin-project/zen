@@ -125,6 +125,7 @@ zgnr_gl_base_technique_protocol_draw_arrays(struct wl_client *client,
   self->pending.args.arrays.mode = mode;
   self->pending.args.arrays.first = first;
   self->pending.args.arrays.count = count;
+  self->pending.draw_info_changed = true;
 }
 
 static void
@@ -181,8 +182,12 @@ zgnr_gl_base_technique_handle_rendering_unit_commit(
 
   self->base.comitted = true;
 
-  self->base.current.args = self->pending.args;
-  self->base.current.draw_method = self->pending.draw_method;
+  self->base.current.draw_info_changed = self->pending.draw_info_changed;
+  if (self->pending.draw_info_changed) {
+    self->base.current.args = self->pending.args;
+    self->base.current.draw_method = self->pending.draw_method;
+    self->pending.draw_info_changed = false;
+  }
 
   self->base.current.vertex_array_changed = self->pending.vertex_array_changed;
   if (self->pending.vertex_array_changed) {
@@ -243,6 +248,10 @@ zgnr_gl_base_technique_create(struct wl_client *client, uint32_t id,
 
   self->base.unit = &unit->base;
   self->base.comitted = false;
+  self->base.current.draw_method = ZGNR_GL_BASE_TECHNIQUE_DRAW_NONE;
+  self->base.current.draw_info_changed = false;
+  self->pending.draw_info_changed = false;
+
   self->base.current.vertex_array = NULL;
   self->base.current.vertex_array_changed = false;
 
