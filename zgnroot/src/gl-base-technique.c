@@ -123,7 +123,7 @@ zgnr_gl_base_technique_protocol_draw_arrays(struct wl_client *client,
       wl_resource_get_user_data(resource);
   if (self == NULL) return;
 
-  self->pending.draw_method = ZGNR_GL_BASE_TECHNIQUE_DRAW_ARRAYS;
+  self->pending.draw_method = ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ARRAYS;
   self->pending.args.arrays.mode = mode;
   self->pending.args.arrays.first = first;
   self->pending.args.arrays.count = count;
@@ -250,7 +250,7 @@ zgnr_gl_base_technique_create(struct wl_client *client, uint32_t id,
 
   self->base.unit = &unit->base;
   self->base.comitted = false;
-  self->base.current.draw_method = ZGNR_GL_BASE_TECHNIQUE_DRAW_NONE;
+  self->base.current.draw_method = ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_NONE;
   self->base.current.draw_info_changed = false;
   self->pending.draw_info_changed = false;
 
