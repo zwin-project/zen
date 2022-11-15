@@ -36,7 +36,7 @@ struct zgnr_gl_base_technique {
 
     enum zgnr_gl_base_technique_draw_method draw_method;
     union zgnr_gl_base_technique_draw_args args;
-    bool draw_info_changed;
+    bool draw_method_changed;
   } current;
 
   void *user_data;
