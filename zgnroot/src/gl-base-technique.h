@@ -19,6 +19,9 @@ struct zgnr_gl_base_technique_impl {
     struct zn_weak_resource vertex_array;  // zgnr_gl_vertex_array_impl
     bool vertex_array_changed;
 
+    struct zn_weak_resource program;  // zgnr_gl_program_impl
+    bool program_changed;
+
     enum zgnr_gl_base_technique_draw_method draw_method;
     union zgnr_gl_base_technique_draw_args args;
     bool draw_method_changed;
@@ -28,6 +31,7 @@ struct zgnr_gl_base_technique_impl {
   struct wl_listener rendering_unit_commit_listener;
 
   struct wl_listener current_vertex_array_destroy_listener;
+  struct wl_listener current_program_destroy_listener;
 };
 
 struct zgnr_gl_base_technique_impl *zgnr_gl_base_technique_create(

@@ -87,6 +87,7 @@ main(void)
       0, 3, GL_FLOAT, GL_FALSE, 0, 0, gl_buffer.get());
 
   technique->Bind(vertex_array.get());
+  technique->Bind(program.get());
 
   vo->Commit();
 

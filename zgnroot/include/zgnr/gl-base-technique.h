@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wayland-server-core.h>
+#include <zgnr/gl-program.h>
 #include <zgnr/gl-vertex-array.h>
 #include <zgnr/rendering-unit.h>
 
@@ -33,6 +34,9 @@ struct zgnr_gl_base_technique {
   struct {
     struct zgnr_gl_vertex_array *vertex_array;  // nullable
     bool vertex_array_changed;
+
+    struct zgnr_gl_program *program;  // nullable
+    bool program_changed;
 
     enum zgnr_gl_base_technique_draw_method draw_method;
     union zgnr_gl_base_technique_draw_args args;

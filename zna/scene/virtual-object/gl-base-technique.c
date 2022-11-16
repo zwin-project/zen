@@ -2,6 +2,7 @@
 
 #include <zen-common.h>
 
+#include "scene/virtual-object/gl-program.h"
 #include "scene/virtual-object/gl-vertex-array.h"
 #include "scene/virtual-object/rendering-unit.h"
 
@@ -63,6 +64,19 @@ zna_gl_base_technique_apply_commit(
         !only_damaged) {
       znr_gl_base_technique_bind_vertex_array(
           self->znr_gl_base_technique, vertex_array->znr_gl_vertex_array);
+    }
+  }
+
+  if (self->zgnr_gl_base_technique->current.program) {
+    struct zna_gl_program* program =
+        self->zgnr_gl_base_technique->current.program->user_data;
+
+    zna_gl_program_apply_commit(program, only_damaged);
+
+    if (self->zgnr_gl_base_technique->current.program_changed ||
+        !only_damaged) {
+      znr_gl_base_technique_bind_program(
+          self->znr_gl_base_technique, program->znr_gl_program);
     }
   }
 

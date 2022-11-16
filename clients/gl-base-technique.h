@@ -10,6 +10,7 @@ namespace zen::client {
 
 class Application;
 class RenderingUnit;
+class GlProgram;
 class GlVertexArray;
 
 class GlBaseTechnique
@@ -22,6 +23,8 @@ class GlBaseTechnique
   bool Init(RenderingUnit *unit);
 
   void DrawArrays(GLenum mode, GLint first, GLsizei count);
+
+  void Bind(GlProgram *program);
 
   void Bind(GlVertexArray *vertex_array);
 
