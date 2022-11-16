@@ -5,6 +5,7 @@ _zen_appearance_srcs = [
   'scene/virtual-object.c',
   'scene/virtual-object/gl-base-technique.c',
   'scene/virtual-object/gl-buffer.c',
+  'scene/virtual-object/gl-program.c',
   'scene/virtual-object/gl-shader.c',
   'scene/virtual-object/gl-vertex-array.c',
   'scene/virtual-object/rendering-unit.c',

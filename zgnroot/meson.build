@@ -6,6 +6,7 @@ _zgnr_srcs = [
   'src/gles-v32.c',
   'src/gl-base-technique.c',
   'src/gl-buffer.c',
+  'src/gl-program.c',
   'src/gl-shader.c',
   'src/gl-vertex-array.c',
   'src/gl-vertex-attrib.c',

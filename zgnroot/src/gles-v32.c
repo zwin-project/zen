@@ -5,6 +5,7 @@
 
 #include "gl-base-technique.h"
 #include "gl-buffer.h"
+#include "gl-program.h"
 #include "gl-shader.h"
 #include "gl-vertex-array.h"
 #include "rendering-unit.h"
@@ -65,6 +66,7 @@ zgnr_gles_v32_protocol_create_gl_shader(struct wl_client* client,
   if (shader == NULL) {
     zn_error("Failed to creat a gl shader");
     wl_client_post_no_memory(client);
+    return;
   }
 
   wl_signal_emit(&self->base.events.new_gl_shader, &shader->base);
@@ -74,9 +76,16 @@ static void
 zgnr_gles_v32_protocol_create_gl_program(
     struct wl_client* client, struct wl_resource* resource, uint32_t id)
 {
-  UNUSED(client);
-  UNUSED(resource);
-  UNUSED(id);
+  struct zgnr_gles_v32_impl* self = wl_resource_get_user_data(resource);
+
+  struct zgnr_gl_program_impl* program = zgnr_gl_program_create(client, id);
+  if (program == NULL) {
+    zn_error("Failed to creat a gl program");
+    wl_client_post_no_memory(client);
+    return;
+  }
+
+  wl_signal_emit(&self->base.events.new_gl_program, &program->base);
 }
 
 static void
@@ -164,11 +173,12 @@ zgnr_gles_v32_create(struct wl_display* display)
     goto err;
   }
 
-  wl_signal_init(&self->base.events.new_rendering_unit);
   wl_signal_init(&self->base.events.new_gl_base_technique);
   wl_signal_init(&self->base.events.new_gl_buffer);
-  wl_signal_init(&self->base.events.new_gl_vertex_array);
+  wl_signal_init(&self->base.events.new_gl_program);
   wl_signal_init(&self->base.events.new_gl_shader);
+  wl_signal_init(&self->base.events.new_gl_vertex_array);
+  wl_signal_init(&self->base.events.new_rendering_unit);
   self->display = display;
 
   self->global = wl_global_create(
@@ -194,11 +204,12 @@ zgnr_gles_v32_destroy(struct zgnr_gles_v32* parent)
 
   wl_global_destroy(self->global);
 
-  wl_list_remove(&self->base.events.new_gl_buffer.listener_list);
-  wl_list_remove(&self->base.events.new_gl_base_technique.listener_list);
   wl_list_remove(&self->base.events.new_rendering_unit.listener_list);
   wl_list_remove(&self->base.events.new_gl_vertex_array.listener_list);
   wl_list_remove(&self->base.events.new_gl_shader.listener_list);
+  wl_list_remove(&self->base.events.new_gl_program.listener_list);
+  wl_list_remove(&self->base.events.new_gl_buffer.listener_list);
+  wl_list_remove(&self->base.events.new_gl_base_technique.listener_list);
 
   free(self);
 }

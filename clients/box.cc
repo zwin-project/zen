@@ -11,6 +11,7 @@
 #include "fd.h"
 #include "gl-base-technique.h"
 #include "gl-buffer.h"
+#include "gl-program.h"
 #include "gl-shader.h"
 #include "gl-vertex-array.h"
 #include "rendering-unit.h"
@@ -75,6 +76,9 @@ main(void)
 
   auto vertex_shader = CreateGlShader(&app, default_vertex_shader_source);
   if (!vertex_shader) return EXIT_FAILURE;
+
+  auto program = CreateGlProgram(&app);
+  if (!program) return EXIT_FAILURE;
 
   gl_buffer->Data(GL_ARRAY_BUFFER, buffer.get(), GL_STATIC_DRAW);
 
