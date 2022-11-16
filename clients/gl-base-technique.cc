@@ -1,6 +1,7 @@
 #include "gl-base-technique.h"
 
 #include "application.h"
+#include "gl-program.h"
 #include "gl-vertex-array.h"
 #include "rendering-unit.h"
 
@@ -17,6 +18,12 @@ GlBaseTechnique::Init(RenderingUnit *unit)
   }
 
   return true;
+}
+
+void
+GlBaseTechnique::Bind(GlProgram *program)
+{
+  zgn_gl_base_technique_bind_program(proxy_, program->proxy());
 }
 
 void

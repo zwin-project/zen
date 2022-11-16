@@ -3,6 +3,7 @@
 #include <zen-common.h>
 #include <zigen-gles-v32-protocol.h>
 
+#include "gl-program.h"
 #include "gl-vertex-array.h"
 
 static void zgnr_gl_base_technique_destroy(
@@ -40,6 +41,26 @@ zgnr_gl_base_technique_set_current_vertex_array(
   self->base.current.vertex_array = vertex_array;
 }
 
+/**
+ * @param program is nullable
+ */
+static void
+zgnr_gl_base_technique_set_current_program(
+    struct zgnr_gl_base_technique_impl *self, struct zgnr_gl_program *program)
+{
+  if (self->base.current.program) {
+    wl_list_remove(&self->current_program_destroy_listener.link);
+    wl_list_init(&self->current_program_destroy_listener.link);
+  }
+
+  if (program) {
+    wl_signal_add(
+        &program->events.destroy, &self->current_program_destroy_listener);
+  }
+
+  self->base.current.program = program;
+}
+
 static void
 zgnr_gl_base_technique_protocol_destroy(
     struct wl_client *client, struct wl_resource *resource)
@@ -53,8 +74,12 @@ zgnr_gl_base_technique_protocol_bind_program(struct wl_client *client,
     struct wl_resource *resource, struct wl_resource *program)
 {
   UNUSED(client);
-  UNUSED(resource);
-  UNUSED(program);
+  struct zgnr_gl_base_technique_impl *self =
+      wl_resource_get_user_data(resource);
+  if (self == NULL) return;
+
+  zn_weak_resource_link(&self->pending.program, program);
+  self->pending.program_changed = true;
 }
 
 static void
@@ -169,6 +194,18 @@ zgnr_gl_base_technique_handle_current_vertex_array_destroy(
 }
 
 static void
+zgnr_gl_base_technique_handle_current_program_destroy(
+    struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+
+  struct zgnr_gl_base_technique_impl *self =
+      zn_container_of(listener, self, current_program_destroy_listener);
+
+  zgnr_gl_base_technique_set_current_program(self, NULL);
+}
+
+static void
 zgnr_gl_base_technique_handle_rendering_unit_commit(
     struct wl_listener *listener, void *data)
 {
@@ -178,6 +215,7 @@ zgnr_gl_base_technique_handle_rendering_unit_commit(
   struct zgnr_rendering_unit_impl *unit =
       zn_container_of(self->base.unit, unit, base);
   struct zgnr_gl_vertex_array_impl *vertex_array;
+  struct zgnr_gl_program_impl *program;
 
   if (!self->base.comitted)
     zgnr_rendering_unit_set_current_technique(unit, self);
@@ -194,14 +232,28 @@ zgnr_gl_base_technique_handle_rendering_unit_commit(
   self->base.current.vertex_array_changed = self->pending.vertex_array_changed;
   if (self->pending.vertex_array_changed) {
     vertex_array = zn_weak_resource_get_user_data(&self->pending.vertex_array);
-    if (vertex_array) {
-      zgnr_gl_vertex_array_commit(vertex_array);
-      zgnr_gl_base_technique_set_current_vertex_array(
-          self, &vertex_array->base);
-    } else {
-      zgnr_gl_base_technique_set_current_vertex_array(self, NULL);
-    }
+    zgnr_gl_base_technique_set_current_vertex_array(
+        self, vertex_array ? &vertex_array->base : NULL);
     self->pending.vertex_array_changed = false;
+  }
+
+  if (self->base.current.vertex_array) {
+    vertex_array =
+        zn_container_of(self->base.current.vertex_array, vertex_array, base);
+    zgnr_gl_vertex_array_commit(vertex_array);
+  }
+
+  self->base.current.program_changed = self->pending.program_changed;
+  if (self->pending.program_changed) {
+    program = zn_weak_resource_get_user_data(&self->pending.program);
+    zgnr_gl_base_technique_set_current_program(
+        self, program ? &program->base : NULL);
+    self->pending.program_changed = false;
+  }
+
+  if (self->base.current.program) {
+    program = zn_container_of(self->base.current.program, program, base);
+    zgnr_gl_program_commit(program);
   }
 }
 
@@ -257,10 +309,16 @@ zgnr_gl_base_technique_create(struct wl_client *client, uint32_t id,
   self->base.current.vertex_array = NULL;
   self->base.current.vertex_array_changed = false;
 
+  self->base.current.program = NULL;
+  self->base.current.program_changed = false;
+
   wl_signal_init(&self->base.events.destroy);
 
   zn_weak_resource_init(&self->pending.vertex_array);
   self->pending.vertex_array_changed = false;
+
+  zn_weak_resource_init(&self->pending.program);
+  self->pending.program_changed = false;
 
   self->rendering_unit_destroy_listener.notify =
       zgnr_gl_base_technique_handle_rendering_unit_destroy;
@@ -274,6 +332,10 @@ zgnr_gl_base_technique_create(struct wl_client *client, uint32_t id,
   self->current_vertex_array_destroy_listener.notify =
       zgnr_gl_base_technique_handle_current_vertex_array_destroy;
   wl_list_init(&self->current_vertex_array_destroy_listener.link);
+
+  self->current_program_destroy_listener.notify =
+      zgnr_gl_base_technique_handle_current_program_destroy;
+  wl_list_init(&self->current_program_destroy_listener.link);
 
   return self;
 
@@ -289,7 +351,9 @@ zgnr_gl_base_technique_destroy(struct zgnr_gl_base_technique_impl *self)
 {
   wl_signal_emit(&self->base.events.destroy, NULL);
 
+  zn_weak_resource_unlink(&self->pending.program);
   zn_weak_resource_unlink(&self->pending.vertex_array);
+  wl_list_remove(&self->current_program_destroy_listener.link);
   wl_list_remove(&self->current_vertex_array_destroy_listener.link);
   wl_list_remove(&self->rendering_unit_commit_listener.link);
   wl_list_remove(&self->rendering_unit_destroy_listener.link);

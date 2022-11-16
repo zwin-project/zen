@@ -22,7 +22,7 @@ zgnr_gl_program_protocol_destroy(
 }
 
 static void
-zgnr_gl_program_protocol_attach(struct wl_client* client,
+zgnr_gl_program_protocol_attach_shader(struct wl_client* client,
     struct wl_resource* resource, struct wl_resource* shader)
 {
   UNUSED(client);
@@ -40,9 +40,16 @@ zgnr_gl_program_protocol_link(
 
 static const struct zgn_gl_program_interface implementation = {
     .destroy = zgnr_gl_program_protocol_destroy,
-    .attach = zgnr_gl_program_protocol_attach,
+    .attach_shader = zgnr_gl_program_protocol_attach_shader,
     .link = zgnr_gl_program_protocol_link,
 };
+
+void
+zgnr_gl_program_commit(struct zgnr_gl_program_impl* self)
+{
+  UNUSED(self);
+  // TODO:
+}
 
 struct zgnr_gl_program_impl*
 zgnr_gl_program_create(struct wl_client* client, uint32_t id)
