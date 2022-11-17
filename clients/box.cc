@@ -42,16 +42,21 @@ main(void)
   auto technique = CreateGlBaseTechnique(&app, unit.get());
   if (!technique) return EXIT_FAILURE;
 
-  float cx = 0, cy = 0, cz = 0;
-  vec3 vertices[8] = {
-      {cx - 1, cy - 1, cz + 1},
-      {cx + 1, cy - 1, cz + 1},
-      {cx + 1, cy - 1, cz - 1},
-      {cx - 1, cy - 1, cz - 1},
-      {cx - 1, cy + 1, cz + 1},
-      {cx + 1, cy + 1, cz + 1},
-      {cx + 1, cy + 1, cz - 1},
-      {cx - 1, cy + 1, cz - 1},
+  float cx = 0, cy = 1.2, cz = -1, size = 0.25;
+  vec3 vertices[] = {
+      {cx - size, cy - size, cz + size}, {cx + size, cy - size, cz + size},
+      {cx + size, cy - size, cz + size}, {cx + size, cy - size, cz - size},
+      {cx + size, cy - size, cz - size}, {cx - size, cy - size, cz - size},
+      {cx - size, cy - size, cz - size}, {cx - size, cy - size, cz + size},
+      {cx - size, cy + size, cz + size}, {cx + size, cy + size, cz + size},
+      {cx + size, cy + size, cz + size}, {cx + size, cy + size, cz - size},
+      {cx + size, cy + size, cz - size}, {cx - size, cy + size, cz - size},
+      {cx - size, cy + size, cz - size}, {cx - size, cy + size, cz + size},
+      {cx - size, cy - size, cz + size}, {cx - size, cy + size, cz + size},
+      {cx + size, cy - size, cz + size}, {cx + size, cy + size, cz + size},
+      {cx + size, cy - size, cz - size}, {cx + size, cy + size, cz - size},
+      {cx - size, cy - size, cz - size}, {cx - size, cy + size, cz - size},
+      //
   };
 
   int fd = create_anonymous_file(sizeof(vertices));
@@ -98,6 +103,8 @@ main(void)
 
   technique->Bind(vertex_array.get());
   technique->Bind(program.get());
+
+  technique->DrawArrays(GL_LINES, 0, sizeof(vertices) / sizeof(vec3));
 
   vo->Commit();
 
