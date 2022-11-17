@@ -7,6 +7,7 @@
 
 #include "application.h"
 #include "buffer.h"
+#include "color.fragment.h"
 #include "default.vert.h"
 #include "fd.h"
 #include "gl-base-technique.h"
@@ -74,11 +75,20 @@ main(void)
   auto vertex_array = CreateGlVertexArray(&app);
   if (!vertex_array) return EXIT_FAILURE;
 
-  auto vertex_shader = CreateGlShader(&app, default_vertex_shader_source);
+  auto vertex_shader =
+      CreateGlShader(&app, GL_VERTEX_SHADER, default_vertex_shader_source);
   if (!vertex_shader) return EXIT_FAILURE;
+
+  auto fragment_shader =
+      CreateGlShader(&app, GL_FRAGMENT_SHADER, color_fragment_shader_source);
+  if (!fragment_shader) return EXIT_FAILURE;
 
   auto program = CreateGlProgram(&app);
   if (!program) return EXIT_FAILURE;
+
+  program->AttachShader(vertex_shader.get());
+  program->AttachShader(fragment_shader.get());
+  program->Link();
 
   gl_buffer->Data(GL_ARRAY_BUFFER, buffer.get(), GL_STATIC_DRAW);
 

@@ -11,6 +11,13 @@ struct zgnr_gl_program {
     struct wl_signal destroy;
   } events;
 
+  struct {
+    struct wl_list program_shader_list;  // zgnr_program_shader::link
+
+    bool should_link;
+    bool linked;
+  } current;
+
   void *user_data;
 };
 

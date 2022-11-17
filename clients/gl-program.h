@@ -8,6 +8,7 @@
 namespace zen::client {
 
 class Application;
+class GlShader;
 
 class GlProgram
 {
@@ -17,6 +18,10 @@ class GlProgram
   ~GlProgram();
 
   bool Init();
+
+  void AttachShader(GlShader *shader);
+
+  void Link();
 
   inline zgn_gl_program *proxy();
 

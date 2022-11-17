@@ -12,7 +12,7 @@
 namespace zen::client {
 
 bool
-GlShader::Init(std::string source)
+GlShader::Init(GLenum type, std::string source)
 {
   fd_ = create_anonymous_file(source.size());
   if (fd_ < 0) {
@@ -29,8 +29,8 @@ GlShader::Init(std::string source)
   pool_ = CreateShmPool(app_, fd_, source.size());
   buffer_ = CreateBuffer(pool_.get(), 0, source.size());
 
-  proxy_ = zgn_gles_v32_create_gl_shader(
-      app_->gles_v32(), buffer_->proxy(), GL_VERTEX_SHADER);
+  proxy_ =
+      zgn_gles_v32_create_gl_shader(app_->gles_v32(), buffer_->proxy(), type);
 
   if (proxy_ == nullptr) {
     zn_error("Failed to create gl shader proxy");
@@ -54,11 +54,11 @@ GlShader::~GlShader()
 }
 
 std::unique_ptr<GlShader>
-CreateGlShader(Application *app, std::string source)
+CreateGlShader(Application *app, GLenum type, std::string source)
 {
   auto gl_shader = std::make_unique<GlShader>(app);
 
-  if (!gl_shader->Init(std::move(source))) {
+  if (!gl_shader->Init(type, std::move(source))) {
     return std::unique_ptr<GlShader>();
   }
 
