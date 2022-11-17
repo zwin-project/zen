@@ -12,9 +12,7 @@ _zen_appearance_srcs = [
 ]
 
 _zen_appearance_deps = [
-  wayland_server_dep,
-  zen_common_dep,
-  zgnr_dep,
+  zen_dep,
 ]
 
 _zen_appearance_lib = static_library(

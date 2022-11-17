@@ -11,10 +11,14 @@
 #include "scene/virtual-object/gl-shader.h"
 #include "scene/virtual-object/gl-vertex-array.h"
 #include "scene/virtual-object/rendering-unit.h"
+#include "zen/server.h"
+
 void
 zna_system_set_current_session(
     struct zna_system* self, struct znr_session* session)
 {
+  struct zn_server* server = zn_server_get_singleton();
+
   if (self->current_session) {
     wl_list_remove(&self->current_session_disconnected_listener.link);
     wl_list_init(&self->current_session_disconnected_listener.link);
@@ -32,6 +36,10 @@ zna_system_set_current_session(
 
     zn_debug("The current session is newly created");
     wl_signal_emit(&self->events.current_session_created, NULL);
+
+    zn_server_change_display_system(server, ZEN_DISPLAY_SYSTEM_TYPE_IMMERSIVE);
+  } else {
+    zn_server_change_display_system(server, ZEN_DISPLAY_SYSTEM_TYPE_SCREEN);
   }
 }
 

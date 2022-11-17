@@ -55,6 +55,9 @@ struct zn_server {
 
 struct zn_server *zn_server_get_singleton(void);
 
+void zn_server_change_display_system(
+    struct zn_server *self, enum zen_display_system_type display_system);
+
 /** returns exit code */
 int zn_server_run(struct zn_server *self);
 

@@ -116,6 +116,13 @@ zn_server_get_singleton(void)
   return server_singleton;
 }
 
+void
+zn_server_change_display_system(
+    struct zn_server *self, enum zen_display_system_type display_system)
+{
+  self->display_system = display_system;
+}
+
 int
 zn_server_run(struct zn_server *self)
 {
