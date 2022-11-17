@@ -146,8 +146,8 @@ subdir('protocols')
 subdir('common')
 subdir('zgnroot')
 subdir('znr-remote')
-subdir('zna')
 subdir('zen')
+subdir('zna')
 if get_option('clients')
   subdir('clients')
 endif
@@ -165,3 +165,13 @@ install_data(
 if get_option('tests')
   subdir('tests')
 endif
+
+executable(
+  'zen-desktop',
+  'zen/main.c',
+  install: true,
+  dependencies: [
+    zen_dep,
+    zen_appearance_dep,
+  ],
+)
