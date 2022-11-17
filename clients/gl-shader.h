@@ -1,5 +1,6 @@
 #pragma once
 
+#include <GLES3/gl32.h>
 #include <zen-common.h>
 #include <zigen-gles-v32-client-protocol.h>
 
@@ -19,7 +20,7 @@ class GlShader
   GlShader(Application *app);
   ~GlShader();
 
-  bool Init(std::string source);
+  bool Init(GLenum type, std::string source);
 
   inline zgn_gl_shader *proxy();
 
@@ -37,6 +38,7 @@ GlShader::proxy()
   return proxy_;
 }
 
-std::unique_ptr<GlShader> CreateGlShader(Application *app, std::string source);
+std::unique_ptr<GlShader> CreateGlShader(
+    Application *app, GLenum type, std::string source);
 
 }  // namespace zen::client

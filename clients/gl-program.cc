@@ -1,6 +1,7 @@
 #include "gl-program.h"
 
 #include "application.h"
+#include "gl-shader.h"
 
 namespace zen::client {
 
@@ -14,6 +15,18 @@ GlProgram::Init()
   }
 
   return true;
+}
+
+void
+GlProgram::AttachShader(GlShader *shader)
+{
+  zgn_gl_program_attach_shader(proxy_, shader->proxy());
+}
+
+void
+GlProgram::Link()
+{
+  zgn_gl_program_link(proxy_);
 }
 
 GlProgram::GlProgram(Application *app) : app_(app) {}

@@ -1,6 +1,9 @@
 #include "gl-program.h"
 
 #include <zen-common.h>
+#include <zgnr/program-shader.h>
+
+#include "gl-shader.h"
 
 static void zna_gl_program_destroy(struct zna_gl_program *self);
 
@@ -31,10 +34,26 @@ zna_gl_program_handle_zgnr_gl_program_destroy(
 void
 zna_gl_program_apply_commit(struct zna_gl_program *self, bool only_damaged)
 {
-  UNUSED(only_damaged);
   struct znr_session *session = self->system->current_session;
+  struct zgnr_program_shader *program_shader;
+
   if (self->znr_gl_program == NULL) {
     self->znr_gl_program = znr_gl_program_create(session);
+  }
+
+  wl_list_for_each (program_shader,
+      &self->zgnr_gl_program->current.program_shader_list, link) {
+    struct zna_gl_shader *shader = program_shader->shader->user_data;
+    zna_gl_shader_apply_commit(shader, only_damaged);
+  }
+
+  if (self->zgnr_gl_program->current.should_link || !only_damaged) {
+    wl_list_for_each (program_shader,
+        &self->zgnr_gl_program->current.program_shader_list, link) {
+      struct zna_gl_shader *shader = program_shader->shader->user_data;
+      znr_gl_program_attach_shader(self->znr_gl_program, shader->znr_gl_shader);
+    }
+    znr_gl_program_link(self->znr_gl_program);
   }
 }
 

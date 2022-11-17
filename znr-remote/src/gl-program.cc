@@ -2,7 +2,20 @@
 
 #include <zen-common.h>
 
+#include "gl-shader.h"
 #include "session.h"
+void
+znr_gl_program_attach_shader(
+    struct znr_gl_program* self, struct znr_gl_shader* shader)
+{
+  self->proxy->GlAttachShader(shader->proxy->id());
+}
+
+void
+znr_gl_program_link(struct znr_gl_program* self)
+{
+  self->proxy->GlLinkProgram();
+}
 
 struct znr_gl_program*
 znr_gl_program_create(struct znr_session* session_base)
