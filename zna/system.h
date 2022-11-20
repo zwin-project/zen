@@ -4,11 +4,14 @@
 
 #include "zen/appearance/system.h"
 
+struct zna_shader_inventory;
+
 struct zna_system {
   struct wl_display *display;
   struct zgnr_gles_v32 *gles;  // nonnull, owning
 
-  struct znr_session *current_session;  // nullable, owning
+  struct zna_shader_inventory *shader_inventory;  // nonnull, owning
+  struct znr_session *current_session;            // nullable, owning
 
   struct {
     // When the current session switches to a new one, current_session_destroyed

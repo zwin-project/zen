@@ -1,6 +1,8 @@
 #include "zen/scene/ray.h"
 
 #include "zen-common.h"
+#include "zen/appearance/scene/ray.h"
+#include "zen/server.h"
 
 void
 zn_ray_move(struct zn_ray* self, float polar, float azimuthal)
@@ -15,6 +17,7 @@ struct zn_ray*
 zn_ray_create(void)
 {
   struct zn_ray* self;
+  struct zn_server* server = zn_server_get_singleton();
   vec3 initial_origin = {0.3f, 1.1f, 0.0f};
 
   self = zalloc(sizeof *self);
@@ -30,7 +33,15 @@ zn_ray_create(void)
   wl_signal_init(&self->events.destroy);
   wl_signal_init(&self->events.motion);
 
+  self->appearance = zna_ray_create(self, server->appearance_system);
+  if (self->appearance == NULL) {
+    goto err_free;
+  }
+
   return self;
+
+err_free:
+  free(self);
 
 err:
   return NULL;
@@ -40,6 +51,8 @@ void
 zn_ray_destroy(struct zn_ray* self)
 {
   wl_signal_emit(&self->events.destroy, NULL);
+
+  zna_ray_destroy(self->appearance);
   wl_list_remove(&self->events.destroy.listener_list);
   wl_list_remove(&self->events.motion.listener_list);
   free(self);

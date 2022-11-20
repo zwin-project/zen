@@ -40,7 +40,7 @@ zgnr_mem_storage_create(void* src, size_t size)
     goto err_free;
   }
 
-  memcpy(self->base.data, src, size);
+  if (src) memcpy(self->base.data, src, size);
 
   return &self->base;
 

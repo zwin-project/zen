@@ -58,8 +58,8 @@ err:
 static void
 zn_virtual_object_destroy(struct zn_virtual_object* self)
 {
+  zna_virtual_object_destroy(self->appearance);
   wl_list_remove(&self->link);
   wl_list_remove(&self->zgnr_virtual_object_destroy_listener.link);
-  zna_virtual_object_destroy(self->appearance);
   free(self);
 }

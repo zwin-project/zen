@@ -11,6 +11,7 @@
 #include "scene/virtual-object/gl-shader.h"
 #include "scene/virtual-object/gl-vertex-array.h"
 #include "scene/virtual-object/rendering-unit.h"
+#include "shader-inventory.h"
 #include "zen/server.h"
 
 void
@@ -170,6 +171,8 @@ zna_system_create(struct wl_display* display)
       zna_system_handle_current_session_disconnected;
   wl_list_init(&self->current_session_disconnected_listener.link);
 
+  self->shader_inventory = zna_shader_inventory_create(self);
+
   return self;
 
 err_free:
@@ -183,6 +186,8 @@ void
 zna_system_destroy(struct zna_system* self)
 {
   if (self->current_session) znr_session_destroy(self->current_session);
+
+  zna_shader_inventory_destroy(self->shader_inventory);
 
   wl_list_remove(&self->events.current_session_created.listener_list);
   wl_list_remove(&self->events.current_session_destroyed.listener_list);
