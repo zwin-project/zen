@@ -114,6 +114,8 @@ zn_screen_renderer_render_ui_nodes(struct zn_output *output,
       zn_screen_renderer_scissor_output(output, &rects[i]);
       wlr_render_texture_with_matrix(renderer, node->texture, matrix, 1.0f);
     }
+    zn_screen_renderer_render_ui_nodes(
+        output, renderer, &node->children, screen_damage);
   }
 }
 

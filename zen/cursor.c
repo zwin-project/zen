@@ -42,6 +42,18 @@ default_grab_motion(
 }
 
 static void
+handle_ui_nodes_on_click(struct wl_list* nodes, double x, double y)
+{
+  struct zn_ui_node* node;
+  wl_list_for_each (node, nodes, link) {
+    if (wlr_box_contains_point(node->frame, x, y)) {
+      node->handler(node, x, y);
+    }
+    handle_ui_nodes_on_click(&node->children, x, y);
+  }
+}
+
+static void
 default_grab_button(
     struct zn_cursor_grab* grab, struct wlr_event_pointer_button* event)
 {
@@ -58,12 +70,7 @@ default_grab_button(
       seat, event->time_msec, event->button, event->state);
 
   if (event->state == WLR_BUTTON_PRESSED) {
-    struct zn_ui_node* node;
-    wl_list_for_each (node, &cursor->screen->ui_nodes, link) {
-      if (wlr_box_contains_point(node->frame, cursor->x, cursor->y)) {
-        node->handler(node, cursor->x, cursor->y);
-      }
-    }
+    handle_ui_nodes_on_click(&cursor->screen->ui_nodes, cursor->x, cursor->y);
     zn_screen_get_surface_at(
         cursor->screen, cursor->x, cursor->y, NULL, NULL, &view);
     zn_scene_set_focused_view(server->scene, view);
