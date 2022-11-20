@@ -124,14 +124,13 @@ zgnr_gl_base_technique_protocol_uniform_vector(struct wl_client *client,
 static void
 zgnr_gl_base_technique_protocol_uniform_matrix(struct wl_client *client,
     struct wl_resource *resource, uint32_t location, const char *name,
-    uint32_t type, uint32_t col, uint32_t row, uint32_t count,
-    uint32_t transpose, struct wl_array *value)
+    uint32_t col, uint32_t row, uint32_t count, uint32_t transpose,
+    struct wl_array *value)
 {
   UNUSED(client);
   UNUSED(resource);
   UNUSED(location);
   UNUSED(name);
-  UNUSED(type);
   UNUSED(col);
   UNUSED(row);
   UNUSED(count);

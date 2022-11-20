@@ -3,6 +3,8 @@
 #include <cglm/cglm.h>
 #include <wayland-server-core.h>
 
+struct zna_ray;
+
 struct zn_ray {
   vec3 origin;
 
@@ -17,6 +19,8 @@ struct zn_ray {
     struct wl_signal destroy;  // (NULL)
     struct wl_signal motion;   // (NULL)
   } events;
+
+  struct zna_ray* appearance;  // nonnull, owning
 };
 
 void zn_ray_move(struct zn_ray* self, float polar, float azimuthal);

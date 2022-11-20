@@ -5,5 +5,3 @@ struct zgnr_mem_storage_impl {
 
   int ref_count;
 };
-
-struct zgnr_mem_storage* zgnr_mem_storage_create(void* src, size_t size);

@@ -1,7 +1,13 @@
+subdir('shaders')
+
 _zen_appearance_inc = include_directories('.')
 
 _zen_appearance_srcs = [
+  'base-unit.c',
+  'shader-inventory.c',
   'system.c',
+  
+  'scene/ray.c',
   'scene/virtual-object.c',
   'scene/virtual-object/gl-base-technique.c',
   'scene/virtual-object/gl-buffer.c',
@@ -9,7 +15,7 @@ _zen_appearance_srcs = [
   'scene/virtual-object/gl-shader.c',
   'scene/virtual-object/gl-vertex-array.c',
   'scene/virtual-object/rendering-unit.c',
-]
+] + shaders
 
 _zen_appearance_deps = [
   zen_dep,
