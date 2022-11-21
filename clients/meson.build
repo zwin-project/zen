@@ -38,6 +38,7 @@ _zen_box_client_srcs = [
 _zen_box_client_deps = [
   wayland_client_dep,
   zen_common_dep,
+  glm_dep,
 ]
 
 executable(

@@ -20,6 +20,7 @@ void znr_gl_base_technique_bind_program(
     struct znr_gl_base_technique* self, struct znr_gl_program* program);
 
 /**
+ * @param name is nullable
  * @param value must be larger than or equeal to (32 * size * count) bits
  */
 void znr_gl_base_technique_gl_uniform_vector(struct znr_gl_base_technique* self,
@@ -28,6 +29,7 @@ void znr_gl_base_technique_gl_uniform_vector(struct znr_gl_base_technique* self,
     uint32_t count, void* value);
 
 /**
+ * @param name is nullable
  * @param value must be larger than or equeal to (32 * col * row * count) bits
  */
 void znr_gl_base_technique_gl_uniform_matrix(struct znr_gl_base_technique* self,

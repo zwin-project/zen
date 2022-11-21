@@ -116,6 +116,10 @@ if get_option('cui-client') or get_option('clients')
   wayland_client_dep = dependency('wayland-client', version: wayland_req)
 endif
 
+if get_option('clients')
+  glm_dep = dependency('glm')
+endif
+
 if get_option('default-wallpaper')
   wallpaper_files = files(
     'assets/Zen_Wallpaper_Dark_3840x2160.png',

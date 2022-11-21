@@ -2,8 +2,10 @@
 
 #include <zen-common.h>
 #include <zigen-gles-v32-protocol.h>
+#include <zigen-protocol.h>
 
 #include "gl-program.h"
+#include "gl-uniform-variable.h"
 #include "gl-vertex-array.h"
 
 static void zgnr_gl_base_technique_destroy(
@@ -112,13 +114,32 @@ zgnr_gl_base_technique_protocol_uniform_vector(struct wl_client *client,
     uint32_t type, uint32_t size, uint32_t count, struct wl_array *value)
 {
   UNUSED(client);
-  UNUSED(resource);
-  UNUSED(location);
-  UNUSED(name);
-  UNUSED(type);
-  UNUSED(size);
-  UNUSED(count);
-  UNUSED(value);
+  struct zgnr_gl_base_technique_impl *self =
+      wl_resource_get_user_data(resource);
+  struct zgnr_gl_uniform_variable *uniform_variable;
+
+  if (self == NULL) return;
+
+  if (!(0 < size && size <= 4)) {
+    wl_resource_post_error(resource,
+        ZGN_GL_BASE_TECHNIQUE_ERROR_UNIFORM_VARIABLE,
+        "size must be between 1 to 4, but got %d", size);
+    return;
+  }
+
+  size_t expected_size = 4 * size * count;
+  if (value->size < expected_size) {
+    wl_resource_post_error(resource, ZGN_COMPOSITOR_ERROR_WL_ARRAY_SIZE,
+        "value is expected to be larger than %ld, but actually got %ld",
+        expected_size, value->size);
+    return;
+  }
+
+  uniform_variable = zgnr_gl_uniform_variable_create(
+      location, name, type, 1, size, count, false, value->data);
+
+  wl_list_insert(
+      self->pending.uniform_variable_list.prev, &uniform_variable->link);
 }
 
 static void
@@ -128,14 +149,33 @@ zgnr_gl_base_technique_protocol_uniform_matrix(struct wl_client *client,
     struct wl_array *value)
 {
   UNUSED(client);
-  UNUSED(resource);
-  UNUSED(location);
-  UNUSED(name);
-  UNUSED(col);
-  UNUSED(row);
-  UNUSED(count);
-  UNUSED(transpose);
-  UNUSED(value);
+  struct zgnr_gl_base_technique_impl *self =
+      wl_resource_get_user_data(resource);
+  struct zgnr_gl_uniform_variable *uniform_variable;
+
+  if (self == NULL) return;
+
+  if (!(0 < col && col <= 4 && 0 < row && row <= 4)) {
+    wl_resource_post_error(resource,
+        ZGN_GL_BASE_TECHNIQUE_ERROR_UNIFORM_VARIABLE,
+        "invalid matrix size (%d x %d)", col, row);
+    return;
+  }
+
+  size_t expected_size = 4 * col * row * count;
+  if (value->size < expected_size) {
+    wl_resource_post_error(resource, ZGN_COMPOSITOR_ERROR_WL_ARRAY_SIZE,
+        "value is expected to be larger than %ld, but actually got %ld",
+        expected_size, value->size);
+    return;
+  }
+
+  uniform_variable = zgnr_gl_uniform_variable_create(location, name,
+      ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_FLOAT, col, row, count,
+      transpose, value->data);
+
+  wl_list_insert(
+      self->pending.uniform_variable_list.prev, &uniform_variable->link);
 }
 
 static void
@@ -204,6 +244,31 @@ zgnr_gl_base_technique_handle_current_program_destroy(
   zgnr_gl_base_technique_set_current_program(self, NULL);
 }
 
+/**
+ * Even in the case of updating uniform variable, the uniform variable is
+ * inserted at the end. This ensures that even if the same uniform variable is
+ * specified by location and by name, the one applied later will be used.
+ */
+static void
+zgnr_gl_base_technique_commit_uniform_variable(
+    struct zgnr_gl_base_technique_impl *self,
+    struct zgnr_gl_uniform_variable *variable)
+{
+  struct zgnr_gl_uniform_variable *current_variable, *tmp;
+
+  wl_list_for_each_safe (
+      current_variable, tmp, &self->base.current.uniform_variable_list, link) {
+    if (zgnr_gl_uniform_variable_compare(variable, current_variable) == 0) {
+      zgnr_gl_uniform_variable_destroy(current_variable);
+      break;
+    }
+  }
+
+  wl_list_insert(
+      self->base.current.uniform_variable_list.prev, &variable->link);
+  variable->newly_comitted = true;
+}
+
 static void
 zgnr_gl_base_technique_handle_rendering_unit_commit(
     struct wl_listener *listener, void *data)
@@ -236,12 +301,27 @@ zgnr_gl_base_technique_handle_rendering_unit_commit(
     self->pending.vertex_array_changed = false;
   }
 
+  // uniform variables
+  struct zgnr_gl_uniform_variable *uniform_variable, *tmp_uniform_variable;
+  wl_list_for_each (
+      uniform_variable, &self->base.current.uniform_variable_list, link) {
+    uniform_variable->newly_comitted = false;
+  }
+
+  wl_list_for_each_safe (uniform_variable, tmp_uniform_variable,
+      &self->pending.uniform_variable_list, link) {
+    wl_list_remove(&uniform_variable->link);
+    zgnr_gl_base_technique_commit_uniform_variable(self, uniform_variable);
+  }
+
+  // vertex array
   if (self->base.current.vertex_array) {
     vertex_array =
         zn_container_of(self->base.current.vertex_array, vertex_array, base);
     zgnr_gl_vertex_array_commit(vertex_array);
   }
 
+  // program
   self->base.current.program_changed = self->pending.program_changed;
   if (self->pending.program_changed) {
     program = zn_weak_resource_get_user_data(&self->pending.program);
@@ -312,6 +392,8 @@ zgnr_gl_base_technique_create(struct wl_client *client, uint32_t id,
   self->base.current.program_changed = false;
 
   wl_signal_init(&self->base.events.destroy);
+  wl_list_init(&self->base.current.uniform_variable_list);
+  wl_list_init(&self->pending.uniform_variable_list);
 
   zn_weak_resource_init(&self->pending.vertex_array);
   self->pending.vertex_array_changed = false;
@@ -348,7 +430,18 @@ err:
 static void
 zgnr_gl_base_technique_destroy(struct zgnr_gl_base_technique_impl *self)
 {
+  struct zgnr_gl_uniform_variable *uniform_variable, *tmp;
   wl_signal_emit(&self->base.events.destroy, NULL);
+
+  wl_list_for_each_safe (
+      uniform_variable, tmp, &self->base.current.uniform_variable_list, link) {
+    zgnr_gl_uniform_variable_destroy(uniform_variable);
+  }
+
+  wl_list_for_each_safe (
+      uniform_variable, tmp, &self->pending.uniform_variable_list, link) {
+    zgnr_gl_uniform_variable_destroy(uniform_variable);
+  }
 
   zn_weak_resource_unlink(&self->pending.program);
   zn_weak_resource_unlink(&self->pending.vertex_array);

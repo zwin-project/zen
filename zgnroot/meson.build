@@ -8,6 +8,7 @@ _zgnr_srcs = [
   'src/gl-buffer.c',
   'src/gl-program.c',
   'src/gl-shader.c',
+  'src/gl-uniform-variable.c',
   'src/gl-vertex-array.c',
   'src/gl-vertex-attrib.c',
   'src/mem-storage.c',
