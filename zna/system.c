@@ -23,6 +23,8 @@ zna_system_set_current_session(
   if (self->current_session) {
     wl_list_remove(&self->current_session_disconnected_listener.link);
     wl_list_init(&self->current_session_disconnected_listener.link);
+    wl_list_remove(&self->current_session_frame_listener.link);
+    wl_list_init(&self->current_session_frame_listener.link);
     znr_session_destroy(self->current_session);
     self->current_session = NULL;
 
@@ -34,6 +36,8 @@ zna_system_set_current_session(
     self->current_session = session;
     wl_signal_add(&session->events.disconnected,
         &self->current_session_disconnected_listener);
+    wl_signal_add(
+        &session->events.frame, &self->current_session_frame_listener);
 
     zn_debug("The current session is newly created");
     wl_signal_emit(&self->events.current_session_created, NULL);
@@ -42,6 +46,17 @@ zna_system_set_current_session(
   } else {
     zn_server_change_display_system(server, ZEN_DISPLAY_SYSTEM_TYPE_SCREEN);
   }
+}
+
+static void
+zna_system_handle_current_session_frame(
+    struct wl_listener* listener, void* data)
+{
+  UNUSED(data);
+  struct zna_system* self =
+      zn_container_of(listener, self, current_session_frame_listener);
+
+  wl_signal_emit(&self->events.current_session_frame, NULL);
 }
 
 static void
@@ -139,6 +154,7 @@ zna_system_create(struct wl_display* display)
 
   wl_signal_init(&self->events.current_session_created);
   wl_signal_init(&self->events.current_session_destroyed);
+  wl_signal_init(&self->events.current_session_frame);
 
   self->new_rendering_unit_listener.notify =
       zna_system_handle_new_rendering_unit;
@@ -171,6 +187,10 @@ zna_system_create(struct wl_display* display)
       zna_system_handle_current_session_disconnected;
   wl_list_init(&self->current_session_disconnected_listener.link);
 
+  self->current_session_frame_listener.notify =
+      zna_system_handle_current_session_frame;
+  wl_list_init(&self->current_session_frame_listener.link);
+
   self->shader_inventory = zna_shader_inventory_create(self);
 
   return self;
@@ -191,6 +211,7 @@ zna_system_destroy(struct zna_system* self)
 
   wl_list_remove(&self->events.current_session_created.listener_list);
   wl_list_remove(&self->events.current_session_destroyed.listener_list);
+  wl_list_remove(&self->events.current_session_frame.listener_list);
   wl_list_remove(&self->new_rendering_unit_listener.link);
   wl_list_remove(&self->new_gl_buffer_listener.link);
   wl_list_remove(&self->new_gl_base_technique_listener.link);
@@ -198,6 +219,7 @@ zna_system_destroy(struct zna_system* self)
   wl_list_remove(&self->new_gl_shader_listener.link);
   wl_list_remove(&self->new_gl_program_listener.link);
   wl_list_remove(&self->current_session_disconnected_listener.link);
+  wl_list_remove(&self->current_session_frame_listener.link);
   zgnr_gles_v32_destroy(self->gles);
   free(self);
 }

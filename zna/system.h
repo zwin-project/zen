@@ -19,6 +19,8 @@ struct zna_system {
     // signals are always alternately emitted.
     struct wl_signal current_session_created;    // (NULL)
     struct wl_signal current_session_destroyed;  // (NULL)
+
+    struct wl_signal current_session_frame;  // (NULL)
   } events;
 
   struct wl_listener new_rendering_unit_listener;
@@ -28,4 +30,5 @@ struct zna_system {
   struct wl_listener new_gl_shader_listener;
   struct wl_listener new_gl_program_listener;
   struct wl_listener current_session_disconnected_listener;
+  struct wl_listener current_session_frame_listener;
 };

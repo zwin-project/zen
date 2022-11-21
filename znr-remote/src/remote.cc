@@ -23,7 +23,7 @@ znr_remote_create_session(
     return nullptr;
   };
 
-  auto session = znr_session_create(std::move(session_proxy));
+  auto session = znr_session_create(std::move(session_proxy), self->display);
   if (!session) {
     zn_error("Failed to create a session");
     zn_terminate(EXIT_FAILURE);
