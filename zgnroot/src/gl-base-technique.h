@@ -25,6 +25,9 @@ struct zgnr_gl_base_technique_impl {
     enum zgnr_gl_base_technique_draw_method draw_method;
     union zgnr_gl_base_technique_draw_args args;
     bool draw_method_changed;
+
+    // insert from the back, commit from the front
+    struct wl_list uniform_variable_list;
   } pending;
 
   struct wl_listener rendering_unit_destroy_listener;

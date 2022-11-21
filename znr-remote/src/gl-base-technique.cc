@@ -30,21 +30,21 @@ znr_gl_base_technique_gl_uniform_vector(struct znr_gl_base_technique* self,
     enum zgn_gl_base_technique_uniform_variable_type type, uint32_t size,
     uint32_t count, void* value)
 {
-  std::string name_string = name;
+  std::string name_string = name ? name : "";
   switch (type) {
     case ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_INT:
       self->proxy->GlUniformVector(
-          location, name_string, size, count, (int32_t*)value);
+          location, std::move(name_string), size, count, (int32_t*)value);
       break;
 
     case ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_UINT:
       self->proxy->GlUniformVector(
-          location, name_string, size, count, (uint32_t*)value);
+          location, std::move(name_string), size, count, (uint32_t*)value);
       break;
 
     case ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_FLOAT:
       self->proxy->GlUniformVector(
-          location, name_string, size, count, (float*)value);
+          location, std::move(name_string), size, count, (float*)value);
       break;
 
     default:
@@ -58,8 +58,9 @@ znr_gl_base_technique_gl_uniform_matrix(struct znr_gl_base_technique* self,
     uint32_t location, const char* name, uint32_t col, uint32_t row,
     uint32_t count, bool transpose, float* value)
 {
+  std::string name_string = name ? name : "";
   self->proxy->GlUniformMatrix(
-      location, name, col, row, count, transpose, value);
+      location, std::move(name_string), col, row, count, transpose, value);
 }
 
 void

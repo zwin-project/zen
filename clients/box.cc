@@ -4,6 +4,7 @@
 #include <zigen-protocol.h>
 
 #include <cstring>
+#include <glm/vec4.hpp>
 #include <iostream>
 #include <vector>
 
@@ -33,9 +34,20 @@ class Box final : public VirtualObject
   Box() = delete;
   Box(Application* app) : VirtualObject(app), app_(app) {}
 
+  void SetUniformVariables()
+  {
+    glm::vec4 translation = {0, 1.2, -1, 0};
+
+    translation.x = sin(animation_seed_ * 2 * M_PI);
+
+    technique_->Uniform(0, "translate", translation);
+  }
+
   void Frame(uint32_t time) override
   {
-    std::cerr << "frame! " << time << std::endl;
+    animation_seed_ = (float)(time % 2000) / 2000.0f;
+
+    SetUniformVariables();
     NextFrame();
     Commit();
   }
@@ -50,21 +62,21 @@ class Box final : public VirtualObject
     technique_ = CreateGlBaseTechnique(app_, unit_.get());
     if (!technique_) return false;
 
-    float cx = 0, cy = 1.2, cz = -1, size = 0.25;
+    float size = 0.25;
     // clang-format off
     vertices_ = {
-      {cx - size, cy - size, cz + size}, {cx + size, cy - size, cz + size},
-      {cx + size, cy - size, cz + size}, {cx + size, cy - size, cz - size},
-      {cx + size, cy - size, cz - size}, {cx - size, cy - size, cz - size},
-      {cx - size, cy - size, cz - size}, {cx - size, cy - size, cz + size},
-      {cx - size, cy + size, cz + size}, {cx + size, cy + size, cz + size},
-      {cx + size, cy + size, cz + size}, {cx + size, cy + size, cz - size},
-      {cx + size, cy + size, cz - size}, {cx - size, cy + size, cz - size},
-      {cx - size, cy + size, cz - size}, {cx - size, cy + size, cz + size},
-      {cx - size, cy - size, cz + size}, {cx - size, cy + size, cz + size},
-      {cx + size, cy - size, cz + size}, {cx + size, cy + size, cz + size},
-      {cx + size, cy - size, cz - size}, {cx + size, cy + size, cz - size},
-      {cx - size, cy - size, cz - size}, {cx - size, cy + size, cz - size},
+      {-size, -size, +size}, {+size, -size, +size},
+      {+size, -size, +size}, {+size, -size, -size},
+      {+size, -size, -size}, {-size, -size, -size},
+      {-size, -size, -size}, {-size, -size, +size},
+      {-size, +size, +size}, {+size, +size, +size},
+      {+size, +size, +size}, {+size, +size, -size},
+      {+size, +size, -size}, {-size, +size, -size},
+      {-size, +size, -size}, {-size, +size, +size},
+      {-size, -size, +size}, {-size, +size, +size},
+      {+size, -size, +size}, {+size, +size, +size},
+      {+size, -size, -size}, {+size, +size, -size},
+      {-size, -size, -size}, {-size, +size, -size},
     };
     // clang-format on
 
@@ -134,6 +146,8 @@ class Box final : public VirtualObject
   std::unique_ptr<GlShader> vertex_shader_;
   std::unique_ptr<GlShader> fragment_shader_;
   std::unique_ptr<GlProgram> program_;
+
+  float animation_seed_;  // 0 to 1
 };
 
 int

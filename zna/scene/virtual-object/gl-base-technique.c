@@ -1,6 +1,7 @@
 #include "gl-base-technique.h"
 
 #include <zen-common.h>
+#include <zgnr/gl-uniform-variable.h>
 
 #include "scene/virtual-object/gl-program.h"
 #include "scene/virtual-object/gl-vertex-array.h"
@@ -47,8 +48,10 @@ zna_gl_base_technique_apply_commit(
     struct zna_gl_base_technique* self, bool only_damaged)
 {
   struct znr_session* session = self->system->current_session;
+  struct zgnr_gl_uniform_variable* uniform_variable;
   struct zna_rendering_unit* unit =
       zna_gl_base_technique_get_rendering_unit(self);
+
   if (self->znr_gl_base_technique == NULL) {
     self->znr_gl_base_technique =
         znr_gl_base_technique_create(session, unit->znr_rendering_unit);
@@ -77,6 +80,24 @@ zna_gl_base_technique_apply_commit(
         !only_damaged) {
       znr_gl_base_technique_bind_program(
           self->znr_gl_base_technique, program->znr_gl_program);
+    }
+  }
+
+  wl_list_for_each (uniform_variable,
+      &self->zgnr_gl_base_technique->current.uniform_variable_list, link) {
+    if (uniform_variable->newly_comitted || !only_damaged) {
+      if (uniform_variable->col == 1) {
+        znr_gl_base_technique_gl_uniform_vector(self->znr_gl_base_technique,
+            uniform_variable->location, uniform_variable->name,
+            uniform_variable->type, uniform_variable->row,
+            uniform_variable->count, uniform_variable->value);
+      } else {
+        znr_gl_base_technique_gl_uniform_matrix(self->znr_gl_base_technique,
+            uniform_variable->location, uniform_variable->name,
+            uniform_variable->col, uniform_variable->row,
+            uniform_variable->count, uniform_variable->transpose,
+            uniform_variable->value);
+      }
     }
   }
 

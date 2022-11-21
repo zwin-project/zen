@@ -2,7 +2,7 @@
 
 #include <zen-common.h>
 
-static constexpr float kRefreshRate = 30.0f;
+static constexpr float kRefreshRate = 60.0f;
 static constexpr uint32_t kRefreshIntervalNsec = NSEC_PER_SEC / kRefreshRate;
 
 static int
