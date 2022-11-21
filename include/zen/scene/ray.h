@@ -23,6 +23,8 @@ struct zn_ray {
   struct zna_ray* appearance;  // nonnull, owning
 };
 
+void zn_ray_get_tip(struct zn_ray* self, float length, vec3 tip);
+
 void zn_ray_move(struct zn_ray* self, float polar, float azimuthal);
 
 struct zn_ray* zn_ray_create(void);

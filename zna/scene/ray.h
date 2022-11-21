@@ -11,8 +11,9 @@ struct zna_ray {
   // null when the current session does not exist, not null otherwise
   struct znr_virtual_object* virtual_object;
 
-  struct zna_base_unit* baes_unit;  // nonnull
+  struct zna_base_unit* base_unit;  // nonnull
 
+  struct wl_listener motion_listener;
   struct wl_listener session_created_listener;
   struct wl_listener session_destroyed_listener;
 };

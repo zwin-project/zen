@@ -15,7 +15,9 @@ _zgnr_srcs = [
   'src/rendering-unit.c',
   'src/shm.c',
   'src/virtual-object.c',
+]
 
+_zgnr_srcs_pub = [
   protocols['zigen']['private-code'],
   protocols['zigen']['server-header'],
   protocols['zigen-gles-v32']['private-code'],
@@ -29,7 +31,7 @@ _zgnr_deps = [
 
 _zgnr_lib = static_library(
   'zgnr',
-  _zgnr_srcs,
+  _zgnr_srcs + _zgnr_srcs_pub,
   c_args: ['-include', 'config.h'],
   include_directories: _zgnr_inc,
   dependencies: _zgnr_deps,
@@ -39,4 +41,5 @@ _zgnr_lib = static_library(
 zgnr_dep = declare_dependency(
   link_with: _zgnr_lib,
   include_directories: _zgnr_inc,
+  sources: _zgnr_srcs_pub,
 )
