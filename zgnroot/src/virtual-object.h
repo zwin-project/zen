@@ -8,6 +8,10 @@ struct zgnr_virtual_object_impl {
   struct zgnr_virtual_object base;
 
   struct {
+    struct wl_list frame_callback_list;
+  } pending;
+
+  struct {
     /** Emitted before the public signal (base::events::committed) */
     struct wl_signal on_commit;  // (NULL)
   } events;

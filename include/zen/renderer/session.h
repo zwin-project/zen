@@ -9,6 +9,7 @@ extern "C" {
 struct znr_session {
   struct {
     struct wl_signal disconnected;  // (NULL)
+    struct wl_signal frame;         // (NULL)
   } events;
 };
 
