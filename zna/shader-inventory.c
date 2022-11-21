@@ -5,7 +5,36 @@
 
 #include "color.frag.h"
 #include "default.vert.h"
+#include "ray.vert.h"
 #include "system.h"
+
+struct shader_info {
+  const char* source;
+  size_t length;
+  GLenum type;
+};
+
+static const struct shader_info shader_info[ZNA_SHADER_COUNT] = {
+    [ZNA_SHADER_DEFAULT_VERTEX] =
+        {
+            .source = default_vert_source,
+            .length = sizeof(default_vert_source),
+            .type = GL_VERTEX_SHADER,
+        },
+    [ZNA_SHADER_RAY_VERTEX] =
+        {
+            .source = ray_vert_source,
+            .length = sizeof(ray_vert_source),
+            .type = GL_VERTEX_SHADER,
+        },
+    [ZNA_SHADER_COLOR_FRAGMENT] =
+        {
+            .source = color_frag_source,
+            .length = sizeof(color_frag_source),
+            .type = GL_FRAGMENT_SHADER,
+        },
+
+};
 
 struct zna_shader_inventory {
   struct znr_gl_shader* shaders[ZNA_SHADER_COUNT];
@@ -35,9 +64,6 @@ zna_shader_inventory_get(
     struct zna_shader_inventory* self, enum zna_shader_name name)
 {
   struct znr_session* session = self->system->current_session;
-  const char* shader_source;
-  uint32_t type;
-  size_t length;
 
   if (!session || name >= ZNA_SHADER_COUNT) return NULL;
 
@@ -45,26 +71,10 @@ zna_shader_inventory_get(
     return self->shaders[name];
   }
 
-  switch (name) {
-    case ZNA_SHADER_DEFAULT_VERTEX:
-      shader_source = default_vert_source;
-      length = sizeof(default_vert_source);
-      type = GL_VERTEX_SHADER;
-      break;
-
-    case ZNA_SHADER_COLOR_FRAGMENT:
-      shader_source = color_frag_source;
-      length = sizeof(color_frag_source);
-      type = GL_FRAGMENT_SHADER;
-      break;
-
-    default:
-      zn_assert(false, "Unknown shader name");
-      return NULL;
-  }
+  const struct shader_info* info = &shader_info[name];
 
   self->shaders[name] =
-      znr_gl_shader_create(session, shader_source, length, type);
+      znr_gl_shader_create(session, info->source, info->length, info->type);
 
   return self->shaders[name];
 }

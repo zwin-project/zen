@@ -1,6 +1,7 @@
 _shader_sources = [
   'color.frag',
   'default.vert',
+  'ray.vert',
 ]
 
 shaders = []

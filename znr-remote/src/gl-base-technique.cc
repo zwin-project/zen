@@ -2,6 +2,9 @@
 
 #include <zen-common.h>
 
+#include <cstring>
+#include <vector>
+
 #include "gl-program.h"
 #include "gl-vertex-array.h"
 #include "rendering-unit.h"
@@ -19,6 +22,44 @@ znr_gl_base_technique_bind_program(
     struct znr_gl_base_technique* self, struct znr_gl_program* program)
 {
   self->proxy->BindProgram(program->proxy->id());
+}
+
+void
+znr_gl_base_technique_gl_uniform_vector(struct znr_gl_base_technique* self,
+    uint32_t location, const char* name,
+    enum zgn_gl_base_technique_uniform_variable_type type, uint32_t size,
+    uint32_t count, void* value)
+{
+  std::string name_string = name;
+  switch (type) {
+    case ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_INT:
+      self->proxy->GlUniformVector(
+          location, name_string, size, count, (int32_t*)value);
+      break;
+
+    case ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_UINT:
+      self->proxy->GlUniformVector(
+          location, name_string, size, count, (uint32_t*)value);
+      break;
+
+    case ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_FLOAT:
+      self->proxy->GlUniformVector(
+          location, name_string, size, count, (float*)value);
+      break;
+
+    default:
+      zn_assert(false, "Unknown enum entry");
+      break;
+  }
+}
+
+void
+znr_gl_base_technique_gl_uniform_matrix(struct znr_gl_base_technique* self,
+    uint32_t location, const char* name, uint32_t col, uint32_t row,
+    uint32_t count, bool transpose, float* value)
+{
+  self->proxy->GlUniformMatrix(
+      location, name, col, row, count, transpose, value);
 }
 
 void
