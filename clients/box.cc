@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "application.h"
+#include "bounded.h"
 #include "buffer.h"
 #include "color.fragment.h"
 #include "default.vert.h"
@@ -28,11 +29,11 @@ typedef struct {
   float x, y, z;
 } vec3;
 
-class Box final : public VirtualObject
+class Box final : public Bounded
 {
  public:
   Box() = delete;
-  Box(Application* app) : VirtualObject(app), app_(app) {}
+  Box(Application* app) : Bounded(app), app_(app) {}
 
   void SetUniformVariables()
   {
@@ -54,7 +55,7 @@ class Box final : public VirtualObject
 
   bool Init()
   {
-    if (!VirtualObject::Init()) return false;
+    if (!Bounded::Init()) return false;
 
     unit_ = CreateRenderingUnit(app_, this);
     if (!unit_) return false;

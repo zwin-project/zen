@@ -17,6 +17,7 @@
 #include "zen/decoration-manager.h"
 #include "zen/input/input-manager.h"
 #include "zen/scene/scene.h"
+#include "zen/shell/shell.h"
 
 struct zn_server {
   struct wl_display *display;
@@ -36,6 +37,7 @@ struct zn_server {
   struct zn_input_manager *input_manager;
   struct zna_system *appearance_system;
   struct znr_remote *remote;
+  struct zn_shell *shell;
 
   struct zn_scene *scene;
 

@@ -13,6 +13,7 @@ class VirtualObject
 {
  public:
   DISABLE_MOVE_AND_COPY(VirtualObject);
+  VirtualObject() = delete;
   VirtualObject(Application *app);
   virtual ~VirtualObject();
 
@@ -43,7 +44,5 @@ VirtualObject::proxy()
 {
   return proxy_;
 }
-
-std::unique_ptr<VirtualObject> CreateVirtualObject(Application *app);
 
 }  // namespace zen::client

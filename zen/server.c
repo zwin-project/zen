@@ -262,10 +262,16 @@ zn_server_create(struct wl_display *display)
     goto err_input_manager;
   }
 
+  self->shell = zn_shell_create(self->display);
+  if (self->shell == NULL) {
+    zn_error("Failed to create a zn_shell");
+    goto err_remote;
+  }
+
   self->appearance_system = zna_system_create(self->display);
   if (self->appearance_system == NULL) {
     zn_error("Failed to create a zn_appearance");
-    goto err_remote;
+    goto err_shell;
   }
 
   self->xwayland = wlr_xwayland_create(self->display, self->w_compositor, true);
@@ -312,6 +318,9 @@ zn_server_create(struct wl_display *display)
 
 err_appearance:
   zna_system_destroy(self->appearance_system);
+
+err_shell:
+  zn_shell_destroy(self->shell);
 
 err_remote:
   znr_remote_destroy(self->remote);
@@ -365,6 +374,7 @@ zn_server_destroy(struct zn_server *self)
 {
   wlr_xwayland_destroy(self->xwayland);
   zna_system_destroy(self->appearance_system);
+  zn_shell_destroy(self->shell);
   znr_remote_destroy(self->remote);
   zn_input_manager_destroy(self->input_manager);
   zn_decoration_manager_destroy(self->decoration_manager);
