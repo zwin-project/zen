@@ -56,16 +56,4 @@ VirtualObject::~VirtualObject()
   }
 }
 
-std::unique_ptr<VirtualObject>
-CreateVirtualObject(Application *app)
-{
-  auto virtual_object = std::make_unique<VirtualObject>(app);
-
-  if (!virtual_object->Init()) {
-    return std::unique_ptr<VirtualObject>();
-  }
-
-  return virtual_object;
-}
-
 }  // namespace zen::client

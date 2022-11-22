@@ -152,6 +152,7 @@ subdir('zgnroot')
 subdir('znr-remote')
 subdir('zen')
 subdir('zna')
+subdir('zns')
 if get_option('clients')
   subdir('clients')
 endif
@@ -177,5 +178,6 @@ executable(
   dependencies: [
     zen_dep,
     zen_appearance_dep,
+    zen_shell_dep,
   ],
 )

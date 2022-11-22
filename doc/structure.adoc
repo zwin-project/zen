@@ -9,6 +9,9 @@
 |zna_
 |Appearance of objects in immersive display system
 
+|zns_
+|Interactive shell in immersive display system
+
 |znr_
 |Rendering backend for immersive display system
 

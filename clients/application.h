@@ -3,6 +3,7 @@
 #include <wayland-client.h>
 #include <zigen-client-protocol.h>
 #include <zigen-gles-v32-client-protocol.h>
+#include <zigen-shell-client-protocol.h>
 
 #include <memory>
 
@@ -26,6 +27,7 @@ class Application
   inline Loop* loop();
   inline zgn_compositor* compositor();
   inline zgn_gles_v32* gles_v32();
+  inline zgn_shell* shell();
   inline zgn_shm* shm();
 
  private:
@@ -41,6 +43,7 @@ class Application
   wl_registry* registry_ = nullptr;
   zgn_compositor* zgn_compositor_ = nullptr;
   zgn_gles_v32* zgn_gles_v32_ = nullptr;
+  zgn_shell* zgn_shell_ = nullptr;
   zgn_shm* zgn_shm_ = nullptr;
   Loop loop_;
   std::unique_ptr<EventSource> event_source_;
@@ -62,6 +65,12 @@ inline zgn_gles_v32*
 Application::gles_v32()
 {
   return zgn_gles_v32_;
+}
+
+inline zgn_shell*
+Application::shell()
+{
+  return zgn_shell_;
 }
 
 inline zgn_shm*

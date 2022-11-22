@@ -14,6 +14,7 @@ color_frag_glsl = custom_target(
 
 _zen_box_client_srcs = [
   'application.cc',
+  'bounded.cc',
   'box.cc',
   'buffer.cc',
   'gl-base-technique.cc',
@@ -31,6 +32,8 @@ _zen_box_client_srcs = [
 
   protocols['zigen']['private-code'],
   protocols['zigen']['client-header'],
+  protocols['zigen-shell']['private-code'],
+  protocols['zigen-shell']['client-header'],
   protocols['zigen-gles-v32']['private-code'],
   protocols['zigen-gles-v32']['client-header'],
 ]
