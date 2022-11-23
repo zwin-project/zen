@@ -4,6 +4,7 @@
 #include <zigen-protocol.h>
 
 #include <cstring>
+#include <glm/common.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <iostream>
@@ -11,9 +12,9 @@
 
 #include "application.h"
 #include "bounded.h"
+#include "box.vert.h"
 #include "buffer.h"
 #include "color.fragment.h"
-#include "default.vert.h"
 #include "fd.h"
 #include "gl-base-technique.h"
 #include "gl-buffer.h"
@@ -30,6 +31,7 @@ typedef struct {
   float x, y, z;
 } Vertex;
 
+/** Draw the rotating cube so that it always fits within the boundary */
 class Box final : public Bounded
 {
  public:
@@ -38,16 +40,19 @@ class Box final : public Bounded
 
   void SetUniformVariables()
   {
-    glm::vec4 translation = {0, 1.2, -1, 0};
-
-    translation.x = sin(animation_seed_ * 2 * M_PI);
-
-    technique_->Uniform(0, "translate", translation);
+    float rad_2 = M_PI * animation_seed_ * 4;  // rad / 2
+    float cos = cosf(rad_2);
+    float sin = sinf(rad_2);
+    glm::vec4 quaternion = {0, sin, 0, cos};
+    float min = glm::min(glm::min(half_size_.x, half_size_.y), half_size_.z);
+    glm::vec3 size(min / sqrt(3));
+    technique_->Uniform(0, "half_size", size);
+    technique_->Uniform(0, "quaternion", quaternion);
   }
 
   void Frame(uint32_t time) override
   {
-    animation_seed_ = (float)(time % 2000) / 2000.0f;
+    animation_seed_ = (float)(time % 12000) / 12000.0f;
 
     SetUniformVariables();
     NextFrame();
@@ -56,12 +61,13 @@ class Box final : public Bounded
 
   void Configure(glm::vec3 half_size, uint32_t serial) override
   {
-    (void)half_size;
+    half_size_ = half_size;
+
+    SetUniformVariables();
 
     AckConfigure(serial);
 
     if (!committed_) {
-      SetUniformVariables();
       NextFrame();
       Commit();
       committed_ = true;
@@ -70,7 +76,7 @@ class Box final : public Bounded
 
   bool Init()
   {
-    if (!Bounded::Init(glm::vec3(0.25, 0.25, 0.25))) return false;
+    if (!Bounded::Init(glm::vec3(0.25, 0.25, 0.50))) return false;
 
     unit_ = CreateRenderingUnit(app_, this);
     if (!unit_) return false;
@@ -78,21 +84,20 @@ class Box final : public Bounded
     technique_ = CreateGlBaseTechnique(app_, unit_.get());
     if (!technique_) return false;
 
-    float size = 0.25;
     // clang-format off
     vertices_ = {
-      {-size, -size, +size}, {+size, -size, +size},
-      {+size, -size, +size}, {+size, -size, -size},
-      {+size, -size, -size}, {-size, -size, -size},
-      {-size, -size, -size}, {-size, -size, +size},
-      {-size, +size, +size}, {+size, +size, +size},
-      {+size, +size, +size}, {+size, +size, -size},
-      {+size, +size, -size}, {-size, +size, -size},
-      {-size, +size, -size}, {-size, +size, +size},
-      {-size, -size, +size}, {-size, +size, +size},
-      {+size, -size, +size}, {+size, +size, +size},
-      {+size, -size, -size}, {+size, +size, -size},
-      {-size, -size, -size}, {-size, +size, -size},
+      {-1, -1, +1}, {+1, -1, +1},
+      {+1, -1, +1}, {+1, -1, -1},
+      {+1, -1, -1}, {-1, -1, -1},
+      {-1, -1, -1}, {-1, -1, +1},
+      {-1, +1, +1}, {+1, +1, +1},
+      {+1, +1, +1}, {+1, +1, -1},
+      {+1, +1, -1}, {-1, +1, -1},
+      {-1, +1, -1}, {-1, +1, +1},
+      {-1, -1, +1}, {-1, +1, +1},
+      {+1, -1, +1}, {+1, +1, +1},
+      {+1, -1, -1}, {+1, +1, -1},
+      {-1, -1, -1}, {-1, +1, -1},
     };
     // clang-format on
 
@@ -105,7 +110,7 @@ class Box final : public Bounded
       auto v = mmap(nullptr, vertex_buffer_size, PROT_WRITE, MAP_SHARED,
           vertex_buffer_fd_, 0);
       std::memcpy(v, vertices_.data(), vertex_buffer_size);
-      munmap(v, size);
+      munmap(v, vertex_buffer_size);
     }
 
     pool_ = CreateShmPool(app_, vertex_buffer_fd_, vertex_buffer_size);
@@ -121,7 +126,7 @@ class Box final : public Bounded
     if (!vertex_array_) return false;
 
     vertex_shader_ =
-        CreateGlShader(app_, GL_VERTEX_SHADER, default_vertex_shader_source);
+        CreateGlShader(app_, GL_VERTEX_SHADER, box_vertex_shader_source);
     if (!vertex_shader_) return false;
 
     fragment_shader_ =
@@ -164,6 +169,7 @@ class Box final : public Bounded
   std::unique_ptr<GlProgram> program_;
 
   float animation_seed_;  // 0 to 1
+  glm::vec3 half_size_;
   bool committed_ = false;
 };
 
