@@ -13,7 +13,7 @@ zgnr_compositor_protocol_create_virtual_object(
 {
   struct zgnr_compositor* self = wl_resource_get_user_data(resource);
   struct zgnr_virtual_object_impl* virtual_object =
-      zgnr_virtual_object_create(client, id);
+      zgnr_virtual_object_create(client, id, self->display);
 
   if (virtual_object == NULL) {
     zn_error("Failed to create zgnr_virtual_object");

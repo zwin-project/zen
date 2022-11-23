@@ -8,6 +8,7 @@ _zen_common_srcs = [
 ]
 
 _zen_common_deps = [
+  cglm_dep,
   wayland_server_dep.partial_dependency(includes: true),
 ]
 

@@ -3,6 +3,7 @@ _zgnr_inc = include_directories('include')
 _zgnr_srcs = [
   'src/backend.c',
   'src/bounded.c',
+  'src/bounded-configure.c',
   'src/compositor.c',
   'src/gles-v32.c',
   'src/gl-base-technique.c',

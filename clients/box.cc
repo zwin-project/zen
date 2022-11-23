@@ -4,6 +4,7 @@
 #include <zigen-protocol.h>
 
 #include <cstring>
+#include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
 #include <iostream>
 #include <vector>
@@ -27,7 +28,7 @@ using namespace zen::client;
 
 typedef struct {
   float x, y, z;
-} vec3;
+} Vertex;
 
 class Box final : public Bounded
 {
@@ -53,9 +54,23 @@ class Box final : public Bounded
     Commit();
   }
 
+  void Configure(glm::vec3 half_size, uint32_t serial) override
+  {
+    (void)half_size;
+
+    AckConfigure(serial);
+
+    if (!committed_) {
+      SetUniformVariables();
+      NextFrame();
+      Commit();
+      committed_ = true;
+    }
+  }
+
   bool Init()
   {
-    if (!Bounded::Init()) return false;
+    if (!Bounded::Init(glm::vec3(0.25, 0.25, 0.25))) return false;
 
     unit_ = CreateRenderingUnit(app_, this);
     if (!unit_) return false;
@@ -138,7 +153,7 @@ class Box final : public Bounded
   Application* app_;
   std::unique_ptr<RenderingUnit> unit_;
   std::unique_ptr<GlBaseTechnique> technique_;
-  std::vector<vec3> vertices_;
+  std::vector<Vertex> vertices_;
   int vertex_buffer_fd_;
   std::unique_ptr<ShmPool> pool_;
   std::unique_ptr<Buffer> buffer_;
@@ -149,6 +164,7 @@ class Box final : public Bounded
   std::unique_ptr<GlProgram> program_;
 
   float animation_seed_;  // 0 to 1
+  bool committed_ = false;
 };
 
 int
@@ -161,9 +177,6 @@ main(void)
 
   Box box(&app);
   if (!box.Init()) return EXIT_FAILURE;
-
-  box.NextFrame();
-  box.Commit();
 
   return app.Run();
 }

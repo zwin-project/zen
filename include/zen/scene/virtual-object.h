@@ -13,6 +13,7 @@ struct zn_virtual_object {
   struct zna_virtual_object *appearance;  // nonnull, owning
 
   vec3 position;
+  versor quaternion;
 
   struct wl_listener zgnr_virtual_object_destroy_listener;
 };

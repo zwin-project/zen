@@ -33,6 +33,8 @@ zn_virtual_object_create(
 
   self->zgnr_virtual_object = zgnr_virtual_object;
   zgnr_virtual_object->user_data = self;
+  glm_vec3_zero(self->position);
+  glm_quat_identity(self->quaternion);
 
   wl_list_insert(&scene->virtual_object_list, &self->link);
 

@@ -1,5 +1,6 @@
 #include "shell.h"
 
+#include <cglm/vec3.h>
 #include <zen-common.h>
 #include <zigen-shell-protocol.h>
 
@@ -17,15 +18,27 @@ zgnr_shell_protocol_destroy(
 static void
 zgnr_shell_protocol_get_bounded(struct wl_client* client,
     struct wl_resource* resource, uint32_t id,
-    struct wl_resource* virtual_object_resource)
+    struct wl_resource* virtual_object_resource,
+    struct wl_array* half_size_array)
 {
   struct zgnr_shell_impl* self = wl_resource_get_user_data(resource);
+  vec3 half_size;
 
   struct zgnr_virtual_object_impl* virtual_object =
       wl_resource_get_user_data(virtual_object_resource);
 
   struct zgnr_bounded_impl* bounded =
       zgnr_bounded_create(client, id, virtual_object);
+
+  if (!zgnr_virtual_object_set_role(virtual_object,
+          ZGNR_VIRTUAL_OBJECT_ROLE_BOUNDED, &bounded->base, bounded->resource,
+          ZGN_SHELL_ERROR_ROLE)) {
+    return;
+  }
+
+  zn_array_to_vec3(half_size_array, half_size);
+
+  zgnr_bounded_configure(bounded, half_size);
 
   wl_signal_emit(&self->base.events.new_bounded, &bounded->base);
 }
