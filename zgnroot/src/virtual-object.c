@@ -81,11 +81,39 @@ zgnr_virtual_object_send_frame_done(
   }
 }
 
+bool
+zgnr_virtual_object_set_role(struct zgnr_virtual_object_impl* self,
+    enum zgnr_virtual_object_role role, void* role_object,
+    struct wl_resource* error_resource, uint32_t error_code)
+{
+  if (self->base.role != ZGNR_VIRTUAL_OBJECT_ROLE_NONE &&
+      self->base.role != role) {
+    if (error_resource != NULL) {
+      wl_resource_post_error(error_resource, error_code,
+          "zgn_virtual_object@%u already has another role",
+          wl_resource_get_id(self->resource));
+    }
+    return false;
+  }
+
+  if (self->base.role_object != NULL && self->base.role_object != role_object) {
+    wl_resource_post_error(error_resource, error_code,
+        "zgn_virtual_object@%u already has a active role",
+        wl_resource_get_id(self->resource));
+    return false;
+  }
+
+  self->base.role = role;
+  self->base.role_object = role_object;
+
+  return true;
+}
+
 struct zgnr_virtual_object_impl*
-zgnr_virtual_object_create(struct wl_client* client, uint32_t id)
+zgnr_virtual_object_create(
+    struct wl_client* client, uint32_t id, struct wl_display* display)
 {
   struct zgnr_virtual_object_impl* self;
-  struct wl_resource* resource;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -93,14 +121,15 @@ zgnr_virtual_object_create(struct wl_client* client, uint32_t id)
     goto err;
   }
 
-  resource = wl_resource_create(client, &zgn_virtual_object_interface, 1, id);
-  if (resource == NULL) {
+  self->resource =
+      wl_resource_create(client, &zgn_virtual_object_interface, 1, id);
+  if (self->resource == NULL) {
     zn_error("Failed to create a wl_resource");
     goto err_free;
   }
 
-  wl_resource_set_implementation(
-      resource, &implementation, self, zgnr_virtual_object_handle_destroy);
+  wl_resource_set_implementation(self->resource, &implementation, self,
+      zgnr_virtual_object_handle_destroy);
 
   wl_signal_init(&self->base.events.destroy);
   wl_signal_init(&self->base.events.committed);
@@ -110,6 +139,9 @@ zgnr_virtual_object_create(struct wl_client* client, uint32_t id)
   wl_list_init(&self->pending.frame_callback_list);
 
   self->base.committed = false;
+  self->display = display;
+  self->base.role = ZGNR_VIRTUAL_OBJECT_ROLE_NONE;
+  self->base.role_object = NULL;
 
   return self;
 

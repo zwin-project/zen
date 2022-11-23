@@ -14,6 +14,7 @@ color_frag_glsl = custom_target(
 
 _zen_box_client_srcs = [
   'application.cc',
+  'array.cc',
   'bounded.cc',
   'box.cc',
   'buffer.cc',
