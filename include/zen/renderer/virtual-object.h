@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cglm/cglm.h>
+
 #include "zen/renderer/session.h"
 
 #ifdef __cplusplus
@@ -7,6 +9,9 @@ extern "C" {
 #endif
 
 struct znr_virtual_object;
+
+void znr_virtual_object_move(
+    struct znr_virtual_object* self, vec3 position, versor quaternion);
 
 void znr_virtual_object_commit(struct znr_virtual_object* self);
 
