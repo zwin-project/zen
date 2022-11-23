@@ -5,6 +5,13 @@
 #include "session.h"
 
 void
+znr_virtual_object_move(
+    struct znr_virtual_object* self, vec3 position, versor quaternion)
+{
+  self->proxy->Move(position, quaternion);
+}
+
+void
 znr_virtual_object_commit(struct znr_virtual_object* self)
 {
   self->proxy->Commit();
