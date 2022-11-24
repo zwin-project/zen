@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cglm/vec3.h>
+#include <cglm/types.h>
 #include <wayland-server-core.h>
 
 #ifdef __cplusplus

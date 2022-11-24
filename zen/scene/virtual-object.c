@@ -1,5 +1,7 @@
 #include "zen/scene/virtual-object.h"
 
+#include <cglm/quat.h>
+#include <cglm/vec3.h>
 #include <zen-common.h>
 
 #include "zen/appearance/scene/virtual-object.h"

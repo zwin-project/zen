@@ -1,6 +1,6 @@
 #include "shell.h"
 
-#include <cglm/vec3.h>
+#include <cglm/types.h>
 #include <zen-common.h>
 #include <zigen-protocol.h>
 #include <zigen-shell-protocol.h>

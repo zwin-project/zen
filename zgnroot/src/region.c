@@ -1,5 +1,6 @@
 #include "region.h"
 
+#include <cglm/types.h>
 #include <zen-common.h>
 #include <zigen-protocol.h>
 

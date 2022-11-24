@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cglm/cglm.h>
+#include <cglm/types.h>
 #include <zgnr/virtual-object.h>
 
 #include "zen/scene/scene.h"

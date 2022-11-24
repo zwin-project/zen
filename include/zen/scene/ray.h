@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cglm/cglm.h>
+#include <cglm/types.h>
 #include <wayland-server-core.h>
 
 struct zna_ray;
