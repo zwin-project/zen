@@ -8,10 +8,13 @@
 static void
 zn_shell_handle_new_bounded(struct wl_listener* listener, void* data)
 {
-  UNUSED(listener);
-  struct zgnr_bounded* bounded = data;
+  struct zn_shell* self = zn_container_of(listener, self, new_bounded_listener);
 
-  (void)zns_bounded_create(bounded);
+  struct zgnr_bounded* zgnr_bounded = data;
+
+  struct zns_bounded* zns_bounded = zns_bounded_create(zgnr_bounded);
+
+  wl_list_insert(&self->bounded_list, &zns_bounded->link);
 }
 
 struct zn_ray_grab*
@@ -39,6 +42,8 @@ zn_shell_create(struct wl_display* display)
 
   zns_default_ray_grab_init(&self->default_grab);
 
+  wl_list_init(&self->bounded_list);
+
   self->new_bounded_listener.notify = zn_shell_handle_new_bounded;
   wl_signal_add(
       &self->zgnr_shell->events.new_bounded, &self->new_bounded_listener);
@@ -56,6 +61,7 @@ void
 zn_shell_destroy(struct zn_shell* self)
 {
   zns_default_ray_grab_fini(&self->default_grab);
+  wl_list_remove(&self->bounded_list);
   wl_list_remove(&self->new_bounded_listener.link);
   zgnr_shell_destroy(self->zgnr_shell);
   free(self);
