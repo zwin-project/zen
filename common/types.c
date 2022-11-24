@@ -76,3 +76,13 @@ zn_vec3_to_array(vec3 vec, struct wl_array *array)
 
   return 0;
 }
+
+int
+zn_array_to_versor(struct wl_array *array, versor vec)
+{
+  if (sizeof(versor) != array->size) return -1;
+
+  memcpy(vec, array->data, sizeof(versor));
+
+  return 0;
+}
