@@ -1,5 +1,6 @@
 #include "bounded.h"
 
+#include <cglm/vec3.h>
 #include <zen-common.h>
 #include <zigen-shell-protocol.h>
 

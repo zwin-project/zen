@@ -1,5 +1,6 @@
 #include "bounded-configure.h"
 
+#include <cglm/vec3.h>
 #include <zen-common.h>
 
 struct zgnr_bounded_configure*

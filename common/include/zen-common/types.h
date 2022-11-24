@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cglm/cglm.h>
+#include <cglm/types.h>
 #include <sys/types.h>
 #include <wayland-util.h>
 
