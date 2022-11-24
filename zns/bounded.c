@@ -28,6 +28,7 @@ zns_bounded_create(struct zgnr_bounded* zgnr_bounded)
   }
 
   self->zgnr_bounded = zgnr_bounded;
+  wl_list_init(&self->link);
 
   self->zgnr_bounded_destroy_listener.notify =
       zns_bounded_handle_zgnr_bounded_destroy;
@@ -43,6 +44,7 @@ err:
 static void
 zns_bounded_destroy(struct zns_bounded* self)
 {
+  wl_list_remove(&self->link);
   wl_list_remove(&self->zgnr_bounded_destroy_listener.link);
   free(self);
 }
