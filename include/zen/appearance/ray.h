@@ -1,7 +1,7 @@
 #pragma once
 
 #include "zen/appearance/system.h"
-#include "zen/scene/ray.h"
+#include "zen/ray.h"
 
 struct zna_ray;
 

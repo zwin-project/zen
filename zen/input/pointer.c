@@ -6,7 +6,7 @@
 
 #include "zen-common.h"
 #include "zen/cursor.h"
-#include "zen/scene/ray.h"
+#include "zen/ray.h"
 #include "zen/scene/view.h"
 #include "zen/server.h"
 
@@ -15,13 +15,13 @@ zn_pointer_handle_motion(struct wl_listener* listener, void* data)
 {
   UNUSED(listener);
   struct zn_server* server = zn_server_get_singleton();
-  struct zn_cursor* cursor = server->input_manager->seat->cursor;
   struct wlr_event_pointer_motion* event = data;
 
   if (server->display_system == ZEN_DISPLAY_SYSTEM_TYPE_SCREEN) {
+    struct zn_cursor* cursor = server->input_manager->seat->cursor;
     cursor->grab->interface->motion(cursor->grab, event);
   } else {
-    struct zn_ray* ray = zn_scene_ensure_ray(server->scene);
+    struct zn_ray* ray = server->input_manager->seat->ray;
 
     float polar = ray->angle.polar + event->delta_y * 0.001;
     if (polar < 0)

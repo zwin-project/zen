@@ -220,10 +220,16 @@ zn_server_create(struct wl_display *display)
     goto err_allocator;
   }
 
+  self->appearance_system = zna_system_create(self->display);
+  if (self->appearance_system == NULL) {
+    zn_error("Failed to create a zn_appearance");
+    goto err_allocator;
+  }
+
   self->scene = zn_scene_create(self->config);
   if (self->scene == NULL) {
     zn_error("Failed to create zn_scene");
-    goto err_allocator;
+    goto err_appearance;
   }
 
   for (int i = 1; i <= 32; i++) {
@@ -268,16 +274,10 @@ zn_server_create(struct wl_display *display)
     goto err_remote;
   }
 
-  self->appearance_system = zna_system_create(self->display);
-  if (self->appearance_system == NULL) {
-    zn_error("Failed to create a zn_appearance");
-    goto err_shell;
-  }
-
   self->xwayland = wlr_xwayland_create(self->display, self->w_compositor, true);
   if (self->xwayland == NULL) {
     zn_error("Failed to create xwayland");
-    goto err_appearance;
+    goto err_shell;
   }
 
   setenv("DISPLAY", self->xwayland->display_name, true);
@@ -316,9 +316,6 @@ zn_server_create(struct wl_display *display)
 
   return self;
 
-err_appearance:
-  zna_system_destroy(self->appearance_system);
-
 err_shell:
   zn_shell_destroy(self->shell);
 
@@ -336,6 +333,9 @@ err_socket:
 
 err_scene:
   zn_scene_destroy(self->scene);
+
+err_appearance:
+  zna_system_destroy(self->appearance_system);
 
 err_allocator:
   wlr_allocator_destroy(self->allocator);

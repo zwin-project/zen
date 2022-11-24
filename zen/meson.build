@@ -5,6 +5,7 @@ _zen_srcs = [
   'decoration-manager.c',
   'main.c',
   'output.c',
+  'ray.c',
   'screen-renderer.c',
   'server.c',
   'xdg-decoration.c',
@@ -21,7 +22,6 @@ _zen_srcs = [
   'input/seat.c',
 
   'scene/board.c',
-  'scene/ray.c',
   'scene/scene.c',
   'scene/screen.c',
   'scene/screen-layout.c',
