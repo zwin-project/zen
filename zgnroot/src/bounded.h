@@ -3,6 +3,11 @@
 #include "virtual-object.h"
 #include "zgnr/bounded.h"
 
+enum zgnr_bounded_damage {
+  ZGNR_BOUNDED_DAMAGE_HALF_SIZE = 0,
+  ZGNR_BOUNDED_DAMAGE_REGION = 1 << 0,
+};
+
 /**
  * When the associated virtual object is destroyed, this object is destroyed
  * and the wl_resource becomes inert (resource::data == NULL).
@@ -18,6 +23,8 @@ struct zgnr_bounded_impl {
 
   struct {
     vec3 half_size;
+    struct zgnr_region_node *region;  // nullable
+    uint32_t damage;                  // bit sum of enum zgnr_bounded_damage
   } pending;
 
   bool configured;

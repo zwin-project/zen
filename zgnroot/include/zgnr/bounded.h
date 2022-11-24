@@ -2,6 +2,7 @@
 
 #include <cglm/types.h>
 #include <wayland-server-core.h>
+#include <zgnr/region/node.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,6 +15,7 @@ struct zgnr_bounded {
 
   struct {
     vec3 half_size;
+    struct zgnr_region_node *region;  // nullable
   } current;
 
   void *user_data;

@@ -5,6 +5,7 @@
 #include <zigen-shell-protocol.h>
 
 #include "bounded-configure.h"
+#include "region.h"
 
 static void zgnr_bounded_destroy(struct zgnr_bounded_impl *self);
 static void zgnr_bounded_inert(struct zgnr_bounded_impl *self);
@@ -76,13 +77,36 @@ zgnr_bounded_protocol_ack_configure(
 
   self->configured = true;
   glm_vec3_copy(configure->half_size, self->pending.half_size);
+  self->pending.damage |= ZGNR_BOUNDED_DAMAGE_HALF_SIZE;
 
   zgnr_bounded_configure_destroy(configure);
+}
+
+static void
+zgnr_bounded_protocol_set_region(struct wl_client *client,
+    struct wl_resource *resource, struct wl_resource *region_resource)
+{
+  UNUSED(client);
+  struct zgnr_bounded_impl *self = wl_resource_get_user_data(resource);
+
+  if (self->pending.region) {
+    zgnr_region_node_destroy(self->pending.region);
+  }
+
+  if (region_resource == NULL) {
+    self->pending.region = NULL;
+  } else {
+    struct zgnr_region *region = wl_resource_get_user_data(region_resource);
+    self->pending.region = zgnr_region_node_create_copy(region->node);
+  }
+
+  self->pending.damage |= ZGNR_BOUNDED_DAMAGE_REGION;
 }
 
 static const struct zgn_bounded_interface implementation = {
     .destroy = zgnr_bounded_protocol_destroy,
     .ack_configure = zgnr_bounded_protocol_ack_configure,
+    .set_region = zgnr_bounded_protocol_set_region,
 };
 
 static void
@@ -98,7 +122,7 @@ zgnr_bounded_handle_virtual_object_destroy(
 }
 
 static void
-zgnr_bounded_handle_virtual_Object_commit(
+zgnr_bounded_handle_virtual_object_commit(
     struct wl_listener *listener, void *data)
 {
   UNUSED(data);
@@ -111,7 +135,19 @@ zgnr_bounded_handle_virtual_Object_commit(
     return;
   }
 
-  glm_vec3_copy(self->pending.half_size, self->base.current.half_size);
+  if (self->pending.damage & ZGNR_BOUNDED_DAMAGE_HALF_SIZE) {
+    glm_vec3_copy(self->pending.half_size, self->base.current.half_size);
+  }
+
+  if (self->pending.damage & ZGNR_BOUNDED_DAMAGE_REGION) {
+    if (self->base.current.region) {
+      zgnr_region_node_destroy(self->base.current.region);
+    }
+    self->base.current.region = self->pending.region;  // move ownership
+    self->pending.region = NULL;
+  }
+
+  self->pending.damage = 0;
 }
 
 static void
@@ -142,13 +178,17 @@ zgnr_bounded_create(struct wl_client *client, uint32_t id,
 
   self->configured = false;
 
+  self->pending.region = NULL;
+  self->pending.damage = 0;
+  self->base.current.region = NULL;
+
   self->virtual_object_destroy_listener.notify =
       zgnr_bounded_handle_virtual_object_destroy;
   wl_signal_add(&virtual_object->base.events.destroy,
       &self->virtual_object_destroy_listener);
 
   self->virtual_object_commit_listener.notify =
-      zgnr_bounded_handle_virtual_Object_commit;
+      zgnr_bounded_handle_virtual_object_commit;
   wl_signal_add(
       &virtual_object->events.on_commit, &self->virtual_object_commit_listener);
 
@@ -178,6 +218,14 @@ zgnr_bounded_destroy(struct zgnr_bounded_impl *self)
   struct zgnr_bounded_configure *configure, *tmp;
   wl_list_for_each_safe (configure, tmp, &self->configure_list, link) {
     zgnr_bounded_configure_destroy(configure);
+  }
+
+  if (self->pending.region) {
+    zgnr_region_node_destroy(self->pending.region);
+  }
+
+  if (self->base.current.region) {
+    zgnr_region_node_destroy(self->base.current.region);
   }
 
   wl_list_remove(&self->virtual_object_destroy_listener.link);
