@@ -4,6 +4,8 @@
 #include <zen-common.h>
 #include <zigen-protocol.h>
 
+#include "region/cuboid.h"
+
 static void zgnr_region_destroy(struct zgnr_region* self);
 
 static void
@@ -56,12 +58,13 @@ zgnr_region_protocol_add_cuboid(struct wl_client* client,
     return;
   }
 
-  cuboid = zalloc(sizeof *cuboid);
-  glm_vec3_copy(half_size, cuboid->half_size);
-  glm_vec3_copy(center, cuboid->center);
-  glm_vec4_copy(quaternion, cuboid->quaternion);
+  cuboid = zgnr_cuboid_region_create(half_size, center, quaternion);
+  if (cuboid == NULL) {
+    zn_error("Failed to creat a cuboid region");
+    return;
+  }
 
-  wl_list_insert(&self->cuboid_list, &cuboid->link);
+  zgnr_region_node_add_cuboid(self->node, cuboid);
 }
 
 static const struct zgn_region_interface implementation = {
@@ -81,18 +84,25 @@ zgnr_region_create(struct wl_client* client, uint32_t id)
     goto err;
   }
 
-  resource = wl_resource_create(client, &zgn_region_interface, 1, id);
-  if (resource == NULL) {
-    zn_error("Failed to create a wl_resource");
+  self->node = zgnr_region_node_create();
+  if (self->node == NULL) {
+    zn_error("Failed to create zgnr_region_node");
     goto err_free;
   }
 
-  wl_list_init(&self->cuboid_list);
+  resource = wl_resource_create(client, &zgn_region_interface, 1, id);
+  if (resource == NULL) {
+    zn_error("Failed to create a wl_resource");
+    goto err_node;
+  }
 
   wl_resource_set_implementation(
       resource, &implementation, self, zgnr_region_handle_destroy);
 
   return self;
+
+err_node:
+  zgnr_region_node_destroy(self->node);
 
 err_free:
   free(self);
@@ -104,13 +114,7 @@ err:
 static void
 zgnr_region_destroy(struct zgnr_region* self)
 {
-  struct zgnr_cuboid_region *cuboid, *tmp;
+  zgnr_region_node_destroy(self->node);
 
-  wl_list_for_each_safe (cuboid, tmp, &self->cuboid_list, link) {
-    wl_list_remove(&cuboid->link);
-    free(cuboid);
-  }
-
-  wl_list_remove(&self->cuboid_list);
   free(self);
 }

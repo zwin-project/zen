@@ -5,6 +5,7 @@
 
 #include "application.h"
 #include "array.h"
+#include "region.h"
 
 namespace zen::client {
 
@@ -33,6 +34,12 @@ void
 Bounded::AckConfigure(uint32_t serial)
 {
   zgn_bounded_ack_configure(proxy_, serial);
+}
+
+void
+Bounded::SetRegion(Region *region)
+{
+  zgn_bounded_set_region(proxy_, region->proxy());
 }
 
 const struct zgn_bounded_listener Bounded::listener = {

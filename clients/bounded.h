@@ -10,6 +10,7 @@
 namespace zen::client {
 
 class Application;
+class Region;
 
 class Bounded : public VirtualObject
 {
@@ -24,6 +25,8 @@ class Bounded : public VirtualObject
   virtual void Configure(glm::vec3 /*half_size*/, uint32_t /*serial*/){};
 
   void AckConfigure(uint32_t serial);
+
+  void SetRegion(Region *region);
 
   inline zgn_bounded *proxy();
 

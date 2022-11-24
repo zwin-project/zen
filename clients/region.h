@@ -23,10 +23,18 @@ class Region
 
   void AddCuboid(glm::vec3 half_size, glm::vec3 center, glm::quat quaternion);
 
+  inline zgn_region *proxy();
+
  private:
   Application *app_;
   zgn_region *proxy_ = nullptr;
 };
+
+inline zgn_region *
+Region::proxy()
+{
+  return proxy_;
+}
 
 std::unique_ptr<Region> CreateRegion(Application *app);
 
