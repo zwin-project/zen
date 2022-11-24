@@ -14,6 +14,9 @@ Application::GlobalRegistry(void* data, struct wl_registry* registry,
   if (std::strcmp(interface, "zgn_compositor") == 0) {
     app->zgn_compositor_ = static_cast<zgn_compositor*>(
         wl_registry_bind(registry, id, &zgn_compositor_interface, version));
+  } else if (std::strcmp(interface, "zgn_seat") == 0) {
+    app->zgn_seat_ = static_cast<zgn_seat*>(
+        wl_registry_bind(registry, id, &zgn_seat_interface, version));
   } else if (std::strcmp(interface, "zgn_gles_v32") == 0) {
     app->zgn_gles_v32_ = static_cast<zgn_gles_v32*>(
         wl_registry_bind(registry, id, &zgn_gles_v32_interface, version));
@@ -63,8 +66,9 @@ Application::Connect(const char* socket)
 
   wl_display_roundtrip(display_);
 
-  if (zgn_compositor_ == nullptr || zgn_gles_v32_ == nullptr ||
-      zgn_shell_ == nullptr || zgn_shm_ == nullptr) {
+  if (zgn_compositor_ == nullptr || zgn_seat_ == nullptr ||
+      zgn_gles_v32_ == nullptr || zgn_shell_ == nullptr ||
+      zgn_shm_ == nullptr) {
     zn_error("Server does not support zigen protocols");
     goto err_globals;
   }
@@ -85,10 +89,17 @@ Application::Connect(const char* socket)
   return true;
 
 err_globals:
+  if (zgn_shm_) zgn_shm_destroy(zgn_shm_);
+  zgn_shm_ = nullptr;
+
   if (zgn_shell_) zgn_shell_destroy(zgn_shell_);
+  zgn_shell_ = nullptr;
 
   if (zgn_gles_v32_) zgn_gles_v32_destroy(zgn_gles_v32_);
   zgn_gles_v32_ = nullptr;
+
+  if (zgn_seat_) zgn_seat_destroy(zgn_seat_);
+  zgn_seat_ = nullptr;
 
   if (zgn_compositor_) zgn_compositor_destroy(zgn_compositor_);
   zgn_compositor_ = nullptr;
@@ -140,6 +151,7 @@ Application::~Application()
   if (zgn_shm_) zgn_shm_destroy(zgn_shm_);
   if (zgn_shell_) zgn_shell_destroy(zgn_shell_);
   if (zgn_gles_v32_) zgn_gles_v32_destroy(zgn_gles_v32_);
+  if (zgn_seat_) zgn_seat_destroy(zgn_seat_);
   if (zgn_compositor_) zgn_compositor_destroy(zgn_compositor_);
   if (registry_) wl_registry_destroy(registry_);
   if (display_) wl_display_disconnect(display_);

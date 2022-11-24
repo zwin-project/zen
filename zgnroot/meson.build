@@ -20,6 +20,7 @@ _zgnr_srcs = [
   'src/region/node.c',
   'src/region/cuboid.c',
   'src/rendering-unit.c',
+  'src/seat.c',
   'src/shell.c',
   'src/shm.c',
   'src/texture-binding.c',
