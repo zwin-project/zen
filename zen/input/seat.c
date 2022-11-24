@@ -82,10 +82,16 @@ zn_seat_create(struct wl_display* display, const char* seat_name)
     goto err_free;
   }
 
+  self->zgnr_seat = zgnr_seat_create(display);
+  if (self->zgnr_seat == NULL) {
+    zn_error("Failed to creat zgnr_seat");
+    goto err_wlr_seat;
+  }
+
   self->cursor = zn_cursor_create();
   if (self->cursor == NULL) {
     zn_error("Failed to create zn_cursor");
-    goto err_wlr_seat;
+    goto err_zgnr_seat;
   }
 
   self->ray = zn_ray_create();
@@ -106,6 +112,9 @@ zn_seat_create(struct wl_display* display, const char* seat_name)
 err_cursor:
   zn_cursor_destroy(self->cursor);
 
+err_zgnr_seat:
+  zgnr_seat_destroy(self->zgnr_seat);
+
 err_wlr_seat:
   wlr_seat_destroy(self->wlr_seat);
 
@@ -125,6 +134,7 @@ zn_seat_destroy(struct zn_seat* self)
   wl_list_remove(&self->devices);
   zn_ray_destroy(self->ray);
   zn_cursor_destroy(self->cursor);
+  zgnr_seat_destroy(self->zgnr_seat);
   wlr_seat_destroy(self->wlr_seat);
   free(self);
 }

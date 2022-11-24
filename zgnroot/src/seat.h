@@ -1,11 +1,8 @@
 #pragma once
 
-#include <wayland-server-core.h>
+#include "zgnr/seat.h"
 
-struct zgnr_seat {
+struct zgnr_seat_impl {
+  struct zgnr_seat base;
   struct wl_global* global;
 };
-
-struct zgnr_seat* zgnr_seat_create(struct wl_display* display);
-
-void zgnr_seat_destroy(struct zgnr_seat* self);
