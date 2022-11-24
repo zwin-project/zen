@@ -18,12 +18,41 @@ zn_ray_get_tip(struct zn_ray* self, float length, vec3 tip)
 }
 
 void
-zn_ray_move(struct zn_ray* self, float polar, float azimuthal)
+zn_ray_move(struct zn_ray* self, vec3 origin, float polar, float azimuthal)
 {
   self->angle.polar = polar;
   self->angle.azimuthal = azimuthal;
+  glm_vec3_copy(origin, self->origin);
 
   wl_signal_emit(&self->events.motion, NULL);
+}
+
+void
+zn_ray_start_grab(struct zn_ray* self, struct zn_ray_grab* grab)
+{
+  struct zn_server* server = zn_server_get_singleton();
+  struct zn_ray_grab* default_grab = zn_shell_get_default_grab(server->shell);
+
+  if (!zn_assert(
+          self->grab == default_grab, "Non-default grab already exists")) {
+    return;
+  }
+
+  self->grab->interface->cancel(self->grab);
+
+  self->grab = grab;
+  self->grab->ray = self;
+}
+
+void
+zn_ray_end_grab(struct zn_ray* self)
+{
+  struct zn_server* server = zn_server_get_singleton();
+
+  self->grab->interface->cancel(self->grab);
+
+  self->grab = zn_shell_get_default_grab(server->shell);
+  self->grab->ray = self;
 }
 
 struct zn_ray*
@@ -38,6 +67,9 @@ zn_ray_create(void)
     zn_error("Failed to allocate memory");
     goto err;
   }
+
+  self->grab = zn_shell_get_default_grab(server->shell);
+  self->grab->ray = self;
 
   glm_vec3_copy(initial_origin, self->origin);
   self->angle.polar = GLM_PI / 3;
@@ -63,6 +95,8 @@ err:
 void
 zn_ray_destroy(struct zn_ray* self)
 {
+  zn_ray_end_grab(self);
+
   wl_signal_emit(&self->events.destroy, NULL);
 
   zna_ray_destroy(self->appearance);

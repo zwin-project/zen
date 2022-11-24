@@ -256,10 +256,16 @@ zn_server_create(struct wl_display *display)
   zn_debug("WAYLAND_DISPLAY=%s", self->socket);
   zn_debug("XDG_RUNTIME_DIR=%s", xdg);
 
+  self->shell = zn_shell_create(self->display);
+  if (self->shell == NULL) {
+    zn_error("Failed to create a zn_shell");
+    goto err_server_decoration;
+  }
+
   self->input_manager = zn_input_manager_create(self->display);
   if (self->input_manager == NULL) {
     zn_error("Failed to create input manager");
-    goto err_server_decoration;
+    goto err_shell;
   }
 
   self->remote = znr_remote_create(self->display);
@@ -268,16 +274,10 @@ zn_server_create(struct wl_display *display)
     goto err_input_manager;
   }
 
-  self->shell = zn_shell_create(self->display);
-  if (self->shell == NULL) {
-    zn_error("Failed to create a zn_shell");
-    goto err_remote;
-  }
-
   self->xwayland = wlr_xwayland_create(self->display, self->w_compositor, true);
   if (self->xwayland == NULL) {
     zn_error("Failed to create xwayland");
-    goto err_shell;
+    goto err_remote;
   }
 
   setenv("DISPLAY", self->xwayland->display_name, true);
@@ -316,14 +316,14 @@ zn_server_create(struct wl_display *display)
 
   return self;
 
-err_shell:
-  zn_shell_destroy(self->shell);
-
 err_remote:
   znr_remote_destroy(self->remote);
 
 err_input_manager:
   zn_input_manager_destroy(self->input_manager);
+
+err_shell:
+  zn_shell_destroy(self->shell);
 
 err_server_decoration:
   zn_decoration_manager_destroy(self->decoration_manager);
@@ -374,9 +374,9 @@ zn_server_destroy(struct zn_server *self)
 {
   wlr_xwayland_destroy(self->xwayland);
   zna_system_destroy(self->appearance_system);
-  zn_shell_destroy(self->shell);
   znr_remote_destroy(self->remote);
   zn_input_manager_destroy(self->input_manager);
+  zn_shell_destroy(self->shell);
   zn_decoration_manager_destroy(self->decoration_manager);
   free(self->socket);
   zn_scene_destroy(self->scene);
