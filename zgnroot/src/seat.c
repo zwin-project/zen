@@ -29,7 +29,7 @@ static void
 zgnr_seat_bind(
     struct wl_client* client, void* data, uint32_t version, uint32_t id)
 {
-  struct zgnr_seat* self = data;
+  struct zgnr_seat_impl* self = data;
 
   struct wl_resource* resource =
       wl_resource_create(client, &zgn_seat_interface, version, id);
@@ -45,7 +45,7 @@ zgnr_seat_bind(
 struct zgnr_seat*
 zgnr_seat_create(struct wl_display* display)
 {
-  struct zgnr_seat* self;
+  struct zgnr_seat_impl* self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -56,15 +56,18 @@ zgnr_seat_create(struct wl_display* display)
   self->global =
       wl_global_create(display, &zgn_seat_interface, 1, self, zgnr_seat_bind);
 
-  return self;
+  return &self->base;
 
 err:
   return NULL;
 }
 
 void
-zgnr_seat_destroy(struct zgnr_seat* self)
+zgnr_seat_destroy(struct zgnr_seat* parent)
 {
+  struct zgnr_seat_impl* self = zn_container_of(parent, self, base);
+
   wl_global_destroy(self->global);
+
   free(self);
 }
