@@ -2,6 +2,7 @@
 
 #include <cglm/vec3.h>
 #include <zen-common.h>
+#include <zigen-protocol.h>
 #include <zigen-shell-protocol.h>
 
 #include "bounded.h"
@@ -24,6 +25,13 @@ zgnr_shell_protocol_get_bounded(struct wl_client* client,
   struct zgnr_shell_impl* self = wl_resource_get_user_data(resource);
   vec3 half_size;
 
+  if (zn_array_to_vec3(half_size_array, half_size) != 0) {
+    wl_resource_post_error(resource, ZGN_COMPOSITOR_ERROR_WL_ARRAY_SIZE,
+        "half_size is expected vec3 (%ld bytes) but got %ld bytes",
+        sizeof(vec3), half_size_array->size);
+    return;
+  }
+
   struct zgnr_virtual_object_impl* virtual_object =
       wl_resource_get_user_data(virtual_object_resource);
 
@@ -35,8 +43,6 @@ zgnr_shell_protocol_get_bounded(struct wl_client* client,
           ZGN_SHELL_ERROR_ROLE)) {
     return;
   }
-
-  zn_array_to_vec3(half_size_array, half_size);
 
   zgnr_bounded_configure(bounded, half_size);
 

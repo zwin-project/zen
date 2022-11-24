@@ -25,6 +25,7 @@ _zen_box_client_srcs = [
   'gl-texture.cc',
   'gl-vertex-array.cc',
   'loop.cc',
+  'region.cc',
   'rendering-unit.cc',
   'shm-pool.cc',
   'virtual-object.cc',

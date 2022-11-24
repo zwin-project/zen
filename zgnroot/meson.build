@@ -16,6 +16,7 @@ _zgnr_srcs = [
   'src/gl-vertex-attrib.c',
   'src/mem-storage.c',
   'src/program-shader.c',
+  'src/region.c',
   'src/rendering-unit.c',
   'src/shell.c',
   'src/shm.c',

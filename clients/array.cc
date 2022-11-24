@@ -27,4 +27,17 @@ to_array(glm::vec3 &vec, struct wl_array *array)
   return true;
 }
 
+bool
+to_array(glm::quat &quaternion, struct wl_array *array)
+{
+  wl_array_init(array);
+
+  void *container = wl_array_add(array, sizeof(glm::quat));
+  if (container == NULL) return false;
+
+  std::memcpy(container, &quaternion, sizeof(glm::quat));
+
+  return true;
+}
+
 }  // namespace zen::client

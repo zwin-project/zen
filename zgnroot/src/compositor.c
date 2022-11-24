@@ -5,6 +5,7 @@
 #include <zigen-protocol.h>
 
 #include "backend.h"
+#include "region.h"
 #include "virtual-object.h"
 
 static void
@@ -25,8 +26,21 @@ zgnr_compositor_protocol_create_virtual_object(
       &self->backend->base.events.new_virtual_object, &virtual_object->base);
 }
 
+static void
+zgnr_compositor_protocol_create_region(
+    struct wl_client* client, struct wl_resource* resource, uint32_t id)
+{
+  UNUSED(resource);
+  struct zgnr_region* region = zgnr_region_create(client, id);
+  if (region == NULL) {
+    zn_error("Failed to create zgnr_region");
+    wl_client_post_no_memory(client);
+  }
+}
+
 static const struct zgn_compositor_interface implementation = {
     .create_virtual_object = zgnr_compositor_protocol_create_virtual_object,
+    .create_region = zgnr_compositor_protocol_create_region,
 };
 
 static void
