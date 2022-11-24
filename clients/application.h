@@ -26,6 +26,7 @@ class Application
 
   inline Loop* loop();
   inline zgn_compositor* compositor();
+  inline zgn_seat* seat();
   inline zgn_gles_v32* gles_v32();
   inline zgn_shell* shell();
   inline zgn_shm* shm();
@@ -42,6 +43,7 @@ class Application
   wl_display* display_ = nullptr;
   wl_registry* registry_ = nullptr;
   zgn_compositor* zgn_compositor_ = nullptr;
+  zgn_seat* zgn_seat_ = nullptr;
   zgn_gles_v32* zgn_gles_v32_ = nullptr;
   zgn_shell* zgn_shell_ = nullptr;
   zgn_shm* zgn_shm_ = nullptr;
@@ -59,6 +61,12 @@ inline zgn_compositor*
 Application::compositor()
 {
   return zgn_compositor_;
+}
+
+inline zgn_seat*
+Application::seat()
+{
+  return zgn_seat_;
 }
 
 inline zgn_gles_v32*
