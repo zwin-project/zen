@@ -1,5 +1,6 @@
 #include "zen/input/pointer.h"
 
+#include <cglm/vec3.h>
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_pointer.h>
 #include <wlr/types/wlr_surface.h>
@@ -23,17 +24,8 @@ zn_pointer_handle_motion(struct wl_listener* listener, void* data)
   } else {
     struct zn_ray* ray = server->input_manager->seat->ray;
 
-    float polar = ray->angle.polar + event->delta_y * 0.001;
-    if (polar < 0)
-      polar = 0;
-    else if (polar > M_PI)
-      polar = M_PI;
-
-    float azimuthal = ray->angle.azimuthal - event->delta_x * 0.001;
-    while (azimuthal >= 2 * M_PI) azimuthal -= 2 * M_PI;
-    while (azimuthal < 0) azimuthal += 2 * M_PI;
-
-    zn_ray_move(ray, polar, azimuthal);
+    ray->grab->interface->motion_relative(ray->grab, GLM_VEC3_ZERO,
+        event->delta_y * 0.001, -event->delta_x * 0.001);
   }
 }
 
