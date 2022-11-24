@@ -4,7 +4,6 @@
 #include <wlr/render/wlr_texture.h>
 
 #include "zen/config.h"
-#include "zen/scene/ray.h"
 #include "zen/scene/screen-layout.h"
 
 struct zn_scene {
@@ -15,22 +14,14 @@ struct zn_scene {
   struct wl_list board_list;           // zn_board::link, non empty
   struct wl_list virtual_object_list;  // zn_virtual_object::link
 
-  // create or get zn_scene::ray via zn_scene_ensure_ray
-  struct zn_ray* ray;  // null if no pointing device exists
-
   struct wl_listener unmap_focused_view_listener;
 
   struct wlr_texture* bg_texture;  // nullable
 
   struct {
     struct wl_signal new_board;  // (struct zn_board*)
-    struct wl_signal new_ray;    // (NULL)
   } events;
 };
-
-struct zn_ray* zn_scene_ensure_ray(struct zn_scene* self);
-
-void zn_scene_destroy_ray(struct zn_scene* self);
 
 void zn_scene_set_focused_view(struct zn_scene* self, struct zn_view* view);
 

@@ -4,10 +4,10 @@ _zen_appearance_inc = include_directories('.')
 
 _zen_appearance_srcs = [
   'base-unit.c',
+  'ray.c',
   'shader-inventory.c',
   'system.c',
   
-  'scene/ray.c',
   'scene/virtual-object.c',
   'scene/virtual-object/gl-base-technique.c',
   'scene/virtual-object/gl-buffer.c',

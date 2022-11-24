@@ -28,7 +28,6 @@ static void
 zn_seat_update_capabilities(struct zn_seat* self)
 {
   uint32_t caps = 0;
-  struct zn_server* server = zn_server_get_singleton();
 
   struct zn_input_device* input_device;
   wl_list_for_each (input_device, &self->devices, link) {
@@ -47,12 +46,6 @@ zn_seat_update_capabilities(struct zn_seat* self)
       case WLR_INPUT_DEVICE_SWITCH:
         break;
     }
-  }
-
-  if (caps & WL_SEAT_CAPABILITY_POINTER) {
-    zn_scene_ensure_ray(server->scene);
-  } else {
-    zn_scene_destroy_ray(server->scene);
   }
 
   wlr_seat_set_capabilities(self->wlr_seat, caps);
@@ -95,6 +88,12 @@ zn_seat_create(struct wl_display* display, const char* seat_name)
     goto err_wlr_seat;
   }
 
+  self->ray = zn_ray_create();
+  if (self->ray == NULL) {
+    zn_error("Failed to create zn_ray");
+    goto err_cursor;
+  }
+
   wl_list_init(&self->devices);
   wl_signal_init(&self->events.destroy);
 
@@ -103,6 +102,9 @@ zn_seat_create(struct wl_display* display, const char* seat_name)
       &self->request_set_cursor_listener);
 
   return self;
+
+err_cursor:
+  zn_cursor_destroy(self->cursor);
 
 err_wlr_seat:
   wlr_seat_destroy(self->wlr_seat);
@@ -121,6 +123,7 @@ zn_seat_destroy(struct zn_seat* self)
 
   wl_list_remove(&self->request_set_cursor_listener.link);
   wl_list_remove(&self->devices);
+  zn_ray_destroy(self->ray);
   zn_cursor_destroy(self->cursor);
   wlr_seat_destroy(self->wlr_seat);
   free(self);

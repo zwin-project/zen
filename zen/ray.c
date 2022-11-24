@@ -1,9 +1,9 @@
-#include "zen/scene/ray.h"
+#include "zen/ray.h"
 
 #include <cglm/vec3.h>
 
 #include "zen-common.h"
-#include "zen/appearance/scene/ray.h"
+#include "zen/appearance/ray.h"
 #include "zen/server.h"
 
 void
