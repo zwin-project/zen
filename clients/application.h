@@ -16,7 +16,7 @@ class Application
  public:
   DISABLE_MOVE_AND_COPY(Application);
   Application() = default;
-  ~Application();
+  virtual ~Application();
 
   bool Init();
 
@@ -37,6 +37,10 @@ class Application
       uint32_t id, const char* interface, uint32_t version);
   static void GlobalRegistryRemove(
       void* data, struct wl_registry* registry, uint32_t id);
+
+  static const struct zgn_seat_listener zgn_seat_listener_;
+  static void SeatCapabilities(
+      void* data, struct zgn_seat* zgn_seat, uint32_t capabilities);
 
   void Poll();
 

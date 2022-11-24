@@ -17,6 +17,8 @@ Application::GlobalRegistry(void* data, struct wl_registry* registry,
   } else if (std::strcmp(interface, "zgn_seat") == 0) {
     app->zgn_seat_ = static_cast<zgn_seat*>(
         wl_registry_bind(registry, id, &zgn_seat_interface, version));
+    zgn_seat_add_listener(
+        app->zgn_seat_, &Application::zgn_seat_listener_, app);
   } else if (std::strcmp(interface, "zgn_gles_v32") == 0) {
     app->zgn_gles_v32_ = static_cast<zgn_gles_v32*>(
         wl_registry_bind(registry, id, &zgn_gles_v32_interface, version));
@@ -32,6 +34,11 @@ Application::GlobalRegistry(void* data, struct wl_registry* registry,
 void
 Application::GlobalRegistryRemove(
     void* /*data*/, struct wl_registry* /*registry*/, uint32_t /*id*/)
+{}
+
+void
+Application::SeatCapabilities(
+    void* /*data*/, struct zgn_seat* /*zgn_seat*/, uint32_t /*capabilities*/)
 {}
 
 bool
@@ -160,6 +167,10 @@ Application::~Application()
 const struct wl_registry_listener Application::registry_listener_ = {
     Application::GlobalRegistry,
     Application::GlobalRegistryRemove,
+};
+
+const struct zgn_seat_listener Application::zgn_seat_listener_ = {
+    Application::SeatCapabilities,
 };
 
 }  // namespace zen::client
