@@ -1,6 +1,7 @@
 #include "zen/input/seat.h"
 
 #include <wlr/types/wlr_seat.h>
+#include <zigen-protocol.h>
 
 #include "zen-common.h"
 #include "zen/input/input-device.h"
@@ -27,16 +28,18 @@ zn_seat_handle_request_set_cursor(struct wl_listener* listener, void* data)
 static void
 zn_seat_update_capabilities(struct zn_seat* self)
 {
-  uint32_t caps = 0;
+  uint32_t wl_caps = 0;
+  uint32_t zgn_caps = 0;
 
   struct zn_input_device* input_device;
   wl_list_for_each (input_device, &self->devices, link) {
     switch (input_device->wlr_input->type) {
       case WLR_INPUT_DEVICE_KEYBOARD:
-        caps |= WL_SEAT_CAPABILITY_KEYBOARD;
+        wl_caps |= WL_SEAT_CAPABILITY_KEYBOARD;
         break;
       case WLR_INPUT_DEVICE_POINTER:
-        caps |= WL_SEAT_CAPABILITY_POINTER;
+        wl_caps |= WL_SEAT_CAPABILITY_POINTER;
+        zgn_caps |= ZGN_SEAT_CAPABILITY_RAY_DIRECTION;
         break;
       case WLR_INPUT_DEVICE_TOUCH:
         // TODO: support touch device
@@ -48,7 +51,8 @@ zn_seat_update_capabilities(struct zn_seat* self)
     }
   }
 
-  wlr_seat_set_capabilities(self->wlr_seat, caps);
+  wlr_seat_set_capabilities(self->wlr_seat, wl_caps);
+  zgnr_seat_set_capabilities(self->zgnr_seat, zgn_caps);
 }
 
 void
