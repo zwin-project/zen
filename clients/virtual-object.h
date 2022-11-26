@@ -25,6 +25,8 @@ class VirtualObject
 
   inline zgn_virtual_object *proxy();
 
+  inline Application *app();
+
  protected:
   virtual void Frame(uint32_t /*time*/){};
 
@@ -43,6 +45,12 @@ inline zgn_virtual_object *
 VirtualObject::proxy()
 {
   return proxy_;
+}
+
+inline Application *
+VirtualObject::app()
+{
+  return app_;
 }
 
 }  // namespace zen::client
