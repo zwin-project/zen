@@ -5,15 +5,18 @@
 
 #include <cstring>
 #include <glm/common.hpp>
-#include <glm/vec3.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/mat4x4.hpp>
 #include <glm/vec4.hpp>
 #include <iostream>
 #include <vector>
 
 #include "application.h"
 #include "bounded.h"
-#include "box.vert.h"
 #include "buffer.h"
+#include "default.vert.h"
 #include "fd.h"
 #include "gl-base-technique.h"
 #include "gl-buffer.h"
@@ -69,11 +72,15 @@ class Box final : public Bounded
     float rad_2 = M_PI * animation_seed_ * 4;  // rad / 2
     float cos = cosf(rad_2);
     float sin = sinf(rad_2);
-    glm::vec4 quaternion = {0, sin, 0, cos};
+    glm::quat quaternion = {0, sin, 0, cos};
     float min = glm::min(glm::min(half_size_.x, half_size_.y), half_size_.z);
     glm::vec3 size(min / sqrt(3));
-    technique_->Uniform(0, "half_size", size);
-    technique_->Uniform(0, "quaternion", quaternion);
+
+    glm::mat4 matrix = glm::toMat4(quaternion);
+
+    matrix = glm::scale(matrix, size);
+
+    technique_->Uniform(0, "local_model", matrix);
   }
 
   void Frame(uint32_t time) override
@@ -181,7 +188,7 @@ class Box final : public Bounded
     if (!vertex_array_) return false;
 
     vertex_shader_ =
-        CreateGlShader(app_, GL_VERTEX_SHADER, box_vertex_shader_source);
+        CreateGlShader(app_, GL_VERTEX_SHADER, default_vertex_shader_source);
     if (!vertex_shader_) return false;
 
     fragment_shader_ = CreateGlShader(
