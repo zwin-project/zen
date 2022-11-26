@@ -9,6 +9,7 @@
 #include "scene/virtual-object/gl-buffer.h"
 #include "scene/virtual-object/gl-program.h"
 #include "scene/virtual-object/gl-shader.h"
+#include "scene/virtual-object/gl-texture.h"
 #include "scene/virtual-object/gl-vertex-array.h"
 #include "scene/virtual-object/rendering-unit.h"
 #include "shader-inventory.h"
@@ -122,6 +123,17 @@ zna_system_handle_new_gl_shader(struct wl_listener* listener, void* data)
 }
 
 static void
+zna_system_handle_new_gl_texture(struct wl_listener* listener, void* data)
+{
+  struct zna_system* self =
+      zn_container_of(listener, self, new_gl_texture_listener);
+
+  struct zgnr_gl_texture* texture = data;
+
+  (void)zna_gl_texture_create(texture, self);
+}
+
+static void
 zna_system_handle_new_gl_program(struct wl_listener* listener, void* data)
 {
   struct zna_system* self =
@@ -183,6 +195,10 @@ zna_system_create(struct wl_display* display)
   wl_signal_add(
       &self->gles->events.new_gl_program, &self->new_gl_program_listener);
 
+  self->new_gl_texture_listener.notify = zna_system_handle_new_gl_texture;
+  wl_signal_add(
+      &self->gles->events.new_gl_texture, &self->new_gl_texture_listener);
+
   self->current_session_disconnected_listener.notify =
       zna_system_handle_current_session_disconnected;
   wl_list_init(&self->current_session_disconnected_listener.link);
@@ -218,6 +234,7 @@ zna_system_destroy(struct zna_system* self)
   wl_list_remove(&self->new_gl_vertex_array_listener.link);
   wl_list_remove(&self->new_gl_shader_listener.link);
   wl_list_remove(&self->new_gl_program_listener.link);
+  wl_list_remove(&self->new_gl_texture_listener.link);
   wl_list_remove(&self->current_session_disconnected_listener.link);
   wl_list_remove(&self->current_session_frame_listener.link);
   zgnr_gles_v32_destroy(self->gles);

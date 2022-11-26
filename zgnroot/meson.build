@@ -10,6 +10,7 @@ _zgnr_srcs = [
   'src/gl-buffer.c',
   'src/gl-program.c',
   'src/gl-shader.c',
+  'src/gl-texture.c',
   'src/gl-uniform-variable.c',
   'src/gl-vertex-array.c',
   'src/gl-vertex-attrib.c',
@@ -18,6 +19,7 @@ _zgnr_srcs = [
   'src/rendering-unit.c',
   'src/shell.c',
   'src/shm.c',
+  'src/texture-binding.c',
   'src/virtual-object.c',
 ]
 

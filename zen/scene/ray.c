@@ -39,7 +39,7 @@ zn_ray_create(void)
 
   glm_vec3_copy(initial_origin, self->origin);
   self->angle.polar = GLM_PI / 3;
-  self->angle.azimuthal = GLM_PI * 0.6;
+  self->angle.azimuthal = GLM_PI * 0.5;
 
   wl_signal_init(&self->events.destroy);
   wl_signal_init(&self->events.motion);

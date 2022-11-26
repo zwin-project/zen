@@ -7,6 +7,7 @@
 #include "gl-program.h"
 #include "gl-uniform-variable.h"
 #include "gl-vertex-array.h"
+#include "texture-binding.h"
 
 static void zgnr_gl_base_technique_destroy(
     struct zgnr_gl_base_technique_impl *self);
@@ -99,13 +100,35 @@ zgnr_gl_base_technique_protocol_bind_vertex_array(struct wl_client *client,
 
 static void
 zgnr_gl_base_technique_protocol_bind_texture(struct wl_client *client,
-    struct wl_resource *resource, uint32_t location,
-    struct wl_resource *texture)
+    struct wl_resource *resource, uint32_t binding, const char *name,
+    struct wl_resource *texture_resource, uint32_t target)
 {
-  UNUSED(client);
-  UNUSED(resource);
-  UNUSED(location);
-  UNUSED(texture);
+  struct zgnr_texture_binding_impl *texture_binding;
+  struct zgnr_gl_texture_impl *texture;
+  struct zgnr_gl_base_technique_impl *self =
+      wl_resource_get_user_data(resource);
+  if (self == NULL) return;
+
+  wl_list_for_each (
+      texture_binding, &self->pending.texture_binding_list, base.link) {
+    if (texture_binding->base.binding == binding) {
+      zgnr_texture_binding_destroy(texture_binding);
+      break;
+    }
+  }
+
+  texture = wl_resource_get_user_data(texture_resource);
+  texture_binding = zgnr_texture_binding_create(binding, name, texture, target);
+  if (texture_binding == NULL) {
+    zn_error("Failed to create a zgnr_texture_binding");
+    wl_client_post_no_memory(client);
+    return;
+  }
+
+  wl_list_insert(
+      &self->pending.texture_binding_list, &texture_binding->base.link);
+
+  self->pending.texture_changed = true;
 }
 
 static void
@@ -280,6 +303,7 @@ zgnr_gl_base_technique_handle_rendering_unit_commit(
       zn_container_of(self->base.unit, unit, base);
   struct zgnr_gl_vertex_array_impl *vertex_array;
   struct zgnr_gl_program_impl *program;
+  struct zgnr_texture_binding_impl *texture_binding;
 
   if (!self->base.comitted)
     zgnr_rendering_unit_set_current_technique(unit, self);
@@ -291,14 +315,6 @@ zgnr_gl_base_technique_handle_rendering_unit_commit(
     self->base.current.args = self->pending.args;
     self->base.current.draw_method = self->pending.draw_method;
     self->pending.draw_method_changed = false;
-  }
-
-  self->base.current.vertex_array_changed = self->pending.vertex_array_changed;
-  if (self->pending.vertex_array_changed) {
-    vertex_array = zn_weak_resource_get_user_data(&self->pending.vertex_array);
-    zgnr_gl_base_technique_set_current_vertex_array(
-        self, vertex_array ? &vertex_array->base : NULL);
-    self->pending.vertex_array_changed = false;
   }
 
   // uniform variables
@@ -315,6 +331,14 @@ zgnr_gl_base_technique_handle_rendering_unit_commit(
   }
 
   // vertex array
+  self->base.current.vertex_array_changed = self->pending.vertex_array_changed;
+  if (self->pending.vertex_array_changed) {
+    vertex_array = zn_weak_resource_get_user_data(&self->pending.vertex_array);
+    zgnr_gl_base_technique_set_current_vertex_array(
+        self, vertex_array ? &vertex_array->base : NULL);
+    self->pending.vertex_array_changed = false;
+  }
+
   if (self->base.current.vertex_array) {
     vertex_array =
         zn_container_of(self->base.current.vertex_array, vertex_array, base);
@@ -333,6 +357,39 @@ zgnr_gl_base_technique_handle_rendering_unit_commit(
   if (self->base.current.program) {
     program = zn_container_of(self->base.current.program, program, base);
     zgnr_gl_program_commit(program);
+  }
+
+  // texture
+  self->base.current.texture_changed = self->pending.texture_changed;
+  if (self->pending.texture_changed) {
+    struct zgnr_texture_binding_impl *tmp, *copy;
+
+    wl_list_for_each_safe (texture_binding, tmp,
+        &self->base.current.texture_binding_list, base.link) {
+      zgnr_texture_binding_destroy(texture_binding);
+    }
+
+    wl_list_for_each (
+        texture_binding, &self->pending.texture_binding_list, base.link) {
+      struct zgnr_gl_texture_impl *texture =
+          zn_container_of(texture_binding->base.texture, texture, base);
+
+      copy = zgnr_texture_binding_create(texture_binding->base.binding,
+          texture_binding->base.name, texture, texture_binding->base.target);
+
+      wl_list_insert(
+          &self->base.current.texture_binding_list, &copy->base.link);
+    }
+
+    self->pending.texture_changed = false;
+  }
+
+  wl_list_for_each (
+      texture_binding, &self->base.current.texture_binding_list, base.link) {
+    struct zgnr_gl_texture_impl *texture =
+        zn_container_of(texture_binding->base.texture, texture, base);
+
+    zgnr_gl_texture_commit(texture);
   }
 }
 
@@ -391,6 +448,12 @@ zgnr_gl_base_technique_create(struct wl_client *client, uint32_t id,
   self->base.current.program = NULL;
   self->base.current.program_changed = false;
 
+  wl_list_init(&self->base.current.texture_binding_list);
+  self->base.current.texture_changed = false;
+
+  wl_list_init(&self->pending.texture_binding_list);
+  self->pending.texture_changed = false;
+
   wl_signal_init(&self->base.events.destroy);
   wl_list_init(&self->base.current.uniform_variable_list);
   wl_list_init(&self->pending.uniform_variable_list);
@@ -430,17 +493,28 @@ err:
 static void
 zgnr_gl_base_technique_destroy(struct zgnr_gl_base_technique_impl *self)
 {
-  struct zgnr_gl_uniform_variable *uniform_variable, *tmp;
+  struct zgnr_gl_uniform_variable *uniform_variable, *uniform_variabl_tmp;
+  struct zgnr_texture_binding_impl *texture_binding, *texture_binding_tmp;
   wl_signal_emit(&self->base.events.destroy, NULL);
 
-  wl_list_for_each_safe (
-      uniform_variable, tmp, &self->base.current.uniform_variable_list, link) {
+  wl_list_for_each_safe (uniform_variable, uniform_variabl_tmp,
+      &self->base.current.uniform_variable_list, link) {
     zgnr_gl_uniform_variable_destroy(uniform_variable);
   }
 
-  wl_list_for_each_safe (
-      uniform_variable, tmp, &self->pending.uniform_variable_list, link) {
+  wl_list_for_each_safe (uniform_variable, uniform_variabl_tmp,
+      &self->pending.uniform_variable_list, link) {
     zgnr_gl_uniform_variable_destroy(uniform_variable);
+  }
+
+  wl_list_for_each_safe (texture_binding, texture_binding_tmp,
+      &self->base.current.texture_binding_list, base.link) {
+    zgnr_texture_binding_destroy(texture_binding);
+  }
+
+  wl_list_for_each_safe (texture_binding, texture_binding_tmp,
+      &self->pending.texture_binding_list, base.link) {
+    zgnr_texture_binding_destroy(texture_binding);
   }
 
   zn_weak_resource_unlink(&self->pending.program);

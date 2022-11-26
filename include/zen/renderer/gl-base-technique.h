@@ -3,6 +3,7 @@
 #include <zigen-gles-v32-protocol.h>
 
 #include "zen/renderer/gl-program.h"
+#include "zen/renderer/gl-texture.h"
 #include "zen/renderer/gl-vertex-array.h"
 #include "zen/renderer/rendering-unit.h"
 #include "zen/renderer/session.h"
@@ -18,6 +19,10 @@ void znr_gl_base_technique_bind_vertex_array(struct znr_gl_base_technique* self,
 
 void znr_gl_base_technique_bind_program(
     struct znr_gl_base_technique* self, struct znr_gl_program* program);
+
+void znr_gl_base_technique_bind_texture(struct znr_gl_base_technique* self,
+    uint32_t binding, const char* name, struct znr_gl_texture* texture,
+    uint32_t target);
 
 /**
  * @param name is nullable
