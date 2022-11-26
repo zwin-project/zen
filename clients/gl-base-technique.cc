@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include "application.h"
+#include "gl-buffer.h"
 #include "gl-program.h"
 #include "gl-texture.h"
 #include "gl-vertex-array.h"
@@ -47,6 +48,18 @@ void
 GlBaseTechnique::DrawArrays(GLenum mode, GLint first, GLsizei count)
 {
   zgn_gl_base_technique_draw_arrays(proxy_, mode, first, count);
+}
+
+void
+GlBaseTechnique::DrawElements(GLenum mode, GLsizei count, GLenum type,
+    size_t offset, GlBuffer *element_array_buffer)
+{
+  struct wl_array array;
+  wl_array_init(&array);
+  zn_uint64_t_to_array(offset, &array);
+  zgn_gl_base_technique_draw_elements(
+      proxy_, mode, count, type, &array, element_array_buffer->proxy());
+  wl_array_release(&array);
 }
 
 void

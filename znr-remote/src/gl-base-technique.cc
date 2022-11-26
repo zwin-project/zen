@@ -5,6 +5,7 @@
 #include <cstring>
 #include <vector>
 
+#include "gl-buffer.h"
 #include "gl-program.h"
 #include "gl-texture.h"
 #include "gl-vertex-array.h"
@@ -77,6 +78,15 @@ znr_gl_base_technique_draw_arrays(struct znr_gl_base_technique* self,
     uint32_t mode, int32_t first, uint32_t count)
 {
   self->proxy->GlDrawArrays(mode, first, count);
+}
+
+void
+znr_gl_base_technique_draw_elements(struct znr_gl_base_technique* self,
+    uint32_t mode, uint32_t count, uint32_t type, uint64_t offset,
+    struct znr_gl_buffer* element_array_buffer)
+{
+  self->proxy->GlDrawElements(
+      mode, count, type, offset, element_array_buffer->proxy->id());
 }
 
 struct znr_gl_base_technique*

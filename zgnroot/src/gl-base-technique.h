@@ -24,6 +24,7 @@ struct zgnr_gl_base_technique_impl {
 
     enum zgnr_gl_base_technique_draw_method draw_method;
     union zgnr_gl_base_technique_draw_args args;
+    struct zn_weak_resource element_array_buffer;
     bool draw_method_changed;
 
     struct wl_list texture_binding_list;  // zgnr_texture_binding::link
@@ -38,6 +39,7 @@ struct zgnr_gl_base_technique_impl {
 
   struct wl_listener current_vertex_array_destroy_listener;
   struct wl_listener current_program_destroy_listener;
+  struct wl_listener current_element_array_buffer_destroy_listener;
 };
 
 struct zgnr_gl_base_technique_impl *zgnr_gl_base_technique_create(

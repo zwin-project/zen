@@ -23,6 +23,18 @@ int zn_off_t_to_array(off_t value, struct wl_array *array);
 /**
  * @return 0 if successful, -1 otherwise
  */
+int zn_array_to_uint64_t(struct wl_array *array, uint64_t *value);
+
+/**
+ * @return 0 if successful, -1 otherwise
+ *
+ * @param array is first initialzed by this function
+ */
+int zn_uint64_t_to_array(uint64_t value, struct wl_array *array);
+
+/**
+ * @return 0 if successful, -1 otherwise
+ */
 int zn_array_to_vec3(struct wl_array *array, vec3 vec);
 
 /**

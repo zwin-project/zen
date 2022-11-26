@@ -17,6 +17,7 @@ namespace zen::client {
 
 class Application;
 class RenderingUnit;
+class GlBuffer;
 class GlProgram;
 class GlVertexArray;
 class GlTexture;
@@ -55,6 +56,9 @@ class GlBaseTechnique
   }
 
   void DrawArrays(GLenum mode, GLint first, GLsizei count);
+
+  void DrawElements(GLenum mode, GLsizei count, GLenum type, size_t offset,
+      GlBuffer *element_array_buffer);
 
   void Bind(GlProgram *program);
 

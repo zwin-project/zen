@@ -33,6 +33,28 @@ zn_off_t_to_array(off_t value, struct wl_array *array)
 }
 
 int
+zn_array_to_uint64_t(struct wl_array *array, uint64_t *value)
+{
+  if (array->size != sizeof(uint64_t)) return -1;
+
+  memcpy(value, array->data, array->size);
+
+  return 0;
+}
+
+int
+zn_uint64_t_to_array(uint64_t value, struct wl_array *array)
+{
+  wl_array_init(array);
+
+  off_t *container = wl_array_add(array, sizeof(uint64_t));
+  if (container == NULL) return -1;
+
+  *container = value;
+  return 0;
+}
+
+int
 zn_array_to_vec3(struct wl_array *array, vec3 vec)
 {
   if (sizeof(vec3) != array->size) return -1;
