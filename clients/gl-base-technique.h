@@ -55,6 +55,15 @@ class GlBaseTechnique
     UniformVector(location, std::move(name), type, length, 1, &value);
   }
 
+  template <glm::length_t C, glm::length_t R>
+  void Uniform(uint32_t location, std::string name, glm::mat<C, R, float> value)
+  {
+    static_assert(1 < C && C <= 4 && 1 < R && R <= 4,
+        "Matrix must be between 2x2 and 4x4");
+
+    UniformMatrix(location, std::move(name), C, R, 1, false, &value);
+  }
+
   void DrawArrays(GLenum mode, GLint first, GLsizei count);
 
   void DrawElements(GLenum mode, GLsizei count, GLenum type, size_t offset,
@@ -71,6 +80,9 @@ class GlBaseTechnique
   void UniformVector(uint32_t location, std::string name,
       enum zgn_gl_base_technique_uniform_variable_type type, uint32_t size,
       uint32_t count, void *value);
+
+  void UniformMatrix(uint32_t location, std::string name, uint32_t col,
+      uint32_t row, uint32_t count, bool transpose, void *value);
 
   Application *app_;
   zgn_gl_base_technique *proxy_ = nullptr;  // nonnull after initialization

@@ -1,8 +1,8 @@
-box_vert_glsl = custom_target(
-  'box.vertex.h',
-  command: [textify, 'box_vertex_shader_source', '@INPUT@', '@OUTPUT@'],
-  input: 'box.vert',
-  output: 'box.vert.h',
+default_vert_glsl = custom_target(
+  'default.vertex.h',
+  command: [textify, 'default_vertex_shader_source', '@INPUT@', '@OUTPUT@'],
+  input: 'default.vert',
+  output: 'default.vert.h',
 )
 
 texture_frag_glsl = custom_target(
@@ -29,7 +29,7 @@ _zen_box_client_srcs = [
   'shm-pool.cc',
   'virtual-object.cc',
 
-  box_vert_glsl,
+  default_vert_glsl,
   texture_frag_glsl,
 
   protocols['zigen']['private-code'],

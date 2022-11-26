@@ -82,6 +82,25 @@ GlBaseTechnique::UniformVector(uint32_t location, std::string name,
   wl_array_release(&array);
 }
 
+void
+GlBaseTechnique::UniformMatrix(uint32_t location, std::string name,
+    uint32_t col, uint32_t row, uint32_t count, bool transpose, void *value)
+{
+  wl_array array;
+  wl_array_init(&array);
+
+  {
+    size_t value_size = sizeof(float) * col * row * count;
+    void *data = wl_array_add(&array, value_size);
+    std::memcpy(data, value, value_size);
+  }
+
+  zgn_gl_base_technique_uniform_matrix(
+      proxy_, location, name.c_str(), col, row, count, transpose, &array);
+
+  wl_array_release(&array);
+}
+
 GlBaseTechnique::GlBaseTechnique(Application *app) : app_(app) {}
 
 GlBaseTechnique::~GlBaseTechnique()
