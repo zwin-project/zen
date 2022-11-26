@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "gl-program.h"
+#include "gl-texture.h"
 #include "gl-vertex-array.h"
 #include "rendering-unit.h"
 #include "session.h"
@@ -22,6 +23,14 @@ znr_gl_base_technique_bind_program(
     struct znr_gl_base_technique* self, struct znr_gl_program* program)
 {
   self->proxy->BindProgram(program->proxy->id());
+}
+
+void
+znr_gl_base_technique_bind_texture(struct znr_gl_base_technique* self,
+    uint32_t binding, const char* name, struct znr_gl_texture* texture,
+    uint32_t target)
+{
+  self->proxy->BindTexture(binding, name, texture->proxy->id(), target);
 }
 
 void

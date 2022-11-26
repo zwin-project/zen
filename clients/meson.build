@@ -5,11 +5,11 @@ box_vert_glsl = custom_target(
   output: 'box.vert.h',
 )
 
-color_frag_glsl = custom_target(
-  'color.fragment.h',
-  command: [textify, 'color_fragment_shader_source', '@INPUT@', '@OUTPUT@'],
-  input: 'color.frag',
-  output: 'color.fragment.h',
+texture_frag_glsl = custom_target(
+  'texture.fragment.h',
+  command: [textify, 'texture_fragment_shader_source', '@INPUT@', '@OUTPUT@'],
+  input: 'texture.frag',
+  output: 'texture.fragment.h',
 )
 
 _zen_box_client_srcs = [
@@ -22,6 +22,7 @@ _zen_box_client_srcs = [
   'gl-buffer.cc',
   'gl-program.cc',
   'gl-shader.cc',
+  'gl-texture.cc',
   'gl-vertex-array.cc',
   'loop.cc',
   'rendering-unit.cc',
@@ -29,7 +30,7 @@ _zen_box_client_srcs = [
   'virtual-object.cc',
 
   box_vert_glsl,
-  color_frag_glsl,
+  texture_frag_glsl,
 
   protocols['zigen']['private-code'],
   protocols['zigen']['client-header'],

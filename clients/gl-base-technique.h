@@ -19,6 +19,7 @@ class Application;
 class RenderingUnit;
 class GlProgram;
 class GlVertexArray;
+class GlTexture;
 
 class GlBaseTechnique
 {
@@ -58,6 +59,9 @@ class GlBaseTechnique
   void Bind(GlProgram *program);
 
   void Bind(GlVertexArray *vertex_array);
+
+  void Bind(
+      uint32_t binding, std::string name, GlTexture *texture, GLenum target);
 
  private:
   void UniformVector(uint32_t location, std::string name,

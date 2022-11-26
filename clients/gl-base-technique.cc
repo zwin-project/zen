@@ -4,6 +4,7 @@
 
 #include "application.h"
 #include "gl-program.h"
+#include "gl-texture.h"
 #include "gl-vertex-array.h"
 #include "rendering-unit.h"
 
@@ -32,6 +33,14 @@ void
 GlBaseTechnique::Bind(GlVertexArray *vertex_array)
 {
   zgn_gl_base_technique_bind_vertex_array(proxy_, vertex_array->proxy());
+}
+
+void
+GlBaseTechnique::Bind(
+    uint32_t binding, std::string name, GlTexture *texture, GLenum target)
+{
+  zgn_gl_base_technique_bind_texture(
+      proxy_, binding, name.c_str(), texture->proxy(), target);
 }
 
 void

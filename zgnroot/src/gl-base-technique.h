@@ -26,6 +26,9 @@ struct zgnr_gl_base_technique_impl {
     union zgnr_gl_base_technique_draw_args args;
     bool draw_method_changed;
 
+    struct wl_list texture_binding_list;  // zgnr_texture_binding::link
+    bool texture_changed;
+
     // insert from the back, commit from the front
     struct wl_list uniform_variable_list;
   } pending;

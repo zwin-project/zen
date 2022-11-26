@@ -29,6 +29,7 @@ struct zna_system {
   struct wl_listener new_gl_vertex_array_listener;
   struct wl_listener new_gl_shader_listener;
   struct wl_listener new_gl_program_listener;
+  struct wl_listener new_gl_texture_listener;
   struct wl_listener current_session_disconnected_listener;
   struct wl_listener current_session_frame_listener;
 };

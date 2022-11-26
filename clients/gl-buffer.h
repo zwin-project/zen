@@ -15,6 +15,7 @@ class GlBuffer
 {
  public:
   DISABLE_MOVE_AND_COPY(GlBuffer);
+  GlBuffer() = delete;
   GlBuffer(Application* app);
   ~GlBuffer();
 

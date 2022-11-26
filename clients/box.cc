@@ -14,22 +14,42 @@
 #include "bounded.h"
 #include "box.vert.h"
 #include "buffer.h"
-#include "color.fragment.h"
 #include "fd.h"
 #include "gl-base-technique.h"
 #include "gl-buffer.h"
 #include "gl-program.h"
 #include "gl-shader.h"
+#include "gl-texture.h"
 #include "gl-vertex-array.h"
 #include "rendering-unit.h"
 #include "shm-pool.h"
+#include "texture.fragment.h"
 #include "virtual-object.h"
 
 using namespace zen::client;
 
 typedef struct {
   float x, y, z;
+  float u, v;
 } Vertex;
+
+typedef struct {
+  uint8_t r, g, b, a;
+} Pixel;
+
+// clang-format off
+#define A {-1, +1, -1, 0, 1}
+#define B {-1, -1, -1, 0, 0}
+#define C {+1, -1, -1, 1, 0}
+#define D {+1, +1, -1, 1, 1}
+#define E {-1, +1, +1, 0, 1}
+#define F {-1, -1, +1, 0, 0}
+#define G {+1, -1, +1, 1, 0}
+#define H {+1, +1, +1, 1, 1}
+// clang-format on
+
+constexpr int kTextureWidth = 64;
+constexpr int kTextureHeight = 64;
 
 /** Draw the rotating cube so that it always fits within the boundary */
 class Box final : public Bounded
@@ -37,6 +57,12 @@ class Box final : public Bounded
  public:
   Box() = delete;
   Box(Application* app) : Bounded(app), app_(app) {}
+
+  ~Box()
+  {
+    if (pool_fd_ > 0) close(pool_fd_);
+    if (pool_mem_ != nullptr) munmap(pool_mem_, pool_size_);
+  }
 
   void SetUniformVariables()
   {
@@ -53,6 +79,20 @@ class Box final : public Bounded
   void Frame(uint32_t time) override
   {
     animation_seed_ = (float)(time % 12000) / 12000.0f;
+
+    auto tex = (Pixel*)((char*)pool_mem_ + vertex_buffer_size_);
+    for (int x = 0; x < kTextureWidth; x++) {
+      for (int y = 0; y < kTextureHeight; y++) {
+        tex->r = UINT8_MAX * x / kTextureWidth;
+        tex->g = UINT8_MAX * y / kTextureHeight;
+        tex->b = (time % 5000) * UINT8_MAX / 5000;
+        tex->a = UINT8_MAX;
+        tex++;
+      }
+    }
+
+    texture_->Image2D(GL_TEXTURE_2D, 0, GL_RGBA, kTextureWidth, kTextureHeight,
+        0, GL_RGBA, GL_UNSIGNED_BYTE, texture_buffer_.get());
 
     SetUniformVariables();
     NextFrame();
@@ -86,41 +126,40 @@ class Box final : public Bounded
 
     // clang-format off
     vertices_ = {
-      {-1, -1, +1}, {+1, -1, +1},
-      {+1, -1, +1}, {+1, -1, -1},
-      {+1, -1, -1}, {-1, -1, -1},
-      {-1, -1, -1}, {-1, -1, +1},
-      {-1, +1, +1}, {+1, +1, +1},
-      {+1, +1, +1}, {+1, +1, -1},
-      {+1, +1, -1}, {-1, +1, -1},
-      {-1, +1, -1}, {-1, +1, +1},
-      {-1, -1, +1}, {-1, +1, +1},
-      {+1, -1, +1}, {+1, +1, +1},
-      {+1, -1, -1}, {+1, +1, -1},
-      {-1, -1, -1}, {-1, +1, -1},
+      A, B, C,
+      A, D, C,
+      E, F, G,
+      E, H, G,
     };
     // clang-format on
 
-    ssize_t vertex_buffer_size =
+    vertex_buffer_size_ =
         sizeof(decltype(vertices_)::value_type) * vertices_.size();
-    vertex_buffer_fd_ = create_anonymous_file(vertex_buffer_size);
-    if (vertex_buffer_fd_ < 0) return false;
+    size_t texture_buffer_size = sizeof(Pixel) * kTextureWidth * kTextureHeight;
+    pool_size_ = vertex_buffer_size_ + texture_buffer_size;
 
-    {
-      auto v = mmap(nullptr, vertex_buffer_size, PROT_WRITE, MAP_SHARED,
-          vertex_buffer_fd_, 0);
-      std::memcpy(v, vertices_.data(), vertex_buffer_size);
-      munmap(v, vertex_buffer_size);
-    }
+    pool_fd_ = create_anonymous_file(pool_size_);
+    if (pool_fd_ < 0) return false;
 
-    pool_ = CreateShmPool(app_, vertex_buffer_fd_, vertex_buffer_size);
+    pool_mem_ = mmap(nullptr, pool_size_, PROT_WRITE, MAP_SHARED, pool_fd_, 0);
+
+    std::memcpy(pool_mem_, vertices_.data(), vertex_buffer_size_);
+
+    pool_ = CreateShmPool(app_, pool_fd_, pool_size_);
     if (!pool_) return false;
 
-    buffer_ = CreateBuffer(pool_.get(), 0, vertex_buffer_size);
-    if (!buffer_) return false;
+    vertex_buffer_ = CreateBuffer(pool_.get(), 0, vertex_buffer_size_);
+    if (!vertex_buffer_) return false;
 
-    gl_buffer_ = CreateGlBuffer(app_);
-    if (!gl_buffer_) return false;
+    texture_buffer_ =
+        CreateBuffer(pool_.get(), vertex_buffer_size_, texture_buffer_size);
+    if (!texture_buffer_) return false;
+
+    gl_vertex_buffer_ = CreateGlBuffer(app_);
+    if (!gl_vertex_buffer_) return false;
+
+    texture_ = CreateGlTexture(app_);
+    if (!texture_) return false;
 
     vertex_array_ = CreateGlVertexArray(app_);
     if (!vertex_array_) return false;
@@ -129,8 +168,8 @@ class Box final : public Bounded
         CreateGlShader(app_, GL_VERTEX_SHADER, box_vertex_shader_source);
     if (!vertex_shader_) return false;
 
-    fragment_shader_ =
-        CreateGlShader(app_, GL_FRAGMENT_SHADER, color_fragment_shader_source);
+    fragment_shader_ = CreateGlShader(
+        app_, GL_FRAGMENT_SHADER, texture_fragment_shader_source);
     if (!fragment_shader_) return false;
 
     program_ = CreateGlProgram(app_);
@@ -140,16 +179,35 @@ class Box final : public Bounded
     program_->AttachShader(fragment_shader_.get());
     program_->Link();
 
-    gl_buffer_->Data(GL_ARRAY_BUFFER, buffer_.get(), GL_STATIC_DRAW);
+    auto tex = (Pixel*)((char*)pool_mem_ + vertex_buffer_size_);
+    for (int x = 0; x < kTextureWidth; x++) {
+      for (int y = 0; y < kTextureHeight; y++) {
+        tex->r = UINT8_MAX * x / kTextureWidth;
+        tex->g = UINT8_MAX * y / kTextureHeight;
+        tex->b = 0;
+        tex->a = UINT8_MAX;
+        tex++;
+      }
+    }
+
+    texture_->Image2D(GL_TEXTURE_2D, 0, GL_RGBA, kTextureWidth, kTextureHeight,
+        0, GL_RGBA, GL_UNSIGNED_BYTE, texture_buffer_.get());
+
+    gl_vertex_buffer_->Data(
+        GL_ARRAY_BUFFER, vertex_buffer_.get(), GL_STATIC_DRAW);
 
     vertex_array_->Enable(0);
     vertex_array_->VertexAttribPointer(
-        0, 3, GL_FLOAT, GL_FALSE, 0, 0, gl_buffer_.get());
+        0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0, gl_vertex_buffer_.get());
+    vertex_array_->Enable(1);
+    vertex_array_->VertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+        offsetof(Vertex, u), gl_vertex_buffer_.get());
 
     technique_->Bind(vertex_array_.get());
     technique_->Bind(program_.get());
+    technique_->Bind(0, "", texture_.get(), GL_TEXTURE_2D);
 
-    technique_->DrawArrays(GL_LINES, 0, vertices_.size());
+    technique_->DrawArrays(GL_TRIANGLES, 0, vertices_.size());
 
     return true;
   }
@@ -159,14 +217,19 @@ class Box final : public Bounded
   std::unique_ptr<RenderingUnit> unit_;
   std::unique_ptr<GlBaseTechnique> technique_;
   std::vector<Vertex> vertices_;
-  int vertex_buffer_fd_;
+  int pool_fd_ = 0;
   std::unique_ptr<ShmPool> pool_;
-  std::unique_ptr<Buffer> buffer_;
-  std::unique_ptr<GlBuffer> gl_buffer_;
+  size_t vertex_buffer_size_;
+  size_t pool_size_;
+  void* pool_mem_ = nullptr;
+  std::unique_ptr<Buffer> vertex_buffer_;
+  std::unique_ptr<Buffer> texture_buffer_;
+  std::unique_ptr<GlBuffer> gl_vertex_buffer_;
   std::unique_ptr<GlVertexArray> vertex_array_;
   std::unique_ptr<GlShader> vertex_shader_;
   std::unique_ptr<GlShader> fragment_shader_;
   std::unique_ptr<GlProgram> program_;
+  std::unique_ptr<GlTexture> texture_;
 
   float animation_seed_;  // 0 to 1
   glm::vec3 half_size_;
