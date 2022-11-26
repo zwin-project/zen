@@ -4,6 +4,7 @@
 #include <zigen-gles-v32-protocol.h>
 #include <zigen-protocol.h>
 
+#include "gl-buffer.h"
 #include "gl-program.h"
 #include "gl-uniform-variable.h"
 #include "gl-vertex-array.h"
@@ -62,6 +63,27 @@ zgnr_gl_base_technique_set_current_program(
   }
 
   self->base.current.program = program;
+}
+
+/**
+ * @param element_array_buffer is nullable
+ */
+static void
+zgnr_gl_base_technique_set_current_element_array_buffer(
+    struct zgnr_gl_base_technique_impl *self,
+    struct zgnr_gl_buffer *element_array_buffer)
+{
+  if (self->base.current.element_array_buffer) {
+    wl_list_remove(&self->current_element_array_buffer_destroy_listener.link);
+    wl_list_init(&self->current_element_array_buffer_destroy_listener.link);
+  }
+
+  if (element_array_buffer) {
+    wl_signal_add(&element_array_buffer->events.destroy,
+        &self->current_element_array_buffer_destroy_listener);
+  }
+
+  self->base.current.element_array_buffer = element_array_buffer;
 }
 
 static void
@@ -214,21 +236,36 @@ zgnr_gl_base_technique_protocol_draw_arrays(struct wl_client *client,
   self->pending.args.arrays.mode = mode;
   self->pending.args.arrays.first = first;
   self->pending.args.arrays.count = count;
+  zn_weak_resource_unlink(&self->pending.element_array_buffer);
   self->pending.draw_method_changed = true;
 }
 
 static void
 zgnr_gl_base_technique_protocol_draw_elements(struct wl_client *client,
     struct wl_resource *resource, uint32_t mode, uint32_t count, uint32_t type,
-    struct wl_array *offset, struct wl_resource *element_array_buffer)
+    struct wl_array *offset_array, struct wl_resource *element_array_buffer)
 {
   UNUSED(client);
-  UNUSED(resource);
-  UNUSED(mode);
-  UNUSED(count);
-  UNUSED(type);
-  UNUSED(offset);
-  UNUSED(element_array_buffer);
+  uint64_t offset;
+  struct zgnr_gl_base_technique_impl *self =
+      wl_resource_get_user_data(resource);
+  if (self == NULL) return;
+
+  if (zn_array_to_uint64_t(offset_array, &offset)) {
+    wl_resource_post_error(resource, ZGN_COMPOSITOR_ERROR_WL_ARRAY_SIZE,
+        "offset is expected to be uint64, but array size was %ld",
+        offset_array->size);
+    return;
+  }
+
+  self->pending.draw_method = ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ELEMENTS;
+  self->pending.args.elements.mode = mode;
+  self->pending.args.elements.count = count;
+  self->pending.args.elements.type = type;
+  self->pending.args.elements.offset = offset;
+  zn_weak_resource_link(
+      &self->pending.element_array_buffer, element_array_buffer);
+  self->pending.draw_method_changed = true;
 }
 
 /** Be careful, resource can be inert. */
@@ -265,6 +302,18 @@ zgnr_gl_base_technique_handle_current_program_destroy(
       zn_container_of(listener, self, current_program_destroy_listener);
 
   zgnr_gl_base_technique_set_current_program(self, NULL);
+}
+
+static void
+zgnr_gl_base_technique_handle_current_element_array_buffer_destroy(
+    struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+
+  struct zgnr_gl_base_technique_impl *self = zn_container_of(
+      listener, self, current_element_array_buffer_destroy_listener);
+
+  zgnr_gl_base_technique_set_current_element_array_buffer(self, NULL);
 }
 
 /**
@@ -310,11 +359,24 @@ zgnr_gl_base_technique_handle_rendering_unit_commit(
 
   self->base.comitted = true;
 
+  // draw method
   self->base.current.draw_method_changed = self->pending.draw_method_changed;
   if (self->pending.draw_method_changed) {
     self->base.current.args = self->pending.args;
     self->base.current.draw_method = self->pending.draw_method;
+
+    struct zgnr_gl_buffer_impl *element_array_buffer =
+        zn_weak_resource_get_user_data(&self->pending.element_array_buffer);
+    zgnr_gl_base_technique_set_current_element_array_buffer(
+        self, element_array_buffer ? &element_array_buffer->base : NULL);
+
     self->pending.draw_method_changed = false;
+  }
+
+  if (self->base.current.element_array_buffer) {
+    struct zgnr_gl_buffer_impl *element_array_buffer = zn_container_of(
+        self->base.current.element_array_buffer, element_array_buffer, base);
+    zgnr_gl_buffer_commit(element_array_buffer);
   }
 
   // uniform variables
@@ -439,8 +501,8 @@ zgnr_gl_base_technique_create(struct wl_client *client, uint32_t id,
   self->base.unit = &unit->base;
   self->base.comitted = false;
   self->base.current.draw_method = ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_NONE;
+  self->base.current.element_array_buffer = NULL;
   self->base.current.draw_method_changed = false;
-  self->pending.draw_method_changed = false;
 
   self->base.current.vertex_array = NULL;
   self->base.current.vertex_array_changed = false;
@@ -464,6 +526,9 @@ zgnr_gl_base_technique_create(struct wl_client *client, uint32_t id,
   zn_weak_resource_init(&self->pending.program);
   self->pending.program_changed = false;
 
+  zn_weak_resource_init(&self->pending.element_array_buffer);
+  self->pending.draw_method_changed = false;
+
   self->rendering_unit_destroy_listener.notify =
       zgnr_gl_base_technique_handle_rendering_unit_destroy;
   wl_signal_add(
@@ -480,6 +545,10 @@ zgnr_gl_base_technique_create(struct wl_client *client, uint32_t id,
   self->current_program_destroy_listener.notify =
       zgnr_gl_base_technique_handle_current_program_destroy;
   wl_list_init(&self->current_program_destroy_listener.link);
+
+  self->current_element_array_buffer_destroy_listener.notify =
+      zgnr_gl_base_technique_handle_current_element_array_buffer_destroy;
+  wl_list_init(&self->current_element_array_buffer_destroy_listener.link);
 
   return self;
 
@@ -519,8 +588,10 @@ zgnr_gl_base_technique_destroy(struct zgnr_gl_base_technique_impl *self)
 
   zn_weak_resource_unlink(&self->pending.program);
   zn_weak_resource_unlink(&self->pending.vertex_array);
+  zn_weak_resource_unlink(&self->pending.element_array_buffer);
   wl_list_remove(&self->current_program_destroy_listener.link);
   wl_list_remove(&self->current_vertex_array_destroy_listener.link);
+  wl_list_remove(&self->current_element_array_buffer_destroy_listener.link);
   wl_list_remove(&self->rendering_unit_commit_listener.link);
   wl_list_remove(&self->rendering_unit_destroy_listener.link);
   wl_list_remove(&self->base.events.destroy.listener_list);

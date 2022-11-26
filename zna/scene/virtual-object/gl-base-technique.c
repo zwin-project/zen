@@ -4,6 +4,7 @@
 #include <zgnr/gl-uniform-variable.h>
 #include <zgnr/texture-binding.h>
 
+#include "scene/virtual-object/gl-buffer.h"
 #include "scene/virtual-object/gl-program.h"
 #include "scene/virtual-object/gl-texture.h"
 #include "scene/virtual-object/gl-vertex-array.h"
@@ -117,18 +118,37 @@ zna_gl_base_technique_apply_commit(
     }
   }
 
-  if (self->zgnr_gl_base_technique->current.draw_method_changed ||
-      !only_damaged) {
-    switch (self->zgnr_gl_base_technique->current.draw_method) {
-      case ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_NONE:
-        break;
-      case ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ARRAYS:
+  switch (self->zgnr_gl_base_technique->current.draw_method) {
+    case ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_NONE:
+      break;
+    case ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ARRAYS:
+      if (self->zgnr_gl_base_technique->current.draw_method_changed ||
+          !only_damaged) {
         znr_gl_base_technique_draw_arrays(self->znr_gl_base_technique,
             self->zgnr_gl_base_technique->current.args.arrays.mode,
             self->zgnr_gl_base_technique->current.args.arrays.first,
             self->zgnr_gl_base_technique->current.args.arrays.count);
-        break;
-    }
+      }
+      break;
+    case ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ELEMENTS:
+      if (self->zgnr_gl_base_technique->current.element_array_buffer) {
+        struct zna_gl_buffer* element_array_buffer =
+            self->zgnr_gl_base_technique->current.element_array_buffer
+                ->user_data;
+
+        zna_gl_buffer_apply_commit(element_array_buffer, only_damaged);
+
+        if (self->zgnr_gl_base_technique->current.draw_method_changed ||
+            !only_damaged) {
+          znr_gl_base_technique_draw_elements(self->znr_gl_base_technique,
+              self->zgnr_gl_base_technique->current.args.elements.mode,
+              self->zgnr_gl_base_technique->current.args.elements.count,
+              self->zgnr_gl_base_technique->current.args.elements.type,
+              self->zgnr_gl_base_technique->current.args.elements.offset,
+              element_array_buffer->znr_gl_buffer);
+        }
+      }
+      break;
   }
 }
 

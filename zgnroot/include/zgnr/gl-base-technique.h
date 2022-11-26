@@ -12,6 +12,7 @@ extern "C" {
 enum zgnr_gl_base_technique_draw_method {
   ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_NONE,
   ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ARRAYS,
+  ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ELEMENTS,
 };
 
 union zgnr_gl_base_technique_draw_args {
@@ -20,6 +21,13 @@ union zgnr_gl_base_technique_draw_args {
     int32_t count;
     int32_t first;
   } arrays;
+
+  struct {
+    uint32_t mode;
+    uint32_t count;
+    uint32_t type;
+    uint64_t offset;
+  } elements;
 };
 
 struct zgnr_gl_base_technique {
@@ -40,6 +48,7 @@ struct zgnr_gl_base_technique {
 
     enum zgnr_gl_base_technique_draw_method draw_method;
     union zgnr_gl_base_technique_draw_args args;
+    struct zgnr_gl_buffer *element_array_buffer;  // nullable
     bool draw_method_changed;
 
     struct wl_list texture_binding_list;  // zgnr_texture_binding::link

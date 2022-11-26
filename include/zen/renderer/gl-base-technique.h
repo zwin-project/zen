@@ -44,6 +44,10 @@ void znr_gl_base_technique_gl_uniform_matrix(struct znr_gl_base_technique* self,
 void znr_gl_base_technique_draw_arrays(struct znr_gl_base_technique* self,
     uint32_t mode, int32_t first, uint32_t count);
 
+void znr_gl_base_technique_draw_elements(struct znr_gl_base_technique* self,
+    uint32_t mode, uint32_t count, uint32_t type, uint64_t offset,
+    struct znr_gl_buffer* element_array_buffer);
+
 struct znr_gl_base_technique* znr_gl_base_technique_create(
     struct znr_session* session, struct znr_rendering_unit* rendering_unit);
 
