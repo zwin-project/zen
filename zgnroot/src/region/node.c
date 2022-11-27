@@ -1,6 +1,33 @@
 #include "node.h"
 
+#include <cglm/affine.h>
+#include <cglm/quat.h>
 #include <zen-common.h>
+
+#include "zgnr/intersection.h"
+
+float
+zgnr_region_node_ray_cast(struct zgnr_region_node* self, mat4 outer_transform,
+    vec3 origin, vec3 direction)
+{
+  struct zgnr_cuboid_region* cuboid_region;
+  float min_distance = FLT_MAX;
+  wl_list_for_each (cuboid_region, &self->cuboid_list, link) {
+    float distance;
+
+    mat4 transform = GLM_MAT4_IDENTITY_INIT;
+    glm_translate(transform, cuboid_region->center);
+    glm_quat_rotate(transform, cuboid_region->quaternion, transform);
+    glm_mat4_mul(outer_transform, transform, transform);
+
+    distance = zgnr_intersection_ray_obb(
+        origin, direction, cuboid_region->half_size, transform);
+
+    if (distance < min_distance) min_distance = distance;
+  }
+
+  return min_distance;
+}
 
 void
 zgnr_region_node_add_cuboid(

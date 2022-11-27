@@ -91,7 +91,7 @@ zgnr_virtual_object_set_role(struct zgnr_virtual_object_impl* self,
     if (error_resource != NULL) {
       wl_resource_post_error(error_resource, error_code,
           "zgn_virtual_object@%u already has another role",
-          wl_resource_get_id(self->resource));
+          wl_resource_get_id(self->base.resource));
     }
     return false;
   }
@@ -99,7 +99,7 @@ zgnr_virtual_object_set_role(struct zgnr_virtual_object_impl* self,
   if (self->base.role_object != NULL && self->base.role_object != role_object) {
     wl_resource_post_error(error_resource, error_code,
         "zgn_virtual_object@%u already has a active role",
-        wl_resource_get_id(self->resource));
+        wl_resource_get_id(self->base.resource));
     return false;
   }
 
@@ -121,14 +121,14 @@ zgnr_virtual_object_create(
     goto err;
   }
 
-  self->resource =
+  self->base.resource =
       wl_resource_create(client, &zgn_virtual_object_interface, 1, id);
-  if (self->resource == NULL) {
+  if (self->base.resource == NULL) {
     zn_error("Failed to create a wl_resource");
     goto err_free;
   }
 
-  wl_resource_set_implementation(self->resource, &implementation, self,
+  wl_resource_set_implementation(self->base.resource, &implementation, self,
       zgnr_virtual_object_handle_destroy);
 
   wl_signal_init(&self->base.events.destroy);

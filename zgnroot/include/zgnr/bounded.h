@@ -3,12 +3,15 @@
 #include <cglm/types.h>
 #include <wayland-server-core.h>
 #include <zgnr/region/node.h>
+#include <zgnr/virtual-object.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 struct zgnr_bounded {
+  struct zgnr_virtual_object *virtual_object;  // nonnull
+
   struct {
     struct wl_signal destroy;  // (NULL)
   } events;

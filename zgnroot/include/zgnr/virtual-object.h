@@ -17,6 +17,8 @@ struct zgnr_virtual_object {
     struct wl_signal committed;  // (NULL)
   } events;
 
+  struct wl_resource *resource;
+
   bool committed;
 
   struct {

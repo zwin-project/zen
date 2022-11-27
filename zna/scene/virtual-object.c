@@ -21,6 +21,9 @@ zna_virtual_object_apply_commit(
 
   if (self->znr_virtual_object == NULL) {
     self->znr_virtual_object = znr_virtual_object_create(session);
+
+    znr_virtual_object_move(self->znr_virtual_object,
+        self->zn_virtual_object->position, self->zn_virtual_object->quaternion);
   }
 
   wl_list_for_each (
