@@ -2,6 +2,7 @@
 
 #include <cglm/types.h>
 #include <wayland-server-core.h>
+#include <zigen-protocol.h>
 
 struct zna_ray;
 struct zn_ray;
@@ -11,6 +12,8 @@ struct zn_virtual_object;
 struct zn_ray_grab_interface {
   void (*motion_relative)(struct zn_ray_grab* grab, vec3 origin, float polar,
       float azimuthal, uint32_t time_msec);
+  void (*button)(struct zn_ray_grab* grab, uint32_t time_msec, uint32_t button,
+      enum zgn_ray_button_state state);
   void (*cancel)(struct zn_ray_grab* grab);
 };
 

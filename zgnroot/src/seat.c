@@ -20,13 +20,11 @@ zgnr_seat_set_capabilities(struct zgnr_seat* parent, uint32_t capabilities)
 
 void
 zgnr_seat_send_ray_enter(struct zgnr_seat* parent,
-    struct zgnr_virtual_object* virtual_object, vec3 origin, vec3 direction)
+    struct zgnr_virtual_object* virtual_object, uint32_t serial, vec3 origin,
+    vec3 direction)
 {
   struct zgnr_seat_impl* self = zn_container_of(parent, self, base);
   struct wl_client* client = wl_resource_get_client(virtual_object->resource);
-  struct wl_display* display = wl_global_get_display(self->global);
-
-  uint32_t serial = wl_display_next_serial(display);
 
   struct wl_array origin_array;
   struct wl_array direction_array;
@@ -69,19 +67,31 @@ zgnr_seat_send_ray_motion(struct zgnr_seat* parent, struct wl_client* client,
 }
 
 void
-zgnr_seat_send_ray_leave(
-    struct zgnr_seat* parent, struct zgnr_virtual_object* virtual_object)
+zgnr_seat_send_ray_leave(struct zgnr_seat* parent,
+    struct zgnr_virtual_object* virtual_object, uint32_t serial)
 {
   struct zgnr_seat_impl* self = zn_container_of(parent, self, base);
   struct wl_client* client = wl_resource_get_client(virtual_object->resource);
-  struct wl_display* display = wl_global_get_display(self->global);
-
-  uint32_t serial = wl_display_next_serial(display);
 
   struct zgnr_seat_ray* seat_ray;
   wl_list_for_each (seat_ray, &self->seat_ray_list, link) {
     if (client == wl_resource_get_client(seat_ray->resource)) {
       zgn_ray_send_leave(seat_ray->resource, serial, virtual_object->resource);
+    }
+  }
+}
+
+void
+zgnr_seat_send_ray_button(struct zgnr_seat* parent, struct wl_client* client,
+    uint32_t serial, uint32_t time_msec, uint32_t button,
+    enum zgn_ray_button_state state)
+{
+  struct zgnr_seat_impl* self = zn_container_of(parent, self, base);
+
+  struct zgnr_seat_ray* seat_ray;
+  wl_list_for_each (seat_ray, &self->seat_ray_list, link) {
+    if (client == wl_resource_get_client(seat_ray->resource)) {
+      zgn_ray_send_button(seat_ray->resource, serial, time_msec, button, state);
     }
   }
 }

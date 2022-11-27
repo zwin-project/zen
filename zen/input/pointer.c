@@ -40,7 +40,16 @@ zn_pointer_handle_button(struct wl_listener* listener, void* data)
   if (server->display_system == ZEN_DISPLAY_SYSTEM_TYPE_SCREEN) {
     cursor->grab->interface->button(cursor->grab, event);
   } else {
-    // TODO: ray
+    struct zn_ray* ray = server->input_manager->seat->ray;
+    enum zgn_ray_button_state state = 0;
+    if (event->state == WLR_BUTTON_PRESSED) {
+      state = ZGN_RAY_BUTTON_STATE_PRESSED;
+    } else {
+      state = ZGN_RAY_BUTTON_STATE_RELEASED;
+    }
+
+    ray->grab->interface->button(
+        ray->grab, event->time_msec, event->button, state);
   }
 }
 

@@ -58,6 +58,12 @@ Bounded::Configure(void *data, struct zgn_bounded * /*zgn_bounded*/,
   self->Configure(half_size, serial);
 }
 
+void
+Bounded::Move(uint32_t serial)
+{
+  zgn_bounded_move(proxy_, app_->seat(), serial);
+}
+
 Bounded::Bounded(Application *app) : VirtualObject(app), app_(app) {}
 
 Bounded::~Bounded()

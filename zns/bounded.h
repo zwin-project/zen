@@ -12,6 +12,7 @@ struct zns_bounded {
   struct zgnr_bounded* zgnr_bounded;  // nonnull
 
   struct wl_listener zgnr_bounded_destroy_listener;
+  struct wl_listener move_listener;
 
   struct wl_list link;  // zn_shell::bounded_list
 };
