@@ -30,6 +30,7 @@ zn_virtual_object_move(
   glm_translate(self->model_matrix, position);
   glm_quat_rotate(self->model_matrix, quaternion, self->model_matrix);
   glm_mat4_inv(self->model_matrix, self->model_invert);
+  wl_signal_emit(&self->events.move, NULL);
 }
 
 struct zn_virtual_object*
@@ -50,6 +51,8 @@ zn_virtual_object_create(
 
   wl_list_insert(&scene->virtual_object_list, &self->link);
 
+  wl_signal_init(&self->events.move);
+
   self->zgnr_virtual_object_destroy_listener.notify =
       zn_virtual_object_handle_zgnr_virtual_object_destroy;
   wl_signal_add(&self->zgnr_virtual_object->events.destroy,
@@ -60,7 +63,8 @@ zn_virtual_object_create(
     goto err_free;
   }
 
-  zn_virtual_object_move(self, GLM_VEC3_ZERO, GLM_QUAT_IDENTITY);
+  vec3 initial_pos = {0, 1, -1};
+  zn_virtual_object_move(self, initial_pos, GLM_QUAT_IDENTITY);
 
   return self;
 
@@ -75,6 +79,7 @@ static void
 zn_virtual_object_destroy(struct zn_virtual_object* self)
 {
   zna_virtual_object_destroy(self->appearance);
+  wl_list_remove(&self->events.move.listener_list);
   wl_list_remove(&self->link);
   wl_list_remove(&self->zgnr_virtual_object_destroy_listener.link);
   free(self);

@@ -8,8 +8,6 @@
 #include "zen/scene/virtual-object.h"
 #include "zen/server.h"
 
-#define DEFAULT_RAY_LENGTH 1
-
 void
 zn_ray_get_tip(struct zn_ray* self, vec3 tip)
 {
@@ -49,14 +47,19 @@ zn_ray_move(struct zn_ray* self, vec3 origin, float polar, float azimuthal)
   self->direction[2] = -r * sinf(self->angle.azimuthal);
 }
 
-void
-zn_ray_start_grab(struct zn_ray* self, struct zn_ray_grab* grab)
+static bool
+zn_ray_is_default_grab(struct zn_ray* self)
 {
   struct zn_server* server = zn_server_get_singleton();
   struct zn_ray_grab* default_grab = zn_shell_get_default_grab(server->shell);
+  return self->grab->interface == default_grab->interface;
+}
 
+void
+zn_ray_start_grab(struct zn_ray* self, struct zn_ray_grab* grab)
+{
   if (!zn_assert(
-          self->grab == default_grab, "Non-default grab already exists")) {
+          zn_ray_is_default_grab(self), "Non-default grab already exists")) {
     return;
   }
 
@@ -64,6 +67,8 @@ zn_ray_start_grab(struct zn_ray* self, struct zn_ray_grab* grab)
 
   self->grab = grab;
   self->grab->ray = self;
+
+  self->grab->interface->rebase(self->grab);
 }
 
 void
@@ -75,6 +80,8 @@ zn_ray_end_grab(struct zn_ray* self)
 
   self->grab = zn_shell_get_default_grab(server->shell);
   self->grab->ray = self;
+
+  self->grab->interface->rebase(self->grab);
 }
 
 struct zn_ray*
