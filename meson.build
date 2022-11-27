@@ -96,6 +96,7 @@ cairo_dep = dependency('cairo')
 m_dep = cc.find_library('m')
 pixman_dep = dependency('pixman-1')
 zen_remote_display_system_server_dep = remote_display_system_proj.dependency('zen_remote_display_system_server')
+rsvg_dep = dependency('librsvg-2.0')
 toml_dep = dependency('libtoml')
 zen_remote_display_system_server_dep = remote_display_system_proj.dependency('zen_remote_display_system_server')
 wayland_protocols_dep = dependency('wayland-protocols', version: wayland_protocols_req)
@@ -111,13 +112,21 @@ endif
 
 cdata = configuration_data()
 
+icon_files = files(
+  'assets/icons/power-button.svg',
+)
+icon_install_dir = join_paths(datadir, 'icons', 'zen')
+install_data(icon_files, install_dir: icon_install_dir)
+power_button_icon = join_paths(get_option('prefix'), icon_install_dir, 'power-button.svg')
+cdata.set_quoted('POWER_BUTTON_ICON', power_button_icon)
+
 if get_option('default-wallpaper')
   wallpaper_files = files(
-    'assets/Zen_Wallpaper_Dark_3840x2160.png',
-    'assets/Zen_Wallpaper_Gradient_3840x2160.png',
-    'assets/Zen_Wallpaper_Light_3840x2160.png',
-    'assets/Zen_Wallpaper_Main_3840x2160.png',
-    'assets/Zen_Wallpaper_Mosaic_3840x2160.png',
+    'assets/backgrounds/Zen_Wallpaper_Dark_3840x2160.png',
+    'assets/backgrounds/Zen_Wallpaper_Gradient_3840x2160.png',
+    'assets/backgrounds/Zen_Wallpaper_Light_3840x2160.png',
+    'assets/backgrounds/Zen_Wallpaper_Main_3840x2160.png',
+    'assets/backgrounds/Zen_Wallpaper_Mosaic_3840x2160.png',
   )
   wallpaper_install_dir = join_paths(datadir, 'backgrounds', 'zen')
 

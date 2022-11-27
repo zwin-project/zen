@@ -2,8 +2,10 @@
 
 #include <cairo.h>
 #include <drm_fourcc.h>
+#include <librsvg/rsvg.h>
 #include <wayland-server-core.h>
 
+#include "build-config.h"
 #include "zen-common.h"
 #include "zen/cairo/texture.h"
 
@@ -105,6 +107,81 @@ err_cairo_surface:
 }
 
 void
+power_button_on_click(struct zn_ui_node *self, double x, double y)
+{
+  UNUSED(self);
+  UNUSED(x);
+  UNUSED(y);
+  zn_warn("Power button clicked");
+}
+
+struct zn_ui_node *
+create_power_button(
+    struct zn_server *server, int output_width, int output_height)
+{
+  struct zn_ui_node *power_button = NULL;
+  double button_width = 40;
+  double button_height = 40;
+  cairo_surface_t *surface = cairo_image_surface_create(
+      CAIRO_FORMAT_ARGB32, button_width, button_height);
+
+  if (!zn_assert(cairo_surface_status(surface) == CAIRO_STATUS_SUCCESS,
+          "Failed to create cairo_surface"))
+    goto err_cairo_surface;
+
+  cairo_t *cr = cairo_create(surface);
+  if (!zn_assert(
+          cairo_status(cr) == CAIRO_STATUS_SUCCESS, "Failed to create cairo_t"))
+    goto err_cairo;
+
+  GError *error = NULL;
+  GFile *file = g_file_new_for_path(POWER_BUTTON_ICON);
+  RsvgHandle *handle = rsvg_handle_new_from_gfile_sync(
+      file, RSVG_HANDLE_FLAGS_NONE, NULL, &error);
+  if (handle == NULL) {
+    zn_error("Failed to create the svg handler: %s", error->message);
+    goto err_cairo;
+  }
+  RsvgRectangle viewport = {
+      .x = 0.0,
+      .y = 0.0,
+      .width = button_width,
+      .height = button_height,
+  };
+  if (!rsvg_handle_render_document(handle, cr, &viewport, &error)) {
+    zn_error("Failed to render the svg");
+    goto err_render;
+  }
+
+  struct wlr_texture *texture =
+      zn_wlr_texture_from_cairo_surface(surface, server);
+
+  struct wlr_box *frame;
+  frame = zalloc(sizeof *frame);
+
+  // Put the frame to the center of screen
+  frame->x = (double)output_width - button_width - 10;
+  frame->y = (double)output_height - button_height - 10;
+  frame->width = button_width;
+  frame->height = button_height;
+
+  power_button = zn_ui_node_create(frame, texture, power_button_on_click);
+
+  if (power_button == NULL) {
+    zn_error("Failed to create the power button");
+    goto err_render;
+  }
+
+err_render:
+  g_object_unref(handle);
+err_cairo:
+  cairo_destroy(cr);
+err_cairo_surface:
+  cairo_surface_destroy(surface);
+  return power_button;
+}
+
+void
 menu_bar_on_click(struct zn_ui_node *self, double x, double y)
 {
   UNUSED(self);
@@ -114,7 +191,7 @@ menu_bar_on_click(struct zn_ui_node *self, double x, double y)
 
 struct zn_ui_node *
 create_menu_bar(struct zn_server *server, int output_width, int output_height,
-    struct zn_ui_node *vr_button)
+    struct zn_ui_node *vr_button, struct zn_ui_node *power_button)
 {
   struct zn_ui_node *menu_bar = NULL;
   double bar_width = (double)output_width;
@@ -149,6 +226,7 @@ create_menu_bar(struct zn_server *server, int output_width, int output_height,
 
   menu_bar = zn_ui_node_create(frame, texture, menu_bar_on_click);
   wl_list_insert(&menu_bar->children, &vr_button->link);
+  wl_list_insert(&menu_bar->children, &power_button->link);
 
   if (menu_bar == NULL) {
     zn_error("Failed to create the menu bar");
@@ -169,8 +247,10 @@ zn_ui_node_setup_default(struct zn_screen *screen, struct zn_server *server)
       screen->output->wlr_output, &output_width, &output_height);
   struct zn_ui_node *vr_button =
       create_vr_button(server, output_width, output_height);
-  struct zn_ui_node *menu_bar =
-      create_menu_bar(server, output_width, output_height, vr_button);
+  struct zn_ui_node *power_button =
+      create_power_button(server, output_width, output_height);
+  struct zn_ui_node *menu_bar = create_menu_bar(
+      server, output_width, output_height, vr_button, power_button);
   // Register the widgets on the screen
   wl_list_insert(&screen->ui_nodes, &menu_bar->link);
 }

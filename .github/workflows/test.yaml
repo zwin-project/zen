@@ -17,7 +17,8 @@ jobs:
           sudo apt-get update &&
           sudo apt-get install \
             libwayland-dev libwlroots-dev libpixman-1-dev libxml2-dev \
-            libopenvr-dev libxkbcommon-dev libglu1-mesa-dev libglew-dev weston
+            libopenvr-dev libxkbcommon-dev libglu1-mesa-dev libglew-dev weston \
+            librsvg2-dev
 
       - uses: actions/setup-python@v1
         with:

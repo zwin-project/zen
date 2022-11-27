@@ -1,3 +1,5 @@
 #pragma once
 /* Path to the installed default wallpaper image */
 #mesondefine DEFAULT_WALLPAPER
+/* Path to the power button icon image*/
+#mesondefine POWER_BUTTON_ICON
