@@ -1,16 +1,39 @@
 #include "zen/ray.h"
 
+#include <cglm/mat4.h>
 #include <cglm/vec3.h>
 
 #include "zen-common.h"
 #include "zen/appearance/ray.h"
+#include "zen/scene/virtual-object.h"
 #include "zen/server.h"
 
+#define DEFAULT_RAY_LENGTH 1
+
 void
-zn_ray_get_tip(struct zn_ray* self, float length, vec3 tip)
+zn_ray_get_tip(struct zn_ray* self, vec3 tip)
 {
-  glm_vec3_scale_as(self->direction, length, tip);
+  glm_vec3_scale_as(self->direction, self->length, tip);
   glm_vec3_add(tip, self->origin, tip);
+}
+
+void
+zn_ray_get_local_origin_direction(struct zn_ray* self,
+    struct zn_virtual_object* virtual_object, vec3 local_origin,
+    vec3 local_direction)
+{
+  vec3 tip, local_tip;
+  zn_ray_get_tip(self, tip);
+  glm_mat4_mulv3(virtual_object->model_invert, tip, 1, local_tip);
+  glm_mat4_mulv3(virtual_object->model_invert, self->origin, 1, local_origin);
+  glm_vec3_sub(local_tip, local_origin, local_direction);
+  glm_vec3_scale_as(local_direction, 1, local_direction);
+}
+
+void
+zn_ray_set_length(struct zn_ray* self, float length)
+{
+  self->length = length;
 }
 
 void
@@ -24,8 +47,6 @@ zn_ray_move(struct zn_ray* self, vec3 origin, float polar, float azimuthal)
   self->direction[0] = r * cosf(self->angle.azimuthal);
   self->direction[1] = cosf(self->angle.polar);
   self->direction[2] = -r * sinf(self->angle.azimuthal);
-
-  wl_signal_emit(&self->events.motion, NULL);
 }
 
 void
@@ -73,7 +94,6 @@ zn_ray_create(void)
   self->grab->ray = self;
 
   wl_signal_init(&self->events.destroy);
-  wl_signal_init(&self->events.motion);
 
   self->appearance = zna_ray_create(self, server->appearance_system);
   if (self->appearance == NULL) {
@@ -81,6 +101,7 @@ zn_ray_create(void)
   }
 
   zn_ray_move(self, initial_origin, GLM_PI / 3.0f, GLM_PI / 2.0f);
+  zn_ray_set_length(self, DEFAULT_RAY_LENGTH);
 
   return self;
 
@@ -100,6 +121,5 @@ zn_ray_destroy(struct zn_ray* self)
 
   zna_ray_destroy(self->appearance);
   wl_list_remove(&self->events.destroy.listener_list);
-  wl_list_remove(&self->events.motion.listener_list);
   free(self);
 }
