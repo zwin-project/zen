@@ -25,7 +25,11 @@ zns_default_ray_grab_focus(
   if (self->focus) {
     wl_list_remove(&self->focus_destroy_listener.link);
     wl_list_init(&self->focus_destroy_listener.link);
-    zgnr_seat_send_ray_leave(seat, self->focus->zgnr_bounded->virtual_object);
+
+    uint32_t serial = wl_display_next_serial(server->display);
+
+    zgnr_seat_send_ray_leave(
+        seat, self->focus->zgnr_bounded->virtual_object, serial);
   }
 
   if (bounded) {
@@ -37,8 +41,10 @@ zns_default_ray_grab_focus(
     zn_ray_get_local_origin_direction(
         self->base.ray, zn_virtual_object, local_origin, local_direction);
 
+    uint32_t serial = wl_display_next_serial(server->display);
+
     zgnr_seat_send_ray_enter(seat, bounded->zgnr_bounded->virtual_object,
-        local_origin, local_direction);
+        serial, local_origin, local_direction);
   }
 
   self->focus = bounded;
@@ -103,6 +109,24 @@ zns_default_ray_grab_motion_relative(struct zn_ray_grab* grab_base, vec3 origin,
 }
 
 static void
+zns_default_ray_grab_button(struct zn_ray_grab* grab_base, uint32_t time_msec,
+    uint32_t button, enum zgn_ray_button_state state)
+{
+  struct zns_default_ray_grab* self = zn_container_of(grab_base, self, base);
+  struct wl_client* client;
+  struct zn_server* server = zn_server_get_singleton();
+  struct zgnr_seat* seat = server->input_manager->seat->zgnr_seat;
+
+  if (self->focus == NULL) return;
+
+  client = wl_resource_get_client(
+      self->focus->zgnr_bounded->virtual_object->resource);
+
+  uint32_t serial = wl_display_next_serial(server->display);
+  zgnr_seat_send_ray_button(seat, client, serial, time_msec, button, state);
+}
+
+static void
 zns_default_ray_grab_cancel(struct zn_ray_grab* grab)
 {
   UNUSED(grab);
@@ -110,6 +134,7 @@ zns_default_ray_grab_cancel(struct zn_ray_grab* grab)
 
 static const struct zn_ray_grab_interface implementation = {
     .motion_relative = zns_default_ray_grab_motion_relative,
+    .button = zns_default_ray_grab_button,
     .cancel = zns_default_ray_grab_cancel,
 };
 

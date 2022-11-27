@@ -28,6 +28,8 @@ class Bounded : public VirtualObject
 
   void SetRegion(Region *region);
 
+  void Move(uint32_t serial);
+
   inline zgn_bounded *proxy();
 
  private:

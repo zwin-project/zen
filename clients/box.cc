@@ -1,3 +1,5 @@
+#include <linux/input.h>
+
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/mat4x4.hpp>
@@ -138,6 +140,14 @@ class BoxApp final : public Application
   void RayLeave(uint32_t /*serial*/, VirtualObject* /*virtual_object*/) override
   {
     box_.Enter(false);
+  };
+
+  void RayButton(uint32_t serial, uint32_t /*time*/, uint32_t button,
+      uint32_t state) override
+  {
+    if (button == BTN_LEFT && state == ZGN_RAY_BUTTON_STATE_PRESSED) {
+      box_.Move(serial);
+    }
   };
 
  private:

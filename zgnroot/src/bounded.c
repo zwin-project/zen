@@ -109,10 +109,27 @@ zgnr_bounded_protocol_set_region(struct wl_client *client,
   self->pending.damage |= ZGNR_BOUNDED_DAMAGE_REGION;
 }
 
+static void
+zgnr_bounded_protocol_move(struct wl_client *client,
+    struct wl_resource *resource, struct wl_resource *seat_resource,
+    uint32_t serial)
+{
+  struct zgnr_bounded_impl *self = wl_resource_get_user_data(resource);
+  struct zgnr_seat *seat = wl_resource_get_user_data(seat_resource);
+  struct zgnr_bounded_move_event event;
+
+  event.serial = serial;
+  event.seat = seat;
+  event.client = client;
+
+  wl_signal_emit(&self->base.events.move, &event);
+}
+
 static const struct zgn_bounded_interface implementation = {
     .destroy = zgnr_bounded_protocol_destroy,
     .ack_configure = zgnr_bounded_protocol_ack_configure,
     .set_region = zgnr_bounded_protocol_set_region,
+    .move = zgnr_bounded_protocol_move,
 };
 
 static void
@@ -180,6 +197,7 @@ zgnr_bounded_create(struct wl_client *client, uint32_t id,
   self->base.virtual_object = &virtual_object->base;
 
   wl_signal_init(&self->base.events.destroy);
+  wl_signal_init(&self->base.events.move);
   wl_list_init(&self->configure_list);
 
   self->configured = false;
@@ -237,6 +255,7 @@ zgnr_bounded_destroy(struct zgnr_bounded_impl *self)
   wl_list_remove(&self->virtual_object_destroy_listener.link);
   wl_list_remove(&self->virtual_object_commit_listener.link);
   wl_list_remove(&self->base.events.destroy.listener_list);
+  wl_list_remove(&self->base.events.move.listener_list);
 
   free(self);
 }

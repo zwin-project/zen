@@ -33,6 +33,13 @@ zns_bounded_ray_cast(struct zns_bounded* self, struct zn_ray* ray)
 }
 
 static void
+zns_bounded_handle_move(struct wl_listener* listener, void* data)
+{
+  UNUSED(listener);
+  UNUSED(data);
+}
+
+static void
 zns_bounded_handle_zgnr_bounded_destroy(
     struct wl_listener* listener, void* data)
 {
@@ -63,6 +70,9 @@ zns_bounded_create(struct zgnr_bounded* zgnr_bounded)
   wl_signal_add(
       &zgnr_bounded->events.destroy, &self->zgnr_bounded_destroy_listener);
 
+  self->move_listener.notify = zns_bounded_handle_move;
+  wl_signal_add(&zgnr_bounded->events.move, &self->move_listener);
+
   wl_signal_init(&self->events.destroy);
 
   return self;
@@ -77,6 +87,7 @@ zns_bounded_destroy(struct zns_bounded* self)
   wl_signal_emit(&self->events.destroy, NULL);
 
   wl_list_remove(&self->link);
+  wl_list_remove(&self->move_listener.link);
   wl_list_remove(&self->zgnr_bounded_destroy_listener.link);
   wl_list_remove(&self->events.destroy.listener_list);
   free(self);
