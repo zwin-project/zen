@@ -6,6 +6,7 @@
 
 #include "bounded.h"
 #include "shell.h"
+#include "zen/appearance/ray.h"
 #include "zen/scene/virtual-object.h"
 #include "zen/server.h"
 
@@ -32,12 +33,10 @@ zns_default_ray_grab_focus(
     struct zn_virtual_object* zn_virtual_object =
         bounded->zgnr_bounded->virtual_object->user_data;
 
-    vec3 ray_tip, local_origin, local_tip, local_direction;
-    zn_ray_get_tip(self->base.ray, 1, ray_tip);
-    glm_mat4_mulv3(zn_virtual_object->model_invert, ray_tip, 1, local_tip);
-    glm_mat4_mulv3(zn_virtual_object->model_invert, self->base.ray->origin, 1,
-        local_origin);
-    glm_vec3_sub(local_tip, local_origin, local_direction);
+    vec3 local_origin, local_direction;
+    zn_ray_get_local_origin_direction(
+        self->base.ray, zn_virtual_object, local_origin, local_direction);
+
     zgnr_seat_send_ray_enter(seat, bounded->zgnr_bounded->virtual_object,
         local_origin, local_direction);
   }
@@ -61,12 +60,9 @@ zns_default_ray_grab_send_motion(
 
   zn_virtual_object = self->focus->zgnr_bounded->virtual_object->user_data;
 
-  vec3 ray_tip, local_origin, local_tip, local_direction;
-  zn_ray_get_tip(self->base.ray, 1, ray_tip);
-  glm_mat4_mulv3(zn_virtual_object->model_invert, ray_tip, 1, local_tip);
-  glm_mat4_mulv3(
-      zn_virtual_object->model_invert, self->base.ray->origin, 1, local_origin);
-  glm_vec3_sub(local_tip, local_origin, local_direction);
+  vec3 local_origin, local_direction;
+  zn_ray_get_local_origin_direction(
+      self->base.ray, zn_virtual_object, local_origin, local_direction);
 
   zgnr_seat_send_ray_motion(
       seat, client, time_msec, local_origin, local_direction);
@@ -96,6 +92,10 @@ zns_default_ray_grab_motion_relative(struct zn_ray_grab* grab_base, vec3 origin,
 
   float distance;
   bounded = zn_shell_ray_cast(self->shell, self->base.ray, &distance);
+
+  zn_ray_set_length(self->base.ray, distance);
+
+  zna_ray_commit(self->base.ray->appearance);
 
   zns_default_ray_grab_focus(self, bounded);
 

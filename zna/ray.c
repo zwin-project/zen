@@ -5,15 +5,12 @@
 
 #include "system.h"
 
-static void
-zna_ray_handle_motion(struct wl_listener* listener, void* data)
+void
+zna_ray_commit(struct zna_ray* self)
 {
-  UNUSED(data);
-  struct zna_ray* self = zn_container_of(listener, self, motion_listener);
-
   if (self->base_unit->has_renderer_objects) {
     vec3 tip;
-    zn_ray_get_tip(self->zn_ray, 1.0, tip);
+    zn_ray_get_tip(self->zn_ray, tip);
     znr_gl_base_technique_gl_uniform_vector(self->base_unit->technique, 0,
         "tip", ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_FLOAT, 3, 1, tip);
     znr_virtual_object_commit(self->virtual_object);
@@ -33,7 +30,7 @@ zna_ray_setup_renderer_objects(
       self->base_unit, session, self->virtual_object);
 
   vec3 tip;
-  zn_ray_get_tip(self->zn_ray, 1.0, tip);
+  zn_ray_get_tip(self->zn_ray, tip);
   znr_gl_base_technique_gl_uniform_vector(self->base_unit->technique, 0, "tip",
       ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_FLOAT, 3, 1, tip);
 
@@ -88,9 +85,6 @@ zna_ray_create(struct zn_ray* ray, struct zna_system* system)
     zn_error("Failed to allocate memory");
     goto err;
   }
-
-  self->motion_listener.notify = zna_ray_handle_motion;
-  wl_signal_add(&ray->events.motion, &self->motion_listener);
 
   self->session_created_listener.notify = zna_ray_handle_session_created;
   wl_signal_add(
@@ -153,6 +147,5 @@ zna_ray_destroy(struct zna_ray* self)
   zna_base_unit_destroy(self->base_unit);
   wl_list_remove(&self->session_created_listener.link);
   wl_list_remove(&self->session_destroyed_listener.link);
-  wl_list_remove(&self->motion_listener.link);
   free(self);
 }
