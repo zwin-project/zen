@@ -8,8 +8,8 @@ struct zn_ray;
 struct zn_ray_grab;
 
 struct zn_ray_grab_interface {
-  void (*motion_relative)(
-      struct zn_ray_grab* grab, vec3 origin, float polar, float azimuthal);
+  void (*motion_relative)(struct zn_ray_grab* grab, vec3 origin, float polar,
+      float azimuthal, uint32_t time_msec);
   void (*cancel)(struct zn_ray_grab* grab);
 };
 

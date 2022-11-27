@@ -33,11 +33,10 @@ zns_default_ray_grab_focus(
         bounded->zgnr_bounded->virtual_object->user_data;
 
     vec3 ray_tip, local_origin, local_tip, local_direction;
-    mat4 invert;
-    glm_mat4_inv(zn_virtual_object->model_matrix, invert);
     zn_ray_get_tip(self->base.ray, 1, ray_tip);
-    glm_mat4_mulv3(invert, ray_tip, 1, local_tip);
-    glm_mat4_mulv3(invert, self->base.ray->origin, 1, local_origin);
+    glm_mat4_mulv3(zn_virtual_object->model_invert, ray_tip, 1, local_tip);
+    glm_mat4_mulv3(zn_virtual_object->model_invert, self->base.ray->origin, 1,
+        local_origin);
     glm_vec3_sub(local_tip, local_origin, local_direction);
     zgnr_seat_send_ray_enter(seat, bounded->zgnr_bounded->virtual_object,
         local_origin, local_direction);
@@ -47,15 +46,35 @@ zns_default_ray_grab_focus(
 }
 
 static void
-zns_default_ray_grab_send_motion(struct zns_default_ray_grab* self)
+zns_default_ray_grab_send_motion(
+    struct zns_default_ray_grab* self, uint32_t time_msec)
 {
-  // TODO: motion
-  UNUSED(self);
+  struct wl_client* client;
+  struct zn_server* server = zn_server_get_singleton();
+  struct zgnr_seat* seat = server->input_manager->seat->zgnr_seat;
+  struct zn_virtual_object* zn_virtual_object;
+
+  if (self->focus == NULL) return;
+
+  client = wl_resource_get_client(
+      self->focus->zgnr_bounded->virtual_object->resource);
+
+  zn_virtual_object = self->focus->zgnr_bounded->virtual_object->user_data;
+
+  vec3 ray_tip, local_origin, local_tip, local_direction;
+  zn_ray_get_tip(self->base.ray, 1, ray_tip);
+  glm_mat4_mulv3(zn_virtual_object->model_invert, ray_tip, 1, local_tip);
+  glm_mat4_mulv3(
+      zn_virtual_object->model_invert, self->base.ray->origin, 1, local_origin);
+  glm_vec3_sub(local_tip, local_origin, local_direction);
+
+  zgnr_seat_send_ray_motion(
+      seat, client, time_msec, local_origin, local_direction);
 }
 
 static void
-zns_default_ray_grab_motion_relative(
-    struct zn_ray_grab* grab_base, vec3 origin, float polar, float azimuthal)
+zns_default_ray_grab_motion_relative(struct zn_ray_grab* grab_base, vec3 origin,
+    float polar, float azimuthal, uint32_t time_msec)
 {
   struct zns_default_ray_grab* self = zn_container_of(grab_base, self, base);
   struct zns_bounded* bounded;
@@ -80,7 +99,7 @@ zns_default_ray_grab_motion_relative(
 
   zns_default_ray_grab_focus(self, bounded);
 
-  zns_default_ray_grab_send_motion(self);
+  zns_default_ray_grab_send_motion(self, time_msec);
 }
 
 static void

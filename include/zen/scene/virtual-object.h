@@ -15,6 +15,7 @@ struct zn_virtual_object {
   vec3 position;
   versor quaternion;
   mat4 model_matrix;  // the combination of `position` and `quaternion`
+  mat4 model_invert;
 
   struct wl_listener zgnr_virtual_object_destroy_listener;
 };

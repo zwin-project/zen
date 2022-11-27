@@ -47,10 +47,9 @@ zgnr_seat_send_ray_enter(struct zgnr_seat* parent,
 
 void
 zgnr_seat_send_ray_motion(struct zgnr_seat* parent, struct wl_client* client,
-    struct timespec* time, vec3 origin, vec3 direction)
+    uint32_t time_msec, vec3 origin, vec3 direction)
 {
   struct zgnr_seat_impl* self = zn_container_of(parent, self, base);
-  uint32_t time_msec = timespec_to_msec(time);
 
   struct wl_array origin_array;
   struct wl_array direction_array;

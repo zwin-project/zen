@@ -16,7 +16,7 @@ void zgnr_seat_send_ray_enter(struct zgnr_seat* self,
     struct zgnr_virtual_object* virtual_object, vec3 origin, vec3 direction);
 
 void zgnr_seat_send_ray_motion(struct zgnr_seat* self, struct wl_client* client,
-    struct timespec* time, vec3 origin, vec3 direction);
+    uint32_t time_msec, vec3 origin, vec3 direction);
 
 void zgnr_seat_send_ray_leave(
     struct zgnr_seat* self, struct zgnr_virtual_object* virtual_object);
