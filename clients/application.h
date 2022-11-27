@@ -5,11 +5,14 @@
 #include <zigen-gles-v32-client-protocol.h>
 #include <zigen-shell-client-protocol.h>
 
+#include <glm/vec3.hpp>
 #include <memory>
 
 #include "loop.h"
 
 namespace zen::client {
+
+class VirtualObject;
 
 class Application
 {
@@ -31,6 +34,19 @@ class Application
   inline zgn_shell* shell();
   inline zgn_shm* shm();
 
+ protected:
+  virtual void RayEnter(uint32_t /*serial*/, VirtualObject* /*virtual_object*/,
+      glm::vec3 /*origin*/, glm::vec3 /*direction*/){};
+
+  virtual void RayLeave(
+      uint32_t /*serial*/, VirtualObject* /*virtual_object*/){};
+
+  virtual void RayMotion(
+      uint32_t /*time*/, glm::vec3 /*origin*/, glm::vec3 /*direction*/){};
+
+  virtual void RayButton(uint32_t /*serial*/, uint32_t /*time*/,
+      uint32_t /*button*/, uint32_t /*state*/){};
+
  private:
   static const struct wl_registry_listener registry_listener_;
   static void GlobalRegistry(void* data, struct wl_registry* registry,
@@ -42,6 +58,17 @@ class Application
   static void SeatCapabilities(
       void* data, struct zgn_seat* zgn_seat, uint32_t capabilities);
 
+  static const struct zgn_ray_listener zgn_ray_listener_;
+  static void HandleRayEnter(void* data, struct zgn_ray* zgn_ray,
+      uint32_t serial, struct zgn_virtual_object* virtual_object,
+      struct wl_array* origin, struct wl_array* direction);
+  static void HandleRayLeave(void* data, struct zgn_ray* zgn_ray,
+      uint32_t serial, struct zgn_virtual_object* virtual_object);
+  static void HandleRayMotion(void* data, struct zgn_ray* zgn_ray,
+      uint32_t time, struct wl_array* origin, struct wl_array* direction);
+  static void HandleRayButton(void* data, struct zgn_ray* zgn_ray,
+      uint32_t serial, uint32_t time, uint32_t button, uint32_t state);
+
   void Poll();
 
   wl_display* display_ = nullptr;
@@ -51,6 +78,9 @@ class Application
   zgn_gles_v32* zgn_gles_v32_ = nullptr;
   zgn_shell* zgn_shell_ = nullptr;
   zgn_shm* zgn_shm_ = nullptr;
+
+  zgn_ray* zgn_ray_ = nullptr;  // nullable
+
   Loop loop_;
   std::unique_ptr<EventSource> event_source_;
 };

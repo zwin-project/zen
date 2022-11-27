@@ -30,6 +30,8 @@ struct zn_ray {
     float azimuthal;
   } angle;  // radian, modified by grab
 
+  vec3 direction;  // consistent with the values of angle, length == 1
+
   struct {
     struct wl_signal destroy;  // (NULL)
     struct wl_signal motion;   // (NULL)

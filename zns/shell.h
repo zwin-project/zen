@@ -5,6 +5,8 @@
 #include "ray-grab/default.h"
 #include "zen/shell/shell.h"
 
+struct zns_bounded;
+
 struct zn_shell {
   struct zgnr_shell* zgnr_shell;
 
@@ -14,3 +16,10 @@ struct zn_shell {
 
   struct wl_listener new_bounded_listener;
 };
+
+/**
+ * @param distance returns the distance to the intersection if intersected.
+ * @return the intersected zns_bounded, NULL if not intersected
+ */
+struct zns_bounded* zn_shell_ray_cast(
+    struct zn_shell* self, struct zn_ray* ray, float* distance);

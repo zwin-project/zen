@@ -39,6 +39,7 @@ namespace zen::client {
 class Application;
 class VirtualObject;
 class RenderingUnit;
+class Region;
 class GlBaseTechnique;
 class ShmPool;
 class Buffer;
@@ -61,6 +62,8 @@ class Cuboid
   ~Cuboid();
 
   bool Render(glm::vec3 half_size, glm::mat4 transform, glm::vec4 color);
+
+  bool AddCuboid(Region* region);
 
   inline size_t vertex_buffer_size();
   inline size_t element_buffer_size();

@@ -7,4 +7,6 @@ struct zgnr_seat_impl {
   struct wl_global* global;
 
   struct wl_list resource_list;
+
+  struct wl_list seat_ray_list;  // zgnr_seat_ray::link
 };

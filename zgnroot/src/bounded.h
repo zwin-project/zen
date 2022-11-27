@@ -4,8 +4,8 @@
 #include "zgnr/bounded.h"
 
 enum zgnr_bounded_damage {
-  ZGNR_BOUNDED_DAMAGE_HALF_SIZE = 0,
-  ZGNR_BOUNDED_DAMAGE_REGION = 1 << 0,
+  ZGNR_BOUNDED_DAMAGE_HALF_SIZE = 1 << 0,
+  ZGNR_BOUNDED_DAMAGE_REGION = 1 << 1,
 };
 
 /**
@@ -14,7 +14,6 @@ enum zgnr_bounded_damage {
  */
 struct zgnr_bounded_impl {
   struct zgnr_bounded base;
-  struct zgnr_virtual_object_impl *virtual_object;  // nonnull
 
   struct wl_listener virtual_object_destroy_listener;
   struct wl_listener virtual_object_commit_listener;

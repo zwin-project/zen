@@ -8,8 +8,6 @@ struct zgnr_virtual_object_impl {
   struct zgnr_virtual_object base;
   struct wl_display* display;
 
-  struct wl_resource* resource;
-
   struct {
     struct wl_list frame_callback_list;
   } pending;

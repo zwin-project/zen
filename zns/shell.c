@@ -1,9 +1,32 @@
 #include "shell.h"
 
+#include <float.h>
 #include <zen-common.h>
 #include <zgnr/bounded.h>
 
 #include "bounded.h"
+
+struct zns_bounded*
+zn_shell_ray_cast(struct zn_shell* self, struct zn_ray* ray, float* distance)
+{
+  struct zns_bounded *bounded, *result_bounded = NULL;
+
+  float min_distance = FLT_MAX;
+
+  wl_list_for_each (bounded, &self->bounded_list, link) {
+    float d = zns_bounded_ray_cast(bounded, ray);
+    if (d < min_distance) {
+      min_distance = d;
+      result_bounded = bounded;
+    }
+  }
+
+  if (min_distance < FLT_MAX) {
+    *distance = min_distance;
+  }
+
+  return result_bounded;
+}
 
 static void
 zn_shell_handle_new_bounded(struct wl_listener* listener, void* data)
@@ -40,7 +63,7 @@ zn_shell_create(struct wl_display* display)
     goto err_free;
   }
 
-  zns_default_ray_grab_init(&self->default_grab);
+  zns_default_ray_grab_init(&self->default_grab, self);
 
   wl_list_init(&self->bounded_list);
 

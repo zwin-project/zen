@@ -20,6 +20,17 @@ zn_virtual_object_handle_zgnr_virtual_object_destroy(
   zn_virtual_object_destroy(self);
 }
 
+void
+zn_virtual_object_move(
+    struct zn_virtual_object* self, vec3 position, versor quaternion)
+{
+  glm_vec3_copy(position, self->position);
+  glm_vec4_copy(quaternion, self->quaternion);
+  glm_mat4_identity(self->model_matrix);
+  glm_translate(self->model_matrix, position);
+  glm_quat_rotate(self->model_matrix, quaternion, self->model_matrix);
+}
+
 struct zn_virtual_object*
 zn_virtual_object_create(
     struct zgnr_virtual_object* zgnr_virtual_object, struct zn_scene* scene)
@@ -35,8 +46,6 @@ zn_virtual_object_create(
 
   self->zgnr_virtual_object = zgnr_virtual_object;
   zgnr_virtual_object->user_data = self;
-  glm_vec3_zero(self->position);
-  glm_quat_identity(self->quaternion);
 
   wl_list_insert(&scene->virtual_object_list, &self->link);
 
@@ -49,6 +58,8 @@ zn_virtual_object_create(
   if (self->appearance == NULL) {
     goto err_free;
   }
+
+  zn_virtual_object_move(self, GLM_VEC3_ZERO, GLM_QUAT_IDENTITY);
 
   return self;
 

@@ -3,6 +3,9 @@
 #include <errno.h>
 
 #include <cstring>
+#include <iostream>
+
+#include "array.h"
 
 namespace zen::client {
 
@@ -38,8 +41,69 @@ Application::GlobalRegistryRemove(
 
 void
 Application::SeatCapabilities(
-    void* /*data*/, struct zgn_seat* /*zgn_seat*/, uint32_t /*capabilities*/)
-{}
+    void* data, struct zgn_seat* /*zgn_seat*/, uint32_t capabilities)
+{
+  auto app = static_cast<Application*>(data);
+  bool has_ray =
+      (ZGN_SEAT_CAPABILITY_RAY_ORIGIN | ZGN_SEAT_CAPABILITY_RAY_DIRECTION) &
+      capabilities;
+
+  if (has_ray && !app->zgn_ray_) {
+    app->zgn_ray_ = zgn_seat_get_ray(app->zgn_seat_);
+    zgn_ray_add_listener(app->zgn_ray_, &Application::zgn_ray_listener_, app);
+  }
+
+  if (!has_ray && app->zgn_ray_) {
+    zgn_ray_release(app->zgn_ray_);
+    app->zgn_ray_ = nullptr;
+  }
+}
+
+void
+Application::HandleRayEnter(void* data, struct zgn_ray* /*zgn_ray*/,
+    uint32_t serial, struct zgn_virtual_object* virtual_object_proxy,
+    struct wl_array* origin_array, struct wl_array* direction_array)
+{
+  auto virtual_object = static_cast<VirtualObject*>(
+      wl_proxy_get_user_data((wl_proxy*)virtual_object_proxy));
+  auto app = static_cast<Application*>(data);
+  glm::vec3 origin, direction;
+  to_vec3(origin_array, origin);
+  to_vec3(direction_array, direction);
+
+  app->RayEnter(serial, virtual_object, origin, direction);
+}
+
+void
+Application::HandleRayLeave(void* data, struct zgn_ray* /*zgn_ray*/,
+    uint32_t serial, struct zgn_virtual_object* virtual_object_proxy)
+{
+  auto app = static_cast<Application*>(data);
+  auto virtual_object = static_cast<VirtualObject*>(
+      wl_proxy_get_user_data((wl_proxy*)virtual_object_proxy));
+  app->RayLeave(serial, virtual_object);
+}
+
+void
+Application::HandleRayMotion(void* data, struct zgn_ray* /*zgn_ray*/,
+    uint32_t time, struct wl_array* origin_array,
+    struct wl_array* direction_array)
+{
+  auto app = static_cast<Application*>(data);
+  glm::vec3 origin, direction;
+  to_vec3(origin_array, origin);
+  to_vec3(direction_array, direction);
+
+  app->RayMotion(time, origin, direction);
+}
+
+void
+Application::HandleRayButton(void* data, struct zgn_ray* /*zgn_ray*/,
+    uint32_t serial, uint32_t time, uint32_t button, uint32_t state)
+{
+  auto app = static_cast<Application*>(data);
+  app->RayButton(serial, time, button, state);
+}
 
 bool
 Application::Init()
@@ -171,6 +235,13 @@ const struct wl_registry_listener Application::registry_listener_ = {
 
 const struct zgn_seat_listener Application::zgn_seat_listener_ = {
     Application::SeatCapabilities,
+};
+
+const struct zgn_ray_listener Application::zgn_ray_listener_ = {
+    Application::HandleRayEnter,
+    Application::HandleRayLeave,
+    Application::HandleRayMotion,
+    Application::HandleRayButton,
 };
 
 }  // namespace zen::client

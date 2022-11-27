@@ -13,8 +13,12 @@ static void zgnr_bounded_inert(struct zgnr_bounded_impl *self);
 void
 zgnr_bounded_configure(struct zgnr_bounded_impl *self, vec3 half_size)
 {
+  struct zgnr_virtual_object_impl *virtual_object =
+      zn_container_of(self->base.virtual_object, virtual_object, base);
+
   struct zgnr_bounded_configure *configure =
-      zgnr_bounded_configure_create(self->virtual_object->display, half_size);
+      zgnr_bounded_configure_create(virtual_object->display, half_size);
+
   if (configure == NULL) {
     zn_error("Failed to create bounded configure");
     return;
@@ -52,6 +56,7 @@ zgnr_bounded_protocol_ack_configure(
 {
   UNUSED(client);
   struct zgnr_bounded_impl *self = wl_resource_get_user_data(resource);
+  if (self == NULL) return;
 
   bool found = false;
   struct zgnr_bounded_configure *configure, *tmp;
@@ -88,6 +93,7 @@ zgnr_bounded_protocol_set_region(struct wl_client *client,
 {
   UNUSED(client);
   struct zgnr_bounded_impl *self = wl_resource_get_user_data(resource);
+  if (self == NULL) return;
 
   if (self->pending.region) {
     zgnr_region_node_destroy(self->pending.region);
@@ -171,7 +177,7 @@ zgnr_bounded_create(struct wl_client *client, uint32_t id,
     goto err;
   }
 
-  self->virtual_object = virtual_object;
+  self->base.virtual_object = &virtual_object->base;
 
   wl_signal_init(&self->base.events.destroy);
   wl_list_init(&self->configure_list);
@@ -232,5 +238,5 @@ zgnr_bounded_destroy(struct zgnr_bounded_impl *self)
   wl_list_remove(&self->virtual_object_commit_listener.link);
   wl_list_remove(&self->base.events.destroy.listener_list);
 
-  UNUSED(self);
+  free(self);
 }

@@ -13,6 +13,8 @@ VirtualObject::Init()
     return false;
   }
 
+  wl_proxy_set_user_data((wl_proxy *)proxy_, this);
+
   return true;
 }
 
