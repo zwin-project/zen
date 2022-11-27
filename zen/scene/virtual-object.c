@@ -29,6 +29,7 @@ zn_virtual_object_move(
   glm_mat4_identity(self->model_matrix);
   glm_translate(self->model_matrix, position);
   glm_quat_rotate(self->model_matrix, quaternion, self->model_matrix);
+  glm_mat4_inv(self->model_matrix, self->model_invert);
 }
 
 struct zn_virtual_object*
