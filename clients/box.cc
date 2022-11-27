@@ -52,7 +52,7 @@ class Box final : public Bounded
     }
 
     cuboid_->Render(half_size_tmp, translate * rotate,
-        glm::vec4(1 - cuboid_color_, 1 - cuboid_color_, cuboid_color_, 1));
+        glm::vec4(1 - cuboid_color_, 0, cuboid_color_, 1));
 
     if (half_size) *half_size = half_size_tmp;
     if (center) *center = center_tmp;

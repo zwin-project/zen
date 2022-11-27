@@ -5,6 +5,7 @@ _zen_shell_srcs = [
   'shell.c',
 
   'ray-grab/default.c',
+  'ray-grab/move.c',
 ]
 
 _zen_shell_deps = [

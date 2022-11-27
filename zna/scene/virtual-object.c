@@ -51,6 +51,18 @@ zna_virtual_object_handle_session_frame(
 }
 
 static void
+zna_virtual_object_handle_move(struct wl_listener* listener, void* data)
+{
+  UNUSED(data);
+  struct zna_virtual_object* self =
+      zn_container_of(listener, self, move_listener);
+  if (self->znr_virtual_object) {
+    znr_virtual_object_move(self->znr_virtual_object,
+        self->zn_virtual_object->position, self->zn_virtual_object->quaternion);
+  }
+}
+
+static void
 zna_virtual_object_handle_session_created(
     struct wl_listener* listener, void* data)
 {
@@ -115,6 +127,9 @@ zna_virtual_object_create(
   wl_signal_add(&self->system->events.current_session_frame,
       &self->session_frame_listener);
 
+  self->move_listener.notify = zna_virtual_object_handle_move;
+  wl_signal_add(&zn_virtual_object->events.move, &self->move_listener);
+
   self->commit_listener.notify = zna_virtual_object_handle_commit;
   wl_signal_add(&self->zn_virtual_object->zgnr_virtual_object->events.committed,
       &self->commit_listener);
@@ -133,6 +148,7 @@ zna_virtual_object_destroy(struct zna_virtual_object* self)
   wl_list_remove(&self->session_destroyed_listener.link);
   wl_list_remove(&self->session_created_listener.link);
   wl_list_remove(&self->session_frame_listener.link);
+  wl_list_remove(&self->move_listener.link);
   wl_list_remove(&self->commit_listener.link);
   free(self);
 }

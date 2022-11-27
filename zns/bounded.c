@@ -6,7 +6,10 @@
 #include <zen-common.h>
 #include <zgnr/intersection.h>
 
+#include "ray-grab/default.h"
+#include "ray-grab/move.h"
 #include "zen/scene/virtual-object.h"
+#include "zen/server.h"
 
 static void zns_bounded_destroy(struct zns_bounded* self);
 
@@ -35,8 +38,20 @@ zns_bounded_ray_cast(struct zns_bounded* self, struct zn_ray* ray)
 static void
 zns_bounded_handle_move(struct wl_listener* listener, void* data)
 {
-  UNUSED(listener);
-  UNUSED(data);
+  struct zns_bounded* self = zn_container_of(listener, self, move_listener);
+  struct zn_server* server = zn_server_get_singleton();
+  struct zn_ray* ray = server->input_manager->seat->ray;
+  struct zgnr_bounded_move_event* event = data;
+  struct zns_default_ray_grab* grab = zns_default_ray_grab_get(ray->grab);
+  struct zns_move_ray_grab* move_grab;
+
+  if (grab == NULL || grab->focus != self ||
+      grab->button_state != ZGN_RAY_BUTTON_STATE_PRESSED ||
+      grab->last_button_serial != event->serial)
+    return;
+
+  move_grab = zns_move_ray_grab_create(self);
+  zn_ray_start_grab(grab->base.ray, &move_grab->base);
 }
 
 static void

@@ -99,7 +99,7 @@ zns_default_ray_grab_motion_relative(struct zn_ray_grab* grab_base, vec3 origin,
   float distance;
   bounded = zn_shell_ray_cast(self->shell, self->base.ray, &distance);
 
-  zn_ray_set_length(self->base.ray, distance);
+  zn_ray_set_length(self->base.ray, bounded ? distance : DEFAULT_RAY_LENGTH);
 
   zna_ray_commit(self->base.ray->appearance);
 
@@ -117,6 +117,9 @@ zns_default_ray_grab_button(struct zn_ray_grab* grab_base, uint32_t time_msec,
   struct zn_server* server = zn_server_get_singleton();
   struct zgnr_seat* seat = server->input_manager->seat->zgnr_seat;
 
+  self->button_state = state;
+  self->last_button_serial = 0;
+
   if (self->focus == NULL) return;
 
   client = wl_resource_get_client(
@@ -124,17 +127,36 @@ zns_default_ray_grab_button(struct zn_ray_grab* grab_base, uint32_t time_msec,
 
   uint32_t serial = wl_display_next_serial(server->display);
   zgnr_seat_send_ray_button(seat, client, serial, time_msec, button, state);
+  self->last_button_serial = serial;
 }
 
 static void
-zns_default_ray_grab_cancel(struct zn_ray_grab* grab)
+zns_default_ray_grab_rebase(struct zn_ray_grab* grab_base)
 {
-  UNUSED(grab);
+  struct zns_default_ray_grab* self = zn_container_of(grab_base, self, base);
+  struct zns_bounded* bounded;
+
+  float distance;
+  bounded = zn_shell_ray_cast(self->shell, self->base.ray, &distance);
+
+  zn_ray_set_length(self->base.ray, bounded ? distance : DEFAULT_RAY_LENGTH);
+
+  zna_ray_commit(self->base.ray->appearance);
+
+  zns_default_ray_grab_focus(self, bounded);
+}
+
+static void
+zns_default_ray_grab_cancel(struct zn_ray_grab* grab_base)
+{
+  struct zns_default_ray_grab* self = zn_container_of(grab_base, self, base);
+  zns_default_ray_grab_focus(self, NULL);
 }
 
 static const struct zn_ray_grab_interface implementation = {
     .motion_relative = zns_default_ray_grab_motion_relative,
     .button = zns_default_ray_grab_button,
+    .rebase = zns_default_ray_grab_rebase,
     .cancel = zns_default_ray_grab_cancel,
 };
 
@@ -149,6 +171,17 @@ zns_default_ray_grab_handle_focus_destroy(
   zns_default_ray_grab_focus(self, NULL);
 }
 
+struct zns_default_ray_grab*
+zns_default_ray_grab_get(struct zn_ray_grab* grab)
+{
+  if (grab->interface != &implementation) return NULL;
+  struct zns_default_ray_grab* self;
+
+  self = zn_container_of(grab, self, base);
+
+  return self;
+}
+
 void
 zns_default_ray_grab_init(
     struct zns_default_ray_grab* self, struct zn_shell* shell)
@@ -156,6 +189,7 @@ zns_default_ray_grab_init(
   self->base.interface = &implementation;
   self->shell = shell;
   self->focus = NULL;
+  self->last_button_serial = 0;
 
   self->focus_destroy_listener.notify =
       zns_default_ray_grab_handle_focus_destroy;

@@ -17,6 +17,10 @@ struct zn_virtual_object {
   mat4 model_matrix;  // the combination of `position` and `quaternion`
   mat4 model_invert;
 
+  struct {
+    struct wl_signal move;  // (NULL)
+  } events;
+
   struct wl_listener zgnr_virtual_object_destroy_listener;
 };
 
