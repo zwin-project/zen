@@ -1,3 +1,15 @@
+/*
+TODO:
+- Make cairo directly touch the wlr texture
+- Need to think about re-rendering
+  - What is updated on the click event?
+    -> Directly update the wlr texture?
+  - Add updateState(callback)
+    - update the state and needed post- and pre- processing properly
+  - What do we need to do every frame?
+  - How to avoild wlr_render_start()?
+- Only render the ui nodes in one screen
+*/
 #include "zen/scene/ui-node.h"
 
 #include <cairo.h>
@@ -9,9 +21,37 @@
 #include "zen-common.h"
 #include "zen/cairo/texture.h"
 
+struct wlr_texture *
+zn_ui_node_render_texture(struct zn_ui_node *self, struct zn_server *server)
+{
+  struct wlr_texture *texture = NULL;
+  cairo_surface_t *surface = cairo_image_surface_create(
+      CAIRO_FORMAT_RGB24, self->frame->width, self->frame->height);
+
+  if (!zn_assert(cairo_surface_status(surface) == CAIRO_STATUS_SUCCESS,
+          "Failed to create cairo_surface"))
+    goto err_cairo_surface;
+
+  cairo_t *cr = cairo_create(surface);
+  if (!zn_assert(
+          cairo_status(cr) == CAIRO_STATUS_SUCCESS, "Failed to create cairo_t"))
+    goto err_cairo;
+
+  self->renderer(self, cr);
+
+  texture = zn_wlr_texture_from_cairo_surface(surface, server);
+err_cairo:
+  cairo_destroy(cr);
+err_cairo_surface:
+  cairo_surface_destroy(surface);
+
+  return texture;
+}
+
 struct zn_ui_node *
-zn_ui_node_create(struct wlr_box *frame, struct wlr_texture *texture,
-    zn_ui_node_on_click_handler_t handler)
+zn_ui_node_create(struct wlr_box *frame, void *data, struct zn_server *server,
+    zn_ui_node_on_click_handler_t on_click_handler,
+    zn_ui_node_render_t renderer)
 {
   struct zn_ui_node *self;
   self = zalloc(sizeof *self);
@@ -21,8 +61,12 @@ zn_ui_node_create(struct wlr_box *frame, struct wlr_texture *texture,
   }
   wl_list_init(&self->children);
   self->frame = frame;
-  self->texture = texture;
-  self->handler = handler;
+  self->on_click_handler = on_click_handler;
+  self->renderer = renderer;
+  self->data = data;
+
+  self->texture = zn_ui_node_render_texture(self, server);
+
 err:
   return self;
 }
@@ -32,6 +76,7 @@ zn_ui_node_destroy(struct zn_ui_node *self)
 {
   wl_list_remove(&self->children);
   wlr_texture_destroy(self->texture);
+  if (self->data) free(self->data);
   free(self->frame);
   free(self);
 }
@@ -45,44 +90,30 @@ vr_button_on_click(struct zn_ui_node *self, double x, double y)
   zn_warn("VR Mode starting...");
 }
 
-struct zn_ui_node *
-create_vr_button(struct zn_server *server, int output_width, int output_height)
+void
+vr_button_render(struct zn_ui_node *self, cairo_t *cr)
 {
-  struct zn_ui_node *vr_button = NULL;
-  double button_width = 160;
-  double button_height = 40;
-  cairo_surface_t *surface = cairo_image_surface_create(
-      CAIRO_FORMAT_RGB24, button_width, button_height);
-
-  if (!zn_assert(cairo_surface_status(surface) == CAIRO_STATUS_SUCCESS,
-          "Failed to create cairo_surface"))
-    goto err_cairo_surface;
-
-  cairo_t *cr = cairo_create(surface);
-  if (!zn_assert(
-          cairo_status(cr) == CAIRO_STATUS_SUCCESS, "Failed to create cairo_t"))
-    goto err_cairo;
-
-  // Want The corners to be rounded. needs cairo_line_to() and cairo_curve_to
-  // With cairo_in_fill(), non-rectangle clickable area can be created
+  // TODO: With cairo_in_fill(), non-rectangle clickable area can be created
+  // TODO: use color code
   cairo_set_source_rgb(cr, 0.067, 0.122, 0.302);
   zn_cairo_draw_rounded_rectangle(
-      cr, button_width, button_height, button_height / 2);
+      cr, self->frame->width, self->frame->height, self->frame->height / 2);
   cairo_fill(cr);
 
+  // TODO: verify the font
   cairo_select_font_face(
       cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
   cairo_set_font_size(cr, 18);
   cairo_set_source_rgb(cr, 0.953, 0.957, 0.965);
-  cairo_text_extents_t extents;
-  cairo_text_extents(cr, "VR", &extents);
-  // Implement draw(center)
-  cairo_move_to(cr, button_width / 2 - (extents.width / 2 + extents.x_bearing),
-      button_height / 2 - (extents.height / 2 + extents.y_bearing));
-  cairo_show_text(cr, "VR");
+  zn_cairo_draw_centered_text(
+      cr, "VR", self->frame->width, self->frame->height);
+}
 
-  struct wlr_texture *texture =
-      zn_wlr_texture_from_cairo_surface(surface, server);
+struct zn_ui_node *
+create_vr_button(struct zn_server *server, int output_width, int output_height)
+{
+  double button_width = 160;
+  double button_height = 40;
 
   struct wlr_box *frame;
   frame = zalloc(sizeof *frame);
@@ -93,17 +124,17 @@ create_vr_button(struct zn_server *server, int output_width, int output_height)
   frame->width = button_width;
   frame->height = button_height;
 
-  vr_button = zn_ui_node_create(frame, texture, vr_button_on_click);
+  struct zn_ui_node *vr_button = zn_ui_node_create(
+      frame, NULL, server, vr_button_on_click, vr_button_render);
 
   if (vr_button == NULL) {
     zn_error("Failed to create the VR button");
-    goto err_cairo;
+    goto err;
   }
-err_cairo:
-  cairo_destroy(cr);
-err_cairo_surface:
-  cairo_surface_destroy(surface);
   return vr_button;
+err:
+  free(frame);
+  return NULL;
 }
 
 void
@@ -115,47 +146,38 @@ power_button_on_click(struct zn_ui_node *self, double x, double y)
   zn_warn("Power button clicked");
 }
 
-struct zn_ui_node *
-create_power_button(
-    struct zn_server *server, int output_width, int output_height)
+void
+power_button_render(struct zn_ui_node *self, cairo_t *cr)
 {
-  struct zn_ui_node *power_button = NULL;
-  double button_width = 40;
-  double button_height = 40;
-  cairo_surface_t *surface = cairo_image_surface_create(
-      CAIRO_FORMAT_ARGB32, button_width, button_height);
-
-  if (!zn_assert(cairo_surface_status(surface) == CAIRO_STATUS_SUCCESS,
-          "Failed to create cairo_surface"))
-    goto err_cairo_surface;
-
-  cairo_t *cr = cairo_create(surface);
-  if (!zn_assert(
-          cairo_status(cr) == CAIRO_STATUS_SUCCESS, "Failed to create cairo_t"))
-    goto err_cairo;
-
   GError *error = NULL;
   GFile *file = g_file_new_for_path(POWER_BUTTON_ICON);
   RsvgHandle *handle = rsvg_handle_new_from_gfile_sync(
       file, RSVG_HANDLE_FLAGS_NONE, NULL, &error);
   if (handle == NULL) {
     zn_error("Failed to create the svg handler: %s", error->message);
-    goto err_cairo;
+    goto err;
   }
   RsvgRectangle viewport = {
       .x = 0.0,
       .y = 0.0,
-      .width = button_width,
-      .height = button_height,
+      .width = self->frame->width,
+      .height = self->frame->height,
   };
   if (!rsvg_handle_render_document(handle, cr, &viewport, &error)) {
     zn_error("Failed to render the svg");
-    goto err_render;
   }
 
-  struct wlr_texture *texture =
-      zn_wlr_texture_from_cairo_surface(surface, server);
+  g_object_unref(handle);
+err:
+  return;
+}
 
+struct zn_ui_node *
+create_power_button(
+    struct zn_server *server, int output_width, int output_height)
+{
+  double button_width = 40;
+  double button_height = 40;
   struct wlr_box *frame;
   frame = zalloc(sizeof *frame);
 
@@ -165,20 +187,17 @@ create_power_button(
   frame->width = button_width;
   frame->height = button_height;
 
-  power_button = zn_ui_node_create(frame, texture, power_button_on_click);
+  struct zn_ui_node *power_button = zn_ui_node_create(
+      frame, NULL, server, power_button_on_click, power_button_render);
 
   if (power_button == NULL) {
     zn_error("Failed to create the power button");
-    goto err_render;
+    goto err;
   }
-
-err_render:
-  g_object_unref(handle);
-err_cairo:
-  cairo_destroy(cr);
-err_cairo_surface:
-  cairo_surface_destroy(surface);
   return power_button;
+err:
+  free(frame);
+  return NULL;
 }
 
 void
@@ -189,32 +208,20 @@ menu_bar_on_click(struct zn_ui_node *self, double x, double y)
   UNUSED(y);
 }
 
+void
+menu_bar_render(struct zn_ui_node *self, cairo_t *cr)
+{
+  UNUSED(self);
+  cairo_set_source_rgb(cr, 0.529, 0.557, 0.647);
+  cairo_paint(cr);
+}
+
 struct zn_ui_node *
 create_menu_bar(struct zn_server *server, int output_width, int output_height,
     struct zn_ui_node *vr_button, struct zn_ui_node *power_button)
 {
-  struct zn_ui_node *menu_bar = NULL;
   double bar_width = (double)output_width;
   double bar_height = 60;
-  cairo_surface_t *surface =
-      cairo_image_surface_create(CAIRO_FORMAT_RGB24, bar_width, bar_height);
-
-  if (!zn_assert(cairo_surface_status(surface) == CAIRO_STATUS_SUCCESS,
-          "Failed to create cairo_surface"))
-    goto err_cairo_surface;
-
-  cairo_t *cr = cairo_create(surface);
-  if (!zn_assert(
-          cairo_status(cr) == CAIRO_STATUS_SUCCESS, "Failed to create cairo_t"))
-    goto err_cairo;
-
-  // Want The corners to be rounded. needs cairo_line_to() and cairo_curve_to
-  // With cairo_in_fill(), non-rectangle clickable area can be created
-  cairo_set_source_rgb(cr, 0.529, 0.557, 0.647);
-  cairo_paint(cr);
-  struct wlr_texture *texture =
-      zn_wlr_texture_from_cairo_surface(surface, server);
-
   struct wlr_box *frame;
   frame = zalloc(sizeof *frame);
 
@@ -224,19 +231,19 @@ create_menu_bar(struct zn_server *server, int output_width, int output_height,
   frame->width = bar_width;
   frame->height = bar_height;
 
-  menu_bar = zn_ui_node_create(frame, texture, menu_bar_on_click);
-  wl_list_insert(&menu_bar->children, &vr_button->link);
-  wl_list_insert(&menu_bar->children, &power_button->link);
+  struct zn_ui_node *menu_bar = zn_ui_node_create(
+      frame, NULL, server, menu_bar_on_click, menu_bar_render);
 
   if (menu_bar == NULL) {
     zn_error("Failed to create the menu bar");
-    goto err_cairo;
+    goto err;
   }
-err_cairo:
-  cairo_destroy(cr);
-err_cairo_surface:
-  cairo_surface_destroy(surface);
+  wl_list_insert(&menu_bar->children, &vr_button->link);
+  wl_list_insert(&menu_bar->children, &power_button->link);
   return menu_bar;
+err:
+  free(frame);
+  return NULL;
 }
 
 void

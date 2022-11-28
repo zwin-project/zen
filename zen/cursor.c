@@ -47,7 +47,7 @@ handle_ui_nodes_on_click(struct wl_list* nodes, double x, double y)
   struct zn_ui_node* node;
   wl_list_for_each (node, nodes, link) {
     if (wlr_box_contains_point(node->frame, x, y)) {
-      node->handler(node, x, y);
+      node->on_click_handler(node, x, y);
     }
     handle_ui_nodes_on_click(&node->children, x, y);
   }

@@ -28,3 +28,14 @@ zn_cairo_draw_rounded_rectangle(
   cairo_line_to(cr, 0., radius);
   cairo_arc(cr, radius, radius, radius, M_PI, 3 * M_PI / 2);
 }
+
+void
+zn_cairo_draw_centered_text(
+    cairo_t *cr, char *text, double width, double height)
+{
+  cairo_text_extents_t extents;
+  cairo_text_extents(cr, text, &extents);
+  cairo_move_to(cr, width / 2 - (extents.width / 2 + extents.x_bearing),
+      height / 2 - (extents.height / 2 + extents.y_bearing));
+  cairo_show_text(cr, text);
+}
