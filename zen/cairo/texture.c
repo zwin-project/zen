@@ -2,6 +2,8 @@
 
 #include <drm_fourcc.h>
 
+#include "zen-common.h"
+
 struct wlr_texture *
 zn_wlr_texture_from_cairo_surface(
     cairo_surface_t *surface, struct zn_server *server)
@@ -36,6 +38,29 @@ zn_cairo_draw_centered_text(
   cairo_text_extents_t extents;
   cairo_text_extents(cr, text, &extents);
   cairo_move_to(cr, width / 2 - (extents.width / 2 + extents.x_bearing),
+      height / 2 - (extents.height / 2 + extents.y_bearing));
+  cairo_show_text(cr, text);
+}
+
+void
+zn_cairo_draw_left_aligned_text(
+    cairo_t *cr, char *text, double width, double height, double padding)
+{
+  UNUSED(width);
+  cairo_text_extents_t extents;
+  cairo_text_extents(cr, text, &extents);
+  cairo_move_to(
+      cr, padding, height / 2 - (extents.height / 2 + extents.y_bearing));
+  cairo_show_text(cr, text);
+}
+
+void
+zn_cairo_draw_right_aligned_text(
+    cairo_t *cr, char *text, double width, double height, double padding)
+{
+  cairo_text_extents_t extents;
+  cairo_text_extents(cr, text, &extents);
+  cairo_move_to(cr, width - (extents.width + extents.x_bearing + padding),
       height / 2 - (extents.height / 2 + extents.y_bearing));
   cairo_show_text(cr, text);
 }

@@ -153,6 +153,62 @@ err:
   return NULL;
 }
 
+void
+power_menu_quit_on_click(struct zn_ui_node *self, double x, double y)
+{
+  UNUSED(x);
+  UNUSED(y);
+  UNUSED(self);
+  struct zn_server *server = zn_server_get_singleton();
+  zn_server_terminate(server, EXIT_SUCCESS);
+}
+
+void
+power_menu_quit_render(struct zn_ui_node *self, cairo_t *cr)
+{
+  cairo_set_source_rgb(cr, 0.812, 0.824, 0.859);
+  cairo_paint(cr);
+
+  cairo_select_font_face(
+      cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+  cairo_set_font_size(cr, 18);
+  cairo_set_source_rgb(cr, 0.102, 0.102, 0.102);
+  zn_cairo_draw_left_aligned_text(
+      cr, "Quit", self->frame->width, self->frame->height, 10);
+
+  cairo_set_source_rgb(cr, 0.502, 0.502, 0.502);
+  zn_cairo_draw_right_aligned_text(
+      cr, "alt + q", self->frame->width, self->frame->height, 10);
+}
+
+struct zn_ui_node *
+create_power_menu_quit(struct zn_screen *screen, struct zn_server *server,
+    int output_width, int output_height)
+{
+  double menu_width = 180;
+  double menu_height = 30;
+  struct wlr_box *frame;
+  frame = zalloc(sizeof *frame);
+
+  // Put the frame to the center of screen
+  frame->x = (double)output_width - menu_width;
+  frame->y = (double)output_height - menu_height - 60;
+  frame->width = menu_width;
+  frame->height = menu_height;
+
+  struct zn_ui_node *power_menu_quit = zn_ui_node_create(screen, frame, NULL,
+      server, power_menu_quit_on_click, power_menu_quit_render);
+
+  if (power_menu_quit == NULL) {
+    zn_error("Failed to create the power button");
+    goto err;
+  }
+  return power_menu_quit;
+err:
+  free(frame);
+  return NULL;
+}
+
 struct power_button_state {
   bool clicked;
 };
@@ -197,7 +253,7 @@ err:
 
 struct zn_ui_node *
 create_power_button(struct zn_screen *screen, struct zn_server *server,
-    int output_width, int output_height)
+    int output_width, int output_height, struct zn_ui_node *power_menu_quit)
 {
   double button_width = 40;
   double button_height = 40;
@@ -221,6 +277,7 @@ create_power_button(struct zn_screen *screen, struct zn_server *server,
     zn_error("Failed to create the power button");
     goto err;
   }
+  wl_list_insert(&power_button->children, &power_menu_quit->link);
   return power_button;
 err:
   free(frame);
@@ -282,8 +339,10 @@ zn_ui_node_setup_default(struct zn_screen *screen, struct zn_server *server)
       screen->output->wlr_output, &output_width, &output_height);
   struct zn_ui_node *vr_button =
       create_vr_button(screen, server, output_width, output_height);
-  struct zn_ui_node *power_button =
-      create_power_button(screen, server, output_width, output_height);
+  struct zn_ui_node *power_menu_quit =
+      create_power_menu_quit(screen, server, output_width, output_height);
+  struct zn_ui_node *power_button = create_power_button(
+      screen, server, output_width, output_height, power_menu_quit);
   struct zn_ui_node *menu_bar = create_menu_bar(
       screen, server, output_width, output_height, vr_button, power_button);
   // Register the widgets on the screen

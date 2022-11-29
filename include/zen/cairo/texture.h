@@ -11,3 +11,9 @@ void zn_cairo_draw_rounded_rectangle(
 
 void zn_cairo_draw_centered_text(
     cairo_t *cr, char *text, double width, double height);
+
+void zn_cairo_draw_left_aligned_text(
+    cairo_t *cr, char *text, double width, double height, double padding);
+
+void zn_cairo_draw_right_aligned_text(
+    cairo_t *cr, char *text, double width, double height, double padding);
