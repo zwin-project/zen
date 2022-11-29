@@ -18,6 +18,8 @@ struct zn_ui_node {
   struct wlr_box *frame;
   struct wlr_texture *texture;
 
+  struct zn_screen *screen;
+
   zn_ui_node_on_click_handler_t on_click_handler;
   zn_ui_node_render_t renderer;
 

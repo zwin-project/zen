@@ -114,11 +114,14 @@ cdata = configuration_data()
 
 icon_files = files(
   'assets/icons/power-button.svg',
+  'assets/icons/power-button-clicked.svg',
 )
 icon_install_dir = join_paths(datadir, 'icons', 'zen')
 install_data(icon_files, install_dir: icon_install_dir)
 power_button_icon = join_paths(get_option('prefix'), icon_install_dir, 'power-button.svg')
 cdata.set_quoted('POWER_BUTTON_ICON', power_button_icon)
+power_button_icon_clicked = join_paths(get_option('prefix'), icon_install_dir, 'power-button-clicked.svg')
+cdata.set_quoted('POWER_BUTTON_ICON_CLICKED', power_button_icon_clicked)
 
 if get_option('default-wallpaper')
   wallpaper_files = files(

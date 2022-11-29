@@ -3,3 +3,5 @@
 #mesondefine DEFAULT_WALLPAPER
 /* Path to the power button icon image*/
 #mesondefine POWER_BUTTON_ICON
+/* Path to the power button icon image (when clicked) */
+#mesondefine POWER_BUTTON_ICON_CLICKED
