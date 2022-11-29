@@ -2,6 +2,7 @@
 
 #include <zen-common.h>
 #include <zigen-gles-v32-protocol.h>
+#include <zigen-protocol.h>
 
 #include "gl-buffer.h"
 #include "gl-vertex-attrib.h"
@@ -68,13 +69,23 @@ zgnr_gl_vertex_array_protocol_disable_vertex_attrib_array(
 static void
 zgnr_gl_vertex_array_protocol_vertex_attrib_pointer(struct wl_client *client,
     struct wl_resource *resource, uint32_t index, int32_t size, uint32_t type,
-    uint32_t normalized, int32_t stride, uint32_t offset,
+    uint32_t normalized, int32_t stride, struct wl_array *offset_wl_array,
     struct wl_resource *gl_buffer)
 {
   UNUSED(client);
+
+  uint64_t offset;
+  if (zn_array_to_uint64_t(offset_wl_array, &offset) != 0) {
+    wl_resource_post_error(resource, ZGN_COMPOSITOR_ERROR_WL_ARRAY_SIZE,
+        "offset is expected to be uint64 (%ld byte), but got %ld byte",
+        sizeof(uint64_t), offset_wl_array->size);
+    return;
+  }
+
   struct zgnr_gl_vertex_array_impl *self = wl_resource_get_user_data(resource);
   struct zgnr_gl_vertex_attrib *attrib =
       zgnr_gl_vertex_array_ensure_vertex_attrib(self, index);
+
   attrib->size = size;
   attrib->type = type;
   attrib->normalized = normalized;
