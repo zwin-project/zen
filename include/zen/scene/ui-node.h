@@ -12,6 +12,8 @@ struct zn_ui_node;
 typedef void (*zn_ui_node_on_click_handler_t)(
     struct zn_ui_node *self, double x, double y);
 
+typedef void (*zn_ui_node_set_frame_t)(
+    struct zn_ui_node *self, int output_width, int output_height);
 typedef void (*zn_ui_node_render_t)(struct zn_ui_node *self, cairo_t *cr);
 
 struct zn_ui_node {
@@ -20,6 +22,7 @@ struct zn_ui_node {
 
   struct zn_screen *screen;
 
+  zn_ui_node_set_frame_t set_frame;
   zn_ui_node_on_click_handler_t on_click_handler;
   zn_ui_node_render_t renderer;
 

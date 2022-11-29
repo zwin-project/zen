@@ -41,11 +41,6 @@ zn_ui_node_render_texture(struct zn_ui_node *self, struct zn_server *server)
   self->renderer(self, cr);
 
   texture = zn_wlr_texture_from_cairo_surface(surface, server);
-  struct wlr_fbox fframe = {.x = (double)self->frame->x,
-      .y = (double)self->frame->y,
-      .width = (double)self->frame->width,
-      .height = (double)self->frame->height};
-  zn_output_add_damage_box(self->screen->output, &fframe);
 err_cairo:
   cairo_destroy(cr);
 err_cairo_surface:
@@ -55,16 +50,33 @@ err_cairo_surface:
 }
 
 void
+zn_ui_node_add_damage(struct zn_ui_node *self)
+{
+  struct wlr_fbox fframe = {.x = (double)self->frame->x,
+      .y = (double)self->frame->y,
+      .width = (double)self->frame->width,
+      .height = (double)self->frame->height};
+  zn_output_add_damage_box(self->screen->output, &fframe);
+}
+
+void
 zn_ui_node_update_texture(struct zn_ui_node *self)
 {
+  zn_ui_node_add_damage(self);
+  int output_width, output_height;
+  wlr_output_transformed_resolution(
+      self->screen->output->wlr_output, &output_width, &output_height);
+  self->set_frame(self, output_width, output_height);
   struct wlr_texture *old_texture = self->texture;
   self->texture = zn_ui_node_render_texture(self, zn_server_get_singleton());
+  zn_ui_node_add_damage(self);
   wlr_texture_destroy(old_texture);
 }
 
 struct zn_ui_node *
-zn_ui_node_create(struct zn_screen *screen, struct wlr_box *frame, void *data,
-    struct zn_server *server, zn_ui_node_on_click_handler_t on_click_handler,
+zn_ui_node_create(struct zn_screen *screen, void *data,
+    struct zn_server *server, zn_ui_node_set_frame_t set_frame,
+    zn_ui_node_on_click_handler_t on_click_handler,
     zn_ui_node_render_t renderer)
 {
   struct zn_ui_node *self;
@@ -75,10 +87,16 @@ zn_ui_node_create(struct zn_screen *screen, struct wlr_box *frame, void *data,
   }
   wl_list_init(&self->children);
   self->screen = screen;
-  self->frame = frame;
   self->on_click_handler = on_click_handler;
   self->renderer = renderer;
   self->data = data;
+  self->set_frame = set_frame;
+
+  int output_width, output_height;
+  wlr_output_transformed_resolution(
+      screen->output->wlr_output, &output_width, &output_height);
+  self->frame = zalloc(sizeof self->frame);
+  set_frame(self, output_width, output_height);
 
   self->texture = zn_ui_node_render_texture(self, server);
 
@@ -124,24 +142,24 @@ vr_button_render(struct zn_ui_node *self, cairo_t *cr)
       cr, "VR", self->frame->width, self->frame->height);
 }
 
-struct zn_ui_node *
-create_vr_button(struct zn_screen *screen, struct zn_server *server,
-    int output_width, int output_height)
+void
+vr_button_set_frame(
+    struct zn_ui_node *self, int output_width, int output_height)
 {
   double button_width = 160;
   double button_height = 40;
 
-  struct wlr_box *frame;
-  frame = zalloc(sizeof *frame);
+  self->frame->x = (double)output_width / 2 - button_width / 2;
+  self->frame->y = (double)output_height - button_height - 10.;
+  self->frame->width = button_width;
+  self->frame->height = button_height;
+}
 
-  // Put the frame to the center of screen
-  frame->x = (double)output_width / 2 - button_width / 2;
-  frame->y = (double)output_height - button_height - 10.;
-  frame->width = button_width;
-  frame->height = button_height;
-
-  struct zn_ui_node *vr_button = zn_ui_node_create(
-      screen, frame, NULL, server, vr_button_on_click, vr_button_render);
+struct zn_ui_node *
+create_vr_button(struct zn_screen *screen, struct zn_server *server)
+{
+  struct zn_ui_node *vr_button = zn_ui_node_create(screen, NULL, server,
+      vr_button_set_frame, vr_button_on_click, vr_button_render);
 
   if (vr_button == NULL) {
     zn_error("Failed to create the VR button");
@@ -149,7 +167,6 @@ create_vr_button(struct zn_screen *screen, struct zn_server *server,
   }
   return vr_button;
 err:
-  free(frame);
   return NULL;
 }
 
@@ -181,23 +198,25 @@ power_menu_quit_render(struct zn_ui_node *self, cairo_t *cr)
       cr, "alt + q", self->frame->width, self->frame->height, 10);
 }
 
-struct zn_ui_node *
-create_power_menu_quit(struct zn_screen *screen, struct zn_server *server,
-    int output_width, int output_height)
+void
+power_menu_quit_set_frame(
+    struct zn_ui_node *self, int output_width, int output_height)
 {
   double menu_width = 180;
   double menu_height = 30;
-  struct wlr_box *frame;
-  frame = zalloc(sizeof *frame);
 
-  // Put the frame to the center of screen
-  frame->x = (double)output_width - menu_width;
-  frame->y = (double)output_height - menu_height - 60;
-  frame->width = menu_width;
-  frame->height = menu_height;
+  self->frame->x = (double)output_width - menu_width;
+  self->frame->y = (double)output_height - menu_height - 60;
+  self->frame->width = menu_width;
+  self->frame->height = menu_height;
+}
 
-  struct zn_ui_node *power_menu_quit = zn_ui_node_create(screen, frame, NULL,
-      server, power_menu_quit_on_click, power_menu_quit_render);
+struct zn_ui_node *
+create_power_menu_quit(struct zn_screen *screen, struct zn_server *server)
+{
+  struct zn_ui_node *power_menu_quit =
+      zn_ui_node_create(screen, NULL, server, power_menu_quit_set_frame,
+          power_menu_quit_on_click, power_menu_quit_render);
 
   if (power_menu_quit == NULL) {
     zn_error("Failed to create the power button");
@@ -205,7 +224,6 @@ create_power_menu_quit(struct zn_screen *screen, struct zn_server *server,
   }
   return power_menu_quit;
 err:
-  free(frame);
   return NULL;
 }
 
@@ -251,27 +269,29 @@ err:
   return;
 }
 
-struct zn_ui_node *
-create_power_button(struct zn_screen *screen, struct zn_server *server,
-    int output_width, int output_height, struct zn_ui_node *power_menu_quit)
+void
+power_button_set_frame(
+    struct zn_ui_node *self, int output_width, int output_height)
 {
   double button_width = 40;
   double button_height = 40;
-  struct wlr_box *frame;
-  frame = zalloc(sizeof *frame);
+  self->frame->x = (double)output_width - button_width - 10;
+  self->frame->y = (double)output_height - button_height - 10;
+  self->frame->width = button_width;
+  self->frame->height = button_height;
+}
 
-  // Put the frame to the center of screen
-  frame->x = (double)output_width - button_width - 10;
-  frame->y = (double)output_height - button_height - 10;
-  frame->width = button_width;
-  frame->height = button_height;
-
+struct zn_ui_node *
+create_power_button(struct zn_screen *screen, struct zn_server *server,
+    struct zn_ui_node *power_menu_quit)
+{
   struct power_button_state *state;
   state = zalloc(sizeof *state);
   state->clicked = false;
 
-  struct zn_ui_node *power_button = zn_ui_node_create(screen, frame,
-      (void *)state, server, power_button_on_click, power_button_render);
+  struct zn_ui_node *power_button =
+      zn_ui_node_create(screen, (void *)state, server, power_button_set_frame,
+          power_button_on_click, power_button_render);
 
   if (power_button == NULL) {
     zn_error("Failed to create the power button");
@@ -280,7 +300,6 @@ create_power_button(struct zn_screen *screen, struct zn_server *server,
   wl_list_insert(&power_button->children, &power_menu_quit->link);
   return power_button;
 err:
-  free(frame);
   return NULL;
 }
 
@@ -300,24 +319,24 @@ menu_bar_render(struct zn_ui_node *self, cairo_t *cr)
   cairo_paint(cr);
 }
 
-struct zn_ui_node *
-create_menu_bar(struct zn_screen *screen, struct zn_server *server,
-    int output_width, int output_height, struct zn_ui_node *vr_button,
-    struct zn_ui_node *power_button)
+void
+menu_bar_set_frame(struct zn_ui_node *self, int output_width, int output_height)
 {
   double bar_width = (double)output_width;
   double bar_height = 60;
-  struct wlr_box *frame;
-  frame = zalloc(sizeof *frame);
 
-  // Put the frame to the center of screen
-  frame->x = 0.;
-  frame->y = (double)output_height - bar_height;
-  frame->width = bar_width;
-  frame->height = bar_height;
+  self->frame->x = 0.;
+  self->frame->y = (double)output_height - bar_height;
+  self->frame->width = bar_width;
+  self->frame->height = bar_height;
+}
 
-  struct zn_ui_node *menu_bar = zn_ui_node_create(
-      screen, frame, NULL, server, menu_bar_on_click, menu_bar_render);
+struct zn_ui_node *
+create_menu_bar(struct zn_screen *screen, struct zn_server *server,
+    struct zn_ui_node *vr_button, struct zn_ui_node *power_button)
+{
+  struct zn_ui_node *menu_bar = zn_ui_node_create(screen, NULL, server,
+      menu_bar_set_frame, menu_bar_on_click, menu_bar_render);
 
   if (menu_bar == NULL) {
     zn_error("Failed to create the menu bar");
@@ -327,24 +346,18 @@ create_menu_bar(struct zn_screen *screen, struct zn_server *server,
   wl_list_insert(&menu_bar->children, &power_button->link);
   return menu_bar;
 err:
-  free(frame);
   return NULL;
 }
 
 void
 zn_ui_node_setup_default(struct zn_screen *screen, struct zn_server *server)
 {
-  int output_width, output_height;
-  wlr_output_transformed_resolution(
-      screen->output->wlr_output, &output_width, &output_height);
-  struct zn_ui_node *vr_button =
-      create_vr_button(screen, server, output_width, output_height);
-  struct zn_ui_node *power_menu_quit =
-      create_power_menu_quit(screen, server, output_width, output_height);
-  struct zn_ui_node *power_button = create_power_button(
-      screen, server, output_width, output_height, power_menu_quit);
-  struct zn_ui_node *menu_bar = create_menu_bar(
-      screen, server, output_width, output_height, vr_button, power_button);
+  struct zn_ui_node *vr_button = create_vr_button(screen, server);
+  struct zn_ui_node *power_menu_quit = create_power_menu_quit(screen, server);
+  struct zn_ui_node *power_button =
+      create_power_button(screen, server, power_menu_quit);
+  struct zn_ui_node *menu_bar =
+      create_menu_bar(screen, server, vr_button, power_button);
   // Register the widgets on the screen
   wl_list_insert(&screen->ui_nodes, &menu_bar->link);
 }
