@@ -112,12 +112,8 @@ xkbcommon_dep = dependency('xkbcommon')
 zen_remote_server_dep = dependency('zen-remote-server', version: zen_remote_server_req)
 zigen_protocols_dep = dependency('zigen-protocols')
 
-if get_option('cui-client') or get_option('clients')
+if get_option('cui-client')
   wayland_client_dep = dependency('wayland-client', version: wayland_req)
-endif
-
-if get_option('clients')
-  glm_dep = dependency('glm')
 endif
 
 if get_option('default-wallpaper')
@@ -153,9 +149,6 @@ subdir('znr-remote')
 subdir('zen')
 subdir('zna')
 subdir('zns')
-if get_option('clients')
-  subdir('clients')
-endif
 if get_option('cui-client')
   subdir('cui-client')
 endif

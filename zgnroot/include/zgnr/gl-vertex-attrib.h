@@ -12,7 +12,7 @@ struct zgnr_gl_vertex_attrib {
   int32_t size;
   uint32_t type;
   int32_t stride;
-  uint32_t offset;
+  uint64_t offset;
   bool normalized;
   bool enabled;
   bool enable_changed;
