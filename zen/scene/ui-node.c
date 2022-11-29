@@ -1,15 +1,3 @@
-/*
-TODO:
-- Make cairo directly touch the wlr texture
-- Need to think about re-rendering
-  - What is updated on the click event?
-    -> Directly update the wlr texture?
-  - Add updateState(callback)
-    - update the state and needed post- and pre- processing properly
-  - What do we need to do every frame?
-  - How to avoild wlr_render_start()?
-- Only render the ui nodes in one screen
-*/
 #include "zen/scene/ui-node.h"
 
 #include <cairo.h>
@@ -170,6 +158,10 @@ err:
   return NULL;
 }
 
+struct power_menu_quit_state {
+  bool shown;
+};
+
 void
 power_menu_quit_on_click(struct zn_ui_node *self, double x, double y)
 {
@@ -183,6 +175,9 @@ power_menu_quit_on_click(struct zn_ui_node *self, double x, double y)
 void
 power_menu_quit_render(struct zn_ui_node *self, cairo_t *cr)
 {
+  struct power_menu_quit_state *state =
+      (struct power_menu_quit_state *)self->data;
+  if (!state->shown) return;
   cairo_set_source_rgb(cr, 0.812, 0.824, 0.859);
   cairo_paint(cr);
 
@@ -202,21 +197,34 @@ void
 power_menu_quit_set_frame(
     struct zn_ui_node *self, int output_width, int output_height)
 {
-  double menu_width = 180;
-  double menu_height = 30;
+  struct power_menu_quit_state *state =
+      (struct power_menu_quit_state *)self->data;
+  if (state->shown) {
+    double menu_width = 180;
+    double menu_height = 30;
 
-  self->frame->x = (double)output_width - menu_width;
-  self->frame->y = (double)output_height - menu_height - 60;
-  self->frame->width = menu_width;
-  self->frame->height = menu_height;
+    self->frame->x = (double)output_width - menu_width;
+    self->frame->y = (double)output_height - menu_height - 60;
+    self->frame->width = menu_width;
+    self->frame->height = menu_height;
+
+  } else {
+    self->frame->x = 0;
+    self->frame->y = 0;
+    self->frame->width = 1;
+    self->frame->height = 1;
+  }
 }
 
 struct zn_ui_node *
 create_power_menu_quit(struct zn_screen *screen, struct zn_server *server)
 {
-  struct zn_ui_node *power_menu_quit =
-      zn_ui_node_create(screen, NULL, server, power_menu_quit_set_frame,
-          power_menu_quit_on_click, power_menu_quit_render);
+  struct power_menu_quit_state *state;
+  state = zalloc(sizeof *state);
+  state->shown = false;
+  struct zn_ui_node *power_menu_quit = zn_ui_node_create(screen, (void *)state,
+      server, power_menu_quit_set_frame, power_menu_quit_on_click,
+      power_menu_quit_render);
 
   if (power_menu_quit == NULL) {
     zn_error("Failed to create the power button");
@@ -239,6 +247,13 @@ power_button_on_click(struct zn_ui_node *self, double x, double y)
   struct power_button_state *state = (struct power_button_state *)self->data;
   state->clicked = !state->clicked;
   zn_ui_node_update_texture(self);
+  struct zn_ui_node *child;
+  wl_list_for_each (child, &self->children, link) {
+    struct power_menu_quit_state *child_state =
+        (struct power_menu_quit_state *)child->data;
+    child_state->shown = state->clicked;
+    zn_ui_node_update_texture(child);
+  }
 }
 
 void
