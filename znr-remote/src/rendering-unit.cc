@@ -5,12 +5,12 @@
 #include "session.h"
 #include "virtual-object.h"
 
-struct znr_rendering_unit*
+struct znr_rendering_unit *
 znr_rendering_unit_create(
-    struct znr_session* session_base, struct znr_virtual_object* virtual_object)
+    struct znr_session *session_base, struct znr_virtual_object *virtual_object)
 {
   auto self = new znr_rendering_unit();
-  znr_session_impl* session;
+  znr_session_impl *session;
 
   if (self == nullptr) {
     zn_error("Failed to allocate memory");
@@ -36,7 +36,7 @@ err:
 }
 
 void
-znr_rendering_unit_destroy(struct znr_rendering_unit* self)
+znr_rendering_unit_destroy(struct znr_rendering_unit *self)
 {
   delete self;
 }

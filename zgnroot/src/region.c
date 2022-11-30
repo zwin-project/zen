@@ -6,32 +6,32 @@
 
 #include "region/cuboid.h"
 
-static void zgnr_region_destroy(struct zgnr_region* self);
+static void zgnr_region_destroy(struct zgnr_region *self);
 
 static void
-zgnr_region_handle_destroy(struct wl_resource* resource)
+zgnr_region_handle_destroy(struct wl_resource *resource)
 {
-  struct zgnr_region* self = wl_resource_get_user_data(resource);
+  struct zgnr_region *self = wl_resource_get_user_data(resource);
   zgnr_region_destroy(self);
 }
 
 static void
 zgnr_region_protocol_destroy(
-    struct wl_client* client, struct wl_resource* resource)
+    struct wl_client *client, struct wl_resource *resource)
 {
   UNUSED(client);
   wl_resource_destroy(resource);
 }
 
 static void
-zgnr_region_protocol_add_cuboid(struct wl_client* client,
-    struct wl_resource* resource, struct wl_array* half_size_array,
-    struct wl_array* center_array, struct wl_array* quaternion_array)
+zgnr_region_protocol_add_cuboid(struct wl_client *client,
+    struct wl_resource *resource, struct wl_array *half_size_array,
+    struct wl_array *center_array, struct wl_array *quaternion_array)
 {
   UNUSED(client);
 
-  struct zgnr_region* self = wl_resource_get_user_data(resource);
-  struct zgnr_cuboid_region* cuboid;
+  struct zgnr_region *self = wl_resource_get_user_data(resource);
+  struct zgnr_cuboid_region *cuboid;
 
   vec3 half_size;
   vec3 center;
@@ -72,11 +72,11 @@ static const struct zgn_region_interface implementation = {
     .add_cuboid = zgnr_region_protocol_add_cuboid,
 };
 
-struct zgnr_region*
-zgnr_region_create(struct wl_client* client, uint32_t id)
+struct zgnr_region *
+zgnr_region_create(struct wl_client *client, uint32_t id)
 {
-  struct zgnr_region* self;
-  struct wl_resource* resource;
+  struct zgnr_region *self;
+  struct wl_resource *resource;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -112,7 +112,7 @@ err:
 }
 
 static void
-zgnr_region_destroy(struct zgnr_region* self)
+zgnr_region_destroy(struct zgnr_region *self)
 {
   zgnr_region_node_destroy(self->node);
 

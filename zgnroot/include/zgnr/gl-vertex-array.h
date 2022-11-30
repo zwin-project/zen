@@ -17,7 +17,7 @@ struct zgnr_gl_vertex_array {
     struct wl_list vertex_attrib_list;  // struct zgnr_gl_vertex_attrib::link
   } current;
 
-  void* user_data;
+  void *user_data;
 };
 
 #ifdef __cplusplus

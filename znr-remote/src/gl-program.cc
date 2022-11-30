@@ -6,22 +6,22 @@
 #include "session.h"
 void
 znr_gl_program_attach_shader(
-    struct znr_gl_program* self, struct znr_gl_shader* shader)
+    struct znr_gl_program *self, struct znr_gl_shader *shader)
 {
   self->proxy->GlAttachShader(shader->proxy->id());
 }
 
 void
-znr_gl_program_link(struct znr_gl_program* self)
+znr_gl_program_link(struct znr_gl_program *self)
 {
   self->proxy->GlLinkProgram();
 }
 
-struct znr_gl_program*
-znr_gl_program_create(struct znr_session* session_base)
+struct znr_gl_program *
+znr_gl_program_create(struct znr_session *session_base)
 {
   auto self = new znr_gl_program();
-  znr_session_impl* session;
+  znr_session_impl *session;
 
   if (self == nullptr) {
     zn_error("Failed to allocate memory");
@@ -46,7 +46,7 @@ err:
 }
 
 void
-znr_gl_program_destroy(struct znr_gl_program* self)
+znr_gl_program_destroy(struct znr_gl_program *self)
 {
   delete self;
 }

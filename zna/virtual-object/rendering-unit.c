@@ -7,21 +7,21 @@
 #include "virtual-object/gl-base-technique.h"
 #include "zen/virtual-object.h"
 
-static void zna_rendering_unit_destroy(struct zna_rendering_unit* self);
+static void zna_rendering_unit_destroy(struct zna_rendering_unit *self);
 
-static struct zna_virtual_object*
-zna_rendering_unit_get_virtual_object(struct zna_rendering_unit* self)
+static struct zna_virtual_object *
+zna_rendering_unit_get_virtual_object(struct zna_rendering_unit *self)
 {
-  struct zn_virtual_object* virtual_object =
+  struct zn_virtual_object *virtual_object =
       self->zgnr_rendering_unit->virtual_object->user_data;
   return virtual_object->appearance;
 }
 
 static void
 zna_rendering_unit_handle_session_destroyed(
-    struct wl_listener* listener, void* data)
+    struct wl_listener *listener, void *data)
 {
-  struct zna_rendering_unit* self =
+  struct zna_rendering_unit *self =
       zn_container_of(listener, self, session_destroyed_listener);
   UNUSED(data);
 
@@ -33,10 +33,10 @@ zna_rendering_unit_handle_session_destroyed(
 
 void
 zna_rendering_unit_apply_commit(
-    struct zna_rendering_unit* self, bool only_damaged)
+    struct zna_rendering_unit *self, bool only_damaged)
 {
-  struct znr_session* session = self->system->current_session;
-  struct zna_virtual_object* virtual_object =
+  struct znr_session *session = self->system->current_session;
+  struct zna_virtual_object *virtual_object =
       zna_rendering_unit_get_virtual_object(self);
 
   if (self->znr_rendering_unit == NULL) {
@@ -45,7 +45,7 @@ zna_rendering_unit_apply_commit(
   }
 
   if (self->zgnr_rendering_unit->current.technique) {
-    struct zna_gl_base_technique* gl_base_technique =
+    struct zna_gl_base_technique *gl_base_technique =
         self->zgnr_rendering_unit->current.technique->user_data;
     zna_gl_base_technique_apply_commit(gl_base_technique, only_damaged);
   }
@@ -53,20 +53,20 @@ zna_rendering_unit_apply_commit(
 
 static void
 zna_rendering_unit_handle_zgnr_rendering_unit_destroy(
-    struct wl_listener* listener, void* data)
+    struct wl_listener *listener, void *data)
 {
   UNUSED(data);
-  struct zna_rendering_unit* self =
+  struct zna_rendering_unit *self =
       zn_container_of(listener, self, zgnr_rendering_unit_destroy_listener);
 
   zna_rendering_unit_destroy(self);
 }
 
-struct zna_rendering_unit*
+struct zna_rendering_unit *
 zna_rendering_unit_create(
-    struct zgnr_rendering_unit* zgnr_rendering_unit, struct zna_system* system)
+    struct zgnr_rendering_unit *zgnr_rendering_unit, struct zna_system *system)
 {
-  struct zna_rendering_unit* self;
+  struct zna_rendering_unit *self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -96,7 +96,7 @@ err:
 }
 
 static void
-zna_rendering_unit_destroy(struct zna_rendering_unit* self)
+zna_rendering_unit_destroy(struct zna_rendering_unit *self)
 {
   if (self->znr_rendering_unit)
     znr_rendering_unit_destroy(self->znr_rendering_unit);

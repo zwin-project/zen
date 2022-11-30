@@ -14,7 +14,7 @@ struct zgnr_gl_buffer {
   } events;
 
   struct {
-    struct zgnr_mem_storage* data;  // nullable
+    struct zgnr_mem_storage *data;  // nullable
     uint32_t target;
     uint32_t usage;
 
@@ -22,7 +22,7 @@ struct zgnr_gl_buffer {
     bool data_damaged;
   } current;
 
-  void* user_data;
+  void *user_data;
 };
 
 #ifdef __cplusplus

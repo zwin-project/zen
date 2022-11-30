@@ -6,15 +6,15 @@
 #include "zen/server.h"
 #include "zen/virtual-object.h"
 
-static void zns_move_ray_grab_destroy(struct zns_move_ray_grab* self);
+static void zns_move_ray_grab_destroy(struct zns_move_ray_grab *self);
 
 static void
-zns_move_ray_grab_motion_relative(struct zn_ray_grab* grab_base, vec3 origin,
+zns_move_ray_grab_motion_relative(struct zn_ray_grab *grab_base, vec3 origin,
     float polar, float azimuthal, uint32_t time_msec)
 {
   UNUSED(time_msec);
-  struct zns_move_ray_grab* self = zn_container_of(grab_base, self, base);
-  struct zn_virtual_object* zn_virtual_object =
+  struct zns_move_ray_grab *self = zn_container_of(grab_base, self, base);
+  struct zn_virtual_object *zn_virtual_object =
       self->bounded->zgnr_bounded->virtual_object->user_data;
 
   float next_polar = self->base.ray->angle.polar + polar;
@@ -43,10 +43,10 @@ zns_move_ray_grab_motion_relative(struct zn_ray_grab* grab_base, vec3 origin,
 }
 
 static void
-zns_move_ray_grab_button(struct zn_ray_grab* grab_base, uint32_t time_msec,
+zns_move_ray_grab_button(struct zn_ray_grab *grab_base, uint32_t time_msec,
     uint32_t button, enum zgn_ray_button_state state)
 {
-  struct zns_move_ray_grab* self = zn_container_of(grab_base, self, base);
+  struct zns_move_ray_grab *self = zn_container_of(grab_base, self, base);
   UNUSED(time_msec);
   UNUSED(button);
 
@@ -56,15 +56,15 @@ zns_move_ray_grab_button(struct zn_ray_grab* grab_base, uint32_t time_msec,
 }
 
 static void
-zns_move_ray_grab_rebase(struct zn_ray_grab* grab_base)
+zns_move_ray_grab_rebase(struct zn_ray_grab *grab_base)
 {
   UNUSED(grab_base);
 }
 
 static void
-zns_move_ray_grab_cancel(struct zn_ray_grab* grab_base)
+zns_move_ray_grab_cancel(struct zn_ray_grab *grab_base)
 {
-  struct zns_move_ray_grab* self = zn_container_of(grab_base, self, base);
+  struct zns_move_ray_grab *self = zn_container_of(grab_base, self, base);
   zns_move_ray_grab_destroy(self);
 }
 
@@ -77,21 +77,21 @@ static const struct zn_ray_grab_interface implementation = {
 
 static void
 zns_move_ray_grab_handle_bounded_destroy(
-    struct wl_listener* listener, void* data)
+    struct wl_listener *listener, void *data)
 {
   UNUSED(data);
-  struct zns_move_ray_grab* self =
+  struct zns_move_ray_grab *self =
       zn_container_of(listener, self, bounded_destroy_listener);
   zn_ray_end_grab(self->base.ray);
 }
 
-struct zns_move_ray_grab*
-zns_move_ray_grab_create(struct zns_bounded* bounded)
+struct zns_move_ray_grab *
+zns_move_ray_grab_create(struct zns_bounded *bounded)
 {
-  struct zns_move_ray_grab* self;
-  struct zn_virtual_object* zn_virtual_object =
+  struct zns_move_ray_grab *self;
+  struct zn_virtual_object *zn_virtual_object =
       bounded->zgnr_bounded->virtual_object->user_data;
-  struct zn_server* server = zn_server_get_singleton();
+  struct zn_server *server = zn_server_get_singleton();
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -117,7 +117,7 @@ err:
 }
 
 static void
-zns_move_ray_grab_destroy(struct zns_move_ray_grab* self)
+zns_move_ray_grab_destroy(struct zns_move_ray_grab *self)
 {
   wl_list_remove(&self->bounded_destroy_listener.link);
   free(self);

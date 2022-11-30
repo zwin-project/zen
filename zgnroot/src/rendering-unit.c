@@ -6,15 +6,15 @@
 #include "gl-base-technique.h"
 #include "virtual-object.h"
 
-static void zgnr_rendering_unit_destroy(struct zgnr_rendering_unit_impl* self);
-static void zgnr_rendering_unit_inert(struct zgnr_rendering_unit_impl* self);
+static void zgnr_rendering_unit_destroy(struct zgnr_rendering_unit_impl *self);
+static void zgnr_rendering_unit_inert(struct zgnr_rendering_unit_impl *self);
 
 /**
  * @param technique is nullable
  */
 void
-zgnr_rendering_unit_set_current_technique(struct zgnr_rendering_unit_impl* self,
-    struct zgnr_gl_base_technique_impl* technique)
+zgnr_rendering_unit_set_current_technique(struct zgnr_rendering_unit_impl *self,
+    struct zgnr_gl_base_technique_impl *technique)
 {
   if (technique && self->base.current.type != ZGNR_TECHNIQUE_NONE) {
     wl_resource_post_error(technique->resource,
@@ -38,15 +38,15 @@ zgnr_rendering_unit_set_current_technique(struct zgnr_rendering_unit_impl* self,
 }
 
 static void
-zgnr_rendering_unit_handle_destroy(struct wl_resource* resource)
+zgnr_rendering_unit_handle_destroy(struct wl_resource *resource)
 {
-  struct zgnr_rendering_unit_impl* self = wl_resource_get_user_data(resource);
+  struct zgnr_rendering_unit_impl *self = wl_resource_get_user_data(resource);
   zgnr_rendering_unit_destroy(self);
 }
 
 static void
 zgnr_rendering_unit_protocol_destroy(
-    struct wl_client* client, struct wl_resource* resource)
+    struct wl_client *client, struct wl_resource *resource)
 {
   UNUSED(client);
   wl_resource_destroy(resource);
@@ -59,11 +59,11 @@ static const struct zgn_rendering_unit_interface implementation = {
 
 static void
 zgnr_rendering_unit_handle_current_technique_destroy(
-    struct wl_listener* listener, void* data)
+    struct wl_listener *listener, void *data)
 {
   UNUSED(data);
 
-  struct zgnr_rendering_unit_impl* self =
+  struct zgnr_rendering_unit_impl *self =
       zn_container_of(listener, self, current_technique_destroy_listener);
 
   zgnr_rendering_unit_set_current_technique(self, NULL);
@@ -71,10 +71,10 @@ zgnr_rendering_unit_handle_current_technique_destroy(
 
 static void
 zgnr_rendering_unit_handle_virtual_object_destroy(
-    struct wl_listener* listener, void* data)
+    struct wl_listener *listener, void *data)
 {
   UNUSED(data);
-  struct zgnr_rendering_unit_impl* self =
+  struct zgnr_rendering_unit_impl *self =
       zn_container_of(listener, self, virtual_object_destroy_listener);
 
   zgnr_rendering_unit_inert(self);
@@ -82,10 +82,10 @@ zgnr_rendering_unit_handle_virtual_object_destroy(
 
 static void
 zgnr_rendering_unit_handle_virtual_object_commit(
-    struct wl_listener* listener, void* data)
+    struct wl_listener *listener, void *data)
 {
   UNUSED(data);
-  struct zgnr_rendering_unit_impl* self =
+  struct zgnr_rendering_unit_impl *self =
       zn_container_of(listener, self, virtual_object_commit_listener);
 
   if (self->base.committed == false) {
@@ -98,19 +98,19 @@ zgnr_rendering_unit_handle_virtual_object_commit(
 }
 
 static void
-zgnr_rendering_unit_inert(struct zgnr_rendering_unit_impl* self)
+zgnr_rendering_unit_inert(struct zgnr_rendering_unit_impl *self)
 {
-  struct wl_resource* resource = self->resource;
+  struct wl_resource *resource = self->resource;
   zgnr_rendering_unit_destroy(self);
   wl_resource_set_user_data(resource, NULL);
   wl_resource_set_destructor(resource, NULL);
 }
 
-struct zgnr_rendering_unit_impl*
-zgnr_rendering_unit_create(struct wl_client* client, uint32_t id,
-    struct zgnr_virtual_object_impl* virtual_object)
+struct zgnr_rendering_unit_impl *
+zgnr_rendering_unit_create(struct wl_client *client, uint32_t id,
+    struct zgnr_virtual_object_impl *virtual_object)
 {
-  struct zgnr_rendering_unit_impl* self;
+  struct zgnr_rendering_unit_impl *self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -161,7 +161,7 @@ err:
 }
 
 static void
-zgnr_rendering_unit_destroy(struct zgnr_rendering_unit_impl* self)
+zgnr_rendering_unit_destroy(struct zgnr_rendering_unit_impl *self)
 {
   wl_signal_emit(&self->base.events.destroy, NULL);
 
