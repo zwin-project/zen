@@ -3,8 +3,8 @@
 #include <zen-common.h>
 
 #include "zen/appearance/ray.h"
-#include "zen/scene/virtual-object.h"
 #include "zen/server.h"
+#include "zen/virtual-object.h"
 
 static void zns_move_ray_grab_destroy(struct zns_move_ray_grab* self);
 

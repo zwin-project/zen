@@ -7,8 +7,8 @@
 #include "bounded.h"
 #include "shell.h"
 #include "zen/appearance/ray.h"
-#include "zen/scene/virtual-object.h"
 #include "zen/server.h"
+#include "zen/virtual-object.h"
 
 /**
  * @param bounded is nullable

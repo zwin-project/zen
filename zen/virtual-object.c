@@ -1,10 +1,10 @@
-#include "zen/scene/virtual-object.h"
+#include "zen/virtual-object.h"
 
 #include <cglm/quat.h>
 #include <cglm/vec3.h>
 #include <zen-common.h>
 
-#include "zen/appearance/scene/virtual-object.h"
+#include "zen/appearance/virtual-object.h"
 #include "zen/server.h"
 
 static void zn_virtual_object_destroy(struct zn_virtual_object* self);

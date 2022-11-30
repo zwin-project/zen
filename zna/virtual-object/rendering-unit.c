@@ -3,9 +3,9 @@
 #include <zen-common.h>
 #include <zgnr/virtual-object.h>
 
-#include "scene/virtual-object.h"
-#include "scene/virtual-object/gl-base-technique.h"
-#include "zen/scene/virtual-object.h"
+#include "virtual-object.h"
+#include "virtual-object/gl-base-technique.h"
+#include "zen/virtual-object.h"
 
 static void zna_rendering_unit_destroy(struct zna_rendering_unit* self);
 
