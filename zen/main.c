@@ -42,38 +42,6 @@ zn_terminate_func(int exit_code, void *data)
   zn_server_terminate(server, exit_code);
 }
 
-static void
-zn_terminate_binding_handler(uint32_t time_msec, uint32_t key, void *data)
-{
-  UNUSED(time_msec);
-  UNUSED(key);
-  UNUSED(data);
-
-  zn_terminate(EXIT_SUCCESS);
-}
-
-static void
-zn_switch_vt_handler(uint32_t time_msec, uint32_t key, void *data)
-{
-  UNUSED(data);
-  UNUSED(time_msec);
-
-  if (!zn_assert(KEY_F1 <= key && key <= KEY_F10,
-          "Don't assign this keybind to outside F1-F10")) {
-    return;
-  }
-
-  const unsigned int vt = key - KEY_F1 + 1;
-  struct zn_server *server = zn_server_get_singleton();
-  struct wlr_session *session = wlr_backend_get_session(server->wlr_backend);
-
-  if (!session) {
-    return;
-  }
-
-  wlr_session_change_vt(session, vt);
-}
-
 static int
 on_term_signal(int signal_number, void *data)
 {
@@ -131,7 +99,7 @@ main(int argc, char *argv[])
   struct wl_display *display;
   struct wl_event_loop *loop;
   struct wl_event_source *signal_sources[4];
-  int i, exit_status = EXIT_FAILURE;
+  int exit_status = EXIT_FAILURE;
   char *startup_command = NULL;
   struct zn_server *server;
 
@@ -204,15 +172,6 @@ main(int argc, char *argv[])
     goto err_signal;
   }
 
-  // Terminate the program with a keyboard event for development convenience.
-  zn_input_manager_add_key_binding(server->input_manager, KEY_Q,
-      WLR_MODIFIER_ALT, zn_terminate_binding_handler, NULL);
-
-  for (int i = KEY_F1; i <= KEY_F10; ++i) {
-    zn_input_manager_add_key_binding(server->input_manager, i,
-        WLR_MODIFIER_CTRL | WLR_MODIFIER_ALT, zn_switch_vt_handler, NULL);
-  }
-
   if (startup_command) {
     startup_command_pid = launch_startup_command(startup_command);
     if (startup_command_pid < 0) goto err_server;
@@ -226,10 +185,9 @@ err_server:
   server = NULL;
 
 err_signal:
-  for (i = ARRAY_LENGTH(signal_sources) - 1; i >= 0; i--)
+  for (int i = ARRAY_LENGTH(signal_sources) - 1; i >= 0; i--)
     if (signal_sources[i]) wl_event_source_remove(signal_sources[i]);
 
-  wl_display_destroy_clients(display);
   wl_display_destroy(display);
 
 err:
