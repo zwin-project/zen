@@ -7,32 +7,32 @@
 
 void
 znr_gl_vertex_array_enable_vertex_attrib_array(
-    struct znr_gl_vertex_array* self, uint32_t index)
+    struct znr_gl_vertex_array *self, uint32_t index)
 {
   self->proxy->GlEnableVertexAttribArray(index);
 }
 
 void
 znr_gl_vertex_array_disable_vertex_attrib_array(
-    struct znr_gl_vertex_array* self, uint32_t index)
+    struct znr_gl_vertex_array *self, uint32_t index)
 {
   self->proxy->GlDisableVertexAttribArray(index);
 }
 
 void
-znr_gl_vertex_array_vertex_attrib_pointer(struct znr_gl_vertex_array* self,
+znr_gl_vertex_array_vertex_attrib_pointer(struct znr_gl_vertex_array *self,
     uint32_t index, int32_t size, uint32_t type, bool normalized,
-    int32_t stride, uint64_t offset, struct znr_gl_buffer* gl_buffer)
+    int32_t stride, uint64_t offset, struct znr_gl_buffer *gl_buffer)
 {
   self->proxy->GlVertexAttribPointer(
       index, size, type, normalized, stride, offset, gl_buffer->proxy->id());
 }
 
-struct znr_gl_vertex_array*
-znr_gl_vertex_array_create(struct znr_session* session_base)
+struct znr_gl_vertex_array *
+znr_gl_vertex_array_create(struct znr_session *session_base)
 {
   auto self = new znr_gl_vertex_array();
-  znr_session_impl* session;
+  znr_session_impl *session;
 
   if (self == nullptr) {
     zn_error("Failed to allocate memory");
@@ -57,7 +57,7 @@ err:
 }
 
 void
-znr_gl_vertex_array_destroy(struct znr_gl_vertex_array* self)
+znr_gl_vertex_array_destroy(struct znr_gl_vertex_array *self)
 {
   delete self;
 }

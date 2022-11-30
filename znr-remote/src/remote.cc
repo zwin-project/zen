@@ -7,12 +7,12 @@
 #include "loop.h"
 #include "peer.h"
 
-struct znr_session*
+struct znr_session *
 znr_remote_create_session(
-    struct znr_remote* parent, struct znr_remote_peer* peer_base)
+    struct znr_remote *parent, struct znr_remote_peer *peer_base)
 {
-  znr_remote_impl* self = zn_container_of(parent, self, base);
-  znr_remote_peer_impl* peer = zn_container_of(peer_base, peer, base);
+  znr_remote_impl *self = zn_container_of(parent, self, base);
+  znr_remote_peer_impl *peer = zn_container_of(peer_base, peer, base);
 
   auto loop = wl_display_get_event_loop(self->display);
   auto session_proxy = zen::remote::server::CreateSession(
@@ -34,7 +34,7 @@ znr_remote_create_session(
 }
 
 static void
-znr_remote_handle_new_peer(struct znr_remote_impl* self, uint64_t peer_id)
+znr_remote_handle_new_peer(struct znr_remote_impl *self, uint64_t peer_id)
 {
   auto peer_data = self->peer_manager->Get(peer_id);
   if (!peer_data) return;
@@ -45,7 +45,7 @@ znr_remote_handle_new_peer(struct znr_remote_impl* self, uint64_t peer_id)
 }
 
 static void
-znr_remote_handle_peer_lost(struct znr_remote_impl* self, uint64_t peer_id)
+znr_remote_handle_peer_lost(struct znr_remote_impl *self, uint64_t peer_id)
 {
   znr_remote_peer_impl *peer, *tmp;
   wl_list_for_each_safe (peer, tmp, &self->peer_list, link) {
@@ -57,11 +57,11 @@ znr_remote_handle_peer_lost(struct znr_remote_impl* self, uint64_t peer_id)
   }
 }
 
-struct znr_remote*
-znr_remote_create(wl_display* display)
+struct znr_remote *
+znr_remote_create(wl_display *display)
 {
   zen::remote::InitializeLogger(std::make_unique<LogSink>());
-  wl_event_loop* loop = wl_display_get_event_loop(display);
+  wl_event_loop *loop = wl_display_get_event_loop(display);
 
   auto self = new znr_remote_impl();
   if (self == NULL) {
@@ -88,9 +88,9 @@ err:
 }
 
 void
-znr_remote_destroy(znr_remote* parent)
+znr_remote_destroy(znr_remote *parent)
 {
-  znr_remote_impl* self = zn_container_of(parent, self, base);
+  znr_remote_impl *self = zn_container_of(parent, self, base);
 
   wl_list_remove(&self->base.events.new_peer.listener_list);
   wl_list_remove(&self->peer_list);

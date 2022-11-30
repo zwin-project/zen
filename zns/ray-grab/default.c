@@ -15,12 +15,12 @@
  */
 static void
 zns_default_ray_grab_focus(
-    struct zns_default_ray_grab* self, struct zns_bounded* bounded)
+    struct zns_default_ray_grab *self, struct zns_bounded *bounded)
 {
   if (self->focus == bounded) return;
 
-  struct zn_server* server = zn_server_get_singleton();
-  struct zgnr_seat* seat = server->input_manager->seat->zgnr_seat;
+  struct zn_server *server = zn_server_get_singleton();
+  struct zgnr_seat *seat = server->input_manager->seat->zgnr_seat;
 
   if (self->focus) {
     wl_list_remove(&self->focus_destroy_listener.link);
@@ -34,7 +34,7 @@ zns_default_ray_grab_focus(
 
   if (bounded) {
     wl_signal_add(&bounded->events.destroy, &self->focus_destroy_listener);
-    struct zn_virtual_object* zn_virtual_object =
+    struct zn_virtual_object *zn_virtual_object =
         bounded->zgnr_bounded->virtual_object->user_data;
 
     vec3 local_origin, local_direction;
@@ -52,12 +52,12 @@ zns_default_ray_grab_focus(
 
 static void
 zns_default_ray_grab_send_motion(
-    struct zns_default_ray_grab* self, uint32_t time_msec)
+    struct zns_default_ray_grab *self, uint32_t time_msec)
 {
-  struct wl_client* client;
-  struct zn_server* server = zn_server_get_singleton();
-  struct zgnr_seat* seat = server->input_manager->seat->zgnr_seat;
-  struct zn_virtual_object* zn_virtual_object;
+  struct wl_client *client;
+  struct zn_server *server = zn_server_get_singleton();
+  struct zgnr_seat *seat = server->input_manager->seat->zgnr_seat;
+  struct zn_virtual_object *zn_virtual_object;
 
   if (self->focus == NULL) return;
 
@@ -75,11 +75,11 @@ zns_default_ray_grab_send_motion(
 }
 
 static void
-zns_default_ray_grab_motion_relative(struct zn_ray_grab* grab_base, vec3 origin,
+zns_default_ray_grab_motion_relative(struct zn_ray_grab *grab_base, vec3 origin,
     float polar, float azimuthal, uint32_t time_msec)
 {
-  struct zns_default_ray_grab* self = zn_container_of(grab_base, self, base);
-  struct zns_bounded* bounded;
+  struct zns_default_ray_grab *self = zn_container_of(grab_base, self, base);
+  struct zns_bounded *bounded;
 
   float next_polar = self->base.ray->angle.polar + polar;
   if (next_polar < 0)
@@ -109,13 +109,13 @@ zns_default_ray_grab_motion_relative(struct zn_ray_grab* grab_base, vec3 origin,
 }
 
 static void
-zns_default_ray_grab_button(struct zn_ray_grab* grab_base, uint32_t time_msec,
+zns_default_ray_grab_button(struct zn_ray_grab *grab_base, uint32_t time_msec,
     uint32_t button, enum zgn_ray_button_state state)
 {
-  struct zns_default_ray_grab* self = zn_container_of(grab_base, self, base);
-  struct wl_client* client;
-  struct zn_server* server = zn_server_get_singleton();
-  struct zgnr_seat* seat = server->input_manager->seat->zgnr_seat;
+  struct zns_default_ray_grab *self = zn_container_of(grab_base, self, base);
+  struct wl_client *client;
+  struct zn_server *server = zn_server_get_singleton();
+  struct zgnr_seat *seat = server->input_manager->seat->zgnr_seat;
 
   self->button_state = state;
   self->last_button_serial = 0;
@@ -131,10 +131,10 @@ zns_default_ray_grab_button(struct zn_ray_grab* grab_base, uint32_t time_msec,
 }
 
 static void
-zns_default_ray_grab_rebase(struct zn_ray_grab* grab_base)
+zns_default_ray_grab_rebase(struct zn_ray_grab *grab_base)
 {
-  struct zns_default_ray_grab* self = zn_container_of(grab_base, self, base);
-  struct zns_bounded* bounded;
+  struct zns_default_ray_grab *self = zn_container_of(grab_base, self, base);
+  struct zns_bounded *bounded;
 
   float distance;
   bounded = zn_shell_ray_cast(self->shell, self->base.ray, &distance);
@@ -147,9 +147,9 @@ zns_default_ray_grab_rebase(struct zn_ray_grab* grab_base)
 }
 
 static void
-zns_default_ray_grab_cancel(struct zn_ray_grab* grab_base)
+zns_default_ray_grab_cancel(struct zn_ray_grab *grab_base)
 {
-  struct zns_default_ray_grab* self = zn_container_of(grab_base, self, base);
+  struct zns_default_ray_grab *self = zn_container_of(grab_base, self, base);
   zns_default_ray_grab_focus(self, NULL);
 }
 
@@ -162,20 +162,20 @@ static const struct zn_ray_grab_interface implementation = {
 
 void
 zns_default_ray_grab_handle_focus_destroy(
-    struct wl_listener* listener, void* data)
+    struct wl_listener *listener, void *data)
 {
   UNUSED(data);
-  struct zns_default_ray_grab* self =
+  struct zns_default_ray_grab *self =
       zn_container_of(listener, self, focus_destroy_listener);
 
   zns_default_ray_grab_focus(self, NULL);
 }
 
-struct zns_default_ray_grab*
-zns_default_ray_grab_get(struct zn_ray_grab* grab)
+struct zns_default_ray_grab *
+zns_default_ray_grab_get(struct zn_ray_grab *grab)
 {
   if (grab->interface != &implementation) return NULL;
-  struct zns_default_ray_grab* self;
+  struct zns_default_ray_grab *self;
 
   self = zn_container_of(grab, self, base);
 
@@ -184,7 +184,7 @@ zns_default_ray_grab_get(struct zn_ray_grab* grab)
 
 void
 zns_default_ray_grab_init(
-    struct zns_default_ray_grab* self, struct zn_shell* shell)
+    struct zns_default_ray_grab *self, struct zn_shell *shell)
 {
   self->base.interface = &implementation;
   self->shell = shell;
@@ -197,7 +197,7 @@ zns_default_ray_grab_init(
 }
 
 void
-zns_default_ray_grab_fini(struct zns_default_ray_grab* self)
+zns_default_ray_grab_fini(struct zns_default_ray_grab *self)
 {
   wl_list_remove(&self->focus_destroy_listener.link);
 }

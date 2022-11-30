@@ -18,9 +18,9 @@ struct zgnr_gles_v32 {
   } events;
 };
 
-struct zgnr_gles_v32* zgnr_gles_v32_create(struct wl_display* display);
+struct zgnr_gles_v32 *zgnr_gles_v32_create(struct wl_display *display);
 
-void zgnr_gles_v32_destroy(struct zgnr_gles_v32* self);
+void zgnr_gles_v32_destroy(struct zgnr_gles_v32 *self);
 
 #ifdef __cplusplus
 }

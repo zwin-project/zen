@@ -6,22 +6,22 @@
 
 void
 znr_virtual_object_move(
-    struct znr_virtual_object* self, vec3 position, versor quaternion)
+    struct znr_virtual_object *self, vec3 position, versor quaternion)
 {
   self->proxy->Move(position, quaternion);
 }
 
 void
-znr_virtual_object_commit(struct znr_virtual_object* self)
+znr_virtual_object_commit(struct znr_virtual_object *self)
 {
   self->proxy->Commit();
 }
 
-znr_virtual_object*
-znr_virtual_object_create(znr_session* session_base)
+znr_virtual_object *
+znr_virtual_object_create(znr_session *session_base)
 {
   auto self = new znr_virtual_object();
-  znr_session_impl* session;
+  znr_session_impl *session;
 
   if (self == nullptr) {
     zn_error("Failed to allocate memory");
@@ -46,7 +46,7 @@ err:
 }
 
 void
-znr_virtual_object_destroy(znr_virtual_object* self)
+znr_virtual_object_destroy(znr_virtual_object *self)
 {
   delete self;
 }

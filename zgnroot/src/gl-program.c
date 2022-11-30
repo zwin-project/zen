@@ -5,32 +5,32 @@
 
 #include "program-shader.h"
 
-static void zgnr_gl_program_destroy(struct zgnr_gl_program_impl* self);
+static void zgnr_gl_program_destroy(struct zgnr_gl_program_impl *self);
 
 static void
-zgnr_gl_program_handle_destroy(struct wl_resource* resource)
+zgnr_gl_program_handle_destroy(struct wl_resource *resource)
 {
-  struct zgnr_gl_program_impl* self = wl_resource_get_user_data(resource);
+  struct zgnr_gl_program_impl *self = wl_resource_get_user_data(resource);
 
   zgnr_gl_program_destroy(self);
 }
 
 static void
 zgnr_gl_program_protocol_destroy(
-    struct wl_client* client, struct wl_resource* resource)
+    struct wl_client *client, struct wl_resource *resource)
 {
   UNUSED(client);
   wl_resource_destroy(resource);
 }
 
 static void
-zgnr_gl_program_protocol_attach_shader(struct wl_client* client,
-    struct wl_resource* resource, struct wl_resource* shader_resource)
+zgnr_gl_program_protocol_attach_shader(struct wl_client *client,
+    struct wl_resource *resource, struct wl_resource *shader_resource)
 {
-  struct zgnr_gl_program_impl* self = wl_resource_get_user_data(resource);
-  struct zgnr_gl_shader_impl* shader =
+  struct zgnr_gl_program_impl *self = wl_resource_get_user_data(resource);
+  struct zgnr_gl_shader_impl *shader =
       wl_resource_get_user_data(shader_resource);
-  struct zgnr_program_shader_impl* program_shader;
+  struct zgnr_program_shader_impl *program_shader;
 
   program_shader = zgnr_program_shader_create(self, shader);
   if (program_shader == NULL) {
@@ -45,10 +45,10 @@ zgnr_gl_program_protocol_attach_shader(struct wl_client* client,
 
 static void
 zgnr_gl_program_protocol_link(
-    struct wl_client* client, struct wl_resource* resource)
+    struct wl_client *client, struct wl_resource *resource)
 {
   UNUSED(client);
-  struct zgnr_gl_program_impl* self = wl_resource_get_user_data(resource);
+  struct zgnr_gl_program_impl *self = wl_resource_get_user_data(resource);
 
   self->pending.should_link = true;
 }
@@ -60,7 +60,7 @@ static const struct zgn_gl_program_interface implementation = {
 };
 
 void
-zgnr_gl_program_commit(struct zgnr_gl_program_impl* self)
+zgnr_gl_program_commit(struct zgnr_gl_program_impl *self)
 {
   if (self->base.current.linked && self->pending.should_link) {
     wl_resource_post_error(self->resource, ZGN_GL_PROGRAM_ERROR_RELINK,
@@ -81,10 +81,10 @@ zgnr_gl_program_commit(struct zgnr_gl_program_impl* self)
   self->pending.should_link = false;
 }
 
-struct zgnr_gl_program_impl*
-zgnr_gl_program_create(struct wl_client* client, uint32_t id)
+struct zgnr_gl_program_impl *
+zgnr_gl_program_create(struct wl_client *client, uint32_t id)
 {
-  struct zgnr_gl_program_impl* self;
+  struct zgnr_gl_program_impl *self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -119,7 +119,7 @@ err:
 }
 
 static void
-zgnr_gl_program_destroy(struct zgnr_gl_program_impl* self)
+zgnr_gl_program_destroy(struct zgnr_gl_program_impl *self)
 {
   wl_signal_emit(&self->base.events.destroy, NULL);
 

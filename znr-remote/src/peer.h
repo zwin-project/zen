@@ -14,7 +14,7 @@ struct znr_remote_peer_impl {
   wl_list link;  // znr_remote_impl::peer_list
 };
 
-znr_remote_peer_impl* znr_remote_peer_create(
+znr_remote_peer_impl *znr_remote_peer_create(
     std::shared_ptr<zen::remote::server::IPeer> proxy);
 
-void znr_remote_peer_destroy(znr_remote_peer_impl* self);
+void znr_remote_peer_destroy(znr_remote_peer_impl *self);
