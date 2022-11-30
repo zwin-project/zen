@@ -2,10 +2,7 @@
 
 #include <stdio.h>
 #include <wlr/render/glew.h>
-#include <wlr/types/wlr_output.h>
 #include <zen-common.h>
-
-#include "zen/screen/output.h"
 
 static struct zn_server *server_singleton = NULL;
 
@@ -23,28 +20,8 @@ zn_server_handle_new_output(struct wl_listener *listener, void *data)
 {
   struct zn_server *self = zn_container_of(listener, self, new_output_listener);
   struct wlr_output *wlr_output = data;
-  struct zn_output *output;
-
-  zn_debug("New output %p: %s (non-desktop: %d)", (void *)wlr_output,
-      wlr_output->name, wlr_output->non_desktop);
-
-  if (wlr_output->non_desktop) {
-    zn_debug("Skip non-desktop output");
-    // TODO: DRM lease support for VR headsets
-    return;
-  }
-
-  if (wlr_output_init_render(wlr_output, self->allocator, self->renderer) ==
-      false) {
-    zn_abort("Failed to initialize output renderer");
-    return;
-  }
-
-  output = zn_output_create(wlr_output);
-  if (output == NULL) {
-    zn_error("Failed to create a zn_output");
-    return;
-  }
+  UNUSED(self);
+  UNUSED(wlr_output);
 }
 
 struct zn_server *

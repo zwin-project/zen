@@ -1,7 +1,5 @@
 _zen_srcs = [
   'server.c',
-
-  'screen/output.c',
 ]
 
 _zen_deps = [
