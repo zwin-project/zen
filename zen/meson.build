@@ -7,6 +7,13 @@ _zen_srcs = [
   'screen/output.c',
 ]
 
+_zen_srcs_pub = [
+  protocols['xdg-shell']['private-code'],
+  protocols['xdg-shell']['server-header'],
+  protocols['zen-desktop']['private-code'],
+  protocols['zen-desktop']['server-header'],
+]
+
 _zen_deps = [
   cairo_dep,
   cglm_dep,
@@ -19,13 +26,7 @@ _zen_deps = [
   xkbcommon_dep,
   zen_common_dep,
   zgnr_dep,
-]
-
-_zen_srcs_pub = [
-  protocols['xdg-shell']['private-code'],
-  protocols['xdg-shell']['server-header'],
-  protocols['zen-desktop']['private-code'],
-  protocols['zen-desktop']['server-header'],
+  znr_remote_dep,
 ]
 
 _zen_lib = static_library(
