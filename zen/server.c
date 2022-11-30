@@ -45,6 +45,8 @@ zn_server_handle_new_output(struct wl_listener *listener, void *data)
     zn_error("Failed to create a zn_output");
     return;
   }
+
+  zn_scene_new_screen(self->scene, output->screen);
 }
 
 struct zn_server *
