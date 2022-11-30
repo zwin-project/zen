@@ -49,6 +49,18 @@ zn_server_handle_new_output(struct wl_listener *listener, void *data)
   zn_scene_new_screen(self->scene, output->screen);
 }
 
+static void
+zn_server_handle_new_peer(struct wl_listener *listener, void *data)
+{
+  struct zn_server *self = zn_container_of(listener, self, new_peer_listener);
+  struct znr_remote_peer *peer = data;
+
+  struct znr_session *session = znr_remote_create_session(self->remote, peer);
+  if (session == NULL) return;
+
+  zn_info("new remote session established");
+}
+
 struct zn_server *
 zn_server_get_singleton(void)
 {
@@ -136,6 +148,12 @@ zn_server_create(struct wl_display *display)
     goto err_allocator;
   }
 
+  self->remote = znr_remote_create(self->display);
+  if (self->remote == NULL) {
+    zn_error("Failed to create a znr_remote");
+    goto err_scene;
+  }
+
   for (int i = 1; i <= 32; i++) {
     sprintf(socket_name_candidate, "wayland-%d", i);
     if (wl_display_add_socket(self->display, socket_name_candidate) >= 0) {
@@ -146,7 +164,7 @@ zn_server_create(struct wl_display *display)
 
   if (self->socket == NULL) {
     zn_error("Failed to open wayland socket");
-    goto err_scene;
+    goto err_remote;
   }
 
   setenv("WAYLAND_DISPLAY", self->socket, true);
@@ -162,7 +180,13 @@ zn_server_create(struct wl_display *display)
   wl_signal_add(
       &self->wlr_backend->events.new_output, &self->new_output_listener);
 
+  self->new_peer_listener.notify = zn_server_handle_new_peer;
+  wl_signal_add(&self->remote->events.new_peer, &self->new_peer_listener);
+
   return self;
+
+err_remote:
+  znr_remote_destroy(self->remote);
 
 err_scene:
   zn_scene_destroy(self->scene);
@@ -189,12 +213,15 @@ zn_server_destroy_resources(struct zn_server *self)
 {
   wlr_backend_destroy(self->wlr_backend);
   wl_display_destroy_clients(self->display);
+
+  zn_scene_destroy_resources(self->scene);
 }
 
 void
 zn_server_destroy(struct zn_server *self)
 {
   free(self->socket);
+  znr_remote_destroy(self->remote);
   zn_scene_destroy(self->scene);
   wlr_allocator_destroy(self->allocator);
   wlr_renderer_destroy(self->renderer);
