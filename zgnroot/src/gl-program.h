@@ -10,10 +10,10 @@ struct zgnr_gl_program_impl {
     bool should_link;
   } pending;
 
-  struct wl_resource *resource;  // nonnull
+  struct wl_resource* resource;  // nonnull
 };
 
-void zgnr_gl_program_commit(struct zgnr_gl_program_impl *self);
+void zgnr_gl_program_commit(struct zgnr_gl_program_impl* self);
 
-struct zgnr_gl_program_impl *zgnr_gl_program_create(
-    struct wl_client *client, uint32_t id);
+struct zgnr_gl_program_impl* zgnr_gl_program_create(
+    struct wl_client* client, uint32_t id);

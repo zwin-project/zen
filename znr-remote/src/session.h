@@ -18,9 +18,9 @@ struct znr_session_impl {
       disconnect_signal_connection;
 
   std::chrono::steady_clock::time_point prev_frame;
-  struct wl_event_source *frame_timer_source;
+  struct wl_event_source* frame_timer_source;
 };
 
-znr_session_impl *znr_session_create(
+znr_session_impl* znr_session_create(
     std::unique_ptr<zen::remote::server::ISession> proxy,
-    struct wl_display *display);
+    struct wl_display* display);

@@ -2,7 +2,7 @@
 
 #include <zen-common.h>
 
-znr_remote_peer_impl *
+znr_remote_peer_impl*
 znr_remote_peer_create(std::shared_ptr<zen::remote::server::IPeer> proxy)
 {
   auto self = new znr_remote_peer_impl();
@@ -23,7 +23,7 @@ err:
 }
 
 void
-znr_remote_peer_destroy(znr_remote_peer_impl *self)
+znr_remote_peer_destroy(znr_remote_peer_impl* self)
 {
   wl_signal_emit(&self->base.events.destroy, nullptr);
 

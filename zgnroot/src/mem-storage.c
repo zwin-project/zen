@@ -2,29 +2,29 @@
 
 #include <zen-common.h>
 
-static void zgnr_mem_storage_destroy(struct zgnr_mem_storage_impl *self);
+static void zgnr_mem_storage_destroy(struct zgnr_mem_storage_impl* self);
 
-struct zgnr_mem_storage *
-zgnr_mem_storage_ref(struct zgnr_mem_storage *parent)
+struct zgnr_mem_storage*
+zgnr_mem_storage_ref(struct zgnr_mem_storage* parent)
 {
-  struct zgnr_mem_storage_impl *self = zn_container_of(parent, self, base);
+  struct zgnr_mem_storage_impl* self = zn_container_of(parent, self, base);
   self->ref_count++;
   return &self->base;
 }
 
 void
-zgnr_mem_storage_unref(struct zgnr_mem_storage *parent)
+zgnr_mem_storage_unref(struct zgnr_mem_storage* parent)
 {
-  struct zgnr_mem_storage_impl *self = zn_container_of(parent, self, base);
+  struct zgnr_mem_storage_impl* self = zn_container_of(parent, self, base);
   if (--self->ref_count == 0) {
     zgnr_mem_storage_destroy(self);
   }
 }
 
-struct zgnr_mem_storage *
-zgnr_mem_storage_create(void *src, size_t size)
+struct zgnr_mem_storage*
+zgnr_mem_storage_create(void* src, size_t size)
 {
-  struct zgnr_mem_storage_impl *self;
+  struct zgnr_mem_storage_impl* self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -52,7 +52,7 @@ err:
 }
 
 static void
-zgnr_mem_storage_destroy(struct zgnr_mem_storage_impl *self)
+zgnr_mem_storage_destroy(struct zgnr_mem_storage_impl* self)
 {
   free(self->base.data);
   free(self);

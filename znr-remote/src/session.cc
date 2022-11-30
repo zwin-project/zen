@@ -6,9 +6,9 @@ static constexpr float kRefreshRate = 60.0f;
 static constexpr uint32_t kRefreshIntervalNsec = NSEC_PER_SEC / kRefreshRate;
 
 static int
-znr_session_handle_frame_timer(void *data)
+znr_session_handle_frame_timer(void* data)
 {
-  auto self = static_cast<znr_session_impl *>(data);
+  auto self = static_cast<znr_session_impl*>(data);
 
   wl_signal_emit(&self->base.events.frame, nullptr);
 
@@ -31,14 +31,14 @@ znr_session_handle_frame_timer(void *data)
 }
 
 static void
-znr_session_handle_disconnect(znr_session_impl *self)
+znr_session_handle_disconnect(znr_session_impl* self)
 {
   wl_signal_emit(&self->base.events.disconnected, NULL);
 }
 
-znr_session_impl *
+znr_session_impl*
 znr_session_create(std::unique_ptr<zen::remote::server::ISession> proxy,
-    struct wl_display *display)
+    struct wl_display* display)
 {
   auto self = new znr_session_impl();
   if (self == nullptr) {
@@ -67,9 +67,9 @@ err:
 }
 
 void
-znr_session_destroy(znr_session *parent)
+znr_session_destroy(znr_session* parent)
 {
-  struct znr_session_impl *self = zn_container_of(parent, self, base);
+  struct znr_session_impl* self = zn_container_of(parent, self, base);
 
   self->disconnect_signal_connection->Disconnect();
 

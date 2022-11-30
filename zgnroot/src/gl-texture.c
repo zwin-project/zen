@@ -7,7 +7,7 @@
 
 #include "zgnr/shm.h"
 
-static void zgnr_gl_texture_destroy(struct zgnr_gl_texture_impl *self);
+static void zgnr_gl_texture_destroy(struct zgnr_gl_texture_impl* self);
 
 static size_t
 gl_2d_image_size(GLenum format, GLenum type, GLsizei width, GLsizei height)
@@ -77,16 +77,16 @@ gl_2d_image_size(GLenum format, GLenum type, GLsizei width, GLsizei height)
 }
 
 static void
-zgnr_gl_texture_handle_destroy(struct wl_resource *resource)
+zgnr_gl_texture_handle_destroy(struct wl_resource* resource)
 {
-  struct zgnr_gl_texture_impl *self = wl_resource_get_user_data(resource);
+  struct zgnr_gl_texture_impl* self = wl_resource_get_user_data(resource);
 
   zgnr_gl_texture_destroy(self);
 }
 
 static void
 zgnr_gl_texture_protocol_destroy(
-    struct wl_client *client, struct wl_resource *resource)
+    struct wl_client* client, struct wl_resource* resource)
 {
   UNUSED(client);
 
@@ -94,14 +94,14 @@ zgnr_gl_texture_protocol_destroy(
 }
 
 static void
-zgnr_gl_texture_protocol_image_2d(struct wl_client *client,
-    struct wl_resource *resource, uint32_t target, int32_t level,
+zgnr_gl_texture_protocol_image_2d(struct wl_client* client,
+    struct wl_resource* resource, uint32_t target, int32_t level,
     int32_t internal_format, uint32_t width, uint32_t height, int32_t border,
-    uint32_t format, uint32_t type, struct wl_resource *data)
+    uint32_t format, uint32_t type, struct wl_resource* data)
 {
   UNUSED(client);
-  struct zgnr_gl_texture_impl *self = wl_resource_get_user_data(resource);
-  struct zgnr_shm_buffer *buffer = zgnr_shm_buffer_get(data);
+  struct zgnr_gl_texture_impl* self = wl_resource_get_user_data(resource);
+  struct zgnr_shm_buffer* buffer = zgnr_shm_buffer_get(data);
 
   ssize_t expected_size = gl_2d_image_size(format, type, width, height);
   ssize_t actual_size = zgnr_shm_buffer_get_size(buffer);
@@ -129,11 +129,11 @@ const struct zgn_gl_texture_interface implementation = {
 };
 
 void
-zgnr_gl_texture_commit(struct zgnr_gl_texture_impl *self)
+zgnr_gl_texture_commit(struct zgnr_gl_texture_impl* self)
 {
   if (!self->pending.data.resource) return;  // nothing to commit
 
-  struct zgnr_shm_buffer *buffer =
+  struct zgnr_shm_buffer* buffer =
       zgnr_shm_buffer_get(self->pending.data.resource);
 
   if (self->base.current.data) {
@@ -141,7 +141,7 @@ zgnr_gl_texture_commit(struct zgnr_gl_texture_impl *self)
     self->base.current.data = NULL;
   }
 
-  void *data = zgnr_shm_buffer_get_data(buffer);
+  void* data = zgnr_shm_buffer_get_data(buffer);
   ssize_t size = zgnr_shm_buffer_get_size(buffer);
 
   zgnr_shm_buffer_begin_access(buffer);
@@ -162,11 +162,11 @@ zgnr_gl_texture_commit(struct zgnr_gl_texture_impl *self)
   zn_weak_resource_unlink(&self->pending.data);
 }
 
-struct zgnr_gl_texture_impl *
-zgnr_gl_texture_create(struct wl_client *client, uint32_t id)
+struct zgnr_gl_texture_impl*
+zgnr_gl_texture_create(struct wl_client* client, uint32_t id)
 {
-  struct zgnr_gl_texture_impl *self;
-  struct wl_resource *resource;
+  struct zgnr_gl_texture_impl* self;
+  struct wl_resource* resource;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -197,7 +197,7 @@ err:
 }
 
 static void
-zgnr_gl_texture_destroy(struct zgnr_gl_texture_impl *self)
+zgnr_gl_texture_destroy(struct zgnr_gl_texture_impl* self)
 {
   wl_signal_emit(&self->base.events.destroy, NULL);
 

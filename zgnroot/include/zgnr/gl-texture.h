@@ -15,7 +15,7 @@ struct zgnr_gl_texture {
   } events;
 
   struct {
-    struct zgnr_mem_storage *data;  // nullable
+    struct zgnr_mem_storage* data;  // nullable
 
     uint32_t target;
     int32_t level;
@@ -30,7 +30,7 @@ struct zgnr_gl_texture {
     bool data_damaged;
   } current;
 
-  void *user_data;
+  void* user_data;
 };
 
 #ifdef __cplusplus

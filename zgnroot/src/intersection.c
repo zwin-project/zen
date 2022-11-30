@@ -6,7 +6,7 @@
 
 static int
 ray_obb_intersection_axis_test(vec3 axis, vec3 translation, vec3 ray_direction,
-    float axis_min, float axis_max, float *t_min, float *t_max)
+    float axis_min, float axis_max, float* t_min, float* t_max)
 {
   float e = glm_vec3_dot(axis, translation);
   float f = glm_vec3_dot(ray_direction, axis);

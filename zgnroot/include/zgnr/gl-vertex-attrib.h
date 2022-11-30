@@ -24,8 +24,8 @@ struct zgnr_gl_vertex_attrib {
   struct wl_list link;
 };
 
-struct zgnr_gl_buffer *zgnr_gl_vertex_attrib_get_gl_buffer(
-    struct zgnr_gl_vertex_attrib *attrib);
+struct zgnr_gl_buffer* zgnr_gl_vertex_attrib_get_gl_buffer(
+    struct zgnr_gl_vertex_attrib* attrib);
 
 #ifdef __cplusplus
 }

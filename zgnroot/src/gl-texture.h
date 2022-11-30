@@ -20,7 +20,7 @@ struct zgnr_gl_texture_impl {
   } pending;
 };
 
-void zgnr_gl_texture_commit(struct zgnr_gl_texture_impl *self);
+void zgnr_gl_texture_commit(struct zgnr_gl_texture_impl* self);
 
-struct zgnr_gl_texture_impl *zgnr_gl_texture_create(
-    struct wl_client *client, uint32_t id);
+struct zgnr_gl_texture_impl* zgnr_gl_texture_create(
+    struct wl_client* client, uint32_t id);

@@ -12,9 +12,9 @@ struct zgnr_shell {
   } events;
 };
 
-struct zgnr_shell *zgnr_shell_create(struct wl_display *display);
+struct zgnr_shell* zgnr_shell_create(struct wl_display* display);
 
-void zgnr_shell_destroy(struct zgnr_shell *self);
+void zgnr_shell_destroy(struct zgnr_shell* self);
 
 #ifdef __cplusplus
 }

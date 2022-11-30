@@ -7,8 +7,8 @@
 
 class LogSink : public zen::remote::ILogSink
 {
-  void Sink(zen::remote::Severity severity, const char * /*pretty_function*/,
-      const char *file, int line, const char *format, va_list vp) override
+  void Sink(zen::remote::Severity severity, const char* /*pretty_function*/,
+      const char* file, int line, const char* format, va_list vp) override
   {
     static char zn_fmt[1024] = {0};
 

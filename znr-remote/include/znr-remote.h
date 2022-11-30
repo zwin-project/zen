@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 struct znr_remote_peer {
-  const char *host;  // null-terminated ip address string
+  const char* host;  // null-terminated ip address string
 
   struct {
     struct wl_signal destroy;  // (NULL)
@@ -21,12 +21,12 @@ struct znr_remote {
   } events;
 };
 
-struct znr_session *znr_remote_create_session(
-    struct znr_remote *self, struct znr_remote_peer *peer);
+struct znr_session* znr_remote_create_session(
+    struct znr_remote* self, struct znr_remote_peer* peer);
 
-struct znr_remote *znr_remote_create(struct wl_display *display);
+struct znr_remote* znr_remote_create(struct wl_display* display);
 
-void znr_remote_destroy(struct znr_remote *self);
+void znr_remote_destroy(struct znr_remote* self);
 
 #ifdef __cplusplus
 }

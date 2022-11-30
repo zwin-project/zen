@@ -15,20 +15,20 @@
 
 static void
 zgnr_gles_v32_protocol_destroy(
-    struct wl_client *client, struct wl_resource *resource)
+    struct wl_client* client, struct wl_resource* resource)
 {
   UNUSED(client);
   wl_resource_destroy(resource);
 }
 
 static void
-zgnr_gles_v32_protocol_create_rendering_unit(struct wl_client *client,
-    struct wl_resource *resource, uint32_t id,
-    struct wl_resource *virtual_object_resource)
+zgnr_gles_v32_protocol_create_rendering_unit(struct wl_client* client,
+    struct wl_resource* resource, uint32_t id,
+    struct wl_resource* virtual_object_resource)
 {
-  struct zgnr_gles_v32_impl *self = wl_resource_get_user_data(resource);
-  struct zgnr_rendering_unit_impl *unit;
-  struct zgnr_virtual_object_impl *virtual_object =
+  struct zgnr_gles_v32_impl* self = wl_resource_get_user_data(resource);
+  struct zgnr_rendering_unit_impl* unit;
+  struct zgnr_virtual_object_impl* virtual_object =
       wl_resource_get_user_data(virtual_object_resource);
 
   unit = zgnr_rendering_unit_create(client, id, virtual_object);
@@ -43,10 +43,10 @@ zgnr_gles_v32_protocol_create_rendering_unit(struct wl_client *client,
 
 static void
 zgnr_gles_v32_protocol_create_gl_buffer(
-    struct wl_client *client, struct wl_resource *resource, uint32_t id)
+    struct wl_client* client, struct wl_resource* resource, uint32_t id)
 {
-  struct zgnr_gles_v32_impl *self = wl_resource_get_user_data(resource);
-  struct zgnr_gl_buffer_impl *buffer = zgnr_gl_buffer_create(client, id);
+  struct zgnr_gles_v32_impl* self = wl_resource_get_user_data(resource);
+  struct zgnr_gl_buffer_impl* buffer = zgnr_gl_buffer_create(client, id);
   if (buffer == NULL) {
     zn_error("Failed to create a gl buffer");
     wl_client_post_no_memory(client);
@@ -57,12 +57,12 @@ zgnr_gles_v32_protocol_create_gl_buffer(
 }
 
 static void
-zgnr_gles_v32_protocol_create_gl_shader(struct wl_client *client,
-    struct wl_resource *resource, uint32_t id,
-    struct wl_resource *buffer_resource, uint32_t type)
+zgnr_gles_v32_protocol_create_gl_shader(struct wl_client* client,
+    struct wl_resource* resource, uint32_t id,
+    struct wl_resource* buffer_resource, uint32_t type)
 {
-  struct zgnr_gles_v32_impl *self = wl_resource_get_user_data(resource);
-  struct zgnr_gl_shader_impl *shader =
+  struct zgnr_gles_v32_impl* self = wl_resource_get_user_data(resource);
+  struct zgnr_gl_shader_impl* shader =
       zgnr_gl_shader_create(client, id, buffer_resource, type);
   if (shader == NULL) {
     zn_error("Failed to creat a gl shader");
@@ -75,11 +75,11 @@ zgnr_gles_v32_protocol_create_gl_shader(struct wl_client *client,
 
 static void
 zgnr_gles_v32_protocol_create_gl_program(
-    struct wl_client *client, struct wl_resource *resource, uint32_t id)
+    struct wl_client* client, struct wl_resource* resource, uint32_t id)
 {
-  struct zgnr_gles_v32_impl *self = wl_resource_get_user_data(resource);
+  struct zgnr_gles_v32_impl* self = wl_resource_get_user_data(resource);
 
-  struct zgnr_gl_program_impl *program = zgnr_gl_program_create(client, id);
+  struct zgnr_gl_program_impl* program = zgnr_gl_program_create(client, id);
   if (program == NULL) {
     zn_error("Failed to creat a gl program");
     wl_client_post_no_memory(client);
@@ -91,11 +91,11 @@ zgnr_gles_v32_protocol_create_gl_program(
 
 static void
 zgnr_gles_v32_protocol_create_gl_texture(
-    struct wl_client *client, struct wl_resource *resource, uint32_t id)
+    struct wl_client* client, struct wl_resource* resource, uint32_t id)
 {
-  struct zgnr_gles_v32_impl *self = wl_resource_get_user_data(resource);
+  struct zgnr_gles_v32_impl* self = wl_resource_get_user_data(resource);
 
-  struct zgnr_gl_texture_impl *texture = zgnr_gl_texture_create(client, id);
+  struct zgnr_gl_texture_impl* texture = zgnr_gl_texture_create(client, id);
   if (texture == NULL) {
     zn_error("Failed to creat a gl texture");
     wl_client_post_no_memory(client);
@@ -107,10 +107,10 @@ zgnr_gles_v32_protocol_create_gl_texture(
 
 static void
 zgnr_gles_v32_protocol_create_gl_vertex_array(
-    struct wl_client *client, struct wl_resource *resource, uint32_t id)
+    struct wl_client* client, struct wl_resource* resource, uint32_t id)
 {
-  struct zgnr_gles_v32_impl *self = wl_resource_get_user_data(resource);
-  struct zgnr_gl_vertex_array_impl *vertex_array =
+  struct zgnr_gles_v32_impl* self = wl_resource_get_user_data(resource);
+  struct zgnr_gl_vertex_array_impl* vertex_array =
       zgnr_gl_vertex_array_create(client, id);
   if (self == NULL) {
     zn_error("Failed to creat a gl vertex array");
@@ -122,14 +122,14 @@ zgnr_gles_v32_protocol_create_gl_vertex_array(
 }
 
 static void
-zgnr_gles_v32_protocol_create_gl_base_technique(struct wl_client *client,
-    struct wl_resource *resource, uint32_t id,
-    struct wl_resource *unit_resource)
+zgnr_gles_v32_protocol_create_gl_base_technique(struct wl_client* client,
+    struct wl_resource* resource, uint32_t id,
+    struct wl_resource* unit_resource)
 {
-  struct zgnr_gles_v32_impl *self = wl_resource_get_user_data(resource);
-  struct zgnr_rendering_unit_impl *unit =
+  struct zgnr_gles_v32_impl* self = wl_resource_get_user_data(resource);
+  struct zgnr_rendering_unit_impl* unit =
       wl_resource_get_user_data(unit_resource);
-  struct zgnr_gl_base_technique_impl *technique;
+  struct zgnr_gl_base_technique_impl* technique;
 
   technique = zgnr_gl_base_technique_create(client, id, unit);
   if (technique == NULL) {
@@ -154,11 +154,11 @@ static const struct zgn_gles_v32_interface implementation = {
 
 static void
 zgnr_gles_v32_bind(
-    struct wl_client *client, void *data, uint32_t version, uint32_t id)
+    struct wl_client* client, void* data, uint32_t version, uint32_t id)
 {
-  struct zgnr_gles_v32_impl *self = data;
+  struct zgnr_gles_v32_impl* self = data;
 
-  struct wl_resource *resource =
+  struct wl_resource* resource =
       wl_resource_create(client, &zgn_gles_v32_interface, version, id);
   if (resource == NULL) {
     zn_error("Failed to create a wl_resource");
@@ -169,10 +169,10 @@ zgnr_gles_v32_bind(
   wl_resource_set_implementation(resource, &implementation, self, NULL);
 }
 
-struct zgnr_gles_v32 *
-zgnr_gles_v32_create(struct wl_display *display)
+struct zgnr_gles_v32*
+zgnr_gles_v32_create(struct wl_display* display)
 {
-  struct zgnr_gles_v32_impl *self;
+  struct zgnr_gles_v32_impl* self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -206,9 +206,9 @@ err:
 }
 
 void
-zgnr_gles_v32_destroy(struct zgnr_gles_v32 *parent)
+zgnr_gles_v32_destroy(struct zgnr_gles_v32* parent)
 {
-  struct zgnr_gles_v32_impl *self = zn_container_of(parent, self, base);
+  struct zgnr_gles_v32_impl* self = zn_container_of(parent, self, base);
 
   wl_global_destroy(self->global);
 

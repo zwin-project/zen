@@ -6,7 +6,7 @@
 #include "system.h"
 
 void
-zna_ray_commit(struct zna_ray *self)
+zna_ray_commit(struct zna_ray* self)
 {
   if (self->base_unit->has_renderer_objects) {
     vec3 tip;
@@ -22,7 +22,7 @@ zna_ray_commit(struct zna_ray *self)
  */
 static void
 zna_ray_setup_renderer_objects(
-    struct zna_ray *self, struct znr_session *session)
+    struct zna_ray* self, struct znr_session* session)
 {
   self->virtual_object = znr_virtual_object_create(session);
 
@@ -42,7 +42,7 @@ zna_ray_setup_renderer_objects(
 }
 
 static void
-zna_ray_teardown_renderer_objects(struct zna_ray *self)
+zna_ray_teardown_renderer_objects(struct zna_ray* self)
 {
   zna_base_unit_teardown_renderer_objects(self->base_unit);
 
@@ -53,32 +53,32 @@ zna_ray_teardown_renderer_objects(struct zna_ray *self)
 }
 
 static void
-zna_ray_handle_session_created(struct wl_listener *listener, void *data)
+zna_ray_handle_session_created(struct wl_listener* listener, void* data)
 {
   UNUSED(data);
 
-  struct zna_ray *self =
+  struct zna_ray* self =
       zn_container_of(listener, self, session_created_listener);
-  struct znr_session *session = self->system->current_session;
+  struct znr_session* session = self->system->current_session;
 
   zna_ray_setup_renderer_objects(self, session);
 }
 
 static void
-zna_ray_handle_session_destroyed(struct wl_listener *listener, void *data)
+zna_ray_handle_session_destroyed(struct wl_listener* listener, void* data)
 {
   UNUSED(data);
 
-  struct zna_ray *self =
+  struct zna_ray* self =
       zn_container_of(listener, self, session_destroyed_listener);
 
   zna_ray_teardown_renderer_objects(self);
 }
 
-struct zna_ray *
-zna_ray_create(struct zn_ray *ray, struct zna_system *system)
+struct zna_ray*
+zna_ray_create(struct zn_ray* ray, struct zna_system* system)
 {
-  struct zna_ray *self;
+  struct zna_ray* self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -100,13 +100,13 @@ zna_ray_create(struct zn_ray *ray, struct zna_system *system)
 
   {  // setup base unit
     float vertices[2] = {0, 1};
-    struct zgnr_mem_storage *vertex_buffer =
+    struct zgnr_mem_storage* vertex_buffer =
         zgnr_mem_storage_create(vertices, sizeof(vertices));
 
     struct wl_array vertex_attributes;
     wl_array_init(&vertex_attributes);
 
-    struct zna_base_unit_vertex_attribute *vertex_attribute =
+    struct zna_base_unit_vertex_attribute* vertex_attribute =
         wl_array_add(&vertex_attributes, sizeof *vertex_attribute);
     vertex_attribute->index = 0;
     vertex_attribute->size = 1;
@@ -129,7 +129,7 @@ zna_ray_create(struct zn_ray *ray, struct zna_system *system)
     zgnr_mem_storage_unref(vertex_buffer);
   }
 
-  struct znr_session *session = self->system->current_session;
+  struct znr_session* session = self->system->current_session;
   if (session) {
     zna_ray_setup_renderer_objects(self, session);
   }
@@ -141,7 +141,7 @@ err:
 }
 
 void
-zna_ray_destroy(struct zna_ray *self)
+zna_ray_destroy(struct zna_ray* self)
 {
   if (self->virtual_object) znr_virtual_object_destroy(self->virtual_object);
   zna_base_unit_destroy(self->base_unit);

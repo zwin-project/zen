@@ -10,10 +10,10 @@
 
 static void
 zgnr_compositor_protocol_create_virtual_object(
-    struct wl_client *client, struct wl_resource *resource, uint32_t id)
+    struct wl_client* client, struct wl_resource* resource, uint32_t id)
 {
-  struct zgnr_compositor *self = wl_resource_get_user_data(resource);
-  struct zgnr_virtual_object_impl *virtual_object =
+  struct zgnr_compositor* self = wl_resource_get_user_data(resource);
+  struct zgnr_virtual_object_impl* virtual_object =
       zgnr_virtual_object_create(client, id, self->display);
 
   if (virtual_object == NULL) {
@@ -28,10 +28,10 @@ zgnr_compositor_protocol_create_virtual_object(
 
 static void
 zgnr_compositor_protocol_create_region(
-    struct wl_client *client, struct wl_resource *resource, uint32_t id)
+    struct wl_client* client, struct wl_resource* resource, uint32_t id)
 {
   UNUSED(resource);
-  struct zgnr_region *region = zgnr_region_create(client, id);
+  struct zgnr_region* region = zgnr_region_create(client, id);
   if (region == NULL) {
     zn_error("Failed to create zgnr_region");
     wl_client_post_no_memory(client);
@@ -45,11 +45,11 @@ static const struct zgn_compositor_interface implementation = {
 
 static void
 zgnr_compositor_bind(
-    struct wl_client *client, void *data, uint32_t version, uint32_t id)
+    struct wl_client* client, void* data, uint32_t version, uint32_t id)
 {
-  struct zgnr_compositor *self = data;
+  struct zgnr_compositor* self = data;
 
-  struct wl_resource *resource =
+  struct wl_resource* resource =
       wl_resource_create(client, &zgn_compositor_interface, version, id);
   if (resource == NULL) {
     zn_error("Failed to create a wl_resource");
@@ -61,7 +61,7 @@ zgnr_compositor_bind(
 }
 
 int
-zgnr_compositor_activate(struct zgnr_compositor *self)
+zgnr_compositor_activate(struct zgnr_compositor* self)
 {
   if (self->global != NULL) return 0;
 
@@ -77,7 +77,7 @@ zgnr_compositor_activate(struct zgnr_compositor *self)
 }
 
 void
-zgnr_compositor_deactivate(struct zgnr_compositor *self)
+zgnr_compositor_deactivate(struct zgnr_compositor* self)
 {
   if (self->global == NULL) return;
 
@@ -87,11 +87,11 @@ zgnr_compositor_deactivate(struct zgnr_compositor *self)
   return;
 }
 
-struct zgnr_compositor *
+struct zgnr_compositor*
 zgnr_compositor_create(
-    struct wl_display *display, struct zgnr_backend_impl *backend)
+    struct wl_display* display, struct zgnr_backend_impl* backend)
 {
-  struct zgnr_compositor *self;
+  struct zgnr_compositor* self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -110,7 +110,7 @@ err:
 }
 
 void
-zgnr_compositor_destroy(struct zgnr_compositor *self)
+zgnr_compositor_destroy(struct zgnr_compositor* self)
 {
   if (self->global) {
     wl_global_destroy(self->global);

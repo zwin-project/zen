@@ -6,8 +6,8 @@
 #include "session.h"
 
 void
-znr_gl_buffer_data(struct znr_gl_buffer *self, uint32_t target,
-    struct zgnr_mem_storage *storage, uint32_t usage)
+znr_gl_buffer_data(struct znr_gl_buffer* self, uint32_t target,
+    struct zgnr_mem_storage* storage, uint32_t usage)
 {
   auto loop = std::make_unique<Loop>(wl_display_get_event_loop(self->display));
 
@@ -20,12 +20,12 @@ znr_gl_buffer_data(struct znr_gl_buffer *self, uint32_t target,
   self->proxy->GlBufferData(std::move(buffer), target, storage->size, usage);
 }
 
-struct znr_gl_buffer *
+struct znr_gl_buffer*
 znr_gl_buffer_create(
-    struct znr_session *session_base, struct wl_display *display)
+    struct znr_session* session_base, struct wl_display* display)
 {
   auto self = new znr_gl_buffer();
-  znr_session_impl *session;
+  znr_session_impl* session;
 
   if (self == nullptr) {
     zn_error("Failed to allocate memory");
@@ -52,7 +52,7 @@ err:
 }
 
 void
-znr_gl_buffer_destroy(struct znr_gl_buffer *self)
+znr_gl_buffer_destroy(struct znr_gl_buffer* self)
 {
   delete self;
 }

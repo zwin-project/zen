@@ -7,10 +7,10 @@
 #include "zgnr/intersection.h"
 
 float
-zgnr_region_node_ray_cast(struct zgnr_region_node *self, mat4 outer_transform,
+zgnr_region_node_ray_cast(struct zgnr_region_node* self, mat4 outer_transform,
     vec3 origin, vec3 direction)
 {
-  struct zgnr_cuboid_region *cuboid_region;
+  struct zgnr_cuboid_region* cuboid_region;
   float min_distance = FLT_MAX;
   wl_list_for_each (cuboid_region, &self->cuboid_list, link) {
     float distance;
@@ -31,19 +31,19 @@ zgnr_region_node_ray_cast(struct zgnr_region_node *self, mat4 outer_transform,
 
 void
 zgnr_region_node_add_cuboid(
-    struct zgnr_region_node *self, struct zgnr_cuboid_region *cuboid)
+    struct zgnr_region_node* self, struct zgnr_cuboid_region* cuboid)
 {
   wl_list_insert(&self->cuboid_list, &cuboid->link);
 }
 
-struct zgnr_region_node *
-zgnr_region_node_create_copy(struct zgnr_region_node *self)
+struct zgnr_region_node*
+zgnr_region_node_create_copy(struct zgnr_region_node* self)
 {
-  struct zgnr_region_node *copy = zgnr_region_node_create();
+  struct zgnr_region_node* copy = zgnr_region_node_create();
 
-  struct zgnr_cuboid_region *cuboid;
+  struct zgnr_cuboid_region* cuboid;
   wl_list_for_each (cuboid, &self->cuboid_list, link) {
-    struct zgnr_cuboid_region *cuboid_copy = zgnr_cuboid_region_create(
+    struct zgnr_cuboid_region* cuboid_copy = zgnr_cuboid_region_create(
         cuboid->half_size, cuboid->center, cuboid->quaternion);
     zgnr_region_node_add_cuboid(copy, cuboid_copy);
   }
@@ -51,10 +51,10 @@ zgnr_region_node_create_copy(struct zgnr_region_node *self)
   return copy;
 }
 
-struct zgnr_region_node *
+struct zgnr_region_node*
 zgnr_region_node_create(void)
 {
-  struct zgnr_region_node *self;
+  struct zgnr_region_node* self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -71,7 +71,7 @@ err:
 }
 
 void
-zgnr_region_node_destroy(struct zgnr_region_node *self)
+zgnr_region_node_destroy(struct zgnr_region_node* self)
 {
   struct zgnr_cuboid_region *cuboid, *tmp;
 

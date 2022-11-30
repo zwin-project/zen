@@ -4,10 +4,10 @@
 #include <cglm/vec3.h>
 #include <zen-common.h>
 
-struct zgnr_cuboid_region *
+struct zgnr_cuboid_region*
 zgnr_cuboid_region_create(vec3 half_size, vec3 center, versor quaternion)
 {
-  struct zgnr_cuboid_region *self;
+  struct zgnr_cuboid_region* self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -28,7 +28,7 @@ err:
 }
 
 void
-zgnr_cuboid_region_destroy(struct zgnr_cuboid_region *self)
+zgnr_cuboid_region_destroy(struct zgnr_cuboid_region* self)
 {
   wl_list_remove(&self->link);
   free(self);

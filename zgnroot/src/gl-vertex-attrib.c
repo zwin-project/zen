@@ -7,19 +7,19 @@
 /**
  * @return struct zgnr_gl_buffer* : nullable
  */
-struct zgnr_gl_buffer *
-zgnr_gl_vertex_attrib_get_gl_buffer(struct zgnr_gl_vertex_attrib *attrib)
+struct zgnr_gl_buffer*
+zgnr_gl_vertex_attrib_get_gl_buffer(struct zgnr_gl_vertex_attrib* attrib)
 {
-  struct zgnr_gl_buffer_impl *gl_buffer =
+  struct zgnr_gl_buffer_impl* gl_buffer =
       zn_weak_resource_get_user_data(&attrib->gl_buffer);
 
   return gl_buffer ? &gl_buffer->base : NULL;
 }
 
-struct zgnr_gl_vertex_attrib *
-zgnr_gl_vertex_attrib_copy(struct zgnr_gl_vertex_attrib *src)
+struct zgnr_gl_vertex_attrib*
+zgnr_gl_vertex_attrib_copy(struct zgnr_gl_vertex_attrib* src)
 {
-  struct zgnr_gl_vertex_attrib *dest = zgnr_gl_vertex_attrib_create(src->index);
+  struct zgnr_gl_vertex_attrib* dest = zgnr_gl_vertex_attrib_create(src->index);
 
   memcpy(dest, src, sizeof *dest);
 
@@ -29,10 +29,10 @@ zgnr_gl_vertex_attrib_copy(struct zgnr_gl_vertex_attrib *src)
   return dest;
 }
 
-struct zgnr_gl_vertex_attrib *
+struct zgnr_gl_vertex_attrib*
 zgnr_gl_vertex_attrib_create(uint32_t index)
 {
-  struct zgnr_gl_vertex_attrib *self;
+  struct zgnr_gl_vertex_attrib* self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -55,7 +55,7 @@ err:
 }
 
 void
-zgnr_gl_vertex_attrib_destroy(struct zgnr_gl_vertex_attrib *self)
+zgnr_gl_vertex_attrib_destroy(struct zgnr_gl_vertex_attrib* self)
 {
   wl_list_remove(&self->link);
   zn_weak_resource_unlink(&self->gl_buffer);

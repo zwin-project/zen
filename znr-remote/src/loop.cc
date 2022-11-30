@@ -5,9 +5,9 @@
 namespace {
 
 int
-loop_callback(int fd, uint32_t mask, void *data)
+loop_callback(int fd, uint32_t mask, void* data)
 {
-  auto source = static_cast<zen::remote::FdSource *>(data);
+  auto source = static_cast<zen::remote::FdSource*>(data);
   uint32_t remote_mask = 0;
 
   if (mask & WL_EVENT_READABLE) {
@@ -32,7 +32,7 @@ loop_callback(int fd, uint32_t mask, void *data)
 }  // namespace
 
 void
-Loop::AddFd(zen::remote::FdSource *source)
+Loop::AddFd(zen::remote::FdSource* source)
 {
   uint32_t mask = 0;
 
@@ -54,9 +54,9 @@ Loop::AddFd(zen::remote::FdSource *source)
 }
 
 void
-Loop::RemoveFd(zen::remote::FdSource *source)
+Loop::RemoveFd(zen::remote::FdSource* source)
 {
-  wl_event_source_remove((wl_event_source *)source->data);
+  wl_event_source_remove((wl_event_source*)source->data);
 }
 
 void

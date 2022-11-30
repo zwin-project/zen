@@ -4,27 +4,27 @@
 #include <wlr/render/glew.h>
 #include <zen-common.h>
 
-static struct zn_server *server_singleton = NULL;
+static struct zn_server* server_singleton = NULL;
 
 static void
-zn_server_handle_new_input(struct wl_listener *listener, void *data)
+zn_server_handle_new_input(struct wl_listener* listener, void* data)
 {
-  struct zn_server *self = zn_container_of(listener, self, new_input_listener);
-  struct wlr_input_device *wlr_input = data;
+  struct zn_server* self = zn_container_of(listener, self, new_input_listener);
+  struct wlr_input_device* wlr_input = data;
   UNUSED(self);
   UNUSED(wlr_input);
 }
 
 static void
-zn_server_handle_new_output(struct wl_listener *listener, void *data)
+zn_server_handle_new_output(struct wl_listener* listener, void* data)
 {
-  struct zn_server *self = zn_container_of(listener, self, new_output_listener);
-  struct wlr_output *wlr_output = data;
+  struct zn_server* self = zn_container_of(listener, self, new_output_listener);
+  struct wlr_output* wlr_output = data;
   UNUSED(self);
   UNUSED(wlr_output);
 }
 
-struct zn_server *
+struct zn_server*
 zn_server_get_singleton(void)
 {
   zn_assert(server_singleton != NULL,
@@ -34,7 +34,7 @@ zn_server_get_singleton(void)
 
 /** returns exit code */
 int
-zn_server_run(struct zn_server *self)
+zn_server_run(struct zn_server* self)
 {
   if (!wlr_backend_start(self->wlr_backend)) {
     zn_error("Failed to start backend");
@@ -46,18 +46,18 @@ zn_server_run(struct zn_server *self)
 }
 
 void
-zn_server_terminate(struct zn_server *self, int exit_code)
+zn_server_terminate(struct zn_server* self, int exit_code)
 {
   self->exit_code = exit_code;
   wl_display_terminate(self->display);
 }
 
-struct zn_server *
-zn_server_create(struct wl_display *display)
+struct zn_server*
+zn_server_create(struct wl_display* display)
 {
-  struct zn_server *self;
+  struct zn_server* self;
   char socket_name_candidate[16];
-  char *xdg;
+  char* xdg;
   int drm_fd = -1;
 
   if (!zn_assert(server_singleton == NULL,
@@ -151,14 +151,14 @@ err:
 }
 
 void
-zn_server_destroy_resources(struct zn_server *self)
+zn_server_destroy_resources(struct zn_server* self)
 {
   wlr_backend_destroy(self->wlr_backend);
   wl_display_destroy_clients(self->display);
 }
 
 void
-zn_server_destroy(struct zn_server *self)
+zn_server_destroy(struct zn_server* self)
 {
   free(self->socket);
   wlr_allocator_destroy(self->allocator);

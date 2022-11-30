@@ -17,9 +17,9 @@
 
 void
 zna_system_set_current_session(
-    struct zna_system *self, struct znr_session *session)
+    struct zna_system* self, struct znr_session* session)
 {
-  struct zn_server *server = zn_server_get_singleton();
+  struct zn_server* server = zn_server_get_singleton();
 
   if (self->current_session) {
     wl_list_remove(&self->current_session_disconnected_listener.link);
@@ -51,10 +51,10 @@ zna_system_set_current_session(
 
 static void
 zna_system_handle_current_session_frame(
-    struct wl_listener *listener, void *data)
+    struct wl_listener* listener, void* data)
 {
   UNUSED(data);
-  struct zna_system *self =
+  struct zna_system* self =
       zn_container_of(listener, self, current_session_frame_listener);
 
   wl_signal_emit(&self->events.current_session_frame, NULL);
@@ -62,92 +62,92 @@ zna_system_handle_current_session_frame(
 
 static void
 zna_system_handle_current_session_disconnected(
-    struct wl_listener *listener, void *data)
+    struct wl_listener* listener, void* data)
 {
-  struct zna_system *self =
+  struct zna_system* self =
       zn_container_of(listener, self, current_session_disconnected_listener);
   UNUSED(data);
   zna_system_set_current_session(self, NULL);
 }
 
 static void
-zna_system_handle_new_rendering_unit(struct wl_listener *listener, void *data)
+zna_system_handle_new_rendering_unit(struct wl_listener* listener, void* data)
 {
-  struct zna_system *self =
+  struct zna_system* self =
       zn_container_of(listener, self, new_rendering_unit_listener);
-  struct zgnr_rendering_unit *unit = data;
+  struct zgnr_rendering_unit* unit = data;
 
   (void)zna_rendering_unit_create(unit, self);
 }
 
 static void
-zna_system_handle_new_gl_buffer(struct wl_listener *listener, void *data)
+zna_system_handle_new_gl_buffer(struct wl_listener* listener, void* data)
 {
-  struct zna_system *self =
+  struct zna_system* self =
       zn_container_of(listener, self, new_gl_buffer_listener);
-  struct zgnr_gl_buffer *gl_buffer = data;
+  struct zgnr_gl_buffer* gl_buffer = data;
 
   (void)zna_gl_buffer_create(gl_buffer, self);
 }
 
 static void
 zna_system_handle_new_gl_base_technique(
-    struct wl_listener *listener, void *data)
+    struct wl_listener* listener, void* data)
 {
-  struct zna_system *self =
+  struct zna_system* self =
       zn_container_of(listener, self, new_gl_base_technique_listener);
-  struct zgnr_gl_base_technique *gl_base_technique = data;
+  struct zgnr_gl_base_technique* gl_base_technique = data;
 
   (void)zna_gl_base_technique_create(gl_base_technique, self);
 }
 
 static void
-zna_system_handle_new_gl_vertex_array(struct wl_listener *listener, void *data)
+zna_system_handle_new_gl_vertex_array(struct wl_listener* listener, void* data)
 {
-  struct zna_system *self =
+  struct zna_system* self =
       zn_container_of(listener, self, new_gl_vertex_array_listener);
-  struct zgnr_gl_vertex_array *gl_vertex_array = data;
+  struct zgnr_gl_vertex_array* gl_vertex_array = data;
 
   (void)zna_gl_vertex_array_create(gl_vertex_array, self);
 }
 
 static void
-zna_system_handle_new_gl_shader(struct wl_listener *listener, void *data)
+zna_system_handle_new_gl_shader(struct wl_listener* listener, void* data)
 {
-  struct zna_system *self =
+  struct zna_system* self =
       zn_container_of(listener, self, new_gl_shader_listener);
 
-  struct zgnr_gl_shader *shader = data;
+  struct zgnr_gl_shader* shader = data;
 
   (void)zna_gl_shader_create(shader, self);
 }
 
 static void
-zna_system_handle_new_gl_texture(struct wl_listener *listener, void *data)
+zna_system_handle_new_gl_texture(struct wl_listener* listener, void* data)
 {
-  struct zna_system *self =
+  struct zna_system* self =
       zn_container_of(listener, self, new_gl_texture_listener);
 
-  struct zgnr_gl_texture *texture = data;
+  struct zgnr_gl_texture* texture = data;
 
   (void)zna_gl_texture_create(texture, self);
 }
 
 static void
-zna_system_handle_new_gl_program(struct wl_listener *listener, void *data)
+zna_system_handle_new_gl_program(struct wl_listener* listener, void* data)
 {
-  struct zna_system *self =
+  struct zna_system* self =
       zn_container_of(listener, self, new_gl_program_listener);
 
-  struct zgnr_gl_program *program = data;
+  struct zgnr_gl_program* program = data;
 
   (void)zna_gl_program_create(program, self);
 }
 
-struct zna_system *
-zna_system_create(struct wl_display *display)
+struct zna_system*
+zna_system_create(struct wl_display* display)
 {
-  struct zna_system *self;
+  struct zna_system* self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -219,7 +219,7 @@ err:
 }
 
 void
-zna_system_destroy(struct zna_system *self)
+zna_system_destroy(struct zna_system* self)
 {
   if (self->current_session) znr_session_destroy(self->current_session);
 
