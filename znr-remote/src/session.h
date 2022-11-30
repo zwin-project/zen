@@ -14,7 +14,7 @@ struct znr_session_impl {
 
   std::shared_ptr<zen::remote::server::ISession> proxy;
 
-  std::unique_ptr<zen::remote::Signal<void()>::Connection>
+  std::shared_ptr<zen::remote::Signal<void()>::Connection>
       disconnect_signal_connection;
 
   std::chrono::steady_clock::time_point prev_frame;

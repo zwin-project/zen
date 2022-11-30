@@ -14,6 +14,6 @@ struct znr_remote_impl {
 
   wl_display *display;
 
-  std::unique_ptr<zen::remote::server::IPeerManager> peer_manager;
+  std::shared_ptr<zen::remote::server::IPeerManager> peer_manager;
   wl_list peer_list;  // znr_peer_impl::link
 };
