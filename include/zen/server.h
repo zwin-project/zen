@@ -4,6 +4,7 @@
 #include <wlr/backend.h>
 #include <wlr/render/allocator.h>
 #include <wlr/render/wlr_renderer.h>
+#include <znr-remote.h>
 
 #include "zen/scene.h"
 
@@ -14,12 +15,15 @@ struct zn_server {
   struct wlr_renderer *renderer;
   struct wlr_allocator *allocator;
 
+  struct znr_remote *remote;
+
   struct zn_scene *scene;  // nonnull
 
   char *socket;
 
   struct wl_listener new_input_listener;
   struct wl_listener new_output_listener;
+  struct wl_listener new_peer_listener;
 
   int exit_code;
 };

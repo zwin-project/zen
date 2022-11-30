@@ -52,14 +52,17 @@ err:
 }
 
 void
-zn_scene_destroy(struct zn_scene *self)
+zn_scene_destroy_resources(struct zn_scene *self)
 {
   struct zn_board *board, *tmp;
-
   wl_list_for_each_safe (board, tmp, &self->board_list, link) {
     zn_board_destroy(board);
   }
+}
 
+void
+zn_scene_destroy(struct zn_scene *self)
+{
   wl_list_remove(&self->screen_list);
   free(self);
 }
