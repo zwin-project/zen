@@ -145,13 +145,13 @@ zen_inc = include_directories('include')
 subdir('protocols')
 subdir('common')
 subdir('zgnroot')
-# subdir('znr-remote')
+subdir('znr-remote')
 subdir('zen')
-# subdir('zna')
-# subdir('zns')
-# if get_option('cui-client')
-#   subdir('cui-client')
-# endif
+subdir('zna')
+subdir('zns')
+if get_option('cui-client')
+  subdir('cui-client')
+endif
 
 find_program('weston-terminal', required: true) # used in zen.desktop
 
@@ -170,7 +170,7 @@ executable(
   install: true,
   dependencies: [
     zen_dep,
-    # zen_appearance_dep,
-    # zen_shell_dep,
+    zen_appearance_dep,
+    zen_shell_dep,
   ],
 )
