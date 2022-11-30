@@ -3,10 +3,10 @@
 #include <cglm/vec3.h>
 #include <zen-common.h>
 
-struct zgnr_bounded_configure*
-zgnr_bounded_configure_create(struct wl_display* display, vec3 half_size)
+struct zgnr_bounded_configure *
+zgnr_bounded_configure_create(struct wl_display *display, vec3 half_size)
 {
-  struct zgnr_bounded_configure* self;
+  struct zgnr_bounded_configure *self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -24,7 +24,7 @@ err:
 }
 
 void
-zgnr_bounded_configure_destroy(struct zgnr_bounded_configure* self)
+zgnr_bounded_configure_destroy(struct zgnr_bounded_configure *self)
 {
   wl_list_remove(&self->link);
   free(self);

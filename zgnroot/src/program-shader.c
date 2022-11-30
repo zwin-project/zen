@@ -7,21 +7,21 @@
 
 static void
 zgnr_program_shader_handle_shader_destroy(
-    struct wl_listener* listener, void* data)
+    struct wl_listener *listener, void *data)
 {
   UNUSED(data);
 
-  struct zgnr_program_shader_impl* self =
+  struct zgnr_program_shader_impl *self =
       zn_container_of(listener, self, shader_destroy_listener);
 
   zgnr_program_shader_destroy(self);
 }
 
-struct zgnr_program_shader_impl*
+struct zgnr_program_shader_impl *
 zgnr_program_shader_create(
-    struct zgnr_gl_program_impl* program, struct zgnr_gl_shader_impl* shader)
+    struct zgnr_gl_program_impl *program, struct zgnr_gl_shader_impl *shader)
 {
-  struct zgnr_program_shader_impl* self;
+  struct zgnr_program_shader_impl *self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -44,7 +44,7 @@ err:
 }
 
 void
-zgnr_program_shader_destroy(struct zgnr_program_shader_impl* self)
+zgnr_program_shader_destroy(struct zgnr_program_shader_impl *self)
 {
   wl_list_remove(&self->base.link);
   wl_list_remove(&self->shader_destroy_listener.link);

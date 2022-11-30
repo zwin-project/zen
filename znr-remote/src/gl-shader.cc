@@ -4,12 +4,12 @@
 
 #include "session.h"
 
-struct znr_gl_shader*
-znr_gl_shader_create(struct znr_session* session_base, const char* source,
+struct znr_gl_shader *
+znr_gl_shader_create(struct znr_session *session_base, const char *source,
     size_t length, uint32_t type)
 {
   auto self = new znr_gl_shader();
-  znr_session_impl* session;
+  znr_session_impl *session;
 
   if (self == nullptr) {
     zn_error("Failed to allocate memory");
@@ -35,7 +35,7 @@ err:
 }
 
 void
-znr_gl_shader_destroy(struct znr_gl_shader* self)
+znr_gl_shader_destroy(struct znr_gl_shader *self)
 {
   delete self;
 }

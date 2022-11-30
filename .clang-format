@@ -9,6 +9,9 @@ BraceWrapping:
   SplitEmptyFunction: false
 AlwaysBreakAfterReturnType: TopLevelDefinitions
 AlignAfterOpenBracket: DontAlign
+DerivePointerAlignment: false
+PointerAlignment: Right
+ReferenceAlignment: Right
 ForEachMacros: [
   'wl_list_for_each',
   'wl_list_for_each_safe',

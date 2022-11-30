@@ -3,18 +3,18 @@
 #include <zen-common.h>
 #include <zigen-protocol.h>
 
-static void zgnr_virtual_object_destroy(struct zgnr_virtual_object_impl* self);
+static void zgnr_virtual_object_destroy(struct zgnr_virtual_object_impl *self);
 
 static void
-zgnr_virtual_object_handle_destroy(struct wl_resource* resource)
+zgnr_virtual_object_handle_destroy(struct wl_resource *resource)
 {
-  struct zgnr_virtual_object_impl* self = wl_resource_get_user_data(resource);
+  struct zgnr_virtual_object_impl *self = wl_resource_get_user_data(resource);
   zgnr_virtual_object_destroy(self);
 }
 
 static void
 zgnr_virtual_object_protocol_destroy(
-    struct wl_client* client, struct wl_resource* resource)
+    struct wl_client *client, struct wl_resource *resource)
 {
   UNUSED(client);
   wl_resource_destroy(resource);
@@ -22,10 +22,10 @@ zgnr_virtual_object_protocol_destroy(
 
 static void
 zgnr_virtual_object_protocol_commit(
-    struct wl_client* client, struct wl_resource* resource)
+    struct wl_client *client, struct wl_resource *resource)
 {
   UNUSED(client);
-  struct zgnr_virtual_object_impl* self = wl_resource_get_user_data(resource);
+  struct zgnr_virtual_object_impl *self = wl_resource_get_user_data(resource);
 
   wl_list_insert_list(&self->base.current.frame_callback_list,
       &self->pending.frame_callback_list);
@@ -38,17 +38,17 @@ zgnr_virtual_object_protocol_commit(
 }
 
 static void
-callback_handle_destroy(struct wl_resource* resource)
+callback_handle_destroy(struct wl_resource *resource)
 {
   wl_list_remove(wl_resource_get_link(resource));
 }
 
 static void
 zgnr_virtual_object_protocol_frame(
-    struct wl_client* client, struct wl_resource* resource, uint32_t callback)
+    struct wl_client *client, struct wl_resource *resource, uint32_t callback)
 {
-  struct zgnr_virtual_object_impl* self = wl_resource_get_user_data(resource);
-  struct wl_resource* callback_resource =
+  struct zgnr_virtual_object_impl *self = wl_resource_get_user_data(resource);
+  struct wl_resource *callback_resource =
       wl_resource_create(client, &wl_callback_interface, 1, callback);
   if (callback_resource == NULL) {
     wl_resource_post_no_memory(resource);
@@ -71,7 +71,7 @@ static const struct zgn_virtual_object_interface implementation = {
 
 void
 zgnr_virtual_object_send_frame_done(
-    struct zgnr_virtual_object* self, const struct timespec* when)
+    struct zgnr_virtual_object *self, const struct timespec *when)
 {
   struct wl_resource *resource, *tmp;
   wl_resource_for_each_safe (
@@ -82,9 +82,9 @@ zgnr_virtual_object_send_frame_done(
 }
 
 bool
-zgnr_virtual_object_set_role(struct zgnr_virtual_object_impl* self,
-    enum zgnr_virtual_object_role role, void* role_object,
-    struct wl_resource* error_resource, uint32_t error_code)
+zgnr_virtual_object_set_role(struct zgnr_virtual_object_impl *self,
+    enum zgnr_virtual_object_role role, void *role_object,
+    struct wl_resource *error_resource, uint32_t error_code)
 {
   if (self->base.role != ZGNR_VIRTUAL_OBJECT_ROLE_NONE &&
       self->base.role != role) {
@@ -109,11 +109,11 @@ zgnr_virtual_object_set_role(struct zgnr_virtual_object_impl* self,
   return true;
 }
 
-struct zgnr_virtual_object_impl*
+struct zgnr_virtual_object_impl *
 zgnr_virtual_object_create(
-    struct wl_client* client, uint32_t id, struct wl_display* display)
+    struct wl_client *client, uint32_t id, struct wl_display *display)
 {
-  struct zgnr_virtual_object_impl* self;
+  struct zgnr_virtual_object_impl *self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -153,7 +153,7 @@ err:
 }
 
 static void
-zgnr_virtual_object_destroy(struct zgnr_virtual_object_impl* self)
+zgnr_virtual_object_destroy(struct zgnr_virtual_object_impl *self)
 {
   wl_signal_emit(&self->base.events.destroy, NULL);
   wl_list_remove(&self->base.events.destroy.listener_list);

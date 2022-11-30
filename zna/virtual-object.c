@@ -12,11 +12,11 @@
  */
 static void
 zna_virtual_object_apply_commit(
-    struct zna_virtual_object* self, bool only_damaged)
+    struct zna_virtual_object *self, bool only_damaged)
 {
-  struct znr_session* session = self->system->current_session;
-  struct zgnr_rendering_unit* unit;
-  struct zgnr_virtual_object* zgnr_virtual_object =
+  struct znr_session *session = self->system->current_session;
+  struct zgnr_rendering_unit *unit;
+  struct zgnr_virtual_object *zgnr_virtual_object =
       self->zn_virtual_object->zgnr_virtual_object;
 
   if (self->znr_virtual_object == NULL) {
@@ -37,10 +37,10 @@ zna_virtual_object_apply_commit(
 
 static void
 zna_virtual_object_handle_session_frame(
-    struct wl_listener* listener, void* data)
+    struct wl_listener *listener, void *data)
 {
   UNUSED(data);
-  struct zna_virtual_object* self =
+  struct zna_virtual_object *self =
       zn_container_of(listener, self, session_frame_listener);
 
   struct timespec now;
@@ -51,10 +51,10 @@ zna_virtual_object_handle_session_frame(
 }
 
 static void
-zna_virtual_object_handle_move(struct wl_listener* listener, void* data)
+zna_virtual_object_handle_move(struct wl_listener *listener, void *data)
 {
   UNUSED(data);
-  struct zna_virtual_object* self =
+  struct zna_virtual_object *self =
       zn_container_of(listener, self, move_listener);
   if (self->znr_virtual_object) {
     znr_virtual_object_move(self->znr_virtual_object,
@@ -64,10 +64,10 @@ zna_virtual_object_handle_move(struct wl_listener* listener, void* data)
 
 static void
 zna_virtual_object_handle_session_created(
-    struct wl_listener* listener, void* data)
+    struct wl_listener *listener, void *data)
 {
   UNUSED(data);
-  struct zna_virtual_object* self =
+  struct zna_virtual_object *self =
       zn_container_of(listener, self, session_created_listener);
 
   if (self->zn_virtual_object->zgnr_virtual_object->committed)
@@ -76,10 +76,10 @@ zna_virtual_object_handle_session_created(
 
 static void
 zna_virtual_object_handle_session_destroyed(
-    struct wl_listener* listener, void* data)
+    struct wl_listener *listener, void *data)
 {
   UNUSED(data);
-  struct zna_virtual_object* self =
+  struct zna_virtual_object *self =
       zn_container_of(listener, self, session_destroyed_listener);
 
   if (self->znr_virtual_object) {
@@ -89,21 +89,21 @@ zna_virtual_object_handle_session_destroyed(
 }
 
 static void
-zna_virtual_object_handle_commit(struct wl_listener* listener, void* data)
+zna_virtual_object_handle_commit(struct wl_listener *listener, void *data)
 {
   UNUSED(data);
-  struct zna_virtual_object* self =
+  struct zna_virtual_object *self =
       zn_container_of(listener, self, commit_listener);
-  struct znr_session* session = self->system->current_session;
+  struct znr_session *session = self->system->current_session;
 
   if (session) zna_virtual_object_apply_commit(self, true);
 }
 
-struct zna_virtual_object*
+struct zna_virtual_object *
 zna_virtual_object_create(
-    struct zn_virtual_object* zn_virtual_object, struct zna_system* system)
+    struct zn_virtual_object *zn_virtual_object, struct zna_system *system)
 {
-  struct zna_virtual_object* self;
+  struct zna_virtual_object *self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -141,7 +141,7 @@ err:
 }
 
 void
-zna_virtual_object_destroy(struct zna_virtual_object* self)
+zna_virtual_object_destroy(struct zna_virtual_object *self)
 {
   if (self->znr_virtual_object)
     znr_virtual_object_destroy(self->znr_virtual_object);
