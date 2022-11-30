@@ -17,6 +17,7 @@ global_args_maybe = [
   '-DWL_HIDE_DEPRECATED',
   '-fvisibility=hidden',
   '-Wstrict-prototypes',
+  '-Wno-gnu-zero-variadic-macro-arguments',
 ]
 
 foreach arg : global_args_maybe
