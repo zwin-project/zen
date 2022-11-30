@@ -8,6 +8,7 @@ _zen_srcs = [
   'ray.c',
   'screen-renderer.c',
   'server.c',
+  'virtual-object.c',
   'xdg-decoration.c',
   'xdg-popup.c',
   'xdg-toplevel-view.c',
@@ -27,7 +28,6 @@ _zen_srcs = [
   'scene/screen-layout.c',
   'scene/view.c',
   'scene/view-child.c',
-  'scene/virtual-object.c',
 
   'wlr/box.c',
 ]

@@ -8,8 +8,8 @@
 
 #include "ray-grab/default.h"
 #include "ray-grab/move.h"
-#include "zen/scene/virtual-object.h"
 #include "zen/server.h"
+#include "zen/virtual-object.h"
 
 static void zns_bounded_destroy(struct zns_bounded* self);
 

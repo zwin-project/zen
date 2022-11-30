@@ -2,7 +2,7 @@
 
 #include <wayland-server-core.h>
 
-#include "zen/appearance/scene/virtual-object.h"
+#include "zen/appearance/virtual-object.h"
 #include "zen/renderer/virtual-object.h"
 
 struct zna_virtual_object {

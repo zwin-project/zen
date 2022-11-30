@@ -11,7 +11,7 @@
 #include "zen/appearance/system.h"
 #include "zen/config.h"
 #include "zen/output.h"
-#include "zen/scene/virtual-object.h"
+#include "zen/virtual-object.h"
 #include "zen/xdg-toplevel-view.h"
 #include "zen/xwayland-view.h"
 
