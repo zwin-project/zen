@@ -8,14 +8,14 @@ _zen_appearance_srcs = [
   'shader-inventory.c',
   'system.c',
   
-  'scene/virtual-object.c',
-  'scene/virtual-object/gl-base-technique.c',
-  'scene/virtual-object/gl-buffer.c',
-  'scene/virtual-object/gl-program.c',
-  'scene/virtual-object/gl-shader.c',
-  'scene/virtual-object/gl-texture.c',
-  'scene/virtual-object/gl-vertex-array.c',
-  'scene/virtual-object/rendering-unit.c',
+  'virtual-object.c',
+  'virtual-object/gl-base-technique.c',
+  'virtual-object/gl-buffer.c',
+  'virtual-object/gl-program.c',
+  'virtual-object/gl-shader.c',
+  'virtual-object/gl-texture.c',
+  'virtual-object/gl-vertex-array.c',
+  'virtual-object/rendering-unit.c',
 ] + shaders
 
 _zen_appearance_deps = [

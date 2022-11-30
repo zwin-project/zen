@@ -2,7 +2,7 @@
 
 #include <zen-common.h>
 
-#include "scene/virtual-object/gl-buffer.h"
+#include "virtual-object/gl-buffer.h"
 
 static void zna_gl_vertex_array_destroy(struct zna_gl_vertex_array* self);
 

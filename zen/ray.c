@@ -5,8 +5,8 @@
 
 #include "zen-common.h"
 #include "zen/appearance/ray.h"
-#include "zen/scene/virtual-object.h"
 #include "zen/server.h"
+#include "zen/virtual-object.h"
 
 void
 zn_ray_get_tip(struct zn_ray* self, vec3 tip)

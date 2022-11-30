@@ -5,14 +5,14 @@
 #include <zgnr/gl-shader.h>
 #include <zgnr/rendering-unit.h>
 
-#include "scene/virtual-object/gl-base-technique.h"
-#include "scene/virtual-object/gl-buffer.h"
-#include "scene/virtual-object/gl-program.h"
-#include "scene/virtual-object/gl-shader.h"
-#include "scene/virtual-object/gl-texture.h"
-#include "scene/virtual-object/gl-vertex-array.h"
-#include "scene/virtual-object/rendering-unit.h"
 #include "shader-inventory.h"
+#include "virtual-object/gl-base-technique.h"
+#include "virtual-object/gl-buffer.h"
+#include "virtual-object/gl-program.h"
+#include "virtual-object/gl-shader.h"
+#include "virtual-object/gl-texture.h"
+#include "virtual-object/gl-vertex-array.h"
+#include "virtual-object/rendering-unit.h"
 #include "zen/server.h"
 
 void

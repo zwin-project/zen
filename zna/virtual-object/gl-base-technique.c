@@ -4,11 +4,11 @@
 #include <zgnr/gl-uniform-variable.h>
 #include <zgnr/texture-binding.h>
 
-#include "scene/virtual-object/gl-buffer.h"
-#include "scene/virtual-object/gl-program.h"
-#include "scene/virtual-object/gl-texture.h"
-#include "scene/virtual-object/gl-vertex-array.h"
-#include "scene/virtual-object/rendering-unit.h"
+#include "virtual-object/gl-buffer.h"
+#include "virtual-object/gl-program.h"
+#include "virtual-object/gl-texture.h"
+#include "virtual-object/gl-vertex-array.h"
+#include "virtual-object/rendering-unit.h"
 
 static void zna_gl_base_technique_destroy(struct zna_gl_base_technique* self);
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "zen/appearance/system.h"
-#include "zen/scene/virtual-object.h"
+#include "zen/virtual-object.h"
 
 struct zna_virtual_object;
 
