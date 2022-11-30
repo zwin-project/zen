@@ -7,10 +7,10 @@
 #include "virtual-object.h"
 
 void
-zgnr_seat_set_capabilities(struct zgnr_seat* parent, uint32_t capabilities)
+zgnr_seat_set_capabilities(struct zgnr_seat *parent, uint32_t capabilities)
 {
-  struct zgnr_seat_impl* self = zn_container_of(parent, self, base);
-  struct wl_resource* resource;
+  struct zgnr_seat_impl *self = zn_container_of(parent, self, base);
+  struct wl_resource *resource;
 
   self->base.capabilities = capabilities;
   wl_resource_for_each (resource, &self->resource_list) {
@@ -19,19 +19,19 @@ zgnr_seat_set_capabilities(struct zgnr_seat* parent, uint32_t capabilities)
 }
 
 void
-zgnr_seat_send_ray_enter(struct zgnr_seat* parent,
-    struct zgnr_virtual_object* virtual_object, uint32_t serial, vec3 origin,
+zgnr_seat_send_ray_enter(struct zgnr_seat *parent,
+    struct zgnr_virtual_object *virtual_object, uint32_t serial, vec3 origin,
     vec3 direction)
 {
-  struct zgnr_seat_impl* self = zn_container_of(parent, self, base);
-  struct wl_client* client = wl_resource_get_client(virtual_object->resource);
+  struct zgnr_seat_impl *self = zn_container_of(parent, self, base);
+  struct wl_client *client = wl_resource_get_client(virtual_object->resource);
 
   struct wl_array origin_array;
   struct wl_array direction_array;
   zn_vec3_to_array(origin, &origin_array);
   zn_vec3_to_array(direction, &direction_array);
 
-  struct zgnr_seat_ray* seat_ray;
+  struct zgnr_seat_ray *seat_ray;
   wl_list_for_each (seat_ray, &self->seat_ray_list, link) {
     if (client == wl_resource_get_client(seat_ray->resource)) {
       zgn_ray_send_enter(seat_ray->resource, serial, virtual_object->resource,
@@ -44,17 +44,17 @@ zgnr_seat_send_ray_enter(struct zgnr_seat* parent,
 }
 
 void
-zgnr_seat_send_ray_motion(struct zgnr_seat* parent, struct wl_client* client,
+zgnr_seat_send_ray_motion(struct zgnr_seat *parent, struct wl_client *client,
     uint32_t time_msec, vec3 origin, vec3 direction)
 {
-  struct zgnr_seat_impl* self = zn_container_of(parent, self, base);
+  struct zgnr_seat_impl *self = zn_container_of(parent, self, base);
 
   struct wl_array origin_array;
   struct wl_array direction_array;
   zn_vec3_to_array(origin, &origin_array);
   zn_vec3_to_array(direction, &direction_array);
 
-  struct zgnr_seat_ray* seat_ray;
+  struct zgnr_seat_ray *seat_ray;
   wl_list_for_each (seat_ray, &self->seat_ray_list, link) {
     if (client == wl_resource_get_client(seat_ray->resource)) {
       zgn_ray_send_motion(
@@ -67,13 +67,13 @@ zgnr_seat_send_ray_motion(struct zgnr_seat* parent, struct wl_client* client,
 }
 
 void
-zgnr_seat_send_ray_leave(struct zgnr_seat* parent,
-    struct zgnr_virtual_object* virtual_object, uint32_t serial)
+zgnr_seat_send_ray_leave(struct zgnr_seat *parent,
+    struct zgnr_virtual_object *virtual_object, uint32_t serial)
 {
-  struct zgnr_seat_impl* self = zn_container_of(parent, self, base);
-  struct wl_client* client = wl_resource_get_client(virtual_object->resource);
+  struct zgnr_seat_impl *self = zn_container_of(parent, self, base);
+  struct wl_client *client = wl_resource_get_client(virtual_object->resource);
 
-  struct zgnr_seat_ray* seat_ray;
+  struct zgnr_seat_ray *seat_ray;
   wl_list_for_each (seat_ray, &self->seat_ray_list, link) {
     if (client == wl_resource_get_client(seat_ray->resource)) {
       zgn_ray_send_leave(seat_ray->resource, serial, virtual_object->resource);
@@ -82,13 +82,13 @@ zgnr_seat_send_ray_leave(struct zgnr_seat* parent,
 }
 
 void
-zgnr_seat_send_ray_button(struct zgnr_seat* parent, struct wl_client* client,
+zgnr_seat_send_ray_button(struct zgnr_seat *parent, struct wl_client *client,
     uint32_t serial, uint32_t time_msec, uint32_t button,
     enum zgn_ray_button_state state)
 {
-  struct zgnr_seat_impl* self = zn_container_of(parent, self, base);
+  struct zgnr_seat_impl *self = zn_container_of(parent, self, base);
 
-  struct zgnr_seat_ray* seat_ray;
+  struct zgnr_seat_ray *seat_ray;
   wl_list_for_each (seat_ray, &self->seat_ray_list, link) {
     if (client == wl_resource_get_client(seat_ray->resource)) {
       zgn_ray_send_button(seat_ray->resource, serial, time_msec, button, state);
@@ -97,22 +97,22 @@ zgnr_seat_send_ray_button(struct zgnr_seat* parent, struct wl_client* client,
 }
 
 static void
-zgnr_seat_handle_destroy(struct wl_resource* resource)
+zgnr_seat_handle_destroy(struct wl_resource *resource)
 {
   wl_list_remove(wl_resource_get_link(resource));
 }
 
 static void
 zgnr_seat_protocol_get_ray(
-    struct wl_client* client, struct wl_resource* resource, uint32_t id)
+    struct wl_client *client, struct wl_resource *resource, uint32_t id)
 {
-  struct zgnr_seat_impl* self = wl_resource_get_user_data(resource);
+  struct zgnr_seat_impl *self = wl_resource_get_user_data(resource);
   (void)zgnr_seat_ray_create(client, id, self);
 }
 
 static void
 zgnr_seat_protocol_release(
-    struct wl_client* client, struct wl_resource* resource)
+    struct wl_client *client, struct wl_resource *resource)
 {
   UNUSED(client);
   wl_resource_destroy(resource);
@@ -125,11 +125,11 @@ static const struct zgn_seat_interface implementation = {
 
 static void
 zgnr_seat_bind(
-    struct wl_client* client, void* data, uint32_t version, uint32_t id)
+    struct wl_client *client, void *data, uint32_t version, uint32_t id)
 {
-  struct zgnr_seat_impl* self = data;
+  struct zgnr_seat_impl *self = data;
 
-  struct wl_resource* resource =
+  struct wl_resource *resource =
       wl_resource_create(client, &zgn_seat_interface, version, id);
   if (resource == NULL) {
     zn_error("Failed to creat a wl_resource");
@@ -145,10 +145,10 @@ zgnr_seat_bind(
   zgn_seat_send_capabilities(resource, self->base.capabilities);
 }
 
-struct zgnr_seat*
-zgnr_seat_create(struct wl_display* display)
+struct zgnr_seat *
+zgnr_seat_create(struct wl_display *display)
 {
-  struct zgnr_seat_impl* self;
+  struct zgnr_seat_impl *self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -169,9 +169,9 @@ err:
 }
 
 void
-zgnr_seat_destroy(struct zgnr_seat* parent)
+zgnr_seat_destroy(struct zgnr_seat *parent)
 {
-  struct zgnr_seat_impl* self = zn_container_of(parent, self, base);
+  struct zgnr_seat_impl *self = zn_container_of(parent, self, base);
 
   wl_global_destroy(self->global);
 

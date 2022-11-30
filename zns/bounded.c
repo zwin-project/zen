@@ -11,12 +11,12 @@
 #include "zen/server.h"
 #include "zen/virtual-object.h"
 
-static void zns_bounded_destroy(struct zns_bounded* self);
+static void zns_bounded_destroy(struct zns_bounded *self);
 
 float
-zns_bounded_ray_cast(struct zns_bounded* self, struct zn_ray* ray)
+zns_bounded_ray_cast(struct zns_bounded *self, struct zn_ray *ray)
 {
-  struct zn_virtual_object* zn_virtual_object =
+  struct zn_virtual_object *zn_virtual_object =
       self->zgnr_bounded->virtual_object->user_data;
   float outer_distance, distance;
 
@@ -36,14 +36,14 @@ zns_bounded_ray_cast(struct zns_bounded* self, struct zn_ray* ray)
 }
 
 static void
-zns_bounded_handle_move(struct wl_listener* listener, void* data)
+zns_bounded_handle_move(struct wl_listener *listener, void *data)
 {
-  struct zns_bounded* self = zn_container_of(listener, self, move_listener);
-  struct zn_server* server = zn_server_get_singleton();
-  struct zn_ray* ray = server->input_manager->seat->ray;
-  struct zgnr_bounded_move_event* event = data;
-  struct zns_default_ray_grab* grab = zns_default_ray_grab_get(ray->grab);
-  struct zns_move_ray_grab* move_grab;
+  struct zns_bounded *self = zn_container_of(listener, self, move_listener);
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_ray *ray = server->input_manager->seat->ray;
+  struct zgnr_bounded_move_event *event = data;
+  struct zns_default_ray_grab *grab = zns_default_ray_grab_get(ray->grab);
+  struct zns_move_ray_grab *move_grab;
 
   if (grab == NULL || grab->focus != self ||
       grab->button_state != ZGN_RAY_BUTTON_STATE_PRESSED ||
@@ -56,20 +56,20 @@ zns_bounded_handle_move(struct wl_listener* listener, void* data)
 
 static void
 zns_bounded_handle_zgnr_bounded_destroy(
-    struct wl_listener* listener, void* data)
+    struct wl_listener *listener, void *data)
 {
   UNUSED(data);
 
-  struct zns_bounded* self =
+  struct zns_bounded *self =
       zn_container_of(listener, self, zgnr_bounded_destroy_listener);
 
   zns_bounded_destroy(self);
 }
 
-struct zns_bounded*
-zns_bounded_create(struct zgnr_bounded* zgnr_bounded)
+struct zns_bounded *
+zns_bounded_create(struct zgnr_bounded *zgnr_bounded)
 {
-  struct zns_bounded* self;
+  struct zns_bounded *self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -97,7 +97,7 @@ err:
 }
 
 static void
-zns_bounded_destroy(struct zns_bounded* self)
+zns_bounded_destroy(struct zns_bounded *self)
 {
   wl_signal_emit(&self->events.destroy, NULL);
 

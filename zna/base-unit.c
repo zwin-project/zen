@@ -4,8 +4,8 @@
 #include <zen-common.h>
 
 void
-zna_base_unit_setup_renderer_objects(struct zna_base_unit* self,
-    struct znr_session* session, struct znr_virtual_object* virtual_object)
+zna_base_unit_setup_renderer_objects(struct zna_base_unit *self,
+    struct znr_session *session, struct znr_virtual_object *virtual_object)
 {
   struct znr_gl_shader *vertex_shader, *fragment_shader;
 
@@ -32,7 +32,7 @@ zna_base_unit_setup_renderer_objects(struct zna_base_unit* self,
       self->vertex_buffer_storage, GL_STATIC_DRAW);
 
   // vertex array
-  struct zna_base_unit_vertex_attribute* vertex_attribute;
+  struct zna_base_unit_vertex_attribute *vertex_attribute;
   wl_array_for_each (vertex_attribute, &self->vertex_attributes) {
     znr_gl_vertex_array_enable_vertex_attrib_array(
         self->vertex_array, vertex_attribute->index);
@@ -62,7 +62,7 @@ zna_base_unit_setup_renderer_objects(struct zna_base_unit* self,
 }
 
 void
-zna_base_unit_teardown_renderer_objects(struct zna_base_unit* self)
+zna_base_unit_teardown_renderer_objects(struct zna_base_unit *self)
 {
   if (!self->has_renderer_objects) return;
 
@@ -80,14 +80,14 @@ zna_base_unit_teardown_renderer_objects(struct zna_base_unit* self)
   self->has_renderer_objects = false;
 }
 
-struct zna_base_unit*
-zna_base_unit_create(struct zna_system* system,
+struct zna_base_unit *
+zna_base_unit_create(struct zna_system *system,
     enum zna_shader_name vertex_shader, enum zna_shader_name fragment_shader,
-    struct zgnr_mem_storage* vertex_buffer, struct wl_array* vertex_attributes,
+    struct zgnr_mem_storage *vertex_buffer, struct wl_array *vertex_attributes,
     enum zgnr_gl_base_technique_draw_method draw_method,
     union zgnr_gl_base_technique_draw_args draw_args)
 {
-  struct zna_base_unit* self;
+  struct zna_base_unit *self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -113,7 +113,7 @@ err:
 }
 
 void
-zna_base_unit_destroy(struct zna_base_unit* self)
+zna_base_unit_destroy(struct zna_base_unit *self)
 {
   if (self->rendering_unit) znr_rendering_unit_destroy(self->rendering_unit);
   if (self->technique) znr_gl_base_technique_destroy(self->technique);

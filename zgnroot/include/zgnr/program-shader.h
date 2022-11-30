@@ -11,7 +11,7 @@ extern "C" {
  * bind zgnr_program and zgnr_shader
  */
 struct zgnr_program_shader {
-  struct zgnr_gl_shader* shader;  // nonnull
+  struct zgnr_gl_shader *shader;  // nonnull
 
   // zgnr_gl_program::current.program_shader_list or
   // zgnr_gl_program_impl::pending.program_shader_list (internal use)

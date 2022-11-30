@@ -6,8 +6,8 @@
 
 #include "bounded.h"
 
-struct zns_bounded*
-zn_shell_ray_cast(struct zn_shell* self, struct zn_ray* ray, float* distance)
+struct zns_bounded *
+zn_shell_ray_cast(struct zn_shell *self, struct zn_ray *ray, float *distance)
 {
   struct zns_bounded *bounded, *result_bounded = NULL;
 
@@ -29,27 +29,27 @@ zn_shell_ray_cast(struct zn_shell* self, struct zn_ray* ray, float* distance)
 }
 
 static void
-zn_shell_handle_new_bounded(struct wl_listener* listener, void* data)
+zn_shell_handle_new_bounded(struct wl_listener *listener, void *data)
 {
-  struct zn_shell* self = zn_container_of(listener, self, new_bounded_listener);
+  struct zn_shell *self = zn_container_of(listener, self, new_bounded_listener);
 
-  struct zgnr_bounded* zgnr_bounded = data;
+  struct zgnr_bounded *zgnr_bounded = data;
 
-  struct zns_bounded* zns_bounded = zns_bounded_create(zgnr_bounded);
+  struct zns_bounded *zns_bounded = zns_bounded_create(zgnr_bounded);
 
   wl_list_insert(&self->bounded_list, &zns_bounded->link);
 }
 
-struct zn_ray_grab*
-zn_shell_get_default_grab(struct zn_shell* self)
+struct zn_ray_grab *
+zn_shell_get_default_grab(struct zn_shell *self)
 {
   return &self->default_grab.base;
 }
 
-struct zn_shell*
-zn_shell_create(struct wl_display* display)
+struct zn_shell *
+zn_shell_create(struct wl_display *display)
 {
-  struct zn_shell* self;
+  struct zn_shell *self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -81,7 +81,7 @@ err:
 }
 
 void
-zn_shell_destroy(struct zn_shell* self)
+zn_shell_destroy(struct zn_shell *self)
 {
   zns_default_ray_grab_fini(&self->default_grab);
   wl_list_remove(&self->bounded_list);

@@ -13,48 +13,48 @@
 #include "session.h"
 
 void
-znr_gl_base_technique_bind_vertex_array(struct znr_gl_base_technique* self,
-    struct znr_gl_vertex_array* vertex_array)
+znr_gl_base_technique_bind_vertex_array(struct znr_gl_base_technique *self,
+    struct znr_gl_vertex_array *vertex_array)
 {
   self->proxy->BindVertexArray(vertex_array->proxy->id());
 }
 
 void
 znr_gl_base_technique_bind_program(
-    struct znr_gl_base_technique* self, struct znr_gl_program* program)
+    struct znr_gl_base_technique *self, struct znr_gl_program *program)
 {
   self->proxy->BindProgram(program->proxy->id());
 }
 
 void
-znr_gl_base_technique_bind_texture(struct znr_gl_base_technique* self,
-    uint32_t binding, const char* name, struct znr_gl_texture* texture,
+znr_gl_base_technique_bind_texture(struct znr_gl_base_technique *self,
+    uint32_t binding, const char *name, struct znr_gl_texture *texture,
     uint32_t target)
 {
   self->proxy->BindTexture(binding, name, texture->proxy->id(), target);
 }
 
 void
-znr_gl_base_technique_gl_uniform_vector(struct znr_gl_base_technique* self,
-    uint32_t location, const char* name,
+znr_gl_base_technique_gl_uniform_vector(struct znr_gl_base_technique *self,
+    uint32_t location, const char *name,
     enum zgn_gl_base_technique_uniform_variable_type type, uint32_t size,
-    uint32_t count, void* value)
+    uint32_t count, void *value)
 {
   std::string name_string = name ? name : "";
   switch (type) {
     case ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_INT:
       self->proxy->GlUniformVector(
-          location, std::move(name_string), size, count, (int32_t*)value);
+          location, std::move(name_string), size, count, (int32_t *)value);
       break;
 
     case ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_UINT:
       self->proxy->GlUniformVector(
-          location, std::move(name_string), size, count, (uint32_t*)value);
+          location, std::move(name_string), size, count, (uint32_t *)value);
       break;
 
     case ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_FLOAT:
       self->proxy->GlUniformVector(
-          location, std::move(name_string), size, count, (float*)value);
+          location, std::move(name_string), size, count, (float *)value);
       break;
 
     default:
@@ -64,9 +64,9 @@ znr_gl_base_technique_gl_uniform_vector(struct znr_gl_base_technique* self,
 }
 
 void
-znr_gl_base_technique_gl_uniform_matrix(struct znr_gl_base_technique* self,
-    uint32_t location, const char* name, uint32_t col, uint32_t row,
-    uint32_t count, bool transpose, float* value)
+znr_gl_base_technique_gl_uniform_matrix(struct znr_gl_base_technique *self,
+    uint32_t location, const char *name, uint32_t col, uint32_t row,
+    uint32_t count, bool transpose, float *value)
 {
   std::string name_string = name ? name : "";
   self->proxy->GlUniformMatrix(
@@ -74,27 +74,27 @@ znr_gl_base_technique_gl_uniform_matrix(struct znr_gl_base_technique* self,
 }
 
 void
-znr_gl_base_technique_draw_arrays(struct znr_gl_base_technique* self,
+znr_gl_base_technique_draw_arrays(struct znr_gl_base_technique *self,
     uint32_t mode, int32_t first, uint32_t count)
 {
   self->proxy->GlDrawArrays(mode, first, count);
 }
 
 void
-znr_gl_base_technique_draw_elements(struct znr_gl_base_technique* self,
+znr_gl_base_technique_draw_elements(struct znr_gl_base_technique *self,
     uint32_t mode, uint32_t count, uint32_t type, uint64_t offset,
-    struct znr_gl_buffer* element_array_buffer)
+    struct znr_gl_buffer *element_array_buffer)
 {
   self->proxy->GlDrawElements(
       mode, count, type, offset, element_array_buffer->proxy->id());
 }
 
-struct znr_gl_base_technique*
+struct znr_gl_base_technique *
 znr_gl_base_technique_create(
-    struct znr_session* session_base, struct znr_rendering_unit* rendering_unit)
+    struct znr_session *session_base, struct znr_rendering_unit *rendering_unit)
 {
   auto self = new znr_gl_base_technique();
-  znr_session_impl* session;
+  znr_session_impl *session;
 
   if (self == nullptr) {
     zn_error("Failed to allocate memory");
@@ -120,7 +120,7 @@ err:
 }
 
 void
-znr_gl_base_technique_destroy(struct znr_gl_base_technique* self)
+znr_gl_base_technique_destroy(struct znr_gl_base_technique *self)
 {
   delete self;
 }
