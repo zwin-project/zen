@@ -94,7 +94,7 @@ zn_output_create(struct wlr_output *wlr_output)
     goto err_damage;
   }
 
-  return self;
+  return NULL;
 
 err_damage:
   wlr_output_damage_destroy(self->damage);

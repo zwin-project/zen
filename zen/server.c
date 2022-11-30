@@ -128,12 +128,6 @@ zn_server_create(struct wl_display *display)
     goto err_renderer;
   }
 
-  self->scene = zn_scene_create();
-  if (self->scene == NULL) {
-    zn_error("Failed to create a zn_scene");
-    goto err_allocator;
-  }
-
   for (int i = 1; i <= 32; i++) {
     sprintf(socket_name_candidate, "wayland-%d", i);
     if (wl_display_add_socket(self->display, socket_name_candidate) >= 0) {
@@ -144,7 +138,7 @@ zn_server_create(struct wl_display *display)
 
   if (self->socket == NULL) {
     zn_error("Failed to open wayland socket");
-    goto err_scene;
+    goto err_allocator;
   }
 
   setenv("WAYLAND_DISPLAY", self->socket, true);
@@ -161,9 +155,6 @@ zn_server_create(struct wl_display *display)
       &self->wlr_backend->events.new_output, &self->new_output_listener);
 
   return self;
-
-err_scene:
-  zn_scene_destroy(self->scene);
 
 err_allocator:
   wlr_allocator_destroy(self->allocator);
@@ -193,7 +184,6 @@ void
 zn_server_destroy(struct zn_server *self)
 {
   free(self->socket);
-  zn_scene_destroy(self->scene);
   wlr_allocator_destroy(self->allocator);
   wlr_renderer_destroy(self->renderer);
   server_singleton = NULL;
