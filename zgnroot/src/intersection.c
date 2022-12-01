@@ -45,3 +45,29 @@ zgnr_intersection_ray_obb(
 
   return t_min;
 }
+
+float
+zgnr_intersection_ray_sphere(
+    vec3 origin, vec3 direction, vec3 center, float radius)
+{
+  float t;  // intersection point is (origin + t * direction)
+
+  vec3 ray_origin;
+
+  // The center of the sphere is the origin of the coordinates.
+  glm_vec3_sub(origin, center, ray_origin);
+
+  // A t^2 + B t + C = 0
+  float A = glm_vec3_dot(direction, direction);
+  float B = 2 * glm_vec3_dot(ray_origin, direction);
+  float C = glm_vec3_dot(ray_origin, ray_origin) - radius * radius;
+  float D = B * B - 4 * A * C;
+
+  if (D < 0) return FLT_MAX;
+
+  t = (-B - sqrtf(D)) / (2 * A);
+
+  if (t <= 0) return FLT_MAX;
+
+  return t;
+}

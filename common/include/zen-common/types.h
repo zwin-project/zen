@@ -49,6 +49,11 @@ int zn_vec3_to_array(vec3 vec, struct wl_array *array);
  */
 int zn_array_to_versor(struct wl_array *array, versor vec);
 
+/**
+ * @return 0 if successful, -1 otherwise
+ */
+int zn_array_to_float(struct wl_array *array, float *value);
+
 #ifdef __cplusplus
 }
 #endif
