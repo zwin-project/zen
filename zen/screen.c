@@ -14,6 +14,13 @@ zn_screen_damage_whole(struct zn_screen *self)
   self->implementation->damage_whole(self->user_data);
 }
 
+void
+zn_screen_get_effective_size(
+    struct zn_screen *self, float *width, float *height)
+{
+  self->implementation->get_effective_size(self->user_data, width, height);
+}
+
 struct zn_screen *
 zn_screen_create(
     const struct zn_screen_interface *implementation, void *user_data)
