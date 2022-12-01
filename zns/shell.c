@@ -6,27 +6,50 @@
 
 #include "bounded.h"
 
-struct zns_bounded *
-zn_shell_ray_cast(struct zn_shell *self, struct zn_ray *ray, float *distance)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+bool
+zn_shell_root_ray_cast(void *user_data, vec3 origin, vec3 direction,
+    mat4 transform, float *distance)
 {
-  struct zns_bounded *bounded, *result_bounded = NULL;
-
-  float min_distance = FLT_MAX;
-
-  wl_list_for_each (bounded, &self->bounded_list, link) {
-    float d = zns_bounded_ray_cast(bounded, ray);
-    if (d < min_distance) {
-      min_distance = d;
-      result_bounded = bounded;
-    }
-  }
-
-  if (min_distance < FLT_MAX) {
-    *distance = min_distance;
-  }
-
-  return result_bounded;
+  return false;
 }
+
+static bool
+zn_shell_root_ray_motion(void *user_data, vec3 origin, vec3 direction,
+    uint32_t time_msec, mat4 transform)
+{
+  return true;
+}
+
+static bool
+zn_shell_root_ray_enter(void *user_data, uint32_t serial, vec3 origin,
+    vec3 direction, mat4 transform)
+{
+  return true;
+}
+
+static bool
+zn_shell_root_ray_leave(void *user_data, uint32_t serial, mat4 transform)
+{
+  return true;
+}
+
+static bool
+zn_shell_root_ray_button(void *user_data, uint32_t serial, uint32_t time_msec,
+    uint32_t button, enum zgn_ray_button_state state, mat4 transform)
+{
+  return true;
+}
+#pragma GCC diagnostic pop
+
+static const struct zns_node_interface node_implementation = {
+    .ray_cast = zn_shell_root_ray_cast,
+    .ray_motion = zn_shell_root_ray_motion,
+    .ray_enter = zn_shell_root_ray_enter,
+    .ray_leave = zn_shell_root_ray_leave,
+    .ray_button = zn_shell_root_ray_button,
+};
 
 static void
 zn_shell_handle_new_bounded(struct wl_listener *listener, void *data)
@@ -63,6 +86,12 @@ zn_shell_create(struct wl_display *display)
     goto err_free;
   }
 
+  self->root = zns_node_create(NULL, self, &node_implementation);
+  if (self->root == NULL) {
+    zn_error("Failed to create zns_node");
+    goto err_zgnr_shell;
+  }
+
   zns_default_ray_grab_init(&self->default_grab, self);
 
   wl_list_init(&self->bounded_list);
@@ -72,6 +101,9 @@ zn_shell_create(struct wl_display *display)
       &self->zgnr_shell->events.new_bounded, &self->new_bounded_listener);
 
   return self;
+
+err_zgnr_shell:
+  zgnr_shell_destroy(self->zgnr_shell);
 
 err_free:
   free(self);
@@ -86,6 +118,7 @@ zn_shell_destroy(struct zn_shell *self)
   zns_default_ray_grab_fini(&self->default_grab);
   wl_list_remove(&self->bounded_list);
   wl_list_remove(&self->new_bounded_listener.link);
+  zns_node_destroy(self->root);
   zgnr_shell_destroy(self->zgnr_shell);
   free(self);
 }

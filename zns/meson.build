@@ -2,6 +2,7 @@ _zen_shell_inc = include_directories('.')
 
 _zen_shell_srcs = [
   'bounded.c',
+  'node.c',
   'shell.c',
 
   'ray-grab/default.c',

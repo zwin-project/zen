@@ -17,19 +17,6 @@ zn_ray_get_tip(struct zn_ray *self, vec3 tip)
 }
 
 void
-zn_ray_get_local_origin_direction(struct zn_ray *self,
-    struct zn_virtual_object *virtual_object, vec3 local_origin,
-    vec3 local_direction)
-{
-  vec3 tip, local_tip;
-  zn_ray_get_tip(self, tip);
-  glm_mat4_mulv3(virtual_object->model_invert, tip, 1, local_tip);
-  glm_mat4_mulv3(virtual_object->model_invert, self->origin, 1, local_origin);
-  glm_vec3_sub(local_tip, local_origin, local_direction);
-  glm_vec3_scale_as(local_direction, 1, local_direction);
-}
-
-void
 zn_ray_set_length(struct zn_ray *self, float length)
 {
   self->length = length;
