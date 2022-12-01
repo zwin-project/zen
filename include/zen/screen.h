@@ -10,6 +10,7 @@ struct zn_screen_interface {
    * @param box : effective coordinate system
    */
   void (*damage)(void *user_data, struct wlr_fbox *box);
+  void (*damage_whole)(void *user_data);
 };
 
 struct zn_screen {
@@ -31,6 +32,8 @@ struct zn_screen {
  * @param box : effective coordinate system
  */
 void zn_screen_damage(struct zn_screen *self, struct wlr_fbox *box);
+
+void zn_screen_damage_whole(struct zn_screen *self);
 
 struct zn_screen *zn_screen_create(
     const struct zn_screen_interface *implementation, void *user_data);

@@ -6,6 +6,7 @@
 #include <zen-common.h>
 
 #include "zen/board.h"
+#include "zen/server.h"
 
 static void zn_output_destroy(struct zn_output *self);
 
@@ -36,8 +37,16 @@ zn_output_handle_screen_damage(void *user_data, struct wlr_fbox *box)
   wlr_output_damage_add_box(self->damage, &transformed);
 }
 
+static void
+zn_output_handle_screen_damage_whole(void *user_data)
+{
+  struct zn_output *self = user_data;
+  wlr_output_damage_add_whole(self->damage);
+}
+
 const struct zn_screen_interface screen_implementation = {
     .damage = zn_output_handle_screen_damage,
+    .damage_whole = zn_output_handle_screen_damage_whole,
 };
 
 static void
@@ -56,6 +65,7 @@ zn_output_handle_damage_frame(struct wl_listener *listener, void *data)
   UNUSED(data);
   struct zn_output *self =
       zn_container_of(listener, self, damage_frame_listener);
+  struct zn_server *server = zn_server_get_singleton();
   struct wlr_renderer *renderer = self->wlr_output->renderer;
   bool needs_frame;
   pixman_region32_t damage;
@@ -70,8 +80,9 @@ zn_output_handle_damage_frame(struct wl_listener *listener, void *data)
     wlr_renderer_begin(
         renderer, self->wlr_output->width, self->wlr_output->height);
 
-    float color[4] = {1.0f, 1.0f, 0.0f, 1.0f};
-    if (self->screen->board) {
+    float color[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+    if (self->screen->board &&
+        server->display_system == ZN_DISPLAY_SYSTEM_SCREEN) {
       color[0] = self->screen->board->color[0];
       color[1] = self->screen->board->color[1];
       color[2] = self->screen->board->color[2];
