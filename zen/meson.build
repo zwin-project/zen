@@ -1,10 +1,19 @@
 _zen_srcs = [
+  'binding.c',
   'board.c',
+  'ray.c',
   'scene.c',
   'screen.c',
   'server.c',
+  'virtual-object.c',
 
   'screen/output.c',
+
+  'input/input-device.c',
+  'input/input-manager.c',
+  'input/keyboard.c',
+  'input/pointer.c',
+  'input/seat.c',
 ]
 
 _zen_srcs_pub = [

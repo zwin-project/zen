@@ -6,6 +6,7 @@
 #include <zen-common.h>
 
 #include "zen/screen/output.h"
+#include "zen/virtual-object.h"
 
 static struct zn_server *server_singleton = NULL;
 
@@ -14,8 +15,7 @@ zn_server_handle_new_input(struct wl_listener *listener, void *data)
 {
   struct zn_server *self = zn_container_of(listener, self, new_input_listener);
   struct wlr_input_device *wlr_input = data;
-  UNUSED(self);
-  UNUSED(wlr_input);
+  zn_input_manager_handle_new_wlr_input(self->input_manager, wlr_input);
 }
 
 static void
@@ -50,6 +50,16 @@ zn_server_handle_new_output(struct wl_listener *listener, void *data)
 }
 
 static void
+zn_server_handle_new_virtual_object(struct wl_listener *listener, void *data)
+{
+  struct zn_server *self =
+      zn_container_of(listener, self, new_virtual_object_listener);
+  struct zgnr_virtual_object *zgnr_virtual_object = data;
+
+  (void)zn_virtual_object_create(zgnr_virtual_object);
+}
+
+static void
 zn_server_handle_new_peer(struct wl_listener *listener, void *data)
 {
   struct zn_server *self = zn_container_of(listener, self, new_peer_listener);
@@ -58,7 +68,7 @@ zn_server_handle_new_peer(struct wl_listener *listener, void *data)
   struct znr_session *session = znr_remote_create_session(self->remote, peer);
   if (session == NULL) return;
 
-  zn_info("new remote session established");
+  zna_system_set_current_session(self->appearance_system, session);
 }
 
 struct zn_server *
@@ -67,6 +77,13 @@ zn_server_get_singleton(void)
   zn_assert(server_singleton != NULL,
       "zn_server_get_singleton was called before creating zn_server");
   return server_singleton;
+}
+
+void
+zn_server_change_display_system(
+    struct zn_server *self, enum zn_display_system_state display_system)
+{
+  self->display_system = display_system;
 }
 
 /** returns exit code */
@@ -112,11 +129,18 @@ zn_server_create(struct wl_display *display)
   self->display = display;
   self->exit_code = EXIT_FAILURE;
   self->loop = wl_display_get_event_loop(display);
+  self->display_system = ZN_DISPLAY_SYSTEM_SCREEN;
+
+  self->zgnr_backend = zgnr_backend_create(self->display);
+  if (self->zgnr_backend == NULL) {
+    zn_error("Failed to create a zgnr_backend");
+    goto err_free;
+  }
 
   self->wlr_backend = wlr_backend_autocreate(self->display);
   if (self->wlr_backend == NULL) {
     zn_error("Failed to create a wlr_backend");
-    goto err_free;
+    goto err_zgnr_backend;
   }
 
   drm_fd = wlr_backend_get_drm_fd(self->wlr_backend);
@@ -142,10 +166,16 @@ zn_server_create(struct wl_display *display)
     goto err_renderer;
   }
 
+  self->appearance_system = zna_system_create(self->display);
+  if (self->appearance_system == NULL) {
+    zn_error("Failed to create a zna_system");
+    goto err_allocator;
+  }
+
   self->scene = zn_scene_create();
   if (self->scene == NULL) {
     zn_error("Failed to create a zn_scene");
-    goto err_allocator;
+    goto err_appearance;
   }
 
   self->remote = znr_remote_create(self->display);
@@ -172,6 +202,18 @@ zn_server_create(struct wl_display *display)
   zn_debug("WAYLAND_DISPLAY=%s", self->socket);
   zn_debug("XDG_RUNTIME_DIR=%s", xdg);
 
+  self->shell = zn_shell_create(self->display);
+  if (self->shell == NULL) {
+    zn_error("Failed to create zn_shell");
+    goto err_socket;
+  }
+
+  self->input_manager = zn_input_manager_create(self->display);
+  if (self->input_manager == NULL) {
+    zn_error("Failed to create input manager");
+    goto err_shell;
+  }
+
   self->new_input_listener.notify = zn_server_handle_new_input;
   wl_signal_add(
       &self->wlr_backend->events.new_input, &self->new_input_listener);
@@ -180,16 +222,32 @@ zn_server_create(struct wl_display *display)
   wl_signal_add(
       &self->wlr_backend->events.new_output, &self->new_output_listener);
 
+  self->new_virtual_object_listener.notify =
+      zn_server_handle_new_virtual_object;
+  wl_signal_add(&self->zgnr_backend->events.new_virtual_object,
+      &self->new_virtual_object_listener);
+
   self->new_peer_listener.notify = zn_server_handle_new_peer;
   wl_signal_add(&self->remote->events.new_peer, &self->new_peer_listener);
 
+  zgnr_backend_activate(self->zgnr_backend);
+
   return self;
+
+err_shell:
+  zn_shell_destroy(self->shell);
+
+err_socket:
+  free(self->socket);
 
 err_remote:
   znr_remote_destroy(self->remote);
 
 err_scene:
   zn_scene_destroy(self->scene);
+
+err_appearance:
+  zna_system_destroy(self->appearance_system);
 
 err_allocator:
   wlr_allocator_destroy(self->allocator);
@@ -199,6 +257,9 @@ err_renderer:
 
 err_wlr_backend:
   wlr_backend_destroy(self->wlr_backend);
+
+err_zgnr_backend:
+  zgnr_backend_destroy(self->zgnr_backend);
 
 err_free:
   server_singleton = NULL;
@@ -220,11 +281,15 @@ zn_server_destroy_resources(struct zn_server *self)
 void
 zn_server_destroy(struct zn_server *self)
 {
+  zn_input_manager_destroy(self->input_manager);
+  zn_shell_destroy(self->shell);
   free(self->socket);
   znr_remote_destroy(self->remote);
   zn_scene_destroy(self->scene);
+  zna_system_destroy(self->appearance_system);
   wlr_allocator_destroy(self->allocator);
   wlr_renderer_destroy(self->renderer);
+  zgnr_backend_destroy(self->zgnr_backend);
   server_singleton = NULL;
   free(self);
 }

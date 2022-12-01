@@ -148,8 +148,8 @@ subdir('common')
 subdir('zgnroot')
 subdir('znr-remote')
 subdir('zen')
-# subdir('zna')
-# subdir('zns')
+subdir('zna')
+subdir('zns')
 # if get_option('cui-client')
 #   subdir('cui-client')
 # endif
@@ -171,7 +171,7 @@ executable(
   install: true,
   dependencies: [
     zen_dep,
-    # zen_appearance_dep,
-    # zen_shell_dep,
+    zen_appearance_dep,
+    zen_shell_dep,
   ],
 )
