@@ -9,10 +9,10 @@ extern "C" {
 
 struct znr_rendering_unit;
 
-struct znr_rendering_unit* znr_rendering_unit_create(
-    struct znr_session* session, struct znr_virtual_object* virtual_object);
+struct znr_rendering_unit *znr_rendering_unit_create(
+    struct znr_session *session, struct znr_virtual_object *virtual_object);
 
-void znr_rendering_unit_destroy(struct znr_rendering_unit* self);
+void znr_rendering_unit_destroy(struct znr_rendering_unit *self);
 
 #ifdef __cplusplus
 }

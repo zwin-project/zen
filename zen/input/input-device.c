@@ -8,28 +8,28 @@
 #include "zen/input/seat.h"
 
 static void
-zn_input_device_handle_seat_destroy(struct wl_listener* listener, void* data)
+zn_input_device_handle_seat_destroy(struct wl_listener *listener, void *data)
 {
   UNUSED(data);
-  struct zn_input_device* self =
+  struct zn_input_device *self =
       zn_container_of(listener, self, seat_destroy_listener);
   zn_input_device_destroy(self);
 }
 
 static void
 zn_input_device_handle_wlr_input_destroy(
-    struct wl_listener* listener, void* data)
+    struct wl_listener *listener, void *data)
 {
   UNUSED(data);
-  struct zn_input_device* self =
+  struct zn_input_device *self =
       zn_container_of(listener, self, wlr_input_destroy_listener);
   zn_input_device_destroy(self);
 }
 
-struct zn_input_device*
-zn_input_device_create(struct zn_seat* seat, struct wlr_input_device* wlr_input)
+struct zn_input_device *
+zn_input_device_create(struct zn_seat *seat, struct wlr_input_device *wlr_input)
 {
-  struct zn_input_device* self;
+  struct zn_input_device *self;
   self = zalloc(sizeof *self);
   if (self == NULL) {
     zn_error("Failed to allocate memory");
@@ -81,7 +81,7 @@ err:
 }
 
 void
-zn_input_device_destroy(struct zn_input_device* self)
+zn_input_device_destroy(struct zn_input_device *self)
 {
   switch (self->wlr_input->type) {
     case WLR_INPUT_DEVICE_KEYBOARD:

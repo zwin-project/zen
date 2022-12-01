@@ -11,8 +11,8 @@ struct zna_system;
  * by the zna_system
  */
 void zna_system_set_current_session(
-    struct zna_system* self, struct znr_session* session);
+    struct zna_system *self, struct znr_session *session);
 
-struct zna_system* zna_system_create(struct wl_display* display);
+struct zna_system *zna_system_create(struct wl_display *display);
 
-void zna_system_destroy(struct zna_system* self);
+void zna_system_destroy(struct zna_system *self);
