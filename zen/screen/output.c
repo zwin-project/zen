@@ -44,9 +44,21 @@ zn_output_handle_screen_damage_whole(void *user_data)
   wlr_output_damage_add_whole(self->damage);
 }
 
+static void
+zn_output_handle_get_effective_size(
+    void *user_data, float *width, float *height)
+{
+  struct zn_output *self = user_data;
+  int width_int, height_int;
+  wlr_output_effective_resolution(self->wlr_output, &width_int, &height_int);
+  *width = width_int;
+  *height = height_int;
+}
+
 const struct zn_screen_interface screen_implementation = {
     .damage = zn_output_handle_screen_damage,
     .damage_whole = zn_output_handle_screen_damage_whole,
+    .get_effective_size = zn_output_handle_get_effective_size,
 };
 
 static void

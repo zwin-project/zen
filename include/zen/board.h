@@ -1,8 +1,10 @@
 #pragma once
 
+#include <cglm/types.h>
 #include <wayland-server-core.h>
 
 struct zn_screen;
+struct zna_board;
 
 struct zn_board {
   struct wl_list link;  // zn_scene::board_list
@@ -12,6 +14,14 @@ struct zn_board {
   struct wl_listener screen_destroy_listener;
 
   float color[3];  // FIXME: debugging purpose, remove me later
+
+  struct {
+    vec3 center;
+    vec2 size;
+    versor quaternion;
+  } geometry;
+
+  struct zna_board *appearance;
 };
 
 bool zn_board_is_dangling(struct zn_board *self);
