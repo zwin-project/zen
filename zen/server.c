@@ -83,6 +83,11 @@ void
 zn_server_change_display_system(
     struct zn_server *self, enum zn_display_system_state display_system)
 {
+  struct zn_screen *screen;
+  wl_list_for_each (screen, &self->scene->screen_list, link) {
+    zn_screen_damage_whole(screen);
+  }
+
   self->display_system = display_system;
 }
 
