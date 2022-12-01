@@ -12,21 +12,21 @@ struct zn_ray_grab;
 struct zn_virtual_object;
 
 struct zn_ray_grab_interface {
-  void (*motion_relative)(struct zn_ray_grab* grab, vec3 origin, float polar,
+  void (*motion_relative)(struct zn_ray_grab *grab, vec3 origin, float polar,
       float azimuthal, uint32_t time_msec);
-  void (*button)(struct zn_ray_grab* grab, uint32_t time_msec, uint32_t button,
+  void (*button)(struct zn_ray_grab *grab, uint32_t time_msec, uint32_t button,
       enum zgn_ray_button_state state);
-  void (*rebase)(struct zn_ray_grab* grab);
-  void (*cancel)(struct zn_ray_grab* grab);
+  void (*rebase)(struct zn_ray_grab *grab);
+  void (*cancel)(struct zn_ray_grab *grab);
 };
 
 struct zn_ray_grab {
-  const struct zn_ray_grab_interface* interface;
-  struct zn_ray* ray;
+  const struct zn_ray_grab_interface *interface;
+  struct zn_ray *ray;
 };
 
 struct zn_ray {
-  struct zn_ray_grab* grab;  // nonnull
+  struct zn_ray_grab *grab;  // nonnull
 
   vec3 origin;  // modified by grab
 
@@ -45,31 +45,31 @@ struct zn_ray {
     struct wl_signal destroy;  // (NULL)
   } events;
 
-  struct zna_ray* appearance;  // nonnull, owning
+  struct zna_ray *appearance;  // nonnull, owning
 };
 
 /**
  * @param tip returns the tip position of the ray
  */
-void zn_ray_get_tip(struct zn_ray* self, vec3 tip);
+void zn_ray_get_tip(struct zn_ray *self, vec3 tip);
 
 /**
  * Returns the origin and direction of ray in the virtual object's local
  * coordinate system.
  */
-void zn_ray_get_local_origin_direction(struct zn_ray* self,
-    struct zn_virtual_object* virtual_object, vec3 local_origin,
+void zn_ray_get_local_origin_direction(struct zn_ray *self,
+    struct zn_virtual_object *virtual_object, vec3 local_origin,
     vec3 local_direction);
 
-void zn_ray_set_length(struct zn_ray* self, float length);
+void zn_ray_set_length(struct zn_ray *self, float length);
 
 void zn_ray_move(
-    struct zn_ray* self, vec3 origin, float polar, float azimuthal);
+    struct zn_ray *self, vec3 origin, float polar, float azimuthal);
 
-void zn_ray_start_grab(struct zn_ray* self, struct zn_ray_grab* grab);
+void zn_ray_start_grab(struct zn_ray *self, struct zn_ray_grab *grab);
 
-void zn_ray_end_grab(struct zn_ray* self);
+void zn_ray_end_grab(struct zn_ray *self);
 
-struct zn_ray* zn_ray_create(void);
+struct zn_ray *zn_ray_create(void);
 
-void zn_ray_destroy(struct zn_ray* self);
+void zn_ray_destroy(struct zn_ray *self);
