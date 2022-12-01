@@ -8,6 +8,12 @@ zn_screen_damage(struct zn_screen *self, struct wlr_fbox *box)
   self->implementation->damage(self->user_data, box);
 }
 
+void
+zn_screen_damage_whole(struct zn_screen *self)
+{
+  self->implementation->damage_whole(self->user_data);
+}
+
 struct zn_screen *
 zn_screen_create(
     const struct zn_screen_interface *implementation, void *user_data)
