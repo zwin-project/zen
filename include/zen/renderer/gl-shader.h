@@ -8,10 +8,10 @@ extern "C" {
 
 struct znr_gl_shader;
 
-struct znr_gl_shader* znr_gl_shader_create(struct znr_session* session_base,
-    const char* source, size_t length, uint32_t type);
+struct znr_gl_shader *znr_gl_shader_create(struct znr_session *session_base,
+    const char *source, size_t length, uint32_t type);
 
-void znr_gl_shader_destroy(struct znr_gl_shader* self);
+void znr_gl_shader_destroy(struct znr_gl_shader *self);
 
 #ifdef __cplusplus
 }

@@ -7,12 +7,12 @@
 #include "zen/server.h"
 
 static void
-zn_keyboard_handle_modifiers(struct wl_listener* listener, void* data)
+zn_keyboard_handle_modifiers(struct wl_listener *listener, void *data)
 {
-  struct zn_keyboard* self =
+  struct zn_keyboard *self =
       zn_container_of(listener, self, modifiers_listener);
-  struct wlr_input_device* wlr_input = self->input_device->wlr_input;
-  struct wlr_seat* wlr_seat = self->input_device->seat->wlr_seat;
+  struct wlr_input_device *wlr_input = self->input_device->wlr_input;
+  struct wlr_seat *wlr_seat = self->input_device->seat->wlr_seat;
   UNUSED(data);
 
   wlr_seat_set_keyboard(wlr_seat, wlr_input);
@@ -20,12 +20,12 @@ zn_keyboard_handle_modifiers(struct wl_listener* listener, void* data)
 }
 
 static void
-zn_keyboard_handle_key(struct wl_listener* listener, void* data)
+zn_keyboard_handle_key(struct wl_listener *listener, void *data)
 {
-  struct zn_keyboard* self = zn_container_of(listener, self, key_listener);
-  struct wlr_event_keyboard_key* event = data;
-  struct zn_server* server = zn_server_get_singleton();
-  struct wlr_seat* wlr_seat = self->input_device->seat->wlr_seat;
+  struct zn_keyboard *self = zn_container_of(listener, self, key_listener);
+  struct wlr_event_keyboard_key *event = data;
+  struct zn_server *server = zn_server_get_singleton();
+  struct wlr_seat *wlr_seat = self->input_device->seat->wlr_seat;
   bool handled;
 
   handled = zn_input_manager_bindings_notify_key(server->input_manager,
@@ -38,11 +38,11 @@ zn_keyboard_handle_key(struct wl_listener* listener, void* data)
   }
 }
 
-struct zn_keyboard*
-zn_keyboard_create(struct zn_input_device* input_device, struct zn_seat* seat)
+struct zn_keyboard *
+zn_keyboard_create(struct zn_input_device *input_device, struct zn_seat *seat)
 {
-  struct zn_keyboard* self;
-  struct wlr_input_device* wlr_input = input_device->wlr_input;
+  struct zn_keyboard *self;
+  struct wlr_input_device *wlr_input = input_device->wlr_input;
 
   if (!zn_assert(wlr_input->type == WLR_INPUT_DEVICE_KEYBOARD,
           "Wrong type - expect: %d, actual: %d", WLR_INPUT_DEVICE_KEYBOARD,
@@ -59,8 +59,8 @@ zn_keyboard_create(struct zn_input_device* input_device, struct zn_seat* seat)
   self->input_device = input_device;
 
   {
-    struct xkb_context* context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
-    struct xkb_keymap* keymap =
+    struct xkb_context *context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
+    struct xkb_keymap *keymap =
         xkb_keymap_new_from_names(context, NULL, XKB_KEYMAP_COMPILE_NO_FLAGS);
     wlr_keyboard_set_keymap(wlr_input->keyboard, keymap);
     xkb_keymap_unref(keymap);
@@ -85,10 +85,10 @@ err:
 }
 
 void
-zn_keyboard_destroy(struct zn_keyboard* self)
+zn_keyboard_destroy(struct zn_keyboard *self)
 {
-  struct wlr_seat* wlr_seat = self->input_device->seat->wlr_seat;
-  struct wlr_keyboard* wlr_keyboard = self->input_device->wlr_input->keyboard;
+  struct wlr_seat *wlr_seat = self->input_device->seat->wlr_seat;
+  struct wlr_keyboard *wlr_keyboard = self->input_device->wlr_input->keyboard;
 
   if (wlr_seat_get_keyboard(wlr_seat) == wlr_keyboard) {
     wlr_seat_set_keyboard(wlr_seat, NULL);

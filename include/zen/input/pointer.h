@@ -10,6 +10,6 @@ struct zn_pointer {
   struct wl_listener frame_listener;
 };
 
-struct zn_pointer* zn_pointer_create(struct wlr_input_device* input_device);
+struct zn_pointer *zn_pointer_create(struct wlr_input_device *input_device);
 
-void zn_pointer_destroy(struct zn_pointer* self);
+void zn_pointer_destroy(struct zn_pointer *self);
