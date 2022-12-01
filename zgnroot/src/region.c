@@ -5,6 +5,7 @@
 #include <zigen-protocol.h>
 
 #include "region/cuboid.h"
+#include "region/sphere.h"
 
 static void zgnr_region_destroy(struct zgnr_region* self);
 
@@ -28,8 +29,6 @@ zgnr_region_protocol_add_cuboid(struct wl_client* client,
     struct wl_resource* resource, struct wl_array* half_size_array,
     struct wl_array* center_array, struct wl_array* quaternion_array)
 {
-  UNUSED(client);
-
   struct zgnr_region* self = wl_resource_get_user_data(resource);
   struct zgnr_cuboid_region* cuboid;
 
@@ -60,6 +59,7 @@ zgnr_region_protocol_add_cuboid(struct wl_client* client,
 
   cuboid = zgnr_cuboid_region_create(half_size, center, quaternion);
   if (cuboid == NULL) {
+    wl_client_post_no_memory(client);
     zn_error("Failed to creat a cuboid region");
     return;
   }
@@ -67,9 +67,45 @@ zgnr_region_protocol_add_cuboid(struct wl_client* client,
   zgnr_region_node_add_cuboid(self->node, cuboid);
 }
 
+static void
+zgnr_region_protocol_add_sphere(struct wl_client* client,
+    struct wl_resource* resource, struct wl_array* center_wl_array,
+    struct wl_array* radius_wl_array)
+{
+  struct zgnr_region* self = wl_resource_get_user_data(resource);
+  struct zgnr_sphere_region* sphere;
+
+  vec3 center;
+  float radius;
+
+  if (zn_array_to_vec3(center_wl_array, center) != 0) {
+    wl_resource_post_error(resource, ZGN_COMPOSITOR_ERROR_WL_ARRAY_SIZE,
+        "center is expected vec3 (%ld bytes) but got %ld bytes", sizeof(vec3),
+        center_wl_array->size);
+    return;
+  }
+
+  if (zn_array_to_float(radius_wl_array, &radius) != 0) {
+    wl_resource_post_error(resource, ZGN_COMPOSITOR_ERROR_WL_ARRAY_SIZE,
+        "radius is expected float (%ld bytes) but got %ld bytes", sizeof(float),
+        radius_wl_array->size);
+    return;
+  }
+
+  sphere = zgnr_sphere_region_create(center, radius);
+  if (sphere == NULL) {
+    wl_client_post_no_memory(client);
+    zn_error("Failed to creat a sphere region");
+    return;
+  }
+
+  zgnr_region_node_add_sphere(self->node, sphere);
+}
+
 static const struct zgn_region_interface implementation = {
     .destroy = zgnr_region_protocol_destroy,
     .add_cuboid = zgnr_region_protocol_add_cuboid,
+    .add_sphere = zgnr_region_protocol_add_sphere,
 };
 
 struct zgnr_region*
