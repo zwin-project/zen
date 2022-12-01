@@ -43,9 +43,9 @@ zna_system_set_current_session(
     zn_debug("The current session is newly created");
     wl_signal_emit(&self->events.current_session_created, NULL);
 
-    zn_server_change_display_system(server, ZEN_DISPLAY_SYSTEM_TYPE_IMMERSIVE);
+    zn_server_change_display_system(server, ZN_DISPLAY_SYSTEM_IMMERSIVE);
   } else {
-    zn_server_change_display_system(server, ZEN_DISPLAY_SYSTEM_TYPE_SCREEN);
+    zn_server_change_display_system(server, ZN_DISPLAY_SYSTEM_SCREEN);
   }
 }
 
