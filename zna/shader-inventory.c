@@ -3,6 +3,8 @@
 #include <GLES3/gl32.h>
 #include <zen-common.h>
 
+#include "board.frag.h"
+#include "board.vert.h"
 #include "color.frag.h"
 #include "default.vert.h"
 #include "ray.vert.h"
@@ -33,7 +35,18 @@ static const struct shader_info shader_info[ZNA_SHADER_COUNT] = {
             .length = sizeof(color_frag_source),
             .type = GL_FRAGMENT_SHADER,
         },
-
+    [ZNA_SHADER_BOARD_VERTEX] =
+        {
+            .source = board_vert_source,
+            .length = sizeof(board_vert_source),
+            .type = GL_VERTEX_SHADER,
+        },
+    [ZNA_SHADER_BOARD_FRAGMENT] =
+        {
+            .source = board_frag_source,
+            .length = sizeof(board_frag_source),
+            .type = GL_FRAGMENT_SHADER,
+        },
 };
 
 struct zna_shader_inventory {
