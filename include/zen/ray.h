@@ -53,14 +53,6 @@ struct zn_ray {
  */
 void zn_ray_get_tip(struct zn_ray *self, vec3 tip);
 
-/**
- * Returns the origin and direction of ray in the virtual object's local
- * coordinate system.
- */
-void zn_ray_get_local_origin_direction(struct zn_ray *self,
-    struct zn_virtual_object *virtual_object, vec3 local_origin,
-    vec3 local_direction);
-
 void zn_ray_set_length(struct zn_ray *self, float length);
 
 void zn_ray_move(
