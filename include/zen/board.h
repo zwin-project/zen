@@ -11,8 +11,6 @@ struct zn_board {
 
   struct zn_screen *screen;  // nullable
 
-  struct wl_listener screen_destroy_listener;
-
   float color[3];  // FIXME: debugging purpose, remove me later
 
   struct {
@@ -22,6 +20,12 @@ struct zn_board {
   } geometry;
 
   struct zna_board *appearance;
+
+  struct {
+    struct wl_signal destroy;  // (NULL)
+  } events;
+
+  struct wl_listener screen_destroy_listener;
 };
 
 bool zn_board_is_dangling(struct zn_board *self);

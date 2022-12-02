@@ -65,6 +65,8 @@ zn_board_create(void)
   self->screen_destroy_listener.notify = zn_board_handle_screen_destroy;
   wl_list_init(&self->screen_destroy_listener.link);
 
+  wl_signal_init(&self->events.destroy);
+
   clock_gettime(CLOCK_MONOTONIC, &time);
   self->color[0] = (float)(time.tv_nsec % 255) / 255.f;
   self->color[1] = (float)(time.tv_nsec % 254) / 254.f;
@@ -86,6 +88,8 @@ err:
 void
 zn_board_destroy(struct zn_board *self)
 {
+  wl_signal_emit(&self->events.destroy, NULL);
+
   wl_list_remove(&self->screen_destroy_listener.link);
   wl_list_remove(&self->link);
   zna_board_destroy(self->appearance);
