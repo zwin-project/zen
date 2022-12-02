@@ -5,6 +5,7 @@
 #include <wlr/types/wlr_output.h>
 #include <zen-common.h>
 
+#include "zen/ray.h"
 #include "zen/screen/output.h"
 #include "zen/virtual-object.h"
 
@@ -212,6 +213,9 @@ zn_server_create(struct wl_display *display)
     zn_error("Failed to create zn_shell");
     goto err_socket;
   }
+
+  zn_ray_set_default_grab(
+      self->scene->ray, zn_shell_get_default_grab(self->shell));
 
   self->input_manager = zn_input_manager_create(self->display);
   if (self->input_manager == NULL) {

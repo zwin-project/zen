@@ -88,8 +88,7 @@ zns_board_node_ray_button(void *user_data, uint32_t serial, uint32_t time_msec,
     struct zns_board_move_ray_grab *board_move_grab;
     board_move_grab = zns_board_move_ray_grab_create(self);
     if (board_move_grab) {
-      zn_ray_start_grab(
-          server->input_manager->seat->ray, &board_move_grab->base);
+      zn_ray_start_grab(server->scene->ray, &board_move_grab->base);
     }
   }
 
