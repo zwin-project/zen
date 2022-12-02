@@ -110,7 +110,7 @@ zns_move_ray_grab_create(struct zns_bounded *bounded)
   wl_signal_add(&bounded->events.destroy, &self->bounded_destroy_listener);
 
   vec3 tip;
-  zn_ray_get_tip(server->input_manager->seat->ray, tip);
+  zn_ray_get_tip(server->scene->ray, tip);
   glm_mat4_mulv3(zn_virtual_object->model_invert, tip, 1, self->local_tip);
 
   return self;

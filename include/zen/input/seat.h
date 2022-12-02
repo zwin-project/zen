@@ -4,9 +4,6 @@
 #include <wlr/types/wlr_seat.h>
 #include <zgnr/seat.h>
 
-// #include "zen/cursor.h"
-#include "zen/ray.h"
-
 #define ZEN_DEFAULT_SEAT "seat0"
 
 struct zn_input_device;
@@ -15,9 +12,6 @@ struct zn_seat {
   struct wlr_seat *wlr_seat;
   struct zgnr_seat *zgnr_seat;
   struct wl_list devices;  // zn_input_device::link
-
-  // TODO: struct zn_cursor* cursor;  // nonnull
-  struct zn_ray *ray;  // nonnull
 
   struct {
     struct wl_signal destroy;

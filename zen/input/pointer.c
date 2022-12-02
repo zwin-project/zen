@@ -19,7 +19,7 @@ zn_pointer_handle_motion(struct wl_listener *listener, void *data)
   if (server->display_system == ZN_DISPLAY_SYSTEM_SCREEN) {
     // TODO: cursor
   } else {
-    struct zn_ray *ray = server->input_manager->seat->ray;
+    struct zn_ray *ray = server->scene->ray;
 
     ray->grab->interface->motion_relative(ray->grab, GLM_VEC3_ZERO,
         event->delta_y * 0.001, -event->delta_x * 0.001, event->time_msec);
@@ -36,7 +36,7 @@ zn_pointer_handle_button(struct wl_listener *listener, void *data)
   if (server->display_system == ZN_DISPLAY_SYSTEM_SCREEN) {
     // TODO: cursor
   } else {
-    struct zn_ray *ray = server->input_manager->seat->ray;
+    struct zn_ray *ray = server->scene->ray;
     enum zgn_ray_button_state state = 0;
     if (event->state == WLR_BUTTON_PRESSED) {
       state = ZGN_RAY_BUTTON_STATE_PRESSED;

@@ -97,7 +97,7 @@ zns_board_move_ray_grab_create(struct zns_board *zns_board)
 {
   struct zns_board_move_ray_grab *self;
   struct zn_server *server = zn_server_get_singleton();
-  struct zn_ray *ray = server->input_manager->seat->ray;
+  struct zn_ray *ray = server->scene->ray;
   float u, v;
 
   self = zalloc(sizeof *self);

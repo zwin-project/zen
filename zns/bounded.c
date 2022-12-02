@@ -140,7 +140,7 @@ zns_bounded_handle_move(struct wl_listener *listener, void *data)
 {
   struct zns_bounded *self = zn_container_of(listener, self, move_listener);
   struct zn_server *server = zn_server_get_singleton();
-  struct zn_ray *ray = server->input_manager->seat->ray;
+  struct zn_ray *ray = server->scene->ray;
   struct zgnr_bounded_move_event *event = data;
   struct zns_default_ray_grab *grab = zns_default_ray_grab_get(ray->grab);
   struct zns_move_ray_grab *move_grab;

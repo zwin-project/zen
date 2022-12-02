@@ -3,7 +3,6 @@
 #include <zgnr/bounded.h>
 
 #include "node.h"
-#include "zen/ray.h"
 
 struct zns_bounded {
   struct {
