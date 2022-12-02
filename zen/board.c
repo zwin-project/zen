@@ -16,6 +16,14 @@ zn_board_is_dangling(struct zn_board *self)
   return self->screen == NULL;
 }
 
+void
+zn_board_move(struct zn_board *self, vec3 center, vec2 size, versor quaternion)
+{
+  glm_vec3_copy(center, self->geometry.center);
+  glm_vec2_copy(size, self->geometry.size);
+  glm_vec4_copy(quaternion, self->geometry.quaternion);
+}
+
 static void
 zn_board_handle_screen_destroy(struct wl_listener *listener, void *data)
 {

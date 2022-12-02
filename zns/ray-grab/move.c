@@ -82,7 +82,10 @@ zns_move_ray_grab_handle_bounded_destroy(
   UNUSED(data);
   struct zns_move_ray_grab *self =
       zn_container_of(listener, self, bounded_destroy_listener);
-  zn_ray_end_grab(self->base.ray);
+
+  if (self->base.ray->grab->interface == &implementation) {
+    zn_ray_end_grab(self->base.ray);
+  }
 }
 
 struct zns_move_ray_grab *

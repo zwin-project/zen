@@ -30,6 +30,9 @@ struct zn_board {
 
 bool zn_board_is_dangling(struct zn_board *self);
 
+void zn_board_move(
+    struct zn_board *self, vec3 center, vec2 size, versor quaternion);
+
 /**
  * @param screen is nullable
  */
