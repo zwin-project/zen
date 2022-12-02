@@ -207,7 +207,7 @@ zn_server_create(struct wl_display *display)
   zn_debug("WAYLAND_DISPLAY=%s", self->socket);
   zn_debug("XDG_RUNTIME_DIR=%s", xdg);
 
-  self->shell = zn_shell_create(self->display);
+  self->shell = zn_shell_create(self->display, self->scene);
   if (self->shell == NULL) {
     zn_error("Failed to create zn_shell");
     goto err_socket;

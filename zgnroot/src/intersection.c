@@ -45,3 +45,57 @@ zgnr_intersection_ray_obb(
 
   return t_min;
 }
+
+/* Customize Möller–Trumbore ray-triangle intersection algorithm */
+float
+zgnr_intersection_ray_parallelogram(vec3 origin, vec3 direction, vec3 v0,
+    vec3 v1, vec3 v2, float *u, float *v, bool test_cull)
+{
+  static const float epsilon = 0.000001;
+  vec3 edge1, edge2, tvec, pvec, qvec;
+  float det, inv_det, t;
+
+  glm_vec3_sub(v1, v0, edge1);
+  glm_vec3_sub(v2, v0, edge2);
+
+  glm_vec3_cross(direction, edge2, pvec);
+  det = glm_vec3_dot(edge1, pvec);
+
+  if (test_cull) {
+    if (det < epsilon) return FLT_MAX;
+
+    glm_vec3_sub(origin, v0, tvec);
+
+    *u = glm_vec3_dot(tvec, qvec);
+    if (*u < 0.f || *u > det) return FLT_MAX;
+
+    glm_vec3_cross(tvec, edge1, qvec);
+
+    *v = glm_vec3_dot(direction, qvec);
+    if (*v < 0.f || *v > det) return FLT_MAX;
+
+    t = glm_vec3_dot(edge2, qvec);
+    inv_det = 1.f / det;
+    t *= inv_det;
+    *u *= inv_det;
+    *v *= inv_det;
+  } else {
+    if (det > -epsilon && det < epsilon) return FLT_MAX;
+
+    inv_det = 1.f / det;
+
+    glm_vec3_sub(origin, v0, tvec);
+
+    *u = glm_vec3_dot(tvec, pvec) * inv_det;
+    if (*u < 0.f || *u > 1.f) return FLT_MAX;
+
+    glm_vec3_cross(tvec, edge1, qvec);
+
+    *v = glm_vec3_dot(direction, qvec) * inv_det;
+    if (*v < 0.f || *v > 1.f) return FLT_MAX;
+
+    t = glm_vec3_dot(edge2, qvec) * inv_det;
+  }
+
+  return t;
+}

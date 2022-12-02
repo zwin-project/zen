@@ -17,6 +17,8 @@ zn_scene_ensure_dangling_board(struct zn_scene *self)
 
   wl_list_insert(&self->board_list, &board->link);
 
+  wl_signal_emit(&self->events.new_board, board);
+
   return board;
 }
 
@@ -44,6 +46,7 @@ zn_scene_create(void)
 
   wl_list_init(&self->screen_list);
   wl_list_init(&self->board_list);
+  wl_signal_init(&self->events.new_board);
 
   return self;
 
@@ -63,6 +66,7 @@ zn_scene_destroy_resources(struct zn_scene *self)
 void
 zn_scene_destroy(struct zn_scene *self)
 {
+  wl_list_remove(&self->events.new_board.listener_list);
   wl_list_remove(&self->screen_list);
   free(self);
 }

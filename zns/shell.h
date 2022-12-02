@@ -13,9 +13,8 @@ struct zn_shell {
 
   struct zns_node *root;
 
-  struct wl_list bounded_list;  // zns_bounded::link
-
   struct zns_default_ray_grab default_grab;
 
   struct wl_listener new_bounded_listener;
+  struct wl_listener new_board_listener;
 };
