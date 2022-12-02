@@ -7,6 +7,10 @@ struct zn_screen;
 struct zn_scene {
   struct wl_list screen_list;  // zn_screen::link;
   struct wl_list board_list;   // zn_board::link
+
+  struct {
+    struct wl_signal new_board;  // (struct zn_board*)
+  } events;
 };
 
 void zn_scene_new_screen(struct zn_scene *self, struct zn_screen *screen);
