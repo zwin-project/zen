@@ -8,6 +8,31 @@
 
 #include "system.h"
 
+void
+zna_board_commit(struct zna_board *self)
+{
+  if (self->base_unit->has_renderer_objects) {
+    float scale_x = self->zn_board->geometry.size[0];
+    float scale_y = self->zn_board->geometry.size[1];
+
+    mat4 rotate;
+    glm_quat_mat4(self->zn_board->geometry.quaternion, rotate);
+
+    mat4 local_model = GLM_MAT4_IDENTITY_INIT;
+    glm_translate(local_model, self->zn_board->geometry.center);
+    glm_mat4_mul(local_model, rotate, local_model);
+    glm_scale(local_model, (vec3){scale_x, scale_y, 1});
+
+    znr_gl_base_technique_gl_uniform_matrix(self->base_unit->technique, 0,
+        "local_model", 4, 4, 1, false, local_model[0]);
+    znr_gl_base_technique_gl_uniform_vector(self->base_unit->technique, 0,
+        "color", ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_FLOAT, 3, 1,
+        self->zn_board->color);
+
+    znr_virtual_object_commit(self->virtual_object);
+  }
+}
+
 /**
  * @param session must not be null
  */
@@ -19,24 +44,7 @@ zna_board_setup_renderer_object(
   zna_base_unit_setup_renderer_objects(
       self->base_unit, session, self->virtual_object);
 
-  float scale_x = self->zn_board->geometry.size[0];
-  float scale_y = self->zn_board->geometry.size[1];
-
-  mat4 rotate;
-  glm_quat_mat4(self->zn_board->geometry.quaternion, rotate);
-
-  mat4 local_model = GLM_MAT4_IDENTITY_INIT;
-  glm_translate(local_model, self->zn_board->geometry.center);
-  glm_mat4_mul(local_model, rotate, local_model);
-  glm_scale(local_model, (vec3){scale_x, scale_y, 1});
-
-  znr_gl_base_technique_gl_uniform_matrix(self->base_unit->technique, 0,
-      "local_model", 4, 4, 1, false, local_model[0]);
-  znr_gl_base_technique_gl_uniform_vector(self->base_unit->technique, 0,
-      "color", ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_FLOAT, 3, 1,
-      self->zn_board->color);
-
-  znr_virtual_object_commit(self->virtual_object);
+  zna_board_commit(self);
 }
 
 static void

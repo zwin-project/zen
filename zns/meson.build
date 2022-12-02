@@ -6,6 +6,7 @@ _zen_shell_srcs = [
   'node.c',
   'shell.c',
 
+  'ray-grab/board-move.c',
   'ray-grab/default.c',
   'ray-grab/move.c',
 ]
