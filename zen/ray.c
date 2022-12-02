@@ -38,9 +38,9 @@ zn_ray_move(struct zn_ray *self, vec3 origin, float polar, float azimuthal)
 static bool
 zn_ray_is_default_grab(struct zn_ray *self)
 {
-  struct zn_server *server = zn_server_get_singleton();
-  struct zn_ray_grab *default_grab = zn_shell_get_default_grab(server->shell);
-  return self->grab->interface == default_grab->interface;
+  if (self->grab == NULL || self->default_grab == NULL) return false;
+
+  return self->grab->interface == self->default_grab->interface;
 }
 
 void
@@ -66,10 +66,21 @@ zn_ray_end_grab(struct zn_ray *self)
 
   self->grab->interface->cancel(self->grab);
 
-  self->grab = zn_shell_get_default_grab(server->shell);
+  self->grab = self->default_grab;
   self->grab->ray = self;
 
   self->grab->interface->rebase(self->grab);
+}
+
+void
+zn_ray_set_default_grab(struct zn_ray *self, struct zn_ray_grab *default_grab)
+{
+  if (!zn_assert(self->default_grab == NULL, "default grab already set")) {
+    return;
+  }
+  self->default_grab = default_grab;
+  self->grab = default_grab;
+  self->grab->ray = self;
 }
 
 struct zn_ray *
@@ -85,8 +96,8 @@ zn_ray_create(void)
     goto err;
   }
 
-  self->grab = zn_shell_get_default_grab(server->shell);
-  self->grab->ray = self;
+  self->grab = NULL;
+  self->default_grab = NULL;
 
   wl_signal_init(&self->events.destroy);
 
@@ -110,7 +121,7 @@ err:
 void
 zn_ray_destroy(struct zn_ray *self)
 {
-  zn_ray_end_grab(self);
+  if (self->grab) zn_ray_end_grab(self);
 
   wl_signal_emit(&self->events.destroy, NULL);
 

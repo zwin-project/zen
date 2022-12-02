@@ -3,6 +3,7 @@
 #include <zen-common.h>
 
 #include "zen/board.h"
+#include "zen/ray.h"
 #include "zen/screen.h"
 
 static struct zn_board *
@@ -44,11 +45,20 @@ zn_scene_create(void)
     goto err;
   }
 
+  self->ray = zn_ray_create();
+  if (self->ray == NULL) {
+    zn_error("Failed to create a ray");
+    goto err_free;
+  }
+
   wl_list_init(&self->screen_list);
   wl_list_init(&self->board_list);
   wl_signal_init(&self->events.new_board);
 
   return self;
+
+err_free:
+  free(self);
 
 err:
   return NULL;
@@ -68,5 +78,6 @@ zn_scene_destroy(struct zn_scene *self)
 {
   wl_list_remove(&self->events.new_board.listener_list);
   wl_list_remove(&self->screen_list);
+  zn_ray_destroy(self->ray);
   free(self);
 }

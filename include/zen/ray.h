@@ -26,7 +26,8 @@ struct zn_ray_grab {
 };
 
 struct zn_ray {
-  struct zn_ray_grab *grab;  // nonnull
+  struct zn_ray_grab *grab;          // nonnull after set_default_grab
+  struct zn_ray_grab *default_grab;  // nonnull after set_default_grab
 
   vec3 origin;  // modified by grab
 
@@ -61,6 +62,9 @@ void zn_ray_move(
 void zn_ray_start_grab(struct zn_ray *self, struct zn_ray_grab *grab);
 
 void zn_ray_end_grab(struct zn_ray *self);
+
+void zn_ray_set_default_grab(
+    struct zn_ray *self, struct zn_ray_grab *default_grab);
 
 struct zn_ray *zn_ray_create(void);
 
