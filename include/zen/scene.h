@@ -4,13 +4,14 @@
 
 struct zn_screen;
 struct zn_ray;
+struct zn_cursor;
 
 struct zn_scene {
   struct wl_list screen_list;  // zn_screen::link;
   struct wl_list board_list;   // zn_board::link
 
-  // TODO: struct zn_cursor* cursor;  // nonnull
-  struct zn_ray *ray;  // nonnull
+  struct zn_cursor *cursor;  // nonnull
+  struct zn_ray *ray;        // nonnull
 
   struct {
     struct wl_signal new_board;  // (struct zn_board*)

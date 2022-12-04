@@ -10,6 +10,8 @@
 #include "zen/screen.h"
 #include "zen/server.h"
 
+#define BOARD_PIXEL_PER_METER 2800.f
+
 bool
 zn_board_is_dangling(struct zn_board *self)
 {
@@ -22,6 +24,35 @@ zn_board_move(struct zn_board *self, vec3 center, vec2 size, versor quaternion)
   glm_vec3_copy(center, self->geometry.center);
   glm_vec2_copy(size, self->geometry.size);
   glm_vec4_copy(quaternion, self->geometry.quaternion);
+}
+
+void
+zn_board_get_effective_size(
+    struct zn_board *self, double *width, double *height)
+{
+  struct zn_server *server = zn_server_get_singleton();
+  if (server->display_system == ZN_DISPLAY_SYSTEM_SCREEN) {
+    if (self->screen) {
+      zn_screen_get_effective_size(self->screen, width, height);
+    } else {
+      *width = 0;
+      *height = 0;
+    }
+  } else {
+    *width = self->geometry.size[0] * BOARD_PIXEL_PER_METER;
+    *height = self->geometry.size[1] * BOARD_PIXEL_PER_METER;
+  }
+}
+
+void
+zn_board_box_effective_to_local_geom(
+    struct zn_board *self, struct wlr_fbox *effective, struct wlr_fbox *geom)
+{
+  UNUSED(self);
+  geom->x = effective->x / BOARD_PIXEL_PER_METER - self->geometry.size[0] / 2.f;
+  geom->y = self->geometry.size[1] / 2.f - effective->y / BOARD_PIXEL_PER_METER;
+  geom->width = effective->width / BOARD_PIXEL_PER_METER;
+  geom->height = effective->height / BOARD_PIXEL_PER_METER;
 }
 
 static void

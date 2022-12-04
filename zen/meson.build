@@ -1,6 +1,7 @@
 _zen_srcs = [
   'binding.c',
   'board.c',
+  'cursor.c',
   'ray.c',
   'scene.c',
   'screen.c',
@@ -8,6 +9,7 @@ _zen_srcs = [
   'virtual-object.c',
 
   'screen/output.c',
+  'screen/renderer.c',
 
   'input/input-device.c',
   'input/input-manager.c',
@@ -26,6 +28,7 @@ _zen_srcs_pub = [
 _zen_deps = [
   cairo_dep,
   cglm_dep,
+  gl_dep,
   m_dep,
   pixman_dep,
   toml_dep,

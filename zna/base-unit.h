@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wayland-server-core.h>
+#include <wlr/render/wlr_texture.h>
 #include <zgnr/gl-base-technique.h>
 #include <zgnr/mem-storage.h>
 
@@ -32,6 +33,8 @@ struct zna_base_unit {
   struct znr_gl_buffer *vertex_buffer;
   struct znr_gl_vertex_array *vertex_array;
   struct znr_gl_program *program;
+  struct znr_gl_texture *texture0;
+  bool has_texture_data;
 
   enum zna_shader_name vertex_shader;
   enum zna_shader_name fragment_shader;
@@ -43,6 +46,9 @@ struct zna_base_unit {
   enum zgnr_gl_base_technique_draw_method draw_method;
   union zgnr_gl_base_technique_draw_args draw_args;
 };
+
+void zna_base_unit_read_wlr_texture(
+    struct zna_base_unit *self, struct wlr_texture *texture);
 
 void zna_base_unit_setup_renderer_objects(struct zna_base_unit *self,
     struct znr_session *session, struct znr_virtual_object *virtual_object);

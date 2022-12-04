@@ -2,21 +2,29 @@
 
 #include <zen-common.h>
 
+#include "zen/server.h"
+
 void
 zn_screen_damage(struct zn_screen *self, struct wlr_fbox *box)
 {
+  struct zn_server *server = zn_server_get_singleton();
+  if (server->display_system != ZN_DISPLAY_SYSTEM_SCREEN) return;
+
   self->implementation->damage(self->user_data, box);
 }
 
 void
 zn_screen_damage_whole(struct zn_screen *self)
 {
+  struct zn_server *server = zn_server_get_singleton();
+  if (server->display_system != ZN_DISPLAY_SYSTEM_SCREEN) return;
+
   self->implementation->damage_whole(self->user_data);
 }
 
 void
 zn_screen_get_effective_size(
-    struct zn_screen *self, float *width, float *height)
+    struct zn_screen *self, double *width, double *height)
 {
   self->implementation->get_effective_size(self->user_data, width, height);
 }

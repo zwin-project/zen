@@ -62,8 +62,6 @@ zn_ray_start_grab(struct zn_ray *self, struct zn_ray_grab *grab)
 void
 zn_ray_end_grab(struct zn_ray *self)
 {
-  struct zn_server *server = zn_server_get_singleton();
-
   self->grab->interface->cancel(self->grab);
 
   self->grab = self->default_grab;
@@ -103,6 +101,7 @@ zn_ray_create(void)
 
   self->appearance = zna_ray_create(self, server->appearance_system);
   if (self->appearance == NULL) {
+    zn_error("Failed to create a zna_ray");
     goto err_free;
   }
 
@@ -119,10 +118,15 @@ err:
 }
 
 void
+zn_ray_destroy_resources(struct zn_ray *self)
+{
+  if (self->grab) self->grab->interface->cancel(self->grab);
+  self->grab = NULL;
+}
+
+void
 zn_ray_destroy(struct zn_ray *self)
 {
-  if (self->grab) zn_ray_end_grab(self);
-
   wl_signal_emit(&self->events.destroy, NULL);
 
   zna_ray_destroy(self->appearance);
