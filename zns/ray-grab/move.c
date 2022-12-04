@@ -83,7 +83,7 @@ zns_move_ray_grab_handle_bounded_destroy(
   struct zns_move_ray_grab *self =
       zn_container_of(listener, self, bounded_destroy_listener);
 
-  if (self->base.ray->grab->interface == &implementation) {
+  if (self->base.ray->grab->impl == &implementation) {
     zn_ray_end_grab(self->base.ray);
   }
 }
@@ -102,7 +102,7 @@ zns_move_ray_grab_create(struct zns_bounded *bounded)
     goto err;
   }
 
-  self->base.interface = &implementation;
+  self->base.impl = &implementation;
   self->bounded = bounded;
 
   self->bounded_destroy_listener.notify =

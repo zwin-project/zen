@@ -40,7 +40,7 @@ zn_ray_is_default_grab(struct zn_ray *self)
 {
   if (self->grab == NULL || self->default_grab == NULL) return false;
 
-  return self->grab->interface == self->default_grab->interface;
+  return self->grab->impl == self->default_grab->impl;
 }
 
 void
@@ -51,23 +51,23 @@ zn_ray_start_grab(struct zn_ray *self, struct zn_ray_grab *grab)
     return;
   }
 
-  self->grab->interface->cancel(self->grab);
+  self->grab->impl->cancel(self->grab);
 
   self->grab = grab;
   self->grab->ray = self;
 
-  self->grab->interface->rebase(self->grab);
+  self->grab->impl->rebase(self->grab);
 }
 
 void
 zn_ray_end_grab(struct zn_ray *self)
 {
-  self->grab->interface->cancel(self->grab);
+  self->grab->impl->cancel(self->grab);
 
   self->grab = self->default_grab;
   self->grab->ray = self;
 
-  self->grab->interface->rebase(self->grab);
+  self->grab->impl->rebase(self->grab);
 }
 
 void
@@ -120,7 +120,7 @@ err:
 void
 zn_ray_destroy_resources(struct zn_ray *self)
 {
-  if (self->grab) self->grab->interface->cancel(self->grab);
+  if (self->grab) self->grab->impl->cancel(self->grab);
   self->grab = NULL;
 }
 

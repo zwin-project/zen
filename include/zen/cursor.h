@@ -8,8 +8,31 @@
 
 struct zn_board;
 struct zna_cursor;
+struct zn_cursor_grab;
+struct zn_default_cursor_grab;
+
+struct zn_cursor_grab_interface {
+  void (*motion_relative)(
+      struct zn_cursor_grab *grab, double dx, double dy, uint32_t time_msec);
+  /**
+   * @param board can be NULL
+   * @param time_msec will not be used when the board is NULL
+   */
+  void (*motion_absolute)(struct zn_cursor_grab *grab, struct zn_board *board,
+      double x, double y, uint32_t time_msec);
+  void (*rebase)(struct zn_cursor_grab *grab);
+  void (*cancel)(struct zn_cursor_grab *grab);
+};
+
+struct zn_cursor_grab {
+  const struct zn_cursor_grab_interface *impl;
+  struct zn_cursor *cursor;
+};
 
 struct zn_cursor {
+  struct zn_cursor_grab *grab;                  // nonnull
+  struct zn_default_cursor_grab *default_grab;  // nonnull
+
   double x, y;
   struct zn_board *board;  // nullable
 
@@ -49,6 +72,10 @@ void zn_cursor_set_xcursor(struct zn_cursor *self, const char *name);
  */
 void zn_cursor_move(
     struct zn_cursor *self, struct zn_board *board, double x, double y);
+
+void zn_cursor_start_grab(struct zn_cursor *self, struct zn_cursor_grab *grab);
+
+void zn_cursor_end_grab(struct zn_cursor *self);
 
 struct zn_cursor *zn_cursor_create(void);
 
