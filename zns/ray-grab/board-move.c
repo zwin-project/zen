@@ -87,7 +87,7 @@ zns_board_move_ray_grab_handle_zns_board_destroy(
   struct zns_board_move_ray_grab *self =
       zn_container_of(listener, self, zns_board_destroy_listener);
 
-  if (self->base.ray->grab->interface == &implementation) {
+  if (self->base.ray->grab->impl == &implementation) {
     zn_ray_end_grab(self->base.ray);
   }
 }
@@ -111,7 +111,7 @@ zns_board_move_ray_grab_create(struct zns_board *zns_board)
     goto err_free;
   }
 
-  self->base.interface = &implementation;
+  self->base.impl = &implementation;
   self->zns_board = zns_board;
   self->tip[0] = zns_board->zn_board->geometry.size[0] * (u - 0.5f);
   self->tip[1] = zns_board->zn_board->geometry.size[1] * (v - 0.5f);

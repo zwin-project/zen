@@ -21,7 +21,7 @@ struct zn_ray_grab_interface {
 };
 
 struct zn_ray_grab {
-  const struct zn_ray_grab_interface *interface;
+  const struct zn_ray_grab_interface *impl;
   struct zn_ray *ray;
 };
 

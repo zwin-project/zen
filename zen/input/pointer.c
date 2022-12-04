@@ -6,6 +6,7 @@
 #include <wlr/types/wlr_surface.h>
 
 #include "zen-common.h"
+#include "zen/cursor.h"
 #include "zen/ray.h"
 #include "zen/server.h"
 
@@ -17,11 +18,13 @@ zn_pointer_handle_motion(struct wl_listener *listener, void *data)
   struct wlr_event_pointer_motion *event = data;
 
   if (server->display_system == ZN_DISPLAY_SYSTEM_SCREEN) {
-    // TODO: cursor
+    struct zn_cursor *cursor = server->scene->cursor;
+    cursor->grab->impl->motion_relative(
+        cursor->grab, event->delta_x, event->delta_y, event->time_msec);
   } else {
     struct zn_ray *ray = server->scene->ray;
 
-    ray->grab->interface->motion_relative(ray->grab, GLM_VEC3_ZERO,
+    ray->grab->impl->motion_relative(ray->grab, GLM_VEC3_ZERO,
         event->delta_y * 0.001, -event->delta_x * 0.001, event->time_msec);
   }
 }
@@ -44,8 +47,7 @@ zn_pointer_handle_button(struct wl_listener *listener, void *data)
       state = ZGN_RAY_BUTTON_STATE_RELEASED;
     }
 
-    ray->grab->interface->button(
-        ray->grab, event->time_msec, event->button, state);
+    ray->grab->impl->button(ray->grab, event->time_msec, event->button, state);
   }
 }
 

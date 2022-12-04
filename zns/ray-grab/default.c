@@ -146,7 +146,7 @@ zns_default_ray_grab_handle_focus_destroy(
 struct zns_default_ray_grab *
 zns_default_ray_grab_get(struct zn_ray_grab *grab)
 {
-  if (grab->interface != &implementation) return NULL;
+  if (grab->impl != &implementation) return NULL;
   struct zns_default_ray_grab *self;
 
   self = zn_container_of(grab, self, base);
@@ -158,7 +158,7 @@ void
 zns_default_ray_grab_init(
     struct zns_default_ray_grab *self, struct zn_shell *shell)
 {
-  self->base.interface = &implementation;
+  self->base.impl = &implementation;
   self->shell = shell;
   self->focus = NULL;
   self->last_button_serial = 0;

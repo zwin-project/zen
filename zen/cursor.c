@@ -9,6 +9,7 @@
 #include "zen/appearance/cursor.h"
 #include "zen/board.h"
 #include "zen/screen.h"
+#include "zen/screen/cursor-grab/default.h"
 #include "zen/server.h"
 
 static void
@@ -141,6 +142,41 @@ zn_cursor_move(
   zna_cursor_commit(self->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
 }
 
+static bool
+zn_cursor_is_default_grab(struct zn_cursor *self)
+{
+  if (self->grab == NULL || self->default_grab == NULL) return false;
+
+  return self->grab->impl == self->default_grab->base.impl;
+}
+
+void
+zn_cursor_start_grab(struct zn_cursor *self, struct zn_cursor_grab *grab)
+{
+  if (!zn_assert(
+          zn_cursor_is_default_grab(self), "Non-default grab already exists")) {
+    return;
+  }
+
+  self->grab->impl->cancel(self->grab);
+
+  self->grab = grab;
+  self->grab->cursor = self;
+
+  self->grab->impl->rebase(self->grab);
+}
+
+void
+zn_cursor_end_grab(struct zn_cursor *self)
+{
+  self->grab->impl->cancel(self->grab);
+
+  self->grab = &self->default_grab->base;
+  self->grab->cursor = self;
+
+  self->grab->impl->rebase(self->grab);
+}
+
 struct zn_cursor *
 zn_cursor_create(void)
 {
@@ -184,6 +220,10 @@ zn_cursor_create(void)
 
   zn_cursor_set_xcursor(self, "left_ptr");
 
+  self->default_grab = zn_default_cursor_grab_create();
+  self->grab = &self->default_grab->base;
+  self->grab->cursor = self;
+
   return self;
 
 err_xcursor_manager:
@@ -199,6 +239,9 @@ err:
 void
 zn_cursor_destroy_resources(struct zn_cursor *self)
 {
+  if (self->grab) self->grab->impl->cancel(self->grab);
+  self->grab = NULL;
+
   if (self->xcursor_texture) {
     wlr_texture_destroy(self->xcursor_texture);
   }
@@ -208,6 +251,7 @@ void
 zn_cursor_destroy(struct zn_cursor *self)
 {
   wl_list_remove(&self->board_destroy_listener.link);
+  zn_default_cursor_grab_destroy(self->default_grab);
   zna_cursor_destroy(self->appearance);
   wlr_xcursor_manager_destroy(self->xcursor_manager);
   free(self->xcursor_name);
