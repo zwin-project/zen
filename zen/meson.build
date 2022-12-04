@@ -10,6 +10,7 @@ _zen_srcs = [
 
   'screen/output.c',
   'screen/renderer.c',
+  'screen/cursor-grab/default.c',
 
   'input/input-device.c',
   'input/input-manager.c',

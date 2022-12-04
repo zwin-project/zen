@@ -7,6 +7,7 @@
 
 #include "ray-grab/board-move.h"
 #include "shell.h"
+#include "zen/cursor.h"
 #include "zen/server.h"
 
 static void zns_board_destroy(struct zns_board *self);
@@ -50,12 +51,29 @@ zns_board_node_ray_cast(void *user_data, vec3 origin, vec3 direction,
   return true;
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 static bool
 zns_board_node_ray_motion(void *user_data, vec3 origin, vec3 direction,
     uint32_t time_msec, mat4 transform)
 {
+  UNUSED(transform);  // must be identity matrix
+  struct zns_board *self = user_data;
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_cursor *cursor = server->scene->cursor;
+  float u, v;
+  double effective_width, effective_height;
+  double effective_x, effective_y;
+
+  (void)zns_board_ray_cast(self, origin, direction, &u, &v);
+
+  zn_board_get_effective_size(
+      self->zn_board, &effective_width, &effective_height);
+
+  effective_x = effective_width * u;
+  effective_y = effective_height * (1 - v);
+
+  cursor->grab->impl->motion_absolute(
+      cursor->grab, self->zn_board, effective_x, effective_y, time_msec);
+
   return true;
 }
 
@@ -63,15 +81,28 @@ static bool
 zns_board_node_ray_enter(void *user_data, uint32_t serial, vec3 origin,
     vec3 direction, mat4 transform)
 {
+  UNUSED(user_data);
+  UNUSED(serial);
+  UNUSED(origin);
+  UNUSED(direction);
+  UNUSED(transform);
   return true;
 }
 
 static bool
 zns_board_node_ray_leave(void *user_data, uint32_t serial, mat4 transform)
 {
+  UNUSED(user_data);
+  UNUSED(serial);
+  UNUSED(transform);  // must be identity matrix
+
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_cursor *cursor = server->scene->cursor;
+
+  cursor->grab->impl->motion_absolute(cursor->grab, NULL, 0, 0, 0);
+
   return true;
 }
-#pragma GCC diagnostic pop
 
 static bool
 zns_board_node_ray_button(void *user_data, uint32_t serial, uint32_t time_msec,
