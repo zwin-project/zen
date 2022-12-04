@@ -2,9 +2,12 @@
 
 #include <cglm/types.h>
 #include <wayland-server-core.h>
+#include <wlr/util/box.h>
 
 struct zn_screen;
 struct zna_board;
+
+#define CURSOR_Z_OFFSET_ON_BOARD 0.0001
 
 struct zn_board {
   struct wl_list link;  // zn_scene::board_list
@@ -32,6 +35,12 @@ bool zn_board_is_dangling(struct zn_board *self);
 
 void zn_board_move(
     struct zn_board *self, vec3 center, vec2 size, versor quaternion);
+
+void zn_board_get_effective_size(
+    struct zn_board *self, double *width, double *height);
+
+void zn_board_box_effective_to_local_geom(
+    struct zn_board *self, struct wlr_fbox *effective, struct wlr_fbox *geom);
 
 /**
  * @param screen is nullable

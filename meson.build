@@ -94,13 +94,14 @@ openvr_req = '>= 1.12.5'
 wayland_protocols_req = '>= 1.24'
 wayland_req = '>= 1.18.0'
 wlroots_req = ['>= 0.15', '< 0.16']
-wlr_glew_renderer_req = wlroots_req
+wlr_glew_renderer_req = '0.15.1.1'
 zen_remote_server_req = '0.1.0.21'
 
 # dependencies
 
 cairo_dep = dependency('cairo')
 cglm_dep = dependency('cglm')
+gl_dep = dependency('gl')
 m_dep = cc.find_library('m')
 pixman_dep = dependency('pixman-1')
 toml_dep = dependency('libtoml')

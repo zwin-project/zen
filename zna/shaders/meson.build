@@ -1,5 +1,7 @@
 _shader_sources = [
   'color.frag',
+  'cursor.frag',
+  'cursor.vert',
   'default.vert',
   'ray.vert',
   'board.frag',
