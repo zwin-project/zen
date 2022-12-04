@@ -1,7 +1,51 @@
 #include "base-unit.h"
 
-#include <GLES3/gl32.h>
+#include <GL/glew.h>
+#include <stdio.h>
+#include <wlr/render/egl.h>
+#include <wlr/render/glew.h>
 #include <zen-common.h>
+
+#include "zen/server.h"
+
+void
+zna_base_unit_read_wlr_texture(
+    struct zna_base_unit *self, struct wlr_texture *texture)
+{
+  struct zn_server *server = zn_server_get_singleton();
+  struct zgnr_mem_storage *storage;
+
+  if (!self->has_renderer_objects) return;
+
+  if (!zn_assert(wlr_texture_is_glew(texture), "glew renderer is required")) {
+    return;
+  }
+
+  storage =
+      zgnr_mem_storage_create(NULL, 32 * texture->width * texture->height);
+
+  struct wlr_glew_texture_attribs texture_attrib;
+  wlr_glew_texture_get_attribs(texture, &texture_attrib);
+
+  struct wlr_egl *egl = wlr_glew_renderer_get_egl(server->renderer);
+  wlr_egl_make_current(egl);
+  glBindTexture(texture_attrib.target, texture_attrib.tex);
+  glGetTexImage(
+      texture_attrib.target, 0, GL_RGBA, GL_UNSIGNED_BYTE, storage->data);
+  glBindTexture(texture_attrib.target, 0);
+  wlr_egl_unset_current(egl);
+
+  if (self->has_texture_data == false) {
+    self->has_texture_data = true;
+    znr_gl_base_technique_bind_texture(
+        self->technique, 0, "", self->texture0, GL_TEXTURE_2D);
+  }
+
+  znr_gl_texture_image_2d(self->texture0, GL_TEXTURE_2D, 0, GL_RGBA,
+      texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, storage);
+
+  zgnr_mem_storage_unref(storage);
+}
 
 void
 zna_base_unit_setup_renderer_objects(struct zna_base_unit *self,
@@ -16,6 +60,7 @@ zna_base_unit_setup_renderer_objects(struct zna_base_unit *self,
   self->vertex_buffer = znr_gl_buffer_create(session, self->system->display);
   self->vertex_array = znr_gl_vertex_array_create(session);
   self->program = znr_gl_program_create(session);
+  self->texture0 = znr_gl_texture_create(session, self->system->display);
 
   // program
   vertex_shader = zna_shader_inventory_get(
@@ -76,8 +121,11 @@ zna_base_unit_teardown_renderer_objects(struct zna_base_unit *self)
   self->vertex_array = NULL;
   znr_gl_program_destroy(self->program);
   self->program = NULL;
+  znr_gl_texture_destroy(self->texture0);
+  self->texture0 = NULL;
 
   self->has_renderer_objects = false;
+  self->has_texture_data = false;
 }
 
 struct zna_base_unit *
@@ -97,6 +145,7 @@ zna_base_unit_create(struct zna_system *system,
 
   self->system = system;
   self->has_renderer_objects = false;
+  self->has_texture_data = false;
   self->vertex_shader = vertex_shader;
   self->fragment_shader = fragment_shader;
   self->vertex_buffer_storage = vertex_buffer;
@@ -120,6 +169,7 @@ zna_base_unit_destroy(struct zna_base_unit *self)
   if (self->vertex_buffer) znr_gl_buffer_destroy(self->vertex_buffer);
   if (self->vertex_array) znr_gl_vertex_array_destroy(self->vertex_array);
   if (self->program) znr_gl_program_destroy(self->program);
+  if (self->texture0) znr_gl_texture_destroy(self->texture0);
 
   zgnr_mem_storage_unref(self->vertex_buffer_storage);
   wl_array_release(&self->vertex_attributes);

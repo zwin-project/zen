@@ -1,16 +1,17 @@
 #pragma once
 
-#include "board/plane-unit.h"
-#include "zen/appearance/board.h"
+#include "base-unit.h"
+#include "zen/appearance/cursor.h"
+#include "zen/renderer/virtual-object.h"
 
-struct zna_board {
-  struct zn_board *zn_board;  // nonnull
-  struct zna_system *system;  // nonnull
+struct zna_cursor {
+  struct zn_cursor *zn_cursor;  // nonnull
+  struct zna_system *system;
 
   // null when the current session does not exist, not null otherwise
   struct znr_virtual_object *virtual_object;
 
-  struct zna_board_plane_unit *plane_unit;  // nonnull
+  struct zna_base_unit *base_unit;
 
   struct wl_listener session_created_listener;
   struct wl_listener session_destroyed_listener;

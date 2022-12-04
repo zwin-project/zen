@@ -68,4 +68,6 @@ void zn_ray_set_default_grab(
 
 struct zn_ray *zn_ray_create(void);
 
+void zn_ray_destroy_resources(struct zn_ray *self);
+
 void zn_ray_destroy(struct zn_ray *self);

@@ -18,4 +18,7 @@ struct zn_output {
   struct wl_listener damage_frame_listener;
 };
 
+void zn_output_box_effective_to_transformed_coords(struct zn_output *self,
+    struct wlr_fbox *effective, struct wlr_box *transformed);
+
 struct zn_output *zn_output_create(struct wlr_output *wlr_output);
