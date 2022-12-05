@@ -100,6 +100,7 @@ zn_board_create(void)
 
   wl_list_init(&self->link);
   self->screen = NULL;
+  wl_list_init(&self->view_list);
 
   self->screen_destroy_listener.notify = zn_board_handle_screen_destroy;
   wl_list_init(&self->screen_destroy_listener.link);
@@ -129,6 +130,7 @@ zn_board_destroy(struct zn_board *self)
 {
   wl_signal_emit(&self->events.destroy, NULL);
 
+  wl_list_remove(&self->view_list);
   wl_list_remove(&self->screen_destroy_listener.link);
   wl_list_remove(&self->link);
   zna_board_destroy(self->appearance);

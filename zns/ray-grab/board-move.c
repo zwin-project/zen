@@ -7,6 +7,7 @@
 #include "zen/appearance/board.h"
 #include "zen/appearance/ray.h"
 #include "zen/server.h"
+#include "zen/view.h"
 
 static void zns_board_move_ray_grab_destroy(
     struct zns_board_move_ray_grab *self);
@@ -44,6 +45,12 @@ zns_board_move_ray_grab_motion_relative(struct zn_ray_grab *grab_base,
       zn_board->geometry.quaternion);
 
   zna_board_commit(zn_board->appearance);
+
+  struct zn_view *view;
+  wl_list_for_each (view, &zn_board->view_list, board_link) {
+    zn_view_move(view, zn_board, view->x, view->y);
+    zna_view_commit(view->appearance, ZNA_VIEW_DAMAGE_GEOMETRY);
+  }
 }
 
 static void

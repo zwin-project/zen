@@ -20,6 +20,9 @@ zn_cursor_handle_board_destroy(struct wl_listener *listener, void *data)
       zn_container_of(listener, self, board_destroy_listener);
 
   zn_cursor_move(self, NULL, 0, 0);
+
+  zna_cursor_commit(self->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
+
   // TODO: show cursor on another board when screen display system mode
   // TODO: handle the case the board becomes invisible but not destroyed
 }
@@ -109,6 +112,8 @@ zn_cursor_move(
 
   self->board = board;
 
+  zn_cursor_damage(self);
+
   if (self->board) {
     struct wlr_fbox cursor_fbox, board_local_cursor_geom;
     mat4 transform, board_rotation;
@@ -137,9 +142,6 @@ zn_cursor_move(
     glm_vec2_zero(self->geometry.size);
     glm_quat_identity(self->geometry.quaternion);
   }
-
-  zn_cursor_damage(self);
-  zna_cursor_commit(self->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
 }
 
 static bool

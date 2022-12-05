@@ -1,4 +1,4 @@
-#include "cursor.h"
+#include "view.h"
 
 #include <GLES3/gl32.h>
 #include <cglm/affine.h>
@@ -6,33 +6,34 @@
 #include <cglm/quat.h>
 #include <zen-common.h>
 
-#include "zen/board.h"
+#include "zen/view.h"
 
 void
-zna_cursor_commit(struct zna_cursor *self, uint32_t damage)
+zna_view_commit(struct zna_view *self, uint32_t damage)
 {
   if (!self->base_unit->has_renderer_objects) return;
 
-  if (damage & ZNA_CURSOR_DAMAGE_GEOMETRY) {
+  if (damage & ZNA_VIEW_DAMAGE_GEOMETRY) {
     mat4 local_model = GLM_MAT4_IDENTITY_INIT;
 
-    // TODO: Do not render cursor when it doesn't have board
-
     mat4 rotation;
-    glm_quat_mat4(self->zn_cursor->geometry.quaternion, rotation);
+    glm_quat_mat4(self->zn_view->geometry.quaternion, rotation);
 
-    glm_translate(local_model, self->zn_cursor->geometry.position);
+    glm_translate(local_model, self->zn_view->geometry.position);
     glm_mat4_mul(local_model, rotation, local_model);
-    glm_scale(local_model, (vec3){self->zn_cursor->geometry.size[0],
-                               self->zn_cursor->geometry.size[1], 0});
+    glm_scale(local_model, (vec3){self->zn_view->geometry.size[0],
+                               self->zn_view->geometry.size[1], 0});
 
     znr_gl_base_technique_gl_uniform_matrix(self->base_unit->technique, 0,
         "local_model", 4, 4, 1, false, local_model[0]);
   }
 
-  if (damage & ZNA_CURSOR_DAMAGE_TEXTURE) {
-    zna_base_unit_read_wlr_texture(
-        self->base_unit, zn_cursor_get_texture(self->zn_cursor));
+  if (damage & ZNA_VIEW_DAMAGE_TEXTURE) {
+    struct wlr_texture *texture =
+        wlr_surface_get_texture(self->zn_view->surface);
+    if (texture) {
+      zna_base_unit_read_wlr_texture(self->base_unit, texture);
+    }
   }
 
   znr_virtual_object_commit(self->virtual_object);
@@ -42,19 +43,19 @@ zna_cursor_commit(struct zna_cursor *self, uint32_t damage)
  * @param session must not be null
  */
 static void
-zna_cursor_setup_renderer_objects(
-    struct zna_cursor *self, struct znr_session *session)
+zna_view_setup_renderer_objects(
+    struct zna_view *self, struct znr_session *session)
 {
   self->virtual_object = znr_virtual_object_create(session);
 
   zna_base_unit_setup_renderer_objects(
       self->base_unit, session, self->virtual_object);
 
-  zna_cursor_commit(self, UINT32_MAX);
+  zna_view_commit(self, UINT32_MAX);
 }
 
 static void
-zna_cursor_teardown_renderer_objects(struct zna_cursor *self)
+zna_view_teardown_renderer_objects(struct zna_view *self)
 {
   zna_base_unit_teardown_renderer_objects(self->base_unit);
 
@@ -65,32 +66,32 @@ zna_cursor_teardown_renderer_objects(struct zna_cursor *self)
 }
 
 static void
-zna_cursor_handle_session_created(struct wl_listener *listener, void *data)
+zna_view_handle_session_created(struct wl_listener *listener, void *data)
 {
   UNUSED(data);
 
-  struct zna_cursor *self =
+  struct zna_view *self =
       zn_container_of(listener, self, session_created_listener);
   struct znr_session *session = self->system->current_session;
 
-  zna_cursor_setup_renderer_objects(self, session);
+  zna_view_setup_renderer_objects(self, session);
 }
 
 static void
-zna_cursor_handle_session_destroyed(struct wl_listener *listener, void *data)
+zna_view_handle_session_destroyed(struct wl_listener *listener, void *data)
 {
   UNUSED(data);
 
-  struct zna_cursor *self =
+  struct zna_view *self =
       zn_container_of(listener, self, session_destroyed_listener);
 
-  zna_cursor_teardown_renderer_objects(self);
+  zna_view_teardown_renderer_objects(self);
 }
 
-struct zna_cursor *
-zna_cursor_create(struct zn_cursor *zn_cursor, struct zna_system *system)
+struct zna_view *
+zna_view_create(struct zn_view *zn_view, struct zna_system *system)
 {
-  struct zna_cursor *self;
+  struct zna_view *self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -98,15 +99,15 @@ zna_cursor_create(struct zn_cursor *zn_cursor, struct zna_system *system)
     goto err;
   }
 
-  self->session_created_listener.notify = zna_cursor_handle_session_created;
+  self->session_created_listener.notify = zna_view_handle_session_created;
   wl_signal_add(
       &system->events.current_session_created, &self->session_created_listener);
 
-  self->session_destroyed_listener.notify = zna_cursor_handle_session_destroyed;
+  self->session_destroyed_listener.notify = zna_view_handle_session_destroyed;
   wl_signal_add(&system->events.current_session_destroyed,
       &self->session_destroyed_listener);
 
-  self->zn_cursor = zn_cursor;
+  self->zn_view = zn_view;
   self->system = system;
   self->virtual_object = NULL;
 
@@ -158,7 +159,7 @@ zna_cursor_create(struct zn_cursor *zn_cursor, struct zna_system *system)
 
   struct znr_session *session = self->system->current_session;
   if (session) {
-    zna_cursor_setup_renderer_objects(self, session);
+    zna_view_setup_renderer_objects(self, session);
   }
 
   return self;
@@ -168,7 +169,7 @@ err:
 }
 
 void
-zna_cursor_destroy(struct zna_cursor *self)
+zna_view_destroy(struct zna_view *self)
 {
   if (self->virtual_object) znr_virtual_object_destroy(self->virtual_object);
   zna_base_unit_destroy(self->base_unit);

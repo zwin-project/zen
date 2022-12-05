@@ -8,6 +8,7 @@ _zen_appearance_srcs = [
   'ray.c',
   'shader-inventory.c',
   'system.c',
+  'view.c',
 
   'board.c',
   'board/plane-unit.c',
