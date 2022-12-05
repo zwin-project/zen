@@ -6,6 +6,7 @@
 #include "zen/cursor.h"
 #include "zen/screen/output.h"
 #include "zen/server.h"
+#include "zen/view.h"
 
 static void
 scissor_output(struct zn_output *output, pixman_box32_t *rect)
@@ -92,10 +93,45 @@ render_cursor(struct zn_output *output, struct zn_cursor *cursor,
 }
 
 void
+render_view(struct zn_output *output, struct zn_view *view,
+    struct wlr_renderer *renderer, pixman_region32_t *screen_damage)
+{
+  struct wlr_texture *texture = wlr_surface_get_texture(view->surface);
+  struct wlr_fbox view_fbox;
+  struct wlr_box transformed_box;
+  pixman_region32_t render_damage;
+  pixman_box32_t *rects;
+  int rect_count;
+
+  if (!texture) return;
+
+  zn_view_get_surface_fbox(view, &view_fbox);
+  zn_output_box_effective_to_transformed_coords(
+      output, &view_fbox, &transformed_box);
+
+  pixman_region32_init(&render_damage);
+  pixman_region32_union_rect(&render_damage, &render_damage, transformed_box.x,
+      transformed_box.y, transformed_box.width, transformed_box.height);
+  pixman_region32_intersect(&render_damage, &render_damage, screen_damage);
+
+  if (pixman_region32_not_empty(&render_damage)) {
+    float matrix[9];
+    wlr_matrix_project_box(matrix, &transformed_box, WL_OUTPUT_TRANSFORM_NORMAL,
+        0, output->wlr_output->transform_matrix);
+    rects = pixman_region32_rectangles(&render_damage, &rect_count);
+    for (int i = 0; i < rect_count; i++) {
+      scissor_output(output, &rects[i]);
+      wlr_render_texture_with_matrix(renderer, texture, matrix, 1.f);
+    }
+  }
+}
+
+void
 zn_screen_renderer_render(struct zn_output *output,
     struct wlr_renderer *renderer, pixman_region32_t *damage)
 {
   struct zn_server *server = zn_server_get_singleton();
+  struct zn_board *board = output->screen->board;
   pixman_region32_t screen_damage;
   int output_width, output_height;
 
@@ -114,6 +150,12 @@ zn_screen_renderer_render(struct zn_output *output,
   render_background(output, renderer, &screen_damage);
 
   if (server->display_system != ZN_DISPLAY_SYSTEM_SCREEN) goto out;
+
+  if (board) {
+    struct zn_view *view;
+    wl_list_for_each (view, &board->view_list, board_link)
+      render_view(output, view, renderer, &screen_damage);
+  }
 
   render_cursor(output, server->scene->cursor, renderer, &screen_damage);
 

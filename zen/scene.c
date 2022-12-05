@@ -7,6 +7,7 @@
 #include "zen/ray.h"
 #include "zen/screen.h"
 #include "zen/server.h"
+#include "zen/view.h"
 
 static struct zn_board *
 zn_scene_ensure_dangling_board(struct zn_scene *self)
@@ -44,6 +45,20 @@ zn_scene_new_screen(struct zn_scene *self, struct zn_screen *screen)
   }
 }
 
+void
+zn_scene_new_view(struct zn_scene *self, struct zn_view *view)
+{
+  wl_list_insert(&self->view_list, &view->link);
+
+  if (wl_list_empty(&self->board_list)) return;
+
+  struct zn_board *board = zn_container_of(self->board_list.next, board, link);
+
+  zn_view_move(view, board, 0, 0);
+
+  zna_view_commit(view->appearance, ZNA_VIEW_DAMAGE_GEOMETRY);
+}
+
 struct zn_scene *
 zn_scene_create(void)
 {
@@ -69,6 +84,7 @@ zn_scene_create(void)
 
   wl_list_init(&self->screen_list);
   wl_list_init(&self->board_list);
+  wl_list_init(&self->view_list);
   wl_signal_init(&self->events.new_board);
 
   return self;
@@ -99,6 +115,7 @@ zn_scene_destroy(struct zn_scene *self)
 {
   wl_list_remove(&self->events.new_board.listener_list);
   wl_list_remove(&self->screen_list);
+  wl_list_remove(&self->view_list);
   zn_cursor_destroy(self->cursor);
   zn_ray_destroy(self->ray);
   free(self);

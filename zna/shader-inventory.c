@@ -6,11 +6,11 @@
 #include "board.frag.h"
 #include "board.vert.h"
 #include "color.frag.h"
-#include "cursor.frag.h"
-#include "cursor.vert.h"
 #include "default.vert.h"
 #include "ray.vert.h"
 #include "system.h"
+#include "view.frag.h"
+#include "view.vert.h"
 
 struct shader_info {
   const char *source;
@@ -43,23 +43,23 @@ static const struct shader_info shader_info[ZNA_SHADER_COUNT] = {
             .length = sizeof(color_frag_source),
             .type = GL_FRAGMENT_SHADER,
         },
-    [ZNA_SHADER_CURSOR_VERTEX] =
-        {
-            .source = cursor_vert_source,
-            .length = sizeof(cursor_vert_source),
-            .type = GL_VERTEX_SHADER,
-        },
-    [ZNA_SHADER_CURSOR_FRAGMENT] =
-        {
-            .source = cursor_frag_source,
-            .length = sizeof(cursor_frag_source),
-            .type = GL_FRAGMENT_SHADER,
-        },
     [ZNA_SHADER_RAY_VERTEX] =
         {
             .source = ray_vert_source,
             .length = sizeof(ray_vert_source),
             .type = GL_VERTEX_SHADER,
+        },
+    [ZNA_SHADER_VIEW_VERTEX] =
+        {
+            .source = view_vert_source,
+            .length = sizeof(view_vert_source),
+            .type = GL_VERTEX_SHADER,
+        },
+    [ZNA_SHADER_VIEW_FRAGMENT] =
+        {
+            .source = view_frag_source,
+            .length = sizeof(view_frag_source),
+            .type = GL_FRAGMENT_SHADER,
         },
 };
 
