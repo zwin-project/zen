@@ -175,10 +175,17 @@ zn_server_create(struct wl_display *display)
     goto err_renderer;
   }
 
+  self->screen_compositor =
+      zn_screen_compositor_create(self->display, self->renderer);
+  if (self->screen_compositor == NULL) {
+    zn_error("Failed to create zn_screen_compositor");
+    goto err_allocator;
+  }
+
   self->appearance_system = zna_system_create(self->display);
   if (self->appearance_system == NULL) {
     zn_error("Failed to create a zna_system");
-    goto err_allocator;
+    goto err_screen_compositor;
   }
 
   self->scene = zn_scene_create();
@@ -261,6 +268,9 @@ err_scene:
 err_appearance:
   zna_system_destroy(self->appearance_system);
 
+err_screen_compositor:
+  zn_screen_compositor_destroy(self->screen_compositor);
+
 err_allocator:
   wlr_allocator_destroy(self->allocator);
 
@@ -299,6 +309,7 @@ zn_server_destroy(struct zn_server *self)
   znr_remote_destroy(self->remote);
   zn_scene_destroy(self->scene);
   zna_system_destroy(self->appearance_system);
+  zn_screen_compositor_destroy(self->screen_compositor);
   wlr_allocator_destroy(self->allocator);
   wlr_renderer_destroy(self->renderer);
   zgnr_backend_destroy(self->zgnr_backend);

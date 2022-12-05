@@ -6,10 +6,13 @@ _zen_srcs = [
   'scene.c',
   'screen.c',
   'server.c',
+  'view.c',
   'virtual-object.c',
 
+  'screen/compositor.c',
   'screen/output.c',
   'screen/renderer.c',
+  'screen/xdg-toplevel.c',
   'screen/cursor-grab/default.c',
 
   'input/input-device.c',

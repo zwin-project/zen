@@ -7,12 +7,15 @@
 struct zn_screen;
 struct zna_board;
 
-#define CURSOR_Z_OFFSET_ON_BOARD 0.0001
+#define CURSOR_Z_OFFSET_ON_BOARD 0.0005
+#define VIEW_Z_OFFSET_ON_BOARD 0.0001
 
 struct zn_board {
   struct wl_list link;  // zn_scene::board_list
 
   struct zn_screen *screen;  // nullable
+
+  struct wl_list view_list;  // zn_view::board_link
 
   float color[3];  // FIXME: debugging purpose, remove me later
 

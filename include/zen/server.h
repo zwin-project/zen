@@ -10,6 +10,7 @@
 #include "zen/appearance/system.h"
 #include "zen/input/input-manager.h"
 #include "zen/scene.h"
+#include "zen/screen/compositor.h"
 #include "zen/shell/shell.h"
 
 enum zn_display_system_state {
@@ -24,6 +25,8 @@ struct zn_server {
   struct zgnr_backend *zgnr_backend;
   struct wlr_renderer *renderer;
   struct wlr_allocator *allocator;
+
+  struct zn_screen_compositor *screen_compositor;
 
   struct zn_input_manager *input_manager;
   struct znr_remote *remote;

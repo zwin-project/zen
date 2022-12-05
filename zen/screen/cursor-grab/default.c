@@ -2,6 +2,8 @@
 
 #include <zen-common.h>
 
+#include "zen/appearance/cursor.h"
+
 void
 zn_default_cursor_grab_motion_relative(
     struct zn_cursor_grab *grab, double dx, double dy, uint32_t time_msec)
@@ -9,6 +11,8 @@ zn_default_cursor_grab_motion_relative(
   struct zn_cursor *cursor = grab->cursor;
 
   zn_cursor_move(cursor, cursor->board, cursor->x + dx, cursor->y + dy);
+
+  zna_cursor_commit(cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
 
   UNUSED(time_msec);
 }
@@ -18,6 +22,8 @@ zn_default_cursor_grab_motion_absolute(struct zn_cursor_grab *grab,
     struct zn_board *board, double x, double y, uint32_t time_msec)
 {
   zn_cursor_move(grab->cursor, board, x, y);
+
+  zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
 
   UNUSED(time_msec);
 }
