@@ -126,7 +126,8 @@ jobs:
           ninja -C build test
         working-directory: ./main
         env:
-          CC: gcc
+          CXX: clang++
+          CC: clang
 
       - uses: actions/upload-artifact@v3
         if: failure()
