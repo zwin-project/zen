@@ -9,71 +9,74 @@
 
 static void zgnr_gl_texture_destroy(struct zgnr_gl_texture_impl *self);
 
+// See "8.4.2 Transfer of Pixel Rectangles" of the OpenGL ES 3.2 spec
 static size_t
 gl_2d_image_size(GLenum format, GLenum type, GLsizei width, GLsizei height)
 {
-  size_t size = 0;
+  size_t external_bytes_per_pixel = 0;
+  bool take_format_into_account = true;
+
   switch (type) {
     case GL_UNSIGNED_BYTE:
-      size = sizeof(GLubyte);
-      break;
     case GL_BYTE:
-      size = sizeof(GLbyte);
+      external_bytes_per_pixel = 1;
       break;
-    case GL_UNSIGNED_SHORT:
+
     case GL_UNSIGNED_SHORT_5_6_5:
     case GL_UNSIGNED_SHORT_4_4_4_4:
     case GL_UNSIGNED_SHORT_5_5_5_1:
-      size = sizeof(GLushort);
-      break;
+      take_format_into_account = false;
+    case GL_UNSIGNED_SHORT:
     case GL_SHORT:
-      size = sizeof(GLshort);
+    case GL_HALF_FLOAT:
+      external_bytes_per_pixel = 2;
       break;
-    case GL_UNSIGNED_INT:
+
     case GL_UNSIGNED_INT_2_10_10_10_REV:
     case GL_UNSIGNED_INT_10F_11F_11F_REV:
     case GL_UNSIGNED_INT_5_9_9_9_REV:
     case GL_UNSIGNED_INT_24_8:
-      size = sizeof(GLuint);
-      break;
+      take_format_into_account = false;
+    case GL_UNSIGNED_INT:
     case GL_INT:
-      size = sizeof(GLint);
-      break;
-    case GL_HALF_FLOAT:
-      size = sizeof(GLfloat) / 2;
-      break;
     case GL_FLOAT:
+      external_bytes_per_pixel = 4;
+      break;
+
     case GL_FLOAT_32_UNSIGNED_INT_24_8_REV:
-      size = sizeof(GLfloat);
+      take_format_into_account = false;
+      external_bytes_per_pixel = 8;
       break;
   }
 
-  switch (format) {
-    case GL_RED:
-    case GL_RED_INTEGER:
-    case GL_DEPTH_COMPONENT:
-    case GL_ALPHA:
-    case GL_STENCIL_INDEX:
-    case GL_LUMINANCE:
-      size *= 1;
-      break;
-    case GL_RG:
-    case GL_RG_INTEGER:
-    case GL_DEPTH_STENCIL:
-    case GL_LUMINANCE_ALPHA:
-      size *= 2;
-      break;
-    case GL_RGB:
-    case GL_RGB_INTEGER:
-      size *= 3;
-      break;
-    case GL_RGBA:
-    case GL_RGBA_INTEGER:
-      size *= 4;
-      break;
+  if (take_format_into_account) {
+    switch (format) {
+      case GL_RED:
+      case GL_RED_INTEGER:
+      case GL_DEPTH_COMPONENT:
+      case GL_ALPHA:
+      case GL_STENCIL_INDEX:
+      case GL_LUMINANCE:
+        external_bytes_per_pixel *= 1;
+        break;
+      case GL_RG:
+      case GL_RG_INTEGER:
+      case GL_DEPTH_STENCIL:
+      case GL_LUMINANCE_ALPHA:
+        external_bytes_per_pixel *= 2;
+        break;
+      case GL_RGB:
+      case GL_RGB_INTEGER:
+        external_bytes_per_pixel *= 3;
+        break;
+      case GL_RGBA:
+      case GL_RGBA_INTEGER:
+        external_bytes_per_pixel *= 4;
+        break;
+    }
   }
 
-  return size * width * height;
+  return external_bytes_per_pixel * width * height;
 }
 
 static void

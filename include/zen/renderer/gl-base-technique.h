@@ -3,6 +3,7 @@
 #include <zigen-gles-v32-protocol.h>
 
 #include "zen/renderer/gl-program.h"
+#include "zen/renderer/gl-sampler.h"
 #include "zen/renderer/gl-texture.h"
 #include "zen/renderer/gl-vertex-array.h"
 #include "zen/renderer/rendering-unit.h"
@@ -22,11 +23,11 @@ void znr_gl_base_technique_bind_program(
 
 void znr_gl_base_technique_bind_texture(struct znr_gl_base_technique *self,
     uint32_t binding, const char *name, struct znr_gl_texture *texture,
-    uint32_t target);
+    uint32_t target, struct znr_gl_sampler *sampler);
 
 /**
  * @param name is nullable
- * @param value must be larger than or equeal to (32 * size * count) bits
+ * @param value must be larger than or equal to (32 * size * count) bits
  */
 void znr_gl_base_technique_gl_uniform_vector(struct znr_gl_base_technique *self,
     uint32_t location, const char *name,
@@ -35,7 +36,7 @@ void znr_gl_base_technique_gl_uniform_vector(struct znr_gl_base_technique *self,
 
 /**
  * @param name is nullable
- * @param value must be larger than or equeal to (32 * col * row * count) bits
+ * @param value must be larger than or equal to (32 * col * row * count) bits
  */
 void znr_gl_base_technique_gl_uniform_matrix(struct znr_gl_base_technique *self,
     uint32_t location, const char *name, uint32_t col, uint32_t row,

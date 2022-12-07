@@ -9,6 +9,7 @@ _zgnr_srcs = [
   'src/gl-base-technique.c',
   'src/gl-buffer.c',
   'src/gl-program.c',
+  'src/gl-sampler.c',
   'src/gl-shader.c',
   'src/gl-texture.c',
   'src/gl-uniform-variable.c',

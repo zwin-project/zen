@@ -5,6 +5,7 @@
 #include <wlr/render/egl.h>
 #include <wlr/render/glew.h>
 #include <zen-common.h>
+#include <zgnr/gl-sampler.h>
 
 #include "zen/server.h"
 
@@ -38,7 +39,7 @@ zna_base_unit_read_wlr_texture(
   if (self->has_texture_data == false) {
     self->has_texture_data = true;
     znr_gl_base_technique_bind_texture(
-        self->technique, 0, "", self->texture0, GL_TEXTURE_2D);
+        self->technique, 0, "", self->texture0, GL_TEXTURE_2D, self->sampler0);
   }
 
   znr_gl_texture_image_2d(self->texture0, GL_TEXTURE_2D, 0, GL_RGBA,
@@ -61,6 +62,7 @@ zna_base_unit_setup_renderer_objects(struct zna_base_unit *self,
   self->vertex_array = znr_gl_vertex_array_create(session);
   self->program = znr_gl_program_create(session);
   self->texture0 = znr_gl_texture_create(session, self->system->display);
+  self->sampler0 = znr_gl_sampler_create(session);
 
   // program
   vertex_shader = zna_shader_inventory_get(
@@ -123,6 +125,8 @@ zna_base_unit_teardown_renderer_objects(struct zna_base_unit *self)
   self->program = NULL;
   znr_gl_texture_destroy(self->texture0);
   self->texture0 = NULL;
+  znr_gl_sampler_destroy(self->sampler0);
+  self->sampler0 = NULL;
 
   self->has_renderer_objects = false;
   self->has_texture_data = false;
@@ -170,6 +174,7 @@ zna_base_unit_destroy(struct zna_base_unit *self)
   if (self->vertex_array) znr_gl_vertex_array_destroy(self->vertex_array);
   if (self->program) znr_gl_program_destroy(self->program);
   if (self->texture0) znr_gl_texture_destroy(self->texture0);
+  if (self->sampler0) znr_gl_sampler_destroy(self->sampler0);
 
   zgnr_mem_storage_unref(self->vertex_buffer_storage);
   wl_array_release(&self->vertex_attributes);

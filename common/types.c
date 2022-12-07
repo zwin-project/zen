@@ -86,3 +86,13 @@ zn_array_to_versor(struct wl_array *array, versor vec)
 
   return 0;
 }
+
+int
+zn_array_to_float(struct wl_array *array, float *value)
+{
+  if (sizeof(float) != array->size) return -1;
+
+  memcpy(value, array->data, sizeof(float));
+
+  return 0;
+}

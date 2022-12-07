@@ -123,10 +123,12 @@ zgnr_gl_base_technique_protocol_bind_vertex_array(struct wl_client *client,
 static void
 zgnr_gl_base_technique_protocol_bind_texture(struct wl_client *client,
     struct wl_resource *resource, uint32_t binding, const char *name,
-    struct wl_resource *texture_resource, uint32_t target)
+    struct wl_resource *texture_resource, uint32_t target,
+    struct wl_resource *sampler_resource)
 {
   struct zgnr_texture_binding_impl *texture_binding;
   struct zgnr_gl_texture_impl *texture;
+  struct zgnr_gl_sampler_impl *sampler;
   struct zgnr_gl_base_technique_impl *self =
       wl_resource_get_user_data(resource);
   if (self == NULL) return;
@@ -140,7 +142,9 @@ zgnr_gl_base_technique_protocol_bind_texture(struct wl_client *client,
   }
 
   texture = wl_resource_get_user_data(texture_resource);
-  texture_binding = zgnr_texture_binding_create(binding, name, texture, target);
+  sampler = wl_resource_get_user_data(sampler_resource);
+  texture_binding =
+      zgnr_texture_binding_create(binding, name, texture, target, sampler);
   if (texture_binding == NULL) {
     zn_error("Failed to create a zgnr_texture_binding");
     wl_client_post_no_memory(client);
@@ -435,9 +439,12 @@ zgnr_gl_base_technique_handle_rendering_unit_commit(
         texture_binding, &self->pending.texture_binding_list, base.link) {
       struct zgnr_gl_texture_impl *texture =
           zn_container_of(texture_binding->base.texture, texture, base);
+      struct zgnr_gl_sampler_impl *sampler =
+          zn_container_of(texture_binding->base.sampler, sampler, base);
 
       copy = zgnr_texture_binding_create(texture_binding->base.binding,
-          texture_binding->base.name, texture, texture_binding->base.target);
+          texture_binding->base.name, texture, texture_binding->base.target,
+          sampler);
 
       wl_list_insert(
           &self->base.current.texture_binding_list, &copy->base.link);
@@ -450,8 +457,11 @@ zgnr_gl_base_technique_handle_rendering_unit_commit(
       texture_binding, &self->base.current.texture_binding_list, base.link) {
     struct zgnr_gl_texture_impl *texture =
         zn_container_of(texture_binding->base.texture, texture, base);
+    struct zgnr_gl_sampler_impl *sampler =
+        zn_container_of(texture_binding->base.sampler, sampler, base);
 
     zgnr_gl_texture_commit(texture);
+    zgnr_gl_sampler_commit(sampler);
   }
 }
 

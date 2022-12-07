@@ -6,6 +6,7 @@
 #include "gl-base-technique.h"
 #include "gl-buffer.h"
 #include "gl-program.h"
+#include "gl-sampler.h"
 #include "gl-shader.h"
 #include "gl-texture.h"
 #include "gl-vertex-array.h"
@@ -97,12 +98,28 @@ zgnr_gles_v32_protocol_create_gl_texture(
 
   struct zgnr_gl_texture_impl *texture = zgnr_gl_texture_create(client, id);
   if (texture == NULL) {
-    zn_error("Failed to creat a gl texture");
+    zn_error("Failed to create a gl texture");
     wl_client_post_no_memory(client);
     return;
   }
 
   wl_signal_emit(&self->base.events.new_gl_texture, &texture->base);
+}
+
+static void
+zgnr_gles_v32_protocol_create_gl_sampler(
+    struct wl_client *client, struct wl_resource *resource, uint32_t id)
+{
+  struct zgnr_gles_v32_impl *self = wl_resource_get_user_data(resource);
+
+  struct zgnr_gl_sampler_impl *sampler = zgnr_gl_sampler_create(client, id);
+  if (sampler == NULL) {
+    zn_error("Failed to create a gl sampler");
+    wl_client_post_no_memory(client);
+    return;
+  }
+
+  wl_signal_emit(&self->base.events.new_gl_sampler, &sampler->base);
 }
 
 static void
@@ -146,6 +163,7 @@ static const struct zgn_gles_v32_interface implementation = {
     .create_rendering_unit = zgnr_gles_v32_protocol_create_rendering_unit,
     .create_gl_buffer = zgnr_gles_v32_protocol_create_gl_buffer,
     .create_gl_shader = zgnr_gles_v32_protocol_create_gl_shader,
+    .create_gl_sampler = zgnr_gles_v32_protocol_create_gl_sampler,
     .create_gl_program = zgnr_gles_v32_protocol_create_gl_program,
     .create_gl_texture = zgnr_gles_v32_protocol_create_gl_texture,
     .create_gl_vertex_array = zgnr_gles_v32_protocol_create_gl_vertex_array,
@@ -183,6 +201,7 @@ zgnr_gles_v32_create(struct wl_display *display)
   wl_signal_init(&self->base.events.new_gl_base_technique);
   wl_signal_init(&self->base.events.new_gl_buffer);
   wl_signal_init(&self->base.events.new_gl_program);
+  wl_signal_init(&self->base.events.new_gl_sampler);
   wl_signal_init(&self->base.events.new_gl_shader);
   wl_signal_init(&self->base.events.new_gl_texture);
   wl_signal_init(&self->base.events.new_gl_vertex_array);
@@ -216,6 +235,7 @@ zgnr_gles_v32_destroy(struct zgnr_gles_v32 *parent)
   wl_list_remove(&self->base.events.new_gl_vertex_array.listener_list);
   wl_list_remove(&self->base.events.new_gl_texture.listener_list);
   wl_list_remove(&self->base.events.new_gl_shader.listener_list);
+  wl_list_remove(&self->base.events.new_gl_sampler.listener_list);
   wl_list_remove(&self->base.events.new_gl_program.listener_list);
   wl_list_remove(&self->base.events.new_gl_buffer.listener_list);
   wl_list_remove(&self->base.events.new_gl_base_technique.listener_list);

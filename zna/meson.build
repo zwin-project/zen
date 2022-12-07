@@ -17,6 +17,7 @@ _zen_appearance_srcs = [
   'virtual-object/gl-base-technique.c',
   'virtual-object/gl-buffer.c',
   'virtual-object/gl-program.c',
+  'virtual-object/gl-sampler.c',
   'virtual-object/gl-shader.c',
   'virtual-object/gl-texture.c',
   'virtual-object/gl-vertex-array.c',

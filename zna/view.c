@@ -33,6 +33,10 @@ zna_view_commit(struct zna_view *self, uint32_t damage)
         wlr_surface_get_texture(self->zn_view->surface);
     if (texture) {
       zna_base_unit_read_wlr_texture(self->base_unit, texture);
+      znr_gl_sampler_parameter_i(
+          self->base_unit->sampler0, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      znr_gl_sampler_parameter_i(
+          self->base_unit->sampler0, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     }
   }
 

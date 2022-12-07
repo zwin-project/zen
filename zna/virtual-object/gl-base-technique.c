@@ -6,6 +6,7 @@
 
 #include "virtual-object/gl-buffer.h"
 #include "virtual-object/gl-program.h"
+#include "virtual-object/gl-sampler.h"
 #include "virtual-object/gl-texture.h"
 #include "virtual-object/gl-vertex-array.h"
 #include "virtual-object/rendering-unit.h"
@@ -90,13 +91,17 @@ zna_gl_base_technique_apply_commit(
   wl_list_for_each (texture_binding,
       &self->zgnr_gl_base_technique->current.texture_binding_list, link) {
     struct zna_gl_texture *texture = texture_binding->texture->user_data;
+    struct zna_gl_sampler *sampler = texture_binding->sampler->user_data;
+
     zna_gl_texture_apply_commit(texture, only_damaged);
+    zna_gl_sampler_apply_commit(sampler, only_damaged);
 
     if (self->zgnr_gl_base_technique->current.texture_changed ||
         !only_damaged) {
       znr_gl_base_technique_bind_texture(self->znr_gl_base_technique,
           texture_binding->binding, texture_binding->name,
-          texture->znr_gl_texture, texture_binding->target);
+          texture->znr_gl_texture, texture_binding->target,
+          sampler->znr_gl_sampler);
     }
   }
 
