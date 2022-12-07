@@ -4,6 +4,7 @@ _znr_remote_srcs = [
   'src/gl-base-technique.cc',
   'src/gl-buffer.cc',
   'src/gl-program.cc',
+  'src/gl-sampler.cc',
   'src/gl-shader.cc',
   'src/gl-texture.cc',
   'src/gl-vertex-array.cc',

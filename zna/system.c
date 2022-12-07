@@ -9,6 +9,7 @@
 #include "virtual-object/gl-base-technique.h"
 #include "virtual-object/gl-buffer.h"
 #include "virtual-object/gl-program.h"
+#include "virtual-object/gl-sampler.h"
 #include "virtual-object/gl-shader.h"
 #include "virtual-object/gl-texture.h"
 #include "virtual-object/gl-vertex-array.h"
@@ -112,6 +113,17 @@ zna_system_handle_new_gl_vertex_array(struct wl_listener *listener, void *data)
 }
 
 static void
+zna_system_handle_new_gl_sampler(struct wl_listener *listener, void *data)
+{
+  struct zna_system *self =
+      zn_container_of(listener, self, new_gl_sampler_listener);
+
+  struct zgnr_gl_sampler *gl_sampler = data;
+
+  (void)zna_gl_sampler_create(gl_sampler, self);
+}
+
+static void
 zna_system_handle_new_gl_shader(struct wl_listener *listener, void *data)
 {
   struct zna_system *self =
@@ -187,6 +199,10 @@ zna_system_create(struct wl_display *display)
   wl_signal_add(&self->gles->events.new_gl_vertex_array,
       &self->new_gl_vertex_array_listener);
 
+  self->new_gl_sampler_listener.notify = zna_system_handle_new_gl_sampler;
+  wl_signal_add(
+      &self->gles->events.new_gl_sampler, &self->new_gl_sampler_listener);
+
   self->new_gl_shader_listener.notify = zna_system_handle_new_gl_shader;
   wl_signal_add(
       &self->gles->events.new_gl_shader, &self->new_gl_shader_listener);
@@ -232,6 +248,7 @@ zna_system_destroy(struct zna_system *self)
   wl_list_remove(&self->new_gl_buffer_listener.link);
   wl_list_remove(&self->new_gl_base_technique_listener.link);
   wl_list_remove(&self->new_gl_vertex_array_listener.link);
+  wl_list_remove(&self->new_gl_sampler_listener.link);
   wl_list_remove(&self->new_gl_shader_listener.link);
   wl_list_remove(&self->new_gl_program_listener.link);
   wl_list_remove(&self->new_gl_texture_listener.link);

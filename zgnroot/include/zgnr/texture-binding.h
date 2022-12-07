@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wayland-server-core.h>
+#include <zgnr/gl-sampler.h>
 #include <zgnr/gl-texture.h>
 
 #ifdef __cplusplus
@@ -11,6 +12,7 @@ struct zgnr_texture_binding {
   uint32_t binding;
   char *name;                       // null terminated
   struct zgnr_gl_texture *texture;  // nonnull, reference
+  struct zgnr_gl_sampler *sampler;  // nonnull, reference
   uint32_t target;
 
   //  zgnr_gl_base_technique::current.texture_binding_list or

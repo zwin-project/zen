@@ -39,7 +39,7 @@ znr_gl_texture_create(
 
   self->proxy = zen::remote::server::CreateGlTexture(session->proxy);
   if (!self->proxy) {
-    zn_error("Failed to creat remote gl texture");
+    zn_error("Failed to create remote gl texture");
     goto err_delete;
   }
 

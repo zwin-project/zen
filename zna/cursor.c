@@ -5,6 +5,7 @@
 #include <cglm/mat4.h>
 #include <cglm/quat.h>
 #include <zen-common.h>
+#include <zgnr/gl-sampler.h>
 
 #include "zen/board.h"
 
@@ -33,6 +34,10 @@ zna_cursor_commit(struct zna_cursor *self, uint32_t damage)
   if (damage & ZNA_CURSOR_DAMAGE_TEXTURE) {
     zna_base_unit_read_wlr_texture(
         self->base_unit, zn_cursor_get_texture(self->zn_cursor));
+    znr_gl_sampler_parameter_i(
+        self->base_unit->sampler0, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    znr_gl_sampler_parameter_i(
+        self->base_unit->sampler0, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   }
 
   znr_virtual_object_commit(self->virtual_object);

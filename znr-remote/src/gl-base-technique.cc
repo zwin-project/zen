@@ -7,6 +7,7 @@
 
 #include "gl-buffer.h"
 #include "gl-program.h"
+#include "gl-sampler.h"
 #include "gl-texture.h"
 #include "gl-vertex-array.h"
 #include "rendering-unit.h"
@@ -29,9 +30,10 @@ znr_gl_base_technique_bind_program(
 void
 znr_gl_base_technique_bind_texture(struct znr_gl_base_technique *self,
     uint32_t binding, const char *name, struct znr_gl_texture *texture,
-    uint32_t target)
+    uint32_t target, struct znr_gl_sampler *sampler)
 {
-  self->proxy->BindTexture(binding, name, texture->proxy->id(), target);
+  self->proxy->BindTexture(
+      binding, name, texture->proxy->id(), target, sampler->proxy->id());
 }
 
 void

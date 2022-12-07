@@ -34,6 +34,7 @@ struct zna_base_unit {
   struct znr_gl_vertex_array *vertex_array;
   struct znr_gl_program *program;
   struct znr_gl_texture *texture0;
+  struct znr_gl_sampler *sampler0;
   bool has_texture_data;
 
   enum zna_shader_name vertex_shader;
@@ -47,6 +48,9 @@ struct zna_base_unit {
   union zgnr_gl_base_technique_draw_args draw_args;
 };
 
+/**
+ * @param sampler_parameters array of zgnr_gl_sampler_parameter
+ */
 void zna_base_unit_read_wlr_texture(
     struct zna_base_unit *self, struct wlr_texture *texture);
 
