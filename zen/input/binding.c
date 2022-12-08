@@ -1,4 +1,4 @@
-#include "zen/binding.h"
+#include "zen/input/binding.h"
 
 #include <zen-common.h>
 

@@ -4,7 +4,7 @@
 #include <wlr/types/wlr_input_device.h>
 
 #include "zen-common.h"
-#include "zen/binding.h"
+#include "zen/input/binding.h"
 #include "zen/input/input-device.h"
 #include "zen/input/seat.h"
 

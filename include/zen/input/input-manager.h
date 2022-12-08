@@ -3,7 +3,7 @@
 #include <wayland-server.h>
 #include <wlr/types/wlr_input_device.h>
 
-#include "zen/binding.h"
+#include "zen/input/binding.h"
 #include "zen/input/input-device.h"
 #include "zen/input/keyboard.h"
 
