@@ -151,9 +151,6 @@ subdir('znr-remote')
 subdir('zen')
 subdir('zna')
 subdir('zns')
-# if get_option('cui-client')
-#   subdir('cui-client')
-# endif
 
 find_program('weston-terminal', required: true) # used in zen.desktop
 

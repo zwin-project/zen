@@ -9,7 +9,6 @@ _protocols = {
   'zigen': join_paths(_zigen_protocols_dir, 'zigen.xml'),
   'zigen-gles-v32': join_paths(_zigen_protocols_dir, 'zigen-gles-v32.xml'),
   'zigen-shell': join_paths(_zigen_protocols_dir, 'zigen-shell.xml'),
-  'zen-desktop': 'zen-desktop.xml',
 }
 
 # protocols[<protocol-name>][<type>]
