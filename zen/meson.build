@@ -25,8 +25,6 @@ _zen_srcs = [
 _zen_srcs_pub = [
   protocols['xdg-shell']['private-code'],
   protocols['xdg-shell']['server-header'],
-  protocols['zen-desktop']['private-code'],
-  protocols['zen-desktop']['server-header'],
 ]
 
 _zen_deps = [
