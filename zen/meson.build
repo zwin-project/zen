@@ -1,5 +1,4 @@
 _zen_srcs = [
-  'binding.c',
   'board.c',
   'cursor.c',
   'ray.c',
@@ -15,6 +14,7 @@ _zen_srcs = [
   'screen/xdg-toplevel.c',
   'screen/cursor-grab/default.c',
 
+  'input/binding.c',
   'input/input-device.c',
   'input/input-manager.c',
   'input/keyboard.c',
