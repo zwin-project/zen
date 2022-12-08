@@ -5,13 +5,7 @@ _wayland_dtd_path = join_paths(wayland_scanner_dep.get_variable('pkgdatadir'), '
 _test_inc = include_directories('.')
 
 _tests = {
-  'protocol/validate-xml': {
-    'env': {
-      'WAYLAND_DTD_PATH': _wayland_dtd_path,
-      'ZEN_DESKTOP_XML': zen_desktop_xml_abs_path,
-    },
-    'deps': _libxml_dep,
-  },
+  'noop': {},
 }
 
 foreach key, args : _tests
