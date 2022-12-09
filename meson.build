@@ -95,6 +95,7 @@ wayland_protocols_req = '>= 1.24'
 wayland_req = '>= 1.18.0'
 wlroots_req = ['>= 0.15', '< 0.16']
 wlr_glew_renderer_req = '0.15.1.1'
+zen_protocols_req = '0.0.1'
 zen_remote_server_req = '0.1.0.23'
 
 # dependencies
@@ -111,6 +112,7 @@ wayland_server_dep = dependency('wayland-server', version: wayland_req)
 wlroots_dep = dependency('wlroots', version: wlroots_req)
 wlr_glew_renderer_dep = dependency('wlr-glew-renderer', version: wlr_glew_renderer_req)
 xkbcommon_dep = dependency('xkbcommon')
+zen_protocols_dep = dependency('zen-protocols', version: zen_protocols_req)
 zen_remote_server_dep = dependency('zen-remote-server', version: zen_remote_server_req)
 zigen_protocols_dep = dependency('zigen-protocols')
 

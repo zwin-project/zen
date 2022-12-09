@@ -61,8 +61,7 @@ zn_virtual_object_create(struct zgnr_virtual_object *zgnr_virtual_object)
     goto err_free;
   }
 
-  vec3 initial_pos = {0, 1, -1};
-  zn_virtual_object_move(self, initial_pos, GLM_QUAT_IDENTITY);
+  zn_virtual_object_move(self, GLM_VEC3_ZERO, GLM_QUAT_IDENTITY);
 
   return self;
 
