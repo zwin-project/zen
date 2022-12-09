@@ -26,6 +26,8 @@ _zgnr_srcs = [
   'src/seat-ray.c',
   'src/shell.c',
   'src/shm.c',
+  'src/space.c',
+  'src/space-manager.c',
   'src/texture-binding.c',
   'src/virtual-object.c',
 ]
@@ -37,6 +39,8 @@ _zgnr_srcs_pub = [
   protocols['zigen-shell']['server-header'],
   protocols['zigen-gles-v32']['private-code'],
   protocols['zigen-gles-v32']['server-header'],
+  protocols['zen-space']['private-code'],
+  protocols['zen-space']['server-header'],
 ]
 
 _zgnr_deps = [

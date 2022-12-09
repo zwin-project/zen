@@ -7,6 +7,7 @@
 #include "zen/ray.h"
 #include "zen/screen.h"
 #include "zen/server.h"
+#include "zen/space.h"
 #include "zen/view.h"
 
 static struct zn_board *
@@ -24,6 +25,41 @@ zn_scene_ensure_dangling_board(struct zn_scene *self)
   wl_signal_emit(&self->events.new_board, board);
 
   return board;
+}
+
+static void
+zn_scene_set_current_space(struct zn_scene *self, struct zn_space *space)
+{
+  if (self->current_space) {
+    wl_list_remove(&self->current_space_destroy_listener.link);
+    wl_list_init(&self->current_space_destroy_listener.link);
+    zgnr_space_leave(self->current_space->zgnr_space);
+    zgnr_space_shutdown(self->current_space->zgnr_space);
+  }
+
+  if (space) {
+    wl_signal_add(
+        &space->events.destroy, &self->current_space_destroy_listener);
+    zgnr_space_enter(space->zgnr_space);
+  }
+
+  self->current_space = space;
+}
+
+void
+zn_scene_new_space(struct zn_scene *self, struct zn_space *space)
+{
+  zn_scene_set_current_space(self, space);
+}
+
+static void
+zn_scene_handle_current_space_destroy(struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+  struct zn_scene *self =
+      zn_container_of(listener, self, current_space_destroy_listener);
+
+  zn_scene_set_current_space(self, NULL);
 }
 
 void
@@ -82,10 +118,16 @@ zn_scene_create(void)
     goto err_ray;
   }
 
+  self->current_space = NULL;
+
   wl_list_init(&self->screen_list);
   wl_list_init(&self->board_list);
   wl_list_init(&self->view_list);
   wl_signal_init(&self->events.new_board);
+
+  self->current_space_destroy_listener.notify =
+      zn_scene_handle_current_space_destroy;
+  wl_list_init(&self->current_space_destroy_listener.link);
 
   return self;
 
@@ -114,6 +156,7 @@ void
 zn_scene_destroy(struct zn_scene *self)
 {
   wl_list_remove(&self->events.new_board.listener_list);
+  wl_list_remove(&self->current_space_destroy_listener.link);
   wl_list_remove(&self->screen_list);
   wl_list_remove(&self->view_list);
   zn_cursor_destroy(self->cursor);

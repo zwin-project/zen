@@ -1,5 +1,6 @@
 #include "shell.h"
 
+#include <cglm/quat.h>
 #include <float.h>
 #include <zen-common.h>
 #include <zgnr/bounded.h>
@@ -8,6 +9,7 @@
 #include "bounded.h"
 #include "zen/board.h"
 #include "zen/scene.h"
+#include "zen/virtual-object.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -60,8 +62,15 @@ zn_shell_handle_new_bounded(struct wl_listener *listener, void *data)
   struct zn_shell *self = zn_container_of(listener, self, new_bounded_listener);
 
   struct zgnr_bounded *zgnr_bounded = data;
+  struct zn_virtual_object *zn_virtual_object =
+      zgnr_bounded->virtual_object->user_data;
 
   (void)zns_bounded_create(zgnr_bounded);
+
+  // TODO: calculate better initial position
+  vec3 initial_bounded_position = {0, 1, -1};
+  zn_virtual_object_move(
+      zn_virtual_object, initial_bounded_position, GLM_QUAT_IDENTITY);
 }
 
 static void

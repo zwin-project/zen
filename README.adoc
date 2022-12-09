@@ -16,6 +16,9 @@ to build and install.
 . zen-remote +
 Please see https://github.com/zigen-project/zen-remote[zigen-project/zen-remote]
 to build and install.
+. zen-protocols +
+Please see https://github.com/zigen-project/zen-protocols[zigen-project/zen-protocols]
+to install.
 . tomlc99 +
 Please see https://github.com/cktan/tomlc99[cktan/tomlc99] to build and install. +
 Note that `make install` tries to install `libtoml.pc` to `/usr/local/lib/pkgconfig`.

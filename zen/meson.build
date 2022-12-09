@@ -5,6 +5,7 @@ _zen_srcs = [
   'scene.c',
   'screen.c',
   'server.c',
+  'space.c',
   'view.c',
   'virtual-object.c',
 

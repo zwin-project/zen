@@ -206,6 +206,15 @@ zgnr_bounded_create(struct wl_client *client, uint32_t id,
   self->pending.damage = 0;
   self->base.current.region = NULL;
 
+  self->resource = wl_resource_create(client, &zgn_bounded_interface, 1, id);
+  if (self->resource == NULL) {
+    zn_error("Failed to create a wl_resource");
+    goto err_free;
+  }
+
+  wl_resource_set_implementation(
+      self->resource, &implementation, self, zgnr_bounded_handle_destroy);
+
   self->virtual_object_destroy_listener.notify =
       zgnr_bounded_handle_virtual_object_destroy;
   wl_signal_add(&virtual_object->base.events.destroy,
@@ -215,15 +224,6 @@ zgnr_bounded_create(struct wl_client *client, uint32_t id,
       zgnr_bounded_handle_virtual_object_commit;
   wl_signal_add(
       &virtual_object->events.on_commit, &self->virtual_object_commit_listener);
-
-  self->resource = wl_resource_create(client, &zgn_bounded_interface, 1, id);
-  if (self->resource == NULL) {
-    zn_error("Failed to create a wl_resource");
-    goto err_free;
-  }
-
-  wl_resource_set_implementation(
-      self->resource, &implementation, self, zgnr_bounded_handle_destroy);
 
   return self;
 
