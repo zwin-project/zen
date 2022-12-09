@@ -9,8 +9,13 @@ on:
       - main
 
 jobs:
-  test-with-gcc:
+  test-with-clang:
     runs-on: ubuntu-22.04
+
+    env:
+      CC: clang
+      CXX: clang++
+
     steps:
       - name: Install dependencies
         run: |
@@ -35,8 +40,6 @@ jobs:
           meson build
           sudo ninja -C build install
         working-directory: ./cglm
-        env:
-          CC: gcc
 
       - name: Clone wlr-glew-renderer
         uses: actions/checkout@v2
@@ -49,8 +52,6 @@ jobs:
           meson build
           sudo meson install -C build --skip-subprojects
         working-directory: ./wlr-glew-renderer
-        env:
-          CC: gcc
 
       - name: Clone grpc-dev
         uses: actions/checkout@v2
@@ -79,8 +80,6 @@ jobs:
           cmake -B build -DZEN_REMOTE_GRPC_SYSROOT=$GITHUB_WORKSPACE/grpc-dev/native/Debug -GNinja
           cmake --build build
           sudo cmake --install build
-        env:
-          CXX: clang++
 
       - name: Clone tomlc99
         uses: actions/checkout@v2
@@ -97,8 +96,6 @@ jobs:
           sudo mkdir -p /usr/local/lib/pkgconfig
           sudo make install
         working-directory: ./tomlc99
-        env:
-          CC: gcc
 
       - name: Clone zigen
         uses: actions/checkout@v2
@@ -112,8 +109,19 @@ jobs:
         run: |
           meson build
           sudo ninja -C build install
-        env:
-          CC: gcc
+
+      - name: Clone zen-protocols
+        uses: actions/checkout@v2
+        with:
+          repository: zigen-project/zen-protocols
+          path: zen-protocols
+          ref: main
+      
+      - name: Build zen-protocols
+        working-directory: ./zen-protocols
+        run: |
+          meson build
+          sudo ninja -C build install
 
       - name: Checkout
         uses: actions/checkout@v2
@@ -125,9 +133,6 @@ jobs:
           meson build
           ninja -C build test
         working-directory: ./main
-        env:
-          CXX: clang++
-          CC: clang
 
       - uses: actions/upload-artifact@v3
         if: failure()
