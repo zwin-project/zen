@@ -26,8 +26,6 @@ _zgnr_srcs = [
   'src/seat-ray.c',
   'src/shell.c',
   'src/shm.c',
-  'src/space.c',
-  'src/space-manager.c',
   'src/texture-binding.c',
   'src/virtual-object.c',
 ]

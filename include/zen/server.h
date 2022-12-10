@@ -5,7 +5,6 @@
 #include <wlr/render/allocator.h>
 #include <wlr/render/wlr_renderer.h>
 #include <zgnr/backend.h>
-#include <zgnr/space-manager.h>
 #include <znr-remote.h>
 
 #include "zen/appearance/system.h"
@@ -25,7 +24,6 @@ struct zn_server {
   struct wl_event_loop *loop;
   struct wlr_backend *wlr_backend;
   struct zgnr_backend *zgnr_backend;
-  struct zgnr_space_manager *space_manager;
   struct wlr_renderer *renderer;
   struct wlr_allocator *allocator;
 
@@ -46,7 +44,6 @@ struct zn_server {
   struct wl_listener new_output_listener;
   struct wl_listener new_virtual_object_listener;
   struct wl_listener new_peer_listener;
-  struct wl_listener new_space_listener;
 
   int exit_code;
 };

@@ -4,13 +4,11 @@
 #include <wlr/render/glew.h>
 #include <wlr/types/wlr_output.h>
 #include <zen-common.h>
-#include <zgnr/space.h>
 
 #include "zen/config/config-parser.h"
 #include "zen/config/config.h"
 #include "zen/ray.h"
 #include "zen/screen/output.h"
-#include "zen/space.h"
 #include "zen/virtual-object.h"
 
 static struct zn_server *server_singleton = NULL;
@@ -74,18 +72,6 @@ zn_server_handle_new_peer(struct wl_listener *listener, void *data)
   if (session == NULL) return;
 
   zna_system_set_current_session(self->appearance_system, session);
-}
-
-static void
-
-zn_server_handle_new_space(struct wl_listener *listener, void *data)
-{
-  struct zn_server *self = zn_container_of(listener, self, new_space_listener);
-  struct zgnr_space *zgnr_space = data;
-
-  struct zn_space *zn_space = zn_space_create(zgnr_space);
-
-  zn_scene_new_space(self->scene, zn_space);
 }
 
 struct zn_server *
@@ -171,16 +157,10 @@ zn_server_create(struct wl_display *display)
     goto err_config;
   }
 
-  self->space_manager = zgnr_space_manager_create(self->display);
-  if (self->space_manager == NULL) {
-    zn_error("Failed to create a zgnr_space_manager");
-    goto err_zgnr_backend;
-  }
-
   self->wlr_backend = wlr_backend_autocreate(self->display);
   if (self->wlr_backend == NULL) {
     zn_error("Failed to create a wlr_backend");
-    goto err_space_manager;
+    goto err_zgnr_backend;
   }
 
   drm_fd = wlr_backend_get_drm_fd(self->wlr_backend);
@@ -280,10 +260,6 @@ zn_server_create(struct wl_display *display)
   self->new_peer_listener.notify = zn_server_handle_new_peer;
   wl_signal_add(&self->remote->events.new_peer, &self->new_peer_listener);
 
-  self->new_space_listener.notify = zn_server_handle_new_space;
-  wl_signal_add(
-      &self->space_manager->events.new_space, &self->new_space_listener);
-
   zgnr_backend_activate(self->zgnr_backend);
 
   return self;
@@ -314,9 +290,6 @@ err_renderer:
 
 err_wlr_backend:
   wlr_backend_destroy(self->wlr_backend);
-
-err_space_manager:
-  zgnr_space_manager_destroy(self->space_manager);
 
 err_zgnr_backend:
   zgnr_backend_destroy(self->zgnr_backend);
@@ -353,7 +326,6 @@ zn_server_destroy(struct zn_server *self)
   zn_screen_compositor_destroy(self->screen_compositor);
   wlr_allocator_destroy(self->allocator);
   wlr_renderer_destroy(self->renderer);
-  zgnr_space_manager_destroy(self->space_manager);
   zgnr_backend_destroy(self->zgnr_backend);
   zn_config_destroy(self->config);
   server_singleton = NULL;
