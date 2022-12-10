@@ -18,7 +18,7 @@ jobs:
           sudo apt-get install \
             libwayland-dev libwlroots-dev libpixman-1-dev libxml2-dev \
             libopenvr-dev libxkbcommon-dev libglu1-mesa-dev libglew-dev weston \
-            librsvg2-dev
+            librsvg2-dev libcairo2-dev
 
       - uses: actions/setup-python@v1
         with:
@@ -27,6 +27,18 @@ jobs:
       - name: Install meson & ninja
         run: pip install meson ninja
 
+      - name: Clone cglm
+        uses: actions/checkout@v2
+        with:
+          repository: recp/cglm
+          path: cglm
+
+      - name: Build cglm
+        run: |
+          meson build
+          sudo ninja -C build install
+        working-directory: ./cglm
+This project is an Android project using the OpenXR Mobile SDK provided by 
       - name: Clone wlr-glew-renderer
         uses: actions/checkout@v2
         with:
