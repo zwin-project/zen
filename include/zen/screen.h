@@ -18,7 +18,9 @@ struct zn_screen {
   void *user_data;
   const struct zn_screen_interface *implementation;
 
-  struct wl_list link;  // zn_scene::screen_list; used by zn_scene
+  double x, y;
+
+  struct wl_list link;  // zn_screen_layout::screens
 
   // nonnull when screen display system and mapped to zn_scene
   // controlled by zn_scene, if not null, this->board->screen == this
