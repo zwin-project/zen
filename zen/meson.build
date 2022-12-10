@@ -48,6 +48,7 @@ _zen_desktop_srcs = [
 
 _zen_desktop_deps = [
   cairo_dep,
+  ft_dep,
   m_dep,
   pixman_dep,
   rsvg_dep,

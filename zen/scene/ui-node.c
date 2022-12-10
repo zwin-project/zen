@@ -1,6 +1,11 @@
 #include "zen/scene/ui-node.h"
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
+
 #include <cairo.h>
+#include <cairo-ft.h>
 #include <drm_fourcc.h>
 #include <librsvg/rsvg.h>
 #include <wayland-server-core.h>
@@ -121,13 +126,26 @@ vr_button_render(struct zn_ui_node *self, cairo_t *cr)
       cr, self->frame->width, self->frame->height, self->frame->height / 2);
   cairo_fill(cr);
 
+  FT_Library library;
+  FT_Init_FreeType(&library);
+  FT_Face face;
+  FT_New_Face(library, "/usr/share/fonts/truetype/ubuntu/Ubuntu-M.ttf", 0, &face);
+
+  cairo_font_face_t *cr_face = cairo_ft_font_face_create_for_ft_face(face, 0);
+  cairo_set_font_face(cr, cr_face);
+
+
   // TODO: verify the font
-  cairo_select_font_face(
-      cr, "sans-serif", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+  // cairo_select_font_face(
+  //     cr, "Times", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_BOLD);
+  // zn_error("Font type: %d", cairo_font_face_get_type(cairo_get_font_face(cr)));
+
   cairo_set_font_size(cr, 18);
   cairo_set_source_rgb(cr, 0.953, 0.957, 0.965);
   zn_cairo_draw_centered_text(
-      cr, "VR", self->frame->width, self->frame->height);
+      cr, "Zigen", self->frame->width, self->frame->height);
+  FT_Done_Face(face);
+  FT_Done_FreeType(library);
 }
 
 void
