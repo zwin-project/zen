@@ -3,6 +3,7 @@
 #include <zen-common.h>
 
 #include "zen/board.h"
+#include "zen/cairo/surface.h"
 #include "zen/cursor.h"
 #include "zen/ray.h"
 #include "zen/screen.h"
@@ -81,6 +82,31 @@ zn_scene_new_screen(struct zn_scene *self, struct zn_screen *screen)
   }
 }
 
+static void
+zn_scene_setup_wallpaper(struct zn_scene *self, const char *wallpaper_filepath)
+{
+  cairo_surface_t *surface =
+      cairo_image_surface_create_from_png(wallpaper_filepath);
+  cairo_t *cr = cairo_create(surface);
+  cairo_status_t status = cairo_status(cr);
+  if (status != CAIRO_STATUS_SUCCESS) {
+    zn_warn("Wallpaper not loaded");
+    goto err;
+  }
+  cairo_format_t format = cairo_image_surface_get_format(surface);
+  if (format != CAIRO_FORMAT_ARGB32 && format != CAIRO_FORMAT_RGB24) {
+    zn_error("Image format not supported");
+    goto err;
+  }
+
+  struct zn_server *server = zn_server_get_singleton();
+  self->wallpaper =
+      zn_wlr_texture_from_cairo_surface(surface, server->renderer);
+err:
+  cairo_surface_destroy(surface);
+  cairo_destroy(cr);
+}
+
 void
 zn_scene_new_view(struct zn_scene *self, struct zn_view *view)
 {
@@ -118,7 +144,8 @@ zn_scene_create(void)
     goto err_ray;
   }
 
-  self->current_space = NULL;
+  struct zn_server *server = zn_server_get_singleton();
+  zn_scene_setup_wallpaper(self, server->config->wallpaper_filepath);
 
   wl_list_init(&self->screen_list);
   wl_list_init(&self->board_list);
@@ -159,6 +186,7 @@ zn_scene_destroy(struct zn_scene *self)
   wl_list_remove(&self->current_space_destroy_listener.link);
   wl_list_remove(&self->screen_list);
   wl_list_remove(&self->view_list);
+  if (self->wallpaper != NULL) wlr_texture_destroy(self->wallpaper);
   zn_cursor_destroy(self->cursor);
   zn_ray_destroy(self->ray);
   free(self);

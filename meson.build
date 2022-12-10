@@ -138,7 +138,7 @@ else
 endif
 
 configure_file(
-  output: 'config.h',
+  output: 'constants.h',
   configuration: cdata,
 )
 

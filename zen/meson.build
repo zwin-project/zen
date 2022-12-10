@@ -9,6 +9,11 @@ _zen_srcs = [
   'view.c',
   'virtual-object.c',
 
+  'cairo/surface.c',
+
+  'config/config.c',
+  'config/config-parser.c',
+
   'screen/compositor.c',
   'screen/output.c',
   'screen/renderer.c',
@@ -48,7 +53,7 @@ _zen_lib = static_library(
   'zen-lib',
   _zen_srcs + _zen_srcs_pub,
   install: false,
-  c_args: ['-include', 'config.h'],
+  c_args: ['-include', 'constants.h'],
   dependencies: _zen_deps,
   include_directories: zen_inc,
 )

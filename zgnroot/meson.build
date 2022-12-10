@@ -51,7 +51,7 @@ _zgnr_deps = [
 _zgnr_lib = static_library(
   'zgnr',
   _zgnr_srcs + _zgnr_srcs_pub,
-  c_args: ['-include', 'config.h'],
+  c_args: ['-include', 'constants.h'],
   include_directories: _zgnr_inc,
   dependencies: _zgnr_deps,
   install: false,

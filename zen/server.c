@@ -6,6 +6,8 @@
 #include <zen-common.h>
 #include <zgnr/space.h>
 
+#include "zen/config/config-parser.h"
+#include "zen/config/config.h"
 #include "zen/ray.h"
 #include "zen/screen/output.h"
 #include "zen/space.h"
@@ -149,6 +151,15 @@ zn_server_create(struct wl_display *display)
   }
 
   server_singleton = self;
+
+  struct toml_table_t *config_table = zn_config_get_toml_table();
+  self->config = zn_config_create(config_table);
+  if (config_table != NULL) toml_free(config_table);
+  if (self->config == NULL) {
+    zn_error("Failed to create a config object");
+    goto err_free;
+  }
+
   self->display = display;
   self->exit_code = EXIT_FAILURE;
   self->loop = wl_display_get_event_loop(display);
@@ -157,7 +168,7 @@ zn_server_create(struct wl_display *display)
   self->zgnr_backend = zgnr_backend_create(self->display);
   if (self->zgnr_backend == NULL) {
     zn_error("Failed to create a zgnr_backend");
-    goto err_free;
+    goto err_config;
   }
 
   self->space_manager = zgnr_space_manager_create(self->display);
@@ -310,6 +321,9 @@ err_space_manager:
 err_zgnr_backend:
   zgnr_backend_destroy(self->zgnr_backend);
 
+err_config:
+  zn_config_destroy(self->config);
+
 err_free:
   server_singleton = NULL;
   free(self);
@@ -342,5 +356,6 @@ zn_server_destroy(struct zn_server *self)
   zgnr_space_manager_destroy(self->space_manager);
   zgnr_backend_destroy(self->zgnr_backend);
   server_singleton = NULL;
+  zn_config_destroy(self->config);
   free(self);
 }
