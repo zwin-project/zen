@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wayland-server-core.h>
+#include <wlr/render/wlr_texture.h>
 
 struct zn_screen;
 struct zn_ray;
@@ -23,6 +24,8 @@ struct zn_scene {
   } events;
 
   struct wl_listener current_space_destroy_listener;
+
+  struct wlr_texture *wallpaper;  // nullable
 };
 
 void zn_scene_new_space(struct zn_scene *self, struct zn_space *space);

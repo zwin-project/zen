@@ -30,26 +30,58 @@ scissor_output(struct zn_output *output, pixman_box32_t *rect)
   wlr_renderer_scissor(renderer, &box);
 }
 
+static void
+get_wallpaper_projection_matrix(struct wlr_output *output,
+    struct wlr_texture *wallpaper, float matrix[static 9])
+{
+  if (wallpaper == NULL) return;
+  int output_width, output_height;
+  struct wlr_box box;
+  wlr_output_transformed_resolution(output, &output_width, &output_height);
+  double output_ratio = (double)output_height / (double)output_width;
+  double texture_ratio = (double)wallpaper->height / (double)wallpaper->width;
+
+  if (output_ratio > texture_ratio) {
+    // Fit the height of the texture to that of the output
+    box.y = 0;
+    box.height = output_height;
+    box.width = wallpaper->width * output_height / wallpaper->height;
+    box.x = (output_width - box.width) / 2;
+  } else {
+    // Fit the width of the texture to that of the output
+    box.x = 0;
+    box.width = output_width;
+    box.height = wallpaper->height * output_width / wallpaper->width;
+    box.y = (output_height - box.height) / 2;
+  }
+  wlr_matrix_project_box(
+      matrix, &box, WL_OUTPUT_TRANSFORM_NORMAL, 0, output->transform_matrix);
+}
+
 void
 render_background(struct zn_output *output, struct wlr_renderer *renderer,
-    pixman_region32_t *screen_damage)
+    struct wlr_texture *wallpaper, pixman_region32_t *screen_damage)
 {
   struct zn_server *server = zn_server_get_singleton();
   pixman_box32_t *rects;
   int rect_count;
+  float matrix[9];
 
-  float color[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+  float default_color[4] = {0.0f, 0.0f, 0.0f, 1.0f};
   if (output->screen->board &&
       server->display_system == ZN_DISPLAY_SYSTEM_SCREEN) {
-    color[0] = output->screen->board->color[0];
-    color[1] = output->screen->board->color[1];
-    color[2] = output->screen->board->color[2];
+    default_color[0] = output->screen->board->color[0];
+    default_color[1] = output->screen->board->color[1];
+    default_color[2] = output->screen->board->color[2];
   }
 
+  get_wallpaper_projection_matrix(output->wlr_output, wallpaper, matrix);
   rects = pixman_region32_rectangles(screen_damage, &rect_count);
   for (int i = 0; i < rect_count; i++) {
     scissor_output(output, &rects[i]);
-    wlr_renderer_clear(renderer, color);
+    wlr_renderer_clear(renderer, default_color);
+    if (wallpaper != NULL)
+      wlr_render_texture_with_matrix(renderer, wallpaper, matrix, 1.0f);
   }
 }
 
@@ -147,7 +179,7 @@ zn_screen_renderer_render(struct zn_output *output,
     goto out;
   }
 
-  render_background(output, renderer, &screen_damage);
+  render_background(output, renderer, server->scene->wallpaper, &screen_damage);
 
   if (server->display_system != ZN_DISPLAY_SYSTEM_SCREEN) goto out;
 

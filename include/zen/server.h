@@ -9,6 +9,7 @@
 #include <znr-remote.h>
 
 #include "zen/appearance/system.h"
+#include "zen/config/config.h"
 #include "zen/input/input-manager.h"
 #include "zen/scene.h"
 #include "zen/screen/compositor.h"
@@ -34,7 +35,8 @@ struct zn_server {
   struct znr_remote *remote;
   struct zna_system *appearance_system;
   struct zn_shell *shell;
-  struct zn_scene *scene;  // nonnull
+  struct zn_scene *scene;    // nonnull
+  struct zn_config *config;  // nonnull
 
   enum zn_display_system_state display_system;
 
