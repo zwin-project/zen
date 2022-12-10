@@ -3,14 +3,28 @@
 #include <zen-common.h>
 
 #include "zen/appearance/cursor.h"
+#include "zen/board.h"
+#include "zen/scene.h"
+#include "zen/screen-layout.h"
+#include "zen/screen.h"
+#include "zen/server.h"
 
 void
 zn_default_cursor_grab_motion_relative(
     struct zn_cursor_grab *grab, double dx, double dy, uint32_t time_msec)
 {
+  struct zn_server *server = zn_server_get_singleton();
   struct zn_cursor *cursor = grab->cursor;
 
-  zn_cursor_move(cursor, cursor->board, cursor->x + dx, cursor->y + dy);
+  double layout_x, layout_y;
+  zn_screen_get_screen_layout_coords(cursor->board->screen, cursor->x + dx,
+      cursor->y + dy, &layout_x, &layout_y);
+
+  double screen_x, screen_y;
+  struct zn_screen *scr = zn_screen_layout_get_closest_screen(
+      server->scene->screen_layout, layout_x, layout_y, &screen_x, &screen_y);
+
+  zn_cursor_move(cursor, scr->board, screen_x, screen_y);
 
   zna_cursor_commit(cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
 
