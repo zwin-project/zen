@@ -4,6 +4,7 @@ _zen_srcs = [
   'ray.c',
   'scene.c',
   'screen.c',
+  'screen-layout.c',
   'server.c',
   'view.c',
   'virtual-object.c',

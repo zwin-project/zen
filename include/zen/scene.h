@@ -4,14 +4,15 @@
 #include <wlr/render/wlr_texture.h>
 
 struct zn_screen;
+struct zn_screen_layout;
 struct zn_ray;
 struct zn_cursor;
 struct zn_view;
 
 struct zn_scene {
-  struct wl_list screen_list;  // zn_screen::link
-  struct wl_list board_list;   // zn_board::link
-  struct wl_list view_list;    // zn_view::link
+  struct zn_screen_layout *screen_layout;
+  struct wl_list board_list;  // zn_board::link
+  struct wl_list view_list;   // zn_view::link
 
   struct zn_cursor *cursor;  // nonnull
   struct zn_ray *ray;        // nonnull
