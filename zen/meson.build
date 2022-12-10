@@ -26,6 +26,8 @@ _zen_srcs = [
   'input/keyboard.c',
   'input/pointer.c',
   'input/seat.c',
+
+  'wlr/box.c',
 ]
 
 _zen_srcs_pub = [

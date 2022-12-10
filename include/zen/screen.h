@@ -38,6 +38,9 @@ void zn_screen_damage(struct zn_screen *self, struct wlr_fbox *box);
 
 void zn_screen_damage_whole(struct zn_screen *self);
 
+void zn_screen_get_screen_layout_coords(
+    struct zn_screen *self, double x, double y, double *dest_x, double *dest_y);
+
 void zn_screen_get_effective_size(
     struct zn_screen *self, double *width, double *height);
 
