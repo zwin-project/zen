@@ -6,12 +6,7 @@ struct zn_scene;
 struct zn_screen;
 
 struct zn_screen_layout {
-  struct zn_scene *scene;
   struct wl_list screen_list;  // zn_screen::link
-
-  struct {
-    struct wl_signal new_screen;  // (struct zn_screen*)
-  } events;
 };
 
 // Returns the screen at the given x, y of the coordinates of screen layout.
@@ -28,6 +23,6 @@ void zn_screen_layout_remove(
 
 int zn_screen_layout_screen_count(struct zn_screen_layout *self);
 
-struct zn_screen_layout *zn_screen_layout_create(struct zn_scene *scene);
+struct zn_screen_layout *zn_screen_layout_create(void);
 
 void zn_screen_layout_destroy(struct zn_screen_layout *self);
