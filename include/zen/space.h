@@ -13,8 +13,6 @@ struct zn_space {
   } events;
 
   struct wl_listener zgnr_space_destroy_listener;
-
-  struct wlr_texture *wallpaper;
 };
 
 struct zn_space *zn_space_create(struct zgnr_space *zgnr_space);

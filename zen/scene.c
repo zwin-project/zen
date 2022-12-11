@@ -3,13 +3,13 @@
 #include <zen-common.h>
 
 #include "zen/board.h"
-#include "zen/cairo/surface.h"
 #include "zen/cursor.h"
 #include "zen/ray.h"
 #include "zen/screen.h"
 #include "zen/server.h"
 #include "zen/space.h"
 #include "zen/view.h"
+#include "zen/wlr/texture.h"
 
 static struct zn_board *
 zn_scene_ensure_dangling_board(struct zn_scene *self)
