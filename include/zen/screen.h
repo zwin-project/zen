@@ -18,7 +18,7 @@ struct zn_screen {
   void *user_data;
   const struct zn_screen_interface *implementation;
 
-  double x, y;
+  double x, y;  // layout coordinate, controlled by zn_screen_layout
 
   struct wl_list link;  // zn_screen_layout::screen_list
 
