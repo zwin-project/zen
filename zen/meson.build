@@ -9,7 +9,7 @@ _zen_srcs = [
   'view.c',
   'virtual-object.c',
 
-  'cairo/surface.c',
+  'wlr/texture.c',
 
   'config/config.c',
   'config/config-parser.c',

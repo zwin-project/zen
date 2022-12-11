@@ -355,7 +355,7 @@ zn_server_destroy(struct zn_server *self)
   wlr_renderer_destroy(self->renderer);
   zgnr_space_manager_destroy(self->space_manager);
   zgnr_backend_destroy(self->zgnr_backend);
-  server_singleton = NULL;
   zn_config_destroy(self->config);
+  server_singleton = NULL;
   free(self);
 }
