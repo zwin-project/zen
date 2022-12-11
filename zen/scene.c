@@ -40,7 +40,7 @@ zn_scene_new_screen(struct zn_scene *self, struct zn_screen *screen)
   screen->board = board;
 
   if (server->display_system == ZN_DISPLAY_SYSTEM_SCREEN &&
-      zn_screen_layout_len(self->screen_layout) == 1) {
+      zn_screen_layout_screen_count(self->screen_layout) == 1) {
     double width, height;
     zn_board_get_effective_size(board, &width, &height);
     zn_cursor_move(server->scene->cursor, board, width / 2.f, height / 2.f);

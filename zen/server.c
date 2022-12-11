@@ -91,7 +91,7 @@ zn_server_change_display_system(
 
   self->display_system = ZN_DISPLAY_SYSTEM_SCREEN;  // enable screen damage
 
-  wl_list_for_each (screen, &self->scene->screen_layout->screens, link) {
+  wl_list_for_each (screen, &self->scene->screen_layout->screen_list, link) {
     zn_screen_damage_whole(screen);
   }
 
