@@ -6,11 +6,11 @@
 #include <wlr/types/wlr_output_damage.h>
 #include <wlr/types/wlr_seat.h>
 #include <wlr/xcursor.h>
+#include <zigzag.h>
 
 #include "zen-common.h"
 #include "zen/input/cursor-grab.h"
 #include "zen/scene/screen-layout.h"
-#include "zen/scene/ui-node.h"
 #include "zen/scene/view.h"
 #include "zen/server.h"
 
@@ -44,10 +44,10 @@ default_grab_motion(
 static void
 handle_ui_nodes_on_click(struct wl_list* nodes, double x, double y)
 {
-  struct zn_ui_node* node;
+  struct zigzag_node* node;
   wl_list_for_each (node, nodes, link) {
     if (wlr_box_contains_point(node->frame, x, y)) {
-      node->on_click_handler(node, x, y);
+      node->on_click(node, x, y);
     }
     handle_ui_nodes_on_click(&node->children, x, y);
   }
