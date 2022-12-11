@@ -31,5 +31,4 @@ zn_wlr_fbox_closest_point(const struct wlr_fbox *box, double x, double y,
   } else {
     *dest_y = y;
   }
-  zn_debug(">> closest: %lf, %lf", *dest_x, *dest_y);
 }
