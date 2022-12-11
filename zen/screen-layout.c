@@ -56,7 +56,6 @@ zn_screen_layout_add(
 {
   wl_list_insert(&self->screen_list, &new_screen->link);
   zn_screen_layout_rearrange(self);
-  wl_signal_emit(&self->events.new_screen, new_screen);
 }
 
 void
@@ -73,7 +72,7 @@ zn_screen_layout_screen_count(struct zn_screen_layout *self)
 }
 
 struct zn_screen_layout *
-zn_screen_layout_create(struct zn_scene *scene)
+zn_screen_layout_create(void)
 {
   struct zn_screen_layout *self;
 
@@ -83,10 +82,7 @@ zn_screen_layout_create(struct zn_scene *scene)
     goto err;
   }
 
-  self->scene = scene;
   wl_list_init(&self->screen_list);
-
-  wl_signal_init(&self->events.new_screen);
 
   return self;
 
@@ -97,5 +93,6 @@ err:
 void
 zn_screen_layout_destroy(struct zn_screen_layout *self)
 {
+  wl_list_remove(&self->screen_list);
   free(self);
 }
