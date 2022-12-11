@@ -13,7 +13,7 @@ zn_screen_layout_rearrange(struct zn_screen_layout *self)
   struct zn_screen *screen;
   double width, height;
 
-  wl_list_for_each (screen, &self->screens, link) {
+  wl_list_for_each (screen, &self->screen_list, link) {
     zn_screen_get_effective_size(screen, &width, &height);
     screen->x = x;
     screen->y = 0;
@@ -29,7 +29,7 @@ zn_screen_layout_get_closest_screen(struct zn_screen_layout *self, double x,
   struct zn_screen *closest_screen = NULL;
   struct zn_screen *screen;
 
-  wl_list_for_each (screen, &self->screens, link) {
+  wl_list_for_each (screen, &self->screen_list, link) {
     double current_closest_x, current_closest_y, current_closest_distance;
     struct wlr_fbox box = {.x = screen->x, .y = screen->y};
     zn_screen_get_effective_size(screen, &box.width, &box.height);
@@ -54,7 +54,7 @@ void
 zn_screen_layout_add(
     struct zn_screen_layout *self, struct zn_screen *new_screen)
 {
-  wl_list_insert(&self->screens, &new_screen->link);
+  wl_list_insert(&self->screen_list, &new_screen->link);
   zn_screen_layout_rearrange(self);
   wl_signal_emit(&self->events.new_screen, new_screen);
 }
@@ -67,9 +67,9 @@ zn_screen_layout_remove(struct zn_screen_layout *self, struct zn_screen *screen)
 }
 
 int
-zn_screen_layout_len(struct zn_screen_layout *self)
+zn_screen_layout_screen_count(struct zn_screen_layout *self)
 {
-  return wl_list_length(&self->screens);
+  return wl_list_length(&self->screen_list);
 }
 
 struct zn_screen_layout *
@@ -84,7 +84,7 @@ zn_screen_layout_create(struct zn_scene *scene)
   }
 
   self->scene = scene;
-  wl_list_init(&self->screens);
+  wl_list_init(&self->screen_list);
 
   wl_signal_init(&self->events.new_screen);
 

@@ -20,7 +20,7 @@ struct zn_screen {
 
   double x, y;
 
-  struct wl_list link;  // zn_screen_layout::screens
+  struct wl_list link;  // zn_screen_layout::screen_list
 
   // nonnull when screen display system and mapped to zn_scene
   // controlled by zn_scene, if not null, this->board->screen == this
