@@ -47,6 +47,23 @@ zn_default_cursor_grab_motion_absolute(struct zn_cursor_grab *grab,
 }
 
 void
+zn_default_cursor_grab_enter(
+    struct zn_cursor_grab *grab, struct zn_board *board, double x, double y)
+{
+  zn_cursor_move(grab->cursor, board, x, y);
+
+  zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
+}
+
+void
+zn_default_cursor_grab_leave(struct zn_cursor_grab *grab)
+{
+  zn_cursor_move(grab->cursor, NULL, 0, 0);
+
+  zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
+}
+
+void
 zn_default_cursor_grab_rebase(struct zn_cursor_grab *grab)
 {
   UNUSED(grab);
@@ -61,6 +78,8 @@ zn_default_cursor_grab_cancel(struct zn_cursor_grab *grab)
 static const struct zn_cursor_grab_interface implementation = {
     .motion_relative = zn_default_cursor_grab_motion_relative,
     .motion_absolute = zn_default_cursor_grab_motion_absolute,
+    .enter = zn_default_cursor_grab_enter,
+    .leave = zn_default_cursor_grab_leave,
     .rebase = zn_default_cursor_grab_rebase,
     .cancel = zn_default_cursor_grab_cancel,
 };

@@ -81,11 +81,26 @@ static bool
 zns_board_node_ray_enter(void *user_data, uint32_t serial, vec3 origin,
     vec3 direction, mat4 transform)
 {
-  UNUSED(user_data);
   UNUSED(serial);
-  UNUSED(origin);
-  UNUSED(direction);
-  UNUSED(transform);
+  UNUSED(transform);  // must be identity matrix
+  struct zns_board *self = user_data;
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_cursor *cursor = server->scene->cursor;
+  float u, v;
+  double effective_width, effective_height;
+  double effective_x, effective_y;
+
+  (void)zns_board_ray_cast(self, origin, direction, &u, &v);
+
+  zn_board_get_effective_size(
+      self->zn_board, &effective_width, &effective_height);
+
+  effective_x = effective_width * u;
+  effective_y = effective_height * (1 - v);
+
+  cursor->grab->impl->enter(
+      cursor->grab, self->zn_board, effective_x, effective_y);
+
   return true;
 }
 
@@ -99,7 +114,7 @@ zns_board_node_ray_leave(void *user_data, uint32_t serial, mat4 transform)
   struct zn_server *server = zn_server_get_singleton();
   struct zn_cursor *cursor = server->scene->cursor;
 
-  cursor->grab->impl->motion_absolute(cursor->grab, NULL, 0, 0, 0);
+  cursor->grab->impl->leave(cursor->grab);
 
   return true;
 }

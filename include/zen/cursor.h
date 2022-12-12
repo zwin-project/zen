@@ -15,11 +15,13 @@ struct zn_cursor_grab_interface {
   void (*motion_relative)(
       struct zn_cursor_grab *grab, double dx, double dy, uint32_t time_msec);
   /**
-   * @param board can be NULL
-   * @param time_msec will not be used when the board is NULL
+   * @param board is nonnull
    */
   void (*motion_absolute)(struct zn_cursor_grab *grab, struct zn_board *board,
       double x, double y, uint32_t time_msec);
+  void (*enter)(
+      struct zn_cursor_grab *grab, struct zn_board *board, double x, double y);
+  void (*leave)(struct zn_cursor_grab *grab);
   void (*rebase)(struct zn_cursor_grab *grab);
   void (*cancel)(struct zn_cursor_grab *grab);
 };
