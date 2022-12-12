@@ -5,6 +5,7 @@ _zgnr_srcs = [
   'src/bounded.c',
   'src/bounded-configure.c',
   'src/compositor.c',
+  'src/expansive.c',
   'src/gles-v32.c',
   'src/gl-base-technique.c',
   'src/gl-buffer.c',
@@ -37,8 +38,6 @@ _zgnr_srcs_pub = [
   protocols['zigen-shell']['server-header'],
   protocols['zigen-gles-v32']['private-code'],
   protocols['zigen-gles-v32']['server-header'],
-  protocols['zen-space']['private-code'],
-  protocols['zen-space']['server-header'],
 ]
 
 _zgnr_deps = [

@@ -3,6 +3,7 @@ _zen_shell_inc = include_directories('.')
 _zen_shell_srcs = [
   'board.c',
   'bounded.c',
+  'expansive.c',
   'node.c',
   'shell.c',
 

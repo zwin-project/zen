@@ -117,6 +117,7 @@ zgnr_bounded_protocol_move(struct wl_client *client,
   struct zgnr_bounded_impl *self = wl_resource_get_user_data(resource);
   struct zgnr_seat *seat = wl_resource_get_user_data(seat_resource);
   struct zgnr_bounded_move_event event;
+  if (self == NULL) return;
 
   event.serial = serial;
   event.seat = seat;

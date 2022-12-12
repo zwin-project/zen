@@ -7,6 +7,7 @@
 
 #include "board.h"
 #include "bounded.h"
+#include "expansive.h"
 #include "zen/board.h"
 #include "zen/scene.h"
 #include "zen/virtual-object.h"
@@ -74,6 +75,17 @@ zn_shell_handle_new_bounded(struct wl_listener *listener, void *data)
 }
 
 static void
+zn_shell_handle_new_expansive(struct wl_listener *listener, void *data)
+{
+  struct zn_shell *self =
+      zn_container_of(listener, self, new_expansive_listener);
+
+  struct zgnr_expansive *zgnr_expansive = data;
+
+  (void)zns_expansive_create(zgnr_expansive);
+}
+
+static void
 zn_shell_handle_new_board(struct wl_listener *listener, void *data)
 {
   struct zn_shell *self = zn_container_of(listener, self, new_board_listener);
@@ -118,6 +130,10 @@ zn_shell_create(struct wl_display *display, struct zn_scene *scene)
   wl_signal_add(
       &self->zgnr_shell->events.new_bounded, &self->new_bounded_listener);
 
+  self->new_expansive_listener.notify = zn_shell_handle_new_expansive;
+  wl_signal_add(
+      &self->zgnr_shell->events.new_expansive, &self->new_expansive_listener);
+
   self->new_board_listener.notify = zn_shell_handle_new_board;
   wl_signal_add(&scene->events.new_board, &self->new_board_listener);
 
@@ -138,6 +154,7 @@ zn_shell_destroy(struct zn_shell *self)
 {
   zns_default_ray_grab_fini(&self->default_grab);
   wl_list_remove(&self->new_board_listener.link);
+  wl_list_remove(&self->new_expansive_listener.link);
   wl_list_remove(&self->new_bounded_listener.link);
   zns_node_destroy(self->root);
   zgnr_shell_destroy(self->zgnr_shell);

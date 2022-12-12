@@ -16,5 +16,6 @@ struct zn_shell {
   struct zns_default_ray_grab default_grab;
 
   struct wl_listener new_bounded_listener;
+  struct wl_listener new_expansive_listener;
   struct wl_listener new_board_listener;
 };

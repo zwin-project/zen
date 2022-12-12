@@ -8,7 +8,8 @@ extern "C" {
 
 struct zgnr_shell {
   struct {
-    struct wl_signal new_bounded;  // (struct zgnr_bounded)
+    struct wl_signal new_bounded;    // (struct zgnr_bounded)
+    struct wl_signal new_expansive;  // (struct zgnr_expansive)
   } events;
 };
 

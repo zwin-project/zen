@@ -6,6 +6,7 @@
 #include <zigen-shell-protocol.h>
 
 #include "bounded.h"
+#include "expansive.h"
 #include "virtual-object.h"
 
 static void
@@ -49,9 +50,32 @@ zgnr_shell_protocol_get_bounded(struct wl_client *client,
   wl_signal_emit(&self->base.events.new_bounded, &bounded->base);
 }
 
+static void
+zgnr_shell_protocol_get_expansive(struct wl_client *client,
+    struct wl_resource *resource, uint32_t id,
+    struct wl_resource *virtual_object_resource)
+{
+  struct zgnr_shell_impl *self = wl_resource_get_user_data(resource);
+
+  struct zgnr_virtual_object_impl *virtual_object =
+      wl_resource_get_user_data(virtual_object_resource);
+
+  struct zgnr_expansive_impl *expansive =
+      zgnr_expansive_create(client, id, virtual_object);
+
+  if (!zgnr_virtual_object_set_role(virtual_object,
+          ZGNR_VIRTUAL_OBJECT_ROLE_EXPANSIVE, &expansive->base,
+          expansive->resource, ZGN_SHELL_ERROR_ROLE)) {
+    return;
+  }
+
+  wl_signal_emit(&self->base.events.new_expansive, &expansive->base);
+}
+
 static const struct zgn_shell_interface implementation = {
     .destroy = zgnr_shell_protocol_destroy,
     .get_bounded = zgnr_shell_protocol_get_bounded,
+    .get_expansive = zgnr_shell_protocol_get_expansive,
 };
 
 static void
@@ -90,6 +114,7 @@ zgnr_shell_create(struct wl_display *display)
   }
 
   wl_signal_init(&self->base.events.new_bounded);
+  wl_signal_init(&self->base.events.new_expansive);
 
   return &self->base;
 
@@ -106,6 +131,7 @@ zgnr_shell_destroy(struct zgnr_shell *parent)
   struct zgnr_shell_impl *self = zn_container_of(parent, self, base);
 
   wl_list_remove(&self->base.events.new_bounded.listener_list);
+  wl_list_remove(&self->base.events.new_expansive.listener_list);
 
   wl_global_remove(self->global);
 
