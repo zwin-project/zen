@@ -52,20 +52,14 @@ jobs:
           meson build
           sudo meson install -C build --skip-subprojects
         working-directory: ./wlr-glew-renderer
-
-      - name: Clone grpc-dev
-        uses: actions/checkout@v2
-        with:
-          repository: zigen-project/grpc-dev
-          path: grpc-dev
-          submodules: recursive
-          ref: 'v1.49.1'
       
-      - name: Build grpc-dev
-        working-directory: ./grpc-dev
+      - run: mkdir -p grpc-dev
+
+      - name: Download grpc-dev
         run: |
-          touch local.mk
-          make native
+          curl -L https://github.com/zigen-project/grpc-dev/releases/download/0.0.1/grpc-dev-refs.heads.main-github-host.zip -o grpc-dev.zip
+          unzip grpc-dev.zip
+        working-directory: ./grpc-dev
 
       - name: Clone zen-remote
         uses: actions/checkout@v2
