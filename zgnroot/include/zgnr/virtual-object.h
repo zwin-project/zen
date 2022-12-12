@@ -7,8 +7,9 @@ extern "C" {
 #endif
 
 enum zgnr_virtual_object_role {
-  ZGNR_VIRTUAL_OBJECT_ROLE_NONE,     // NULL
-  ZGNR_VIRTUAL_OBJECT_ROLE_BOUNDED,  // struct zgnr_bounded*
+  ZGNR_VIRTUAL_OBJECT_ROLE_NONE,       // NULL
+  ZGNR_VIRTUAL_OBJECT_ROLE_BOUNDED,    // struct zgnr_bounded*
+  ZGNR_VIRTUAL_OBJECT_ROLE_EXPANSIVE,  // struct zgnr_expansive*
 };
 
 struct zgnr_virtual_object {

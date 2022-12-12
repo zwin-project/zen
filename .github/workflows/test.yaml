@@ -110,19 +110,6 @@ jobs:
           meson build
           sudo ninja -C build install
 
-      - name: Clone zen-protocols
-        uses: actions/checkout@v2
-        with:
-          repository: zigen-project/zen-protocols
-          path: zen-protocols
-          ref: main
-      
-      - name: Build zen-protocols
-        working-directory: ./zen-protocols
-        run: |
-          meson build
-          sudo ninja -C build install
-
       - name: Checkout
         uses: actions/checkout@v2
         with:
