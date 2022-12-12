@@ -7,6 +7,7 @@
 
 #include "zen/config/config-parser.h"
 #include "zen/config/config.h"
+#include "zen/cursor.h"
 #include "zen/ray.h"
 #include "zen/screen/output.h"
 #include "zen/virtual-object.h"
@@ -88,6 +89,8 @@ zn_server_change_display_system(
 {
   struct zn_screen *screen;
 
+  if (self->display_system == display_system) return;
+
   self->display_system = ZN_DISPLAY_SYSTEM_SCREEN;  // enable screen damage
 
   wl_list_for_each (screen, &self->scene->screen_list, link) {
@@ -95,6 +98,8 @@ zn_server_change_display_system(
   }
 
   self->display_system = display_system;
+
+  zn_shell_handle_new_display_system(self->shell);
 }
 
 /** returns exit code */
@@ -113,6 +118,8 @@ zn_server_run(struct zn_server *self)
 void
 zn_server_terminate(struct zn_server *self, int exit_code)
 {
+  // FIXME: request session destruction, which results in display system change
+  zn_server_change_display_system(self, ZN_DISPLAY_SYSTEM_SCREEN);
   self->exit_code = exit_code;
   wl_display_terminate(self->display);
 }

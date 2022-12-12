@@ -9,7 +9,9 @@
 #include "bounded.h"
 #include "expansive.h"
 #include "zen/board.h"
+#include "zen/cursor.h"
 #include "zen/scene.h"
+#include "zen/server.h"
 #include "zen/virtual-object.h"
 
 #pragma GCC diagnostic push
@@ -56,6 +58,26 @@ static const struct zns_node_interface node_implementation = {
     .ray_leave = zn_shell_root_ray_leave,
     .ray_button = zn_shell_root_ray_button,
 };
+
+void
+zn_shell_handle_new_display_system(struct zn_shell *self)
+{
+  UNUSED(self);
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_ray *ray = server->scene->ray;
+  struct zn_cursor *cursor = server->scene->cursor;
+
+  if (server->display_system == ZN_DISPLAY_SYSTEM_SCREEN) {
+    struct zn_board *board = cursor->grab->cursor->board;
+    double x = cursor->x;
+    double y = cursor->y;
+    ray->grab->impl->cancel(ray->grab);
+    cursor->grab->impl->enter(cursor->grab, board, x, y);
+  } else {
+    cursor->grab->impl->leave(cursor->grab);
+    ray->grab->impl->rebase(ray->grab);
+  }
+}
 
 static void
 zn_shell_handle_new_bounded(struct wl_listener *listener, void *data)
