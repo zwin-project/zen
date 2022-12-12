@@ -2,6 +2,7 @@
 
 #include <zen-common.h>
 
+#include "zen/screen-layout.h"
 #include "zen/server.h"
 
 void
@@ -65,9 +66,10 @@ err:
 void
 zn_screen_destroy(struct zn_screen *self)
 {
+  struct zn_server *server = zn_server_get_singleton();
   wl_signal_emit(&self->events.destroy, NULL);
 
   wl_list_remove(&self->events.destroy.listener_list);
-  wl_list_remove(&self->link);
+  zn_screen_layout_remove(server->scene->screen_layout, self);
   free(self);
 }
