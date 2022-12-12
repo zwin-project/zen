@@ -21,10 +21,10 @@ zn_default_cursor_grab_motion_relative(
       cursor->y + dy, &layout_x, &layout_y);
 
   double screen_x, screen_y;
-  struct zn_screen *scr = zn_screen_layout_get_closest_screen(
+  struct zn_screen *screen = zn_screen_layout_get_closest_screen(
       server->scene->screen_layout, layout_x, layout_y, &screen_x, &screen_y);
 
-  zn_cursor_move(cursor, scr->board, screen_x, screen_y);
+  zn_cursor_move(cursor, screen->board, screen_x, screen_y);
 
   zna_cursor_commit(cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
 
