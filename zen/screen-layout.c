@@ -62,6 +62,7 @@ void
 zn_screen_layout_remove(struct zn_screen_layout *self, struct zn_screen *screen)
 {
   wl_list_remove(&screen->link);
+  wl_list_init(&screen->link);
   zn_screen_layout_rearrange(self);
 }
 
