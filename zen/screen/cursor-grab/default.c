@@ -16,6 +16,10 @@ zn_default_cursor_grab_motion_relative(
   struct zn_server *server = zn_server_get_singleton();
   struct zn_cursor *cursor = grab->cursor;
 
+  if (!cursor->board || !cursor->board->screen) {
+    return;
+  }
+
   double layout_x, layout_y;
   zn_screen_get_screen_layout_coords(cursor->board->screen, cursor->x + dx,
       cursor->y + dy, &layout_x, &layout_y);
