@@ -97,7 +97,7 @@ zn_scene_create(void)
     goto err;
   }
 
-  self->screen_layout = zn_screen_layout_create(self);
+  self->screen_layout = zn_screen_layout_create();
   if (self->screen_layout == NULL) {
     zn_error("Failed to create a screen_layout");
     goto err_free;
