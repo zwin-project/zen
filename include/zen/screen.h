@@ -38,6 +38,13 @@ void zn_screen_damage(struct zn_screen *self, struct wlr_fbox *box);
 
 void zn_screen_damage_whole(struct zn_screen *self);
 
+/**
+ * Convert screen local effective coordinates to layout coordinates
+ * @param x screen local effective coordinates
+ * @param y screen local effective coordinates
+ * @param dest_x layout coordinates
+ * @param dest_y layout coordinates
+ */
 void zn_screen_get_screen_layout_coords(
     struct zn_screen *self, double x, double y, double *dest_x, double *dest_y);
 
