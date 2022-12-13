@@ -2,10 +2,10 @@
 
 #include <cairo.h>
 #include <linux/input.h>
+#include <zigzag.h>
 
 #include "build-config.h"
 #include "zen-common.h"
-#include "zen/cairo/texture.h"
 #include "zen/config.h"
 #include "zen/scene/board.h"
 #include "zen/scene/screen-layout.h"
@@ -203,7 +203,8 @@ zn_scene_setup_background(struct zn_scene* self, const char* background_png)
     goto err;
   }
   struct zn_server* server = zn_server_get_singleton();
-  self->bg_texture = zn_wlr_texture_from_cairo_surface(surface, server);
+  self->bg_texture =
+      zigzag_wlr_texture_from_cairo_surface(surface, server->renderer);
 err:
   cairo_surface_destroy(surface);
   cairo_destroy(cr);

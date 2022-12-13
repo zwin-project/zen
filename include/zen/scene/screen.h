@@ -2,6 +2,7 @@
 
 #include <wayland-server-core.h>
 #include <wlr/types/wlr_surface.h>
+#include <zigzag.h>
 
 #include "zen/output.h"
 #include "zen/scene/board.h"
@@ -20,6 +21,8 @@ struct zn_screen {
   struct wl_listener current_board_screen_assigned_listener;
 
   struct wl_list link;  // zn_screen_layout::screens;
+
+  struct zigzag_layout *node_layout;
 
   struct {
     struct wl_signal destroy;  // (NULL)

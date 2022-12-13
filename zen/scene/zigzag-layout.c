@@ -7,33 +7,31 @@
 #include <drm_fourcc.h>
 #include <librsvg/rsvg.h>
 #include <wayland-server-core.h>
+#include <wlr/types/wlr_output_damage.h>
 
 #include "build-config.h"
 #include "zen-common.h"
 #include "zen/output.h"
+#include "zen/scene/zigzag-layout.h"
 
-struct node_layout_state void
-zigzag_node_add_damage(struct zigzag_node *self)
+void
+zen_zigzag_layout_on_damage(struct zigzag_node *node)
 {
-  struct wlr_fbox fframe = {.x = (double)self->frame->x,
-      .y = (double)self->frame->y,
-      .width = (double)self->frame->width,
-      .height = (double)self->frame->height};
-  zn_output_add_damage_box(self->screen->output, &fframe);
+  struct zen_zigzag_layout_state *state =
+      (struct zen_zigzag_layout_state *)node->state;
+  wlr_output_damage_add_box(state->output->damage, node->frame);
 }
 
 void
 zigzag_node_update_texture(struct zigzag_node *self)
 {
-  zigzag_node_add_damage(self);
-  int output_width, output_height;
-  wlr_output_transformed_resolution(
-      self->screen->output->wlr_output, &output_width, &output_height);
-  self->set_frame(self, output_width, output_height);
+  self->layout->on_damage(self);
+  self->set_frame(
+      self, self->layout->output_width, self->layout->output_height);
   struct wlr_texture *old_texture = self->texture;
   struct zn_server *server = zn_server_get_singleton();
   self->texture = zigzag_node_render_texture(self, server->renderer);
-  zigzag_node_add_damage(self);
+  self->layout->on_damage(self);
   wlr_texture_destroy(old_texture);
 }
 
@@ -93,10 +91,11 @@ vr_button_set_frame(
 }
 
 struct zigzag_node *
-create_vr_button(struct zn_screen *screen, struct zn_server *server)
+create_vr_button(struct zigzag_layout *node_layout, struct zn_server *server)
 {
-  struct zigzag_node *vr_button = zigzag_node_create(screen, NULL, server,
-      vr_button_set_frame, vr_button_on_click, vr_button_render);
+  struct zigzag_node *vr_button =
+      zigzag_node_create(node_layout, NULL, server->renderer,
+          vr_button_set_frame, vr_button_on_click, vr_button_render);
 
   if (vr_button == NULL) {
     zn_error("Failed to create the VR button");
@@ -125,7 +124,7 @@ void
 power_menu_quit_render(struct zigzag_node *self, cairo_t *cr)
 {
   struct power_menu_quit_state *state =
-      (struct power_menu_quit_state *)self->data;
+      (struct power_menu_quit_state *)self->state;
   if (!state->shown) return;
   cairo_set_source_rgb(cr, 0.812, 0.824, 0.859);
   cairo_paint(cr);
@@ -147,7 +146,7 @@ power_menu_quit_set_frame(
     struct zigzag_node *self, int output_width, int output_height)
 {
   struct power_menu_quit_state *state =
-      (struct power_menu_quit_state *)self->data;
+      (struct power_menu_quit_state *)self->state;
   if (state->shown) {
     double menu_width = 180;
     double menu_height = 30;
@@ -166,13 +165,14 @@ power_menu_quit_set_frame(
 }
 
 struct zigzag_node *
-create_power_menu_quit(struct zn_screen *screen, struct zn_server *server)
+create_power_menu_quit(
+    struct zigzag_layout *node_layout, struct zn_server *server)
 {
   struct power_menu_quit_state *state;
   state = zalloc(sizeof *state);
   state->shown = false;
-  struct zigzag_node *power_menu_quit = zigzag_node_create(screen,
-      (void *)state, server, power_menu_quit_set_frame,
+  struct zigzag_node *power_menu_quit = zigzag_node_create(node_layout,
+      (void *)state, server->renderer, power_menu_quit_set_frame,
       power_menu_quit_on_click, power_menu_quit_render);
 
   if (power_menu_quit == NULL) {
@@ -193,13 +193,13 @@ power_button_on_click(struct zigzag_node *self, double x, double y)
 {
   UNUSED(x);
   UNUSED(y);
-  struct power_button_state *state = (struct power_button_state *)self->data;
+  struct power_button_state *state = (struct power_button_state *)self->state;
   state->clicked = !state->clicked;
   zigzag_node_update_texture(self);
   struct zigzag_node *child;
   wl_list_for_each (child, &self->children, link) {
     struct power_menu_quit_state *child_state =
-        (struct power_menu_quit_state *)child->data;
+        (struct power_menu_quit_state *)child->state;
     child_state->shown = state->clicked;
     zigzag_node_update_texture(child);
   }
@@ -209,7 +209,7 @@ void
 power_button_render(struct zigzag_node *self, cairo_t *cr)
 {
   GError *error = NULL;
-  struct power_button_state *state = (struct power_button_state *)self->data;
+  struct power_button_state *state = (struct power_button_state *)self->state;
   GFile *file = g_file_new_for_path(
       state->clicked ? POWER_BUTTON_ICON_CLICKED : POWER_BUTTON_ICON);
   RsvgHandle *handle = rsvg_handle_new_from_gfile_sync(
@@ -246,7 +246,7 @@ power_button_set_frame(
 }
 
 struct zigzag_node *
-create_power_button(struct zn_screen *screen, struct zn_server *server,
+create_power_button(struct zigzag_layout *node_layout, struct zn_server *server,
     struct zigzag_node *power_menu_quit)
 {
   struct power_button_state *state;
@@ -254,19 +254,12 @@ create_power_button(struct zn_screen *screen, struct zn_server *server,
   state->clicked = false;
 
   struct zigzag_node *power_button =
-      zigzag_node_create(screen, (void *)state, server, power_button_set_frame,
-          power_button_on_click, power_button_render);
+      zigzag_node_create(node_layout, (void *)state, server->renderer,
+          power_button_set_frame, power_button_on_click, power_button_render);
 
   if (power_button == NULL) {
     zn_error("Failed to create the power button");
-    goto errtypedef void (*zigzag_node_on_click_t)(
-        struct zigzag_node * self, double x, double y);
-
-    typedef void (*zigzag_node_set_frame_t)(
-        struct zigzag_node * self, int output_width, int output_height);
-    typedef void (*zigzag_node_render_t)(
-        struct zigzag_node * self, cairo_t * cr);
-    ;
+    goto err;
   }
   wl_list_insert(&power_button->children, &power_menu_quit->link);
   return power_button;
@@ -304,11 +297,11 @@ menu_bar_set_frame(
 }
 
 struct zigzag_node *
-create_menu_bar(struct zn_screen *screen, struct zn_server *server,
+create_menu_bar(struct zigzag_layout *node_layout, struct zn_server *server,
     struct zigzag_node *vr_button, struct zigzag_node *power_button)
 {
-  struct zigzag_node *menu_bar = zigzag_node_create(screen, NULL, server,
-      menu_bar_set_frame, menu_bar_on_click, menu_bar_render);
+  struct zigzag_node *menu_bar = zigzag_node_create(node_layout, NULL,
+      server->renderer, menu_bar_set_frame, menu_bar_on_click, menu_bar_render);
 
   if (menu_bar == NULL) {
     zn_error("Failed to create the menu bar");
@@ -322,19 +315,16 @@ err:
 }
 
 void
-zigzag_screen_setup_default(struct zn_screen *screen, struct zn_server *server)
+zigzag_layout_setup_default(
+    struct zigzag_layout *node_layout, struct zn_server *server)
 {
-  int output_width, output_height;
-  wlr_output_transformed_resolution(
-      screen->output->wlr_output, &output_width, &output_height);
-  struct zigzag_layout *node_layout = zigzag_layout_create(
-      screen->output_heigt, screen->output_width, NULL, NULL);
-  struct zigzag_node *vr_button = create_vr_button(screen, server);
-  struct zigzag_node *power_menu_quit = create_power_menu_quit(screen, server);
+  struct zigzag_node *vr_button = create_vr_button(node_layout, server);
+  struct zigzag_node *power_menu_quit =
+      create_power_menu_quit(node_layout, server);
   struct zigzag_node *power_button =
-      create_power_button(screen, server, power_menu_quit);
+      create_power_button(node_layout, server, power_menu_quit);
   struct zigzag_node *menu_bar =
-      create_menu_bar(screen, server, vr_button, power_button);
+      create_menu_bar(node_layout, server, vr_button, power_button);
   // Register the widgets on the screen
-  wl_list_insert(&screen->nodes, &menu_bar->link);
+  wl_list_insert(&node_layout->nodes, &menu_bar->link);
 }

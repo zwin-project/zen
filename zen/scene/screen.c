@@ -4,8 +4,8 @@
 #include "zen/input/seat.h"
 #include "zen/scene/board.h"
 #include "zen/scene/screen-layout.h"
-#include "zen/scene/ui-node.h"
 #include "zen/scene/view.h"
+#include "zen/scene/zigzag-layout.h"
 #include "zen/wlr/box.h"
 
 struct surface_callback_data {
@@ -251,6 +251,31 @@ zn_screen_create(
     goto err;
   }
 
+  struct zen_zigzag_layout_state *state;
+  state = zalloc(sizeof *state);
+  if (state == NULL) {
+    zn_error("Failed to allocate memory");
+    goto err_free;
+  }
+
+  int output_width, output_height;
+  wlr_output_transformed_resolution(
+      output->wlr_output, &output_width, &output_height);
+
+  // struct zigzag_layout *node_layout = zigzag_layout_create(
+  //     output_width, output_height, (void *)state,
+  //     zen_zigzag_layout_on_damage);
+
+  // if (node_layout == NULL) {
+  //   zn_error("Failed to create zigzag_layout");
+  //   goto err_state;
+  // }
+
+  UNUSED(server);
+  // zigzag_layout_setup_default(node_layout, server);
+  // self->node_layout = node_layout;
+  zn_screen_layout_add(screen_layout, self);
+
   self->output = output;
   self->screen_layout = screen_layout;
   wl_signal_init(&self->events.destroy);
@@ -259,13 +284,13 @@ zn_screen_create(
   self->current_board_screen_assigned_listener.notify =
       zn_screen_handle_current_board_screen_assigned;
   wl_list_init(&self->current_board_screen_assigned_listener.link);
-  wl_list_init(&self->ui_nodes);
-
-  zn_ui_node_setup_default(self, server);
-  zn_screen_layout_add(screen_layout, self);
 
   return self;
 
+err_state:
+  free(state);
+err_free:
+  free(self);
 err:
   return NULL;
 }
@@ -273,10 +298,13 @@ err:
 void
 zn_screen_destroy(struct zn_screen *self)
 {
-  wl_list_remove(&self->ui_nodes);
   wl_list_remove(&self->current_board_screen_assigned_listener.link);
   wl_signal_emit(&self->events.destroy, NULL);
 
   zn_screen_layout_remove(self->screen_layout, self);
+
+  free(self->node_layout->state);
+  zigzag_node_cleanup_list(&self->node_layout->nodes);
+  zigzag_layout_destroy(self->node_layout);
   free(self);
 }

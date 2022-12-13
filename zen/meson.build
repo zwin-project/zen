@@ -32,7 +32,7 @@ _zen_desktop_srcs = [
   'scene/scene.c',
   'scene/screen.c',
   'scene/screen-layout.c',
-  'scene/zigzag-screen.c',
+  'scene/zigzag-layout.c',
   'scene/view.c',
   'scene/view-child.c',
 
@@ -56,6 +56,7 @@ _zen_desktop_deps = [
   wlr_glew_renderer_dep,
   xkbcommon_dep,
   zen_common_dep,
+  zigzag_dep,
 ]
 
 executable(

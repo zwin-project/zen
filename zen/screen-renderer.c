@@ -9,7 +9,6 @@
 #include "zen/output.h"
 #include "zen/scene/board.h"
 #include "zen/scene/screen.h"
-#include "zen/scene/ui-node.h"
 #include "zen/scene/view.h"
 
 typedef void (*surface_iterator_func_t)(struct zn_screen *screen,
@@ -97,12 +96,12 @@ zn_screen_renderer_render_background(struct zn_output *output,
 }
 
 static void
-zn_screen_renderer_render_ui_nodes(struct zn_output *output,
-    struct wlr_renderer *renderer, struct wl_list *ui_nodes,
+zn_screen_renderer_render_zigzag_nodes(struct zn_output *output,
+    struct wlr_renderer *renderer, struct wl_list *nodes,
     pixman_region32_t *screen_damage)
 {
-  struct zn_ui_node *node;
-  wl_list_for_each (node, ui_nodes, link) {
+  struct zigzag_node *node;
+  wl_list_for_each (node, nodes, link) {
     float matrix[9];
     wlr_matrix_project_box(matrix, node->frame, WL_OUTPUT_TRANSFORM_NORMAL, 0,
         output->wlr_output->transform_matrix);
@@ -114,7 +113,7 @@ zn_screen_renderer_render_ui_nodes(struct zn_output *output,
       zn_screen_renderer_scissor_output(output, &rects[i]);
       wlr_render_texture_with_matrix(renderer, node->texture, matrix, 1.0f);
     }
-    zn_screen_renderer_render_ui_nodes(
+    zn_screen_renderer_render_zigzag_nodes(
         output, renderer, &node->children, screen_damage);
   }
 }
@@ -376,8 +375,8 @@ zn_screen_renderer_render(struct zn_screen *screen,
   wl_list_for_each (view, &board->view_list, link)
     zn_screen_renderer_render_view(screen, view, renderer, &screen_damage);
 
-  zn_screen_renderer_render_ui_nodes(
-      output, renderer, &screen->ui_nodes, &screen_damage);
+  zn_screen_renderer_render_zigzag_nodes(
+      output, renderer, &screen->node_layout->nodes, &screen_damage);
 
   zn_screen_renderer_render_cursor(screen, cursor, renderer, &screen_damage);
 
