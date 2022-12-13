@@ -5,11 +5,27 @@
 
 #include "zen/appearance/view.h"
 
+struct zn_view;
 struct zn_board;
+struct zn_xdg_toplevel;
+
+struct zn_view_impl {
+  struct wlr_surface *(*get_wlr_surface_at)(struct zn_view *view,
+      double view_sx, double view_sy, double *surface_x, double *surface_y);
+};
+
+enum zn_view_type {
+  ZN_VIEW_XDG_TOPLEVEL,
+};
 
 /** lifetime of given wlr_surface must be longer than zn_view */
 struct zn_view {
   struct wlr_surface *surface;  // nonnull
+
+  const struct zn_view_impl *impl;
+  union {
+    struct zn_xdg_toplevel *xdg_toplevel;
+  };
 
   struct wl_list link;        // zn_scene::view_list
   struct wl_list board_link;  // zn_board::view_list
