@@ -8,6 +8,7 @@
 #include "board.h"
 #include "bounded.h"
 #include "expansive.h"
+#include "seat-capsule.h"
 #include "zen/board.h"
 #include "zen/cursor.h"
 #include "zen/scene.h"
@@ -85,15 +86,8 @@ zn_shell_handle_new_bounded(struct wl_listener *listener, void *data)
   struct zn_shell *self = zn_container_of(listener, self, new_bounded_listener);
 
   struct zgnr_bounded *zgnr_bounded = data;
-  struct zn_virtual_object *zn_virtual_object =
-      zgnr_bounded->virtual_object->user_data;
 
   (void)zns_bounded_create(zgnr_bounded);
-
-  // TODO: calculate better initial position
-  vec3 initial_bounded_position = {0, 1, -1};
-  zn_virtual_object_move(
-      zn_virtual_object, initial_bounded_position, GLM_QUAT_IDENTITY);
 }
 
 static void
@@ -140,10 +134,16 @@ zn_shell_create(struct wl_display *display, struct zn_scene *scene)
     goto err_free;
   }
 
+  self->seat_capsule = zns_seat_capsule_create();
+  if (self->seat_capsule == NULL) {
+    zn_error("Failed to create a seat capsule");
+    goto err_zgnr_shell;
+  }
+
   self->root = zns_node_create(NULL, self, &node_implementation);
   if (self->root == NULL) {
     zn_error("Failed to create zns_node");
-    goto err_zgnr_shell;
+    goto err_seat_capsule;
   }
 
   zns_default_ray_grab_init(&self->default_grab, self);
@@ -160,6 +160,9 @@ zn_shell_create(struct wl_display *display, struct zn_scene *scene)
   wl_signal_add(&scene->events.new_board, &self->new_board_listener);
 
   return self;
+
+err_seat_capsule:
+  zns_seat_capsule_destroy(self->seat_capsule);
 
 err_zgnr_shell:
   zgnr_shell_destroy(self->zgnr_shell);
@@ -179,6 +182,7 @@ zn_shell_destroy(struct zn_shell *self)
   wl_list_remove(&self->new_expansive_listener.link);
   wl_list_remove(&self->new_bounded_listener.link);
   zns_node_destroy(self->root);
+  zns_seat_capsule_destroy(self->seat_capsule);
   zgnr_shell_destroy(self->zgnr_shell);
   free(self);
 }

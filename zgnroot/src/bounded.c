@@ -172,6 +172,11 @@ zgnr_bounded_handle_virtual_object_commit(
   }
 
   self->pending.damage = 0;
+
+  if (!self->mapped) {
+    self->mapped = true;
+    wl_signal_emit(&self->base.events.mapped, NULL);
+  }
 }
 
 static void
@@ -199,9 +204,11 @@ zgnr_bounded_create(struct wl_client *client, uint32_t id,
 
   wl_signal_init(&self->base.events.destroy);
   wl_signal_init(&self->base.events.move);
+  wl_signal_init(&self->base.events.mapped);
   wl_list_init(&self->configure_list);
 
   self->configured = false;
+  self->mapped = false;
 
   self->pending.region = NULL;
   self->pending.damage = 0;
@@ -257,6 +264,7 @@ zgnr_bounded_destroy(struct zgnr_bounded_impl *self)
   wl_list_remove(&self->virtual_object_commit_listener.link);
   wl_list_remove(&self->base.events.destroy.listener_list);
   wl_list_remove(&self->base.events.move.listener_list);
+  wl_list_remove(&self->base.events.mapped.listener_list);
 
   free(self);
 }

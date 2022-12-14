@@ -2,6 +2,8 @@
 
 #include <zen-common.h>
 
+#include "seat-capsule.h"
+#include "shell.h"
 #include "zen/appearance/ray.h"
 #include "zen/server.h"
 #include "zen/virtual-object.h"
@@ -13,33 +15,52 @@ zns_move_ray_grab_motion_relative(struct zn_ray_grab *grab_base, vec3 origin,
     float polar, float azimuthal, uint32_t time_msec)
 {
   UNUSED(time_msec);
+  if (!zn_assert(origin[0] == 0 && origin[1] == 0 && origin[2] == 0,
+          "ZEN is not supporting 6DoF devices yet")) {
+    return;
+  }
+
+  struct zn_server *server = zn_server_get_singleton();
+  struct zns_seat_capsule *seat_capsule = server->shell->seat_capsule;
   struct zns_move_ray_grab *self = zn_container_of(grab_base, self, base);
-  struct zn_virtual_object *zn_virtual_object =
+  struct zn_virtual_object *virtual_object =
       self->bounded->zgnr_bounded->virtual_object->user_data;
+  vec3 tip;
 
-  float next_polar = self->base.ray->angle.polar + polar;
-  if (next_polar < 0)
-    next_polar = 0;
-  else if (next_polar > M_PI)
-    next_polar = M_PI;
+  zn_ray_get_tip(self->base.ray, tip);
+  glm_mat4_mulv3(virtual_object->model_invert, tip, 1, tip);
 
-  float next_azimuthal = self->base.ray->angle.azimuthal + azimuthal;
-  while (next_azimuthal >= 2 * M_PI) next_azimuthal -= 2 * M_PI;
-  while (next_azimuthal < 0) next_azimuthal += 2 * M_PI;
+  float next_board_polar = self->bounded->seat_capsule_polar + polar;
+  if (next_board_polar < 0)
+    next_board_polar = 0;
+  else if (next_board_polar > M_PI)
+    next_board_polar = M_PI;
 
-  vec3 next_origin;
+  float next_board_azimuthal =
+      self->bounded->seat_capsule_azimuthal + azimuthal;
+  while (next_board_azimuthal >= 2 * M_PI) next_board_azimuthal -= 2 * M_PI;
+  while (next_board_azimuthal < 0) next_board_azimuthal += 2 * M_PI;
+
+  zns_seat_capsule_move_bounded(
+      seat_capsule, self->bounded, next_board_azimuthal, next_board_polar);
+
+  glm_mat4_mulv3(virtual_object->model_matrix, tip, 1, tip);
+
+  vec3 next_origin, next_direction;
+  float next_polar, next_azimuthal, next_length;
   glm_vec3_add(self->base.ray->origin, origin, next_origin);
+  glm_vec3_sub(tip, next_origin, next_direction);
+  next_length = glm_vec3_distance(GLM_VEC3_ZERO, next_direction);
+  glm_vec3_normalize(next_direction);
+  next_azimuthal = atan2f(-next_direction[2], next_direction[0]);
+  float r = sqrtf(powf(next_direction[2], 2) + powf(next_direction[0], 2));
+  next_polar = atan2(r, next_direction[1]);
 
   zn_ray_move(self->base.ray, next_origin, next_polar, next_azimuthal);
 
+  zn_ray_set_length(self->base.ray, next_length);
+
   zna_ray_commit(self->base.ray->appearance);
-
-  vec3 tip, next_virtual_object_position;
-  zn_ray_get_tip(self->base.ray, tip);
-  glm_vec3_sub(tip, self->local_tip, next_virtual_object_position);
-
-  zn_virtual_object_move(zn_virtual_object, next_virtual_object_position,
-      zn_virtual_object->quaternion);
 }
 
 static void

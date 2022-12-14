@@ -5,6 +5,7 @@ _zen_shell_srcs = [
   'bounded.c',
   'expansive.c',
   'node.c',
+  'seat-capsule.c',
   'shell.c',
 
   'ray-grab/board-move.c',

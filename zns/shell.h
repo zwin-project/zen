@@ -7,11 +7,14 @@
 #include "zen/shell/shell.h"
 
 struct zns_bounded;
+struct zns_seat_capsule;
 
 struct zn_shell {
   struct zgnr_shell *zgnr_shell;
 
   struct zns_node *root;
+
+  struct zns_seat_capsule *seat_capsule;
 
   struct zns_default_ray_grab default_grab;
 
