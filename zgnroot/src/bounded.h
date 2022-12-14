@@ -27,6 +27,7 @@ struct zgnr_bounded_impl {
   } pending;
 
   bool configured;
+  bool mapped;
 
   struct wl_resource *resource;
 };

@@ -8,6 +8,7 @@
 
 #include "ray-grab/default.h"
 #include "ray-grab/move.h"
+#include "seat-capsule.h"
 #include "shell.h"
 #include "zen/server.h"
 #include "zen/virtual-object.h"
@@ -136,6 +137,17 @@ static const struct zns_node_interface node_implementation = {
 };
 
 static void
+zns_bounded_handle_mapped(struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+
+  struct zns_bounded *self = zn_container_of(listener, self, mapped_listener);
+  struct zn_server *server = zn_server_get_singleton();
+
+  zns_seat_capsule_add_bounded(server->shell->seat_capsule, self);
+}
+
+static void
 zns_bounded_handle_move(struct wl_listener *listener, void *data)
 {
   struct zns_bounded *self = zn_container_of(listener, self, move_listener);
@@ -186,6 +198,7 @@ zns_bounded_create(struct zgnr_bounded *zgnr_bounded)
 
   self->zgnr_bounded = zgnr_bounded;
   wl_list_init(&self->link);
+  wl_list_init(&self->seat_capsule_link);
 
   self->zgnr_bounded_destroy_listener.notify =
       zns_bounded_handle_zgnr_bounded_destroy;
@@ -194,6 +207,9 @@ zns_bounded_create(struct zgnr_bounded *zgnr_bounded)
 
   self->move_listener.notify = zns_bounded_handle_move;
   wl_signal_add(&zgnr_bounded->events.move, &self->move_listener);
+
+  self->mapped_listener.notify = zns_bounded_handle_mapped;
+  wl_signal_add(&zgnr_bounded->events.mapped, &self->mapped_listener);
 
   wl_signal_init(&self->events.destroy);
 
@@ -212,7 +228,9 @@ zns_bounded_destroy(struct zns_bounded *self)
   wl_signal_emit(&self->events.destroy, NULL);
 
   wl_list_remove(&self->link);
+  wl_list_remove(&self->seat_capsule_link);
   wl_list_remove(&self->move_listener.link);
+  wl_list_remove(&self->mapped_listener.link);
   wl_list_remove(&self->zgnr_bounded_destroy_listener.link);
   wl_list_remove(&self->events.destroy.listener_list);
   zns_node_destroy(self->node);

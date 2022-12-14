@@ -19,6 +19,7 @@ struct zgnr_bounded {
   struct zgnr_virtual_object *virtual_object;  // nonnull
 
   struct {
+    struct wl_signal mapped;   // (NULL)
     struct wl_signal destroy;  // (NULL)
     struct wl_signal move;     // (struct zgnr_bounded_move_event*)
   } events;
