@@ -14,8 +14,11 @@ struct zn_scene {
   struct wl_list board_list;  // zn_board::link
   struct wl_list view_list;   // zn_view::link
 
-  struct zn_cursor *cursor;  // nonnull
-  struct zn_ray *ray;        // nonnull
+  struct zn_cursor *cursor;      // nonnull
+  struct zn_ray *ray;            // nonnull
+  struct zn_view *focused_view;  // nullable
+
+  struct wl_listener focused_view_destroy_listener;
 
   struct {
     struct wl_signal new_board;  // (struct zn_board*)
@@ -27,6 +30,8 @@ struct zn_scene {
 void zn_scene_new_screen(struct zn_scene *self, struct zn_screen *screen);
 
 void zn_scene_new_view(struct zn_scene *self, struct zn_view *view);
+
+void zn_scene_set_focused_view(struct zn_scene *self, struct zn_view *view);
 
 struct zn_scene *zn_scene_create(void);
 

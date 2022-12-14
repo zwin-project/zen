@@ -23,7 +23,7 @@ zn_default_cursor_grab_send_motion(
 
   double surface_x, surface_y;
   struct wlr_surface *surface = zn_board_get_surface_at(grab->cursor->board,
-      grab->cursor->x, grab->cursor->y, &surface_x, &surface_y);
+      grab->cursor->x, grab->cursor->y, &surface_x, &surface_y, NULL);
 
   if (surface) {
     wlr_seat_pointer_enter(seat, surface, surface_x, surface_y);
@@ -82,8 +82,20 @@ zn_default_cursor_grab_button(struct zn_cursor_grab *grab, uint32_t time_msec,
   UNUSED(grab);
   struct zn_server *server = zn_server_get_singleton();
   struct wlr_seat *seat = server->input_manager->seat->wlr_seat;
+  struct zn_cursor *cursor = grab->cursor;
+
+  if (!cursor->board) {
+    return;
+  }
 
   wlr_seat_pointer_send_button(seat, time_msec, button, state);
+
+  if (state == WLR_BUTTON_PRESSED) {
+    struct zn_view *view;
+    zn_board_get_surface_at(
+        cursor->board, cursor->x, cursor->y, NULL, NULL, &view);
+    zn_scene_set_focused_view(server->scene, view);
+  }
 }
 
 void

@@ -16,9 +16,16 @@ zn_xdg_toplevel_view_impl_get_wlr_surface_at(struct zn_view *view,
           view_sx, view_sy, surface_x, surface_y);
   return s;
 }
+static void
+zn_xdg_toplevel_view_impl_set_activated(struct zn_view *view, bool activated)
+{
+  wlr_xdg_toplevel_set_activated(
+      view->xdg_toplevel->wlr_xdg_toplevel->base, activated);
+}
 
 static const struct zn_view_impl zn_xdg_toplevel_view_impl = {
     .get_wlr_surface_at = zn_xdg_toplevel_view_impl_get_wlr_surface_at,
+    .set_activated = zn_xdg_toplevel_view_impl_set_activated,
 };
 
 static void
