@@ -4,10 +4,35 @@
 
 #include "zen/appearance/cursor.h"
 #include "zen/board.h"
+#include "zen/cursor.h"
 #include "zen/scene.h"
 #include "zen/screen-layout.h"
 #include "zen/screen.h"
 #include "zen/server.h"
+
+static void
+zn_default_cursor_grab_send_motion(
+    struct zn_cursor_grab *grab, uint32_t time_msec)
+{
+  if (!grab->cursor->board) {
+    return;
+  }
+
+  struct zn_server *server = zn_server_get_singleton();
+  struct wlr_seat *seat = server->input_manager->seat->wlr_seat;
+
+  double surface_x, surface_y;
+  struct wlr_surface *surface = zn_board_get_surface_at(grab->cursor->board,
+      grab->cursor->x, grab->cursor->y, &surface_x, &surface_y);
+
+  if (surface) {
+    wlr_seat_pointer_enter(seat, surface, surface_x, surface_y);
+    wlr_seat_pointer_send_motion(seat, time_msec, surface_x, surface_y);
+  } else {
+    zn_cursor_set_xcursor(grab->cursor, "left_ptr");
+    wlr_seat_pointer_clear_focus(seat);
+  }
+}
 
 void
 zn_default_cursor_grab_motion_relative(
@@ -30,6 +55,8 @@ zn_default_cursor_grab_motion_relative(
 
   zn_cursor_move(cursor, screen->board, screen_x, screen_y);
 
+  zn_default_cursor_grab_send_motion(grab, time_msec);
+
   zna_cursor_commit(cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
 
   UNUSED(time_msec);
@@ -41,9 +68,45 @@ zn_default_cursor_grab_motion_absolute(struct zn_cursor_grab *grab,
 {
   zn_cursor_move(grab->cursor, board, x, y);
 
+  zn_default_cursor_grab_send_motion(grab, time_msec);
+
   zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
 
   UNUSED(time_msec);
+}
+
+void
+zn_default_cursor_grab_button(struct zn_cursor_grab *grab, uint32_t time_msec,
+    uint32_t button, enum wlr_button_state state)
+{
+  UNUSED(grab);
+  struct zn_server *server = zn_server_get_singleton();
+  struct wlr_seat *seat = server->input_manager->seat->wlr_seat;
+
+  wlr_seat_pointer_send_button(seat, time_msec, button, state);
+}
+
+void
+zn_default_cursor_grab_axis(struct zn_cursor_grab *grab, uint32_t time_msec,
+    enum wlr_axis_source source, enum wlr_axis_orientation orientation,
+    double delta, int32_t delta_discrete)
+{
+  UNUSED(grab);
+  struct zn_server *server = zn_server_get_singleton();
+  struct wlr_seat *seat = server->input_manager->seat->wlr_seat;
+
+  wlr_seat_pointer_send_axis(
+      seat, time_msec, orientation, delta, delta_discrete, source);
+}
+
+void
+zn_default_cursor_grab_frame(struct zn_cursor_grab *grab)
+{
+  UNUSED(grab);
+  struct zn_server *server = zn_server_get_singleton();
+  struct wlr_seat *seat = server->input_manager->seat->wlr_seat;
+
+  wlr_seat_pointer_send_frame(seat);
 }
 
 void
@@ -78,6 +141,9 @@ zn_default_cursor_grab_cancel(struct zn_cursor_grab *grab)
 static const struct zn_cursor_grab_interface implementation = {
     .motion_relative = zn_default_cursor_grab_motion_relative,
     .motion_absolute = zn_default_cursor_grab_motion_absolute,
+    .button = zn_default_cursor_grab_button,
+    .axis = zn_default_cursor_grab_axis,
+    .frame = zn_default_cursor_grab_frame,
     .enter = zn_default_cursor_grab_enter,
     .leave = zn_default_cursor_grab_leave,
     .rebase = zn_default_cursor_grab_rebase,

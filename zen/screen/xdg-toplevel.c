@@ -11,8 +11,10 @@ static struct wlr_surface *
 zn_xdg_toplevel_view_impl_get_wlr_surface_at(struct zn_view *view,
     double view_sx, double view_sy, double *surface_x, double *surface_y)
 {
-  return wlr_xdg_surface_surface_at(view->xdg_toplevel->wlr_xdg_toplevel->base,
-      view_sx, view_sy, surface_x, surface_y);
+  struct wlr_surface *s =
+      wlr_xdg_surface_surface_at(view->xdg_toplevel->wlr_xdg_toplevel->base,
+          view_sx, view_sy, surface_x, surface_y);
+  return s;
 }
 
 static const struct zn_view_impl zn_xdg_toplevel_view_impl = {

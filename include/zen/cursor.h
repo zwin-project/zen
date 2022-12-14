@@ -3,6 +3,7 @@
 #include <cglm/types.h>
 #include <wayland-server-core.h>
 #include <wlr/render/wlr_texture.h>
+#include <wlr/types/wlr_pointer.h>
 #include <wlr/types/wlr_xcursor_manager.h>
 #include <wlr/util/box.h>
 
@@ -19,6 +20,12 @@ struct zn_cursor_grab_interface {
    */
   void (*motion_absolute)(struct zn_cursor_grab *grab, struct zn_board *board,
       double x, double y, uint32_t time_msec);
+  void (*button)(struct zn_cursor_grab *grab, uint32_t time_msec,
+      uint32_t button, enum wlr_button_state state);
+  void (*axis)(struct zn_cursor_grab *grab, uint32_t time_msec,
+      enum wlr_axis_source source, enum wlr_axis_orientation orientation,
+      double delta, int32_t delta_discrete);
+  void (*frame)(struct zn_cursor_grab *grab);
   void (*enter)(
       struct zn_cursor_grab *grab, struct zn_board *board, double x, double y);
   void (*leave)(struct zn_cursor_grab *grab);

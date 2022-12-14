@@ -37,7 +37,9 @@ zn_pointer_handle_button(struct wl_listener *listener, void *data)
   struct wlr_event_pointer_button *event = data;
 
   if (server->display_system == ZN_DISPLAY_SYSTEM_SCREEN) {
-    // TODO: cursor
+    struct zn_cursor *cursor = server->scene->cursor;
+    cursor->grab->impl->button(
+        cursor->grab, event->time_msec, event->button, event->state);
   } else {
     struct zn_ray *ray = server->scene->ray;
     enum zgn_ray_button_state state = 0;
@@ -55,9 +57,12 @@ static void
 zn_pointer_handle_axis(struct wl_listener *listener, void *data)
 {
   UNUSED(listener);
-  UNUSED(data);
+  struct zn_server *server = zn_server_get_singleton();
+  struct wlr_event_pointer_axis *event = data;
 
-  // TODO:
+  struct zn_cursor *cursor = server->scene->cursor;
+  cursor->grab->impl->axis(cursor->grab, event->time_msec, event->source,
+      event->orientation, event->delta, event->delta_discrete);
 }
 
 static void
@@ -65,8 +70,10 @@ zn_pointer_handle_frame(struct wl_listener *listener, void *data)
 {
   UNUSED(listener);
   UNUSED(data);
+  struct zn_server *server = zn_server_get_singleton();
 
-  // TODO:
+  struct zn_cursor *cursor = server->scene->cursor;
+  cursor->grab->impl->frame(cursor->grab);
 }
 
 struct zn_pointer *

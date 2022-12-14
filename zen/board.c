@@ -40,6 +40,33 @@ zn_board_move(struct zn_board *self, vec2 size, mat4 transform)
   glm_mat4_copy(transform, self->geometry.transform);
 }
 
+struct wlr_surface *
+zn_board_get_surface_at(struct zn_board *self, double x, double y,
+    double *surface_x, double *surface_y)
+{
+  struct zn_view *view_iterator;
+  double view_sx, view_sy;
+  struct wlr_surface *surface;
+
+  wl_list_for_each_reverse (view_iterator, &self->view_list, board_link) {
+    struct wlr_fbox fbox;
+    zn_view_get_surface_fbox(view_iterator, &fbox);
+    view_sx = x - fbox.x;
+    view_sy = y - fbox.y;
+
+    double sx, sy;
+    surface = view_iterator->impl->get_wlr_surface_at(
+        view_iterator, view_sx, view_sy, &sx, &sy);
+    if (surface) {
+      if (surface_x) *surface_x = sx;
+      if (surface_y) *surface_y = sy;
+      return surface;
+    }
+  }
+
+  return NULL;
+}
+
 void
 zn_board_get_effective_size(
     struct zn_board *self, double *width, double *height)
