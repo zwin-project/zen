@@ -39,6 +39,9 @@ void zn_board_send_frame_done(struct zn_board *self, struct timespec *when);
 
 void zn_board_move(struct zn_board *self, vec2 size, mat4 transform);
 
+struct wlr_surface *zn_board_get_surface_at(struct zn_board *self, double x,
+    double y, double *surface_x, double *surface_y);
+
 void zn_board_get_effective_size(
     struct zn_board *self, double *width, double *height);
 
