@@ -11,6 +11,16 @@
 #include "zen/view.h"
 #include "zen/wlr/texture.h"
 
+static void
+zn_scene_handle_focused_view_destroy(struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+  struct zn_scene *self =
+      zn_container_of(listener, self, focused_view_destroy_listener);
+
+  zn_scene_set_focused_view(self, NULL);
+}
+
 static struct zn_board *
 zn_scene_ensure_dangling_board(struct zn_scene *self)
 {
@@ -86,6 +96,28 @@ zn_scene_new_view(struct zn_scene *self, struct zn_view *view)
   zna_view_commit(view->appearance, ZNA_VIEW_DAMAGE_GEOMETRY);
 }
 
+void
+zn_scene_set_focused_view(struct zn_scene *self, struct zn_view *view)
+{
+  if (view == self->focused_view) {
+    return;
+  }
+
+  if (self->focused_view != NULL) {
+    self->focused_view->impl->set_activated(self->focused_view, false);
+    wl_list_remove(&self->focused_view_destroy_listener.link);
+    wl_list_init(&self->focused_view_destroy_listener.link);
+  }
+
+  if (view != NULL) {
+    view->impl->set_activated(view, true);
+    wl_signal_add(&view->events.destroy, &self->focused_view_destroy_listener);
+    // TODO: enter seat_keyboard
+  }
+
+  self->focused_view = view;
+}
+
 struct zn_scene *
 zn_scene_create(void)
 {
@@ -117,6 +149,10 @@ zn_scene_create(void)
 
   struct zn_server *server = zn_server_get_singleton();
   zn_scene_setup_wallpaper(self, server->config->wallpaper_filepath);
+
+  self->focused_view_destroy_listener.notify =
+      zn_scene_handle_focused_view_destroy;
+  wl_list_init(&self->focused_view_destroy_listener.link);
 
   wl_list_init(&self->board_list);
   wl_list_init(&self->view_list);
@@ -151,6 +187,7 @@ zn_scene_destroy_resources(struct zn_scene *self)
 void
 zn_scene_destroy(struct zn_scene *self)
 {
+  wl_list_remove(&self->focused_view_destroy_listener.link);
   wl_list_remove(&self->events.new_board.listener_list);
   wl_list_remove(&self->view_list);
   if (self->wallpaper != NULL) wlr_texture_destroy(self->wallpaper);

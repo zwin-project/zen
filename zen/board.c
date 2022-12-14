@@ -42,7 +42,7 @@ zn_board_move(struct zn_board *self, vec2 size, mat4 transform)
 
 struct wlr_surface *
 zn_board_get_surface_at(struct zn_board *self, double x, double y,
-    double *surface_x, double *surface_y)
+    double *surface_x, double *surface_y, struct zn_view **view)
 {
   struct zn_view *view_iterator;
   double view_sx, view_sy;
@@ -60,6 +60,7 @@ zn_board_get_surface_at(struct zn_board *self, double x, double y,
     if (surface) {
       if (surface_x) *surface_x = sx;
       if (surface_y) *surface_y = sy;
+      if (view) *view = view_iterator;
       return surface;
     }
   }

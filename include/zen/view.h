@@ -12,6 +12,7 @@ struct zn_xdg_toplevel;
 struct zn_view_impl {
   struct wlr_surface *(*get_wlr_surface_at)(struct zn_view *view,
       double view_sx, double view_sy, double *surface_x, double *surface_y);
+  void (*set_activated)(struct zn_view *view, bool activated);
 };
 
 enum zn_view_type {
