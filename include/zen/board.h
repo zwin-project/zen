@@ -16,7 +16,7 @@ struct zn_board {
 
   struct zn_screen *screen;  // nullable
 
-  struct wl_list view_list;  // zn_view::board_link
+  struct wl_list view_list;  // zn_view::board_link, sorted from back to front
 
   float color[3];  // FIXME: debugging purpose, remove me later
 

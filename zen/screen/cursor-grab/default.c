@@ -58,8 +58,6 @@ zn_default_cursor_grab_motion_relative(
   zn_default_cursor_grab_send_motion(grab, time_msec);
 
   zna_cursor_commit(cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
-
-  UNUSED(time_msec);
 }
 
 void
