@@ -14,4 +14,5 @@ struct zna_board {
 
   struct wl_listener session_created_listener;
   struct wl_listener session_destroyed_listener;
+  struct wl_listener session_frame_listener;
 };
