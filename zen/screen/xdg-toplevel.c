@@ -11,19 +11,21 @@ static struct wlr_surface *
 zn_xdg_toplevel_view_impl_get_wlr_surface_at(struct zn_view *view,
     double view_sx, double view_sy, double *surface_x, double *surface_y)
 {
-  struct wlr_surface *s =
-      wlr_xdg_surface_surface_at(view->xdg_toplevel->wlr_xdg_toplevel->base,
-          view_sx, view_sy, surface_x, surface_y);
-  return s;
+  struct zn_xdg_toplevel *toplevel = view->user_data;
+
+  return wlr_xdg_surface_surface_at(
+      toplevel->wlr_xdg_toplevel->base, view_sx, view_sy, surface_x, surface_y);
 }
+
 static void
 zn_xdg_toplevel_view_impl_set_activated(struct zn_view *view, bool activated)
 {
-  wlr_xdg_toplevel_set_activated(
-      view->xdg_toplevel->wlr_xdg_toplevel->base, activated);
+  struct zn_xdg_toplevel *toplevel = view->user_data;
+
+  wlr_xdg_toplevel_set_activated(toplevel->wlr_xdg_toplevel->base, activated);
 }
 
-static const struct zn_view_impl zn_xdg_toplevel_view_impl = {
+static const struct zn_view_interface zn_xdg_toplevel_view_impl = {
     .get_wlr_surface_at = zn_xdg_toplevel_view_impl_get_wlr_surface_at,
     .set_activated = zn_xdg_toplevel_view_impl_set_activated,
 };
@@ -40,9 +42,8 @@ zn_xdg_toplevel_handle_map(struct wl_listener *listener, void *data)
     return;
   }
 
-  self->view = zn_view_create(self->wlr_xdg_toplevel->base->surface);
-  self->view->impl = &zn_xdg_toplevel_view_impl;
-  self->view->xdg_toplevel = self;
+  self->view = zn_view_create(
+      self->wlr_xdg_toplevel->base->surface, &zn_xdg_toplevel_view_impl, self);
   zn_scene_new_view(server->scene, self->view);
 }
 
