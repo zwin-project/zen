@@ -89,7 +89,7 @@ zn_default_cursor_grab_button(struct zn_cursor_grab *grab, uint32_t time_msec,
   wlr_seat_pointer_send_button(seat, time_msec, button, state);
 
   if (state == WLR_BUTTON_PRESSED) {
-    struct zn_view *view;
+    struct zn_view *view = NULL;
     zn_board_get_surface_at(
         cursor->board, cursor->x, cursor->y, NULL, NULL, &view);
     zn_scene_set_focused_view(server->scene, view);
