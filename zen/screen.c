@@ -2,6 +2,7 @@
 
 #include <zen-common.h>
 
+#include "zen/board.h"
 #include "zen/screen-layout.h"
 #include "zen/server.h"
 
@@ -21,6 +22,12 @@ zn_screen_damage_whole(struct zn_screen *self)
   if (server->display_system != ZN_DISPLAY_SYSTEM_SCREEN) return;
 
   self->implementation->damage_whole(self->user_data);
+}
+
+void
+zn_screen_send_frame_done(struct zn_screen *self, struct timespec *when)
+{
+  if (self->board) zn_board_send_frame_done(self->board, when);
 }
 
 void

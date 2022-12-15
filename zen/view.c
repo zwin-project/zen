@@ -32,6 +32,36 @@ zn_view_add_damage_fbox(struct zn_view *self, struct wlr_fbox *effective_box)
 }
 
 static void
+zn_view_handle_commit(struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+  struct zn_view *self = zn_container_of(listener, self, commit_listener);
+  struct wlr_fbox damage_box, surface_box;
+  pixman_region32_t damage;
+  pixman_box32_t *rects;
+  int rect_count;
+
+  zn_view_get_surface_fbox(self, &surface_box);
+
+  pixman_region32_init(&damage);
+
+  wlr_surface_get_effective_damage(self->surface, &damage);
+  rects = pixman_region32_rectangles(&damage, &rect_count);
+
+  for (int i = 0; i < rect_count; ++i) {
+    damage_box.x = surface_box.x + rects[i].x1;
+    damage_box.y = surface_box.y + rects[i].y1;
+    damage_box.width = rects[i].x2 - rects[i].x1;
+    damage_box.height = rects[i].y2 - rects[i].y1;
+    zn_view_add_damage_fbox(self, &damage_box);
+  }
+
+  pixman_region32_fini(&damage);
+
+  // FIXME: add damages of synced subsurfaces
+}
+
+static void
 zn_view_damage_whole(struct zn_view *self)
 {
   struct wlr_fbox fbox;
@@ -141,6 +171,9 @@ zn_view_create(struct wlr_surface *surface)
   self->board_destroy_listener.notify = zn_view_handle_board_destroy;
   wl_list_init(&self->board_destroy_listener.link);
 
+  self->commit_listener.notify = zn_view_handle_commit;
+  wl_signal_add(&surface->events.commit, &self->commit_listener);
+
   return self;
 
 err_free:
@@ -159,6 +192,7 @@ zn_view_destroy(struct zn_view *self)
   wl_list_remove(&self->link);
   wl_list_remove(&self->board_link);
   wl_list_remove(&self->board_destroy_listener.link);
+  wl_list_remove(&self->commit_listener.link);
   wl_list_remove(&self->events.destroy.listener_list);
   zna_view_destroy(self->appearance);
   free(self);

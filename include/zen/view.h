@@ -23,11 +23,12 @@ struct zn_view {
     versor quaternion;
   } geometry;
 
-  struct wl_listener board_destroy_listener;
-
   struct {
     struct wl_signal destroy;  // (NULL)
   } events;
+
+  struct wl_listener board_destroy_listener;
+  struct wl_listener commit_listener;
 
   struct zna_view *appearance;
 };
