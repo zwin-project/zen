@@ -136,7 +136,8 @@ zn_view_move(struct zn_view *self, struct zn_board *board, double x, double y)
 }
 
 struct zn_view *
-zn_view_create(struct wlr_surface *surface)
+zn_view_create(struct wlr_surface *surface,
+    const struct zn_view_interface *impl, void *user_data)
 {
   struct zn_view *self;
   struct zn_server *server = zn_server_get_singleton();
@@ -148,6 +149,8 @@ zn_view_create(struct wlr_surface *surface)
   }
 
   self->surface = surface;
+  self->impl = impl;
+  self->user_data = user_data;
 
   self->appearance = zna_view_create(self, server->appearance_system);
   if (self->appearance == NULL) {

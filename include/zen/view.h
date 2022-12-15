@@ -9,7 +9,7 @@ struct zn_view;
 struct zn_board;
 struct zn_xdg_toplevel;
 
-struct zn_view_impl {
+struct zn_view_interface {
   struct wlr_surface *(*get_wlr_surface_at)(struct zn_view *view,
       double view_sx, double view_sy, double *surface_x, double *surface_y);
   void (*set_activated)(struct zn_view *view, bool activated);
@@ -17,12 +17,10 @@ struct zn_view_impl {
 
 /** lifetime of given wlr_surface must be longer than zn_view */
 struct zn_view {
+  void *user_data;
   struct wlr_surface *surface;  // nonnull
 
-  const struct zn_view_impl *impl;
-  union {
-    struct zn_xdg_toplevel *xdg_toplevel;
-  };
+  const struct zn_view_interface *impl;
 
   struct wl_list link;        // zn_scene::view_list
   struct wl_list board_link;  // zn_board::view_list
@@ -51,6 +49,7 @@ void zn_view_move(
     struct zn_view *view, struct zn_board *board, double x, double y);
 
 /** lifetime of given wlr_surface must be longer than zn_view */
-struct zn_view *zn_view_create(struct wlr_surface *surface);
+struct zn_view *zn_view_create(struct wlr_surface *surface,
+    const struct zn_view_interface *impl, void *user_data);
 
 void zn_view_destroy(struct zn_view *self);
