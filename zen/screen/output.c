@@ -6,6 +6,7 @@
 #include <zen-common.h>
 
 #include "zen/screen/renderer.h"
+#include "zen/server.h"
 
 static void zn_output_destroy(struct zn_output *self);
 
@@ -74,11 +75,18 @@ static void
 zn_output_handle_damage_frame(struct wl_listener *listener, void *data)
 {
   UNUSED(data);
+  struct zn_server *server = zn_server_get_singleton();
   struct zn_output *self =
       zn_container_of(listener, self, damage_frame_listener);
   struct wlr_renderer *renderer = self->wlr_output->renderer;
   bool needs_frame;
   pixman_region32_t damage;
+
+  if (server->display_system == ZN_DISPLAY_SYSTEM_SCREEN) {
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    zn_screen_send_frame_done(self->screen, &now);
+  }
 
   pixman_region32_init(&damage);
 
