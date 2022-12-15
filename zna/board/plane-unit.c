@@ -3,7 +3,6 @@
 #include <GLES3/gl32.h>
 #include <cglm/affine.h>
 #include <cglm/mat4.h>
-#include <cglm/quat.h>
 #include <zen-common.h>
 
 void
@@ -15,12 +14,9 @@ zna_board_plane_unit_commit(struct zna_board_plane_unit *self,
   float scale_x = board->geometry.size[0];
   float scale_y = board->geometry.size[1];
 
-  mat4 rotate;
-  glm_quat_mat4(board->geometry.quaternion, rotate);
-
   mat4 local_model = GLM_MAT4_IDENTITY_INIT;
-  glm_translate(local_model, board->geometry.center);
-  glm_mat4_mul(local_model, rotate, local_model);
+
+  glm_mat4_copy(board->geometry.transform, local_model);
   glm_scale(local_model, (vec3){scale_x, scale_y, 1});
 
   znr_gl_base_technique_gl_uniform_matrix(self->base_unit->technique, 0,
@@ -59,10 +55,10 @@ zna_board_plane_unit_create(struct zna_system *system)
   }
 
   float vertices[4][2] = {
-      {-0.5, -0.5},
-      {+0.5, -0.5},
-      {+0.5, +0.5},
-      {-0.5, +0.5},
+      {-0.5, 0.f},
+      {+0.5, 0.f},
+      {+0.5, 1.f},
+      {-0.5, 1.f},
   };
 
   struct zgnr_mem_storage *vertex_buffer =

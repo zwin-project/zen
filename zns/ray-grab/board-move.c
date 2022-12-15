@@ -1,9 +1,13 @@
 #include "board-move.h"
 
+#include <cglm/affine.h>
+#include <cglm/mat4.h>
 #include <cglm/vec2.h>
 #include <zen-common.h>
 
 #include "board.h"
+#include "seat-capsule.h"
+#include "shell.h"
 #include "zen/appearance/board.h"
 #include "zen/appearance/ray.h"
 #include "zen/server.h"
@@ -18,33 +22,48 @@ zns_board_move_ray_grab_motion_relative(struct zn_ray_grab *grab_base,
 {
   UNUSED(time_msec);
   struct zns_board_move_ray_grab *self = zn_container_of(grab_base, self, base);
+  struct zn_board *zn_board = self->zns_board->zn_board;
 
-  float next_polar = self->base.ray->angle.polar + polar;
-  if (next_polar < 0)
-    next_polar = 0;
-  else if (next_polar > M_PI)
-    next_polar = M_PI;
+  if (!zn_assert(origin[0] == 0 && origin[1] == 0 && origin[2] == 0,
+          "ZEN is not supporting 6DoF devices yet")) {
+    return;
+  }
 
-  float next_azimuthal = self->base.ray->angle.azimuthal + azimuthal;
-  while (next_azimuthal >= 2 * M_PI) next_azimuthal -= 2 * M_PI;
-  while (next_azimuthal < 0) next_azimuthal += 2 * M_PI;
+  struct zn_server *server = zn_server_get_singleton();
+  struct zns_seat_capsule *seat_capsule = server->shell->seat_capsule;
 
-  vec3 next_origin;
+  float next_board_polar = self->zns_board->seat_capsule_polar + polar;
+  if (next_board_polar < 0)
+    next_board_polar = 0;
+  else if (next_board_polar > M_PI)
+    next_board_polar = M_PI;
+
+  float next_board_azimuthal =
+      self->zns_board->seat_capsule_azimuthal + azimuthal;
+  while (next_board_azimuthal >= 2 * M_PI) next_board_azimuthal -= 2 * M_PI;
+  while (next_board_azimuthal < 0) next_board_azimuthal += 2 * M_PI;
+
+  zns_seat_capsule_move_board(
+      seat_capsule, self->zns_board, next_board_azimuthal, next_board_polar);
+
+  zna_board_commit(zn_board->appearance);
+
+  vec3 next_tip, next_origin, next_direction;
+  float next_polar, next_azimuthal, next_length;
   glm_vec3_add(self->base.ray->origin, origin, next_origin);
+  glm_mat4_mulv3(zn_board->geometry.transform, self->local_tip, 1, next_tip);
+  glm_vec3_sub(next_tip, self->base.ray->origin, next_direction);
+  next_length = glm_vec3_distance(GLM_VEC3_ZERO, next_direction);
+  glm_vec3_normalize(next_direction);
+  next_azimuthal = atan2f(-next_direction[2], next_direction[0]);
+  float r = sqrtf(powf(next_direction[2], 2) + powf(next_direction[0], 2));
+  next_polar = atan2(r, next_direction[1]);
 
   zn_ray_move(self->base.ray, next_origin, next_polar, next_azimuthal);
 
+  zn_ray_set_length(self->base.ray, next_length);
+
   zna_ray_commit(self->base.ray->appearance);
-
-  vec3 tip, next_center;
-  struct zn_board *zn_board = self->zns_board->zn_board;
-  zn_ray_get_tip(self->base.ray, tip);
-  glm_vec3_sub(tip, self->tip, next_center);
-
-  zn_board_move(zn_board, next_center, zn_board->geometry.size,
-      zn_board->geometry.quaternion);
-
-  zna_board_commit(zn_board->appearance);
 
   struct zn_view *view;
   wl_list_for_each (view, &zn_board->view_list, board_link) {
@@ -120,9 +139,9 @@ zns_board_move_ray_grab_create(struct zns_board *zns_board)
 
   self->base.impl = &implementation;
   self->zns_board = zns_board;
-  self->tip[0] = zns_board->zn_board->geometry.size[0] * (u - 0.5f);
-  self->tip[1] = zns_board->zn_board->geometry.size[1] * (v - 0.5f);
-  self->tip[2] = 0;
+  self->local_tip[0] = zns_board->zn_board->geometry.size[0] * (u - 0.5f);
+  self->local_tip[1] = zns_board->zn_board->geometry.size[1] * v;
+  self->local_tip[2] = 0;
 
   self->zns_board_destroy_listener.notify =
       zns_board_move_ray_grab_handle_zns_board_destroy;

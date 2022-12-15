@@ -4,7 +4,9 @@
 #include <cglm/vec3.h>
 #include <zen-common.h>
 
+#include "board.h"
 #include "bounded.h"
+#include "zen/appearance/board.h"
 #include "zen/virtual-object.h"
 
 void
@@ -46,6 +48,50 @@ zns_seat_capsule_move_bounded(struct zns_seat_capsule *self,
 }
 
 void
+zns_seat_capsule_move_board(struct zns_seat_capsule *self,
+    struct zns_board *board, float azimuthal, float polar)
+{
+  mat4 next_transform = GLM_MAT4_IDENTITY_INIT;
+
+  board->seat_capsule_azimuthal = azimuthal;
+  board->seat_capsule_polar = polar;
+
+  if (M_PI_2 - self->flat_angle <= polar &&
+      polar <= M_PI_2 + self->flat_angle) {
+    vec3 position;
+    float to_flat_surface = self->radius * cosf(self->flat_angle);
+    position[0] = to_flat_surface;
+    position[1] = tanf(M_PI_2 - polar) * to_flat_surface;
+    position[2] = 0;
+
+    glm_translate(next_transform, self->center);
+    glm_rotate(next_transform, azimuthal, (vec3){0, 1, 0});
+    glm_translate(next_transform, position);
+    glm_rotate(next_transform, -M_PI_2, (vec3){0, 1, 0});
+
+  } else {
+    vec3 position;
+    float orientation;
+
+    position[0] = self->radius * sinf(polar);
+    position[1] = self->radius * cosf(polar);
+    position[2] = 0;
+
+    orientation = M_PI - polar -
+                  acosf(board->zn_board->geometry.size[1] / 2 / self->radius);
+
+    glm_translate(next_transform, self->center);
+    glm_rotate(next_transform, azimuthal, (vec3){0, 1, 0});
+    glm_translate(next_transform, position);
+    glm_rotate(next_transform, orientation, (vec3){0, 0, 1});
+    glm_rotate(next_transform, -M_PI_2, (vec3){0, 1, 0});
+  }
+
+  zn_board_move(
+      board->zn_board, board->zn_board->geometry.size, next_transform);
+}
+
+void
 zns_seat_capsule_add_bounded(
     struct zns_seat_capsule *self, struct zns_bounded *bounded)
 {
@@ -53,6 +99,18 @@ zns_seat_capsule_add_bounded(
 
   // TODO: calculate better initial position
   zns_seat_capsule_move_bounded(self, bounded, M_PI / 2.f, M_PI / 1.8f);
+}
+
+void
+zns_seat_capsule_add_board(
+    struct zns_seat_capsule *self, struct zns_board *board)
+{
+  wl_list_insert(&self->board_list, &board->seat_capsule_link);
+
+  // TODO: calculate better initial position
+  zns_seat_capsule_move_board(self, board, M_PI / 2.f, M_PI / 1.8f);
+
+  zna_board_commit(board->zn_board->appearance);
 }
 
 struct zns_seat_capsule *
@@ -67,6 +125,7 @@ zns_seat_capsule_create(void)
   }
 
   wl_list_init(&self->bounded_list);
+  wl_list_init(&self->board_list);
 
   glm_vec3_copy((vec3){0, 0.8f, 0}, self->center);
   self->radius = 1;
@@ -82,5 +141,6 @@ void
 zns_seat_capsule_destroy(struct zns_seat_capsule *self)
 {
   wl_list_remove(&self->bounded_list);
+  wl_list_remove(&self->board_list);
   free(self);
 }

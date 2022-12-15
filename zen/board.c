@@ -34,11 +34,10 @@ zn_board_send_frame_done(struct zn_board *self, struct timespec *when)
 }
 
 void
-zn_board_move(struct zn_board *self, vec3 center, vec2 size, versor quaternion)
+zn_board_move(struct zn_board *self, vec2 size, mat4 transform)
 {
-  glm_vec3_copy(center, self->geometry.center);
   glm_vec2_copy(size, self->geometry.size);
-  glm_vec4_copy(quaternion, self->geometry.quaternion);
+  glm_mat4_copy(transform, self->geometry.transform);
 }
 
 void
@@ -65,7 +64,7 @@ zn_board_box_effective_to_local_geom(
 {
   UNUSED(self);
   geom->x = effective->x / BOARD_PIXEL_PER_METER - self->geometry.size[0] / 2.f;
-  geom->y = self->geometry.size[1] / 2.f - effective->y / BOARD_PIXEL_PER_METER;
+  geom->y = self->geometry.size[1] - effective->y / BOARD_PIXEL_PER_METER;
   geom->width = effective->width / BOARD_PIXEL_PER_METER;
   geom->height = effective->height / BOARD_PIXEL_PER_METER;
 }
@@ -93,6 +92,14 @@ zn_board_set_screen(struct zn_board *self, struct zn_screen *screen)
   }
 
   self->screen = screen;
+
+  if (self->screen) {
+    double width, height;
+    zn_screen_get_effective_size(screen, &width, &height);
+    glm_vec2_copy(
+        (vec2){width / BOARD_PIXEL_PER_METER, height / BOARD_PIXEL_PER_METER},
+        self->geometry.size);
+  }
 }
 
 struct zn_board *
@@ -127,9 +134,7 @@ zn_board_create(void)
   self->color[1] = (float)(time.tv_nsec % 254) / 254.f;
   self->color[2] = (float)(time.tv_nsec % 253) / 253.f;
 
-  glm_vec3_copy((vec3){0, 1, -0.5}, self->geometry.center);
-  glm_quat_identity(self->geometry.quaternion);
-  glm_vec2_copy((vec2){0.7, 0.5}, self->geometry.size);
+  glm_mat4_identity(self->geometry.transform);
 
   return self;
 

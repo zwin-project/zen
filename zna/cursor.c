@@ -3,7 +3,6 @@
 #include <GLES3/gl32.h>
 #include <cglm/affine.h>
 #include <cglm/mat4.h>
-#include <cglm/quat.h>
 #include <zen-common.h>
 #include <zgnr/gl-sampler.h>
 
@@ -19,11 +18,8 @@ zna_cursor_commit(struct zna_cursor *self, uint32_t damage)
 
     // TODO: Do not render cursor when it doesn't have board
 
-    mat4 rotation;
-    glm_quat_mat4(self->zn_cursor->geometry.quaternion, rotation);
+    glm_mat4_copy(self->zn_cursor->geometry.transform, local_model);
 
-    glm_translate(local_model, self->zn_cursor->geometry.position);
-    glm_mat4_mul(local_model, rotation, local_model);
     glm_scale(local_model, (vec3){self->zn_cursor->geometry.size[0],
                                self->zn_cursor->geometry.size[1], 0});
 
