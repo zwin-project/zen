@@ -18,9 +18,8 @@ struct zn_view {
   double x, y;
 
   struct {
-    vec3 position;
     vec2 size;
-    versor quaternion;
+    mat4 transform;  // translation and rotation only
   } geometry;
 
   struct {

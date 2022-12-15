@@ -17,18 +17,13 @@ zns_board_ray_cast(
     struct zns_board *self, vec3 origin, vec3 direction, float *u, float *v)
 {
   float x = self->zn_board->geometry.size[0] / 2.f;
-  float y = self->zn_board->geometry.size[1] / 2.f;
-  vec3 v0 = {-x, -y, 0};
-  vec3 v1 = {+x, -y, 0};
-  vec3 v2 = {-x, +y, 0};
+  vec3 v0 = {-x, 0, 0};
+  vec3 v1 = {+x, 0, 0};
+  vec3 v2 = {-x, self->zn_board->geometry.size[1], 0};
 
-  glm_quat_rotatev(self->zn_board->geometry.quaternion, v0, v0);
-  glm_quat_rotatev(self->zn_board->geometry.quaternion, v1, v1);
-  glm_quat_rotatev(self->zn_board->geometry.quaternion, v2, v2);
-
-  glm_vec3_add(self->zn_board->geometry.center, v0, v0);
-  glm_vec3_add(self->zn_board->geometry.center, v1, v1);
-  glm_vec3_add(self->zn_board->geometry.center, v2, v2);
+  glm_mat4_mulv3(self->zn_board->geometry.transform, v0, 1, v0);
+  glm_mat4_mulv3(self->zn_board->geometry.transform, v1, 1, v1);
+  glm_mat4_mulv3(self->zn_board->geometry.transform, v2, 1, v2);
 
   return zgnr_intersection_ray_parallelogram(
       origin, direction, v0, v1, v2, u, v, false);
@@ -182,6 +177,7 @@ zns_board_create(struct zn_board *zn_board)
   wl_signal_add(&zn_board->events.destroy, &self->zn_board_destroy_listener);
 
   wl_signal_init(&self->events.destroy);
+  wl_list_init(&self->seat_capsule_link);
 
   return self;
 
@@ -198,6 +194,7 @@ zns_board_destroy(struct zns_board *self)
   wl_signal_emit(&self->events.destroy, NULL);
 
   wl_list_remove(&self->zn_board_destroy_listener.link);
+  wl_list_remove(&self->seat_capsule_link);
   zns_node_destroy(self->node);
   free(self);
 }

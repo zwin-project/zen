@@ -116,10 +116,6 @@ zn_cursor_move(
 
   if (self->board) {
     struct wlr_fbox cursor_fbox, board_local_cursor_geom;
-    mat4 transform, board_rotation;
-    glm_quat_mat4(self->board->geometry.quaternion, board_rotation);
-
-    glm_vec4_copy(self->board->geometry.quaternion, self->geometry.quaternion);
 
     zn_cursor_get_fbox(self, &cursor_fbox);
     zn_board_box_effective_to_local_geom(
@@ -128,19 +124,13 @@ zn_cursor_move(
     self->geometry.size[0] = board_local_cursor_geom.width;
     self->geometry.size[1] = board_local_cursor_geom.height;
 
-    glm_vec3_zero(self->geometry.position);
-    glm_mat4_identity(transform);
-    glm_translate(transform, self->board->geometry.center);
-    glm_mat4_mul(transform, board_rotation, transform);
-    glm_translate(
-        transform, (vec3){board_local_cursor_geom.x, board_local_cursor_geom.y,
-                       CURSOR_Z_OFFSET_ON_BOARD});
-    glm_mat4_mulv3(
-        transform, self->geometry.position, 1, self->geometry.position);
+    glm_mat4_copy(self->board->geometry.transform, self->geometry.transform);
+    glm_translate(self->geometry.transform,
+        (vec3){board_local_cursor_geom.x, board_local_cursor_geom.y,
+            CURSOR_Z_OFFSET_ON_BOARD});
   } else {
-    glm_vec3_zero(self->geometry.position);
     glm_vec2_zero(self->geometry.size);
-    glm_quat_identity(self->geometry.quaternion);
+    glm_mat4_identity(self->geometry.transform);
   }
 }
 
@@ -213,9 +203,8 @@ zn_cursor_create(void)
   self->hotspot_x = 0;
   self->hotspot_y = 0;
 
-  glm_vec3_zero(self->geometry.position);
   glm_vec2_zero(self->geometry.size);
-  glm_quat_identity(self->geometry.quaternion);
+  glm_mat4_identity(self->geometry.transform);
 
   self->board_destroy_listener.notify = zn_cursor_handle_board_destroy;
   wl_list_init(&self->board_destroy_listener.link);

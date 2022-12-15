@@ -108,7 +108,9 @@ zn_shell_handle_new_board(struct wl_listener *listener, void *data)
 
   struct zn_board *zn_board = data;
 
-  (void)zns_board_create(zn_board);
+  struct zns_board *zns_board = zns_board_create(zn_board);
+
+  zns_seat_capsule_add_board(self->seat_capsule, zns_board);
 }
 
 struct zn_ray_grab *

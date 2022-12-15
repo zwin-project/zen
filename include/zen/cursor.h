@@ -43,9 +43,8 @@ struct zn_cursor {
   double hotspot_x, hotspot_y;
 
   struct {
-    vec3 position;  // top-left of the cursor image (not the hotspot)
     vec2 size;
-    versor quaternion;
+    mat4 transform;
   } geometry;
 
   struct wlr_xcursor_manager *xcursor_manager;  // nonnull

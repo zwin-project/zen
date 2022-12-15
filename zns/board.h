@@ -8,6 +8,11 @@ struct zns_board {
 
   struct zns_node *node;
 
+  float seat_capsule_azimuthal;
+  float seat_capsule_polar;
+
+  struct wl_list seat_capsule_link;  // zns_seat_capsule::board_list
+
   struct {
     struct wl_signal destroy;  // (NULL)
   } events;

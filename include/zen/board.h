@@ -20,9 +20,8 @@ struct zn_board {
   float color[3];  // FIXME: debugging purpose, remove me later
 
   struct {
-    vec3 center;
+    mat4 transform;  // translation and rotation only
     vec2 size;
-    versor quaternion;
   } geometry;
 
   struct zna_board *appearance;
@@ -38,8 +37,7 @@ bool zn_board_is_dangling(struct zn_board *self);
 
 void zn_board_send_frame_done(struct zn_board *self, struct timespec *when);
 
-void zn_board_move(
-    struct zn_board *self, vec3 center, vec2 size, versor quaternion);
+void zn_board_move(struct zn_board *self, vec2 size, mat4 transform);
 
 void zn_board_get_effective_size(
     struct zn_board *self, double *width, double *height);

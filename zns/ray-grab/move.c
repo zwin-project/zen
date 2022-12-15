@@ -25,31 +25,26 @@ zns_move_ray_grab_motion_relative(struct zn_ray_grab *grab_base, vec3 origin,
   struct zns_move_ray_grab *self = zn_container_of(grab_base, self, base);
   struct zn_virtual_object *virtual_object =
       self->bounded->zgnr_bounded->virtual_object->user_data;
-  vec3 tip;
 
-  zn_ray_get_tip(self->base.ray, tip);
-  glm_mat4_mulv3(virtual_object->model_invert, tip, 1, tip);
+  float next_bounded_polar = self->bounded->seat_capsule_polar + polar;
+  if (next_bounded_polar < 0)
+    next_bounded_polar = 0;
+  else if (next_bounded_polar > M_PI)
+    next_bounded_polar = M_PI;
 
-  float next_board_polar = self->bounded->seat_capsule_polar + polar;
-  if (next_board_polar < 0)
-    next_board_polar = 0;
-  else if (next_board_polar > M_PI)
-    next_board_polar = M_PI;
-
-  float next_board_azimuthal =
+  float next_bounded_azimuthal =
       self->bounded->seat_capsule_azimuthal + azimuthal;
-  while (next_board_azimuthal >= 2 * M_PI) next_board_azimuthal -= 2 * M_PI;
-  while (next_board_azimuthal < 0) next_board_azimuthal += 2 * M_PI;
+  while (next_bounded_azimuthal >= 2 * M_PI) next_bounded_azimuthal -= 2 * M_PI;
+  while (next_bounded_azimuthal < 0) next_bounded_azimuthal += 2 * M_PI;
 
   zns_seat_capsule_move_bounded(
-      seat_capsule, self->bounded, next_board_azimuthal, next_board_polar);
+      seat_capsule, self->bounded, next_bounded_azimuthal, next_bounded_polar);
 
-  glm_mat4_mulv3(virtual_object->model_matrix, tip, 1, tip);
-
-  vec3 next_origin, next_direction;
+  vec3 next_tip, next_origin, next_direction;
   float next_polar, next_azimuthal, next_length;
   glm_vec3_add(self->base.ray->origin, origin, next_origin);
-  glm_vec3_sub(tip, next_origin, next_direction);
+  glm_mat4_mulv3(virtual_object->model_matrix, self->local_tip, 1, next_tip);
+  glm_vec3_sub(next_tip, next_origin, next_direction);
   next_length = glm_vec3_distance(GLM_VEC3_ZERO, next_direction);
   glm_vec3_normalize(next_direction);
   next_azimuthal = atan2f(-next_direction[2], next_direction[0]);
