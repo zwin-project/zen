@@ -41,6 +41,19 @@ zna_board_teardown_renderer_object(struct zna_board *self)
 }
 
 static void
+zna_board_handle_session_frame(struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+  struct zna_board *self =
+      zn_container_of(listener, self, session_frame_listener);
+
+  struct timespec now;
+  clock_gettime(CLOCK_MONOTONIC, &now);
+
+  zn_board_send_frame_done(self->zn_board, &now);
+}
+
+static void
 zna_board_handle_session_created(struct wl_listener *listener, void *data)
 {
   UNUSED(data);
@@ -91,6 +104,10 @@ zna_board_create(struct zn_board *board, struct zna_system *system)
   wl_signal_add(&system->events.current_session_destroyed,
       &self->session_destroyed_listener);
 
+  self->session_frame_listener.notify = zna_board_handle_session_frame;
+  wl_signal_add(
+      &system->events.current_session_frame, &self->session_frame_listener);
+
   struct znr_session *session = self->system->current_session;
   if (session) {
     zna_board_setup_renderer_object(self, session);
@@ -112,5 +129,6 @@ zna_board_destroy(struct zna_board *self)
   zna_board_plane_unit_destroy(self->plane_unit);
   wl_list_remove(&self->session_created_listener.link);
   wl_list_remove(&self->session_destroyed_listener.link);
+  wl_list_remove(&self->session_frame_listener.link);
   free(self);
 }

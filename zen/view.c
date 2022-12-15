@@ -57,6 +57,11 @@ zn_view_handle_commit(struct wl_listener *listener, void *data)
     zn_view_add_damage_fbox(self, &damage_box);
   }
 
+  if (pixman_region32_not_empty(&damage)) {
+    // FIXME: Update only sub image
+    zna_view_commit(self->appearance, ZNA_VIEW_DAMAGE_TEXTURE);
+  }
+
   pixman_region32_fini(&damage);
 
   // FIXME: add damages of synced subsurfaces
