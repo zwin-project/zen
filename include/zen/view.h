@@ -15,10 +15,6 @@ struct zn_view_impl {
   void (*set_activated)(struct zn_view *view, bool activated);
 };
 
-enum zn_view_type {
-  ZN_VIEW_XDG_TOPLEVEL,
-};
-
 /** lifetime of given wlr_surface must be longer than zn_view */
 struct zn_view {
   struct wlr_surface *surface;  // nonnull
