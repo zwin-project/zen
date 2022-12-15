@@ -15,7 +15,7 @@ zna_gl_sampler_handle_session_destroyed(
 
   if (self->znr_gl_sampler) {
     znr_gl_sampler_destroy(self->znr_gl_sampler);
-    self->zgnr_gl_sampler = NULL;
+    self->znr_gl_sampler = NULL;
   }
 }
 
