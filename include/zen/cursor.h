@@ -90,6 +90,8 @@ void zn_cursor_set_xcursor(struct zn_cursor *self, const char *name);
 void zn_cursor_move(
     struct zn_cursor *self, struct zn_board *board, double x, double y);
 
+void zn_cursor_move_relative(struct zn_cursor *self, double dx, double dy);
+
 void zn_cursor_start_grab(struct zn_cursor *self, struct zn_cursor_grab *grab);
 
 void zn_cursor_end_grab(struct zn_cursor *self);

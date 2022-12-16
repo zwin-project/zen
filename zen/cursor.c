@@ -8,6 +8,7 @@
 
 #include "zen/appearance/cursor.h"
 #include "zen/board.h"
+#include "zen/screen-layout.h"
 #include "zen/screen.h"
 #include "zen/screen/cursor-grab/default.h"
 #include "zen/server.h"
@@ -212,6 +213,22 @@ zn_cursor_move(
     glm_vec2_zero(self->geometry.size);
     glm_mat4_identity(self->geometry.transform);
   }
+}
+
+void
+zn_cursor_move_relative(struct zn_cursor *self, double dx, double dy)
+{
+  struct zn_server *server = zn_server_get_singleton();
+
+  double layout_x, layout_y;
+  zn_screen_get_screen_layout_coords(
+      self->board->screen, self->x + dx, self->y + dy, &layout_x, &layout_y);
+
+  double screen_x, screen_y;
+  struct zn_screen *screen = zn_screen_layout_get_closest_screen(
+      server->scene->screen_layout, layout_x, layout_y, &screen_x, &screen_y);
+
+  zn_cursor_move(self, screen->board, screen_x, screen_y);
 }
 
 static bool
