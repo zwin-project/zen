@@ -3,10 +3,49 @@
 #include <zen-common.h>
 
 #include "zen/screen/cursor-grab/move.h"
+#include "zen/screen/cursor-grab/resize.h"
 #include "zen/server.h"
 #include "zen/view.h"
 
 static void zn_xdg_toplevel_destroy(struct zn_xdg_toplevel *self);
+
+static void
+zn_xdg_toplevel_view_handle_wlr_surface_commit(
+    struct wl_listener *listener, void *data)
+{
+  struct zn_xdg_toplevel *self =
+      zn_container_of(listener, self, wlr_surface_commit_listener);
+
+  if (!self->view) {
+    return;
+  }
+
+  zn_view_damage(self->view);
+
+  if (!self->view->resize_status.resizing) {
+    return;
+  }
+
+  if (!(self->view->resize_status.edges & (WLR_EDGE_LEFT | WLR_EDGE_TOP))) {
+    return;
+  }
+
+  struct wlr_surface *surface = data;
+  int dx = 0, dy = 0;
+  if (self->view->resize_status.edges & WLR_EDGE_LEFT) {
+    dx = surface->previous.width - surface->current.width;
+  }
+  if (self->view->resize_status.edges & WLR_EDGE_TOP) {
+    dy = surface->previous.height - surface->current.height;
+  }
+  zn_view_move(
+      self->view, self->view->board, self->view->x + dx, self->view->y + dy);
+
+  if (self->wlr_xdg_toplevel->base->current.configure_serial ==
+      self->view->resize_status.last_serial) {
+    self->view->resize_status.resizing = false;
+  }
+}
 
 static struct wlr_surface *
 zn_xdg_toplevel_view_impl_get_wlr_surface_at(struct zn_view *view,
@@ -59,6 +98,17 @@ zn_xdg_toplevel_view_handle_move(struct wl_listener *listener, void *data)
   struct zn_server *server = zn_server_get_singleton();
 
   zn_move_cursor_grab_start(server->scene->cursor, self->view);
+}
+
+static void
+zn_xdg_toplevel_view_handle_resize(struct wl_listener *listener, void *data)
+{
+  struct zn_xdg_toplevel *self =
+      zn_container_of(listener, self, resize_listener);
+  struct wlr_xdg_toplevel_resize_event *event = data;
+  struct zn_server *server = zn_server_get_singleton();
+
+  zn_resize_cursor_grab_start(server->scene->cursor, self->view, event->edges);
 }
 
 static void
@@ -133,6 +183,14 @@ zn_xdg_toplevel_create(struct wlr_xdg_toplevel *toplevel)
 
   self->move_listener.notify = zn_xdg_toplevel_view_handle_move;
   wl_signal_add(&toplevel->events.request_move, &self->move_listener);
+
+  self->resize_listener.notify = zn_xdg_toplevel_view_handle_resize;
+  wl_signal_add(&toplevel->events.request_resize, &self->resize_listener);
+
+  self->wlr_surface_commit_listener.notify =
+      zn_xdg_toplevel_view_handle_wlr_surface_commit;
+  wl_signal_add(&toplevel->base->surface->events.commit,
+      &self->wlr_surface_commit_listener);
 
   return self;
 

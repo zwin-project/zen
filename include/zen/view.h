@@ -31,6 +31,12 @@ struct zn_view {
   double x, y;
 
   struct {
+    bool resizing;
+    uint32_t edges;
+    uint32_t last_serial;
+  } resize_status;
+
+  struct {
     vec2 size;
     mat4 transform;  // translation and rotation only
   } geometry;
@@ -44,6 +50,8 @@ struct zn_view {
 
   struct zna_view *appearance;
 };
+
+void zn_view_damage(struct zn_view *self);
 
 void zn_view_get_surface_fbox(struct zn_view *self, struct wlr_fbox *fbox);
 
