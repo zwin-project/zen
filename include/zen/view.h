@@ -13,6 +13,7 @@ struct zn_view_interface {
   struct wlr_surface *(*get_wlr_surface_at)(struct zn_view *view,
       double view_sx, double view_sy, double *surface_x, double *surface_y);
   void (*get_window_geom)(struct zn_view *view, struct wlr_box *box);
+  uint32_t (*set_size)(struct zn_view *view, double width, double height);
   void (*set_activated)(struct zn_view *view, bool activated);
 };
 

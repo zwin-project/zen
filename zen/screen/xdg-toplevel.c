@@ -26,6 +26,15 @@ zn_xdg_toplevel_view_impl_get_window_geom(
   wlr_xdg_surface_get_geometry(self->wlr_xdg_toplevel->base, box);
 }
 
+static uint32_t
+zn_xdg_toplevel_view_impl_set_size(
+    struct zn_view *view, double width, double height)
+{
+  struct zn_xdg_toplevel *self = view->user_data;
+
+  return wlr_xdg_toplevel_set_size(self->wlr_xdg_toplevel->base, width, height);
+}
+
 static void
 zn_xdg_toplevel_view_impl_set_activated(struct zn_view *view, bool activated)
 {
@@ -37,6 +46,7 @@ zn_xdg_toplevel_view_impl_set_activated(struct zn_view *view, bool activated)
 static const struct zn_view_interface zn_xdg_toplevel_view_impl = {
     .get_wlr_surface_at = zn_xdg_toplevel_view_impl_get_wlr_surface_at,
     .get_window_geom = zn_xdg_toplevel_view_impl_get_window_geom,
+    .set_size = zn_xdg_toplevel_view_impl_set_size,
     .set_activated = zn_xdg_toplevel_view_impl_set_activated,
 };
 
