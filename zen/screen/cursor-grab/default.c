@@ -1,5 +1,6 @@
 #include "zen/screen/cursor-grab/default.h"
 
+#include <time.h>
 #include <zen-common.h>
 
 #include "zen/appearance/cursor.h"
@@ -128,7 +129,9 @@ zn_default_cursor_grab_leave(struct zn_cursor_grab *grab)
 void
 zn_default_cursor_grab_rebase(struct zn_cursor_grab *grab)
 {
-  UNUSED(grab);
+  struct timespec now;
+  clock_gettime(CLOCK_MONOTONIC, &now);
+  zn_default_cursor_grab_send_motion(grab, timespec_to_msec(&now));
 }
 
 void
