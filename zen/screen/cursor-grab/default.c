@@ -38,26 +38,15 @@ void
 zn_default_cursor_grab_motion_relative(
     struct zn_cursor_grab *grab, double dx, double dy, uint32_t time_msec)
 {
-  struct zn_server *server = zn_server_get_singleton();
-  struct zn_cursor *cursor = grab->cursor;
-
-  if (!cursor->board || !cursor->board->screen) {
+  if (!grab->cursor->board || !grab->cursor->board->screen) {
     return;
   }
 
-  double layout_x, layout_y;
-  zn_screen_get_screen_layout_coords(cursor->board->screen, cursor->x + dx,
-      cursor->y + dy, &layout_x, &layout_y);
-
-  double screen_x, screen_y;
-  struct zn_screen *screen = zn_screen_layout_get_closest_screen(
-      server->scene->screen_layout, layout_x, layout_y, &screen_x, &screen_y);
-
-  zn_cursor_move(cursor, screen->board, screen_x, screen_y);
+  zn_cursor_move_relative(grab->cursor, dx, dy);
 
   zn_default_cursor_grab_send_motion(grab, time_msec);
 
-  zna_cursor_commit(cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
+  zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
 }
 
 void
