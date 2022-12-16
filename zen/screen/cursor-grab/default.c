@@ -66,6 +66,8 @@ zn_default_cursor_grab_motion_absolute(struct zn_cursor_grab *grab,
 {
   zn_cursor_move(grab->cursor, board, x, y);
 
+  zn_default_cursor_grab_send_motion(grab, time_msec);
+
   zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
 
   UNUSED(time_msec);

@@ -27,6 +27,8 @@ zns_board_ray_cast(
 
   return zgnr_intersection_ray_parallelogram(
       origin, direction, v0, v1, v2, u, v, false);
+
+  // TODO: Take into account the overhanging views
 }
 
 static bool
@@ -119,13 +121,28 @@ zns_board_node_ray_button(void *user_data, uint32_t serial, uint32_t time_msec,
     uint32_t button, enum zgn_ray_button_state state, mat4 transform)
 {
   UNUSED(serial);
-  UNUSED(time_msec);
   UNUSED(transform);  // must be identity matrix
 
   struct zns_board *self = user_data;
   struct zn_server *server = zn_server_get_singleton();
+  struct zn_cursor *cursor = server->scene->cursor;
+  struct wlr_surface *surface;
 
-  if (state == ZGN_RAY_BUTTON_STATE_PRESSED && button == BTN_LEFT) {
+  if (cursor->board == NULL) return true;
+
+  surface = zn_board_get_surface_at(
+      cursor->board, cursor->x, cursor->y, NULL, NULL, NULL);
+
+  if (surface) {
+    enum wlr_button_state wlr_state;
+    if (state == ZGN_RAY_BUTTON_STATE_PRESSED) {
+      wlr_state = WLR_BUTTON_PRESSED;
+    } else {
+      wlr_state = WLR_BUTTON_RELEASED;
+    }
+
+    cursor->grab->impl->button(cursor->grab, time_msec, button, wlr_state);
+  } else if (state == ZGN_RAY_BUTTON_STATE_PRESSED && button == BTN_LEFT) {
     struct zns_board_move_ray_grab *board_move_grab;
     board_move_grab = zns_board_move_ray_grab_create(self);
     if (board_move_grab) {
