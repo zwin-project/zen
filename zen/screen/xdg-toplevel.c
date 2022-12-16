@@ -2,6 +2,7 @@
 
 #include <zen-common.h>
 
+#include "zen/screen/cursor-grab/move.h"
 #include "zen/server.h"
 #include "zen/view.h"
 
@@ -38,6 +39,17 @@ static const struct zn_view_interface zn_xdg_toplevel_view_impl = {
     .get_window_geom = zn_xdg_toplevel_view_impl_get_window_geom,
     .set_activated = zn_xdg_toplevel_view_impl_set_activated,
 };
+
+static void
+zn_xdg_toplevel_view_handle_move(struct wl_listener *listener, void *data)
+{
+  // FIXME: pointer/button/serial validation
+  UNUSED(data);
+  struct zn_xdg_toplevel *self = zn_container_of(listener, self, move_listener);
+  struct zn_server *server = zn_server_get_singleton();
+
+  zn_move_cursor_grab_start(server->scene->cursor, self->view);
+}
 
 static void
 zn_xdg_toplevel_handle_map(struct wl_listener *listener, void *data)
@@ -109,6 +121,9 @@ zn_xdg_toplevel_create(struct wlr_xdg_toplevel *toplevel)
   self->unmap_listener.notify = zn_xdg_toplevel_handle_unmap;
   wl_signal_add(&toplevel->base->events.unmap, &self->unmap_listener);
 
+  self->move_listener.notify = zn_xdg_toplevel_view_handle_move;
+  wl_signal_add(&toplevel->events.request_move, &self->move_listener);
+
   return self;
 
 err:
@@ -120,6 +135,7 @@ zn_xdg_toplevel_destroy(struct zn_xdg_toplevel *self)
 {
   wl_list_remove(&self->unmap_listener.link);
   wl_list_remove(&self->map_listener.link);
+  wl_list_remove(&self->move_listener.link);
   wl_list_remove(&self->wlr_xdg_surface_destroy_listener.link);
   if (self->view) zn_view_destroy(self->view);
   free(self);
