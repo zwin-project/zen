@@ -78,6 +78,36 @@ zn_view_damage_whole(struct zn_view *self)
 }
 
 void
+zn_view_damage(struct zn_view *self)
+{
+  struct wlr_fbox surface_box;
+  zn_view_get_surface_fbox(self, &surface_box);
+
+  pixman_region32_t damage;
+  pixman_region32_init(&damage);
+
+  wlr_surface_get_effective_damage(self->surface, &damage);
+
+  pixman_box32_t *rects;
+  int rect_count;
+  rects = pixman_region32_rectangles(&damage, &rect_count);
+
+  for (int i = 0; i < rect_count; ++i) {
+    struct wlr_fbox damage_box = {
+        .x = surface_box.x + rects[i].x1,
+        .y = surface_box.y + rects[i].y1,
+        .width = rects[i].x2 - rects[i].x1,
+        .height = rects[i].y2 - rects[i].y1,
+    };
+    zn_view_add_damage_fbox(self, &damage_box);
+  }
+
+  pixman_region32_fini(&damage);
+
+  // FIXME: add damages of synced subsurfaces
+}
+
+void
 zn_view_get_surface_fbox(struct zn_view *self, struct wlr_fbox *fbox)
 {
   struct wlr_box window_geom;
