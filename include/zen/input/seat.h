@@ -13,11 +13,11 @@ struct zn_seat {
   struct zgnr_seat *zgnr_seat;
   struct wl_list devices;  // zn_input_device::link
 
+  struct wl_listener request_set_cursor_listener;
+
   struct {
     struct wl_signal destroy;
   } events;
-
-  // TODO: struct wl_listener request_set_cursor_listener;
 };
 
 void zn_seat_add_device(

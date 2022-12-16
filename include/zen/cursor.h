@@ -43,11 +43,15 @@ struct zn_cursor {
   struct zn_default_cursor_grab *default_grab;  // nonnull
 
   double x, y;
+  bool visible;
   struct zn_board *board;  // nullable
+
+  struct wlr_surface *surface;  // nullable
+  double surface_hotspot_x, surface_hotspot_y;
 
   char *xcursor_name;                   // nonnull
   struct wlr_texture *xcursor_texture;  // nullable
-  double hotspot_x, hotspot_y;
+  double xcursor_hotspot_x, xcursor_hotspot_y;
 
   struct {
     vec2 size;
@@ -57,6 +61,8 @@ struct zn_cursor {
   struct wlr_xcursor_manager *xcursor_manager;  // nonnull
 
   struct wl_listener board_destroy_listener;
+  struct wl_listener surface_commit_listener;
+  struct wl_listener surface_destroy_listener;
 
   struct zna_cursor *appearance;
 };
@@ -69,6 +75,9 @@ void zn_cursor_damage(struct zn_cursor *self);
  * @returns cursor texture, nullable
  */
 struct wlr_texture *zn_cursor_get_texture(struct zn_cursor *self);
+
+void zn_cursor_set_surface(struct zn_cursor *self, struct wlr_surface *surface,
+    int hotspot_x, int hotspot_y);
 
 /**
  * @param name cannot be NULL
