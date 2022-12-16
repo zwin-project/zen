@@ -12,6 +12,7 @@ struct zn_xdg_toplevel;
 struct zn_view_interface {
   struct wlr_surface *(*get_wlr_surface_at)(struct zn_view *view,
       double view_sx, double view_sy, double *surface_x, double *surface_y);
+  void (*get_window_geom)(struct zn_view *view, struct wlr_box *box);
   void (*set_activated)(struct zn_view *view, bool activated);
 };
 
@@ -44,6 +45,8 @@ struct zn_view {
 };
 
 void zn_view_get_surface_fbox(struct zn_view *self, struct wlr_fbox *fbox);
+
+void zn_view_get_view_fbox(struct zn_view *self, struct wlr_fbox *fbox);
 
 void zn_view_move(
     struct zn_view *view, struct zn_board *board, double x, double y);

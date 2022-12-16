@@ -80,11 +80,25 @@ zn_view_damage_whole(struct zn_view *self)
 void
 zn_view_get_surface_fbox(struct zn_view *self, struct wlr_fbox *fbox)
 {
-  // FIXME: take window geometry into account
-  fbox->x = self->x;
-  fbox->y = self->y;
+  struct wlr_box window_geom;
+  self->impl->get_window_geom(self, &window_geom);
+
+  fbox->x = self->x - window_geom.x;
+  fbox->y = self->y - window_geom.y;
   fbox->width = self->surface->current.width;
   fbox->height = self->surface->current.height;
+}
+
+void
+zn_view_get_view_box(struct zn_view *self, struct wlr_fbox *fbox)
+{
+  struct wlr_box window_geom;
+  self->impl->get_window_geom(self, &window_geom);
+
+  fbox->x = self->x;
+  fbox->y = self->y;
+  fbox->width = window_geom.width;
+  fbox->height = window_geom.height;
 }
 
 void
