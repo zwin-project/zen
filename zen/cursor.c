@@ -27,13 +27,53 @@ zn_cursor_handle_board_destroy(struct wl_listener *listener, void *data)
   // TODO: handle the case the board becomes invisible but not destroyed
 }
 
+static void
+zn_cursor_handle_surface_commit(struct wl_listener *listener, void *data)
+{
+  struct zn_cursor *self =
+      zn_container_of(listener, self, surface_commit_listener);
+  UNUSED(data);
+
+  if (!zn_assert(
+          self->surface, "Handling surface commit while no surface exists")) {
+    return;
+  }
+
+  self->visible = wlr_surface_has_buffer(self->surface);
+
+  zn_cursor_damage(self);
+}
+
+static void
+zn_cursor_handle_surface_destroy(struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+  struct zn_cursor *self =
+      zn_container_of(listener, self, surface_destroy_listener);
+
+  zn_cursor_set_surface(self, NULL, 0, 0);
+}
+
 void
 zn_cursor_get_fbox(struct zn_cursor *self, struct wlr_fbox *fbox)
 {
-  fbox->x = self->x - self->hotspot_x;
-  fbox->y = self->y - self->hotspot_y;
-  fbox->width = self->xcursor_texture ? self->xcursor_texture->width : 0;
-  fbox->height = self->xcursor_texture ? self->xcursor_texture->height : 0;
+  fbox->x = self->x;
+  fbox->y = self->y;
+
+  if (!self->visible) {
+    fbox->width = 0;
+    fbox->height = 0;
+  } else if (self->surface) {
+    fbox->x -= self->surface_hotspot_x;
+    fbox->y -= self->surface_hotspot_y;
+    fbox->width = self->surface->current.width;
+    fbox->height = self->surface->current.height;
+  } else if (self->xcursor_texture) {
+    fbox->x -= self->xcursor_hotspot_x;
+    fbox->y -= self->xcursor_hotspot_y;
+    fbox->width = self->xcursor_texture->width;
+    fbox->height = self->xcursor_texture->height;
+  }
 }
 
 void
@@ -50,7 +90,37 @@ zn_cursor_damage(struct zn_cursor *self)
 struct wlr_texture *
 zn_cursor_get_texture(struct zn_cursor *self)
 {
+  if (self->surface) {
+    return wlr_surface_get_texture(self->surface);
+  }
   return self->xcursor_texture;
+}
+
+void
+zn_cursor_set_surface(struct zn_cursor *self, struct wlr_surface *surface,
+    int hotspot_x, int hotspot_y)
+{
+  if (self->surface != NULL) {
+    wl_list_remove(&self->surface_destroy_listener.link);
+    wl_list_init(&self->surface_destroy_listener.link);
+    wl_list_remove(&self->surface_commit_listener.link);
+    wl_list_init(&self->surface_commit_listener.link);
+  }
+
+  if (surface != NULL) {
+    wl_signal_add(&surface->events.destroy, &self->surface_destroy_listener);
+    wl_signal_add(&surface->events.commit, &self->surface_commit_listener);
+  }
+
+  zn_cursor_damage(self);
+
+  self->surface_hotspot_x = hotspot_x;
+  self->surface_hotspot_y = hotspot_y;
+  self->visible = surface != NULL;
+  self->surface = surface;
+
+  zn_cursor_damage(self);
+  zna_cursor_commit(self->appearance, ZNA_CURSOR_DAMAGE_TEXTURE);
 }
 
 void
@@ -59,7 +129,15 @@ zn_cursor_set_xcursor(struct zn_cursor *self, const char *name)
   // TODO: Consider the cursor image specified by the client.
   struct zn_server *server = zn_server_get_singleton();
   struct wlr_xcursor *xcursor = NULL;
-  if (strcmp(name, self->xcursor_name) == 0) return;
+
+  if (self->surface) {
+    zn_cursor_set_surface(self, NULL, 0, 0);
+  }
+
+  if (strcmp(name, self->xcursor_name) == 0) {
+    self->visible = true;
+    return;
+  }
 
   if (strlen(name) > 0) {
     xcursor = wlr_xcursor_manager_get_xcursor(self->xcursor_manager, name, 1.f);
@@ -74,6 +152,7 @@ zn_cursor_set_xcursor(struct zn_cursor *self, const char *name)
   if (self->xcursor_texture) {
     wlr_texture_destroy(self->xcursor_texture);
     self->xcursor_texture = NULL;
+    self->visible = false;
   }
 
   if (xcursor) {
@@ -81,8 +160,9 @@ zn_cursor_set_xcursor(struct zn_cursor *self, const char *name)
     self->xcursor_texture =
         wlr_texture_from_pixels(server->renderer, DRM_FORMAT_ARGB8888,
             image->width * 4, image->width, image->height, image->buffer);
-    self->hotspot_x = image->hotspot_x;
-    self->hotspot_y = image->hotspot_y;
+    self->xcursor_hotspot_x = image->hotspot_x;
+    self->xcursor_hotspot_y = image->hotspot_y;
+    self->visible = true;
   }
 
   free(self->xcursor_name);
@@ -200,14 +280,20 @@ zn_cursor_create(void)
 
   self->xcursor_name = strdup("");
   self->xcursor_texture = NULL;
-  self->hotspot_x = 0;
-  self->hotspot_y = 0;
+  self->surface_hotspot_x = 0;
+  self->surface_hotspot_y = 0;
 
   glm_vec2_zero(self->geometry.size);
   glm_mat4_identity(self->geometry.transform);
 
   self->board_destroy_listener.notify = zn_cursor_handle_board_destroy;
   wl_list_init(&self->board_destroy_listener.link);
+
+  self->surface_commit_listener.notify = zn_cursor_handle_surface_commit;
+  wl_list_init(&self->surface_commit_listener.link);
+
+  self->surface_destroy_listener.notify = zn_cursor_handle_surface_destroy;
+  wl_list_init(&self->surface_destroy_listener.link);
 
   zn_cursor_set_xcursor(self, "left_ptr");
 
@@ -242,6 +328,8 @@ void
 zn_cursor_destroy(struct zn_cursor *self)
 {
   wl_list_remove(&self->board_destroy_listener.link);
+  wl_list_remove(&self->surface_commit_listener.link);
+  wl_list_remove(&self->surface_destroy_listener.link);
   zn_default_cursor_grab_destroy(self->default_grab);
   zna_cursor_destroy(self->appearance);
   wlr_xcursor_manager_destroy(self->xcursor_manager);
