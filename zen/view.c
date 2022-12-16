@@ -90,7 +90,7 @@ zn_view_get_surface_fbox(struct zn_view *self, struct wlr_fbox *fbox)
 }
 
 void
-zn_view_get_view_box(struct zn_view *self, struct wlr_fbox *fbox)
+zn_view_get_view_fbox(struct zn_view *self, struct wlr_fbox *fbox)
 {
   struct wlr_box window_geom;
   self->impl->get_window_geom(self, &window_geom);
