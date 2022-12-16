@@ -11,22 +11,31 @@ static struct wlr_surface *
 zn_xdg_toplevel_view_impl_get_wlr_surface_at(struct zn_view *view,
     double view_sx, double view_sy, double *surface_x, double *surface_y)
 {
-  struct zn_xdg_toplevel *toplevel = view->user_data;
+  struct zn_xdg_toplevel *self = view->user_data;
 
   return wlr_xdg_surface_surface_at(
-      toplevel->wlr_xdg_toplevel->base, view_sx, view_sy, surface_x, surface_y);
+      self->wlr_xdg_toplevel->base, view_sx, view_sy, surface_x, surface_y);
+}
+
+static void
+zn_xdg_toplevel_view_impl_get_window_geom(
+    struct zn_view *view, struct wlr_box *box)
+{
+  struct zn_xdg_toplevel *self = view->user_data;
+  wlr_xdg_surface_get_geometry(self->wlr_xdg_toplevel->base, box);
 }
 
 static void
 zn_xdg_toplevel_view_impl_set_activated(struct zn_view *view, bool activated)
 {
-  struct zn_xdg_toplevel *toplevel = view->user_data;
+  struct zn_xdg_toplevel *self = view->user_data;
 
-  wlr_xdg_toplevel_set_activated(toplevel->wlr_xdg_toplevel->base, activated);
+  wlr_xdg_toplevel_set_activated(self->wlr_xdg_toplevel->base, activated);
 }
 
 static const struct zn_view_interface zn_xdg_toplevel_view_impl = {
     .get_wlr_surface_at = zn_xdg_toplevel_view_impl_get_wlr_surface_at,
+    .get_window_geom = zn_xdg_toplevel_view_impl_get_window_geom,
     .set_activated = zn_xdg_toplevel_view_impl_set_activated,
 };
 
