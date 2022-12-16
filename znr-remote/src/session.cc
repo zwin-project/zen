@@ -10,7 +10,9 @@ znr_session_handle_frame_timer(void *data)
 {
   auto self = static_cast<znr_session_impl *>(data);
 
-  wl_signal_emit(&self->base.events.frame, nullptr);
+  if (self->proxy->GetPendingGrpcQueueCount() < 100) {
+    wl_signal_emit(&self->base.events.frame, nullptr);
+  }
 
   auto now = std::chrono::steady_clock::now();
   std::chrono::steady_clock::time_point next = self->prev_frame;
