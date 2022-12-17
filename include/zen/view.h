@@ -57,6 +57,8 @@ void zn_view_get_surface_fbox(struct zn_view *self, struct wlr_fbox *fbox);
 
 void zn_view_get_view_fbox(struct zn_view *self, struct wlr_fbox *fbox);
 
+void zn_view_bring_to_front(struct zn_view *self);
+
 void zn_view_move(
     struct zn_view *view, struct zn_board *board, double x, double y);
 
