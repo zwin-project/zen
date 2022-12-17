@@ -204,7 +204,9 @@ zn_xdg_toplevel_destroy(struct zn_xdg_toplevel *self)
   wl_list_remove(&self->unmap_listener.link);
   wl_list_remove(&self->map_listener.link);
   wl_list_remove(&self->move_listener.link);
+  wl_list_remove(&self->resize_listener.link);
   wl_list_remove(&self->wlr_xdg_surface_destroy_listener.link);
+  wl_list_remove(&self->wlr_surface_commit_listener.link);
   if (self->view) zn_view_destroy(self->view);
   free(self);
 }
