@@ -50,6 +50,13 @@ zna_gl_texture_apply_commit(struct zna_gl_texture *self, bool only_damaged)
         self->zgnr_gl_texture->current.data);
     self->zgnr_gl_texture->current.data_damaged = false;
   }
+
+  if (self->zgnr_gl_texture->current.generate_mipmap_target_damaged ||
+      !only_damaged) {
+    znr_gl_texture_generate_mipmap(self->znr_gl_texture,
+        self->zgnr_gl_texture->current.generate_mipmap_target);
+    self->zgnr_gl_texture->current.generate_mipmap_target_damaged = false;
+  }
 }
 
 struct zna_gl_texture *

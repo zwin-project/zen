@@ -17,6 +17,8 @@ struct zgnr_gl_texture_impl {
     int32_t border;
     uint32_t format;
     uint32_t type;
+
+    uint32_t generate_mipmap_target;
   } pending;
 };
 
