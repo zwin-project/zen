@@ -15,16 +15,10 @@ zn_move_cursor_grab_motion_relative(
 {
   UNUSED(time_msec);
   struct zn_move_cursor_grab *self = zn_container_of(grab, self, base);
-  struct zn_board *board = self->view->board;
-  const struct zn_board *prev_board = grab->cursor->board;
 
   zn_cursor_move_relative(grab->cursor, dx, dy);
 
-  if (grab->cursor->board != prev_board) {
-    board = grab->cursor->board;
-  }
-
-  zn_view_move(self->view, board, grab->cursor->x + self->diff_x,
+  zn_view_move(self->view, grab->cursor->board, grab->cursor->x + self->diff_x,
       grab->cursor->y + self->diff_y);
 
   zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
@@ -119,7 +113,8 @@ static const struct zn_cursor_grab_interface implementation = {
 };
 
 static void
-zn_move_cursor_grab_handle_view_unmap(struct wl_listener *listener, void *data)
+zn_move_cursor_grab_handle_view_destroy(
+    struct wl_listener *listener, void *data)
 {
   UNUSED(data);
   struct zn_move_cursor_grab *self =
@@ -157,9 +152,8 @@ zn_move_cursor_grab_create(struct zn_cursor *cursor, struct zn_view *view)
   self->diff_y = view_box.y - cursor->y;
   self->view = view;
   self->base.impl = &implementation;
-  self->base.cursor = cursor;
 
-  self->view_destroy_listener.notify = zn_move_cursor_grab_handle_view_unmap;
+  self->view_destroy_listener.notify = zn_move_cursor_grab_handle_view_destroy;
   wl_signal_add(&view->events.destroy, &self->view_destroy_listener);
 
   self->init_board_destroy_listener.notify =
