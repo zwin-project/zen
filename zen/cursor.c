@@ -224,6 +224,10 @@ zn_cursor_move(
 void
 zn_cursor_move_relative(struct zn_cursor *self, double dx, double dy)
 {
+  if (!self->board || !self->board->screen) {
+    return;
+  }
+
   struct zn_server *server = zn_server_get_singleton();
 
   double layout_x, layout_y;

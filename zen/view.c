@@ -134,6 +134,10 @@ zn_view_get_view_fbox(struct zn_view *self, struct wlr_fbox *fbox)
 void
 zn_view_bring_to_front(struct zn_view *self)
 {
+  if (!self->board) {
+    return;
+  }
+
   wl_list_remove(&self->board_link);
   wl_list_insert(self->board->view_list.prev, &self->board_link);
 
