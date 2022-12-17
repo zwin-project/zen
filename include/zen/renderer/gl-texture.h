@@ -13,6 +13,9 @@ void znr_gl_texture_image_2d(struct znr_gl_texture *self, uint32_t target,
     int32_t border, uint32_t format, uint32_t type,
     struct zgnr_mem_storage *storage);
 
+void znr_gl_texture_generate_mipmap(
+    struct znr_gl_texture *self, uint32_t target);
+
 struct znr_gl_texture *znr_gl_texture_create(
     struct znr_session *session, struct wl_display *display);
 

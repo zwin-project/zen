@@ -23,6 +23,12 @@ znr_gl_texture_image_2d(struct znr_gl_texture *self, uint32_t target,
       border, format, type, std::move(buffer));
 }
 
+void
+znr_gl_texture_generate_mipmap(struct znr_gl_texture *self, uint32_t target)
+{
+  self->proxy->GlGenerateMipmap(target);
+}
+
 struct znr_gl_texture *
 znr_gl_texture_create(
     struct znr_session *session_base, struct wl_display *display)

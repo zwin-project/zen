@@ -126,43 +126,61 @@ zgnr_gl_texture_protocol_image_2d(struct wl_client *client,
   self->pending.type = type;
 }
 
+static void
+zgnr_gl_texture_protocol_generate_mipmap(
+    struct wl_client *client, struct wl_resource *resource, uint32_t target)
+{
+  UNUSED(client);
+  struct zgnr_gl_texture_impl *self = wl_resource_get_user_data(resource);
+
+  self->pending.generate_mipmap_target = target;
+}
+
 const struct zgn_gl_texture_interface implementation = {
     .destroy = zgnr_gl_texture_protocol_destroy,
     .image_2d = zgnr_gl_texture_protocol_image_2d,
+    .generate_mipmap = zgnr_gl_texture_protocol_generate_mipmap,
 };
 
 void
 zgnr_gl_texture_commit(struct zgnr_gl_texture_impl *self)
 {
-  if (!self->pending.data.resource) return;  // nothing to commit
+  if (self->pending.data.resource) {
+    struct zgnr_shm_buffer *buffer =
+        zgnr_shm_buffer_get(self->pending.data.resource);
 
-  struct zgnr_shm_buffer *buffer =
-      zgnr_shm_buffer_get(self->pending.data.resource);
+    if (self->base.current.data) {
+      zgnr_mem_storage_unref(self->base.current.data);
+      self->base.current.data = NULL;
+    }
 
-  if (self->base.current.data) {
-    zgnr_mem_storage_unref(self->base.current.data);
-    self->base.current.data = NULL;
+    void *data = zgnr_shm_buffer_get_data(buffer);
+    ssize_t size = zgnr_shm_buffer_get_size(buffer);
+
+    zgnr_shm_buffer_begin_access(buffer);
+    self->base.current.data = zgnr_mem_storage_create(data, size);
+    zgnr_shm_buffer_end_access(buffer);
+
+    self->base.current.data_damaged = true;
+    self->base.current.target = self->pending.target;
+    self->base.current.level = self->pending.level;
+    self->base.current.internal_format = self->pending.internal_format;
+    self->base.current.width = self->pending.width;
+    self->base.current.height = self->pending.height;
+    self->base.current.border = self->pending.border;
+    self->base.current.format = self->pending.format;
+    self->base.current.type = self->pending.type;
+
+    zgn_buffer_send_release(self->pending.data.resource);
+    zn_weak_resource_unlink(&self->pending.data);
   }
 
-  void *data = zgnr_shm_buffer_get_data(buffer);
-  ssize_t size = zgnr_shm_buffer_get_size(buffer);
-
-  zgnr_shm_buffer_begin_access(buffer);
-  self->base.current.data = zgnr_mem_storage_create(data, size);
-  zgnr_shm_buffer_end_access(buffer);
-
-  self->base.current.data_damaged = true;
-  self->base.current.target = self->pending.target;
-  self->base.current.level = self->pending.level;
-  self->base.current.internal_format = self->pending.internal_format;
-  self->base.current.width = self->pending.width;
-  self->base.current.height = self->pending.height;
-  self->base.current.border = self->pending.border;
-  self->base.current.format = self->pending.format;
-  self->base.current.type = self->pending.type;
-
-  zgn_buffer_send_release(self->pending.data.resource);
-  zn_weak_resource_unlink(&self->pending.data);
+  if (self->pending.generate_mipmap_target != 0) {
+    self->base.current.generate_mipmap_target_damaged = true;
+    self->base.current.generate_mipmap_target =
+        self->pending.generate_mipmap_target;
+    self->pending.generate_mipmap_target = 0;
+  }
 }
 
 struct zgnr_gl_texture_impl *
@@ -189,6 +207,8 @@ zgnr_gl_texture_create(struct wl_client *client, uint32_t id)
   zn_weak_resource_init(&self->pending.data);
   self->base.current.data_damaged = false;
   self->base.current.data = NULL;
+  self->base.current.generate_mipmap_target_damaged = false;
+  self->pending.generate_mipmap_target = 0;
 
   return self;
 

@@ -28,6 +28,10 @@ struct zgnr_gl_texture {
 
     // User may assign false to this; zgnr will only assign true to this.
     bool data_damaged;
+
+    // User may assign false to this; zgnr will only assign true to this.
+    bool generate_mipmap_target_damaged;
+    uint32_t generate_mipmap_target;
   } current;
 
   void *user_data;
