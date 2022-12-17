@@ -9,44 +9,6 @@
 
 static void zn_xdg_toplevel_destroy(struct zn_xdg_toplevel *self);
 
-static void
-zn_xdg_toplevel_view_handle_wlr_surface_commit(
-    struct wl_listener *listener, void *data)
-{
-  struct zn_xdg_toplevel *self =
-      zn_container_of(listener, self, wlr_surface_commit_listener);
-
-  if (!self->view) {
-    return;
-  }
-
-  zn_view_damage(self->view);
-
-  if (!self->view->resize_status.resizing) {
-    return;
-  }
-
-  if (!(self->view->resize_status.edges & (WLR_EDGE_LEFT | WLR_EDGE_TOP))) {
-    return;
-  }
-
-  struct wlr_surface *surface = data;
-  int dx = 0, dy = 0;
-  if (self->view->resize_status.edges & WLR_EDGE_LEFT) {
-    dx = surface->previous.width - surface->current.width;
-  }
-  if (self->view->resize_status.edges & WLR_EDGE_TOP) {
-    dy = surface->previous.height - surface->current.height;
-  }
-  zn_view_move(
-      self->view, self->view->board, self->view->x + dx, self->view->y + dy);
-
-  if (self->wlr_xdg_toplevel->base->current.configure_serial ==
-      self->view->resize_status.last_serial) {
-    self->view->resize_status.resizing = false;
-  }
-}
-
 static struct wlr_surface *
 zn_xdg_toplevel_view_impl_get_wlr_surface_at(struct zn_view *view,
     double view_sx, double view_sy, double *surface_x, double *surface_y)
@@ -63,6 +25,13 @@ zn_xdg_toplevel_view_impl_get_window_geom(
 {
   struct zn_xdg_toplevel *self = view->user_data;
   wlr_xdg_surface_get_geometry(self->wlr_xdg_toplevel->base, box);
+}
+
+static uint32_t
+zn_xdg_toplevel_view_impl_get_current_configure_serial(struct zn_view *view)
+{
+  struct zn_xdg_toplevel *self = view->user_data;
+  return self->wlr_xdg_toplevel->base->current.configure_serial;
 }
 
 static uint32_t
@@ -85,6 +54,8 @@ zn_xdg_toplevel_view_impl_set_activated(struct zn_view *view, bool activated)
 static const struct zn_view_interface zn_xdg_toplevel_view_impl = {
     .get_wlr_surface_at = zn_xdg_toplevel_view_impl_get_wlr_surface_at,
     .get_window_geom = zn_xdg_toplevel_view_impl_get_window_geom,
+    .get_current_configure_serial =
+        zn_xdg_toplevel_view_impl_get_current_configure_serial,
     .set_size = zn_xdg_toplevel_view_impl_set_size,
     .set_activated = zn_xdg_toplevel_view_impl_set_activated,
 };
@@ -187,11 +158,6 @@ zn_xdg_toplevel_create(struct wlr_xdg_toplevel *toplevel)
   self->resize_listener.notify = zn_xdg_toplevel_view_handle_resize;
   wl_signal_add(&toplevel->events.request_resize, &self->resize_listener);
 
-  self->wlr_surface_commit_listener.notify =
-      zn_xdg_toplevel_view_handle_wlr_surface_commit;
-  wl_signal_add(&toplevel->base->surface->events.commit,
-      &self->wlr_surface_commit_listener);
-
   return self;
 
 err:
@@ -206,7 +172,6 @@ zn_xdg_toplevel_destroy(struct zn_xdg_toplevel *self)
   wl_list_remove(&self->move_listener.link);
   wl_list_remove(&self->resize_listener.link);
   wl_list_remove(&self->wlr_xdg_surface_destroy_listener.link);
-  wl_list_remove(&self->wlr_surface_commit_listener.link);
   if (self->view) zn_view_destroy(self->view);
   free(self);
 }

@@ -4,6 +4,7 @@
 #include <cglm/mat4.h>
 #include <cglm/vec2.h>
 #include <cglm/vec3.h>
+#include <wlr/util/edges.h>
 #include <zen-common.h>
 
 #include "zen/board.h"
@@ -65,6 +66,29 @@ zn_view_handle_commit(struct wl_listener *listener, void *data)
   pixman_region32_fini(&damage);
 
   // FIXME: add damages of synced subsurfaces
+
+  if (!self->resize_status.resizing) {
+    return;
+  }
+
+  if (!(self->resize_status.edges & (WLR_EDGE_LEFT | WLR_EDGE_TOP))) {
+    return;
+  }
+
+  struct wlr_surface *surface = data;
+  int dx = 0, dy = 0;
+  if (self->resize_status.edges & WLR_EDGE_LEFT) {
+    dx = surface->previous.width - surface->current.width;
+  }
+  if (self->resize_status.edges & WLR_EDGE_TOP) {
+    dy = surface->previous.height - surface->current.height;
+  }
+  zn_view_move(self, self->board, self->x + dx, self->y + dy);
+
+  if (self->impl->get_current_configure_serial(self) ==
+      self->resize_status.last_serial) {
+    self->resize_status.resizing = false;
+  }
 }
 
 static void
@@ -75,36 +99,6 @@ zn_view_damage_whole(struct zn_view *self)
   zn_view_get_surface_fbox(self, &fbox);
 
   zn_view_add_damage_fbox(self, &fbox);
-}
-
-void
-zn_view_damage(struct zn_view *self)
-{
-  struct wlr_fbox surface_box;
-  zn_view_get_surface_fbox(self, &surface_box);
-
-  pixman_region32_t damage;
-  pixman_region32_init(&damage);
-
-  wlr_surface_get_effective_damage(self->surface, &damage);
-
-  pixman_box32_t *rects;
-  int rect_count;
-  rects = pixman_region32_rectangles(&damage, &rect_count);
-
-  for (int i = 0; i < rect_count; ++i) {
-    struct wlr_fbox damage_box = {
-        .x = surface_box.x + rects[i].x1,
-        .y = surface_box.y + rects[i].y1,
-        .width = rects[i].x2 - rects[i].x1,
-        .height = rects[i].y2 - rects[i].y1,
-    };
-    zn_view_add_damage_fbox(self, &damage_box);
-  }
-
-  pixman_region32_fini(&damage);
-
-  // FIXME: add damages of synced subsurfaces
 }
 
 void
