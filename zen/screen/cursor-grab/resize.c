@@ -121,7 +121,7 @@ zn_resize_cursor_grab_cancel(struct zn_cursor_grab *grab)
   zn_resize_cursor_grab_destroy(self);
 }
 
-static const struct zn_cursor_grab_interface zn_resize_cursor_grab_interface = {
+static const struct zn_cursor_grab_interface implementation = {
     .motion_relative = zn_resize_cursor_grab_motion_relative,
     .motion_absolute = zn_resize_cursor_grab_motion_absolute,
     .button = zn_resize_cursor_grab_button,
@@ -164,7 +164,7 @@ zn_resize_cursor_grab_create(
   self->init_cursor_y = cursor->y;
 
   self->view = view;
-  self->base.impl = &zn_resize_cursor_grab_interface;
+  self->base.impl = &implementation;
   self->base.cursor = cursor;
 
   view->resize_status.edges = edges;
