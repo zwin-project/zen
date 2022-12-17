@@ -91,7 +91,12 @@ zn_scene_new_view(struct zn_scene *self, struct zn_view *view)
 
   struct zn_board *board = zn_container_of(self->board_list.next, board, link);
 
-  zn_view_move(view, board, 0, 0);
+  struct wlr_fbox view_fbox;
+  double board_width, board_height;
+  zn_view_get_view_fbox(view, &view_fbox);
+  zn_board_get_effective_size(board, &board_width, &board_height);
+  zn_view_move(view, board, (board_width - view_fbox.width) / 2,
+      (board_height - view_fbox.height) / 2);
 
   zn_scene_set_focused_view(self, view);
 
