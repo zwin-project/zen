@@ -152,6 +152,7 @@ zn_view_move(struct zn_view *self, struct zn_board *board, double x, double y)
       wl_list_remove(&self->board_destroy_listener.link);
       wl_list_init(&self->board_destroy_listener.link);
       wl_list_remove(&self->board_link);
+      wl_list_init(&self->board_link);
     }
 
     if (board) {
