@@ -12,8 +12,8 @@
 #include "zen/server.h"
 
 static void
-zn_default_cursor_grab_send_motion(
-    struct zn_cursor_grab *grab, uint32_t time_msec)
+zn_default_cursor_grab_enter_to_surface(
+    struct zn_cursor_grab *grab, uint32_t time_msec, bool send_motion)
 {
   if (!grab->cursor->board) {
     return;
@@ -28,7 +28,9 @@ zn_default_cursor_grab_send_motion(
 
   if (surface) {
     wlr_seat_pointer_enter(seat, surface, surface_x, surface_y);
-    wlr_seat_pointer_send_motion(seat, time_msec, surface_x, surface_y);
+    if (send_motion) {
+      wlr_seat_pointer_send_motion(seat, time_msec, surface_x, surface_y);
+    }
   } else {
     zn_cursor_set_xcursor(grab->cursor, "left_ptr");
     wlr_seat_pointer_clear_focus(seat);
@@ -45,7 +47,7 @@ zn_default_cursor_grab_motion_relative(
 
   zn_cursor_move_relative(grab->cursor, dx, dy);
 
-  zn_default_cursor_grab_send_motion(grab, time_msec);
+  zn_default_cursor_grab_enter_to_surface(grab, time_msec, true);
 
   zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
 }
@@ -56,7 +58,7 @@ zn_default_cursor_grab_motion_absolute(struct zn_cursor_grab *grab,
 {
   zn_cursor_move(grab->cursor, board, x, y);
 
-  zn_default_cursor_grab_send_motion(grab, time_msec);
+  zn_default_cursor_grab_enter_to_surface(grab, time_msec, true);
 
   zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
 
@@ -129,9 +131,7 @@ zn_default_cursor_grab_leave(struct zn_cursor_grab *grab)
 void
 zn_default_cursor_grab_rebase(struct zn_cursor_grab *grab)
 {
-  struct timespec now;
-  clock_gettime(CLOCK_MONOTONIC, &now);
-  zn_default_cursor_grab_send_motion(grab, timespec_to_msec(&now));
+  zn_default_cursor_grab_enter_to_surface(grab, 0, false);
 }
 
 void
