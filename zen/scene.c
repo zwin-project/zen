@@ -93,6 +93,8 @@ zn_scene_new_view(struct zn_scene *self, struct zn_view *view)
 
   zn_view_move(view, board, 0, 0);
 
+  zn_scene_set_focused_view(self, view);
+
   zna_view_commit(view->appearance, ZNA_VIEW_DAMAGE_GEOMETRY);
 }
 
@@ -112,6 +114,7 @@ zn_scene_set_focused_view(struct zn_scene *self, struct zn_view *view)
   if (view != NULL) {
     view->impl->set_activated(view, true);
     wl_signal_add(&view->events.destroy, &self->focused_view_destroy_listener);
+    zn_view_bring_to_front(view);
     // TODO: enter seat_keyboard
   }
 
