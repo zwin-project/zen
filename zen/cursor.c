@@ -40,9 +40,14 @@ zn_cursor_handle_surface_commit(struct wl_listener *listener, void *data)
     return;
   }
 
+  zn_cursor_damage(self);
+
   self->visible = wlr_surface_has_buffer(self->surface);
+  self->surface_hotspot_x -= self->surface->current.dx;
+  self->surface_hotspot_y -= self->surface->current.dy;
 
   zn_cursor_damage(self);
+
   zna_cursor_commit(self->appearance, ZNA_CURSOR_DAMAGE_TEXTURE);
 }
 
