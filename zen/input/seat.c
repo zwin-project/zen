@@ -16,8 +16,7 @@ zn_seat_handle_request_set_cursor(struct wl_listener *listener, void *data)
   struct wlr_seat_pointer_request_set_cursor_event *event = data;
   struct zn_server *server = zn_server_get_singleton();
 
-  if (event->seat_client->client ==
-      self->wlr_seat->pointer_state.focused_client->client) {
+  if (event->seat_client == self->wlr_seat->pointer_state.focused_client) {
     zn_cursor_set_surface(server->scene->cursor, event->surface,
         event->hotspot_x, event->hotspot_y);
   }
