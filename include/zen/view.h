@@ -10,6 +10,7 @@ struct zn_board;
 struct zn_xdg_toplevel;
 
 struct zn_view_interface {
+  /** surface_x, surface_y can be NULL */
   struct wlr_surface *(*get_wlr_surface_at)(struct zn_view *view,
       double view_sx, double view_sy, double *surface_x, double *surface_y);
   void (*get_window_geom)(struct zn_view *view, struct wlr_box *box);

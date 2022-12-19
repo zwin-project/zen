@@ -241,22 +241,9 @@ zn_cursor_move_relative(struct zn_cursor *self, double dx, double dy)
   zn_cursor_move(self, screen->board, screen_x, screen_y);
 }
 
-static bool
-zn_cursor_is_default_grab(struct zn_cursor *self)
-{
-  if (self->grab == NULL || self->default_grab == NULL) return false;
-
-  return self->grab->impl == self->default_grab->base.impl;
-}
-
 void
 zn_cursor_start_grab(struct zn_cursor *self, struct zn_cursor_grab *grab)
 {
-  if (!zn_assert(
-          zn_cursor_is_default_grab(self), "Non-default grab already exists")) {
-    return;
-  }
-
   self->grab->impl->cancel(self->grab);
 
   self->grab = grab;

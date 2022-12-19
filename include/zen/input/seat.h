@@ -15,6 +15,8 @@ struct zn_seat {
 
   struct wl_listener request_set_cursor_listener;
 
+  uint32_t pressing_button_count;
+
   struct {
     struct wl_signal destroy;
   } events;

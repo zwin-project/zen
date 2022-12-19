@@ -19,6 +19,7 @@ _zen_srcs = [
   'screen/renderer.c',
   'screen/xdg-toplevel.c',
   'screen/cursor-grab/default.c',
+  'screen/cursor-grab/down.c',
   'screen/cursor-grab/move.c',
   'screen/cursor-grab/resize.c',
 

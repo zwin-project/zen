@@ -36,6 +36,12 @@ zn_pointer_handle_button(struct wl_listener *listener, void *data)
   struct zn_server *server = zn_server_get_singleton();
   struct wlr_event_pointer_button *event = data;
 
+  if (event->state == WLR_BUTTON_PRESSED) {
+    server->input_manager->seat->pressing_button_count++;
+  } else {
+    server->input_manager->seat->pressing_button_count--;
+  }
+
   if (server->display_system == ZN_DISPLAY_SYSTEM_SCREEN) {
     struct zn_cursor *cursor = server->scene->cursor;
     cursor->grab->impl->button(
