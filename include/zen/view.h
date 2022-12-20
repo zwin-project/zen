@@ -16,6 +16,7 @@ struct zn_view_interface {
   void (*get_window_geom)(struct zn_view *view, struct wlr_box *box);
   uint32_t (*get_current_configure_serial)(struct zn_view *view);
   uint32_t (*set_size)(struct zn_view *view, double width, double height);
+  uint32_t (*set_maximized)(struct zn_view *view, bool maximized);
   void (*set_activated)(struct zn_view *view, bool activated);
 };
 
@@ -31,6 +32,15 @@ struct zn_view {
 
   struct zn_board *board;  // nullable
   double x, y;
+
+  // view-local coordinate
+  struct wlr_fbox prev_surface_fbox;
+
+  struct {
+    bool maximized;
+    uint32_t changed_serial;
+    struct wlr_fbox reset_box;
+  } maximize_status;
 
   struct {
     bool resizing;
@@ -61,6 +71,8 @@ void zn_view_bring_to_front(struct zn_view *self);
 
 void zn_view_move(
     struct zn_view *view, struct zn_board *board, double x, double y);
+
+void zn_view_set_maximized(struct zn_view *self, bool maximized);
 
 /** lifetime of given wlr_surface must be longer than zn_view */
 struct zn_view *zn_view_create(struct wlr_surface *surface,
