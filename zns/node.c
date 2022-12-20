@@ -52,42 +52,41 @@ zns_node_ray_motion(
 }
 
 void
-zns_node_ray_enter(
-    struct zns_node *self, uint32_t serial, vec3 origin, vec3 direction)
+zns_node_ray_enter(struct zns_node *self, vec3 origin, vec3 direction)
 {
   mat4 transform;
   zns_node_get_accum_transform(self, transform);
 
   if (!self->implementation->ray_enter(
-          self->user_data, serial, origin, direction, transform) &&
+          self->user_data, origin, direction, transform) &&
       self->parent) {
-    zns_node_ray_enter(self->parent, serial, origin, direction);
+    zns_node_ray_enter(self->parent, origin, direction);
   }
 }
 
 void
-zns_node_ray_leave(struct zns_node *self, uint32_t serial)
+zns_node_ray_leave(struct zns_node *self)
 {
   mat4 transform;
   zns_node_get_accum_transform(self, transform);
 
-  if (!self->implementation->ray_leave(self->user_data, serial, transform) &&
+  if (!self->implementation->ray_leave(self->user_data, transform) &&
       self->parent) {
-    zns_node_ray_leave(self->parent, serial);
+    zns_node_ray_leave(self->parent);
   }
 }
 
 void
-zns_node_ray_button(struct zns_node *self, uint32_t serial, uint32_t time_msec,
-    uint32_t button, enum zgn_ray_button_state state)
+zns_node_ray_button(struct zns_node *self, uint32_t time_msec, uint32_t button,
+    enum zgn_ray_button_state state)
 {
   mat4 transform;
   zns_node_get_accum_transform(self, transform);
 
   if (!self->implementation->ray_button(
-          self->user_data, serial, time_msec, button, state, transform) &&
+          self->user_data, time_msec, button, state, transform) &&
       self->parent) {
-    zns_node_ray_button(self->parent, serial, time_msec, button, state);
+    zns_node_ray_button(self->parent, time_msec, button, state);
   }
 }
 

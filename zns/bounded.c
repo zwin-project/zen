@@ -53,8 +53,6 @@ zns_bounded_node_ray_motion(void *user_data, vec3 origin, vec3 direction,
 {
   UNUSED(transform);  // must be identity matrix
   struct zns_bounded *self = user_data;
-  struct wl_client *client =
-      wl_resource_get_client(self->zgnr_bounded->virtual_object->resource);
   struct zn_server *server = zn_server_get_singleton();
 
   struct zn_virtual_object *zn_virtual_object =
@@ -67,15 +65,15 @@ zns_bounded_node_ray_motion(void *user_data, vec3 origin, vec3 direction,
   glm_vec3_sub(local_tip, local_origin, local_direction);
   glm_vec3_scale_as(local_direction, 1, local_direction);
 
-  zgnr_seat_send_ray_motion(server->input_manager->seat->zgnr_seat, client,
-      time_msec, local_origin, local_direction);
+  zgnr_seat_ray_send_motion(server->input_manager->seat->zgnr_seat, time_msec,
+      local_origin, local_direction);
 
   return true;
 }
 
 static bool
-zns_bounded_node_ray_enter(void *user_data, uint32_t serial, vec3 origin,
-    vec3 direction, mat4 transform)
+zns_bounded_node_ray_enter(
+    void *user_data, vec3 origin, vec3 direction, mat4 transform)
 {
   UNUSED(transform);  // must be identity matrix
   struct zns_bounded *self = user_data;
@@ -91,39 +89,34 @@ zns_bounded_node_ray_enter(void *user_data, uint32_t serial, vec3 origin,
   glm_vec3_sub(local_tip, local_origin, local_direction);
   glm_vec3_scale_as(local_direction, 1, local_direction);
 
-  zgnr_seat_send_ray_enter(server->input_manager->seat->zgnr_seat,
-      self->zgnr_bounded->virtual_object, serial, local_origin,
-      local_direction);
+  zgnr_seat_ray_enter(server->input_manager->seat->zgnr_seat,
+      self->zgnr_bounded->virtual_object, local_origin, local_direction);
 
   return true;
 }
 
 static bool
-zns_bounded_node_ray_leave(void *user_data, uint32_t serial, mat4 transform)
+zns_bounded_node_ray_leave(void *user_data, mat4 transform)
 {
+  UNUSED(user_data);
   UNUSED(transform);  // must be identity matrix
-  struct zns_bounded *self = user_data;
   struct zn_server *server = zn_server_get_singleton();
 
-  zgnr_seat_send_ray_leave(server->input_manager->seat->zgnr_seat,
-      self->zgnr_bounded->virtual_object, serial);
+  zgnr_seat_ray_clear_focus(server->input_manager->seat->zgnr_seat);
 
   return true;
 }
 
 static bool
-zns_bounded_node_ray_button(void *user_data, uint32_t serial,
-    uint32_t time_msec, uint32_t button, enum zgn_ray_button_state state,
-    mat4 transform)
+zns_bounded_node_ray_button(void *user_data, uint32_t time_msec,
+    uint32_t button, enum zgn_ray_button_state state, mat4 transform)
 {
+  UNUSED(user_data);
   UNUSED(transform);  // must be identity matrix
-  struct zns_bounded *self = user_data;
-  struct wl_client *client =
-      wl_resource_get_client(self->zgnr_bounded->virtual_object->resource);
   struct zn_server *server = zn_server_get_singleton();
 
-  zgnr_seat_send_ray_button(server->input_manager->seat->zgnr_seat, client,
-      serial, time_msec, button, state);
+  zgnr_seat_ray_send_button(
+      server->input_manager->seat->zgnr_seat, time_msec, button, state);
 
   return true;
 }
@@ -152,18 +145,17 @@ zns_bounded_handle_move(struct wl_listener *listener, void *data)
 {
   struct zns_bounded *self = zn_container_of(listener, self, move_listener);
   struct zn_server *server = zn_server_get_singleton();
+  struct zgnr_seat *zgnr_seat = server->input_manager->seat->zgnr_seat;
   struct zn_ray *ray = server->scene->ray;
   struct zgnr_bounded_move_event *event = data;
-  struct zns_default_ray_grab *grab = zns_default_ray_grab_get(ray->grab);
-  struct zns_move_ray_grab *move_grab;
 
-  if (grab == NULL || grab->focus != self->node ||
-      grab->button_state != ZGN_RAY_BUTTON_STATE_PRESSED ||
-      grab->last_button_serial != event->serial)
+  // TODO: Check that ray button is pressing
+  if (zgnr_seat->ray_state.focus_virtual_object !=
+          self->zgnr_bounded->virtual_object ||
+      zgnr_seat->ray_state.last_button_serial != event->serial)
     return;
 
-  move_grab = zns_move_ray_grab_create(self);
-  zn_ray_start_grab(grab->base.ray, &move_grab->base);
+  zns_move_ray_grab_start(ray, self);
 }
 
 static void

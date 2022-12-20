@@ -32,21 +32,21 @@ zn_shell_root_ray_motion(void *user_data, vec3 origin, vec3 direction,
 }
 
 static bool
-zn_shell_root_ray_enter(void *user_data, uint32_t serial, vec3 origin,
-    vec3 direction, mat4 transform)
+zn_shell_root_ray_enter(
+    void *user_data, vec3 origin, vec3 direction, mat4 transform)
 {
   return true;
 }
 
 static bool
-zn_shell_root_ray_leave(void *user_data, uint32_t serial, mat4 transform)
+zn_shell_root_ray_leave(void *user_data, mat4 transform)
 {
   return true;
 }
 
 static bool
-zn_shell_root_ray_button(void *user_data, uint32_t serial, uint32_t time_msec,
-    uint32_t button, enum zgn_ray_button_state state, mat4 transform)
+zn_shell_root_ray_button(void *user_data, uint32_t time_msec, uint32_t button,
+    enum zgn_ray_button_state state, mat4 transform)
 {
   return true;
 }
@@ -60,6 +60,46 @@ static const struct zns_node_interface node_implementation = {
     .ray_button = zn_shell_root_ray_button,
 };
 
+static void
+zn_shell_set_ray_focus_node(struct zn_shell *self, struct zns_node *node)
+{
+  if (self->ray_focus) {
+    wl_list_remove(&self->ray_focus_node_destroy_listener.link);
+    wl_list_init(&self->ray_focus_node_destroy_listener.link);
+  }
+
+  if (node) {
+    wl_signal_add(
+        &node->events.destroy, &self->ray_focus_node_destroy_listener);
+  }
+
+  self->ray_focus = node;
+}
+
+void
+zn_shell_ray_enter(
+    struct zn_shell *self, struct zns_node *node, vec3 origin, vec3 direction)
+{
+  if (self->ray_focus == node) return;
+
+  if (self->ray_focus) {
+    zns_node_ray_leave(self->ray_focus);
+  }
+
+  zn_shell_set_ray_focus_node(self, node);
+
+  zns_node_ray_enter(node, origin, direction);
+}
+
+void
+zn_shell_ray_clear_focus(struct zn_shell *self)
+{
+  if (self->ray_focus == NULL) return;
+
+  zns_node_ray_leave(self->ray_focus);
+  zn_shell_set_ray_focus_node(self, NULL);
+}
+
 void
 zn_shell_handle_new_display_system(struct zn_shell *self)
 {
@@ -72,7 +112,7 @@ zn_shell_handle_new_display_system(struct zn_shell *self)
     struct zn_board *board = cursor->grab->cursor->board;
     double x = cursor->x;
     double y = cursor->y;
-    ray->grab->impl->cancel(ray->grab);
+    zn_ray_end_grab(ray);
     cursor->grab->impl->enter(cursor->grab, board, x, y);
   } else {
     cursor->grab->impl->leave(cursor->grab);
@@ -111,6 +151,16 @@ zn_shell_handle_new_board(struct wl_listener *listener, void *data)
   struct zns_board *zns_board = zns_board_create(zn_board);
 
   zns_seat_capsule_add_board(self->seat_capsule, zns_board);
+}
+
+static void
+zn_shell_handle_focus_node_destroy(struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+  struct zn_shell *self =
+      zn_container_of(listener, self, ray_focus_node_destroy_listener);
+
+  zn_shell_set_ray_focus_node(self, NULL);
 }
 
 struct zn_ray_grab *
@@ -161,6 +211,10 @@ zn_shell_create(struct wl_display *display, struct zn_scene *scene)
   self->new_board_listener.notify = zn_shell_handle_new_board;
   wl_signal_add(&scene->events.new_board, &self->new_board_listener);
 
+  self->ray_focus_node_destroy_listener.notify =
+      zn_shell_handle_focus_node_destroy;
+  wl_list_init(&self->ray_focus_node_destroy_listener.link);
+
   return self;
 
 err_seat_capsule:
@@ -183,6 +237,7 @@ zn_shell_destroy(struct zn_shell *self)
   wl_list_remove(&self->new_board_listener.link);
   wl_list_remove(&self->new_expansive_listener.link);
   wl_list_remove(&self->new_bounded_listener.link);
+  wl_list_remove(&self->ray_focus_node_destroy_listener.link);
   zns_node_destroy(self->root);
   zns_seat_capsule_destroy(self->seat_capsule);
   zgnr_shell_destroy(self->zgnr_shell);

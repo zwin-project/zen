@@ -10,11 +10,6 @@ struct zns_default_ray_grab {
 
   struct zn_shell *shell;  // nonnull, reference
 
-  struct zns_node *focus;  // nullable, reference
-
-  struct wl_listener focus_destroy_listener;
-
-  uint32_t last_button_serial;
   enum zgn_ray_button_state button_state;
 };
 

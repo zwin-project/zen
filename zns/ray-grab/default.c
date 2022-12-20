@@ -5,6 +5,7 @@
 #include <zigen-protocol.h>
 
 #include "bounded.h"
+#include "ray-grab/down.h"
 #include "shell.h"
 #include "zen/appearance/ray.h"
 #include "zen/server.h"
@@ -17,29 +18,12 @@ static void
 zns_default_ray_grab_focus(
     struct zns_default_ray_grab *self, struct zns_node *node)
 {
-  if (self->focus == node) return;
-
-  struct zn_server *server = zn_server_get_singleton();
-
-  if (self->focus) {
-    wl_list_remove(&self->focus_destroy_listener.link);
-    wl_list_init(&self->focus_destroy_listener.link);
-
-    uint32_t serial = wl_display_next_serial(server->display);
-
-    zns_node_ray_leave(self->focus, serial);
-  }
-
   if (node) {
-    wl_signal_add(&node->events.destroy, &self->focus_destroy_listener);
-
-    uint32_t serial = wl_display_next_serial(server->display);
-
-    zns_node_ray_enter(
-        node, serial, self->base.ray->origin, self->base.ray->direction);
+    zn_shell_ray_enter(
+        self->shell, node, self->base.ray->origin, self->base.ray->direction);
+  } else {
+    zn_shell_ray_clear_focus(self->shell);
   }
-
-  self->focus = node;
 }
 
 static void
@@ -75,8 +59,8 @@ zns_default_ray_grab_motion_relative(struct zn_ray_grab *grab_base, vec3 origin,
 
   zns_default_ray_grab_focus(self, node);
 
-  if (self->focus) {
-    zns_node_ray_motion(self->focus, self->base.ray->origin,
+  if (self->shell->ray_focus) {
+    zns_node_ray_motion(self->shell->ray_focus, self->base.ray->origin,
         self->base.ray->direction, time_msec);
   }
 }
@@ -89,15 +73,15 @@ zns_default_ray_grab_button(struct zn_ray_grab *grab_base, uint32_t time_msec,
   struct zn_server *server = zn_server_get_singleton();
 
   self->button_state = state;
-  self->last_button_serial = 0;
 
-  if (self->focus == NULL) return;
+  if (self->shell->ray_focus == NULL) return;
 
-  uint32_t serial = wl_display_next_serial(server->display);
+  if (server->input_manager->seat->pressing_button_count == 1 &&
+      state == ZGN_RAY_BUTTON_STATE_PRESSED) {
+    zns_down_ray_grab_start(self->base.ray, self->shell->ray_focus);
+  }
 
-  zns_node_ray_button(self->focus, serial, time_msec, button, state);
-
-  self->last_button_serial = serial;
+  zns_node_ray_button(self->shell->ray_focus, time_msec, button, state);
 }
 
 static void
@@ -121,8 +105,7 @@ zns_default_ray_grab_rebase(struct zn_ray_grab *grab_base)
 static void
 zns_default_ray_grab_cancel(struct zn_ray_grab *grab_base)
 {
-  struct zns_default_ray_grab *self = zn_container_of(grab_base, self, base);
-  zns_default_ray_grab_focus(self, NULL);
+  UNUSED(grab_base);
 }
 
 static const struct zn_ray_grab_interface implementation = {
@@ -131,17 +114,6 @@ static const struct zn_ray_grab_interface implementation = {
     .rebase = zns_default_ray_grab_rebase,
     .cancel = zns_default_ray_grab_cancel,
 };
-
-void
-zns_default_ray_grab_handle_focus_destroy(
-    struct wl_listener *listener, void *data)
-{
-  UNUSED(data);
-  struct zns_default_ray_grab *self =
-      zn_container_of(listener, self, focus_destroy_listener);
-
-  zns_default_ray_grab_focus(self, NULL);
-}
 
 struct zns_default_ray_grab *
 zns_default_ray_grab_get(struct zn_ray_grab *grab)
@@ -160,16 +132,10 @@ zns_default_ray_grab_init(
 {
   self->base.impl = &implementation;
   self->shell = shell;
-  self->focus = NULL;
-  self->last_button_serial = 0;
-
-  self->focus_destroy_listener.notify =
-      zns_default_ray_grab_handle_focus_destroy;
-  wl_list_init(&self->focus_destroy_listener.link);
 }
 
 void
 zns_default_ray_grab_fini(struct zns_default_ray_grab *self)
 {
-  wl_list_remove(&self->focus_destroy_listener.link);
+  UNUSED(self);
 }

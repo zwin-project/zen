@@ -35,22 +35,9 @@ zn_ray_move(struct zn_ray *self, vec3 origin, float polar, float azimuthal)
   self->direction[2] = -r * sinf(self->angle.azimuthal);
 }
 
-static bool
-zn_ray_is_default_grab(struct zn_ray *self)
-{
-  if (self->grab == NULL || self->default_grab == NULL) return false;
-
-  return self->grab->impl == self->default_grab->impl;
-}
-
 void
 zn_ray_start_grab(struct zn_ray *self, struct zn_ray_grab *grab)
 {
-  if (!zn_assert(
-          zn_ray_is_default_grab(self), "Non-default grab already exists")) {
-    return;
-  }
-
   self->grab->impl->cancel(self->grab);
 
   self->grab = grab;

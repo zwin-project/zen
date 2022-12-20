@@ -75,10 +75,9 @@ zns_board_node_ray_motion(void *user_data, vec3 origin, vec3 direction,
 }
 
 static bool
-zns_board_node_ray_enter(void *user_data, uint32_t serial, vec3 origin,
-    vec3 direction, mat4 transform)
+zns_board_node_ray_enter(
+    void *user_data, vec3 origin, vec3 direction, mat4 transform)
 {
-  UNUSED(serial);
   UNUSED(transform);  // must be identity matrix
   struct zns_board *self = user_data;
   struct zn_server *server = zn_server_get_singleton();
@@ -102,10 +101,9 @@ zns_board_node_ray_enter(void *user_data, uint32_t serial, vec3 origin,
 }
 
 static bool
-zns_board_node_ray_leave(void *user_data, uint32_t serial, mat4 transform)
+zns_board_node_ray_leave(void *user_data, mat4 transform)
 {
   UNUSED(user_data);
-  UNUSED(serial);
   UNUSED(transform);  // must be identity matrix
 
   struct zn_server *server = zn_server_get_singleton();
@@ -117,10 +115,9 @@ zns_board_node_ray_leave(void *user_data, uint32_t serial, mat4 transform)
 }
 
 static bool
-zns_board_node_ray_button(void *user_data, uint32_t serial, uint32_t time_msec,
-    uint32_t button, enum zgn_ray_button_state state, mat4 transform)
+zns_board_node_ray_button(void *user_data, uint32_t time_msec, uint32_t button,
+    enum zgn_ray_button_state state, mat4 transform)
 {
-  UNUSED(serial);
   UNUSED(transform);  // must be identity matrix
 
   struct zns_board *self = user_data;
@@ -143,11 +140,7 @@ zns_board_node_ray_button(void *user_data, uint32_t serial, uint32_t time_msec,
 
     cursor->grab->impl->button(cursor->grab, time_msec, button, wlr_state);
   } else if (state == ZGN_RAY_BUTTON_STATE_PRESSED && button == BTN_LEFT) {
-    struct zns_board_move_ray_grab *board_move_grab;
-    board_move_grab = zns_board_move_ray_grab_create(self);
-    if (board_move_grab) {
-      zn_ray_start_grab(server->scene->ray, &board_move_grab->base);
-    }
+    zns_board_move_ray_grab_start(server->scene->ray, self);
   }
 
   return true;

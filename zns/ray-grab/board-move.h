@@ -14,5 +14,8 @@ struct zns_board_move_ray_grab {
   struct wl_listener zns_board_destroy_listener;
 };
 
-struct zns_board_move_ray_grab *zns_board_move_ray_grab_create(
-    struct zns_board *zns_board);
+/**
+ * @param zns_board is nonnull
+ */
+void zns_board_move_ray_grab_start(
+    struct zn_ray *ray, struct zns_board *zns_board);

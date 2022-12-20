@@ -104,7 +104,7 @@ zns_move_ray_grab_handle_bounded_destroy(
   }
 }
 
-struct zns_move_ray_grab *
+static struct zns_move_ray_grab *
 zns_move_ray_grab_create(struct zns_bounded *bounded)
 {
   struct zns_move_ray_grab *self;
@@ -140,4 +140,16 @@ zns_move_ray_grab_destroy(struct zns_move_ray_grab *self)
 {
   wl_list_remove(&self->bounded_destroy_listener.link);
   free(self);
+}
+
+void
+zns_move_ray_grab_start(struct zn_ray *ray, struct zns_bounded *bounded)
+{
+  struct zn_server *server = zn_server_get_singleton();
+  struct zns_move_ray_grab *self = zns_move_ray_grab_create(bounded);
+
+  if (!self) return;
+
+  zn_shell_ray_clear_focus(server->shell);
+  zn_ray_start_grab(ray, &self->base);
 }

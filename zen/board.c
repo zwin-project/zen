@@ -176,7 +176,7 @@ err:
 void
 zn_board_destroy(struct zn_board *self)
 {
-  wl_signal_emit(&self->events.destroy, NULL);
+  zn_signal_emit_mutable(&self->events.destroy, NULL);
 
   wl_list_remove(&self->view_list);
   wl_list_remove(&self->screen_destroy_listener.link);
