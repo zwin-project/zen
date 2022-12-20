@@ -17,13 +17,13 @@ void
 zn_cursor_commit_appearance(struct zn_cursor *self)
 {
   if (self->appearance_damage != 0) {
-    zna_cursor_commit(self->appearance, self->appearance_damage);
+    zna_cursor_commit(self->_appearance, self->appearance_damage);
     self->appearance_damage = 0;
   }
 }
 
 static void
-zn_cursor_update_geom(struct zn_cursor *self)
+zn_cursor_update_geometry(struct zn_cursor *self)
 {
   if (self->board) {
     struct wlr_fbox cursor_fbox, board_local_cursor_geom;
@@ -81,7 +81,7 @@ zn_cursor_handle_surface_commit(struct wl_listener *listener, void *data)
 
   zn_cursor_damage(self);
 
-  zn_cursor_update_geom(self);
+  zn_cursor_update_geometry(self);
 
   zn_cursor_commit_appearance(self);
 }
@@ -165,7 +165,7 @@ zn_cursor_set_surface(struct zn_cursor *self, struct wlr_surface *surface,
 
   zn_cursor_damage(self);
 
-  zn_cursor_update_geom(self);
+  zn_cursor_update_geometry(self);
 
   self->appearance_damage |= ZNA_CURSOR_DAMAGE_TEXTURE;
 }
@@ -217,7 +217,7 @@ zn_cursor_set_xcursor(struct zn_cursor *self, const char *name)
 
   zn_cursor_damage(self);
 
-  zn_cursor_update_geom(self);
+  zn_cursor_update_geometry(self);
 
   self->appearance_damage |= ZNA_CURSOR_DAMAGE_TEXTURE;
 }
@@ -244,7 +244,7 @@ zn_cursor_move(
 
   zn_cursor_damage(self);
 
-  zn_cursor_update_geom(self);
+  zn_cursor_update_geometry(self);
 }
 
 void
@@ -308,8 +308,8 @@ zn_cursor_create(void)
   }
   wlr_xcursor_manager_load(self->xcursor_manager, 1.f);
 
-  self->appearance = zna_cursor_create(self, server->appearance_system);
-  if (self->appearance == NULL) {
+  self->_appearance = zna_cursor_create(self, server->appearance_system);
+  if (self->_appearance == NULL) {
     zn_error("Failed to create a zna_cursor");
     goto err_xcursor_manager;
   }
@@ -371,7 +371,7 @@ zn_cursor_destroy(struct zn_cursor *self)
   wl_list_remove(&self->surface_commit_listener.link);
   wl_list_remove(&self->surface_destroy_listener.link);
   zn_default_cursor_grab_destroy(self->default_grab);
-  zna_cursor_destroy(self->appearance);
+  zna_cursor_destroy(self->_appearance);
   wlr_xcursor_manager_destroy(self->xcursor_manager);
   free(self->xcursor_name);
   free(self);

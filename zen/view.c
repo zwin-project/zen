@@ -12,6 +12,34 @@
 #include "zen/server.h"
 
 static void
+zn_view_update_geometry(struct zn_view *self)
+{
+  if (self->board) {
+    struct wlr_fbox view_fbox, board_local_view_geom;
+
+    // FIXME: take window geometry into account
+    zn_view_get_surface_fbox(self, &view_fbox);
+    zn_board_box_effective_to_local_geom(
+        self->board, &view_fbox, &board_local_view_geom);
+
+    self->geometry.size[0] = board_local_view_geom.width;
+    self->geometry.size[1] = board_local_view_geom.height;
+
+    glm_mat4_copy(self->board->geometry.transform, self->geometry.transform);
+    // FIXME: take view overlap (z-index) into account
+    glm_translate(self->geometry.transform,
+        (vec3){board_local_view_geom.x, board_local_view_geom.y,
+            VIEW_Z_OFFSET_ON_BOARD});
+
+  } else {
+    glm_mat4_identity(self->geometry.transform);
+    glm_vec2_zero(self->geometry.size);
+  }
+
+  self->appearance_damage |= ZNA_VIEW_DAMAGE_GEOMETRY;
+}
+
+static void
 zn_view_handle_board_destroy(struct wl_listener *listener, void *data)
 {
   UNUSED(data);
@@ -19,7 +47,7 @@ zn_view_handle_board_destroy(struct wl_listener *listener, void *data)
       zn_container_of(listener, self, board_destroy_listener);
   zn_view_move(self, NULL, 0, 0);
 
-  zna_view_commit(self->appearance, ZNA_VIEW_DAMAGE_GEOMETRY);
+  zn_view_commit_appearance(self);
 }
 
 static void
@@ -76,7 +104,7 @@ zn_view_handle_commit(struct wl_listener *listener, void *data)
 
   if (pixman_region32_not_empty(&damage)) {
     // FIXME: Update only sub image
-    zna_view_commit(self->appearance, ZNA_VIEW_DAMAGE_TEXTURE);
+    self->appearance_damage |= ZNA_VIEW_DAMAGE_TEXTURE;
   }
 
   pixman_region32_fini(&damage);
@@ -116,6 +144,11 @@ zn_view_handle_commit(struct wl_listener *listener, void *data)
   self->prev_surface_fbox.y = -window_geom.y;
   self->prev_surface_fbox.width = surface_box.width;
   self->prev_surface_fbox.height = surface_box.height;
+
+  // FIXME: Update geometry more efficiently
+  zn_view_update_geometry(self);
+
+  zn_view_commit_appearance(self);
 }
 
 static void
@@ -126,6 +159,15 @@ zn_view_damage_whole(struct zn_view *self)
   zn_view_get_surface_fbox(self, &fbox);
 
   zn_view_add_damage_fbox(self, &fbox);
+}
+
+void
+zn_view_commit_appearance(struct zn_view *self)
+{
+  if (self->appearance_damage != 0) {
+    zna_view_commit(self->_appearance, self->appearance_damage);
+    self->appearance_damage = 0;
+  }
 }
 
 void
@@ -191,27 +233,7 @@ zn_view_move(struct zn_view *self, struct zn_board *board, double x, double y)
 
   zn_view_damage_whole(self);
 
-  if (self->board) {
-    struct wlr_fbox view_fbox, board_local_view_geom;
-
-    // FIXME: take window geometry into account
-    zn_view_get_surface_fbox(self, &view_fbox);
-    zn_board_box_effective_to_local_geom(
-        self->board, &view_fbox, &board_local_view_geom);
-
-    self->geometry.size[0] = board_local_view_geom.width;
-    self->geometry.size[1] = board_local_view_geom.height;
-
-    glm_mat4_copy(self->board->geometry.transform, self->geometry.transform);
-    // // FIXME: take view overlap (z-index) into account
-    glm_translate(self->geometry.transform,
-        (vec3){board_local_view_geom.x, board_local_view_geom.y,
-            VIEW_Z_OFFSET_ON_BOARD});
-
-  } else {
-    glm_mat4_identity(self->geometry.transform);
-    glm_vec2_zero(self->geometry.size);
-  }
+  zn_view_update_geometry(self);
 }
 
 void
@@ -254,8 +276,8 @@ zn_view_create(struct wlr_surface *surface,
   self->impl = impl;
   self->user_data = user_data;
 
-  self->appearance = zna_view_create(self, server->appearance_system);
-  if (self->appearance == NULL) {
+  self->_appearance = zna_view_create(self, server->appearance_system);
+  if (self->_appearance == NULL) {
     zn_error("Failed to create a zna_view");
     goto err_free;
   }
@@ -294,6 +316,6 @@ zn_view_destroy(struct zn_view *self)
   wl_list_remove(&self->board_destroy_listener.link);
   wl_list_remove(&self->commit_listener.link);
   wl_list_remove(&self->events.destroy.listener_list);
-  zna_view_destroy(self->appearance);
+  zna_view_destroy(self->_appearance);
   free(self);
 }

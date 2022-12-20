@@ -64,7 +64,7 @@ struct zn_cursor {
   struct wl_listener surface_commit_listener;
   struct wl_listener surface_destroy_listener;
 
-  struct zna_cursor *appearance;  // be private
+  struct zna_cursor *_appearance;  // be private
   uint32_t appearance_damage;
 };
 
