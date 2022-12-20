@@ -201,14 +201,14 @@ zn_resize_cursor_grab_start(
   }
 
   const char *xcursor_name[] = {
-      [WLR_EDGE_TOP] = "n-resize",
-      [WLR_EDGE_BOTTOM] = "s-resize",
-      [WLR_EDGE_LEFT] = "w-resize",
-      [WLR_EDGE_RIGHT] = "e-resize",
-      [WLR_EDGE_TOP | WLR_EDGE_LEFT] = "nw-resize",
-      [WLR_EDGE_TOP | WLR_EDGE_RIGHT] = "ne-resize",
-      [WLR_EDGE_BOTTOM | WLR_EDGE_LEFT] = "sw-resize",
-      [WLR_EDGE_BOTTOM | WLR_EDGE_RIGHT] = "se-resize",
+      [WLR_EDGE_TOP] = "top_corner",
+      [WLR_EDGE_BOTTOM] = "bottom_corner",
+      [WLR_EDGE_LEFT] = "left_corner",
+      [WLR_EDGE_RIGHT] = "right_corner",
+      [WLR_EDGE_TOP | WLR_EDGE_LEFT] = "top_left_corner",
+      [WLR_EDGE_TOP | WLR_EDGE_RIGHT] = "top_right_corner",
+      [WLR_EDGE_BOTTOM | WLR_EDGE_LEFT] = "bottom_left_corner",
+      [WLR_EDGE_BOTTOM | WLR_EDGE_RIGHT] = "bottom_right_corner",
   };
 
   wlr_seat_pointer_clear_focus(seat);
