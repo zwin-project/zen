@@ -50,7 +50,7 @@ zn_default_cursor_grab_motion_relative(
 
   zn_default_cursor_grab_send_movement(grab, time_msec, false);
 
-  zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
+  zn_cursor_commit_appearance(grab->cursor);
 }
 
 void
@@ -61,9 +61,7 @@ zn_default_cursor_grab_motion_absolute(struct zn_cursor_grab *grab,
 
   zn_default_cursor_grab_send_movement(grab, time_msec, false);
 
-  zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
-
-  UNUSED(time_msec);
+  zn_cursor_commit_appearance(grab->cursor);
 }
 
 void
@@ -122,7 +120,7 @@ zn_default_cursor_grab_enter(
 {
   zn_cursor_move(grab->cursor, board, x, y);
 
-  zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
+  zn_cursor_commit_appearance(grab->cursor);
 }
 
 void
@@ -130,13 +128,15 @@ zn_default_cursor_grab_leave(struct zn_cursor_grab *grab)
 {
   zn_cursor_move(grab->cursor, NULL, 0, 0);
 
-  zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
+  zn_cursor_commit_appearance(grab->cursor);
 }
 
 void
 zn_default_cursor_grab_rebase(struct zn_cursor_grab *grab)
 {
   zn_default_cursor_grab_send_movement(grab, 0, true);
+
+  zn_cursor_commit_appearance(grab->cursor);
 }
 
 void

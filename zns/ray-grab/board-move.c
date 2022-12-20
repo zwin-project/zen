@@ -80,7 +80,7 @@ zns_board_move_ray_grab_motion_relative(struct zn_ray_grab *grab_base,
     struct zn_cursor *cursor = server->scene->cursor;
     zn_cursor_move(cursor, zn_board, cursor->x, cursor->y);
 
-    zna_cursor_commit(cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
+    zn_cursor_commit_appearance(cursor);
   }
 }
 

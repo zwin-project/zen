@@ -64,12 +64,15 @@ struct zn_cursor {
   struct wl_listener surface_commit_listener;
   struct wl_listener surface_destroy_listener;
 
-  struct zna_cursor *appearance;
+  struct zna_cursor *appearance;  // be private
+  uint32_t appearance_damage;
 };
 
 void zn_cursor_get_fbox(struct zn_cursor *self, struct wlr_fbox *fbox);
 
 void zn_cursor_damage(struct zn_cursor *self);
+
+void zn_cursor_commit_appearance(struct zn_cursor *self);
 
 /**
  * @returns cursor texture, nullable

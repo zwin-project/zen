@@ -17,7 +17,7 @@ zn_resize_cursor_grab_motion_relative(
   struct zn_resize_cursor_grab *self = zn_container_of(grab, self, base);
 
   zn_cursor_move_relative(grab->cursor, dx, dy);
-  zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
+  zn_cursor_commit_appearance(grab->cursor);
 
   if (self->view->board != grab->cursor->board) {
     return;
@@ -54,7 +54,7 @@ zn_resize_cursor_grab_motion_absolute(struct zn_cursor_grab *grab,
 
   zn_cursor_move(grab->cursor, board, x, y);
 
-  zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
+  zn_cursor_commit_appearance(grab->cursor);
 }
 
 static void
@@ -95,7 +95,7 @@ zn_resize_cursor_grab_enter(
 {
   zn_cursor_move(grab->cursor, board, x, y);
 
-  zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
+  zn_cursor_commit_appearance(grab->cursor);
 }
 
 void
@@ -103,7 +103,7 @@ zn_resize_cursor_grab_leave(struct zn_cursor_grab *grab)
 {
   zn_cursor_move(grab->cursor, NULL, 0, 0);
 
-  zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
+  zn_cursor_commit_appearance(grab->cursor);
 }
 
 static void

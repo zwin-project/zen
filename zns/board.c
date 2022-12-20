@@ -56,11 +56,13 @@ zns_board_node_ray_motion(void *user_data, vec3 origin, vec3 direction,
   struct zns_board *self = user_data;
   struct zn_server *server = zn_server_get_singleton();
   struct zn_cursor *cursor = server->scene->cursor;
-  float u, v;
+  float u, v, distance;
   double effective_width, effective_height;
   double effective_x, effective_y;
 
-  (void)zns_board_ray_cast(self, origin, direction, &u, &v);
+  distance = zns_board_ray_cast(self, origin, direction, &u, &v);
+
+  if (distance == FLT_MAX) return true;
 
   zn_board_get_effective_size(
       self->zn_board, &effective_width, &effective_height);
@@ -123,25 +125,27 @@ zns_board_node_ray_button(void *user_data, uint32_t time_msec, uint32_t button,
   struct zns_board *self = user_data;
   struct zn_server *server = zn_server_get_singleton();
   struct zn_cursor *cursor = server->scene->cursor;
-  struct wlr_surface *surface;
 
   if (cursor->board == NULL) return true;
 
-  surface = zn_board_get_surface_at(
-      cursor->board, cursor->x, cursor->y, NULL, NULL, NULL);
-
-  if (surface) {
-    enum wlr_button_state wlr_state;
-    if (state == ZGN_RAY_BUTTON_STATE_PRESSED) {
-      wlr_state = WLR_BUTTON_PRESSED;
-    } else {
-      wlr_state = WLR_BUTTON_RELEASED;
+  if (state == ZGN_RAY_BUTTON_STATE_PRESSED && button == BTN_LEFT &&
+      server->input_manager->seat->pressing_button_count == 1) {
+    struct wlr_surface *surface = zn_board_get_surface_at(
+        cursor->board, cursor->x, cursor->y, NULL, NULL, NULL);
+    if (!surface) {
+      zns_board_move_ray_grab_start(server->scene->ray, self);
+      return true;
     }
-
-    cursor->grab->impl->button(cursor->grab, time_msec, button, wlr_state);
-  } else if (state == ZGN_RAY_BUTTON_STATE_PRESSED && button == BTN_LEFT) {
-    zns_board_move_ray_grab_start(server->scene->ray, self);
   }
+
+  enum wlr_button_state wlr_state;
+  if (state == ZGN_RAY_BUTTON_STATE_PRESSED) {
+    wlr_state = WLR_BUTTON_PRESSED;
+  } else {
+    wlr_state = WLR_BUTTON_RELEASED;
+  }
+
+  cursor->grab->impl->button(cursor->grab, time_msec, button, wlr_state);
 
   return true;
 }
