@@ -23,6 +23,7 @@ _zen_srcs = [
   'screen/cursor-grab/down.c',
   'screen/cursor-grab/move.c',
   'screen/cursor-grab/resize.c',
+  'screen/zigzag-layout.c',
 
   'input/binding.c',
   'input/input-device.c',
@@ -42,15 +43,18 @@ _zen_srcs_pub = [
 _zen_deps = [
   cairo_dep,
   cglm_dep,
+  ft_dep,
   gl_dep,
   m_dep,
   pixman_dep,
+  rsvg_dep,
   toml_dep,
   wayland_server_dep,
   wlroots_dep,
   wlr_glew_renderer_dep,
   xkbcommon_dep,
   zen_common_dep,
+  zigzag_dep,
   zgnr_dep,
   znr_remote_dep,
 ]

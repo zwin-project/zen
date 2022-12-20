@@ -100,7 +100,6 @@ zn_screen_create(
   wl_list_init(&self->current_board_destroy_listener.link);
 
   return self;
-
 err:
   return NULL;
 }

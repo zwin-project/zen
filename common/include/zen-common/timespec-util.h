@@ -8,6 +8,16 @@ extern "C" {
 #include <time.h>
 
 #define NSEC_PER_SEC 1000000000
+#define MSEC_PER_MIN 60000
+#define NSEC_PER_MSEC 1000000
+
+static inline long
+current_time_ms(void)
+{
+  struct timespec ts;
+  timespec_get(&ts, TIME_UTC);
+  return (((long)ts.tv_sec) * NSEC_PER_SEC + ts.tv_nsec) / NSEC_PER_MSEC;
+}
 
 /**
  * r = a - b

@@ -114,18 +114,29 @@ wlr_glew_renderer_dep = dependency('wlr-glew-renderer', version: wlr_glew_render
 xkbcommon_dep = dependency('xkbcommon')
 zen_remote_server_dep = dependency('zen-remote-server', version: zen_remote_server_req)
 zigen_protocols_dep = dependency('zigen-protocols', version: zigen_protocols_req)
+zigzag_dep = dependency('zigzag')
+ft_dep = dependency('freetype2')
+rsvg_dep = dependency('librsvg-2.0')
 
 if get_option('cui-client')
   wayland_client_dep = dependency('wayland-client', version: wayland_req)
 endif
 
+icon_files = files(
+  'assets/icon/power-button.svg',
+)
+icon_install_dir = join_paths(datadir, 'icon', 'zen')
+install_data(icon_files, install_dir: icon_install_dir)
+power_button_icon = join_paths(get_option('prefix'), icon_install_dir, 'power-button.svg')
+cdata.set_quoted('POWER_BUTTON_ICON', power_button_icon)
+
 if get_option('default-wallpaper')
   wallpaper_files = files(
-    'assets/Zen_Wallpaper_Dark_3840x2160.png',
-    'assets/Zen_Wallpaper_Gradient_3840x2160.png',
-    'assets/Zen_Wallpaper_Light_3840x2160.png',
-    'assets/Zen_Wallpaper_Main_3840x2160.png',
-    'assets/Zen_Wallpaper_Mosaic_3840x2160.png',
+    'assets/wallpaper/Zen_Wallpaper_Dark_3840x2160.png',
+    'assets/wallpaper/Zen_Wallpaper_Gradient_3840x2160.png',
+    'assets/wallpaper/Zen_Wallpaper_Light_3840x2160.png',
+    'assets/wallpaper/Zen_Wallpaper_Main_3840x2160.png',
+    'assets/wallpaper/Zen_Wallpaper_Mosaic_3840x2160.png',
   )
   wallpaper_install_dir = join_paths(datadir, 'backgrounds', 'zen')
 
