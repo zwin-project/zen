@@ -30,11 +30,11 @@ zn_move_cursor_grab_motion_relative(
   }
 
   zn_cursor_move_relative(grab->cursor, dx, dy);
+  zn_cursor_commit_appearance(grab->cursor);
 
   zn_view_move(self->view, grab->cursor->board, grab->cursor->x + self->diff_x,
       grab->cursor->y + self->diff_y);
-
-  zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
+  zna_view_commit(self->view->appearance, ZNA_VIEW_DAMAGE_GEOMETRY);
 }
 
 static void
@@ -42,10 +42,15 @@ zn_move_cursor_grab_motion_absolute(struct zn_cursor_grab *grab,
     struct zn_board *board, double x, double y, uint32_t time_msec)
 {
   UNUSED(time_msec);
+  struct zn_move_cursor_grab *self = zn_container_of(grab, self, base);
 
   zn_cursor_move(grab->cursor, board, x, y);
+  zn_cursor_commit_appearance(grab->cursor);
 
-  zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
+  zn_view_move(self->view, grab->cursor->board, grab->cursor->x + self->diff_x,
+      grab->cursor->y + self->diff_y);
+
+  zna_view_commit(self->view->appearance, ZNA_VIEW_DAMAGE_GEOMETRY);
 }
 
 static void
@@ -86,7 +91,7 @@ zn_move_cursor_grab_enter(
 {
   zn_cursor_move(grab->cursor, board, x, y);
 
-  zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
+  zn_cursor_commit_appearance(grab->cursor);
 }
 
 void
@@ -94,7 +99,7 @@ zn_move_cursor_grab_leave(struct zn_cursor_grab *grab)
 {
   zn_cursor_move(grab->cursor, NULL, 0, 0);
 
-  zna_cursor_commit(grab->cursor->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
+  zn_cursor_commit_appearance(grab->cursor);
 }
 
 static void
@@ -110,6 +115,7 @@ zn_move_cursor_grab_cancel(struct zn_cursor_grab *grab)
 {
   struct zn_move_cursor_grab *self = zn_container_of(grab, self, base);
   zn_cursor_set_xcursor(self->base.cursor, "left_ptr");
+  zn_cursor_commit_appearance(grab->cursor);
   zn_move_cursor_grab_destroy(self);
 }
 
@@ -196,6 +202,7 @@ zn_move_cursor_grab_start(struct zn_cursor *cursor, struct zn_view *view)
   }
 
   zn_cursor_set_xcursor(cursor, "grabbing");
+  zn_cursor_commit_appearance(cursor);
   wlr_seat_pointer_clear_focus(seat);
   zn_cursor_start_grab(cursor, &self->base);
 }

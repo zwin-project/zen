@@ -13,6 +13,39 @@
 #include "zen/screen/cursor-grab/default.h"
 #include "zen/server.h"
 
+void
+zn_cursor_commit_appearance(struct zn_cursor *self)
+{
+  if (self->appearance_damage != 0) {
+    zna_cursor_commit(self->appearance, self->appearance_damage);
+    self->appearance_damage = 0;
+  }
+}
+
+static void
+zn_cursor_update_geom(struct zn_cursor *self)
+{
+  if (self->board) {
+    struct wlr_fbox cursor_fbox, board_local_cursor_geom;
+
+    zn_cursor_get_fbox(self, &cursor_fbox);
+    zn_board_box_effective_to_local_geom(
+        self->board, &cursor_fbox, &board_local_cursor_geom);
+
+    self->geometry.size[0] = board_local_cursor_geom.width;
+    self->geometry.size[1] = board_local_cursor_geom.height;
+
+    glm_mat4_copy(self->board->geometry.transform, self->geometry.transform);
+    glm_translate(self->geometry.transform,
+        (vec3){board_local_cursor_geom.x, board_local_cursor_geom.y,
+            CURSOR_Z_OFFSET_ON_BOARD});
+  } else {
+    glm_vec2_zero(self->geometry.size);
+    glm_mat4_identity(self->geometry.transform);
+  }
+  self->appearance_damage |= ZNA_CURSOR_DAMAGE_GEOMETRY;
+}
+
 static void
 zn_cursor_handle_board_destroy(struct wl_listener *listener, void *data)
 {
@@ -22,7 +55,7 @@ zn_cursor_handle_board_destroy(struct wl_listener *listener, void *data)
 
   zn_cursor_move(self, NULL, 0, 0);
 
-  zna_cursor_commit(self->appearance, ZNA_CURSOR_DAMAGE_GEOMETRY);
+  zn_cursor_commit_appearance(self);
 
   // TODO: show cursor on another board when screen display system mode
   // TODO: handle the case the board becomes invisible but not destroyed
@@ -48,7 +81,9 @@ zn_cursor_handle_surface_commit(struct wl_listener *listener, void *data)
 
   zn_cursor_damage(self);
 
-  zna_cursor_commit(self->appearance, ZNA_CURSOR_DAMAGE_TEXTURE);
+  zn_cursor_update_geom(self);
+
+  zn_cursor_commit_appearance(self);
 }
 
 static void
@@ -59,6 +94,8 @@ zn_cursor_handle_surface_destroy(struct wl_listener *listener, void *data)
       zn_container_of(listener, self, surface_destroy_listener);
 
   zn_cursor_set_surface(self, NULL, 0, 0);
+
+  zn_cursor_commit_appearance(self);
 }
 
 void
@@ -127,7 +164,10 @@ zn_cursor_set_surface(struct zn_cursor *self, struct wlr_surface *surface,
   self->surface = surface;
 
   zn_cursor_damage(self);
-  zna_cursor_commit(self->appearance, ZNA_CURSOR_DAMAGE_TEXTURE);
+
+  zn_cursor_update_geom(self);
+
+  self->appearance_damage |= ZNA_CURSOR_DAMAGE_TEXTURE;
 }
 
 void
@@ -176,7 +216,10 @@ zn_cursor_set_xcursor(struct zn_cursor *self, const char *name)
   self->xcursor_name = strdup(name);
 
   zn_cursor_damage(self);
-  zna_cursor_commit(self->appearance, ZNA_CURSOR_DAMAGE_TEXTURE);
+
+  zn_cursor_update_geom(self);
+
+  self->appearance_damage |= ZNA_CURSOR_DAMAGE_TEXTURE;
 }
 
 void
@@ -201,24 +244,7 @@ zn_cursor_move(
 
   zn_cursor_damage(self);
 
-  if (self->board) {
-    struct wlr_fbox cursor_fbox, board_local_cursor_geom;
-
-    zn_cursor_get_fbox(self, &cursor_fbox);
-    zn_board_box_effective_to_local_geom(
-        self->board, &cursor_fbox, &board_local_cursor_geom);
-
-    self->geometry.size[0] = board_local_cursor_geom.width;
-    self->geometry.size[1] = board_local_cursor_geom.height;
-
-    glm_mat4_copy(self->board->geometry.transform, self->geometry.transform);
-    glm_translate(self->geometry.transform,
-        (vec3){board_local_cursor_geom.x, board_local_cursor_geom.y,
-            CURSOR_Z_OFFSET_ON_BOARD});
-  } else {
-    glm_vec2_zero(self->geometry.size);
-    glm_mat4_identity(self->geometry.transform);
-  }
+  zn_cursor_update_geom(self);
 }
 
 void

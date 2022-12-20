@@ -3,6 +3,7 @@
 #include <wlr/types/wlr_seat.h>
 #include <zen-common.h>
 
+#include "zen/appearance/cursor.h"
 #include "zen/server.h"
 #include "zen/view.h"
 
@@ -48,6 +49,8 @@ zn_down_cursor_grab_motion_relative(
   zn_cursor_move_relative(grab->cursor, dx, dy);
 
   zn_down_cursor_grab_send_movement(self, time_msec);
+
+  zn_cursor_commit_appearance(grab->cursor);
 }
 
 static void
@@ -59,6 +62,8 @@ zn_down_cursor_grab_motion_absolute(struct zn_cursor_grab *grab,
   zn_cursor_move(grab->cursor, board, x, y);
 
   zn_down_cursor_grab_send_movement(self, time_msec);
+
+  zn_cursor_commit_appearance(grab->cursor);
 }
 
 static void
