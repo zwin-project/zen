@@ -43,6 +43,15 @@ zn_xdg_toplevel_view_impl_set_size(
   return wlr_xdg_toplevel_set_size(self->wlr_xdg_toplevel->base, width, height);
 }
 
+static uint32_t
+zn_xdg_toplevel_view_impl_set_maximized(struct zn_view *view, bool maximized)
+{
+  struct zn_xdg_toplevel *self = view->user_data;
+
+  return wlr_xdg_toplevel_set_maximized(
+      self->wlr_xdg_toplevel->base, maximized);
+}
+
 static void
 zn_xdg_toplevel_view_impl_set_activated(struct zn_view *view, bool activated)
 {
@@ -57,6 +66,7 @@ static const struct zn_view_interface zn_xdg_toplevel_view_impl = {
     .get_current_configure_serial =
         zn_xdg_toplevel_view_impl_get_current_configure_serial,
     .set_size = zn_xdg_toplevel_view_impl_set_size,
+    .set_maximized = zn_xdg_toplevel_view_impl_set_maximized,
     .set_activated = zn_xdg_toplevel_view_impl_set_activated,
 };
 
@@ -80,6 +90,15 @@ zn_xdg_toplevel_view_handle_resize(struct wl_listener *listener, void *data)
   struct zn_server *server = zn_server_get_singleton();
 
   zn_resize_cursor_grab_start(server->scene->cursor, self->view, event->edges);
+}
+
+static void
+zn_xdg_toplevel_view_handle_maximize(struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+  struct zn_xdg_toplevel *self =
+      zn_container_of(listener, self, maximize_listener);
+  zn_view_set_maximized(self->view, !self->view->maximize_status.maximized);
 }
 
 static void
@@ -158,6 +177,9 @@ zn_xdg_toplevel_create(struct wlr_xdg_toplevel *toplevel)
   self->resize_listener.notify = zn_xdg_toplevel_view_handle_resize;
   wl_signal_add(&toplevel->events.request_resize, &self->resize_listener);
 
+  self->maximize_listener.notify = zn_xdg_toplevel_view_handle_maximize;
+  wl_signal_add(&toplevel->events.request_maximize, &self->maximize_listener);
+
   return self;
 
 err:
@@ -171,6 +193,7 @@ zn_xdg_toplevel_destroy(struct zn_xdg_toplevel *self)
   wl_list_remove(&self->map_listener.link);
   wl_list_remove(&self->move_listener.link);
   wl_list_remove(&self->resize_listener.link);
+  wl_list_remove(&self->maximize_listener.link);
   wl_list_remove(&self->wlr_xdg_surface_destroy_listener.link);
   if (self->view) zn_view_destroy(self->view);
   free(self);

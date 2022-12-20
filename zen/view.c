@@ -50,12 +50,28 @@ zn_view_handle_commit(struct wl_listener *listener, void *data)
   wlr_surface_get_effective_damage(self->surface, &damage);
   rects = pixman_region32_rectangles(&damage, &rect_count);
 
-  for (int i = 0; i < rect_count; ++i) {
-    damage_box.x = surface_box.x + rects[i].x1;
-    damage_box.y = surface_box.y + rects[i].y1;
-    damage_box.width = rects[i].x2 - rects[i].x1;
-    damage_box.height = rects[i].y2 - rects[i].y1;
+  struct wlr_box window_geom;
+  self->impl->get_window_geom(self, &window_geom);
+
+  // geometry was changed
+  if (self->prev_surface_fbox.x != window_geom.x ||
+      self->prev_surface_fbox.y != window_geom.y) {
+    damage_box = self->prev_surface_fbox;
+    damage_box.x += self->x;
+    damage_box.y += self->y;
     zn_view_add_damage_fbox(self, &damage_box);
+
+    // add damage with *updated* surface box
+    zn_view_get_surface_fbox(self, &damage_box);
+    zn_view_add_damage_fbox(self, &damage_box);
+  } else {
+    for (int i = 0; i < rect_count; ++i) {
+      damage_box.x = surface_box.x + rects[i].x1;
+      damage_box.y = surface_box.y + rects[i].y1;
+      damage_box.width = rects[i].x2 - rects[i].x1;
+      damage_box.height = rects[i].y2 - rects[i].y1;
+      zn_view_add_damage_fbox(self, &damage_box);
+    }
   }
 
   if (pixman_region32_not_empty(&damage)) {
@@ -67,28 +83,39 @@ zn_view_handle_commit(struct wl_listener *listener, void *data)
 
   // FIXME: add damages of synced subsurfaces
 
-  if (!self->resize_status.resizing) {
-    return;
+  const uint32_t last_serial = self->impl->get_current_configure_serial(self);
+
+  if (self->maximize_status.changed_serial == last_serial) {
+    self->maximize_status.changed_serial = 0;
+    if (self->maximize_status.maximized) {
+      zn_view_move(self, self->board, 0, 0);
+    } else {
+      zn_view_move(self, self->board, self->maximize_status.reset_box.x,
+          self->maximize_status.reset_box.y);
+    }
   }
 
-  if (!(self->resize_status.edges & (WLR_EDGE_LEFT | WLR_EDGE_TOP))) {
-    return;
+  if (self->resize_status.resizing &&
+      self->resize_status.edges & (WLR_EDGE_LEFT | WLR_EDGE_TOP)) {
+    struct wlr_surface *surface = data;
+    int dx = 0, dy = 0;
+    if (self->resize_status.edges & WLR_EDGE_LEFT) {
+      dx = surface->previous.width - surface->current.width;
+    }
+    if (self->resize_status.edges & WLR_EDGE_TOP) {
+      dy = surface->previous.height - surface->current.height;
+    }
+    zn_view_move(self, self->board, self->x + dx, self->y + dy);
+
+    if (self->resize_status.last_serial == last_serial) {
+      self->resize_status.resizing = false;
+    }
   }
 
-  struct wlr_surface *surface = data;
-  int dx = 0, dy = 0;
-  if (self->resize_status.edges & WLR_EDGE_LEFT) {
-    dx = surface->previous.width - surface->current.width;
-  }
-  if (self->resize_status.edges & WLR_EDGE_TOP) {
-    dy = surface->previous.height - surface->current.height;
-  }
-  zn_view_move(self, self->board, self->x + dx, self->y + dy);
-
-  if (self->impl->get_current_configure_serial(self) ==
-      self->resize_status.last_serial) {
-    self->resize_status.resizing = false;
-  }
+  self->prev_surface_fbox.x = window_geom.x;
+  self->prev_surface_fbox.y = window_geom.y;
+  self->prev_surface_fbox.width = surface_box.width;
+  self->prev_surface_fbox.height = surface_box.height;
 }
 
 static void
@@ -185,6 +212,31 @@ zn_view_move(struct zn_view *self, struct zn_board *board, double x, double y)
     glm_mat4_identity(self->geometry.transform);
     glm_vec2_zero(self->geometry.size);
   }
+}
+
+void
+zn_view_set_maximized(struct zn_view *self, bool maximized)
+{
+  if (!self->board) {
+    return;
+  }
+  if (self->maximize_status.maximized == maximized) {
+    return;
+  }
+
+  double width, height;
+  if (maximized) {
+    zn_view_get_view_fbox(self, &self->maximize_status.reset_box);
+    zn_board_get_effective_size(self->board, &width, &height);
+  } else {
+    width = self->maximize_status.reset_box.width;
+    height = self->maximize_status.reset_box.height;
+  }
+
+  self->impl->set_maximized(self, maximized);
+  self->maximize_status.changed_serial =
+      self->impl->set_size(self, width, height);
+  self->maximize_status.maximized = maximized;
 }
 
 struct zn_view *
