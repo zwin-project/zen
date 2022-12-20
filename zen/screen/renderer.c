@@ -1,6 +1,7 @@
 #include "zen/screen/renderer.h"
 
 #include <wlr/types/wlr_matrix.h>
+#include <zen-common.h>
 
 #include "zen/board.h"
 #include "zen/cursor.h"
@@ -57,6 +58,8 @@ get_wallpaper_projection_matrix(struct wlr_output *output,
     box.height = wallpaper->height * output_width / wallpaper->width;
     box.y = (output_height - box.height) / 2;
   }
+  zn_error("Box: x = %d, y = %d, width = %d, height = %d", box.x, box.y,
+      box.width, box.height);
   wlr_matrix_project_box(
       matrix, &box, WL_OUTPUT_TRANSFORM_NORMAL, 0, output->transform_matrix);
 }
@@ -155,6 +158,30 @@ render_view(struct zn_output *output, struct zn_view *view,
   }
 }
 
+static void
+render_zigzag_nodes(struct zn_output *output, struct wlr_renderer *renderer,
+    struct wl_list *nodes, pixman_region32_t *screen_damage)
+{
+  struct zigzag_node *node;
+  wl_list_for_each (node, nodes, link) {
+    float matrix[9];
+    wlr_matrix_project_box(matrix, node->frame, WL_OUTPUT_TRANSFORM_NORMAL, 0,
+        output->wlr_output->transform_matrix);
+    int rect_count;
+    pixman_box32_t *rects =
+        pixman_region32_rectangles(screen_damage, &rect_count);
+
+    for (int i = 0; i < rect_count; i++) {
+      zn_error("Render a rect");
+      zn_error("x1: %d, y1: %d, x2: %d, y2: %d", rects[i].x1, rects[i].y1,
+          rects[i].x2, rects[i].y2);
+      scissor_output(output, &rects[i]);
+      wlr_render_texture_with_matrix(renderer, node->texture, matrix, 1.0f);
+    }
+    render_zigzag_nodes(output, renderer, &node->children, screen_damage);
+  }
+}
+
 void
 zn_screen_renderer_render(struct zn_output *output,
     struct wlr_renderer *renderer, pixman_region32_t *damage)
@@ -184,6 +211,9 @@ zn_screen_renderer_render(struct zn_output *output,
     struct zn_view *view;
     wl_list_for_each (view, &board->view_list, board_link)
       render_view(output, view, renderer, &screen_damage);
+
+    render_zigzag_nodes(
+        output, renderer, &output->node_layout->nodes, &screen_damage);
   }
 
   render_cursor(output, server->scene->cursor, renderer, &screen_damage);

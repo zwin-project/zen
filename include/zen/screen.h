@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wlr/util/box.h>
+#include <zigzag.h>
 
 struct zn_screen;
 struct zn_board;

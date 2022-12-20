@@ -3,6 +3,7 @@
 #include <wayland-server-core.h>
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_damage.h>
+#include <zigzag.h>
 
 #include "zen/screen.h"
 
@@ -14,8 +15,13 @@ struct zn_output {
 
   struct zn_screen *screen;  // nonnull, owning
 
+  struct zigzag_layout *node_layout;  // nonnull, owning
+
   struct wl_listener wlr_output_destroy_listener;
   struct wl_listener damage_frame_listener;
+  struct wl_event_source *minute_timer_source;
+  long next_min_ms;
+  struct zigzag_node *power_button;
 };
 
 void zn_output_box_effective_to_transformed_coords(struct zn_output *self,
