@@ -72,7 +72,7 @@ zns_board_move_ray_grab_motion_relative(struct zn_ray_grab *grab_base,
     struct zn_view *view;
     wl_list_for_each (view, &zn_board->view_list, board_link) {
       zn_view_move(view, zn_board, view->x, view->y);
-      zna_view_commit(view->appearance, ZNA_VIEW_DAMAGE_GEOMETRY);
+      zn_view_commit_appearance(view);
     }
   }
 

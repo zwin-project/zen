@@ -10,23 +10,14 @@
 static void zn_resize_cursor_grab_destroy(struct zn_resize_cursor_grab *self);
 
 static void
-zn_resize_cursor_grab_motion_relative(
-    struct zn_cursor_grab *grab, double dx, double dy, uint32_t time_msec)
+zn_resize_cursor_grab_set_view_size(struct zn_resize_cursor_grab *self)
 {
-  UNUSED(time_msec);
-  struct zn_resize_cursor_grab *self = zn_container_of(grab, self, base);
-
-  zn_cursor_move_relative(grab->cursor, dx, dy);
-  zn_cursor_commit_appearance(grab->cursor);
-
-  if (self->view->board != grab->cursor->board) {
-    return;
-  }
+  if (self->view->board != self->base.cursor->board) return;
 
   double width = self->init_view_width;
   double height = self->init_view_height;
-  const double diff_width = grab->cursor->x - self->init_cursor_x;
-  const double diff_height = grab->cursor->y - self->init_cursor_y;
+  const double diff_width = self->base.cursor->x - self->init_cursor_x;
+  const double diff_height = self->base.cursor->y - self->init_cursor_y;
 
   if (self->view->resize_status.edges & WLR_EDGE_LEFT) {
     width -= diff_width;
@@ -47,14 +38,29 @@ zn_resize_cursor_grab_motion_relative(
 }
 
 static void
+zn_resize_cursor_grab_motion_relative(
+    struct zn_cursor_grab *grab, double dx, double dy, uint32_t time_msec)
+{
+  UNUSED(time_msec);
+  struct zn_resize_cursor_grab *self = zn_container_of(grab, self, base);
+
+  zn_cursor_move_relative(grab->cursor, dx, dy);
+  zn_cursor_commit_appearance(grab->cursor);
+
+  zn_resize_cursor_grab_set_view_size(self);
+}
+
+static void
 zn_resize_cursor_grab_motion_absolute(struct zn_cursor_grab *grab,
     struct zn_board *board, double x, double y, uint32_t time_msec)
 {
   UNUSED(time_msec);
+  struct zn_resize_cursor_grab *self = zn_container_of(grab, self, base);
 
   zn_cursor_move(grab->cursor, board, x, y);
-
   zn_cursor_commit_appearance(grab->cursor);
+
+  zn_resize_cursor_grab_set_view_size(self);
 }
 
 static void

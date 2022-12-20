@@ -34,7 +34,8 @@ zn_move_cursor_grab_motion_relative(
 
   zn_view_move(self->view, grab->cursor->board, grab->cursor->x + self->diff_x,
       grab->cursor->y + self->diff_y);
-  zna_view_commit(self->view->appearance, ZNA_VIEW_DAMAGE_GEOMETRY);
+
+  zn_view_commit_appearance(self->view);
 }
 
 static void
@@ -50,7 +51,7 @@ zn_move_cursor_grab_motion_absolute(struct zn_cursor_grab *grab,
   zn_view_move(self->view, grab->cursor->board, grab->cursor->x + self->diff_x,
       grab->cursor->y + self->diff_y);
 
-  zna_view_commit(self->view->appearance, ZNA_VIEW_DAMAGE_GEOMETRY);
+  zn_view_commit_appearance(self->view);
 }
 
 static void

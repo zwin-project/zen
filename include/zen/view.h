@@ -61,8 +61,11 @@ struct zn_view {
   struct wl_listener board_destroy_listener;
   struct wl_listener commit_listener;
 
-  struct zna_view *appearance;
+  struct zna_view *_appearance;  // be private
+  uint32_t appearance_damage;
 };
+
+void zn_view_commit_appearance(struct zn_view *self);
 
 void zn_view_get_surface_fbox(struct zn_view *self, struct wlr_fbox *fbox);
 
@@ -71,7 +74,7 @@ void zn_view_get_view_fbox(struct zn_view *self, struct wlr_fbox *fbox);
 void zn_view_bring_to_front(struct zn_view *self);
 
 void zn_view_move(
-    struct zn_view *view, struct zn_board *board, double x, double y);
+    struct zn_view *self, struct zn_board *board, double x, double y);
 
 void zn_view_set_maximized(struct zn_view *self, bool maximized);
 

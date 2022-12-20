@@ -100,7 +100,7 @@ zn_scene_new_view(struct zn_scene *self, struct zn_view *view)
 
   zn_scene_set_focused_view(self, view);
 
-  zna_view_commit(view->appearance, ZNA_VIEW_DAMAGE_GEOMETRY);
+  zn_view_commit_appearance(view);
 }
 
 void
