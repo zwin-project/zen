@@ -16,6 +16,19 @@ zn_move_cursor_grab_motion_relative(
   UNUSED(time_msec);
   struct zn_move_cursor_grab *self = zn_container_of(grab, self, base);
 
+  if (self->view->maximize_status.maximized) {
+    struct wlr_fbox view_fbox;
+    zn_view_get_view_fbox(self->view, &view_fbox);
+    // calculate relative pos
+    self->view->maximize_status.reset_box.x =
+        grab->cursor->x - (self->view->maximize_status.reset_box.width *
+                              (grab->cursor->x / view_fbox.width));
+    self->view->maximize_status.reset_box.y = grab->cursor->y + self->diff_y;
+    self->diff_x = self->view->maximize_status.reset_box.x - grab->cursor->x;
+    self->diff_y = self->view->maximize_status.reset_box.y - grab->cursor->y;
+    zn_view_set_maximized(self->view, false);
+  }
+
   zn_cursor_move_relative(grab->cursor, dx, dy);
 
   zn_view_move(self->view, grab->cursor->board, grab->cursor->x + self->diff_x,
