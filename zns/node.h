@@ -22,19 +22,19 @@ struct zns_node_interface {
   /**
    * @return false to pass the event to the parent node
    */
-  bool (*ray_enter)(void *user_data, uint32_t serial, vec3 origin,
-      vec3 direction, mat4 transform);
+  bool (*ray_enter)(
+      void *user_data, vec3 origin, vec3 direction, mat4 transform);
 
   /**
    * @return false to pass the event to the parent node
    */
-  bool (*ray_leave)(void *user_data, uint32_t serial, mat4 transform);
+  bool (*ray_leave)(void *user_data, mat4 transform);
 
   /**
    * @return false to pass the event to the parent node
    */
-  bool (*ray_button)(void *user_data, uint32_t serial, uint32_t time_msec,
-      uint32_t button, enum zgn_ray_button_state state, mat4 transform);
+  bool (*ray_button)(void *user_data, uint32_t time_msec, uint32_t button,
+      enum zgn_ray_button_state state, mat4 transform);
 };
 
 struct zns_node {
@@ -65,13 +65,12 @@ struct zns_node *zns_node_ray_cast(struct zns_node *self, vec3 origin,
 void zns_node_ray_motion(
     struct zns_node *self, vec3 origin, vec3 direction, uint32_t time_msec);
 
-void zns_node_ray_enter(
-    struct zns_node *self, uint32_t serial, vec3 origin, vec3 direction);
+void zns_node_ray_enter(struct zns_node *self, vec3 origin, vec3 direction);
 
-void zns_node_ray_leave(struct zns_node *self, uint32_t serial);
+void zns_node_ray_leave(struct zns_node *self);
 
-void zns_node_ray_button(struct zns_node *self, uint32_t serial,
-    uint32_t time_msec, uint32_t button, enum zgn_ray_button_state state);
+void zns_node_ray_button(struct zns_node *self, uint32_t time_msec,
+    uint32_t button, enum zgn_ray_button_state state);
 
 /**
  * @param parent can be null only for root node

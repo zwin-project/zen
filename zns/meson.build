@@ -10,6 +10,7 @@ _zen_shell_srcs = [
 
   'ray-grab/board-move.c',
   'ray-grab/default.c',
+  'ray-grab/down.c',
   'ray-grab/move.c',
 ]
 

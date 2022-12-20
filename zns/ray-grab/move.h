@@ -15,4 +15,4 @@ struct zns_move_ray_grab {
 /**
  * @param bounded is nonnull
  */
-struct zns_move_ray_grab *zns_move_ray_grab_create(struct zns_bounded *bounded);
+void zns_move_ray_grab_start(struct zn_ray *ray, struct zns_bounded *bounded);
