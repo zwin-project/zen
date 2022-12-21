@@ -13,17 +13,22 @@ zna_board_plane_unit_commit(struct zna_board_plane_unit *self,
 
   float scale_x = board->geometry.size[0];
   float scale_y = board->geometry.size[1];
+  double width, height;
+  vec2 effective_resolution;
 
   mat4 local_model = GLM_MAT4_IDENTITY_INIT;
 
   glm_mat4_copy(board->geometry.transform, local_model);
   glm_scale(local_model, (vec3){scale_x, scale_y, 1});
+  zn_board_get_effective_size(board, &width, &height);
+  effective_resolution[0] = width;
+  effective_resolution[1] = height;
 
+  znr_gl_base_technique_gl_uniform_vector(self->base_unit->technique, 0,
+      "effective_resolution", ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_FLOAT,
+      2, 1, effective_resolution);
   znr_gl_base_technique_gl_uniform_matrix(self->base_unit->technique, 0,
       "local_model", 4, 4, 1, false, local_model[0]);
-  znr_gl_base_technique_gl_uniform_vector(self->base_unit->technique, 0,
-      "color", ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_FLOAT, 3, 1,
-      board->color);
 
   znr_virtual_object_commit(virtual_object);
 }

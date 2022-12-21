@@ -18,8 +18,6 @@ struct zn_board {
 
   struct wl_list view_list;  // zn_view::board_link, sorted from back to front
 
-  float color[3];  // FIXME: debugging purpose, remove me later
-
   struct {
     mat4 transform;  // translation and rotation only
     vec2 size;

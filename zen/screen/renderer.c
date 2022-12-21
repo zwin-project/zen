@@ -65,18 +65,11 @@ void
 render_background(struct zn_output *output, struct wlr_renderer *renderer,
     struct wlr_texture *wallpaper, pixman_region32_t *screen_damage)
 {
-  struct zn_server *server = zn_server_get_singleton();
   pixman_box32_t *rects;
   int rect_count;
   float matrix[9];
 
   float default_color[4] = {0.0f, 0.0f, 0.0f, 1.0f};
-  if (output->screen->board &&
-      server->display_system == ZN_DISPLAY_SYSTEM_SCREEN) {
-    default_color[0] = output->screen->board->color[0];
-    default_color[1] = output->screen->board->color[1];
-    default_color[2] = output->screen->board->color[2];
-  }
 
   if (wallpaper != NULL)
     get_wallpaper_projection_matrix(output->wlr_output, wallpaper, matrix);

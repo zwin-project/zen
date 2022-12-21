@@ -158,9 +158,6 @@ zn_board_create(void)
   wl_signal_init(&self->events.destroy);
 
   clock_gettime(CLOCK_MONOTONIC, &time);
-  self->color[0] = (float)(time.tv_nsec % 255) / 255.f;
-  self->color[1] = (float)(time.tv_nsec % 254) / 254.f;
-  self->color[2] = (float)(time.tv_nsec % 253) / 253.f;
 
   glm_mat4_identity(self->geometry.transform);
 
