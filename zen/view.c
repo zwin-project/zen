@@ -112,8 +112,8 @@ zn_view_handle_commit(struct wl_listener *listener, void *data)
     }
   }
 
-  self->prev_surface_fbox.x = window_geom.x;
-  self->prev_surface_fbox.y = window_geom.y;
+  self->prev_surface_fbox.x = -window_geom.x;
+  self->prev_surface_fbox.y = -window_geom.y;
   self->prev_surface_fbox.width = surface_box.width;
   self->prev_surface_fbox.height = surface_box.height;
 }
