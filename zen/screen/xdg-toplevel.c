@@ -46,10 +46,11 @@ zn_xdg_toplevel_view_impl_set_size(
 static uint32_t
 zn_xdg_toplevel_view_impl_set_maximized(struct zn_view *view, bool maximized)
 {
+  UNUSED(maximized);
   struct zn_xdg_toplevel *self = view->user_data;
 
-  return wlr_xdg_toplevel_set_maximized(
-      self->wlr_xdg_toplevel->base, maximized);
+  return wlr_xdg_toplevel_set_maximized(self->wlr_xdg_toplevel->base,
+      self->wlr_xdg_toplevel->requested.maximized);
 }
 
 static void
@@ -60,6 +61,14 @@ zn_xdg_toplevel_view_impl_set_activated(struct zn_view *view, bool activated)
   wlr_xdg_toplevel_set_activated(self->wlr_xdg_toplevel->base, activated);
 }
 
+static uint32_t
+zn_xdg_toplevel_view_impl_schedule_configure(struct zn_view *view)
+{
+  struct zn_xdg_toplevel *self = view->user_data;
+
+  return wlr_xdg_surface_schedule_configure(self->wlr_xdg_toplevel->base);
+}
+
 static const struct zn_view_interface zn_xdg_toplevel_view_impl = {
     .get_wlr_surface_at = zn_xdg_toplevel_view_impl_get_wlr_surface_at,
     .get_window_geom = zn_xdg_toplevel_view_impl_get_window_geom,
@@ -68,6 +77,7 @@ static const struct zn_view_interface zn_xdg_toplevel_view_impl = {
     .set_size = zn_xdg_toplevel_view_impl_set_size,
     .set_maximized = zn_xdg_toplevel_view_impl_set_maximized,
     .set_activated = zn_xdg_toplevel_view_impl_set_activated,
+    .schedule_configure = zn_xdg_toplevel_view_impl_schedule_configure,
 };
 
 static void
