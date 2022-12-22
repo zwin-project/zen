@@ -54,8 +54,8 @@ zn_view_handle_commit(struct wl_listener *listener, void *data)
   self->impl->get_window_geom(self, &window_geom);
 
   // geometry was changed
-  if (self->prev_surface_fbox.x != window_geom.x ||
-      self->prev_surface_fbox.y != window_geom.y) {
+  if (self->prev_surface_fbox.x != -window_geom.x ||
+      self->prev_surface_fbox.y != -window_geom.y) {
     damage_box = self->prev_surface_fbox;
     damage_box.x += self->x;
     damage_box.y += self->y;
