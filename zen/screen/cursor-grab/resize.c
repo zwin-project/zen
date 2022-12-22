@@ -187,10 +187,6 @@ void
 zn_resize_cursor_grab_start(
     struct zn_cursor *cursor, struct zn_view *view, uint32_t edges)
 {
-  if (view->maximize_status.maximized) {
-    return;
-  }
-
   struct zn_server *server = zn_server_get_singleton();
   struct wlr_seat *seat = server->input_manager->seat->wlr_seat;
 
