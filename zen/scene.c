@@ -106,6 +106,9 @@ zn_scene_new_view(struct zn_scene *self, struct zn_view *view)
 void
 zn_scene_set_focused_view(struct zn_scene *self, struct zn_view *view)
 {
+  struct zn_server *server = zn_server_get_singleton();
+  struct wlr_seat *seat = server->input_manager->seat->wlr_seat;
+
   if (view == self->focused_view) {
     return;
   }
@@ -114,13 +117,18 @@ zn_scene_set_focused_view(struct zn_scene *self, struct zn_view *view)
     self->focused_view->impl->set_activated(self->focused_view, false);
     wl_list_remove(&self->focused_view_destroy_listener.link);
     wl_list_init(&self->focused_view_destroy_listener.link);
+
+    wlr_seat_keyboard_notify_clear_focus(seat);
   }
 
   if (view != NULL) {
     view->impl->set_activated(view, true);
     wl_signal_add(&view->events.destroy, &self->focused_view_destroy_listener);
     zn_view_bring_to_front(view);
-    // TODO: enter seat_keyboard
+
+    struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(seat);
+    wlr_seat_keyboard_notify_enter(seat, view->surface, keyboard->keycodes,
+        keyboard->num_keycodes, &keyboard->modifiers);
   }
 
   self->focused_view = view;
