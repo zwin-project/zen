@@ -1,7 +1,7 @@
 _zen_srcs = [
   'board.c',
   'cursor.c',
-  'data_device_manager.c',
+  'data-device-manager.c',
   'ray.c',
   'scene.c',
   'screen.c',
