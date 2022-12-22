@@ -18,6 +18,7 @@ struct zn_view_interface {
   uint32_t (*set_size)(struct zn_view *view, double width, double height);
   uint32_t (*set_maximized)(struct zn_view *view, bool maximized);
   void (*set_activated)(struct zn_view *view, bool activated);
+  uint32_t (*schedule_configure)(struct zn_view *view);
 };
 
 /** lifetime of given wlr_surface must be longer than zn_view */
