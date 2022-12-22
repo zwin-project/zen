@@ -19,7 +19,10 @@ zn_data_device_manager_create(struct wl_display *display)
     goto err_free;
   }
 
-  wlr_primary_selection_v1_device_manager_create(display);
+  if (!wlr_primary_selection_v1_device_manager_create(display)) {
+    zn_error("Failed to create wlr_primary_selection_v1_device_manager");
+    goto err_free;
+  }
 
   return self;
 
