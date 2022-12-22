@@ -107,7 +107,8 @@ zn_xdg_toplevel_view_handle_maximize(struct wl_listener *listener, void *data)
   UNUSED(data);
   struct zn_xdg_toplevel *self =
       zn_container_of(listener, self, maximize_listener);
-  zn_view_set_maximized(self->view, !self->view->maximize_status.maximized);
+  zn_view_set_maximized(
+      self->view, self->wlr_xdg_toplevel->requested.maximized);
 }
 
 static void
