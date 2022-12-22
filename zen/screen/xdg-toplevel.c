@@ -46,11 +46,10 @@ zn_xdg_toplevel_view_impl_set_size(
 static uint32_t
 zn_xdg_toplevel_view_impl_set_maximized(struct zn_view *view, bool maximized)
 {
-  UNUSED(maximized);
   struct zn_xdg_toplevel *self = view->user_data;
 
-  return wlr_xdg_toplevel_set_maximized(self->wlr_xdg_toplevel->base,
-      self->wlr_xdg_toplevel->requested.maximized);
+  return wlr_xdg_toplevel_set_maximized(
+      self->wlr_xdg_toplevel->base, maximized);
 }
 
 static void
