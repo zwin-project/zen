@@ -1,4 +1,4 @@
-#include "zen/data_device_manager.h"
+#include "zen/data-device-manager.h"
 
 #include <wlr/types/wlr_primary_selection_v1.h>
 #include <zen-common.h>

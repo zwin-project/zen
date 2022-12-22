@@ -9,7 +9,7 @@
 
 #include "zen/appearance/system.h"
 #include "zen/config/config.h"
-#include "zen/data_device_manager.h"
+#include "zen/data-device-manager.h"
 #include "zen/input/input-manager.h"
 #include "zen/scene.h"
 #include "zen/screen/compositor.h"
