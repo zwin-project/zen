@@ -21,15 +21,10 @@ zn_scene_handle_focused_view_destroy(struct wl_listener *listener, void *data)
   zn_scene_set_focused_view(self, NULL);
 }
 
-static struct zn_board *
-zn_scene_ensure_dangling_board(struct zn_scene *self)
+struct zn_board *
+zn_scene_create_new_board(struct zn_scene *self)
 {
-  struct zn_board *board;
-  wl_list_for_each (board, &self->board_list, link) {
-    if (zn_board_is_dangling(board)) return board;
-  }
-
-  board = zn_board_create();
+  struct zn_board *board = zn_board_create();
 
   wl_list_insert(&self->board_list, &board->link);
 
@@ -44,10 +39,19 @@ zn_scene_new_screen(struct zn_scene *self, struct zn_screen *screen)
   zn_screen_layout_add(self->screen_layout, screen);
   struct zn_server *server = zn_server_get_singleton();
 
-  struct zn_board *board = zn_scene_ensure_dangling_board(self);
+  struct zn_board *board;
+  wl_list_for_each (board, &self->board_list, link) {
+    if (zn_board_is_dangling(board)) {
+      zn_board_set_screen(board, screen);
+    }
+  }
 
-  zn_board_set_screen(board, screen);
-  screen->current_board = board;
+  if (wl_list_length(&screen->board_list) == 0) {
+    board = zn_scene_create_new_board(self);
+    zn_board_set_screen(board, screen);
+  }
+
+  zn_screen_set_current_board(screen, board);
 
   if (server->display_system == ZN_DISPLAY_SYSTEM_SCREEN &&
       zn_screen_layout_screen_count(self->screen_layout) == 1) {

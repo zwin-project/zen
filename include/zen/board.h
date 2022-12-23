@@ -14,7 +14,10 @@ struct zn_view;
 struct zn_board {
   struct wl_list link;  // zn_scene::board_list
 
-  struct zn_screen *screen;  // nullable
+  struct wl_list screen_link;  // zn_screen::board_list
+
+  // nonnull when the screen exists
+  struct zn_screen *screen;
 
   struct wl_list view_list;  // zn_view::board_link, sorted from back to front
 

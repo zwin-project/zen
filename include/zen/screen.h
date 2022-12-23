@@ -22,9 +22,14 @@ struct zn_screen {
 
   struct wl_list link;  // zn_screen_layout::screen_list
 
+  // inserted by zn_board
+  struct wl_list board_list;  // zn_board::screen_link
+
   // nonnull when screen display system and mapped to zn_scene
-  // controlled by zn_scene, if not null, this->board->screen == this
+  // if not null, this->board->screen == this
   struct zn_board *current_board;
+
+  struct wl_listener current_board_destroy_listener;
 
   struct {
     struct wl_signal destroy;  // (NULL)
@@ -52,6 +57,9 @@ void zn_screen_get_screen_layout_coords(
 
 void zn_screen_get_effective_size(
     struct zn_screen *self, double *width, double *height);
+
+void zn_screen_set_current_board(
+    struct zn_screen *self, struct zn_board *board);
 
 struct zn_screen *zn_screen_create(
     const struct zn_screen_interface *implementation, void *user_data);
