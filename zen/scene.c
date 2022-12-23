@@ -95,9 +95,12 @@ zn_scene_new_view(struct zn_scene *self, struct zn_view *view)
 {
   wl_list_insert(&self->view_list, &view->link);
 
-  if (wl_list_empty(&self->board_list)) return;
+  struct zn_board *board = self->cursor->board;
 
-  struct zn_board *board = zn_container_of(self->board_list.next, board, link);
+  if (!board) {
+    if (wl_list_empty(&self->board_list)) return;
+    board = zn_container_of(self->board_list.next, board, link);
+  }
 
   struct wlr_fbox view_fbox;
   double board_width, board_height;
