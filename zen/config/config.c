@@ -6,8 +6,8 @@
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 
-#define MAX_BOARD_INITIAL_COUNT 5
-#define DEFAULT_BOARD_INITIAL_COUNT 0
+#define BOARD_INITIAL_COUNT_MAX 5
+#define BOARD_INITIAL_COUNT_DEFAULT 0
 
 static void
 zn_config_set_default(struct zn_config *self)
@@ -15,7 +15,7 @@ zn_config_set_default(struct zn_config *self)
   // It is freed in zen_config_destroy so DEFAULT_WALLPAPER
   // should not be passed directly.
   self->wallpaper_filepath = strdup(DEFAULT_WALLPAPER);
-  self->board_initial_count = DEFAULT_BOARD_INITIAL_COUNT;
+  self->board_initial_count = BOARD_INITIAL_COUNT_DEFAULT;
 }
 
 struct zn_config *
@@ -48,12 +48,12 @@ zn_config_create(struct toml_table_t *config_table)
     toml_datum_t initial_count = toml_int_in(board, "initial_count");
     if (initial_count.ok) {
       self->board_initial_count = initial_count.u.i;
-      if (self->board_initial_count > MAX_BOARD_INITIAL_COUNT) {
+      if (self->board_initial_count > BOARD_INITIAL_COUNT_MAX) {
         zn_warn(
             "The number of the board is limited to less than %d, "
             "but requested %ld",
-            MAX_BOARD_INITIAL_COUNT, self->board_initial_count);
-        self->board_initial_count = MAX_BOARD_INITIAL_COUNT;
+            BOARD_INITIAL_COUNT_MAX, self->board_initial_count);
+        self->board_initial_count = BOARD_INITIAL_COUNT_MAX;
       }
     }
   }
