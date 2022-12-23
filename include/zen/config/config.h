@@ -4,6 +4,7 @@
 
 struct zn_config {
   char *wallpaper_filepath;  // can be empty string but cannot be null
+  int64_t board_initial_count;
 };
 
 struct zn_config *zn_config_create(struct toml_table_t *config_table);

@@ -38,11 +38,15 @@ zn_scene_new_screen(struct zn_scene *self, struct zn_screen *screen)
 {
   zn_screen_layout_add(self->screen_layout, screen);
   struct zn_server *server = zn_server_get_singleton();
+  struct zn_board *board = NULL;
 
-  struct zn_board *board;
-  wl_list_for_each (board, &self->board_list, link) {
-    if (zn_board_is_dangling(board)) {
-      zn_board_set_screen(board, screen);
+  struct zn_board *board_iter = NULL;
+  wl_list_for_each (board_iter, &self->board_list, link) {
+    if (zn_board_is_dangling(board_iter)) {
+      if (!board) {
+        board = board_iter;
+      }
+      zn_board_set_screen(board_iter, screen);
     }
   }
 
