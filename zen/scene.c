@@ -47,7 +47,7 @@ zn_scene_new_screen(struct zn_scene *self, struct zn_screen *screen)
   struct zn_board *board = zn_scene_ensure_dangling_board(self);
 
   zn_board_set_screen(board, screen);
-  screen->board = board;
+  screen->current_board = board;
 
   if (server->display_system == ZN_DISPLAY_SYSTEM_SCREEN &&
       zn_screen_layout_screen_count(self->screen_layout) == 1) {

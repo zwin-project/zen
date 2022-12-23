@@ -24,7 +24,7 @@ struct zn_screen {
 
   // nonnull when screen display system and mapped to zn_scene
   // controlled by zn_scene, if not null, this->board->screen == this
-  struct zn_board *board;
+  struct zn_board *current_board;
 
   struct {
     struct wl_signal destroy;  // (NULL)
