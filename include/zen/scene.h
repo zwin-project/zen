@@ -3,6 +3,7 @@
 #include <wayland-server-core.h>
 #include <wlr/render/wlr_texture.h>
 
+struct zn_board;
 struct zn_screen;
 struct zn_screen_layout;
 struct zn_ray;
@@ -26,6 +27,8 @@ struct zn_scene {
 
   struct wlr_texture *wallpaper;  // nullable
 };
+
+struct zn_board *zn_scene_create_new_board(struct zn_scene *self);
 
 void zn_scene_new_screen(struct zn_scene *self, struct zn_screen *screen);
 

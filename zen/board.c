@@ -7,6 +7,7 @@
 #include <zen-common.h>
 
 #include "zen/appearance/board.h"
+#include "zen/screen-layout.h"
 #include "zen/screen.h"
 #include "zen/server.h"
 #include "zen/view.h"
@@ -110,13 +111,23 @@ zn_board_handle_screen_destroy(struct wl_listener *listener, void *data)
 void
 zn_board_set_screen(struct zn_board *self, struct zn_screen *screen)
 {
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_screen_layout *screen_layout = server->scene->screen_layout;
+
   if (self->screen) {
     wl_list_remove(&self->screen_destroy_listener.link);
     wl_list_init(&self->screen_destroy_listener.link);
+    wl_list_remove(&self->screen_link);
+    wl_list_init(&self->screen_link);
+  }
+
+  if (!screen && wl_list_length(&screen_layout->screen_list) > 0) {
+    screen = zn_container_of(screen_layout->screen_list.next, screen, link);
   }
 
   if (screen) {
     wl_signal_add(&screen->events.destroy, &self->screen_destroy_listener);
+    wl_list_insert(&screen->board_list, &self->screen_link);
   }
 
   self->screen = screen;
@@ -149,6 +160,7 @@ zn_board_create(void)
   }
 
   wl_list_init(&self->link);
+  wl_list_init(&self->screen_link);
   self->screen = NULL;
   wl_list_init(&self->view_list);
 
@@ -173,6 +185,7 @@ err:
 void
 zn_board_destroy(struct zn_board *self)
 {
+  wl_list_remove(&self->screen_link);
   zn_signal_emit_mutable(&self->events.destroy, NULL);
 
   wl_list_remove(&self->view_list);
