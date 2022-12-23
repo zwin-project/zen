@@ -160,7 +160,7 @@ zn_screen_renderer_render(struct zn_output *output,
     struct wlr_renderer *renderer, pixman_region32_t *damage)
 {
   struct zn_server *server = zn_server_get_singleton();
-  struct zn_board *board = output->screen->board;
+  struct zn_board *board = output->screen->current_board;
   pixman_region32_t screen_damage;
   int output_width, output_height;
 

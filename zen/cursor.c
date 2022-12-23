@@ -264,7 +264,7 @@ zn_cursor_move_relative(struct zn_cursor *self, double dx, double dy)
   struct zn_screen *screen = zn_screen_layout_get_closest_screen(
       server->scene->screen_layout, layout_x, layout_y, &screen_x, &screen_y);
 
-  zn_cursor_move(self, screen->board, screen_x, screen_y);
+  zn_cursor_move(self, screen->current_board, screen_x, screen_y);
 }
 
 void

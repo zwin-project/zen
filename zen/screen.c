@@ -27,7 +27,7 @@ zn_screen_damage_whole(struct zn_screen *self)
 void
 zn_screen_send_frame_done(struct zn_screen *self, struct timespec *when)
 {
-  if (self->board) zn_board_send_frame_done(self->board, when);
+  if (self->current_board) zn_board_send_frame_done(self->current_board, when);
 }
 
 void
@@ -60,7 +60,7 @@ zn_screen_create(
   self->user_data = user_data;
   self->implementation = implementation;
   wl_list_init(&self->link);
-  self->board = NULL;
+  self->current_board = NULL;
 
   wl_signal_init(&self->events.destroy);
 
