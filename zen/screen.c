@@ -112,6 +112,7 @@ zn_screen_destroy(struct zn_screen *self)
   zn_screen_layout_remove(server->scene->screen_layout, self);
   wl_signal_emit(&self->events.destroy, NULL);
 
+  wl_list_remove(&self->board_list);
   wl_list_remove(&self->current_board_destroy_listener.link);
   wl_list_remove(&self->events.destroy.listener_list);
   free(self);
