@@ -51,7 +51,7 @@ void zn_board_box_effective_to_local_geom(
     struct zn_board *self, struct wlr_fbox *effective, struct wlr_fbox *geom);
 
 /**
- * @param screen is nullable
+ * @param screen is nullable only when used from this board's method
  */
 void zn_board_set_screen(struct zn_board *self, struct zn_screen *screen);
 
