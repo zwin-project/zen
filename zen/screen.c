@@ -7,7 +7,7 @@
 #include "zen/server.h"
 
 void
-zn_screen_handle_current_board_destoy(struct wl_listener *listener, void *data)
+zn_screen_handle_current_board_destroy(struct wl_listener *listener, void *data)
 {
   UNUSED(data);
   struct zn_screen *self =
@@ -96,7 +96,7 @@ zn_screen_create(
   wl_signal_init(&self->events.destroy);
 
   self->current_board_destroy_listener.notify =
-      zn_screen_handle_current_board_destoy;
+      zn_screen_handle_current_board_destroy;
   wl_list_init(&self->current_board_destroy_listener.link);
 
   return self;

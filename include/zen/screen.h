@@ -26,7 +26,7 @@ struct zn_screen {
   struct wl_list board_list;  // zn_board::screen_link
 
   // nonnull when screen display system and mapped to zn_scene
-  // if not null, this->board->screen == this
+  // if not null, this->current_board->screen == this
   struct zn_board *current_board;
 
   struct wl_listener current_board_destroy_listener;
