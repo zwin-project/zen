@@ -104,25 +104,25 @@ zn_board_handle_screen_destroy(struct wl_listener *listener, void *data)
   UNUSED(data);
   struct zn_board *self =
       zn_container_of(listener, self, screen_destroy_listener);
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_screen_layout *screen_layout = server->scene->screen_layout;
 
-  zn_board_set_screen(self, NULL);
+  struct zn_screen *screen = NULL;
+  if (!wl_list_empty(&screen_layout->screen_list)) {
+    screen = zn_container_of(screen_layout->screen_list.next, screen, link);
+  }
+
+  zn_board_set_screen(self, screen);
 }
 
 void
 zn_board_set_screen(struct zn_board *self, struct zn_screen *screen)
 {
-  struct zn_server *server = zn_server_get_singleton();
-  struct zn_screen_layout *screen_layout = server->scene->screen_layout;
-
   if (self->screen) {
     wl_list_remove(&self->screen_destroy_listener.link);
     wl_list_init(&self->screen_destroy_listener.link);
     wl_list_remove(&self->screen_link);
     wl_list_init(&self->screen_link);
-  }
-
-  if (!screen && wl_list_length(&screen_layout->screen_list) > 0) {
-    screen = zn_container_of(screen_layout->screen_list.next, screen, link);
   }
 
   if (screen) {
