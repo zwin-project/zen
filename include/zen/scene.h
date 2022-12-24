@@ -28,13 +28,14 @@ struct zn_scene {
   struct wlr_texture *wallpaper;  // nullable
 };
 
-struct zn_board *zn_scene_create_new_board(struct zn_scene *self);
-
 void zn_scene_new_screen(struct zn_scene *self, struct zn_screen *screen);
 
 void zn_scene_new_view(struct zn_scene *self, struct zn_view *view);
 
 void zn_scene_set_focused_view(struct zn_scene *self, struct zn_view *view);
+
+void zn_scene_initialize_boards(
+    struct zn_scene *self, int64_t board_initial_count);
 
 struct zn_scene *zn_scene_create(void);
 

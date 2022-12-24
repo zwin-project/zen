@@ -21,7 +21,7 @@ zn_scene_handle_focused_view_destroy(struct wl_listener *listener, void *data)
   zn_scene_set_focused_view(self, NULL);
 }
 
-struct zn_board *
+static struct zn_board *
 zn_scene_create_new_board(struct zn_scene *self)
 {
   struct zn_board *board = zn_board_create();
@@ -143,6 +143,14 @@ zn_scene_set_focused_view(struct zn_scene *self, struct zn_view *view)
   }
 
   self->focused_view = view;
+}
+
+void
+zn_scene_initialize_boards(struct zn_scene *self, int64_t board_initial_count)
+{
+  for (int i = 0; i < board_initial_count; ++i) {
+    zn_scene_create_new_board(self);
+  }
 }
 
 struct zn_scene *
