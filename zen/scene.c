@@ -50,7 +50,7 @@ zn_scene_new_screen(struct zn_scene *self, struct zn_screen *screen)
     }
   }
 
-  if (wl_list_length(&screen->board_list) == 0) {
+  if (wl_list_empty(&screen->board_list)) {
     board = zn_scene_create_new_board(self);
     zn_board_set_screen(board, screen);
   }
