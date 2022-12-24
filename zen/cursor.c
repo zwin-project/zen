@@ -83,6 +83,7 @@ zn_cursor_handle_surface_commit(struct wl_listener *listener, void *data)
 
   zn_cursor_update_geometry(self);
 
+  self->appearance_damage |= ZNA_CURSOR_DAMAGE_TEXTURE;
   zn_cursor_commit_appearance(self);
 }
 
