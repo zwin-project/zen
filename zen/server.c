@@ -243,9 +243,7 @@ zn_server_create(struct wl_display *display)
     goto err_socket;
   }
 
-  for (int i = 0; i < self->config->board_initial_count; ++i) {
-    zn_scene_create_new_board(self->scene);
-  }
+  zn_scene_initialize_boards(self->scene, self->config->board_initial_count);
 
   zn_ray_set_default_grab(
       self->scene->ray, zn_shell_get_default_grab(self->shell));
