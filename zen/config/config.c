@@ -50,7 +50,7 @@ zn_config_create(struct toml_table_t *config_table)
       self->board_initial_count = initial_count.u.i;
       if (self->board_initial_count > BOARD_INITIAL_COUNT_MAX) {
         zn_warn(
-            "The number of the board is limited to less than %d, "
+            "The number of initial boards is limited to no more than %d, "
             "but requested %ld",
             BOARD_INITIAL_COUNT_MAX, self->board_initial_count);
         self->board_initial_count = BOARD_INITIAL_COUNT_MAX;
