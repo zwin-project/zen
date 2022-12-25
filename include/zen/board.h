@@ -35,6 +35,8 @@ struct zn_board {
   struct wl_listener screen_destroy_listener;
 };
 
+void zn_board_reorder_view(struct zn_board *self);
+
 bool zn_board_is_dangling(struct zn_board *self);
 
 void zn_board_send_frame_done(struct zn_board *self, struct timespec *when);
