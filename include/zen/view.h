@@ -34,6 +34,10 @@ struct zn_view {
   struct zn_board *board;  // nullable
   double x, y;
 
+  // controlled by `zn_view_update_z_index`, called from zn_board
+  // 1 is the backmost
+  unsigned int z_index;
+
   // view-local coordinate
   struct wlr_fbox prev_surface_fbox;
 
@@ -64,6 +68,8 @@ struct zn_view {
   struct zna_view *_appearance;  // be private
   uint32_t appearance_damage;
 };
+
+void zn_view_update_z_index(struct zn_view *self, unsigned int z_index);
 
 void zn_view_commit_appearance(struct zn_view *self);
 

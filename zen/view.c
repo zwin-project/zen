@@ -26,17 +26,23 @@ zn_view_update_geometry(struct zn_view *self)
     self->geometry.size[1] = board_local_view_geom.height;
 
     glm_mat4_copy(self->board->geometry.transform, self->geometry.transform);
-    // FIXME: take view overlap (z-index) into account
     glm_translate(self->geometry.transform,
         (vec3){board_local_view_geom.x, board_local_view_geom.y,
-            VIEW_Z_OFFSET_ON_BOARD});
-
+            VIEW_Z_OFFSET_ON_BOARD * self->z_index});
   } else {
     glm_mat4_identity(self->geometry.transform);
     glm_vec2_zero(self->geometry.size);
   }
 
   self->appearance_damage |= ZNA_VIEW_DAMAGE_GEOMETRY;
+}
+
+void
+zn_view_update_z_index(struct zn_view *self, unsigned int z_index)
+{
+  self->z_index = z_index;
+  zn_view_update_geometry(self);
+  zn_view_commit_appearance(self);
 }
 
 static void
@@ -203,6 +209,7 @@ zn_view_bring_to_front(struct zn_view *self)
 
   wl_list_remove(&self->board_link);
   wl_list_insert(self->board->view_list.prev, &self->board_link);
+  zn_board_reorder_view(self->board);
 
   zn_view_damage_whole(self);
 }
@@ -311,8 +318,10 @@ zn_view_destroy(struct zn_view *self)
   zn_view_damage_whole(self);
   wl_signal_emit(&self->events.destroy, NULL);
 
-  wl_list_remove(&self->link);
   wl_list_remove(&self->board_link);
+  zn_board_reorder_view(self->board);
+
+  wl_list_remove(&self->link);
   wl_list_remove(&self->board_destroy_listener.link);
   wl_list_remove(&self->commit_listener.link);
   wl_list_remove(&self->events.destroy.listener_list);
