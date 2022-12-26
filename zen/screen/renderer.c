@@ -58,8 +58,6 @@ get_wallpaper_projection_matrix(struct wlr_output *output,
     box.height = wallpaper->height * output_width / wallpaper->width;
     box.y = (output_height - box.height) / 2;
   }
-  zn_error("Box: x = %d, y = %d, width = %d, height = %d", box.x, box.y,
-      box.width, box.height);
   wlr_matrix_project_box(
       matrix, &box, WL_OUTPUT_TRANSFORM_NORMAL, 0, output->transform_matrix);
 }
@@ -172,9 +170,6 @@ render_zigzag_nodes(struct zn_output *output, struct wlr_renderer *renderer,
         pixman_region32_rectangles(screen_damage, &rect_count);
 
     for (int i = 0; i < rect_count; i++) {
-      zn_error("Render a rect");
-      zn_error("x1: %d, y1: %d, x2: %d, y2: %d", rects[i].x1, rects[i].y1,
-          rects[i].x2, rects[i].y2);
       scissor_output(output, &rects[i]);
       wlr_render_texture_with_matrix(renderer, node->texture, matrix, 1.0f);
     }
