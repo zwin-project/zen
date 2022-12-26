@@ -3,11 +3,7 @@
 #include "zen/screen/output.h"
 #include "zen/server.h"
 
-struct zen_zigzag_layout_state {
-  struct zn_output *output;
-};
+struct zigzag_layout *zn_zigzag_layout_create_default(
+    struct zn_output *output, struct zn_server *server);
 
-void zen_zigzag_layout_on_damage(struct zigzag_node *node);
-
-void zen_zigzag_layout_setup_default(
-    struct zigzag_layout *node_layout, struct zn_server *server);
+void zn_zigzag_layout_destroy_default(struct zigzag_layout *self);
