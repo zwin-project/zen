@@ -27,12 +27,12 @@ struct zigzag_layout *zigzag_layout_create(
 
 void zigzag_layout_destroy(struct zigzag_layout *self);
 
-typedef void (*zigzag_node_on_click_t)(
-    struct zigzag_node *self, double x, double y);
-
-typedef void (*zigzag_node_set_frame_t)(
-    struct zigzag_node *self, int output_width, int output_height);
-typedef void (*zigzag_node_render_t)(struct zigzag_node *self, cairo_t *cr);
+struct zigzag_node_impl {
+  void (*on_click)(struct zigzag_node *self, double x, double y);
+  void (*set_frame)(
+      struct zigzag_node *self, int output_width, int output_height);
+  void (*render)(struct zigzag_node *self, cairo_t *cr);
+};
 
 struct zigzag_node {
   struct zigzag_layout *layout;
@@ -45,15 +45,12 @@ struct zigzag_node {
   struct wl_list link;  // for zigzag_layout :: nodes
   struct wl_list children;
 
-  zigzag_node_set_frame_t set_frame;
-  zigzag_node_on_click_t on_click;
-  zigzag_node_render_t render;
+  const struct zigzag_node_impl *implementation;
 };
 
-struct zigzag_node *zigzag_node_create(struct zigzag_layout *layout,
-    void *state, struct wlr_renderer *renderer,
-    zigzag_node_set_frame_t set_frame, zigzag_node_on_click_t on_click,
-    zigzag_node_render_t render);
+struct zigzag_node *zigzag_node_create(
+    const struct zigzag_node_impl *implementation, struct zigzag_layout *layout,
+    void *state, struct wlr_renderer *renderer);
 
 void zigzag_node_destroy(struct zigzag_node *self);
 

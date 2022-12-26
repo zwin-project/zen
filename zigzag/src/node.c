@@ -23,7 +23,7 @@ zigzag_node_render_texture(
     goto err_cairo;
   }
 
-  self->render(self, cr);
+  self->implementation->render(self, cr);
 
   texture = zigzag_wlr_texture_from_cairo_surface(surface, renderer);
 err_cairo:
@@ -35,9 +35,8 @@ err_cairo_surface:
 }
 
 struct zigzag_node *
-zigzag_node_create(struct zigzag_layout *layout, void *state,
-    struct wlr_renderer *renderer, zigzag_node_set_frame_t set_frame,
-    zigzag_node_on_click_t on_click, zigzag_node_render_t render)
+zigzag_node_create(const struct zigzag_node_impl *implementation,
+    struct zigzag_layout *layout, void *state, struct wlr_renderer *renderer)
 {
   struct zigzag_node *self;
   self = zalloc(sizeof *self);
@@ -48,13 +47,12 @@ zigzag_node_create(struct zigzag_layout *layout, void *state,
 
   self->layout = layout;
   self->state = state;
-  self->on_click = on_click;
-  self->render = render;
-  self->set_frame = set_frame;
+  self->implementation = implementation;
 
   wl_list_init(&self->children);
   self->frame = zalloc(sizeof self->frame);
-  set_frame(self, layout->output_width, layout->output_height);
+  self->implementation->set_frame(
+      self, layout->output_width, layout->output_height);
 
   self->texture = zigzag_node_render_texture(self, renderer);
 
