@@ -88,7 +88,6 @@ power_button_render(struct zigzag_node *self, cairo_t *cr)
   timeinfo = localtime(&rawtime);
 
   sprintf(output, "%02d:%02d", timeinfo->tm_hour, timeinfo->tm_min);
-  zn_error("Time: %s", output);
 
   double padding = 6.;
   cairo_set_font_size(cr, 11);
@@ -129,8 +128,6 @@ power_button_set_frame(
   double margin_width = 10;
   double button_width = 70.;
   double button_height = menu_bar_height - margin_height * 2;
-
-  zn_error("output: %d", output_width);
 
   self->frame->x = (double)output_width - button_width - margin_width;
   self->frame->y = (double)output_height - button_height - margin_height;
