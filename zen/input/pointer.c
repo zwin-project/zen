@@ -48,14 +48,9 @@ zn_pointer_handle_button(struct wl_listener *listener, void *data)
         cursor->grab, event->time_msec, event->button, event->state);
   } else {
     struct zn_ray *ray = server->scene->ray;
-    enum zgn_ray_button_state state = 0;
-    if (event->state == WLR_BUTTON_PRESSED) {
-      state = ZGN_RAY_BUTTON_STATE_PRESSED;
-    } else {
-      state = ZGN_RAY_BUTTON_STATE_RELEASED;
-    }
 
-    ray->grab->impl->button(ray->grab, event->time_msec, event->button, state);
+    ray->grab->impl->button(
+        ray->grab, event->time_msec, event->button, event->state);
   }
 }
 

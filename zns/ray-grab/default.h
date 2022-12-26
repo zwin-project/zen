@@ -10,7 +10,7 @@ struct zns_default_ray_grab {
 
   struct zn_shell *shell;  // nonnull, reference
 
-  enum zgn_ray_button_state button_state;
+  enum wlr_button_state button_state;
 };
 
 /**

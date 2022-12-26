@@ -86,13 +86,13 @@ zns_board_move_ray_grab_motion_relative(struct zn_ray_grab *grab_base,
 
 static void
 zns_board_move_ray_grab_button(struct zn_ray_grab *grab_base,
-    uint32_t time_msec, uint32_t button, enum zgn_ray_button_state state)
+    uint32_t time_msec, uint32_t button, enum wlr_button_state state)
 {
   UNUSED(time_msec);
   UNUSED(button);
   struct zns_board_move_ray_grab *self = zn_container_of(grab_base, self, base);
 
-  if (state == ZGN_RAY_BUTTON_STATE_RELEASED) {
+  if (state == WLR_BUTTON_RELEASED) {
     zn_ray_end_grab(self->base.ray);
   }
 }
