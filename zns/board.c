@@ -49,10 +49,9 @@ zns_board_node_ray_cast(void *user_data, vec3 origin, vec3 direction,
 }
 
 static bool
-zns_board_node_ray_motion(void *user_data, vec3 origin, vec3 direction,
-    uint32_t time_msec, mat4 transform)
+zns_board_node_ray_motion(
+    void *user_data, vec3 origin, vec3 direction, uint32_t time_msec)
 {
-  UNUSED(transform);  // must be identity matrix
   struct zns_board *self = user_data;
   struct zn_server *server = zn_server_get_singleton();
   struct zn_cursor *cursor = server->scene->cursor;
@@ -77,10 +76,8 @@ zns_board_node_ray_motion(void *user_data, vec3 origin, vec3 direction,
 }
 
 static bool
-zns_board_node_ray_enter(
-    void *user_data, vec3 origin, vec3 direction, mat4 transform)
+zns_board_node_ray_enter(void *user_data, vec3 origin, vec3 direction)
 {
-  UNUSED(transform);  // must be identity matrix
   struct zns_board *self = user_data;
   struct zn_server *server = zn_server_get_singleton();
   struct zn_cursor *cursor = server->scene->cursor;
@@ -103,10 +100,9 @@ zns_board_node_ray_enter(
 }
 
 static bool
-zns_board_node_ray_leave(void *user_data, mat4 transform)
+zns_board_node_ray_leave(void *user_data)
 {
   UNUSED(user_data);
-  UNUSED(transform);  // must be identity matrix
 
   struct zn_server *server = zn_server_get_singleton();
   struct zn_cursor *cursor = server->scene->cursor;
@@ -118,10 +114,8 @@ zns_board_node_ray_leave(void *user_data, mat4 transform)
 
 static bool
 zns_board_node_ray_button(void *user_data, uint32_t time_msec, uint32_t button,
-    enum wlr_button_state state, mat4 transform)
+    enum wlr_button_state state)
 {
-  UNUSED(transform);  // must be identity matrix
-
   struct zns_board *self = user_data;
   struct zn_server *server = zn_server_get_singleton();
   struct zn_cursor *cursor = server->scene->cursor;
@@ -143,12 +137,41 @@ zns_board_node_ray_button(void *user_data, uint32_t time_msec, uint32_t button,
   return true;
 }
 
+static bool
+zns_board_node_ray_axis(void *user_data, uint32_t time_msec,
+    enum wlr_axis_source source, enum wlr_axis_orientation orientation,
+    double delta, int32_t delta_discrete)
+{
+  UNUSED(user_data);
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_cursor *cursor = server->scene->cursor;
+
+  cursor->grab->impl->axis(
+      cursor->grab, time_msec, source, orientation, delta, delta_discrete);
+
+  return true;
+}
+
+static bool
+zns_board_node_ray_frame(void *user_data)
+{
+  UNUSED(user_data);
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_cursor *cursor = server->scene->cursor;
+
+  cursor->grab->impl->frame(cursor->grab);
+
+  return true;
+}
+
 static const struct zns_node_interface node_implementation = {
     .ray_cast = zns_board_node_ray_cast,
     .ray_motion = zns_board_node_ray_motion,
     .ray_enter = zns_board_node_ray_enter,
     .ray_leave = zns_board_node_ray_leave,
     .ray_button = zns_board_node_ray_button,
+    .ray_axis = zns_board_node_ray_axis,
+    .ray_frame = zns_board_node_ray_frame,
 };
 
 static void

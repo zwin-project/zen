@@ -48,10 +48,9 @@ zns_bounded_node_ray_cast(void *user_data, vec3 origin, vec3 direction,
 }
 
 static bool
-zns_bounded_node_ray_motion(void *user_data, vec3 origin, vec3 direction,
-    uint32_t time_msec, mat4 transform)
+zns_bounded_node_ray_motion(
+    void *user_data, vec3 origin, vec3 direction, uint32_t time_msec)
 {
-  UNUSED(transform);  // must be identity matrix
   struct zns_bounded *self = user_data;
   struct zn_server *server = zn_server_get_singleton();
 
@@ -72,10 +71,8 @@ zns_bounded_node_ray_motion(void *user_data, vec3 origin, vec3 direction,
 }
 
 static bool
-zns_bounded_node_ray_enter(
-    void *user_data, vec3 origin, vec3 direction, mat4 transform)
+zns_bounded_node_ray_enter(void *user_data, vec3 origin, vec3 direction)
 {
-  UNUSED(transform);  // must be identity matrix
   struct zns_bounded *self = user_data;
   struct zn_server *server = zn_server_get_singleton();
 
@@ -96,10 +93,9 @@ zns_bounded_node_ray_enter(
 }
 
 static bool
-zns_bounded_node_ray_leave(void *user_data, mat4 transform)
+zns_bounded_node_ray_leave(void *user_data)
 {
   UNUSED(user_data);
-  UNUSED(transform);  // must be identity matrix
   struct zn_server *server = zn_server_get_singleton();
 
   zgnr_seat_ray_clear_focus(server->input_manager->seat->zgnr_seat);
@@ -109,10 +105,9 @@ zns_bounded_node_ray_leave(void *user_data, mat4 transform)
 
 static bool
 zns_bounded_node_ray_button(void *user_data, uint32_t time_msec,
-    uint32_t button, enum wlr_button_state state, mat4 transform)
+    uint32_t button, enum wlr_button_state state)
 {
   UNUSED(user_data);
-  UNUSED(transform);  // must be identity matrix
   struct zn_server *server = zn_server_get_singleton();
 
   enum zgn_ray_button_state zgn_state;
@@ -128,12 +123,69 @@ zns_bounded_node_ray_button(void *user_data, uint32_t time_msec,
   return true;
 }
 
+static bool
+zns_bounded_node_ray_axis(void *user_data, uint32_t time_msec,
+    enum wlr_axis_source source, enum wlr_axis_orientation orientation,
+    double delta, int32_t delta_discrete)
+{
+  UNUSED(user_data);
+  struct zn_server *server = zn_server_get_singleton();
+  enum zgn_ray_axis axis;
+  enum zgn_ray_axis_source zgn_axis_source;
+
+  switch (orientation) {
+    case WLR_AXIS_ORIENTATION_VERTICAL:
+      axis = ZGN_RAY_AXIS_VERTICAL_SCROLL;
+      break;
+
+    case WLR_AXIS_ORIENTATION_HORIZONTAL:
+      axis = ZGN_RAY_AXIS_HORIZONTAL_SCROLL;
+      break;
+  }
+
+  switch (source) {
+    case WLR_AXIS_SOURCE_WHEEL:
+      zgn_axis_source = ZGN_RAY_AXIS_SOURCE_WHEEL;
+      break;
+
+    case WLR_AXIS_SOURCE_FINGER:
+      zgn_axis_source = ZGN_RAY_AXIS_SOURCE_FINGER;
+      break;
+
+    case WLR_AXIS_SOURCE_CONTINUOUS:
+      zgn_axis_source = ZGN_RAY_AXIS_SOURCE_CONTINUOUS;
+      break;
+
+    case WLR_AXIS_SOURCE_WHEEL_TILT:
+      zgn_axis_source = ZGN_RAY_AXIS_SOURCE_WHEEL_TILT;
+      break;
+  }
+
+  zgnr_seat_ray_send_axis(server->input_manager->seat->zgnr_seat, time_msec,
+      axis, delta, delta_discrete, zgn_axis_source);
+
+  return true;
+}
+
+static bool
+zns_bounded_node_ray_frame(void *user_data)
+{
+  UNUSED(user_data);
+  struct zn_server *server = zn_server_get_singleton();
+
+  zgnr_seat_ray_send_frame(server->input_manager->seat->zgnr_seat);
+
+  return true;
+}
+
 static const struct zns_node_interface node_implementation = {
     .ray_cast = zns_bounded_node_ray_cast,
     .ray_motion = zns_bounded_node_ray_motion,
     .ray_enter = zns_bounded_node_ray_enter,
     .ray_leave = zns_bounded_node_ray_leave,
     .ray_button = zns_bounded_node_ray_button,
+    .ray_axis = zns_bounded_node_ray_axis,
+    .ray_frame = zns_bounded_node_ray_frame,
 };
 
 static void

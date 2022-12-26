@@ -26,26 +26,12 @@ zns_node_ray_cast(struct zns_node *self, vec3 origin, vec3 direction,
   return nearest_node;
 }
 
-static void
-zns_node_get_accum_transform(struct zns_node *self, mat4 transform)
-{
-  struct zns_node *node = self;
-  glm_mat4_identity(transform);
-  while (node != NULL) {
-    glm_mat4_mul(transform, node->transform, transform);
-    node = node->parent;
-  }
-}
-
 void
 zns_node_ray_motion(
     struct zns_node *self, vec3 origin, vec3 direction, uint32_t time_msec)
 {
-  mat4 transform;
-  zns_node_get_accum_transform(self, transform);
-
   if (!self->implementation->ray_motion(
-          self->user_data, origin, direction, time_msec, transform) &&
+          self->user_data, origin, direction, time_msec) &&
       self->parent) {
     zns_node_ray_motion(self->parent, origin, direction, time_msec);
   }
@@ -54,11 +40,7 @@ zns_node_ray_motion(
 void
 zns_node_ray_enter(struct zns_node *self, vec3 origin, vec3 direction)
 {
-  mat4 transform;
-  zns_node_get_accum_transform(self, transform);
-
-  if (!self->implementation->ray_enter(
-          self->user_data, origin, direction, transform) &&
+  if (!self->implementation->ray_enter(self->user_data, origin, direction) &&
       self->parent) {
     zns_node_ray_enter(self->parent, origin, direction);
   }
@@ -67,11 +49,7 @@ zns_node_ray_enter(struct zns_node *self, vec3 origin, vec3 direction)
 void
 zns_node_ray_leave(struct zns_node *self)
 {
-  mat4 transform;
-  zns_node_get_accum_transform(self, transform);
-
-  if (!self->implementation->ray_leave(self->user_data, transform) &&
-      self->parent) {
+  if (!self->implementation->ray_leave(self->user_data) && self->parent) {
     zns_node_ray_leave(self->parent);
   }
 }
@@ -80,13 +58,31 @@ void
 zns_node_ray_button(struct zns_node *self, uint32_t time_msec, uint32_t button,
     enum wlr_button_state state)
 {
-  mat4 transform;
-  zns_node_get_accum_transform(self, transform);
-
   if (!self->implementation->ray_button(
-          self->user_data, time_msec, button, state, transform) &&
+          self->user_data, time_msec, button, state) &&
       self->parent) {
     zns_node_ray_button(self->parent, time_msec, button, state);
+  }
+}
+
+void
+zns_node_ray_axis(struct zns_node *self, uint32_t time_msec,
+    enum wlr_axis_source source, enum wlr_axis_orientation orientation,
+    double delta, int32_t delta_discrete)
+{
+  if (!self->implementation->ray_axis(self->user_data, time_msec, source,
+          orientation, delta, delta_discrete) &&
+      self->parent) {
+    zns_node_ray_axis(
+        self->parent, time_msec, source, orientation, delta, delta_discrete);
+  }
+}
+
+void
+zns_node_ray_frame(struct zns_node *self)
+{
+  if (!self->implementation->ray_frame(self->user_data) && self->parent) {
+    zns_node_ray_frame(self->parent);
   }
 }
 

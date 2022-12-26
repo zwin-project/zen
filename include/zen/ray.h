@@ -3,6 +3,7 @@
 #include <cglm/types.h>
 #include <wayland-server-core.h>
 #include <wlr/types/wlr_input_device.h>
+#include <wlr/types/wlr_pointer.h>
 #include <zigen-protocol.h>
 
 #define DEFAULT_RAY_LENGTH 1
@@ -17,6 +18,10 @@ struct zn_ray_grab_interface {
       float azimuthal, uint32_t time_msec);
   void (*button)(struct zn_ray_grab *grab, uint32_t time_msec, uint32_t button,
       enum wlr_button_state state);
+  void (*axis)(struct zn_ray_grab *grab, uint32_t time_msec,
+      enum wlr_axis_source source, enum wlr_axis_orientation orientation,
+      double delta, int32_t delta_discrete);
+  void (*frame)(struct zn_ray_grab *grab);
   void (*rebase)(struct zn_ray_grab *grab);
   void (*cancel)(struct zn_ray_grab *grab);
 };

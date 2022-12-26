@@ -25,28 +25,41 @@ zn_shell_root_ray_cast(void *user_data, vec3 origin, vec3 direction,
 }
 
 static bool
-zn_shell_root_ray_motion(void *user_data, vec3 origin, vec3 direction,
-    uint32_t time_msec, mat4 transform)
+zn_shell_root_ray_motion(
+    void *user_data, vec3 origin, vec3 direction, uint32_t time_msec)
 {
   return true;
 }
 
 static bool
-zn_shell_root_ray_enter(
-    void *user_data, vec3 origin, vec3 direction, mat4 transform)
+zn_shell_root_ray_enter(void *user_data, vec3 origin, vec3 direction)
 {
   return true;
 }
 
 static bool
-zn_shell_root_ray_leave(void *user_data, mat4 transform)
+zn_shell_root_ray_leave(void *user_data)
 {
   return true;
 }
 
 static bool
 zn_shell_root_ray_button(void *user_data, uint32_t time_msec, uint32_t button,
-    enum wlr_button_state state, mat4 transform)
+    enum wlr_button_state state)
+{
+  return true;
+}
+
+static bool
+zn_shell_root_ray_axis(void *user_data, uint32_t time_msec,
+    enum wlr_axis_source source, enum wlr_axis_orientation orientation,
+    double delta, int32_t delta_discrete)
+{
+  return true;
+}
+
+static bool
+zn_shell_root_ray_frame(void *user_data)
 {
   return true;
 }
@@ -58,6 +71,8 @@ static const struct zns_node_interface node_implementation = {
     .ray_enter = zn_shell_root_ray_enter,
     .ray_leave = zn_shell_root_ray_leave,
     .ray_button = zn_shell_root_ray_button,
+    .ray_axis = zn_shell_root_ray_axis,
+    .ray_frame = zn_shell_root_ray_frame,
 };
 
 static void
