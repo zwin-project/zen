@@ -124,7 +124,7 @@ endif
 icon_files = files(
   'assets/icon/power-button.svg',
 )
-icon_install_dir = join_paths(datadir, 'icon', 'zen')
+icon_install_dir = join_paths(datadir, 'zen')
 install_data(icon_files, install_dir: icon_install_dir)
 power_button_icon = join_paths(get_option('prefix'), icon_install_dir, 'power-button.svg')
 cdata.set_quoted('POWER_BUTTON_ICON', power_button_icon)
