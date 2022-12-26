@@ -104,20 +104,6 @@ jobs:
           meson build
           sudo ninja -C build install
 
-      - name: Clone zigzag
-        uses: actions/checkout@v2
-        with:
-          repository: zigen-project/zigen
-          path: zigzag
-          ref: main
-      
-      - name: Build zigzag
-        working-directory: ./zigzag
-        run: |
-          meson build
-          sudo ninja -C build install
-
-
       - name: Checkout
         uses: actions/checkout@v2
         with:
