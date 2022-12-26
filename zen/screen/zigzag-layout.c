@@ -9,27 +9,28 @@
 
 #include "zen/server.h"
 
-const int menu_bar_height = 33.;
+const int menu_bar_height = 33;
 
 struct zn_zigzag_layout_state {
   struct zn_output *output;
   struct zigzag_node *power_button;
-  struct wl_event_source *minute_timer_source;
-  long next_min_ms;
+  struct wl_event_source *second_timer_source;
+  long next_sec_ms;
 };
 
 static int
-zn_output_handle_minute_timer(void *data)
+zn_output_handle_second_timer(void *data)
 {
   struct zigzag_layout *self = (struct zigzag_layout *)data;
   struct zn_zigzag_layout_state *state =
       (struct zn_zigzag_layout_state *)self->state;
   struct zn_server *server = zn_server_get_singleton();
-  long time_ms = current_time_ms();
-  state->next_min_ms += MSEC_PER_MIN;
 
-  wl_event_source_timer_update(
-      state->minute_timer_source, (int)(state->next_min_ms - time_ms + 10));
+  long time_ms = current_realtime_clock_ms();
+  state->next_sec_ms = (time_ms - time_ms % MSEC_PER_SEC + MSEC_PER_SEC);
+
+  int ms_delay = (int)(state->next_sec_ms - time_ms + 10);
+  wl_event_source_timer_update(state->second_timer_source, ms_delay);
 
   struct zigzag_node *power_button = state->power_button;
   power_button->texture =
@@ -38,7 +39,7 @@ zn_output_handle_minute_timer(void *data)
   return 0;
 }
 
-void
+static void
 zn_zigzag_layout_on_damage(struct zigzag_node *node)
 {
   struct zn_zigzag_layout_state *state =
@@ -46,20 +47,21 @@ zn_zigzag_layout_on_damage(struct zigzag_node *node)
   wlr_output_damage_add_box(state->output->damage, node->frame);
 }
 
-const struct zigzag_layout_impl zn_zigzag_layout_default_implementation = {
-    .on_damage = zn_zigzag_layout_on_damage,
+static const struct zigzag_layout_impl zn_zigzag_layout_default_implementation =
+    {
+        .on_damage = zn_zigzag_layout_on_damage,
 };
 
-void
+static void
 power_button_on_click(struct zigzag_node *self, double x, double y)
 {
   UNUSED(self);
   UNUSED(x);
   UNUSED(y);
-  zn_warn("VR Mode starting...");
+  // TODO: Show "Logout"
 }
 
-void
+static void
 power_button_render(struct zigzag_node *self, cairo_t *cr)
 {
   cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
@@ -88,6 +90,7 @@ power_button_render(struct zigzag_node *self, cairo_t *cr)
   timeinfo = localtime(&rawtime);
 
   sprintf(output, "%02d:%02d", timeinfo->tm_hour, timeinfo->tm_min);
+  zn_error("output: %s", output);
 
   double padding = 6.;
   cairo_set_font_size(cr, 11);
@@ -120,7 +123,7 @@ err:
   return;
 }
 
-void
+static void
 power_button_set_frame(
     struct zigzag_node *self, int output_width, int output_height)
 {
@@ -135,13 +138,13 @@ power_button_set_frame(
   self->frame->height = button_height;
 }
 
-const struct zigzag_node_impl power_button_implementation = {
+static const struct zigzag_node_impl power_button_implementation = {
     .on_click = power_button_on_click,
     .set_frame = power_button_set_frame,
     .render = power_button_render,
 };
 
-struct zigzag_node *
+static struct zigzag_node *
 create_power_button(struct zigzag_layout *node_layout, struct zn_server *server)
 {
   struct zigzag_node *power_button = zigzag_node_create(
@@ -156,7 +159,7 @@ err:
   return NULL;
 }
 
-void
+static void
 menu_bar_on_click(struct zigzag_node *self, double x, double y)
 {
   UNUSED(self);
@@ -164,7 +167,7 @@ menu_bar_on_click(struct zigzag_node *self, double x, double y)
   UNUSED(y);
 }
 
-void
+static void
 menu_bar_render(struct zigzag_node *self, cairo_t *cr)
 {
   UNUSED(self);
@@ -176,7 +179,7 @@ menu_bar_render(struct zigzag_node *self, cairo_t *cr)
   cairo_stroke(cr);
 }
 
-void
+static void
 menu_bar_set_frame(
     struct zigzag_node *self, int output_width, int output_height)
 {
@@ -187,13 +190,14 @@ menu_bar_set_frame(
   self->frame->width = bar_width;
   self->frame->height = menu_bar_height;
 }
-const struct zigzag_node_impl menu_bar_implementation = {
+
+static const struct zigzag_node_impl menu_bar_implementation = {
     .on_click = menu_bar_on_click,
     .set_frame = menu_bar_set_frame,
     .render = menu_bar_render,
 };
 
-struct zigzag_node *
+static struct zigzag_node *
 create_menu_bar(struct zigzag_layout *node_layout, struct zn_server *server,
     struct zigzag_node *power_button)
 {
@@ -250,15 +254,15 @@ zn_zigzag_layout_create_default(
 
   zn_zigzag_layout_setup_default_nodes(self, server);
 
-  state->minute_timer_source = wl_event_loop_add_timer(
+  state->second_timer_source = wl_event_loop_add_timer(
       wl_display_get_event_loop(output->wlr_output->display),
-      zn_output_handle_minute_timer, self);
+      zn_output_handle_second_timer, self);
 
-  long time_ms = current_time_ms();
-  state->next_min_ms = (time_ms - time_ms % MSEC_PER_MIN + MSEC_PER_MIN);
+  long time_ms = current_realtime_clock_ms();
+  state->next_sec_ms = (time_ms - time_ms % MSEC_PER_SEC + MSEC_PER_SEC);
 
-  wl_event_source_timer_update(
-      state->minute_timer_source, (int)(state->next_min_ms - time_ms + 10));
+  int ms_delay = (int)(state->next_sec_ms - time_ms + 10);
+  wl_event_source_timer_update(state->second_timer_source, ms_delay);
 
   return self;
 
@@ -273,7 +277,7 @@ zn_zigzag_layout_destroy_default(struct zigzag_layout *self)
 {
   struct zn_zigzag_layout_state *state =
       (struct zn_zigzag_layout_state *)self->state;
-  wl_event_source_remove(state->minute_timer_source);
+  wl_event_source_remove(state->second_timer_source);
   zigzag_node_cleanup_list(&self->nodes);
   zigzag_layout_destroy(self);
   free(state);

@@ -54,8 +54,8 @@ _zen_deps = [
   wlr_glew_renderer_dep,
   xkbcommon_dep,
   zen_common_dep,
-  zigzag_dep,
   zgnr_dep,
+  zigzag_dep,
   znr_remote_dep,
 ]
 

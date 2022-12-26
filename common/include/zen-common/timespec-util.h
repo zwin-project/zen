@@ -8,16 +8,8 @@ extern "C" {
 #include <time.h>
 
 #define NSEC_PER_SEC 1000000000
-#define MSEC_PER_MIN 60000
+#define MSEC_PER_SEC 1000
 #define NSEC_PER_MSEC 1000000
-
-static inline long
-current_time_ms(void)
-{
-  struct timespec ts;
-  timespec_get(&ts, TIME_UTC);
-  return (((long)ts.tv_sec) * NSEC_PER_SEC + ts.tv_nsec) / NSEC_PER_MSEC;
-}
 
 /**
  * r = a - b
@@ -58,6 +50,19 @@ static inline int64_t
 timespec_to_msec(const struct timespec *a)
 {
   return (int64_t)a->tv_sec * 1000 + a->tv_nsec / 1000000;
+}
+
+/**
+ * Get current timestamp from CLOCK_REALTIME in ms
+ *
+ * \return milliseconds
+ */
+static inline long
+current_realtime_clock_ms(void)
+{
+  struct timespec ts;
+  clock_gettime(CLOCK_REALTIME, &ts);
+  return timespec_to_msec(&ts);
 }
 
 #ifdef __cplusplus
