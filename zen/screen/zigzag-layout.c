@@ -115,12 +115,17 @@ power_button_set_frame(
   self->frame->height = button_height;
 }
 
+const struct zigzag_node_impl power_button_implementation = {
+    .on_click = power_button_on_click,
+    .set_frame = power_button_set_frame,
+    .render = power_button_render,
+};
+
 struct zigzag_node *
 create_power_button(struct zigzag_layout *node_layout, struct zn_server *server)
 {
-  struct zigzag_node *power_button =
-      zigzag_node_create(node_layout, NULL, server->renderer,
-          power_button_set_frame, power_button_on_click, power_button_render);
+  struct zigzag_node *power_button = zigzag_node_create(
+      &power_button_implementation, node_layout, NULL, server->renderer);
 
   if (power_button == NULL) {
     zn_error("Failed to create the VR button");
@@ -162,13 +167,18 @@ menu_bar_set_frame(
   self->frame->width = bar_width;
   self->frame->height = menu_bar_height;
 }
+const struct zigzag_node_impl menu_bar_implementation = {
+    .on_click = menu_bar_on_click,
+    .set_frame = menu_bar_set_frame,
+    .render = menu_bar_render,
+};
 
 struct zigzag_node *
 create_menu_bar(struct zigzag_layout *node_layout, struct zn_server *server,
     struct zigzag_node *power_button)
 {
-  struct zigzag_node *menu_bar = zigzag_node_create(node_layout, NULL,
-      server->renderer, menu_bar_set_frame, menu_bar_on_click, menu_bar_render);
+  struct zigzag_node *menu_bar = zigzag_node_create(
+      &menu_bar_implementation, node_layout, NULL, server->renderer);
 
   if (menu_bar == NULL) {
     zn_error("Failed to create the menu bar");
