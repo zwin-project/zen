@@ -19,27 +19,6 @@ scale_length(float length, float offset, float scale)
 {
   return round((offset + length) * scale) - round(offset * scale);
 }
-
-static int
-zn_output_handle_minute_timer(void *data)
-{
-  struct zn_output *self = (struct zn_output *)data;
-  struct zn_server *server = zn_server_get_singleton();
-  zn_error("Fired");
-  long time_ms = current_time_ms();
-  self->next_min_ms += MSEC_PER_MIN;
-
-  wl_event_source_timer_update(
-      self->minute_timer_source, (int)(self->next_min_ms - time_ms + 10));
-
-  struct zigzag_node *power_button = self->power_button;
-  if (power_button == NULL) return 0;
-  power_button->texture =
-      zigzag_node_render_texture(power_button, server->renderer);
-  power_button->layout->implementation->on_damage(power_button);
-  return 0;
-}
-
 void
 zn_output_box_effective_to_transformed_coords(struct zn_output *self,
     struct wlr_fbox *effective, struct wlr_box *transformed)
@@ -195,17 +174,6 @@ zn_output_create(struct wlr_output *wlr_output)
     goto err_screen;
   }
 
-  self->minute_timer_source =
-      wl_event_loop_add_timer(wl_display_get_event_loop(wlr_output->display),
-          zn_output_handle_minute_timer, self);
-
-  long time_ms = current_time_ms();
-  self->next_min_ms = (time_ms - time_ms % MSEC_PER_MIN + MSEC_PER_MIN);
-
-  wl_event_source_timer_update(
-      self->minute_timer_source, (int)(self->next_min_ms - time_ms + 10));
-  zn_error("current time: %ld, next time ms: %ld", time_ms, self->next_min_ms);
-
   return self;
 
 err_screen:
@@ -224,7 +192,6 @@ err:
 static void
 zn_output_destroy(struct zn_output *self)
 {
-  free(self->node_layout->state);
   zn_zigzag_layout_destroy_default(self->node_layout);
   wl_list_remove(&self->damage_frame_listener.link);
   wl_list_remove(&self->wlr_output_destroy_listener.link);

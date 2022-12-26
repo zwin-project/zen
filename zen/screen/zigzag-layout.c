@@ -13,7 +13,30 @@ const int menu_bar_height = 33.;
 
 struct zn_zigzag_layout_state {
   struct zn_output *output;
+  struct zigzag_node *power_button;
+  struct wl_event_source *minute_timer_source;
+  long next_min_ms;
 };
+
+static int
+zn_output_handle_minute_timer(void *data)
+{
+  struct zigzag_layout *self = (struct zigzag_layout *)data;
+  struct zn_zigzag_layout_state *state =
+      (struct zn_zigzag_layout_state *)self->state;
+  struct zn_server *server = zn_server_get_singleton();
+  long time_ms = current_time_ms();
+  state->next_min_ms += MSEC_PER_MIN;
+
+  wl_event_source_timer_update(
+      state->minute_timer_source, (int)(state->next_min_ms - time_ms + 10));
+
+  struct zigzag_node *power_button = state->power_button;
+  power_button->texture =
+      zigzag_node_render_texture(power_button, server->renderer);
+  power_button->layout->implementation->on_damage(power_button);
+  return 0;
+}
 
 void
 zn_zigzag_layout_on_damage(struct zigzag_node *node)
@@ -197,7 +220,7 @@ zn_zigzag_layout_setup_default_nodes(
   struct zigzag_node *power_button = create_power_button(node_layout, server);
   struct zn_zigzag_layout_state *state =
       (struct zn_zigzag_layout_state *)node_layout->state;
-  state->output->power_button = power_button;
+  state->power_button = power_button;
   struct zigzag_node *menu_bar =
       create_menu_bar(node_layout, server, power_button);
   wl_list_insert(&node_layout->nodes, &menu_bar->link);
@@ -229,6 +252,17 @@ zn_zigzag_layout_create_default(
   }
 
   zn_zigzag_layout_setup_default_nodes(self, server);
+
+  state->minute_timer_source = wl_event_loop_add_timer(
+      wl_display_get_event_loop(output->wlr_output->display),
+      zn_output_handle_minute_timer, self);
+
+  long time_ms = current_time_ms();
+  state->next_min_ms = (time_ms - time_ms % MSEC_PER_MIN + MSEC_PER_MIN);
+
+  wl_event_source_timer_update(
+      state->minute_timer_source, (int)(state->next_min_ms - time_ms + 10));
+
   return self;
 
 err_state:
@@ -240,6 +274,10 @@ err:
 void
 zn_zigzag_layout_destroy_default(struct zigzag_layout *self)
 {
+  struct zn_zigzag_layout_state *state =
+      (struct zn_zigzag_layout_state *)self->state;
+  wl_event_source_remove(state->minute_timer_source);
   zigzag_node_cleanup_list(&self->nodes);
   zigzag_layout_destroy(self);
+  free(state);
 }
