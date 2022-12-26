@@ -67,7 +67,7 @@ zns_default_ray_grab_motion_relative(struct zn_ray_grab *grab_base, vec3 origin,
 
 static void
 zns_default_ray_grab_button(struct zn_ray_grab *grab_base, uint32_t time_msec,
-    uint32_t button, enum zgn_ray_button_state state)
+    uint32_t button, enum wlr_button_state state)
 {
   struct zns_default_ray_grab *self = zn_container_of(grab_base, self, base);
   struct zn_server *server = zn_server_get_singleton();
@@ -77,7 +77,7 @@ zns_default_ray_grab_button(struct zn_ray_grab *grab_base, uint32_t time_msec,
   if (self->shell->ray_focus == NULL) return;
 
   if (server->input_manager->seat->pressing_button_count == 1 &&
-      state == ZGN_RAY_BUTTON_STATE_PRESSED) {
+      state == WLR_BUTTON_PRESSED) {
     zns_down_ray_grab_start(self->base.ray, self->shell->ray_focus);
   }
 

@@ -118,7 +118,7 @@ zns_board_node_ray_leave(void *user_data, mat4 transform)
 
 static bool
 zns_board_node_ray_button(void *user_data, uint32_t time_msec, uint32_t button,
-    enum zgn_ray_button_state state, mat4 transform)
+    enum wlr_button_state state, mat4 transform)
 {
   UNUSED(transform);  // must be identity matrix
 
@@ -128,7 +128,7 @@ zns_board_node_ray_button(void *user_data, uint32_t time_msec, uint32_t button,
 
   if (cursor->board == NULL) return true;
 
-  if (state == ZGN_RAY_BUTTON_STATE_PRESSED && button == BTN_LEFT &&
+  if (state == WLR_BUTTON_PRESSED && button == BTN_LEFT &&
       server->input_manager->seat->pressing_button_count == 1) {
     struct wlr_surface *surface = zn_board_get_surface_at(
         cursor->board, cursor->x, cursor->y, NULL, NULL, NULL);
@@ -138,14 +138,7 @@ zns_board_node_ray_button(void *user_data, uint32_t time_msec, uint32_t button,
     }
   }
 
-  enum wlr_button_state wlr_state;
-  if (state == ZGN_RAY_BUTTON_STATE_PRESSED) {
-    wlr_state = WLR_BUTTON_PRESSED;
-  } else {
-    wlr_state = WLR_BUTTON_RELEASED;
-  }
-
-  cursor->grab->impl->button(cursor->grab, time_msec, button, wlr_state);
+  cursor->grab->impl->button(cursor->grab, time_msec, button, state);
 
   return true;
 }

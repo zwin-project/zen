@@ -78,7 +78,7 @@ zns_node_ray_leave(struct zns_node *self)
 
 void
 zns_node_ray_button(struct zns_node *self, uint32_t time_msec, uint32_t button,
-    enum zgn_ray_button_state state)
+    enum wlr_button_state state)
 {
   mat4 transform;
   zns_node_get_accum_transform(self, transform);

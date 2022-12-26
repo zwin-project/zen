@@ -109,14 +109,21 @@ zns_bounded_node_ray_leave(void *user_data, mat4 transform)
 
 static bool
 zns_bounded_node_ray_button(void *user_data, uint32_t time_msec,
-    uint32_t button, enum zgn_ray_button_state state, mat4 transform)
+    uint32_t button, enum wlr_button_state state, mat4 transform)
 {
   UNUSED(user_data);
   UNUSED(transform);  // must be identity matrix
   struct zn_server *server = zn_server_get_singleton();
 
+  enum zgn_ray_button_state zgn_state;
+  if (state == WLR_BUTTON_PRESSED) {
+    zgn_state = ZGN_RAY_BUTTON_STATE_PRESSED;
+  } else {
+    zgn_state = ZGN_RAY_BUTTON_STATE_RELEASED;
+  }
+
   zgnr_seat_ray_send_button(
-      server->input_manager->seat->zgnr_seat, time_msec, button, state);
+      server->input_manager->seat->zgnr_seat, time_msec, button, zgn_state);
 
   return true;
 }

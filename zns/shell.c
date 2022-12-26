@@ -46,7 +46,7 @@ zn_shell_root_ray_leave(void *user_data, mat4 transform)
 
 static bool
 zn_shell_root_ray_button(void *user_data, uint32_t time_msec, uint32_t button,
-    enum zgn_ray_button_state state, mat4 transform)
+    enum wlr_button_state state, mat4 transform)
 {
   return true;
 }
