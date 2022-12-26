@@ -61,9 +61,15 @@ zn_pointer_handle_axis(struct wl_listener *listener, void *data)
   struct zn_server *server = zn_server_get_singleton();
   struct wlr_event_pointer_axis *event = data;
 
-  struct zn_cursor *cursor = server->scene->cursor;
-  cursor->grab->impl->axis(cursor->grab, event->time_msec, event->source,
-      event->orientation, event->delta, event->delta_discrete);
+  if (server->display_system == ZN_DISPLAY_SYSTEM_SCREEN) {
+    struct zn_cursor *cursor = server->scene->cursor;
+    cursor->grab->impl->axis(cursor->grab, event->time_msec, event->source,
+        event->orientation, event->delta, event->delta_discrete);
+  } else {
+    struct zn_ray *ray = server->scene->ray;
+    ray->grab->impl->axis(ray->grab, event->time_msec, event->source,
+        event->orientation, event->delta, event->delta_discrete);
+  }
 }
 
 static void
@@ -73,8 +79,13 @@ zn_pointer_handle_frame(struct wl_listener *listener, void *data)
   UNUSED(data);
   struct zn_server *server = zn_server_get_singleton();
 
-  struct zn_cursor *cursor = server->scene->cursor;
-  cursor->grab->impl->frame(cursor->grab);
+  if (server->display_system == ZN_DISPLAY_SYSTEM_SCREEN) {
+    struct zn_cursor *cursor = server->scene->cursor;
+    cursor->grab->impl->frame(cursor->grab);
+  } else {
+    struct zn_ray *ray = server->scene->ray;
+    ray->grab->impl->frame(ray->grab);
+  }
 }
 
 struct zn_pointer *

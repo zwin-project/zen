@@ -98,6 +98,25 @@ zns_board_move_ray_grab_button(struct zn_ray_grab *grab_base,
 }
 
 static void
+zns_board_move_ray_grab_axis(struct zn_ray_grab *grab_base, uint32_t time_msec,
+    enum wlr_axis_source source, enum wlr_axis_orientation orientation,
+    double delta, int32_t delta_discrete)
+{
+  UNUSED(grab_base);
+  UNUSED(time_msec);
+  UNUSED(source);
+  UNUSED(orientation);
+  UNUSED(delta);
+  UNUSED(delta_discrete);
+}
+
+static void
+zns_board_move_ray_grab_frame(struct zn_ray_grab *grab_base)
+{
+  UNUSED(grab_base);
+}
+
+static void
 zns_board_move_ray_grab_rebase(struct zn_ray_grab *grab_base)
 {
   UNUSED(grab_base);
@@ -113,6 +132,8 @@ zns_board_move_ray_grab_cancel(struct zn_ray_grab *grab_base)
 static const struct zn_ray_grab_interface implementation = {
     .motion_relative = zns_board_move_ray_grab_motion_relative,
     .button = zns_board_move_ray_grab_button,
+    .axis = zns_board_move_ray_grab_axis,
+    .frame = zns_board_move_ray_grab_frame,
     .rebase = zns_board_move_ray_grab_rebase,
     .cancel = zns_board_move_ray_grab_cancel,
 };

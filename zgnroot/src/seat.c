@@ -23,6 +23,7 @@ zgnr_seat_send_ray_enter(struct zgnr_seat_impl *self,
     if (client == wl_resource_get_client(seat_ray->resource)) {
       zgn_ray_send_enter(seat_ray->resource, serial, virtual_object->resource,
           &origin_array, &direction_array);
+      zgn_ray_send_frame(seat_ray->resource);
     }
   }
 
@@ -155,6 +156,69 @@ zgnr_seat_ray_send_button(struct zgnr_seat *parent, uint32_t time_msec,
   self->base.ray_state.last_button_serial = serial;
 }
 
+void
+zgnr_seat_ray_send_axis(struct zgnr_seat *parent, uint32_t time_msec,
+    enum zgn_ray_axis axis, double value, int32_t value_discrete,
+    enum zgn_ray_axis_source source)
+{
+  struct zgnr_seat_impl *self = zn_container_of(parent, self, base);
+  struct zgnr_virtual_object *virtual_object =
+      self->base.ray_state.focus_virtual_object;
+  struct wl_client *client;
+
+  if (!virtual_object) return;
+  client = wl_resource_get_client(virtual_object->resource);
+
+  bool should_send_source = false;
+  if (!self->base.ray_state.sent_axis_source) {
+    self->base.ray_state.sent_axis_source = true;
+    should_send_source = true;
+  }
+
+  struct zgnr_seat_ray *seat_ray;
+  wl_list_for_each (seat_ray, &self->seat_ray_list, link) {
+    if (client != wl_resource_get_client(seat_ray->resource)) {
+      continue;
+    }
+
+    if (should_send_source) {
+      zgn_ray_send_axis_source(seat_ray->resource, source);
+    }
+
+    if (value) {
+      if (value_discrete) {
+        zgn_ray_send_axis_discrete(seat_ray->resource, axis, value_discrete);
+      }
+
+      zgn_ray_send_axis(
+          seat_ray->resource, time_msec, axis, wl_fixed_from_double(value));
+    } else {
+      zgn_ray_send_axis_stop(seat_ray->resource, time_msec, axis);
+    }
+  }
+}
+
+void
+zgnr_seat_ray_send_frame(struct zgnr_seat *parent)
+{
+  struct zgnr_seat_impl *self = zn_container_of(parent, self, base);
+  struct zgnr_virtual_object *virtual_object =
+      self->base.ray_state.focus_virtual_object;
+  struct wl_client *client;
+
+  if (!virtual_object) return;
+  client = wl_resource_get_client(virtual_object->resource);
+
+  self->base.ray_state.sent_axis_source = false;
+
+  struct zgnr_seat_ray *seat_ray;
+  wl_list_for_each (seat_ray, &self->seat_ray_list, link) {
+    if (client == wl_resource_get_client(seat_ray->resource)) {
+      zgn_ray_send_frame(seat_ray->resource);
+    }
+  }
+}
+
 static void
 zgnr_seat_handle_destroy(struct wl_resource *resource)
 {
@@ -228,6 +292,7 @@ zgnr_seat_create(struct wl_display *display)
   self->global =
       wl_global_create(display, &zgn_seat_interface, 1, self, zgnr_seat_bind);
   self->display = display;
+  self->base.ray_state.sent_axis_source = false;
 
   wl_list_init(&self->resource_list);
   wl_list_init(&self->seat_ray_list);

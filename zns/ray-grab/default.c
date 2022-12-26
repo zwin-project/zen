@@ -85,6 +85,29 @@ zns_default_ray_grab_button(struct zn_ray_grab *grab_base, uint32_t time_msec,
 }
 
 static void
+zns_default_ray_grab_axis(struct zn_ray_grab *grab_base, uint32_t time_msec,
+    enum wlr_axis_source source, enum wlr_axis_orientation orientation,
+    double delta, int32_t delta_discrete)
+{
+  struct zns_default_ray_grab *self = zn_container_of(grab_base, self, base);
+
+  if (self->shell->ray_focus == NULL) return;
+
+  zns_node_ray_axis(self->shell->ray_focus, time_msec, source, orientation,
+      delta, delta_discrete);
+}
+
+static void
+zns_default_ray_grab_frame(struct zn_ray_grab *grab_base)
+{
+  struct zns_default_ray_grab *self = zn_container_of(grab_base, self, base);
+
+  if (self->shell->ray_focus == NULL) return;
+
+  zns_node_ray_frame(self->shell->ray_focus);
+}
+
+static void
 zns_default_ray_grab_rebase(struct zn_ray_grab *grab_base)
 {
   struct zns_default_ray_grab *self = zn_container_of(grab_base, self, base);
@@ -111,6 +134,8 @@ zns_default_ray_grab_cancel(struct zn_ray_grab *grab_base)
 static const struct zn_ray_grab_interface implementation = {
     .motion_relative = zns_default_ray_grab_motion_relative,
     .button = zns_default_ray_grab_button,
+    .axis = zns_default_ray_grab_axis,
+    .frame = zns_default_ray_grab_frame,
     .rebase = zns_default_ray_grab_rebase,
     .cancel = zns_default_ray_grab_cancel,
 };
