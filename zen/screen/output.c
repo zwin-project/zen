@@ -2,15 +2,12 @@
 
 #include <math.h>
 #include <pixman.h>
-#include <time.h>
 #include <wlr/render/wlr_renderer.h>
 #include <zen-common.h>
 
 #include "zen/screen/renderer.h"
 #include "zen/screen/zigzag-layout.h"
 #include "zen/server.h"
-
-const int MENU_BAR_HEIGHT = 30;
 
 static void zn_output_destroy(struct zn_output *self);
 
