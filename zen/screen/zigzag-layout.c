@@ -11,16 +11,21 @@
 
 const int menu_bar_height = 33.;
 
+struct zn_zigzag_layout_state {
+  struct zn_output *output;
+};
+
 void
-zen_zigzag_layout_on_damage(struct zigzag_node *node)
+zn_zigzag_layout_on_damage(struct zigzag_node *node)
 {
-  zn_error("on_damage");
-  zn_error("x: %d, y: %d, width: %d, height: %d", node->frame->x,
-      node->frame->y, node->frame->width, node->frame->height);
-  struct zen_zigzag_layout_state *state =
-      (struct zen_zigzag_layout_state *)node->layout->state;
+  struct zn_zigzag_layout_state *state =
+      (struct zn_zigzag_layout_state *)node->layout->state;
   wlr_output_damage_add_box(state->output->damage, node->frame);
 }
+
+const struct zigzag_layout_impl zn_zigzag_layout_default_implementation = {
+    .on_damage = zn_zigzag_layout_on_damage,
+};
 
 void
 power_button_on_click(struct zigzag_node *self, double x, double y)
@@ -176,14 +181,55 @@ err:
 }
 
 void
-zen_zigzag_layout_setup_default(
+zn_zigzag_layout_setup_default_nodes(
     struct zigzag_layout *node_layout, struct zn_server *server)
 {
   struct zigzag_node *power_button = create_power_button(node_layout, server);
-  struct zen_zigzag_layout_state *state =
-      (struct zen_zigzag_layout_state *)node_layout->state;
+  struct zn_zigzag_layout_state *state =
+      (struct zn_zigzag_layout_state *)node_layout->state;
   state->output->power_button = power_button;
   struct zigzag_node *menu_bar =
       create_menu_bar(node_layout, server, power_button);
   wl_list_insert(&node_layout->nodes, &menu_bar->link);
+}
+
+struct zigzag_layout *
+zn_zigzag_layout_create_default(
+    struct zn_output *output, struct zn_server *server)
+{
+  struct zigzag_layout *self;
+  struct zn_zigzag_layout_state *state;
+  state = zalloc(sizeof *state);
+  if (state == NULL) {
+    zn_error("Failed to allocate memory");
+    goto err;
+  }
+  state->output = output;
+
+  int output_width, output_height;
+  wlr_output_transformed_resolution(
+      output->wlr_output, &output_width, &output_height);
+
+  self = zigzag_layout_create(&zn_zigzag_layout_default_implementation,
+      output_width, output_height, (void *)state);
+
+  if (self == NULL) {
+    zn_error("Failed to create zigzag_layout");
+    goto err_state;
+  }
+
+  zn_zigzag_layout_setup_default_nodes(self, server);
+  return self;
+
+err_state:
+  free(state);
+err:
+  return NULL;
+}
+
+void
+zn_zigzag_layout_destroy_default(struct zigzag_layout *self)
+{
+  zigzag_node_cleanup_list(&self->nodes);
+  zigzag_layout_destroy(self);
 }

@@ -4,8 +4,8 @@
 #include <zigzag.h>
 
 struct zigzag_layout *
-zigzag_layout_create(int output_width, int output_height, void *state,
-    zigzag_layout_on_damage_t on_damage)
+zigzag_layout_create(const struct zigzag_layout_impl *implementation,
+    int output_width, int output_height, void *state)
 {
   struct zigzag_layout *self;
   self = zalloc(sizeof *self);
@@ -18,7 +18,7 @@ zigzag_layout_create(int output_width, int output_height, void *state,
 
   self->state = state;
 
-  self->on_damage = on_damage;
+  self->implementation = implementation;
 
   wl_list_init(&self->nodes);
 
