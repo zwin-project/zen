@@ -1,10 +1,10 @@
 #pragma once
 
 #include <wlr/render/wlr_renderer.h>
-#include <zen/ui/nodes/power-button.h>
 #include <zigzag.h>
 
 #include "zen/screen/output.h"
+#include "zen/ui/nodes/power-button.h"
 
 struct zn_menu_bar {
   struct zigzag_node *zigzag_node;

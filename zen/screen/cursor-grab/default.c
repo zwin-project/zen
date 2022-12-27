@@ -11,6 +11,7 @@
 #include "zen/screen.h"
 #include "zen/screen/cursor-grab/down.h"
 #include "zen/server.h"
+#include "zen/ui/zigzag-layout.h"
 #include "zen/view.h"
 
 static void
@@ -81,6 +82,8 @@ zn_default_cursor_grab_button(struct zn_cursor_grab *grab, uint32_t time_msec,
   wlr_seat_pointer_send_button(seat, time_msec, button, state);
 
   if (state == WLR_BUTTON_PRESSED) {
+    handle_zn_zigzag_layout_on_click(
+        cursor->board->screen->zn_zigzag_layout, cursor->x, cursor->y);
     struct zn_view *view = NULL;
     zn_board_get_surface_at(
         cursor->board, cursor->x, cursor->y, NULL, NULL, &view);

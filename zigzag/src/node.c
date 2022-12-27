@@ -71,7 +71,7 @@ zigzag_node_update_texture(
 
 struct zigzag_node *
 zigzag_node_create(const struct zigzag_node_impl *implementation,
-    struct zigzag_layout *layout, struct wlr_renderer *renderer,
+    struct zigzag_layout *layout, struct wlr_renderer *renderer, bool visible,
     void *user_data)
 {
   struct zigzag_node *self;
@@ -82,6 +82,7 @@ zigzag_node_create(const struct zigzag_node_impl *implementation,
   }
 
   self->layout = layout;
+  self->visible = visible;
   self->user_data = user_data;
   self->implementation = implementation;
 
@@ -113,4 +114,55 @@ zigzag_node_destroy(struct zigzag_node *self)
   wl_list_remove(&self->link);
   wlr_texture_destroy(self->texture);
   free(self);
+}
+
+static bool
+zigzag_wlr_fbox_contains_point(const struct wlr_fbox *box, double x, double y)
+{
+  if (box->width <= 0 || box->height <= 0) {
+    return false;
+  } else {
+    return x >= box->x && x < box->x + box->width && y >= box->y &&
+           y < box->y + box->height;
+  }
+}
+
+bool
+zigzag_node_contains_point(struct zigzag_node *self, double x, double y)
+{
+  if (!self->visible) {
+    return false;
+  }
+  return zigzag_wlr_fbox_contains_point(&self->frame, x, y);
+}
+
+void
+zigzag_node_show_texture_with_matrix(struct zigzag_node *self,
+    struct wlr_renderer *renderer, const float matrix[static 9])
+{
+  if (self->visible) {
+    wlr_render_texture_with_matrix(renderer, self->texture, matrix, 1.0f);
+  }
+}
+
+void
+zigzag_node_hide(struct zigzag_node *self)
+{
+  self->visible = false;
+  self->layout->implementation->on_damage(self);
+  struct zigzag_node *node;
+  wl_list_for_each (node, &self->node_list, link) {
+    zigzag_node_hide(node);
+  }
+}
+
+void
+zigzag_node_show(struct zigzag_node *self)
+{
+  self->visible = true;
+  self->layout->implementation->on_damage(self);
+  struct zigzag_node *node;
+  wl_list_for_each (node, &self->node_list, link) {
+    zigzag_node_show(node);
+  }
 }

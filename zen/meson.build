@@ -36,6 +36,9 @@ _zen_srcs = [
   'ui/zigzag-layout.c',
   'ui/nodes/menu-bar.c',
   'ui/nodes/power-button.c',
+  'ui/nodes/power-menu.c',
+  'ui/nodes/power-menu-item-clock.c',
+  'ui/nodes/power-menu-item-logout.c',
 
   'wlr/box.c',
 ]
