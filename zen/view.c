@@ -40,9 +40,11 @@ zn_view_update_geometry(struct zn_view *self)
 void
 zn_view_update_z_index(struct zn_view *self, unsigned int z_index)
 {
+  if (self->z_index == z_index) {
+    return;
+  }
   self->z_index = z_index;
   zn_view_update_geometry(self);
-  zn_view_commit_appearance(self);
 }
 
 static void
