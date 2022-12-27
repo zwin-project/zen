@@ -36,7 +36,8 @@ err_cairo_surface:
 
 struct zigzag_node *
 zigzag_node_create(const struct zigzag_node_impl *implementation,
-    struct zigzag_layout *layout, void *state, struct wlr_renderer *renderer)
+    struct zigzag_layout *layout, struct wlr_renderer *renderer,
+    void *user_data)
 {
   struct zigzag_node *self;
   self = zalloc(sizeof *self);
@@ -46,7 +47,7 @@ zigzag_node_create(const struct zigzag_node_impl *implementation,
   }
 
   self->layout = layout;
-  self->state = state;
+  self->user_data = user_data;
   self->implementation = implementation;
 
   wl_list_init(&self->children);
@@ -65,7 +66,7 @@ zigzag_node_destroy(struct zigzag_node *self)
 {
   wl_list_remove(&self->children);
   wlr_texture_destroy(self->texture);
-  if (self->state) free(self->state);
+  if (self->user_data) free(self->user_data);
   free(self->frame);
   free(self);
 }

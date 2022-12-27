@@ -6,8 +6,8 @@
 #include <zen-common.h>
 
 #include "zen/screen/renderer.h"
-#include "zen/screen/zigzag-layout.h"
 #include "zen/server.h"
+#include "zen/ui/zigzag-layout.h"
 
 static void zn_output_destroy(struct zn_output *self);
 
@@ -165,9 +165,10 @@ zn_output_create(struct wlr_output *wlr_output)
     goto err_screen;
   }
 
-  self->node_layout = zn_zigzag_layout_create_default(self, server);
-  if (self->node_layout == NULL) {
-    zn_error("Failed to create zigzag_layout");
+  self->zn_zigzag_layout =
+      zn_zigzag_layout_create(self->wlr_output, server->renderer, self->damage);
+  if (self->zn_zigzag_layout == NULL) {
+    zn_error("Failed to create the zn_zigzag_layout");
     goto err_screen;
   }
 
@@ -189,7 +190,7 @@ err:
 static void
 zn_output_destroy(struct zn_output *self)
 {
-  zn_zigzag_layout_destroy_default(self->node_layout);
+  zn_zigzag_layout_destroy(self->zn_zigzag_layout);
   wl_list_remove(&self->damage_frame_listener.link);
   wl_list_remove(&self->wlr_output_destroy_listener.link);
   zn_screen_destroy(self->screen);

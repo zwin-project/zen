@@ -6,6 +6,7 @@
 #include <zigzag.h>
 
 #include "zen/screen.h"
+#include "zen/ui/zigzag-layout.h"
 
 struct zn_output {
   struct wlr_output *wlr_output;  // nonnull, reference
@@ -15,7 +16,7 @@ struct zn_output {
 
   struct zn_screen *screen;  // nonnull, owning
 
-  struct zigzag_layout *node_layout;  // nonnull, owning
+  struct zn_zigzag_layout *zn_zigzag_layout;  // nonnull, owning
 
   struct wl_listener wlr_output_destroy_listener;
   struct wl_listener damage_frame_listener;

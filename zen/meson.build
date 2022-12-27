@@ -23,7 +23,6 @@ _zen_srcs = [
   'screen/cursor-grab/down.c',
   'screen/cursor-grab/move.c',
   'screen/cursor-grab/resize.c',
-  'screen/zigzag-layout.c',
 
   'input/binding.c',
   'input/input-device.c',
@@ -31,6 +30,10 @@ _zen_srcs = [
   'input/keyboard.c',
   'input/pointer.c',
   'input/seat.c',
+
+  'ui/zigzag-layout.c',
+  'ui/nodes/menu-bar.c',
+  'ui/nodes/power-button.c',
 
   'wlr/box.c',
 ]
