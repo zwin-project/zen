@@ -5,7 +5,7 @@
 
 struct zigzag_layout *
 zigzag_layout_create(const struct zigzag_layout_impl *implementation,
-    int output_width, int output_height, void *state)
+    int output_width, int output_height, void *user_data)
 {
   struct zigzag_layout *self;
   self = zalloc(sizeof *self);
@@ -16,7 +16,7 @@ zigzag_layout_create(const struct zigzag_layout_impl *implementation,
   self->output_width = output_width;
   self->output_height = output_height;
 
-  self->state = state;
+  self->user_data = user_data;
 
   self->implementation = implementation;
 

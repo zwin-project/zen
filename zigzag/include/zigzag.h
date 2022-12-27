@@ -16,14 +16,14 @@ struct zigzag_layout {
 
   struct wl_list nodes;  // zigzag_node::link
 
-  void *state;
+  void *user_data;
 
   const struct zigzag_layout_impl *implementation;
 };
 
 struct zigzag_layout *zigzag_layout_create(
     const struct zigzag_layout_impl *implementation, int output_width,
-    int output_height, void *state);
+    int output_height, void *user_data);
 
 void zigzag_layout_destroy(struct zigzag_layout *self);
 
@@ -40,7 +40,7 @@ struct zigzag_node {
   struct wlr_box *frame;
   struct wlr_texture *texture;
 
-  void *state;
+  void *user_data;
 
   struct wl_list link;  // for zigzag_layout :: nodes
   struct wl_list children;
@@ -50,11 +50,9 @@ struct zigzag_node {
 
 struct zigzag_node *zigzag_node_create(
     const struct zigzag_node_impl *implementation, struct zigzag_layout *layout,
-    void *state, struct wlr_renderer *renderer);
+    struct wlr_renderer *renderer, void *user_data);
 
 void zigzag_node_destroy(struct zigzag_node *self);
-
-void zigzag_node_cleanup_list(struct wl_list *nodes);
 
 struct wlr_texture *zigzag_node_render_texture(
     struct zigzag_node *self, struct wlr_renderer *renderer);
