@@ -7,7 +7,6 @@
 
 #include "zen/screen/renderer.h"
 #include "zen/server.h"
-#include "zen/ui/zigzag-layout.h"
 
 static void zn_output_destroy(struct zn_output *self);
 
@@ -115,7 +114,6 @@ zn_output_create(struct wlr_output *wlr_output)
 {
   struct zn_output *self;
   struct wlr_output_mode *mode;
-  struct zn_server *server = zn_server_get_singleton();
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -133,12 +131,6 @@ zn_output_create(struct wlr_output *wlr_output)
     goto err_free;
   }
 
-  self->screen = zn_screen_create(&screen_implementation, self);
-  if (self->screen == NULL) {
-    zn_error("Failed to create z zn_screen");
-    goto err_damage;
-  }
-
   self->wlr_output_destroy_listener.notify =
       zn_output_handle_wlr_output_destroy;
   wl_signal_add(
@@ -149,33 +141,30 @@ zn_output_create(struct wlr_output *wlr_output)
 
   if (wl_list_empty(&self->wlr_output->modes)) {
     zn_error("Failed to get output mode");
-    goto err_screen;
+    goto err_damage;
   }
 
   mode = wlr_output_preferred_mode(self->wlr_output);
   if (mode == NULL) {
     zn_error("Failed to get preferred output mode");
-    goto err_screen;
+    goto err_damage;
   }
 
   wlr_output_set_mode(self->wlr_output, mode);
   wlr_output_enable(self->wlr_output, true);
   if (wlr_output_commit(self->wlr_output) == false) {
     zn_error("Failed to set output mode");
-    goto err_screen;
+    goto err_damage;
   }
 
-  self->zn_zigzag_layout =
-      zn_zigzag_layout_create(self->wlr_output, server->renderer, self->damage);
-  if (self->zn_zigzag_layout == NULL) {
-    zn_error("Failed to create the zn_zigzag_layout");
-    goto err_screen;
+  self->screen = zn_screen_create(
+      &screen_implementation, self, self->wlr_output, self->damage);
+  if (self->screen == NULL) {
+    zn_error("Failed to create z zn_screen");
+    goto err_damage;
   }
 
   return self;
-
-err_screen:
-  zn_screen_destroy(self->screen);
 
 err_damage:
   wlr_output_damage_destroy(self->damage);
@@ -190,7 +179,6 @@ err:
 static void
 zn_output_destroy(struct zn_output *self)
 {
-  zn_zigzag_layout_destroy(self->zn_zigzag_layout);
   wl_list_remove(&self->damage_frame_listener.link);
   wl_list_remove(&self->wlr_output_destroy_listener.link);
   zn_screen_destroy(self->screen);
