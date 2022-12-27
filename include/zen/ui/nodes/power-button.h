@@ -4,6 +4,8 @@
 #include <wlr/render/wlr_renderer.h>
 #include <zigzag.h>
 
+#include "zen/ui/nodes/power-menu.h"
+
 struct zn_power_button {
   struct zigzag_node *zigzag_node;
 
@@ -11,6 +13,8 @@ struct zn_power_button {
   int64_t next_sec_ms;
 
   cairo_surface_t *power_icon_surface;
+
+  struct zn_power_menu *power_menu;
 };
 
 struct zn_power_button *zn_power_button_create(

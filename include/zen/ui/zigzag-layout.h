@@ -17,3 +17,6 @@ struct zn_zigzag_layout *zn_zigzag_layout_create(
     struct zn_screen *screen, struct wlr_renderer *renderer);
 
 void zn_zigzag_layout_destroy(struct zn_zigzag_layout *self);
+
+void handle_zn_zigzag_layout_on_click(
+    struct zn_zigzag_layout *self, double x, double y);

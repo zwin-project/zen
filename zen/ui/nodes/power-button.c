@@ -6,8 +6,13 @@
 
 #include "zen/server.h"
 
-double icon_width = 10.;
-double icon_height = 10.;
+const double icon_width = 10.;
+const double icon_height = 10.;
+
+const double margin_height = 6.;
+const double margin_width = 10.;
+const double button_width = 70.;
+const double height_with_margin = 33.;
 
 static int
 zn_power_button_handle_second_timer(void *data)
@@ -32,7 +37,12 @@ zn_power_button_on_click(struct zigzag_node *node, double x, double y)
   UNUSED(node);
   UNUSED(x);
   UNUSED(y);
-  // TODO: Show "Logout"
+  struct zn_power_button *power_button = node->user_data;
+  if (power_button->power_menu->zigzag_node->visible) {
+    zigzag_node_hide(power_button->power_menu->zigzag_node);
+  } else {
+    zigzag_node_show(power_button->power_menu->zigzag_node);
+  }
 }
 
 static bool
@@ -50,8 +60,8 @@ static bool
 zn_power_button_render(struct zigzag_node *node, cairo_t *cr)
 {
   cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
-  zigzag_cairo_draw_rounded_rectangle(
-      cr, node->frame.width, node->frame.height, node->frame.height / 2);
+  zigzag_cairo_draw_rounded_rectangle(cr, 0., 0., node->frame.width,
+      node->frame.height, node->frame.height / 2);
   cairo_fill_preserve(cr);
   cairo_set_line_width(cr, 0.5);
   cairo_set_source_rgb(cr, 0.07, 0.12, 0.30);
@@ -87,10 +97,6 @@ static void
 zn_power_button_set_frame(
     struct zigzag_node *node, double screen_width, double screen_height)
 {
-  double margin_height = 6.;
-  double margin_width = 10.;
-  double button_width = 70.;
-  double height_with_margin = 33.;
   double button_height = height_with_margin - margin_height * 2;
 
   node->frame.x = (double)screen_width - button_width - margin_width;
@@ -118,7 +124,7 @@ zn_power_button_create(
   }
 
   struct zigzag_node *zigzag_node =
-      zigzag_node_create(&implementation, zigzag_layout, renderer, self);
+      zigzag_node_create(&implementation, zigzag_layout, renderer, true, self);
 
   if (zigzag_node == NULL) {
     zn_error("Failed to create a zigzag_node");
@@ -126,12 +132,22 @@ zn_power_button_create(
   }
   self->zigzag_node = zigzag_node;
 
+  struct zn_power_menu *power_menu = zn_power_menu_create(zigzag_layout,
+      renderer, zigzag_layout->screen_width - margin_width - button_width / 2);
+  if (power_menu == NULL) {
+    zn_error("Failed to create the power_menu");
+    goto err_zigzag_node;
+  }
+  self->power_menu = power_menu;
+
+  wl_list_insert(&self->zigzag_node->node_list, &power_menu->zigzag_node->link);
+
   self->power_icon_surface = zigzag_node_render_cairo_surface(
       zigzag_node, zn_power_icon_render, icon_width, icon_height);
 
   if (self->power_icon_surface == NULL) {
     zn_error("Failed to load the icon");
-    goto err_zigzag_node;
+    goto err_power_menu;
   }
 
   struct zn_server *server = zn_server_get_singleton();
@@ -145,6 +161,9 @@ zn_power_button_create(
   wl_event_source_timer_update(self->second_timer_source, ms_delay);
 
   return self;
+
+err_power_menu:
+  zn_power_menu_destroy(self->power_menu);
 
 err_zigzag_node:
   zigzag_node_destroy(zigzag_node);

@@ -184,7 +184,7 @@ render_zigzag_nodes(struct zn_output *output, struct wlr_renderer *renderer,
 
       for (int i = 0; i < rect_count; i++) {
         scissor_output(output, &rects[i]);
-        wlr_render_texture_with_matrix(renderer, node->texture, matrix, 1.0f);
+        zigzag_node_show_texture_with_matrix(node, renderer, matrix);
       }
     }
     pixman_region32_fini(&render_damage);

@@ -61,17 +61,42 @@ zigzag_cairo_draw_text(cairo_t *cr, char *text, double x, double y,
 
 void
 zigzag_cairo_draw_rounded_rectangle(
-    cairo_t *cr, double width, double height, double radius)
+    cairo_t *cr, double x, double y, double width, double height, double radius)
 {
-  cairo_move_to(cr, radius, 0.);
-  cairo_line_to(cr, width - radius, 0.);
-  cairo_arc(cr, width - radius, radius, radius, -M_PI / 2, 0.);
-  cairo_line_to(cr, width, height - radius);
-  cairo_arc(cr, width - radius, height - radius, radius, 0., M_PI / 2);
-  cairo_line_to(cr, radius, height);
-  cairo_arc(cr, radius, height - radius, radius, M_PI / 2, M_PI);
-  cairo_line_to(cr, 0., radius);
-  cairo_arc(cr, radius, radius, radius, M_PI, 3 * M_PI / 2);
+  cairo_move_to(cr, x + radius, y);
+  cairo_line_to(cr, x + width - radius, y);
+  cairo_arc(cr, x + width - radius, y + radius, radius, -M_PI / 2, 0.);
+  cairo_line_to(cr, x + width, y + height - radius);
+  cairo_arc(cr, x + width - radius, y + height - radius, radius, 0., M_PI / 2);
+  cairo_line_to(cr, x + radius, y + height);
+  cairo_arc(cr, x + radius, y + height - radius, radius, M_PI / 2, M_PI);
+  cairo_line_to(cr, x, y + radius);
+  cairo_arc(cr, x + radius, y + radius, radius, M_PI, 3 * M_PI / 2);
+}
+
+void
+zigzag_cairo_draw_rounded_bubble(cairo_t *cr, double x, double y, double width,
+    double height, double radius, double tip_x)
+{
+  const double tip_height = 5;
+  const double tip_width = 10;
+  const double rectangle_height = height - tip_height;
+  cairo_move_to(cr, x + radius, y);
+  cairo_line_to(cr, x + width - radius, y);
+  cairo_arc(cr, x + width - radius, y + radius, radius, -M_PI / 2, 0.);
+  cairo_line_to(cr, x + width, y + rectangle_height - radius);
+  cairo_arc(cr, x + width - radius, y + rectangle_height - radius, radius, 0.,
+      M_PI / 2);
+
+  cairo_line_to(cr, tip_x + tip_width / 2, y + rectangle_height);
+  cairo_line_to(cr, tip_x, y + height);
+  cairo_line_to(cr, tip_x - tip_width / 2, y + rectangle_height);
+
+  cairo_line_to(cr, x + radius, y + rectangle_height);
+  cairo_arc(
+      cr, x + radius, y + rectangle_height - radius, radius, M_PI / 2, M_PI);
+  cairo_line_to(cr, x, y + radius);
+  cairo_arc(cr, x + radius, y + radius, radius, M_PI, 3 * M_PI / 2);
 }
 
 bool
