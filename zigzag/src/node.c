@@ -70,13 +70,3 @@ zigzag_node_destroy(struct zigzag_node *self)
   free(self->frame);
   free(self);
 }
-
-void
-zigzag_node_cleanup_list(struct wl_list *nodes)
-{
-  struct zigzag_node *node;
-  wl_list_for_each (node, nodes, link) {
-    zigzag_node_cleanup_list(&node->children);
-    zigzag_node_destroy(node);
-  }
-}
