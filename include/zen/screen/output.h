@@ -16,8 +16,6 @@ struct zn_output {
 
   struct zn_screen *screen;  // nonnull, owning
 
-  struct zn_zigzag_layout *zn_zigzag_layout;  // nonnull, owning
-
   struct wl_listener wlr_output_destroy_listener;
   struct wl_listener damage_frame_listener;
 };

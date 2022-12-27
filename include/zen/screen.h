@@ -1,5 +1,7 @@
 #pragma once
 
+#include <wlr/types/wlr_output.h>
+#include <wlr/types/wlr_output_damage.h>
 #include <wlr/util/box.h>
 
 struct zn_screen;
@@ -30,6 +32,8 @@ struct zn_screen {
   struct zn_board *current_board;
 
   struct wl_listener current_board_destroy_listener;
+
+  struct zn_zigzag_layout *zn_zigzag_layout;  // nonnull, owning
 
   struct {
     struct wl_signal destroy;  // (NULL)
@@ -62,6 +66,7 @@ void zn_screen_set_current_board(
     struct zn_screen *self, struct zn_board *board);
 
 struct zn_screen *zn_screen_create(
-    const struct zn_screen_interface *implementation, void *user_data);
+    const struct zn_screen_interface *implementation, void *user_data,
+    struct wlr_output *output, struct wlr_output_damage *damage);
 
 void zn_screen_destroy(struct zn_screen *self);

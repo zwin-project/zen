@@ -208,7 +208,8 @@ zn_screen_renderer_render(struct zn_output *output,
       render_view(output, view, renderer, &screen_damage);
 
     render_zigzag_nodes(output, renderer,
-        &output->zn_zigzag_layout->zigzag_layout->nodes, &screen_damage);
+        &output->screen->zn_zigzag_layout->zigzag_layout->nodes,
+        &screen_damage);
   }
 
   render_cursor(output, server->scene->cursor, renderer, &screen_damage);
