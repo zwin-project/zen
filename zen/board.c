@@ -18,7 +18,6 @@ void
 zn_board_reorder_view(struct zn_board *self)
 {
   struct zn_view *view;
-
   unsigned int i = 1;
   wl_list_for_each (view, &self->view_list, board_link) {
     zn_view_update_z_index(view, i++);

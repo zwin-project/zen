@@ -11,6 +11,7 @@
 #include "zen/screen.h"
 #include "zen/screen/cursor-grab/down.h"
 #include "zen/server.h"
+#include "zen/view.h"
 
 static void
 zn_default_cursor_grab_send_movement(
@@ -84,6 +85,13 @@ zn_default_cursor_grab_button(struct zn_cursor_grab *grab, uint32_t time_msec,
     zn_board_get_surface_at(
         cursor->board, cursor->x, cursor->y, NULL, NULL, &view);
     zn_scene_set_focused_view(server->scene, view);
+
+    if (view) {
+      struct zn_view *view_iter;
+      wl_list_for_each (view_iter, &view->board->view_list, board_link) {
+        zn_view_commit_appearance(view_iter);
+      }
+    }
 
     if (view && server->input_manager->seat->pressing_button_count == 1) {
       zn_down_cursor_grab_start(cursor, view);
