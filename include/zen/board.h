@@ -10,7 +10,7 @@ struct zn_view;
 
 #define CURSOR_Z_OFFSET_ON_BOARD 0.0005
 #define VIEW_MIN_Z_OFFSET_ON_BOARD 0.0001
-#define VIEW_Z_OFFSET_GAP          0.000001
+#define VIEW_Z_OFFSET_GAP 0.000001
 
 struct zn_board {
   struct wl_list link;  // zn_scene::board_list
