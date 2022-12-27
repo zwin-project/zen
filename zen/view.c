@@ -28,7 +28,7 @@ zn_view_update_geometry(struct zn_view *self)
     glm_mat4_copy(self->board->geometry.transform, self->geometry.transform);
     glm_translate(self->geometry.transform,
         (vec3){board_local_view_geom.x, board_local_view_geom.y,
-            VIEW_Z_OFFSET_ON_BOARD * self->z_index});
+            VIEW_MIN_Z_OFFSET_ON_BOARD + VIEW_Z_OFFSET_GAP * self->z_index});
   } else {
     glm_mat4_identity(self->geometry.transform);
     glm_vec2_zero(self->geometry.size);
