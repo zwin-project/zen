@@ -54,6 +54,7 @@ zn_zigzag_layout_create(struct wlr_output *output,
     zn_error("Failed to create the menu_bar");
     goto err_zigzag_layout;
   }
+  self->menu_bar = menu_bar;
 
   wl_list_insert(&self->zigzag_layout->node_list, &menu_bar->zigzag_node->link);
 

@@ -4,7 +4,7 @@
 #include <zen-common.h>
 #include <zigzag.h>
 
-struct wlr_texture *
+static struct wlr_texture *
 zigzag_node_render_texture(
     struct zigzag_node *self, struct wlr_renderer *renderer)
 {
@@ -32,6 +32,15 @@ err_cairo_surface:
   cairo_surface_destroy(surface);
 
   return texture;
+}
+
+void
+zigzag_node_update_texture(
+    struct zigzag_node *self, struct wlr_renderer *renderer)
+{
+  wlr_texture_destroy(self->texture);
+  self->texture = zigzag_node_render_texture(self, renderer);
+  self->layout->implementation->on_damage(self);
 }
 
 struct zigzag_node *

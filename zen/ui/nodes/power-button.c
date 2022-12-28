@@ -21,9 +21,7 @@ zn_power_button_handle_second_timer(void *data)
   int ms_delay = (int)(self->next_sec_ms - time_ms + 10);
   wl_event_source_timer_update(self->second_timer_source, ms_delay);
 
-  zigzag_node->texture =
-      zigzag_node_render_texture(zigzag_node, server->renderer);
-  zigzag_node->layout->implementation->on_damage(zigzag_node);
+  zigzag_node_update_texture(zigzag_node, server->renderer);
   return 0;
 }
 
