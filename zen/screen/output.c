@@ -131,14 +131,6 @@ zn_output_create(struct wlr_output *wlr_output)
     goto err_free;
   }
 
-  self->wlr_output_destroy_listener.notify =
-      zn_output_handle_wlr_output_destroy;
-  wl_signal_add(
-      &wlr_output->events.destroy, &self->wlr_output_destroy_listener);
-
-  self->damage_frame_listener.notify = zn_output_handle_damage_frame;
-  wl_signal_add(&self->damage->events.frame, &self->damage_frame_listener);
-
   if (wl_list_empty(&self->wlr_output->modes)) {
     zn_error("Failed to get output mode");
     goto err_damage;
@@ -163,6 +155,14 @@ zn_output_create(struct wlr_output *wlr_output)
     zn_error("Failed to create z zn_screen");
     goto err_damage;
   }
+
+  self->wlr_output_destroy_listener.notify =
+      zn_output_handle_wlr_output_destroy;
+  wl_signal_add(
+      &wlr_output->events.destroy, &self->wlr_output_destroy_listener);
+
+  self->damage_frame_listener.notify = zn_output_handle_damage_frame;
+  wl_signal_add(&self->damage->events.frame, &self->damage_frame_listener);
 
   return self;
 
