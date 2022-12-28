@@ -36,7 +36,7 @@ struct zn_view {
 
   // controlled by `zn_view_update_z_index`, called from zn_board
   // 1 is the backmost
-  unsigned int z_index;
+  uint32_t z_index;
 
   // view-local coordinate
   struct wlr_fbox prev_surface_fbox;
