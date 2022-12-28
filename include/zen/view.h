@@ -69,7 +69,7 @@ struct zn_view {
   uint32_t appearance_damage;
 };
 
-void zn_view_update_z_index(struct zn_view *self, unsigned int z_index);
+void zn_view_update_z_index(struct zn_view *self, uint32_t z_index);
 
 void zn_view_commit_appearance(struct zn_view *self);
 
