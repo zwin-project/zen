@@ -15,7 +15,7 @@
 #define BOARD_PIXEL_PER_METER 2800.f
 
 void
-zn_board_reorder_view(struct zn_board *self)
+zn_board_rearrange_view(struct zn_board *self)
 {
   struct zn_view *view;
   unsigned int i = 1;
