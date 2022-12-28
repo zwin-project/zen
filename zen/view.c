@@ -211,7 +211,7 @@ zn_view_bring_to_front(struct zn_view *self)
 
   wl_list_remove(&self->board_link);
   wl_list_insert(self->board->view_list.prev, &self->board_link);
-  zn_board_reorder_view(self->board);
+  zn_board_rearrange_view(self->board);
 
   zn_view_damage_whole(self);
 }
@@ -321,7 +321,7 @@ zn_view_destroy(struct zn_view *self)
   wl_signal_emit(&self->events.destroy, NULL);
 
   wl_list_remove(&self->board_link);
-  zn_board_reorder_view(self->board);
+  zn_board_rearrange_view(self->board);
 
   wl_list_remove(&self->link);
   wl_list_remove(&self->board_destroy_listener.link);
