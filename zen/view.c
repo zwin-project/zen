@@ -38,7 +38,7 @@ zn_view_update_geometry(struct zn_view *self)
 }
 
 void
-zn_view_update_z_index(struct zn_view *self, unsigned int z_index)
+zn_view_update_z_index(struct zn_view *self, uint32_t z_index)
 {
   if (self->z_index == z_index) {
     return;
