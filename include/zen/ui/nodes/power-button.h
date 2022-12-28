@@ -7,7 +7,7 @@ struct zn_power_button {
   struct zigzag_node *zigzag_node;
 
   struct wl_event_source *second_timer_source;
-  long next_sec_ms;
+  int64_t next_sec_ms;
 };
 
 struct zn_power_button *zn_power_button_create(

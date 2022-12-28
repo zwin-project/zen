@@ -55,7 +55,7 @@ zn_zigzag_layout_create(struct wlr_output *output,
     goto err_zigzag_layout;
   }
 
-  wl_list_insert(&self->zigzag_layout->nodes, &menu_bar->zigzag_node->link);
+  wl_list_insert(&self->zigzag_layout->node_list, &menu_bar->zigzag_node->link);
 
   return self;
 

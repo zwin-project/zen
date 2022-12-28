@@ -20,7 +20,7 @@ zigzag_layout_create(const struct zigzag_layout_impl *implementation,
 
   self->implementation = implementation;
 
-  wl_list_init(&self->nodes);
+  wl_list_init(&self->node_list);
 
   return self;
 err:
@@ -30,6 +30,6 @@ err:
 void
 zigzag_layout_destroy(struct zigzag_layout *self)
 {
-  wl_list_remove(&self->nodes);
+  wl_list_remove(&self->node_list);
   free(self);
 }

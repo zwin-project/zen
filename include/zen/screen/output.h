@@ -3,10 +3,8 @@
 #include <wayland-server-core.h>
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_damage.h>
-#include <zigzag.h>
 
 #include "zen/screen.h"
-#include "zen/ui/zigzag-layout.h"
 
 struct zn_output {
   struct wlr_output *wlr_output;  // nonnull, reference
