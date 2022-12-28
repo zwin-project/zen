@@ -14,7 +14,7 @@ struct zigzag_layout {
   int output_width;
   int output_height;
 
-  struct wl_list nodes;  // zigzag_node::link
+  struct wl_list node_list;  // zigzag_node::link
 
   void *user_data;
 
@@ -42,8 +42,11 @@ struct zigzag_node {
 
   void *user_data;
 
-  struct wl_list link;  // for zigzag_layout :: nodes
-  struct wl_list children;
+  // for zigzag_layout::node_list or zigzag_node::node_list
+  struct wl_list link;
+
+  // zigzag_node::link
+  struct wl_list node_list;
 
   const struct zigzag_node_impl *implementation;
 };

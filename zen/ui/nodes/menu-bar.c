@@ -18,7 +18,6 @@ zn_menu_bar_on_click(struct zigzag_node *self, double x, double y)
 static void
 zn_menu_bar_render(struct zigzag_node *self, cairo_t *cr)
 {
-  UNUSED(self);
   cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.1);
   cairo_paint(cr);
   cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.88);
@@ -75,7 +74,7 @@ zn_menu_bar_create(struct zigzag_layout *zigzag_layout,
   }
 
   wl_list_insert(
-      &self->zigzag_node->children, &power_button->zigzag_node->link);
+      &self->zigzag_node->node_list, &power_button->zigzag_node->link);
 
   return self;
 

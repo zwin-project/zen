@@ -57,7 +57,7 @@ timespec_to_msec(const struct timespec *a)
  *
  * \return milliseconds
  */
-static inline long
+static inline int64_t
 current_realtime_clock_ms(void)
 {
   struct timespec ts;

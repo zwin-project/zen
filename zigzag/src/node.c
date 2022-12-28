@@ -50,7 +50,7 @@ zigzag_node_create(const struct zigzag_node_impl *implementation,
   self->user_data = user_data;
   self->implementation = implementation;
 
-  wl_list_init(&self->children);
+  wl_list_init(&self->node_list);
   self->frame = zalloc(sizeof self->frame);
   self->implementation->set_frame(
       self, layout->output_width, layout->output_height);
@@ -64,9 +64,9 @@ err:
 void
 zigzag_node_destroy(struct zigzag_node *self)
 {
-  wl_list_remove(&self->children);
+  wl_list_remove(&self->node_list);
+  wl_list_remove(&self->link);
   wlr_texture_destroy(self->texture);
-  if (self->user_data) free(self->user_data);
   free(self->frame);
   free(self);
 }

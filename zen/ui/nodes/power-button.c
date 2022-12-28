@@ -15,7 +15,7 @@ zn_power_button_handle_second_timer(void *data)
   struct zigzag_node *zigzag_node = self->zigzag_node;
   struct zn_server *server = zn_server_get_singleton();
 
-  long time_ms = current_realtime_clock_ms();
+  int64_t time_ms = current_realtime_clock_ms();
   self->next_sec_ms = (time_ms - time_ms % MSEC_PER_SEC + MSEC_PER_SEC);
 
   int ms_delay = (int)(self->next_sec_ms - time_ms + 10);
@@ -144,7 +144,7 @@ zn_power_button_create(struct zigzag_layout *zigzag_layout,
       wl_event_loop_add_timer(wl_display_get_event_loop(display),
           zn_power_button_handle_second_timer, self);
 
-  long time_ms = current_realtime_clock_ms();
+  int64_t time_ms = current_realtime_clock_ms();
   self->next_sec_ms = (time_ms - time_ms % MSEC_PER_SEC + MSEC_PER_SEC);
 
   int ms_delay = (int)(self->next_sec_ms - time_ms + 10);

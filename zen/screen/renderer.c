@@ -2,11 +2,13 @@
 
 #include <wlr/types/wlr_matrix.h>
 #include <zen-common.h>
+#include <zigzag.h>
 
 #include "zen/board.h"
 #include "zen/cursor.h"
 #include "zen/screen/output.h"
 #include "zen/server.h"
+#include "zen/ui/zigzag-layout.h"
 #include "zen/view.h"
 
 static void
@@ -158,10 +160,10 @@ render_view(struct zn_output *output, struct zn_view *view,
 
 static void
 render_zigzag_nodes(struct zn_output *output, struct wlr_renderer *renderer,
-    struct wl_list *nodes, pixman_region32_t *screen_damage)
+    struct wl_list *node_list, pixman_region32_t *screen_damage)
 {
   struct zigzag_node *node;
-  wl_list_for_each (node, nodes, link) {
+  wl_list_for_each (node, node_list, link) {
     float matrix[9];
     wlr_matrix_project_box(matrix, node->frame, WL_OUTPUT_TRANSFORM_NORMAL, 0,
         output->wlr_output->transform_matrix);
@@ -173,7 +175,7 @@ render_zigzag_nodes(struct zn_output *output, struct wlr_renderer *renderer,
       scissor_output(output, &rects[i]);
       wlr_render_texture_with_matrix(renderer, node->texture, matrix, 1.0f);
     }
-    render_zigzag_nodes(output, renderer, &node->children, screen_damage);
+    render_zigzag_nodes(output, renderer, &node->node_list, screen_damage);
   }
 }
 
@@ -208,7 +210,7 @@ zn_screen_renderer_render(struct zn_output *output,
       render_view(output, view, renderer, &screen_damage);
 
     render_zigzag_nodes(output, renderer,
-        &output->screen->zn_zigzag_layout->zigzag_layout->nodes,
+        &output->screen->zn_zigzag_layout->zigzag_layout->node_list,
         &screen_damage);
   }
 
