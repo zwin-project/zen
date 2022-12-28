@@ -72,6 +72,7 @@ zn_menu_bar_create(struct zigzag_layout *zigzag_layout,
     zn_error("Failed to create the power_button");
     goto err_zigzag_node;
   }
+  self->power_button = power_button;
 
   wl_list_insert(
       &self->zigzag_node->node_list, &power_button->zigzag_node->link);

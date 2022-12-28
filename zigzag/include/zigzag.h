@@ -57,7 +57,7 @@ struct zigzag_node *zigzag_node_create(
 
 void zigzag_node_destroy(struct zigzag_node *self);
 
-struct wlr_texture *zigzag_node_render_texture(
+void zigzag_node_update_texture(
     struct zigzag_node *self, struct wlr_renderer *renderer);
 
 struct wlr_texture *zigzag_wlr_texture_from_cairo_surface(
