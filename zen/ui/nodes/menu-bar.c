@@ -15,7 +15,7 @@ zn_menu_bar_on_click(struct zigzag_node *self, double x, double y)
   UNUSED(y);
 }
 
-static void
+static bool
 zn_menu_bar_render(struct zigzag_node *self, cairo_t *cr)
 {
   cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.1);
@@ -24,6 +24,7 @@ zn_menu_bar_render(struct zigzag_node *self, cairo_t *cr)
   cairo_set_line_width(cr, 0.25);
   cairo_rectangle(cr, 0., 0., self->frame->width, self->frame->height);
   cairo_stroke(cr);
+  return true;
 }
 
 static void

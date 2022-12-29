@@ -10,6 +10,7 @@ _zigzag_deps = [
   cairo_dep,
   wayland_server_dep,
   wlroots_dep,
+  rsvg_dep,
   zen_common_dep,
 ]
 

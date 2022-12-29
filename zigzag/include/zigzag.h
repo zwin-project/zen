@@ -27,11 +27,13 @@ struct zigzag_layout *zigzag_layout_create(
 
 void zigzag_layout_destroy(struct zigzag_layout *self);
 
+typedef bool (*zigzag_node_render_t)(struct zigzag_node *self, cairo_t *cr);
+
 struct zigzag_node_impl {
   void (*on_click)(struct zigzag_node *self, double x, double y);
   void (*set_frame)(
       struct zigzag_node *self, int output_width, int output_height);
-  void (*render)(struct zigzag_node *self, cairo_t *cr);
+  zigzag_node_render_t render;
 };
 
 struct zigzag_node {
@@ -57,6 +59,9 @@ struct zigzag_node *zigzag_node_create(
 
 void zigzag_node_destroy(struct zigzag_node *self);
 
+cairo_surface_t *zigzag_node_render_cairo_surface(struct zigzag_node *self,
+    zigzag_node_render_t render, double width, double height);
+
 void zigzag_node_update_texture(
     struct zigzag_node *self, struct wlr_renderer *renderer);
 
@@ -77,3 +82,6 @@ void zigzag_cairo_draw_right_aligned_text(
 
 void zigzag_cairo_draw_rounded_rectangle(
     cairo_t *cr, double width, double height, double radius);
+
+bool zigzag_cairo_stamp_svg_on_surface(cairo_t *cr, const char *filename,
+    double x, double y, double width, double height);

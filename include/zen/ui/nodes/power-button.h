@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cairo.h>
 #include <wlr/render/wlr_renderer.h>
 #include <zigzag.h>
 
@@ -8,6 +9,8 @@ struct zn_power_button {
 
   struct wl_event_source *second_timer_source;
   int64_t next_sec_ms;
+
+  cairo_surface_t *power_icon_surface;
 };
 
 struct zn_power_button *zn_power_button_create(
