@@ -16,6 +16,10 @@ struct zigzag_layout {
 
   struct wl_list node_list;  // zigzag_node::link
 
+  cairo_font_face_t *system_font;
+  cairo_user_data_key_t ft_font_face_key;
+  cairo_user_data_key_t ft_library_key;
+
   void *user_data;
 
   const struct zigzag_layout_impl *implementation;
@@ -23,7 +27,7 @@ struct zigzag_layout {
 
 struct zigzag_layout *zigzag_layout_create(
     const struct zigzag_layout_impl *implementation, int output_width,
-    int output_height, void *user_data);
+    int output_height, const char *font_file_path, void *user_data);
 
 void zigzag_layout_destroy(struct zigzag_layout *self);
 

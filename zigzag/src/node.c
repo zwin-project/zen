@@ -22,6 +22,7 @@ zigzag_node_render_cairo_surface(struct zigzag_node *self,
     goto err_cairo;
   }
 
+  cairo_set_font_face(cr, self->layout->system_font);
   bool success = render(self, cr);
   if (success) {
     cairo_destroy(cr);

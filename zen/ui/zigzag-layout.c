@@ -37,8 +37,8 @@ zn_zigzag_layout_create(struct wlr_output *output,
   int output_width, output_height;
   wlr_output_transformed_resolution(output, &output_width, &output_height);
 
-  struct zigzag_layout *zigzag_layout =
-      zigzag_layout_create(&implementation, output_width, output_height, self);
+  struct zigzag_layout *zigzag_layout = zigzag_layout_create(
+      &implementation, output_width, output_height, DEFAULT_SYSTEM_FONT, self);
 
   if (zigzag_layout == NULL) {
     zn_error("Failed to create a zigzag_layout");

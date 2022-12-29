@@ -1,6 +1,5 @@
 #include "zen/ui/nodes/power-button.h"
 
-#include <cairo-ft.h>
 #include <cairo.h>
 #include <zen-common.h>
 #include <zigzag.h>
@@ -60,15 +59,6 @@ zn_power_button_render(struct zigzag_node *self, cairo_t *cr)
   cairo_set_line_width(cr, 0.5);
   cairo_set_source_rgb(cr, 0.07, 0.12, 0.30);
   cairo_stroke(cr);
-
-  FT_Library library;
-  FT_Init_FreeType(&library);
-  FT_Face face;
-  FT_New_Face(
-      library, "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf", 0, &face);
-
-  cairo_font_face_t *cr_face = cairo_ft_font_face_create_for_ft_face(face, 0);
-  cairo_set_font_face(cr, cr_face);
 
   time_t rawtime;
   struct tm *timeinfo;
