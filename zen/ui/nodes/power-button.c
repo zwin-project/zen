@@ -2,11 +2,13 @@
 
 #include <cairo-ft.h>
 #include <cairo.h>
-#include <librsvg/rsvg.h>
 #include <zen-common.h>
 #include <zigzag.h>
 
 #include "zen/server.h"
+
+double icon_width = 10.;
+double icon_height = 10.;
 
 static int
 zn_power_button_handle_second_timer(void *data)
@@ -34,7 +36,21 @@ zn_power_button_on_click(struct zigzag_node *self, double x, double y)
   // TODO: Show "Logout"
 }
 
-static void
+static bool
+zn_power_icon_render(struct zigzag_node *self, cairo_t *cr)
+{
+  UNUSED(self);
+  cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
+  cairo_paint(cr);
+  bool result = zigzag_cairo_stamp_svg_on_surface(
+      cr, POWER_BUTTON_ICON, 0., 0., icon_width, icon_height);
+  if (!result) {
+    return false;
+  }
+  return true;
+}
+
+static bool
 zn_power_button_render(struct zigzag_node *self, cairo_t *cr)
 {
   cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
@@ -69,30 +85,16 @@ zn_power_button_render(struct zigzag_node *self, cairo_t *cr)
   zigzag_cairo_draw_left_aligned_text(
       cr, output, self->frame->width, self->frame->height, padding);
 
-  GError *error = NULL;
-  GFile *file = g_file_new_for_path(POWER_BUTTON_ICON);
-  RsvgHandle *handle = rsvg_handle_new_from_gfile_sync(
-      file, RSVG_HANDLE_FLAGS_NONE, NULL, &error);
-  if (handle == NULL) {
-    zn_error("Failed to create the svg handler: %s", error->message);
-    goto err;
-  }
-  double icon_width = 10.;
-  double icon_height = 10.;
-  RsvgRectangle viewport = {
-      .x = self->frame->width - padding - icon_width,
-      .y = (self->frame->height - icon_height) / 2,
-      .width = icon_width,
-      .height = icon_height,
-  };
-  if (!rsvg_handle_render_document(handle, cr, &viewport, &error)) {
-    zn_error("Failed to render the svg");
-  }
+  struct zn_power_button *power_button =
+      (struct zn_power_button *)self->user_data;
 
-  g_object_unref(handle);
+  double icon_x = self->frame->width - padding - icon_width;
+  double icon_y = (self->frame->height - icon_height) / 2;
+  cairo_set_source_surface(
+      cr, power_button->power_icon_surface, icon_x, icon_y);
+  cairo_paint(cr);
 
-err:
-  return;
+  return true;
 }
 
 static void
@@ -138,6 +140,14 @@ zn_power_button_create(struct zigzag_layout *zigzag_layout,
   }
   self->zigzag_node = zigzag_node;
 
+  self->power_icon_surface = zigzag_node_render_cairo_surface(
+      zigzag_node, zn_power_icon_render, icon_width, icon_height);
+
+  if (self->power_icon_surface == NULL) {
+    zn_error("Failed to load the icon");
+    goto err_zigzag_node;
+  }
+
   self->second_timer_source =
       wl_event_loop_add_timer(wl_display_get_event_loop(display),
           zn_power_button_handle_second_timer, self);
@@ -149,6 +159,9 @@ zn_power_button_create(struct zigzag_layout *zigzag_layout,
   wl_event_source_timer_update(self->second_timer_source, ms_delay);
 
   return self;
+
+err_zigzag_node:
+  zigzag_node_destroy(zigzag_node);
 
 err_power_button:
   free(self);
