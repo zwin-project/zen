@@ -22,22 +22,22 @@ zn_menu_bar_render(struct zigzag_node *self, cairo_t *cr)
   cairo_paint(cr);
   cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.88);
   cairo_set_line_width(cr, 0.25);
-  cairo_rectangle(cr, 0., 0., self->frame->width, self->frame->height);
+  cairo_rectangle(cr, 0., 0., self->frame.width, self->frame.height);
   cairo_stroke(cr);
   return true;
 }
 
 static void
 zn_menu_bar_set_frame(
-    struct zigzag_node *self, int output_width, int output_height)
+    struct zigzag_node *self, double screen_width, double screen_height)
 {
   double height = 33.;
-  double bar_width = (double)output_width;
+  double bar_width = screen_width;
 
-  self->frame->x = 0.;
-  self->frame->y = (double)output_height - height;
-  self->frame->width = bar_width;
-  self->frame->height = height;
+  self->frame.x = 0.;
+  self->frame.y = screen_height - height;
+  self->frame.width = bar_width;
+  self->frame.height = height;
 }
 
 static const struct zigzag_node_impl implementation = {
@@ -47,8 +47,8 @@ static const struct zigzag_node_impl implementation = {
 };
 
 struct zn_menu_bar *
-zn_menu_bar_create(struct zigzag_layout *zigzag_layout,
-    struct wlr_renderer *renderer, struct wl_display *display)
+zn_menu_bar_create(
+    struct zigzag_layout *zigzag_layout, struct wlr_renderer *renderer)
 {
   struct zn_menu_bar *self;
 
@@ -68,7 +68,7 @@ zn_menu_bar_create(struct zigzag_layout *zigzag_layout,
   self->zigzag_node = zigzag_node;
 
   struct zn_power_button *power_button =
-      zn_power_button_create(zigzag_layout, renderer, display);
+      zn_power_button_create(zigzag_layout, renderer);
   if (power_button == NULL) {
     zn_error("Failed to create the power_button");
     goto err_zigzag_node;

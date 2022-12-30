@@ -77,9 +77,8 @@ zn_screen_set_current_board(struct zn_screen *self, struct zn_board *board)
 }
 
 struct zn_screen *
-zn_screen_create(const struct zn_screen_interface *implementation,
-    void *user_data, struct wlr_output *output,
-    struct wlr_output_damage *damage)
+zn_screen_create(
+    const struct zn_screen_interface *implementation, void *user_data)
 {
   struct zn_screen *self;
   struct zn_server *server = zn_server_get_singleton();
@@ -102,8 +101,7 @@ zn_screen_create(const struct zn_screen_interface *implementation,
       zn_screen_handle_current_board_destroy;
   wl_list_init(&self->current_board_destroy_listener.link);
 
-  self->zn_zigzag_layout =
-      zn_zigzag_layout_create(output, server->renderer, damage);
+  self->zn_zigzag_layout = zn_zigzag_layout_create(self, server->renderer);
   if (self->zn_zigzag_layout == NULL) {
     zn_error("Failed to create the zn_zigzag_layout");
     goto err_screen;

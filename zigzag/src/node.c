@@ -42,7 +42,7 @@ zigzag_node_render_texture(
     struct zigzag_node *self, struct wlr_renderer *renderer)
 {
   cairo_surface_t *surface = zigzag_node_render_cairo_surface(self,
-      self->implementation->render, self->frame->width, self->frame->height);
+      self->implementation->render, self->frame.width, self->frame.height);
   if (surface == NULL) {
     zn_error("Failed to create a cairo_surface");
     return NULL;
@@ -83,9 +83,8 @@ zigzag_node_create(const struct zigzag_node_impl *implementation,
   self->implementation = implementation;
 
   wl_list_init(&self->node_list);
-  self->frame = zalloc(sizeof self->frame);
   self->implementation->set_frame(
-      self, layout->output_width, layout->output_height);
+      self, layout->screen_width, layout->screen_height);
 
   self->texture = zigzag_node_render_texture(self, renderer);
 
@@ -99,6 +98,5 @@ zigzag_node_destroy(struct zigzag_node *self)
   wl_list_remove(&self->node_list);
   wl_list_remove(&self->link);
   wlr_texture_destroy(self->texture);
-  free(self->frame);
   free(self);
 }

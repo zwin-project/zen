@@ -66,7 +66,6 @@ void zn_screen_set_current_board(
     struct zn_screen *self, struct zn_board *board);
 
 struct zn_screen *zn_screen_create(
-    const struct zn_screen_interface *implementation, void *user_data,
-    struct wlr_output *output, struct wlr_output_damage *damage);
+    const struct zn_screen_interface *implementation, void *user_data);
 
 void zn_screen_destroy(struct zn_screen *self);
