@@ -12,7 +12,7 @@ struct zn_menu_bar {
   struct zn_power_button *power_button;
 };
 
-struct zn_menu_bar *zn_menu_bar_create(struct zigzag_layout *zigzag_layout,
-    struct wlr_renderer *renderer, struct wl_display *display);
+struct zn_menu_bar *zn_menu_bar_create(
+    struct zigzag_layout *zigzag_layout, struct wlr_renderer *renderer);
 
 void zn_menu_bar_destroy(struct zn_menu_bar *self);

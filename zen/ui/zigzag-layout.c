@@ -5,6 +5,7 @@
 #include <zen-common.h>
 #include <zigzag.h>
 
+#include "zen/screen.h"
 #include "zen/server.h"
 #include "zen/ui/nodes/menu-bar.h"
 
@@ -13,7 +14,7 @@ zn_zigzag_layout_on_damage(struct zigzag_node *node)
 {
   struct zn_zigzag_layout *self =
       (struct zn_zigzag_layout *)node->layout->user_data;
-  wlr_output_damage_add_box(self->damage, node->frame);
+  zn_screen_damage(self->screen, &node->frame);
 }
 
 static const struct zigzag_layout_impl implementation = {
@@ -21,8 +22,7 @@ static const struct zigzag_layout_impl implementation = {
 };
 
 struct zn_zigzag_layout *
-zn_zigzag_layout_create(struct wlr_output *output,
-    struct wlr_renderer *renderer, struct wlr_output_damage *damage)
+zn_zigzag_layout_create(struct zn_screen *screen, struct wlr_renderer *renderer)
 {
   struct zn_zigzag_layout *self;
 
@@ -31,14 +31,13 @@ zn_zigzag_layout_create(struct wlr_output *output,
     zn_error("Failed to allocate memory");
     goto err;
   }
+  self->screen = screen;
 
-  self->damage = damage;
-
-  int output_width, output_height;
-  wlr_output_transformed_resolution(output, &output_width, &output_height);
+  double screen_width, screen_height;
+  zn_screen_get_effective_size(screen, &screen_width, &screen_height);
 
   struct zigzag_layout *zigzag_layout = zigzag_layout_create(
-      &implementation, output_width, output_height, DEFAULT_SYSTEM_FONT, self);
+      &implementation, screen_width, screen_height, DEFAULT_SYSTEM_FONT, self);
 
   if (zigzag_layout == NULL) {
     zn_error("Failed to create a zigzag_layout");
@@ -47,8 +46,7 @@ zn_zigzag_layout_create(struct wlr_output *output,
 
   self->zigzag_layout = zigzag_layout;
 
-  struct zn_menu_bar *menu_bar =
-      zn_menu_bar_create(zigzag_layout, renderer, output->display);
+  struct zn_menu_bar *menu_bar = zn_menu_bar_create(zigzag_layout, renderer);
 
   if (menu_bar == NULL) {
     zn_error("Failed to create the menu_bar");

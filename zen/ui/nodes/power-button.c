@@ -54,7 +54,7 @@ zn_power_button_render(struct zigzag_node *self, cairo_t *cr)
 {
   cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
   zigzag_cairo_draw_rounded_rectangle(
-      cr, self->frame->width, self->frame->height, self->frame->height / 2);
+      cr, self->frame.width, self->frame.height, self->frame.height / 2);
   cairo_fill_preserve(cr);
   cairo_set_line_width(cr, 0.5);
   cairo_set_source_rgb(cr, 0.07, 0.12, 0.30);
@@ -73,13 +73,13 @@ zn_power_button_render(struct zigzag_node *self, cairo_t *cr)
   double padding = 6.;
   cairo_set_font_size(cr, 11);
   zigzag_cairo_draw_left_aligned_text(
-      cr, output, self->frame->width, self->frame->height, padding);
+      cr, output, self->frame.width, self->frame.height, padding);
 
   struct zn_power_button *power_button =
       (struct zn_power_button *)self->user_data;
 
-  double icon_x = self->frame->width - padding - icon_width;
-  double icon_y = (self->frame->height - icon_height) / 2;
+  double icon_x = self->frame.width - padding - icon_width;
+  double icon_y = (self->frame.height - icon_height) / 2;
   cairo_set_source_surface(
       cr, power_button->power_icon_surface, icon_x, icon_y);
   cairo_paint(cr);
@@ -89,18 +89,18 @@ zn_power_button_render(struct zigzag_node *self, cairo_t *cr)
 
 static void
 zn_power_button_set_frame(
-    struct zigzag_node *self, int output_width, int output_height)
+    struct zigzag_node *self, double screen_width, double screen_height)
 {
-  double margin_height = 6;
-  double margin_width = 10;
+  double margin_height = 6.;
+  double margin_width = 10.;
   double button_width = 70.;
   double height_with_margin = 33.;
   double button_height = height_with_margin - margin_height * 2;
 
-  self->frame->x = (double)output_width - button_width - margin_width;
-  self->frame->y = (double)output_height - button_height - margin_height;
-  self->frame->width = button_width;
-  self->frame->height = button_height;
+  self->frame.x = (double)screen_width - button_width - margin_width;
+  self->frame.y = (double)screen_height - button_height - margin_height;
+  self->frame.width = button_width;
+  self->frame.height = button_height;
 }
 
 static const struct zigzag_node_impl implementation = {
@@ -110,8 +110,8 @@ static const struct zigzag_node_impl implementation = {
 };
 
 struct zn_power_button *
-zn_power_button_create(struct zigzag_layout *zigzag_layout,
-    struct wlr_renderer *renderer, struct wl_display *display)
+zn_power_button_create(
+    struct zigzag_layout *zigzag_layout, struct wlr_renderer *renderer)
 {
   struct zn_power_button *self;
 
@@ -138,9 +138,9 @@ zn_power_button_create(struct zigzag_layout *zigzag_layout,
     goto err_zigzag_node;
   }
 
-  self->second_timer_source =
-      wl_event_loop_add_timer(wl_display_get_event_loop(display),
-          zn_power_button_handle_second_timer, self);
+  struct zn_server *server = zn_server_get_singleton();
+  self->second_timer_source = wl_event_loop_add_timer(
+      server->loop, zn_power_button_handle_second_timer, self);
 
   int64_t time_ms = current_realtime_clock_ms();
   self->next_sec_ms = (time_ms - time_ms % MSEC_PER_SEC + MSEC_PER_SEC);

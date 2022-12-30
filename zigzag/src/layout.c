@@ -6,7 +6,7 @@
 
 struct zigzag_layout *
 zigzag_layout_create(const struct zigzag_layout_impl *implementation,
-    int output_width, int output_height, const char *font_file_path,
+    double screen_width, double screen_height, const char *font_file_path,
     void *user_data)
 {
   struct zigzag_layout *self;
@@ -15,8 +15,8 @@ zigzag_layout_create(const struct zigzag_layout_impl *implementation,
     zn_error("Failed to allocate memory");
     goto err;
   }
-  self->output_width = output_width;
-  self->output_height = output_height;
+  self->screen_width = screen_width;
+  self->screen_height = screen_height;
 
   self->user_data = user_data;
 

@@ -149,8 +149,7 @@ zn_output_create(struct wlr_output *wlr_output)
     goto err_damage;
   }
 
-  self->screen = zn_screen_create(
-      &screen_implementation, self, self->wlr_output, self->damage);
+  self->screen = zn_screen_create(&screen_implementation, self);
   if (self->screen == NULL) {
     zn_error("Failed to create z zn_screen");
     goto err_damage;

@@ -165,8 +165,11 @@ render_zigzag_nodes(struct zn_output *output, struct wlr_renderer *renderer,
   struct zigzag_node *node;
   wl_list_for_each (node, node_list, link) {
     float matrix[9];
-    wlr_matrix_project_box(matrix, node->frame, WL_OUTPUT_TRANSFORM_NORMAL, 0,
-        output->wlr_output->transform_matrix);
+    struct wlr_box transformed_box;
+    zn_output_box_effective_to_transformed_coords(
+        output, &node->frame, &transformed_box);
+    wlr_matrix_project_box(matrix, &transformed_box, WL_OUTPUT_TRANSFORM_NORMAL,
+        0, output->wlr_output->transform_matrix);
     int rect_count;
     pixman_box32_t *rects =
         pixman_region32_rectangles(screen_damage, &rect_count);

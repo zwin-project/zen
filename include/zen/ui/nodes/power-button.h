@@ -14,7 +14,6 @@ struct zn_power_button {
 };
 
 struct zn_power_button *zn_power_button_create(
-    struct zigzag_layout *zigzag_layout, struct wlr_renderer *renderer,
-    struct wl_display *display);
+    struct zigzag_layout *zigzag_layout, struct wlr_renderer *renderer);
 
 void zn_power_button_destroy(struct zn_power_button *self);

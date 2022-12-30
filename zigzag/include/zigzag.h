@@ -11,8 +11,8 @@ struct zigzag_layout_impl {
 };
 
 struct zigzag_layout {
-  int output_width;
-  int output_height;
+  double screen_width;
+  double screen_height;
 
   struct wl_list node_list;  // zigzag_node::link
 
@@ -26,8 +26,8 @@ struct zigzag_layout {
 };
 
 struct zigzag_layout *zigzag_layout_create(
-    const struct zigzag_layout_impl *implementation, int output_width,
-    int output_height, const char *font_file_path, void *user_data);
+    const struct zigzag_layout_impl *implementation, double screen_width,
+    double screen_height, const char *font_file_path, void *user_data);
 
 void zigzag_layout_destroy(struct zigzag_layout *self);
 
@@ -36,14 +36,14 @@ typedef bool (*zigzag_node_render_t)(struct zigzag_node *self, cairo_t *cr);
 struct zigzag_node_impl {
   void (*on_click)(struct zigzag_node *self, double x, double y);
   void (*set_frame)(
-      struct zigzag_node *self, int output_width, int output_height);
+      struct zigzag_node *self, double screen_width, double screen_height);
   zigzag_node_render_t render;
 };
 
 struct zigzag_node {
   struct zigzag_layout *layout;
 
-  struct wlr_box *frame;
+  struct wlr_fbox frame;
   struct wlr_texture *texture;
 
   void *user_data;
