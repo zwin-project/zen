@@ -6,6 +6,8 @@ struct zn_shell;
 struct zn_scene;
 struct zn_ray_grab;
 
+void zn_shell_rearrange_board(struct zn_shell *self);
+
 /** Always returns the same pointer */
 struct zn_ray_grab *zn_shell_get_default_grab(struct zn_shell *self);
 

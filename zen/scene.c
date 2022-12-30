@@ -148,9 +148,11 @@ zn_scene_set_focused_view(struct zn_scene *self, struct zn_view *view)
 void
 zn_scene_initialize_boards(struct zn_scene *self, int64_t board_initial_count)
 {
+  struct zn_server *server = zn_server_get_singleton();
   for (int i = 0; i < board_initial_count; ++i) {
     zn_scene_create_new_board(self);
   }
+  zn_shell_rearrange_board(server->shell);
 }
 
 struct zn_scene *

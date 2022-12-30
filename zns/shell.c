@@ -163,6 +163,12 @@ zn_shell_handle_focus_node_destroy(struct wl_listener *listener, void *data)
   zn_shell_set_ray_focus_node(self, NULL);
 }
 
+void
+zn_shell_rearrange_board(struct zn_shell *self)
+{
+  zns_seat_capsule_rearrange(self->seat_capsule);
+}
+
 struct zn_ray_grab *
 zn_shell_get_default_grab(struct zn_shell *self)
 {

@@ -2,12 +2,35 @@
 
 #include <cglm/quat.h>
 #include <cglm/vec3.h>
+#include <math.h>
 #include <zen-common.h>
 
 #include "board.h"
 #include "bounded.h"
 #include "zen/appearance/board.h"
 #include "zen/virtual-object.h"
+
+#define INITIAL_BOARD_GAP (M_PI / 10.f)
+
+void
+zns_seat_capsule_rearrange(struct zns_seat_capsule *self)
+{
+  int board_len = wl_list_length(&self->board_list);
+  int i = 0;
+  float prev_azim;
+  struct zns_board *board;
+  wl_list_for_each (board, &self->board_list, seat_capsule_link) {
+    float azim;
+    if (i == 0) {
+      azim = M_PI / 2 + (board_len % 2 ? 0.f : INITIAL_BOARD_GAP);
+    } else {
+      azim = prev_azim + (i % 2 ? -1 : 1) * (2 * i * INITIAL_BOARD_GAP);
+    }
+    zns_seat_capsule_move_board(self, board, azim, M_PI / 1.8f);
+    prev_azim = azim;
+    ++i;
+  }
+}
 
 void
 zns_seat_capsule_move_bounded(struct zns_seat_capsule *self,
@@ -107,7 +130,6 @@ zns_seat_capsule_add_board(
 {
   wl_list_insert(&self->board_list, &board->seat_capsule_link);
 
-  // TODO: calculate better initial position
   zns_seat_capsule_move_board(self, board, M_PI / 2.f, M_PI / 1.8f);
 
   zna_board_commit(board->zn_board->appearance);
