@@ -15,6 +15,8 @@ struct zns_seat_capsule {
   struct wl_list board_list;    // zns_board::seat_capsule_link
 };
 
+void zns_seat_capsule_rearrange(struct zns_seat_capsule *self);
+
 void zns_seat_capsule_move_bounded(struct zns_seat_capsule *self,
     struct zns_bounded *bounded, float azimuthal, float polar);
 
