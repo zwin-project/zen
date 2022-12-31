@@ -130,6 +130,7 @@ zns_seat_capsule_add_board(
 {
   wl_list_insert(&self->board_list, &board->seat_capsule_link);
 
+    // TODO: calculate better initial position
   zns_seat_capsule_move_board(self, board, M_PI / 2.f, M_PI / 1.8f);
 
   zna_board_commit(board->zn_board->appearance);
