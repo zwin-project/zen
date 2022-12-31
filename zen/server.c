@@ -64,18 +64,6 @@ zn_server_handle_new_virtual_object(struct wl_listener *listener, void *data)
   (void)zn_virtual_object_create(zgnr_virtual_object);
 }
 
-static void
-zn_server_handle_new_peer(struct wl_listener *listener, void *data)
-{
-  struct zn_server *self = zn_container_of(listener, self, new_peer_listener);
-  struct znr_remote_peer *peer = data;
-
-  struct znr_session *session = znr_remote_create_session(self->remote, peer);
-  if (session == NULL) return;
-
-  zna_system_set_current_session(self->appearance_system, session);
-}
-
 struct zn_server *
 zn_server_get_singleton(void)
 {
@@ -213,9 +201,9 @@ zn_server_create(struct wl_display *display)
     goto err_appearance;
   }
 
-  self->remote = znr_remote_create(self->display);
+  self->remote = zn_remote_create(self->display);
   if (self->remote == NULL) {
-    zn_error("Failed to create a znr_remote");
+    zn_error("Failed to create a zn_remote");
     goto err_scene;
   }
 
@@ -273,9 +261,6 @@ zn_server_create(struct wl_display *display)
   wl_signal_add(&self->zgnr_backend->events.new_virtual_object,
       &self->new_virtual_object_listener);
 
-  self->new_peer_listener.notify = zn_server_handle_new_peer;
-  wl_signal_add(&self->remote->events.new_peer, &self->new_peer_listener);
-
   zgnr_backend_activate(self->zgnr_backend);
 
   return self;
@@ -290,7 +275,7 @@ err_socket:
   free(self->socket);
 
 err_remote:
-  znr_remote_destroy(self->remote);
+  zn_remote_destroy(self->remote);
 
 err_scene:
   zn_scene_destroy(self->scene);
@@ -340,7 +325,7 @@ zn_server_destroy(struct zn_server *self)
   zn_input_manager_destroy(self->input_manager);
   zn_shell_destroy(self->shell);
   free(self->socket);
-  znr_remote_destroy(self->remote);
+  zn_remote_destroy(self->remote);
   zn_scene_destroy(self->scene);
   zna_system_destroy(self->appearance_system);
   zn_screen_compositor_destroy(self->screen_compositor);
