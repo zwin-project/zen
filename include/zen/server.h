@@ -5,12 +5,12 @@
 #include <wlr/render/allocator.h>
 #include <wlr/render/wlr_renderer.h>
 #include <zgnr/backend.h>
-#include <znr-remote.h>
 
 #include "zen/appearance/system.h"
 #include "zen/config/config.h"
 #include "zen/data-device-manager.h"
 #include "zen/input/input-manager.h"
+#include "zen/remote.h"
 #include "zen/scene.h"
 #include "zen/screen/compositor.h"
 #include "zen/shell/shell.h"
@@ -32,7 +32,7 @@ struct zn_server {
 
   struct zn_data_device_manager *data_device_manager;
   struct zn_input_manager *input_manager;
-  struct znr_remote *remote;
+  struct zn_remote *remote;
   struct zna_system *appearance_system;
   struct zn_shell *shell;
   struct zn_scene *scene;    // nonnull
@@ -45,7 +45,6 @@ struct zn_server {
   struct wl_listener new_input_listener;
   struct wl_listener new_output_listener;
   struct wl_listener new_virtual_object_listener;
-  struct wl_listener new_peer_listener;
 
   int exit_code;
 };
