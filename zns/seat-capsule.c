@@ -15,19 +15,20 @@
 void
 zns_seat_capsule_rearrange(struct zns_seat_capsule *self)
 {
-  int board_len = wl_list_length(&self->board_list);
+  int board_length = wl_list_length(&self->board_list);
   int i = 0;
-  float prev_azim;
+  float prev_azimuthal;
   struct zns_board *board;
   wl_list_for_each (board, &self->board_list, seat_capsule_link) {
-    float azim;
+    float azimuthal;
     if (i == 0) {
-      azim = M_PI / 2 + (board_len % 2 ? 0.f : INITIAL_BOARD_GAP);
+      azimuthal = M_PI / 2 + (board_length % 2 ? 0.f : INITIAL_BOARD_GAP);
     } else {
-      azim = prev_azim + (i % 2 ? -1 : 1) * (2 * i * INITIAL_BOARD_GAP);
+      azimuthal =
+          prev_azimuthal + (i % 2 ? -1 : 1) * (2 * i * INITIAL_BOARD_GAP);
     }
-    zns_seat_capsule_move_board(self, board, azim, M_PI / 1.8f);
-    prev_azim = azim;
+    zns_seat_capsule_move_board(self, board, azimuthal, M_PI / 1.8f);
+    prev_azimuthal = azimuthal;
     ++i;
   }
 }
@@ -130,7 +131,7 @@ zns_seat_capsule_add_board(
 {
   wl_list_insert(&self->board_list, &board->seat_capsule_link);
 
-    // TODO: calculate better initial position
+  // TODO: calculate better initial position
   zns_seat_capsule_move_board(self, board, M_PI / 2.f, M_PI / 1.8f);
 
   zna_board_commit(board->zn_board->appearance);
