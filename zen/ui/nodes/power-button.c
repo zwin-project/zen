@@ -163,6 +163,7 @@ void
 zn_power_button_destroy(struct zn_power_button *self)
 {
   wl_event_source_remove(self->second_timer_source);
+  cairo_surface_destroy(self->power_icon_surface);
   zigzag_node_destroy(self->zigzag_node);
   free(self);
 }

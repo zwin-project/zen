@@ -48,7 +48,10 @@ zigzag_node_render_texture(
     return NULL;
   }
 
-  return zigzag_wlr_texture_from_cairo_surface(surface, renderer);
+  struct wlr_texture *texture =
+      zigzag_wlr_texture_from_cairo_surface(surface, renderer);
+  cairo_surface_destroy(surface);
+  return texture;
 }
 
 void
@@ -82,15 +85,25 @@ zigzag_node_create(const struct zigzag_node_impl *implementation,
   self->user_data = user_data;
   self->implementation = implementation;
 
-  wl_list_init(&self->node_list);
-  wl_list_init(&self->link);
   self->implementation->set_frame(
       self, layout->screen_width, layout->screen_height);
 
   self->texture = zigzag_node_render_texture(self, renderer);
+  if (self->texture == NULL) {
+    zn_error("Failed to render the texture");
+    goto err_self;
+  }
+
+  wl_list_init(&self->node_list);
+  wl_list_init(&self->link);
+
+  return self;
+
+err_self:
+  zigzag_node_destroy(self);
 
 err:
-  return self;
+  return NULL;
 }
 
 void
