@@ -15,6 +15,7 @@ scale_length(float length, float offset, float scale)
 {
   return round((offset + length) * scale) - round(offset * scale);
 }
+
 void
 zn_output_box_effective_to_transformed_coords(struct zn_output *self,
     struct wlr_fbox *effective, struct wlr_box *transformed)

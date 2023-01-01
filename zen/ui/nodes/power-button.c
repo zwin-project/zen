@@ -12,7 +12,7 @@ double icon_height = 10.;
 static int
 zn_power_button_handle_second_timer(void *data)
 {
-  struct zn_power_button *self = (struct zn_power_button *)data;
+  struct zn_power_button *self = data;
   struct zigzag_node *zigzag_node = self->zigzag_node;
   struct zn_server *server = zn_server_get_singleton();
 
@@ -63,7 +63,7 @@ zn_power_button_render(struct zigzag_node *self, cairo_t *cr)
   time_t rawtime;
   struct tm *timeinfo;
 
-  char output[8];
+  char output[6];
 
   time(&rawtime);
   timeinfo = localtime(&rawtime);
@@ -75,8 +75,7 @@ zn_power_button_render(struct zigzag_node *self, cairo_t *cr)
   zigzag_cairo_draw_left_aligned_text(
       cr, output, self->frame.width, self->frame.height, padding);
 
-  struct zn_power_button *power_button =
-      (struct zn_power_button *)self->user_data;
+  struct zn_power_button *power_button = self->user_data;
 
   double icon_x = self->frame.width - padding - icon_width;
   double icon_y = (self->frame.height - icon_height) / 2;
