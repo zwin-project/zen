@@ -1,7 +1,5 @@
 #pragma once
 
-#include <wlr/types/wlr_output.h>
-#include <wlr/types/wlr_output_damage.h>
 #include <wlr/util/box.h>
 
 struct zn_screen;

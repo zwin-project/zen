@@ -83,6 +83,7 @@ zigzag_node_create(const struct zigzag_node_impl *implementation,
   self->implementation = implementation;
 
   wl_list_init(&self->node_list);
+  wl_list_init(&self->link);
   self->implementation->set_frame(
       self, layout->screen_width, layout->screen_height);
 
