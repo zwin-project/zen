@@ -164,20 +164,30 @@ render_zigzag_nodes(struct zn_output *output, struct wlr_renderer *renderer,
 {
   struct zigzag_node *node;
   wl_list_for_each (node, node_list, link) {
-    float matrix[9];
     struct wlr_box transformed_box;
     zn_output_box_effective_to_transformed_coords(
         output, &node->frame, &transformed_box);
-    wlr_matrix_project_box(matrix, &transformed_box, WL_OUTPUT_TRANSFORM_NORMAL,
-        0, output->wlr_output->transform_matrix);
-    int rect_count;
-    pixman_box32_t *rects =
-        pixman_region32_rectangles(screen_damage, &rect_count);
 
-    for (int i = 0; i < rect_count; i++) {
-      scissor_output(output, &rects[i]);
-      wlr_render_texture_with_matrix(renderer, node->texture, matrix, 1.0f);
+    pixman_region32_t render_damage;
+    pixman_region32_init(&render_damage);
+    pixman_region32_union_rect(&render_damage, &render_damage,
+        transformed_box.x, transformed_box.y, transformed_box.width,
+        transformed_box.height);
+    pixman_region32_intersect(&render_damage, &render_damage, screen_damage);
+    if (pixman_region32_not_empty(&render_damage)) {
+      float matrix[9];
+      wlr_matrix_project_box(matrix, &transformed_box,
+          WL_OUTPUT_TRANSFORM_NORMAL, 0, output->wlr_output->transform_matrix);
+      int rect_count;
+      pixman_box32_t *rects =
+          pixman_region32_rectangles(screen_damage, &rect_count);
+
+      for (int i = 0; i < rect_count; i++) {
+        scissor_output(output, &rects[i]);
+        wlr_render_texture_with_matrix(renderer, node->texture, matrix, 1.0f);
+      }
     }
+    pixman_region32_fini(&render_damage);
     render_zigzag_nodes(output, renderer, &node->node_list, screen_damage);
   }
 }
