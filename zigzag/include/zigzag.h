@@ -44,7 +44,7 @@ struct zigzag_node {
   struct zigzag_layout *layout;
 
   struct wlr_fbox frame;
-  struct wlr_texture *texture;
+  struct wlr_texture *texture;  // nonnull
 
   void *user_data;
 
