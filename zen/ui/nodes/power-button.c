@@ -72,8 +72,8 @@ zn_power_button_render(struct zigzag_node *self, cairo_t *cr)
 
   double padding = 6.;
   cairo_set_font_size(cr, 11);
-  zigzag_cairo_draw_left_aligned_text(
-      cr, output, self->frame.width, self->frame.height, padding);
+  zigzag_cairo_draw_text(cr, output, padding, self->frame.height / 2,
+      ZIGZAG_ANCHOR_LEFT, ZIGZAG_ANCHOR_CENTER);
 
   struct zn_power_button *power_button = self->user_data;
 

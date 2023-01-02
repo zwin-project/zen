@@ -4,6 +4,14 @@
 #include <wlr/render/wlr_texture.h>
 #include <wlr/util/box.h>
 
+enum zigzag_anchor {
+  ZIGZAG_ANCHOR_CENTER,
+  ZIGZAG_ANCHOR_LEFT,
+  ZIGZAG_ANCHOR_RIGHT,
+  ZIGZAG_ANCHOR_TOP,
+  ZIGZAG_ANCHOR_BOTTOM,
+};
+
 struct zigzag_node;
 
 struct zigzag_layout_impl {
@@ -75,14 +83,9 @@ struct wlr_texture *zigzag_wlr_texture_from_cairo_surface(
 void zigzag_cairo_draw_rounded_rectangle(
     cairo_t *cr, double width, double height, double radius);
 
-void zigzag_cairo_draw_centered_text(
-    cairo_t *cr, char *text, double width, double height);
 
-void zigzag_cairo_draw_left_aligned_text(
-    cairo_t *cr, char *text, double width, double height, double padding);
-
-void zigzag_cairo_draw_right_aligned_text(
-    cairo_t *cr, char *text, double width, double height, double padding);
+void zigzag_cairo_draw_text(cairo_t *cr, char *text, double x, double y,
+    enum zigzag_anchor horizontal_anchor, enum zigzag_anchor vertical_anchor);
 
 void zigzag_cairo_draw_rounded_rectangle(
     cairo_t *cr, double width, double height, double radius);
