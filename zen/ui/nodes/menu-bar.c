@@ -5,6 +5,8 @@
 #include <zigzag.h>
 
 #include "zen/screen/output.h"
+#include "zen/ui/layout-constants.h"
+#include "zen/ui/nodes/app-launcher.h"
 #include "zen/ui/nodes/power-button.h"
 
 static void
@@ -31,13 +33,10 @@ static void
 zn_menu_bar_set_frame(
     struct zigzag_node *node, double screen_width, double screen_height)
 {
-  double height = 33.;
-  double bar_width = screen_width;
-
   node->frame.x = 0.;
-  node->frame.y = screen_height - height;
-  node->frame.width = bar_width;
-  node->frame.height = height;
+  node->frame.y = screen_height - menu_bar_height;
+  node->frame.width = screen_width;
+  node->frame.height = menu_bar_height;
 }
 
 static const struct zigzag_node_impl implementation = {
@@ -78,7 +77,28 @@ zn_menu_bar_create(
   wl_list_insert(
       &self->zigzag_node->node_list, &power_button->zigzag_node->link);
 
+  struct zn_app_launcher *registered;
+  wl_list_init(&self->launcher_list);
+  for (uint64_t i = 0; i < ARRAY_LENGTH(default_launchers); i++) {
+    struct zn_app_launcher *launcher = zn_app_launcher_create(
+        zigzag_layout, renderer, &default_launchers[i], i);
+    if (launcher == NULL) {
+      zn_error("Failed to create the launcher %ld", i);
+      goto err_launcher_list;
+    }
+    wl_list_insert(&self->launcher_list, &launcher->link);
+    wl_list_insert(&self->zigzag_node->node_list, &launcher->zigzag_node->link);
+  }
+
   return self;
+
+err_launcher_list:
+  wl_list_for_each_reverse (registered, &self->launcher_list, link) {
+    zn_app_launcher_destroy(registered);
+  }
+  wl_list_remove(&self->launcher_list);
+
+  zn_power_button_destroy(self->power_button);
 
 err_zigzag_node:
   zigzag_node_destroy(zigzag_node);
@@ -93,6 +113,11 @@ err:
 void
 zn_menu_bar_destroy(struct zn_menu_bar *self)
 {
+  struct zn_app_launcher *registered;
+  wl_list_for_each_reverse (registered, &self->launcher_list, link) {
+    zn_app_launcher_destroy(registered);
+  }
+  wl_list_remove(&self->launcher_list);
   zn_power_button_destroy(self->power_button);
   zigzag_node_destroy(self->zigzag_node);
   free(self);

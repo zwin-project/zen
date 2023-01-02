@@ -9,7 +9,7 @@ zigzag_node_render_cairo_surface(struct zigzag_node *self,
     zigzag_node_render_t render, double width, double height)
 {
   cairo_surface_t *surface =
-      cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
+      cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
 
   if (cairo_surface_status(surface) != CAIRO_STATUS_SUCCESS) {
     zn_error("Failed to create cairo_surface");

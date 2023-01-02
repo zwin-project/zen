@@ -1,5 +1,6 @@
 #pragma once
 
+#include <wayland-server-core.h>
 #include <wlr/render/wlr_renderer.h>
 #include <zigzag.h>
 
@@ -11,6 +12,7 @@ struct zn_menu_bar {
   struct zigzag_node *zigzag_node;
 
   struct zn_power_button *power_button;
+  struct wl_list launcher_list;  // zn_app_launcher::link
 };
 
 struct zn_menu_bar *zn_menu_bar_create(

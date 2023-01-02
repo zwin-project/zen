@@ -248,6 +248,8 @@ zn_view_move(struct zn_view *self, struct zn_board *board, double x, double y)
 void
 zn_view_set_maximized(struct zn_view *self, bool maximized)
 {
+  // TODO: handle in a better way
+  if (self == NULL) return;
   if (!self->board || self->maximize_status.maximized == maximized) {
     self->impl->schedule_configure(self);
     return;
