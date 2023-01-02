@@ -58,7 +58,8 @@ zn_power_menu_item_clock_set_frame(
 {
   node->frame.x =
       screen_width - power_menu_bubble_width - power_menu_space_right;
-  node->frame.y = screen_height - power_menu_bubble_height - menu_bar_height;
+  node->frame.y =
+      screen_height - power_menu_bubble_height - menu_bar_height + 5.;
   node->frame.width = power_menu_bubble_width;
   node->frame.height = power_menu_clock_height;
 }

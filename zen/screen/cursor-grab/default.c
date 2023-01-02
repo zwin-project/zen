@@ -82,8 +82,9 @@ zn_default_cursor_grab_button(struct zn_cursor_grab *grab, uint32_t time_msec,
   wlr_seat_pointer_send_button(seat, time_msec, button, state);
 
   if (state == WLR_BUTTON_PRESSED) {
-    zn_zigzag_layout_notify_click(
+    bool result = zn_zigzag_layout_notify_click(
         cursor->board->screen->zn_zigzag_layout, cursor->x, cursor->y);
+    if (result) return;
     struct zn_view *view = NULL;
     zn_board_get_surface_at(
         cursor->board, cursor->x, cursor->y, NULL, NULL, &view);
