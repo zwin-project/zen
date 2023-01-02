@@ -83,7 +83,6 @@ struct wlr_texture *zigzag_wlr_texture_from_cairo_surface(
 void zigzag_cairo_draw_rounded_rectangle(
     cairo_t *cr, double width, double height, double radius);
 
-
 void zigzag_cairo_draw_text(cairo_t *cr, char *text, double x, double y,
     enum zigzag_anchor horizontal_anchor, enum zigzag_anchor vertical_anchor);
 
