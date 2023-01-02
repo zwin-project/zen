@@ -34,6 +34,7 @@ _zen_srcs = [
   'input/seat.c',
 
   'ui/zigzag-layout.c',
+  'ui/nodes/app-launcher.c',
   'ui/nodes/menu-bar.c',
   'ui/nodes/power-button.c',
   'ui/nodes/power-menu/clock.c',

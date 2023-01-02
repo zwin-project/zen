@@ -5,6 +5,7 @@
 #include <zigzag.h>
 
 #include "zen/server.h"
+#include "zen/ui/layout-constants.h"
 
 static void
 zn_power_menu_item_logout_on_click(struct zigzag_node *self, double x, double y)
@@ -36,19 +37,13 @@ static void
 zn_power_menu_item_logout_set_frame(
     struct zigzag_node *node, double screen_width, double screen_height)
 {
-  double menu_bar_height = 33.;
-  double space_right = 20.;
-  double bubble_height = 70.;
-  double bubble_width = 110.;
-  double clock_text_height = 33.;
-  double power_menu_item_logout_text_height = 33.;
+  node->frame.x =
+      screen_width - power_menu_bubble_width - power_menu_space_right;
+  node->frame.y = screen_height - power_menu_bubble_height - menu_bar_height +
+                  power_menu_clock_height;
 
-  node->frame.x = screen_width - bubble_width - space_right;
-  node->frame.y =
-      screen_height - bubble_height - menu_bar_height + clock_text_height;
-
-  node->frame.width = bubble_width;
-  node->frame.height = power_menu_item_logout_text_height;
+  node->frame.width = power_menu_bubble_width;
+  node->frame.height = power_menu_logout_height;
 }
 
 static const struct zigzag_node_impl implementation = {

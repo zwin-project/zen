@@ -5,6 +5,7 @@
 #include <zigzag.h>
 
 #include "zen/server.h"
+#include "zen/ui/layout-constants.h"
 #include "zen/ui/nodes/power-menu/clock.h"
 #include "zen/ui/nodes/power-menu/logout.h"
 
@@ -34,15 +35,11 @@ static void
 zn_power_menu_set_frame(
     struct zigzag_node *self, double screen_width, double screen_height)
 {
-  double menu_bar_height = 33.;
-  double space_right = 20.;
-  double bubble_height = 70.;
-  double bubble_width = 110.;
-
-  self->frame.x = screen_width - bubble_width - space_right;
-  self->frame.y = screen_height - bubble_height - menu_bar_height;
-  self->frame.width = bubble_width;
-  self->frame.height = bubble_height;
+  self->frame.x =
+      screen_width - power_menu_bubble_width - power_menu_space_right;
+  self->frame.y = screen_height - power_menu_bubble_height - menu_bar_height;
+  self->frame.width = power_menu_bubble_width;
+  self->frame.height = power_menu_bubble_height;
 }
 
 static const struct zigzag_node_impl implementation = {
