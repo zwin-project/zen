@@ -7,12 +7,14 @@
 #include "zen/screen/output.h"
 
 struct zn_power_button;
+struct zn_vr_button;
 
 struct zn_menu_bar {
   struct zigzag_node *zigzag_node;
 
   struct zn_power_button *power_button;
   struct wl_list launcher_list;  // zn_app_launcher::link
+  struct zn_vr_button *vr_button;
 };
 
 struct zn_menu_bar *zn_menu_bar_create(

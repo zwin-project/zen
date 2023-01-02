@@ -40,7 +40,7 @@ zn_power_menu_item_logout_set_frame(
   node->frame.x =
       screen_width - power_menu_bubble_width - power_menu_space_right;
   node->frame.y = screen_height - power_menu_bubble_height - menu_bar_height +
-                  power_menu_clock_height;
+                  power_menu_clock_height + 5.;
 
   node->frame.width = power_menu_bubble_width;
   node->frame.height = power_menu_logout_height;

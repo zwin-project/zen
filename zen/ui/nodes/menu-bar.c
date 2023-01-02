@@ -8,6 +8,7 @@
 #include "zen/ui/layout-constants.h"
 #include "zen/ui/nodes/app-launcher.h"
 #include "zen/ui/nodes/power-button.h"
+#include "zen/ui/nodes/vr-button.h"
 
 static const struct zn_app_launcher_data default_launchers[2] = {
     {.icon_path = CHROME_LAUNCHER_ICON,
@@ -27,7 +28,7 @@ zn_menu_bar_on_click(struct zigzag_node *node, double x, double y)
 static bool
 zn_menu_bar_render(struct zigzag_node *node, cairo_t *cr)
 {
-  cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.1);
+  cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.3);
   cairo_paint(cr);
   cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.88);
   cairo_set_line_width(cr, 0.25);
@@ -84,6 +85,15 @@ zn_menu_bar_create(
   wl_list_insert(
       &self->zigzag_node->node_list, &power_button->zigzag_node->link);
 
+  struct zn_vr_button *vr_button = zn_vr_button_create(zigzag_layout, renderer);
+  if (vr_button == NULL) {
+    zn_error("Failed to create the vr_button");
+    goto err_power_button;
+  }
+  self->vr_button = vr_button;
+
+  wl_list_insert(&self->zigzag_node->node_list, &vr_button->zigzag_node->link);
+
   struct zn_app_launcher *launcher;
   wl_list_init(&self->launcher_list);
   for (uint64_t i = 0; i < ARRAY_LENGTH(default_launchers); i++) {
@@ -105,6 +115,9 @@ err_launcher_list:
   }
   wl_list_remove(&self->launcher_list);
 
+  zn_vr_button_destroy(vr_button);
+
+err_power_button:
   zn_power_button_destroy(self->power_button);
 
 err_zigzag_node:
@@ -126,6 +139,7 @@ zn_menu_bar_destroy(struct zn_menu_bar *self)
   }
 
   wl_list_remove(&self->launcher_list);
+  zn_vr_button_destroy(self->vr_button);
   zn_power_button_destroy(self->power_button);
   zigzag_node_destroy(self->zigzag_node);
   free(self);

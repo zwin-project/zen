@@ -68,10 +68,10 @@ zn_power_button_render(struct zigzag_node *node, cairo_t *cr)
 
   sprintf(output, "%02d:%02d", time_info->tm_hour, time_info->tm_min);
 
-  double padding = 6.;
-  cairo_set_font_size(cr, 11);
-  zigzag_cairo_draw_text(cr, output, padding, node->frame.height / 2,
-      ZIGZAG_ANCHOR_LEFT, ZIGZAG_ANCHOR_CENTER);
+  double padding = 15.;
+  cairo_set_font_size(cr, 13);
+  zigzag_cairo_draw_text(cr, output, node->frame.width / 2 - 10.,
+      node->frame.height / 2, ZIGZAG_ANCHOR_CENTER, ZIGZAG_ANCHOR_CENTER);
 
   struct zn_power_button *power_button = node->user_data;
 
@@ -90,7 +90,9 @@ zn_power_button_set_frame(
 {
   double power_button_height = menu_bar_height - power_button_margin_height * 2;
 
-  node->frame.x = screen_width - power_button_width - power_button_margin_width;
+  node->frame.x = screen_width - power_button_width -
+                  power_button_margin_width - vr_button_width -
+                  vr_button_margin_width;
   node->frame.y =
       screen_height - power_button_height - power_button_margin_height;
   node->frame.width = power_button_width;
@@ -124,10 +126,10 @@ zn_power_button_create(
   }
   self->zigzag_node = zigzag_node;
 
-  struct zn_power_menu *power_menu =
-      zn_power_menu_create(zigzag_layout, renderer,
-          zigzag_layout->screen_width - power_button_margin_width -
-              power_button_width / 2);
+  struct zn_power_menu *power_menu = zn_power_menu_create(zigzag_layout,
+      renderer,
+      zigzag_layout->screen_width - vr_button_margin_width - vr_button_width -
+          power_button_margin_width - power_button_width / 2);
   if (power_menu == NULL) {
     zn_error("Failed to create the power_menu");
     goto err_zigzag_node;

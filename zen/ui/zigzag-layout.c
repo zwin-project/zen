@@ -113,22 +113,25 @@ zn_zigzag_layout_destroy(struct zn_zigzag_layout *self)
   free(self);
 }
 
-static void
+static bool
 notify_click_recursive(struct wl_list *nodes, double x, double y)
 {
   struct zigzag_node *node;
+  bool result = false;
   wl_list_for_each (node, nodes, link) {
     if (zigzag_node_contains_point(node, x, y)) {
       node->implementation->on_click(node, x, y);
+      result = true;
     }
     if (node->visible) {
-      notify_click_recursive(&node->node_list, x, y);
+      result |= notify_click_recursive(&node->node_list, x, y);
     }
   }
+  return result;
 }
 
-void
+bool
 zn_zigzag_layout_notify_click(struct zn_zigzag_layout *self, double x, double y)
 {
-  notify_click_recursive(&self->zigzag_layout->node_list, x, y);
+  return notify_click_recursive(&self->zigzag_layout->node_list, x, y);
 }
