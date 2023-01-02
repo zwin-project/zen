@@ -4,6 +4,8 @@
 #include <wlr/render/wlr_renderer.h>
 #include <zen-common.h>
 
+#include "zigzag.h"
+
 struct wlr_texture *
 zigzag_wlr_texture_from_cairo_surface(
     cairo_surface_t *surface, struct wlr_renderer *renderer)
@@ -17,36 +19,43 @@ zigzag_wlr_texture_from_cairo_surface(
 }
 
 void
-zigzag_cairo_draw_centered_text(
-    cairo_t *cr, char *text, double width, double height)
+zigzag_cairo_draw_text(cairo_t *cr, char *text, double x, double y,
+    enum zigzag_anchor horizontal_anchor, enum zigzag_anchor vertical_anchor)
 {
   cairo_text_extents_t extents;
   cairo_text_extents(cr, text, &extents);
-  cairo_move_to(cr, width / 2 - (extents.width / 2 + extents.x_bearing),
-      height / 2 - (extents.height / 2 + extents.y_bearing));
-  cairo_show_text(cr, text);
-}
 
-void
-zigzag_cairo_draw_left_aligned_text(
-    cairo_t *cr, char *text, double width, double height, double padding)
-{
-  UNUSED(width);
-  cairo_text_extents_t extents;
-  cairo_text_extents(cr, text, &extents);
-  cairo_move_to(
-      cr, padding, height / 2 - (extents.height / 2 + extents.y_bearing));
-  cairo_show_text(cr, text);
-}
+  x -= extents.x_bearing;
 
-void
-zigzag_cairo_draw_right_aligned_text(
-    cairo_t *cr, char *text, double width, double height, double padding)
-{
-  cairo_text_extents_t extents;
-  cairo_text_extents(cr, text, &extents);
-  cairo_move_to(cr, width - (extents.width + extents.x_bearing + padding),
-      height / 2 - (extents.height / 2 + extents.y_bearing));
+  switch (horizontal_anchor) {
+    case ZIGZAG_ANCHOR_LEFT:
+      break;
+    case ZIGZAG_ANCHOR_CENTER:
+      x -= extents.width / 2;
+      break;
+    case ZIGZAG_ANCHOR_RIGHT:
+      x -= extents.width;
+      break;
+    default:
+      zn_error("invalid horizon anchor");
+      return;
+  }
+
+  switch (vertical_anchor) {
+    case ZIGZAG_ANCHOR_TOP:
+      y += extents.height;
+      break;
+    case ZIGZAG_ANCHOR_CENTER:
+      y += extents.height / 2;
+      break;
+    case ZIGZAG_ANCHOR_BOTTOM:
+      break;
+    default:
+      zn_error("invalid vertical anchor");
+      return;
+  }
+
+  cairo_move_to(cr, x, y);
   cairo_show_text(cr, text);
 }
 
