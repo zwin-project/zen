@@ -27,58 +27,55 @@ zn_power_button_handle_second_timer(void *data)
 }
 
 static void
-zn_power_button_on_click(struct zigzag_node *self, double x, double y)
+zn_power_button_on_click(struct zigzag_node *node, double x, double y)
 {
-  UNUSED(self);
+  UNUSED(node);
   UNUSED(x);
   UNUSED(y);
   // TODO: Show "Logout"
 }
 
 static bool
-zn_power_icon_render(struct zigzag_node *self, cairo_t *cr)
+zn_power_icon_render(struct zigzag_node *node, cairo_t *cr)
 {
-  UNUSED(self);
+  UNUSED(node);
   cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
   cairo_paint(cr);
   bool result = zigzag_cairo_stamp_svg_on_surface(
       cr, POWER_BUTTON_ICON, 0., 0., icon_width, icon_height);
-  if (!result) {
-    return false;
-  }
-  return true;
+  return result;
 }
 
 static bool
-zn_power_button_render(struct zigzag_node *self, cairo_t *cr)
+zn_power_button_render(struct zigzag_node *node, cairo_t *cr)
 {
   cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
   zigzag_cairo_draw_rounded_rectangle(
-      cr, self->frame.width, self->frame.height, self->frame.height / 2);
+      cr, node->frame.width, node->frame.height, node->frame.height / 2);
   cairo_fill_preserve(cr);
   cairo_set_line_width(cr, 0.5);
   cairo_set_source_rgb(cr, 0.07, 0.12, 0.30);
   cairo_stroke(cr);
 
-  time_t rawtime;
-  struct tm *timeinfo;
+  time_t raw_time;
+  struct tm *time_info;
 
   char output[6];
 
-  time(&rawtime);
-  timeinfo = localtime(&rawtime);
+  time(&raw_time);
+  time_info = localtime(&raw_time);
 
-  sprintf(output, "%02d:%02d", timeinfo->tm_hour, timeinfo->tm_min);
+  sprintf(output, "%02d:%02d", time_info->tm_hour, time_info->tm_min);
 
   double padding = 6.;
   cairo_set_font_size(cr, 11);
-  zigzag_cairo_draw_text(cr, output, padding, self->frame.height / 2,
+  zigzag_cairo_draw_text(cr, output, padding, node->frame.height / 2,
       ZIGZAG_ANCHOR_LEFT, ZIGZAG_ANCHOR_CENTER);
 
-  struct zn_power_button *power_button = self->user_data;
+  struct zn_power_button *power_button = node->user_data;
 
-  double icon_x = self->frame.width - padding - icon_width;
-  double icon_y = (self->frame.height - icon_height) / 2;
+  double icon_x = node->frame.width - padding - icon_width;
+  double icon_y = (node->frame.height - icon_height) / 2;
   cairo_set_source_surface(
       cr, power_button->power_icon_surface, icon_x, icon_y);
   cairo_paint(cr);
@@ -88,7 +85,7 @@ zn_power_button_render(struct zigzag_node *self, cairo_t *cr)
 
 static void
 zn_power_button_set_frame(
-    struct zigzag_node *self, double screen_width, double screen_height)
+    struct zigzag_node *node, double screen_width, double screen_height)
 {
   double margin_height = 6.;
   double margin_width = 10.;
@@ -96,10 +93,10 @@ zn_power_button_set_frame(
   double height_with_margin = 33.;
   double button_height = height_with_margin - margin_height * 2;
 
-  self->frame.x = (double)screen_width - button_width - margin_width;
-  self->frame.y = (double)screen_height - button_height - margin_height;
-  self->frame.width = button_width;
-  self->frame.height = button_height;
+  node->frame.x = (double)screen_width - button_width - margin_width;
+  node->frame.y = (double)screen_height - button_height - margin_height;
+  node->frame.width = button_width;
+  node->frame.height = button_height;
 }
 
 static const struct zigzag_node_impl implementation = {
