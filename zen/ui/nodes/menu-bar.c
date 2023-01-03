@@ -8,36 +8,36 @@
 #include "zen/ui/nodes/power-button.h"
 
 static void
-zn_menu_bar_on_click(struct zigzag_node *self, double x, double y)
+zn_menu_bar_on_click(struct zigzag_node *node, double x, double y)
 {
-  UNUSED(self);
+  UNUSED(node);
   UNUSED(x);
   UNUSED(y);
 }
 
 static bool
-zn_menu_bar_render(struct zigzag_node *self, cairo_t *cr)
+zn_menu_bar_render(struct zigzag_node *node, cairo_t *cr)
 {
   cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.1);
   cairo_paint(cr);
   cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.88);
   cairo_set_line_width(cr, 0.25);
-  cairo_rectangle(cr, 0., 0., self->frame.width, self->frame.height);
+  cairo_rectangle(cr, 0., 0., node->frame.width, node->frame.height);
   cairo_stroke(cr);
   return true;
 }
 
 static void
 zn_menu_bar_set_frame(
-    struct zigzag_node *self, double screen_width, double screen_height)
+    struct zigzag_node *node, double screen_width, double screen_height)
 {
   double height = 33.;
   double bar_width = screen_width;
 
-  self->frame.x = 0.;
-  self->frame.y = screen_height - height;
-  self->frame.width = bar_width;
-  self->frame.height = height;
+  node->frame.x = 0.;
+  node->frame.y = screen_height - height;
+  node->frame.width = bar_width;
+  node->frame.height = height;
 }
 
 static const struct zigzag_node_impl implementation = {

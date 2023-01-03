@@ -100,7 +100,7 @@ zigzag_node_create(const struct zigzag_node_impl *implementation,
   return self;
 
 err_self:
-  zigzag_node_destroy(self);
+  free(self);
 
 err:
   return NULL;
