@@ -5,7 +5,7 @@
 struct zn_remote {
   struct znr_remote *znr_remote;
 
-  struct wl_list peer_list;
+  struct wl_list peer_list;  // zn_peer::link
 
   struct {
     struct wl_signal peer_list_changed;  // (NULL)
