@@ -55,7 +55,8 @@ void zna_base_unit_read_wlr_texture(
     struct zna_base_unit *self, struct wlr_texture *texture);
 
 void zna_base_unit_setup_renderer_objects(struct zna_base_unit *self,
-    struct znr_session *session, struct znr_virtual_object *virtual_object);
+    struct znr_dispatcher *dispatcher,
+    struct znr_virtual_object *virtual_object);
 
 void zna_base_unit_teardown_renderer_objects(struct zna_base_unit *self);
 

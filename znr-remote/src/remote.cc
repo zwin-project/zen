@@ -3,9 +3,25 @@
 #include <zen-common.h>
 #include <zen-remote/server/session.h>
 
+#include "dispatcher.h"
 #include "log.h"
 #include "loop.h"
 #include "peer.h"
+
+struct znr_dispatcher *
+znr_remote_create_dispatcher(
+    struct znr_remote *parent, struct znr_session *session_base)
+{
+  znr_remote_impl *self = zn_container_of(parent, self, base);
+  znr_session_impl *session = zn_container_of(session_base, session, base);
+
+  auto dispatcher = znr_dispatcher_create(session->proxy, self->display);
+  if (!dispatcher) {
+    return nullptr;
+  }
+
+  return &dispatcher->base;
+}
 
 struct znr_session *
 znr_remote_create_session(
@@ -23,7 +39,7 @@ znr_remote_create_session(
     return nullptr;
   };
 
-  auto session = znr_session_create(std::move(session_proxy), self->display);
+  auto session = znr_session_create(std::move(session_proxy));
   if (!session) {
     zn_error("Failed to create a session");
     zn_terminate(EXIT_FAILURE);

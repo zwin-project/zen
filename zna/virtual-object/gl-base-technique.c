@@ -51,14 +51,13 @@ void
 zna_gl_base_technique_apply_commit(
     struct zna_gl_base_technique *self, bool only_damaged)
 {
-  struct znr_session *session = self->system->current_session;
   struct zgnr_gl_uniform_variable *uniform_variable;
   struct zna_rendering_unit *unit =
       zna_gl_base_technique_get_rendering_unit(self);
 
   if (self->znr_gl_base_technique == NULL) {
-    self->znr_gl_base_technique =
-        znr_gl_base_technique_create(session, unit->znr_rendering_unit);
+    self->znr_gl_base_technique = znr_gl_base_technique_create(
+        self->system->dispatcher, unit->znr_rendering_unit);
   }
 
   if (self->zgnr_gl_base_technique->current.vertex_array) {

@@ -2,7 +2,7 @@
 
 #include <zen-common.h>
 
-#include "session.h"
+#include "dispatcher.h"
 
 void
 znr_virtual_object_move(
@@ -18,19 +18,18 @@ znr_virtual_object_commit(struct znr_virtual_object *self)
 }
 
 znr_virtual_object *
-znr_virtual_object_create(znr_session *session_base)
+znr_virtual_object_create(znr_dispatcher *dispatcher_base)
 {
   auto self = new znr_virtual_object();
-  znr_session_impl *session;
+  znr_dispatcher_impl *dispatcher =
+      zn_container_of(dispatcher_base, dispatcher, base);
 
   if (self == nullptr) {
     zn_error("Failed to allocate memory");
     goto err;
   }
 
-  session = zn_container_of(session_base, session, base);
-
-  self->proxy = zen::remote::server::CreateVirtualObject(session->proxy);
+  self->proxy = zen::remote::server::CreateVirtualObject(dispatcher->channel);
   if (!self->proxy) {
     zn_error("Failed to create remote virtual object");
     goto err_delete;

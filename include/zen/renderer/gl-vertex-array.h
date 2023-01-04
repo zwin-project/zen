@@ -1,7 +1,7 @@
 #pragma once
 
+#include "zen/renderer/dispatcher.h"
 #include "zen/renderer/gl-buffer.h"
-#include "zen/renderer/session.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -20,7 +20,7 @@ void znr_gl_vertex_array_vertex_attrib_pointer(struct znr_gl_vertex_array *self,
     int32_t stride, uint64_t offset, struct znr_gl_buffer *gl_buffer);
 
 struct znr_gl_vertex_array *znr_gl_vertex_array_create(
-    struct znr_session *session);
+    struct znr_dispatcher *dispatcher);
 
 void znr_gl_vertex_array_destroy(struct znr_gl_vertex_array *self);
 

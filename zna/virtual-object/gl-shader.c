@@ -36,15 +36,13 @@ zna_gl_shader_apply_commit(struct zna_gl_shader *self, bool only_damaged)
 {
   UNUSED(only_damaged);
 
-  struct znr_session *session = self->system->current_session;
-
   if (self->znr_gl_shader == NULL) {
     char *source = zgnr_shm_buffer_get_data(self->zgnr_gl_shader->buffer);
     ssize_t length = zgnr_shm_buffer_get_size(self->zgnr_gl_shader->buffer);
 
     zgnr_shm_buffer_begin_access(self->zgnr_gl_shader->buffer);
     self->znr_gl_shader = znr_gl_shader_create(
-        session, source, length, self->zgnr_gl_shader->type);
+        self->system->dispatcher, source, length, self->zgnr_gl_shader->type);
     zgnr_shm_buffer_end_access(self->zgnr_gl_shader->buffer);
   }
 }

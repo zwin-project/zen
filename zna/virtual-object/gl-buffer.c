@@ -31,9 +31,9 @@ zna_gl_buffer_handle_zgnr_gl_buffer_destroy(
 void
 zna_gl_buffer_apply_commit(struct zna_gl_buffer *self, bool only_damaged)
 {
-  struct znr_session *session = self->system->current_session;
   if (self->znr_gl_buffer == NULL) {
-    self->znr_gl_buffer = znr_gl_buffer_create(session, self->system->display);
+    self->znr_gl_buffer =
+        znr_gl_buffer_create(self->system->dispatcher, self->system->display);
   }
 
   if (self->zgnr_gl_buffer->current.data_damaged || !only_damaged) {

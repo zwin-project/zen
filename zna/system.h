@@ -3,6 +3,7 @@
 #include <zgnr/gles-v32.h>
 
 #include "zen/appearance/system.h"
+#include "zen/renderer/dispatcher.h"
 
 struct zna_shader_inventory;
 
@@ -12,6 +13,13 @@ struct zna_system {
 
   struct zna_shader_inventory *shader_inventory;  // nonnull, owning
   struct znr_session *current_session;            // nullable, owning
+
+  /**
+   * Following two dispatcher is not null when current_session exists, null
+   * otherwise.
+   */
+  struct znr_dispatcher *dispatcher;
+  struct znr_dispatcher *high_priority_dispatcher;
 
   struct {
     // When the current session switches to a new one, current_session_destroyed

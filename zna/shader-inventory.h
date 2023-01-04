@@ -20,7 +20,8 @@ struct zna_shader_inventory;
  * @return struct znr_gl_shader* : nullable
  */
 struct znr_gl_shader *zna_shader_inventory_get(
-    struct zna_shader_inventory *self, enum zna_shader_name name);
+    struct zna_shader_inventory *self, enum zna_shader_name name,
+    struct znr_dispatcher *dispatcher);
 
 struct zna_shader_inventory *zna_shader_inventory_create(
     struct zna_system *system);

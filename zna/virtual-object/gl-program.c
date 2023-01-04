@@ -34,11 +34,10 @@ zna_gl_program_handle_zgnr_gl_program_destroy(
 void
 zna_gl_program_apply_commit(struct zna_gl_program *self, bool only_damaged)
 {
-  struct znr_session *session = self->system->current_session;
   struct zgnr_program_shader *program_shader;
 
   if (self->znr_gl_program == NULL) {
-    self->znr_gl_program = znr_gl_program_create(session);
+    self->znr_gl_program = znr_gl_program_create(self->system->dispatcher);
   }
 
   wl_list_for_each (program_shader,

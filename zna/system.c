@@ -28,6 +28,8 @@ zna_system_set_current_session(
     wl_list_remove(&self->current_session_frame_listener.link);
     wl_list_init(&self->current_session_frame_listener.link);
     znr_session_destroy(self->current_session);
+    znr_dispatcher_destroy(self->dispatcher);
+    znr_dispatcher_destroy(self->high_priority_dispatcher);
     self->current_session = NULL;
 
     zn_debug("The current session was destroyed");
@@ -38,8 +40,14 @@ zna_system_set_current_session(
     self->current_session = session;
     wl_signal_add(&session->events.disconnected,
         &self->current_session_disconnected_listener);
+
+    self->dispatcher =
+        znr_remote_create_dispatcher(server->remote->znr_remote, session);
+    self->high_priority_dispatcher =
+        znr_remote_create_dispatcher(server->remote->znr_remote, session);
+
     wl_signal_add(
-        &session->events.frame, &self->current_session_frame_listener);
+        &self->dispatcher->events.frame, &self->current_session_frame_listener);
 
     zn_debug("The current session is newly created");
     wl_signal_emit(&self->events.current_session_created, NULL);
@@ -238,6 +246,9 @@ void
 zna_system_destroy(struct zna_system *self)
 {
   if (self->current_session) znr_session_destroy(self->current_session);
+  if (self->dispatcher) znr_dispatcher_destroy(self->dispatcher);
+  if (self->high_priority_dispatcher)
+    znr_dispatcher_destroy(self->high_priority_dispatcher);
 
   zna_shader_inventory_destroy(self->shader_inventory);
 

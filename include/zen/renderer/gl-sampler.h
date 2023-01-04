@@ -1,6 +1,6 @@
 #pragma once
 
-#include "zen/renderer/session.h"
+#include "zen/renderer/dispatcher.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,7 +26,7 @@ void znr_gl_sampler_parameter_iiv(
 void znr_gl_sampler_parameter_iuiv(
     struct znr_gl_sampler *self, uint32_t pname, uint32_t *params);
 
-struct znr_gl_sampler *znr_gl_sampler_create(struct znr_session *session);
+struct znr_gl_sampler *znr_gl_sampler_create(struct znr_dispatcher *dispatcher);
 
 void znr_gl_sampler_destroy(struct znr_gl_sampler *self);
 

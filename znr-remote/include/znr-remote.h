@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wayland-server-core.h>
+#include <zen/renderer/dispatcher.h>
 #include <zen/renderer/session.h>
 
 #ifdef __cplusplus
@@ -20,6 +21,9 @@ struct znr_remote {
     struct wl_signal new_peer;  // (struct znr_remote_peer *)
   } events;
 };
+
+struct znr_dispatcher *znr_remote_create_dispatcher(
+    struct znr_remote *self, struct znr_session *session);
 
 struct znr_session *znr_remote_create_session(
     struct znr_remote *self, struct znr_remote_peer *peer);
