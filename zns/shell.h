@@ -23,6 +23,7 @@ struct zn_shell {
   struct wl_listener new_bounded_listener;
   struct wl_listener new_expansive_listener;
   struct wl_listener new_board_listener;
+  struct wl_listener display_system_changed_listener;
   struct wl_listener ray_focus_node_destroy_listener;
 };
 

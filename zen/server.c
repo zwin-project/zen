@@ -89,7 +89,7 @@ zn_server_change_display_system(
 
   self->display_system = display_system;
 
-  zn_shell_handle_new_display_system(self->shell);
+  wl_signal_emit(&self->events.display_system_changed, &self->display_system);
 }
 
 /** returns exit code */
@@ -160,6 +160,8 @@ zn_server_create(struct wl_display *display)
   self->exitted = false;
   self->loop = wl_display_get_event_loop(display);
   self->display_system = ZN_DISPLAY_SYSTEM_SCREEN;
+
+  wl_signal_init(&self->events.display_system_changed);
 
   self->zgnr_backend = zgnr_backend_create(self->display);
   if (self->zgnr_backend == NULL) {

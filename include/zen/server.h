@@ -48,6 +48,11 @@ struct zn_server {
   struct wl_listener new_output_listener;
   struct wl_listener new_virtual_object_listener;
 
+  struct {
+    struct wl_signal
+        display_system_changed;  // (enum zn_display_system_state *)
+  } events;
+
   int exit_code;
   bool exitted;
 };
