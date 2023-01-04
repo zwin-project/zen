@@ -35,11 +35,11 @@ void
 zna_gl_vertex_array_apply_commit(
     struct zna_gl_vertex_array *self, bool only_damage)
 {
-  struct znr_session *session = self->system->current_session;
   struct zgnr_gl_vertex_attrib *vertex_attrib;
 
   if (self->znr_gl_vertex_array == NULL) {
-    self->znr_gl_vertex_array = znr_gl_vertex_array_create(session);
+    self->znr_gl_vertex_array =
+        znr_gl_vertex_array_create(self->system->dispatcher);
   }
 
   wl_list_for_each (vertex_attrib,

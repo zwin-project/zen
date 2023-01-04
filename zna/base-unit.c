@@ -77,25 +77,27 @@ zna_base_unit_read_wlr_texture(
 
 void
 zna_base_unit_setup_renderer_objects(struct zna_base_unit *self,
-    struct znr_session *session, struct znr_virtual_object *virtual_object)
+    struct znr_dispatcher *dispatcher,
+    struct znr_virtual_object *virtual_object)
 {
   struct znr_gl_shader *vertex_shader, *fragment_shader;
 
   if (self->has_renderer_objects) return;
 
-  self->rendering_unit = znr_rendering_unit_create(session, virtual_object);
-  self->technique = znr_gl_base_technique_create(session, self->rendering_unit);
-  self->vertex_buffer = znr_gl_buffer_create(session, self->system->display);
-  self->vertex_array = znr_gl_vertex_array_create(session);
-  self->program = znr_gl_program_create(session);
-  self->texture0 = znr_gl_texture_create(session, self->system->display);
-  self->sampler0 = znr_gl_sampler_create(session);
+  self->rendering_unit = znr_rendering_unit_create(dispatcher, virtual_object);
+  self->technique =
+      znr_gl_base_technique_create(dispatcher, self->rendering_unit);
+  self->vertex_buffer = znr_gl_buffer_create(dispatcher, self->system->display);
+  self->vertex_array = znr_gl_vertex_array_create(dispatcher);
+  self->program = znr_gl_program_create(dispatcher);
+  self->texture0 = znr_gl_texture_create(dispatcher, self->system->display);
+  self->sampler0 = znr_gl_sampler_create(dispatcher);
 
   // program
   vertex_shader = zna_shader_inventory_get(
-      self->system->shader_inventory, self->vertex_shader);
+      self->system->shader_inventory, self->vertex_shader, dispatcher);
   fragment_shader = zna_shader_inventory_get(
-      self->system->shader_inventory, self->fragment_shader);
+      self->system->shader_inventory, self->fragment_shader, dispatcher);
 
   znr_gl_program_attach_shader(self->program, vertex_shader);
   znr_gl_program_attach_shader(self->program, fragment_shader);

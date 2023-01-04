@@ -87,8 +87,8 @@ zna_shader_inventory_handle_session_destroyed(
 }
 
 struct znr_gl_shader *
-zna_shader_inventory_get(
-    struct zna_shader_inventory *self, enum zna_shader_name name)
+zna_shader_inventory_get(struct zna_shader_inventory *self,
+    enum zna_shader_name name, struct znr_dispatcher *dispatcher)
 {
   struct znr_session *session = self->system->current_session;
 
@@ -101,7 +101,7 @@ zna_shader_inventory_get(
   const struct shader_info *info = &shader_info[name];
 
   self->shaders[name] =
-      znr_gl_shader_create(session, info->source, info->length, info->type);
+      znr_gl_shader_create(dispatcher, info->source, info->length, info->type);
 
   return self->shaders[name];
 }

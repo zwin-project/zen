@@ -2,8 +2,8 @@
 
 #include <zen-common.h>
 
+#include "dispatcher.h"
 #include "loop.h"
-#include "session.h"
 
 void
 znr_gl_texture_image_2d(struct znr_gl_texture *self, uint32_t target,
@@ -31,19 +31,18 @@ znr_gl_texture_generate_mipmap(struct znr_gl_texture *self, uint32_t target)
 
 struct znr_gl_texture *
 znr_gl_texture_create(
-    struct znr_session *session_base, struct wl_display *display)
+    struct znr_dispatcher *dispatcher_base, struct wl_display *display)
 {
   auto self = new znr_gl_texture();
-  znr_session_impl *session;
+  znr_dispatcher_impl *dispatcher =
+      zn_container_of(dispatcher_base, dispatcher, base);
 
   if (self == nullptr) {
     zn_error("Failed to allocate memory");
     goto err;
   }
 
-  session = zn_container_of(session_base, session, base);
-
-  self->proxy = zen::remote::server::CreateGlTexture(session->proxy);
+  self->proxy = zen::remote::server::CreateGlTexture(dispatcher->channel);
   if (!self->proxy) {
     zn_error("Failed to create remote gl texture");
     goto err_delete;

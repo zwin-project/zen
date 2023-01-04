@@ -35,13 +35,12 @@ void
 zna_rendering_unit_apply_commit(
     struct zna_rendering_unit *self, bool only_damaged)
 {
-  struct znr_session *session = self->system->current_session;
   struct zna_virtual_object *virtual_object =
       zna_rendering_unit_get_virtual_object(self);
 
   if (self->znr_rendering_unit == NULL) {
-    self->znr_rendering_unit =
-        znr_rendering_unit_create(session, virtual_object->znr_virtual_object);
+    self->znr_rendering_unit = znr_rendering_unit_create(
+        self->system->dispatcher, virtual_object->znr_virtual_object);
   }
 
   if (self->zgnr_rendering_unit->current.technique) {

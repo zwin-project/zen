@@ -33,11 +33,10 @@ zna_gl_sampler_handle_zgnr_gl_sampler_destroy(
 void
 zna_gl_sampler_apply_commit(struct zna_gl_sampler *self, bool only_damaged)
 {
-  struct znr_session *session = self->system->current_session;
   struct zgnr_gl_sampler_parameter *parameter;
 
   if (self->znr_gl_sampler == NULL) {
-    self->znr_gl_sampler = znr_gl_sampler_create(session);
+    self->znr_gl_sampler = znr_gl_sampler_create(self->system->dispatcher);
   }
 
   wl_array_for_each (parameter, &self->zgnr_gl_sampler->current.parameters) {

@@ -2,8 +2,8 @@
 
 #include <zen-common.h>
 
+#include "dispatcher.h"
 #include "loop.h"
-#include "session.h"
 
 void
 znr_gl_buffer_data(struct znr_gl_buffer *self, uint32_t target,
@@ -22,19 +22,18 @@ znr_gl_buffer_data(struct znr_gl_buffer *self, uint32_t target,
 
 struct znr_gl_buffer *
 znr_gl_buffer_create(
-    struct znr_session *session_base, struct wl_display *display)
+    struct znr_dispatcher *dispatcher_base, struct wl_display *display)
 {
   auto self = new znr_gl_buffer();
-  znr_session_impl *session;
+  znr_dispatcher_impl *dispatcher =
+      zn_container_of(dispatcher_base, dispatcher, base);
 
   if (self == nullptr) {
     zn_error("Failed to allocate memory");
     goto err;
   }
 
-  session = zn_container_of(session_base, session, base);
-
-  self->proxy = zen::remote::server::CreateGlBuffer(session->proxy);
+  self->proxy = zen::remote::server::CreateGlBuffer(dispatcher->channel);
   if (!self->proxy) {
     zn_error("Failed to create remote gl buffer");
     goto err_delete;

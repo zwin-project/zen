@@ -2,6 +2,8 @@
 
 #include <zgnr/mem-storage.h>
 
+#include "zen/renderer/dispatcher.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -17,7 +19,7 @@ void znr_gl_texture_generate_mipmap(
     struct znr_gl_texture *self, uint32_t target);
 
 struct znr_gl_texture *znr_gl_texture_create(
-    struct znr_session *session, struct wl_display *display);
+    struct znr_dispatcher *dispatcher, struct wl_display *display);
 
 void znr_gl_texture_destroy(struct znr_gl_texture *self);
 

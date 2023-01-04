@@ -22,9 +22,11 @@ static void
 zna_board_setup_renderer_object(
     struct zna_board *self, struct znr_session *session)
 {
-  self->virtual_object = znr_virtual_object_create(session);
+  UNUSED(session);
+  struct znr_dispatcher *dispatcher = self->system->dispatcher;
+  self->virtual_object = znr_virtual_object_create(dispatcher);
   zna_board_plane_unit_setup_renderer_objects(
-      self->plane_unit, session, self->virtual_object);
+      self->plane_unit, dispatcher, self->virtual_object);
 
   zna_board_commit(self);
 }

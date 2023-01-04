@@ -11,7 +11,7 @@ void zna_board_plane_unit_commit(struct zna_board_plane_unit *self,
     struct zn_board *board, struct znr_virtual_object *virtual_object);
 
 void zna_board_plane_unit_setup_renderer_objects(
-    struct zna_board_plane_unit *self, struct znr_session *session,
+    struct zna_board_plane_unit *self, struct znr_dispatcher *dispatcher,
     struct znr_virtual_object *virtual_object);
 
 void zna_board_plane_unit_teardown_renderer_objects(

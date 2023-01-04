@@ -2,12 +2,12 @@
 
 #include <zigen-gles-v32-protocol.h>
 
+#include "zen/renderer/dispatcher.h"
 #include "zen/renderer/gl-program.h"
 #include "zen/renderer/gl-sampler.h"
 #include "zen/renderer/gl-texture.h"
 #include "zen/renderer/gl-vertex-array.h"
 #include "zen/renderer/rendering-unit.h"
-#include "zen/renderer/session.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -50,7 +50,8 @@ void znr_gl_base_technique_draw_elements(struct znr_gl_base_technique *self,
     struct znr_gl_buffer *element_array_buffer);
 
 struct znr_gl_base_technique *znr_gl_base_technique_create(
-    struct znr_session *session, struct znr_rendering_unit *rendering_unit);
+    struct znr_dispatcher *dispatcher,
+    struct znr_rendering_unit *rendering_unit);
 
 void znr_gl_base_technique_destroy(struct znr_gl_base_technique *self);
 

@@ -35,10 +35,11 @@ zna_board_plane_unit_commit(struct zna_board_plane_unit *self,
 
 void
 zna_board_plane_unit_setup_renderer_objects(struct zna_board_plane_unit *self,
-    struct znr_session *session, struct znr_virtual_object *virtual_object)
+    struct znr_dispatcher *dispatcher,
+    struct znr_virtual_object *virtual_object)
 {
   zna_base_unit_setup_renderer_objects(
-      self->base_unit, session, virtual_object);
+      self->base_unit, dispatcher, virtual_object);
 }
 
 void

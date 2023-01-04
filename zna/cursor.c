@@ -46,10 +46,12 @@ static void
 zna_cursor_setup_renderer_objects(
     struct zna_cursor *self, struct znr_session *session)
 {
-  self->virtual_object = znr_virtual_object_create(session);
+  UNUSED(session);
+  struct znr_dispatcher *dispatcher = self->system->high_priority_dispatcher;
+  self->virtual_object = znr_virtual_object_create(dispatcher);
 
   zna_base_unit_setup_renderer_objects(
-      self->base_unit, session, self->virtual_object);
+      self->base_unit, dispatcher, self->virtual_object);
 
   zna_cursor_commit(self, UINT32_MAX);
 }

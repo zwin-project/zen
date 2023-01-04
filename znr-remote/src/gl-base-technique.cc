@@ -5,6 +5,7 @@
 #include <cstring>
 #include <vector>
 
+#include "dispatcher.h"
 #include "gl-buffer.h"
 #include "gl-program.h"
 #include "gl-sampler.h"
@@ -92,21 +93,20 @@ znr_gl_base_technique_draw_elements(struct znr_gl_base_technique *self,
 }
 
 struct znr_gl_base_technique *
-znr_gl_base_technique_create(
-    struct znr_session *session_base, struct znr_rendering_unit *rendering_unit)
+znr_gl_base_technique_create(struct znr_dispatcher *dispatcher_base,
+    struct znr_rendering_unit *rendering_unit)
 {
   auto self = new znr_gl_base_technique();
-  znr_session_impl *session;
+  znr_dispatcher_impl *dispatcher =
+      zn_container_of(dispatcher_base, dispatcher, base);
 
   if (self == nullptr) {
     zn_error("Failed to allocate memory");
     goto err;
   }
 
-  session = zn_container_of(session_base, session, base);
-
   self->proxy = zen::remote::server::CreateGlBaseTechnique(
-      session->proxy, rendering_unit->proxy->id());
+      dispatcher->channel, rendering_unit->proxy->id());
   if (!self->proxy) {
     zn_error("Failed to create remote gl base technique");
     goto err_delete;

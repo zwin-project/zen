@@ -45,10 +45,13 @@ static void
 zna_view_setup_renderer_objects(
     struct zna_view *self, struct znr_session *session)
 {
-  self->virtual_object = znr_virtual_object_create(session);
+  UNUSED(session);
+  struct znr_dispatcher *dispatcher = self->system->dispatcher;
+
+  self->virtual_object = znr_virtual_object_create(dispatcher);
 
   zna_base_unit_setup_renderer_objects(
-      self->base_unit, session, self->virtual_object);
+      self->base_unit, dispatcher, self->virtual_object);
 
   zna_view_commit(self, UINT32_MAX);
 }

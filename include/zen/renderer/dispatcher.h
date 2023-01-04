@@ -6,13 +6,13 @@
 extern "C" {
 #endif
 
-struct znr_session {
+struct znr_dispatcher {
   struct {
-    struct wl_signal disconnected;  // (NULL)
+    struct wl_signal frame;  // (NULL)
   } events;
 };
 
-void znr_session_destroy(struct znr_session *session);
+void znr_dispatcher_destroy(struct znr_dispatcher *self);
 
 #ifdef __cplusplus
 }

@@ -1,7 +1,7 @@
 #pragma once
 
+#include "zen/renderer/dispatcher.h"
 #include "zen/renderer/gl-shader.h"
-#include "zen/renderer/session.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -14,7 +14,7 @@ void znr_gl_program_attach_shader(
 
 void znr_gl_program_link(struct znr_gl_program *self);
 
-struct znr_gl_program *znr_gl_program_create(struct znr_session *session);
+struct znr_gl_program *znr_gl_program_create(struct znr_dispatcher *dispatcher);
 
 void znr_gl_program_destroy(struct znr_gl_program *self);
 

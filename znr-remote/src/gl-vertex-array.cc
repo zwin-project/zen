@@ -2,8 +2,8 @@
 
 #include <zen-common.h>
 
+#include "dispatcher.h"
 #include "gl-buffer.h"
-#include "session.h"
 
 void
 znr_gl_vertex_array_enable_vertex_attrib_array(
@@ -29,19 +29,18 @@ znr_gl_vertex_array_vertex_attrib_pointer(struct znr_gl_vertex_array *self,
 }
 
 struct znr_gl_vertex_array *
-znr_gl_vertex_array_create(struct znr_session *session_base)
+znr_gl_vertex_array_create(struct znr_dispatcher *dispatcher_base)
 {
   auto self = new znr_gl_vertex_array();
-  znr_session_impl *session;
+  znr_dispatcher_impl *dispatcher =
+      zn_container_of(dispatcher_base, dispatcher, base);
 
   if (self == nullptr) {
     zn_error("Failed to allocate memory");
     goto err;
   }
 
-  session = zn_container_of(session_base, session, base);
-
-  self->proxy = zen::remote::server::CreateGlVertexArray(session->proxy);
+  self->proxy = zen::remote::server::CreateGlVertexArray(dispatcher->channel);
   if (!self->proxy) {
     zn_error("Failed to create remote gl vertex array");
     goto err_delete;

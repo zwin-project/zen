@@ -31,10 +31,9 @@ zna_gl_texture_handle_zgnr_gl_texture_destroy(
 void
 zna_gl_texture_apply_commit(struct zna_gl_texture *self, bool only_damaged)
 {
-  struct znr_session *session = self->system->current_session;
   if (self->znr_gl_texture == NULL) {
     self->znr_gl_texture =
-        znr_gl_texture_create(session, self->system->display);
+        znr_gl_texture_create(self->system->dispatcher, self->system->display);
   }
 
   if (self->zgnr_gl_texture->current.data_damaged || !only_damaged) {

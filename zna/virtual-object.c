@@ -14,13 +14,13 @@ static void
 zna_virtual_object_apply_commit(
     struct zna_virtual_object *self, bool only_damaged)
 {
-  struct znr_session *session = self->system->current_session;
   struct zgnr_rendering_unit *unit;
   struct zgnr_virtual_object *zgnr_virtual_object =
       self->zn_virtual_object->zgnr_virtual_object;
 
   if (self->znr_virtual_object == NULL) {
-    self->znr_virtual_object = znr_virtual_object_create(session);
+    self->znr_virtual_object =
+        znr_virtual_object_create(self->system->dispatcher);
 
     znr_virtual_object_move(self->znr_virtual_object,
         self->zn_virtual_object->position, self->zn_virtual_object->quaternion);

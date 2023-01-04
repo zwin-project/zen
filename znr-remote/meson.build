@@ -1,6 +1,7 @@
 _znr_remote_inc = include_directories('include')
 
 _znr_remote_srcs = [
+  'src/dispatcher.cc',
   'src/gl-base-technique.cc',
   'src/gl-buffer.cc',
   'src/gl-program.cc',
