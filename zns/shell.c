@@ -115,15 +115,16 @@ zn_shell_ray_clear_focus(struct zn_shell *self)
   zn_shell_set_ray_focus_node(self, NULL);
 }
 
-void
-zn_shell_handle_new_display_system(struct zn_shell *self)
+static void
+zn_shell_handle_display_system_changed(struct wl_listener *listener, void *data)
 {
-  UNUSED(self);
+  UNUSED(listener);
   struct zn_server *server = zn_server_get_singleton();
   struct zn_ray *ray = server->scene->ray;
   struct zn_cursor *cursor = server->scene->cursor;
+  enum zn_display_system_state *display_system = data;
 
-  if (server->display_system == ZN_DISPLAY_SYSTEM_SCREEN) {
+  if (*display_system == ZN_DISPLAY_SYSTEM_SCREEN) {
     struct zn_board *board = cursor->grab->cursor->board;
     double x = cursor->x;
     double y = cursor->y;
@@ -221,6 +222,8 @@ zn_shell_create(struct wl_display *display, struct zn_scene *scene)
 
   zns_default_ray_grab_init(&self->default_grab, self);
 
+  struct zn_server *server = zn_server_get_singleton();
+
   self->new_bounded_listener.notify = zn_shell_handle_new_bounded;
   wl_signal_add(
       &self->zgnr_shell->events.new_bounded, &self->new_bounded_listener);
@@ -231,6 +234,11 @@ zn_shell_create(struct wl_display *display, struct zn_scene *scene)
 
   self->new_board_listener.notify = zn_shell_handle_new_board;
   wl_signal_add(&scene->events.new_board, &self->new_board_listener);
+
+  self->display_system_changed_listener.notify =
+      zn_shell_handle_display_system_changed;
+  wl_signal_add(&server->events.display_system_changed,
+      &self->display_system_changed_listener);
 
   self->ray_focus_node_destroy_listener.notify =
       zn_shell_handle_focus_node_destroy;
@@ -258,6 +266,7 @@ zn_shell_destroy(struct zn_shell *self)
   wl_list_remove(&self->new_board_listener.link);
   wl_list_remove(&self->new_expansive_listener.link);
   wl_list_remove(&self->new_bounded_listener.link);
+  wl_list_remove(&self->display_system_changed_listener.link);
   wl_list_remove(&self->ray_focus_node_destroy_listener.link);
   zns_node_destroy(self->root);
   zns_seat_capsule_destroy(self->seat_capsule);
