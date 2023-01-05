@@ -15,7 +15,7 @@
 
 static void zns_bounded_destroy(struct zns_bounded *self);
 
-bool
+static bool
 zns_bounded_node_ray_cast(void *user_data, vec3 origin, vec3 direction,
     mat4 transform, float *distance)
 {

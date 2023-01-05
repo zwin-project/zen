@@ -2,8 +2,12 @@
 
 #include <zgnr/expansive.h>
 
+#include "node.h"
+
 struct zns_expansive {
   struct zgnr_expansive *zgnr_expansive;  // nonnull
+
+  struct zns_node *node;
 
   struct wl_listener zgnr_expansive_destroy_listener;
 };
