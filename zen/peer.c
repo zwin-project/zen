@@ -89,6 +89,7 @@ zn_peer_destroy(struct zn_peer *self)
   struct zn_server *server = zn_server_get_singleton();
 
   free(self->host);
+  wl_list_remove(&self->znr_session_disconnected_listener.link);
   wl_list_remove(&self->link);
   wl_list_remove(&self->znr_remote_peer_destroy_listener.link);
   free(self);
