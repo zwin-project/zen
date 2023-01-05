@@ -27,6 +27,7 @@ zn_remote_handle_new_peer(struct wl_listener *listener, void *data)
         znr_remote_create_session(self->znr_remote, peer->znr_remote_peer);
     if (session == NULL) return;
 
+    zn_peer_set_session(peer, session);
     zna_system_set_current_session(server->appearance_system, session);
   }
 }
