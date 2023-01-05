@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wayland-server-core.h>
+#include <zgnr/region/node.h>
 #include <zgnr/virtual-object.h>
 
 #ifdef __cplusplus
@@ -13,6 +14,10 @@ struct zgnr_expansive {
   struct {
     struct wl_signal destroy;  // (NULL)
   } events;
+
+  struct {
+    struct zgnr_region_node *region;  // nullable
+  } current;
 
   void *user_data;
 };
