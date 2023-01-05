@@ -9,7 +9,7 @@ extern "C" {
 #endif
 
 struct znr_remote_peer {
-  const char *host;  // null-terminated ip address string
+  char *host;  // null-terminated ip address string
 
   struct {
     struct wl_signal destroy;  // (NULL)
