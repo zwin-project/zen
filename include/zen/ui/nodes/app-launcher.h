@@ -9,11 +9,10 @@ struct launcher_data {
   char *cmd;
 };
 
-static const struct launcher_data default_launchers[3] = {
+static const struct launcher_data default_launchers[2] = {
     {.logo_path = CHROME_LAUNCHER_ICON,
         .cmd = "google-chrome-stable --enable-features=UseOzonePlatform "
                "--ozone-platform=wayland --disable-gpu"},
-    {.logo_path = BLENDER_LAUNCHER_ICON, .cmd = "blender"},
     {.logo_path = TERMINAL_LAUNCHER_ICON, .cmd = "weston-terminal"},
 };
 
