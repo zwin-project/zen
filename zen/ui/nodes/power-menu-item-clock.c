@@ -14,9 +14,9 @@ zn_power_menu_item_clock_handle_second_timer(void *data)
   struct zn_server *server = zn_server_get_singleton();
 
   int64_t time_ms = current_realtime_clock_ms();
-  self->next_sec_ms = (time_ms - time_ms % MSEC_PER_SEC + MSEC_PER_SEC);
 
-  int ms_delay = (int)(self->next_sec_ms - time_ms + 10);
+  int ms_delay = MSEC_PER_SEC - time_ms % MSEC_PER_SEC;
+  if (ms_delay <= 0) ms_delay = 1;
   wl_event_source_timer_update(self->second_timer_source, ms_delay);
 
   zigzag_node_update_texture(zigzag_node, server->renderer);
@@ -34,15 +34,15 @@ zn_power_menu_item_clock_on_click(struct zigzag_node *node, double x, double y)
 static bool
 zn_power_menu_item_clock_render(struct zigzag_node *node, cairo_t *cr)
 {
-  time_t rawtime;
-  struct tm *timeinfo;
+  time_t raw_time;
+  struct tm *time_info;
 
-  char output[8];
+  char output[6];
 
-  time(&rawtime);
-  timeinfo = localtime(&rawtime);
+  time(&raw_time);
+  time_info = localtime(&raw_time);
 
-  sprintf(output, "%02d:%02d", timeinfo->tm_hour, timeinfo->tm_min);
+  sprintf(output, "%02d:%02d", time_info->tm_hour, time_info->tm_min);
 
   cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
   cairo_set_font_size(cr, 13);
@@ -99,9 +99,9 @@ zn_power_menu_item_clock_create(
       server->loop, zn_power_menu_item_clock_handle_second_timer, self);
 
   int64_t time_ms = current_realtime_clock_ms();
-  self->next_sec_ms = (time_ms - time_ms % MSEC_PER_SEC + MSEC_PER_SEC);
 
-  int ms_delay = (int)(self->next_sec_ms - time_ms + 10);
+  int ms_delay = MSEC_PER_SEC - time_ms % MSEC_PER_SEC;
+  if (ms_delay <= 0) ms_delay = 1;
   wl_event_source_timer_update(self->second_timer_source, ms_delay);
 
   return self;
