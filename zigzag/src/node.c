@@ -58,6 +58,9 @@ void
 zigzag_node_update_texture(
     struct zigzag_node *self, struct wlr_renderer *renderer)
 {
+  self->layout->implementation->on_damage(self);
+  self->implementation->set_frame(
+      self, self->layout->screen_width, self->layout->screen_height);
   struct wlr_texture *original = self->texture;
   self->texture = zigzag_node_render_texture(self, renderer);
   if (self->texture == NULL) {
