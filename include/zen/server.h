@@ -40,6 +40,8 @@ struct zn_server {
 
   enum zn_display_system_state display_system;
 
+  pid_t default_space_app_pid;
+
   char *socket;
 
   struct wl_listener new_input_listener;
