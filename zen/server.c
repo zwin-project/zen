@@ -48,6 +48,7 @@ zn_server_handle_new_output(struct wl_listener *listener, void *data)
   output = zn_output_create(wlr_output);
   if (output == NULL) {
     zn_error("Failed to create a zn_output");
+    zn_terminate(EXIT_FAILURE);
     return;
   }
 
@@ -100,7 +101,10 @@ zn_server_run(struct zn_server *self)
     return EXIT_FAILURE;
   }
 
-  wl_display_run(self->display);
+  if (!self->exitted) {
+    wl_display_run(self->display);
+  }
+
   return self->exit_code;
 }
 
@@ -108,8 +112,10 @@ void
 zn_server_terminate(struct zn_server *self, int exit_code)
 {
   // FIXME: request session destruction, which results in display system change
+  if (self->exitted) return;
   zn_server_change_display_system(self, ZN_DISPLAY_SYSTEM_SCREEN);
   self->exit_code = exit_code;
+  self->exitted = true;
   wl_display_terminate(self->display);
 }
 
@@ -144,6 +150,7 @@ zn_server_create(struct wl_display *display)
 
   self->display = display;
   self->exit_code = EXIT_FAILURE;
+  self->exitted = false;
   self->loop = wl_display_get_event_loop(display);
   self->display_system = ZN_DISPLAY_SYSTEM_SCREEN;
 
