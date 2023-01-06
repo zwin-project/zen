@@ -18,5 +18,5 @@ struct zn_zigzag_layout *zn_zigzag_layout_create(
 
 void zn_zigzag_layout_destroy(struct zn_zigzag_layout *self);
 
-void handle_zn_zigzag_layout_on_click(
+void zn_zigzag_layout_notify_click(
     struct zn_zigzag_layout *self, double x, double y);

@@ -9,7 +9,6 @@ struct zn_power_menu_item_clock {
 
   // TODO: Prepare a common struct for power_menu_item_clock and power_button
   struct wl_event_source *second_timer_source;
-  int64_t next_sec_ms;
 };
 
 struct zn_power_menu_item_clock *zn_power_menu_item_clock_create(

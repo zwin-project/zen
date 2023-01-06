@@ -10,7 +10,6 @@ struct zn_power_button {
   struct zigzag_node *zigzag_node;
 
   struct wl_event_source *second_timer_source;
-  int64_t next_sec_ms;
 
   cairo_surface_t *power_icon_surface;
 

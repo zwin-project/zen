@@ -1,10 +1,3 @@
-// TODO
-// 1. Draw bubbles
-// 2. Add the clock to the bubble
-// 3. Draw "Logout" item and the line above
-// 4. Set visible / not visible based on the onclick of the power button
-// 5. Add is_clicked to the power_button and change the color
-
 #include "zen/ui/zigzag-layout.h"
 
 #include <time.h>
@@ -83,20 +76,19 @@ zn_zigzag_layout_destroy(struct zn_zigzag_layout *self)
 }
 
 static void
-handle_zn_zigzag_nodes_on_click(struct wl_list *nodes, double x, double y)
+notify_click_recursive(struct wl_list *nodes, double x, double y)
 {
   struct zigzag_node *node;
   wl_list_for_each (node, nodes, link) {
     if (zigzag_node_contains_point(node, x, y)) {
       node->implementation->on_click(node, x, y);
     }
-    handle_zn_zigzag_nodes_on_click(&node->node_list, x, y);
+    notify_click_recursive(&node->node_list, x, y);
   }
 }
 
 void
-handle_zn_zigzag_layout_on_click(
-    struct zn_zigzag_layout *self, double x, double y)
+zn_zigzag_layout_notify_click(struct zn_zigzag_layout *self, double x, double y)
 {
-  handle_zn_zigzag_nodes_on_click(&self->zigzag_layout->node_list, x, y);
+  notify_click_recursive(&self->zigzag_layout->node_list, x, y);
 }
