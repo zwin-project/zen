@@ -12,8 +12,7 @@ zn_power_menu_item_logout_on_click(struct zigzag_node *self, double x, double y)
   UNUSED(self);
   UNUSED(x);
   UNUSED(y);
-  struct zn_server *server = zn_server_get_singleton();
-  zn_server_terminate(server, EXIT_SUCCESS);
+  zn_terminate(EXIT_SUCCESS);
 }
 
 static bool

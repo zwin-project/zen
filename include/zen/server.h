@@ -47,6 +47,7 @@ struct zn_server {
   struct wl_listener new_virtual_object_listener;
 
   int exit_code;
+  bool exitted;
 };
 
 struct zn_server *zn_server_get_singleton(void);
