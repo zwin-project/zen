@@ -12,9 +12,9 @@
 static void
 zn_config_set_default(struct zn_config *self)
 {
+  self->space_default_app = NULL;
   // It is freed in zen_config_destroy so DEFAULT_WALLPAPER
   // should not be passed directly.
-  self->space_default_app = NULL;
   self->wallpaper_filepath = strdup(DEFAULT_WALLPAPER);
   self->board_initial_count = BOARD_INITIAL_COUNT_DEFAULT;
 }

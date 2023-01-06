@@ -92,10 +92,15 @@ on_signal_child(int signal_number, void *data)
   int status;
   UNUSED(data);
   UNUSED(signal_number);
+  struct zn_server *server = zn_server_get_singleton();
 
   while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
     if (startup_command_pid != -1 && pid == startup_command_pid) {
       zn_debug("Startup command exited");
+      zn_terminate(EXIT_SUCCESS);
+    }
+    if (pid == server->default_space_app_pid) {
+      zn_debug("Default space app exited");
       zn_terminate(EXIT_SUCCESS);
     }
   }
