@@ -5,6 +5,7 @@
 
 #include "zen-common/log.h"
 #include "zen-common/util.h"
+#include "zen/config/autostart.h"
 
 #define BOARD_INITIAL_COUNT_MAX 5
 #define BOARD_INITIAL_COUNT_DEFAULT 0
@@ -12,6 +13,7 @@
 static void
 zn_config_set_default(struct zn_config *self)
 {
+  wl_list_init(&self->autostart_list);
   // It is freed in zen_config_destroy so DEFAULT_WALLPAPER
   // should not be passed directly.
   self->wallpaper_filepath = strdup(DEFAULT_WALLPAPER);
@@ -34,6 +36,23 @@ zn_config_create(struct toml_table_t *config_table)
   if (!config_table) {
     zn_warn("Config is empty, use the default values.");
     return self;
+  }
+
+  toml_table_t *general = toml_table_in(config_table, "general");
+  if (general != NULL) {
+    toml_array_t *autostarts = toml_array_in(general, "autostart");
+    if (autostarts) {
+      for (int i = 0;; ++i) {
+        toml_datum_t command = toml_string_at(autostarts, i);
+        if (!command.ok) {
+          break;
+        }
+        struct zn_autostart *autostart = zn_autostart_create(command.u.s);
+        if (autostart) {
+          wl_list_insert(&self->autostart_list, &autostart->link);
+        }
+      }
+    }
   }
 
   toml_table_t *bg = toml_table_in(config_table, "wallpaper");
@@ -67,6 +86,10 @@ err:
 void
 zn_config_destroy(struct zn_config *self)
 {
+  struct zn_autostart *autostart, *tmp;
+  wl_list_for_each_safe (autostart, tmp, &self->autostart_list, link) {
+    zn_autostart_destroy(autostart);
+  }
   free(self->wallpaper_filepath);
   free(self);
 }

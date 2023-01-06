@@ -5,6 +5,7 @@
 #include <wlr/types/wlr_output.h>
 #include <zen-common.h>
 
+#include "zen/config/autostart.h"
 #include "zen/config/config-parser.h"
 #include "zen/config/config.h"
 #include "zen/cursor.h"
@@ -262,6 +263,11 @@ zn_server_create(struct wl_display *display)
       &self->new_virtual_object_listener);
 
   zgnr_backend_activate(self->zgnr_backend);
+
+  struct zn_autostart *autostart;
+  wl_list_for_each (autostart, &self->config->autostart_list, link) {
+    zn_autostart_exec(autostart);
+  }
 
   return self;
 

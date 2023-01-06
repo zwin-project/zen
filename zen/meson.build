@@ -14,6 +14,7 @@ _zen_srcs = [
 
   'wlr/texture.c',
 
+  'config/autostart.c',
   'config/config.c',
   'config/config-parser.c',
 
