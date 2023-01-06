@@ -1,5 +1,6 @@
 #pragma once
 
+#include "zen-common/cmd.h"
 #include "zen-common/log.h"
 #include "zen-common/signal.h"
 #include "zen-common/terminate.h"

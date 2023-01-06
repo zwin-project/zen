@@ -1,6 +1,7 @@
 _zen_common_inc = include_directories('include')
 
 _zen_common_srcs = [
+  'cmd.c',
   'log.c',
   'signal.c',
   'terminate.c',
