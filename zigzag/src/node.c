@@ -153,10 +153,6 @@ zigzag_node_hide(struct zigzag_node *self)
 {
   self->visible = false;
   self->layout->implementation->on_damage(self);
-  struct zigzag_node *node;
-  wl_list_for_each (node, &self->node_list, link) {
-    zigzag_node_hide(node);
-  }
 }
 
 void
@@ -164,8 +160,4 @@ zigzag_node_show(struct zigzag_node *self)
 {
   self->visible = true;
   self->layout->implementation->on_damage(self);
-  struct zigzag_node *node;
-  wl_list_for_each (node, &self->node_list, link) {
-    zigzag_node_show(node);
-  }
 }

@@ -202,7 +202,7 @@ zn_vr_modal_create(
   }
 
   struct zigzag_node *zigzag_node =
-      zigzag_node_create(&implementation, zigzag_layout, renderer, true, self);
+      zigzag_node_create(&implementation, zigzag_layout, renderer, false, self);
 
   if (zigzag_node == NULL) {
     zn_error("Failed to create a zigzag_node");

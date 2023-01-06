@@ -164,6 +164,10 @@ render_zigzag_nodes(struct zn_output *output, struct wlr_renderer *renderer,
 {
   struct zigzag_node *node;
   wl_list_for_each (node, node_list, link) {
+    if (!node->visible) {
+      continue;
+    }
+
     struct wlr_box transformed_box;
     zn_output_box_effective_to_transformed_coords(
         output, &node->frame, &transformed_box);

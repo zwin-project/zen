@@ -11,6 +11,23 @@
 #include "zen/ui/nodes/vr-modal.h"
 
 static void
+zn_zigzag_layout_handle_display_system_changed(
+    struct wl_listener *listener, void *data)
+{
+  struct zn_zigzag_layout *self =
+      zn_container_of(listener, self, display_system_changed_listener);
+  enum zn_display_system_state *display_system = data;
+
+  if (*display_system == ZN_DISPLAY_SYSTEM_SCREEN) {
+    zigzag_node_show(self->menu_bar->zigzag_node);
+    zigzag_node_hide(self->vr_modal->zigzag_node);
+  } else {
+    zigzag_node_hide(self->menu_bar->zigzag_node);
+    zigzag_node_show(self->vr_modal->zigzag_node);
+  }
+}
+
+static void
 zn_zigzag_layout_on_damage(struct zigzag_node *node)
 {
   struct zn_zigzag_layout *self = node->layout->user_data;
@@ -65,6 +82,12 @@ zn_zigzag_layout_create(struct zn_screen *screen, struct wlr_renderer *renderer)
 
   wl_list_insert(&self->zigzag_layout->node_list, &menu_bar->zigzag_node->link);
 
+  struct zn_server *server = zn_server_get_singleton();
+  self->display_system_changed_listener.notify =
+      zn_zigzag_layout_handle_display_system_changed;
+  wl_signal_add(&server->events.display_system_changed,
+      &self->display_system_changed_listener);
+
   return self;
 
 err_vr_modal:
@@ -83,6 +106,7 @@ err:
 void
 zn_zigzag_layout_destroy(struct zn_zigzag_layout *self)
 {
+  wl_list_remove(&self->display_system_changed_listener.link);
   zn_vr_modal_destroy(self->vr_modal);
   zn_menu_bar_destroy(self->menu_bar);
   zigzag_layout_destroy(self->zigzag_layout);

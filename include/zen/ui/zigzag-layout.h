@@ -14,6 +14,8 @@ struct zn_zigzag_layout {
   struct zn_screen *screen;
   struct zn_menu_bar *menu_bar;
   struct zn_vr_modal *vr_modal;
+
+  struct wl_listener display_system_changed_listener;
 };
 
 struct zn_zigzag_layout *zn_zigzag_layout_create(
