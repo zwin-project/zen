@@ -6,11 +6,14 @@
 #include "zen/screen.h"
 #include "zen/ui/nodes/menu-bar.h"
 
+struct zn_vr_modal;
+
 struct zn_zigzag_layout {
   struct zigzag_layout *zigzag_layout;
 
   struct zn_screen *screen;
   struct zn_menu_bar *menu_bar;
+  struct zn_vr_modal *vr_modal;
 };
 
 struct zn_zigzag_layout *zn_zigzag_layout_create(

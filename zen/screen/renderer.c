@@ -215,19 +215,21 @@ zn_screen_renderer_render(struct zn_output *output,
 
   render_background(output, renderer, server->scene->wallpaper, &screen_damage);
 
-  if (server->display_system != ZN_DISPLAY_SYSTEM_SCREEN) goto out;
-
   if (board) {
-    struct zn_view *view;
-    wl_list_for_each (view, &board->view_list, board_link)
-      render_view(output, view, renderer, &screen_damage);
+    if (server->display_system == ZN_DISPLAY_SYSTEM_SCREEN) {
+      struct zn_view *view;
+      wl_list_for_each (view, &board->view_list, board_link)
+        render_view(output, view, renderer, &screen_damage);
+    }
 
     render_zigzag_nodes(output, renderer,
         &output->screen->zn_zigzag_layout->zigzag_layout->node_list,
         &screen_damage);
   }
 
-  render_cursor(output, server->scene->cursor, renderer, &screen_damage);
+  if (server->display_system == ZN_DISPLAY_SYSTEM_SCREEN) {
+    render_cursor(output, server->scene->cursor, renderer, &screen_damage);
+  }
 
 out:
   pixman_region32_fini(&screen_damage);

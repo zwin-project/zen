@@ -8,6 +8,7 @@
 #include "zen/screen.h"
 #include "zen/server.h"
 #include "zen/ui/nodes/menu-bar.h"
+#include "zen/ui/nodes/vr-modal.h"
 
 static void
 zn_zigzag_layout_on_damage(struct zigzag_node *node)
@@ -45,17 +46,29 @@ zn_zigzag_layout_create(struct zn_screen *screen, struct wlr_renderer *renderer)
 
   self->zigzag_layout = zigzag_layout;
 
+  struct zn_vr_modal *vr_modal = zn_vr_modal_create(zigzag_layout, renderer);
+  if (!vr_modal) {
+    zn_error("Failed to create the vr_modal");
+    goto err_zigzag_layout;
+  }
+  self->vr_modal = vr_modal;
+
+  wl_list_insert(&self->zigzag_layout->node_list, &vr_modal->zigzag_node->link);
+
   struct zn_menu_bar *menu_bar = zn_menu_bar_create(zigzag_layout, renderer);
 
   if (menu_bar == NULL) {
     zn_error("Failed to create the menu_bar");
-    goto err_zigzag_layout;
+    goto err_vr_modal;
   }
   self->menu_bar = menu_bar;
 
   wl_list_insert(&self->zigzag_layout->node_list, &menu_bar->zigzag_node->link);
 
   return self;
+
+err_vr_modal:
+  zn_vr_modal_destroy(self->vr_modal);
 
 err_zigzag_layout:
   zigzag_layout_destroy(zigzag_layout);
@@ -70,6 +83,7 @@ err:
 void
 zn_zigzag_layout_destroy(struct zn_zigzag_layout *self)
 {
+  zn_vr_modal_destroy(self->vr_modal);
   zn_menu_bar_destroy(self->menu_bar);
   zigzag_layout_destroy(self->zigzag_layout);
   free(self);
