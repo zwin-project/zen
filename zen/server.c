@@ -270,6 +270,10 @@ zn_server_create(struct wl_display *display)
 
   zgnr_backend_activate(self->zgnr_backend);
 
+  if (self->config->space_default_app) {
+    launch_command(self->config->space_default_app);
+  }
+
   return self;
 
 err_input_manager:

@@ -14,6 +14,7 @@ zn_config_set_default(struct zn_config *self)
 {
   // It is freed in zen_config_destroy so DEFAULT_WALLPAPER
   // should not be passed directly.
+  self->space_default_app = NULL;
   self->wallpaper_filepath = strdup(DEFAULT_WALLPAPER);
   self->board_initial_count = BOARD_INITIAL_COUNT_DEFAULT;
 }
@@ -58,6 +59,14 @@ zn_config_create(struct toml_table_t *config_table)
     }
   }
 
+  toml_table_t *space = toml_table_in(config_table, "space");
+  if (space != NULL) {
+    toml_datum_t default_app = toml_string_in(space, "default_app");
+    if (default_app.ok) {
+      self->space_default_app = strdup(default_app.u.s);
+    }
+  }
+
   return self;
 
 err:
@@ -67,6 +76,9 @@ err:
 void
 zn_config_destroy(struct zn_config *self)
 {
+  if (self->space_default_app) {
+    free(self->space_default_app);
+  }
   free(self->wallpaper_filepath);
   free(self);
 }
