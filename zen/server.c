@@ -101,6 +101,15 @@ zn_server_run(struct zn_server *self)
     return EXIT_FAILURE;
   }
 
+  if (self->config->space_default_app ||
+      strlen(self->config->space_default_app) == 0) {
+    self->default_space_app_pid =
+        zn_launch_command(self->config->space_default_app);
+    if (self->default_space_app_pid < 0) {
+      zn_error("Failed to launch default space app");
+    }
+  }
+
   if (!self->exitted) {
     wl_display_run(self->display);
   }
@@ -270,20 +279,7 @@ zn_server_create(struct wl_display *display)
 
   zgnr_backend_activate(self->zgnr_backend);
 
-  if (self->config->space_default_app ||
-      strlen(self->config->space_default_app) == 0) {
-    self->default_space_app_pid =
-        zn_launch_command(self->config->space_default_app);
-    if (self->default_space_app_pid < 0) {
-      zn_error("Failed to launch default space app");
-      goto err_data_device_manager;
-    }
-  }
-
   return self;
-
-err_data_device_manager:
-  zn_data_device_manager_destroy(self->data_device_manager);
 
 err_input_manager:
   zn_input_manager_destroy(self->input_manager);
