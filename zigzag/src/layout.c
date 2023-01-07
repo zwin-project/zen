@@ -29,12 +29,6 @@ zigzag_layout_create(const struct zigzag_layout_impl *implementation,
   if (FT_New_Face(library, font_file_path, 0, &ft_face) == 0) {
     self->system_font = cairo_ft_font_face_create_for_ft_face(ft_face, 0);
     cairo_status_t status = cairo_font_face_set_user_data(self->system_font,
-        &self->ft_font_face_key, ft_face, (cairo_destroy_func_t)FT_Done_Face);
-    if (status) {
-      zn_error("Failed to bind the FT_Face to cairo_font_face_t");
-      goto err_font;
-    }
-    status = cairo_font_face_set_user_data(self->system_font,
         &self->ft_library_key, library, (cairo_destroy_func_t)FT_Done_FreeType);
     if (status) {
       zn_error("Failed to bind the FT_Library to cairo_font_face_t");
@@ -50,7 +44,6 @@ zigzag_layout_create(const struct zigzag_layout_impl *implementation,
   return self;
 err_font:
   cairo_font_face_destroy(self->system_font);
-  FT_Done_Face(ft_face);
   FT_Done_FreeType(library);
 err:
   return NULL;

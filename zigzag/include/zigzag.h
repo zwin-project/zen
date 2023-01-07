@@ -25,7 +25,6 @@ struct zigzag_layout {
   struct wl_list node_list;  // zigzag_node::link
 
   cairo_font_face_t *system_font;
-  cairo_user_data_key_t ft_font_face_key;
   cairo_user_data_key_t ft_library_key;
 
   void *user_data;
