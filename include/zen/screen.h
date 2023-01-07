@@ -38,6 +38,8 @@ struct zn_screen {
   } events;
 };
 
+void zn_screen_damage_force(struct zn_screen *self, struct wlr_fbox *box);
+
 /**
  * @param box : effective coordinate system
  */

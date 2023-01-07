@@ -20,7 +20,8 @@ zn_remote_handle_new_peer(struct wl_listener *listener, void *data)
 
   wl_list_insert(&self->peer_list, &peer->link);
 
-  {  // FIXME: Do this when user clicks "Connect" button
+  if (server->display_system == ZN_DISPLAY_SYSTEM_SCREEN) {
+    // FIXME: Do this when user clicks "Connect" button
     struct znr_session *session =
         znr_remote_create_session(self->znr_remote, peer->znr_remote_peer);
     if (session == NULL) return;
