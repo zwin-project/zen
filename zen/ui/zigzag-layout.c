@@ -121,7 +121,9 @@ notify_click_recursive(struct wl_list *nodes, double x, double y)
     if (zigzag_node_contains_point(node, x, y)) {
       node->implementation->on_click(node, x, y);
     }
-    notify_click_recursive(&node->node_list, x, y);
+    if (node->visible) {
+      notify_click_recursive(&node->node_list, x, y);
+    }
   }
 }
 
