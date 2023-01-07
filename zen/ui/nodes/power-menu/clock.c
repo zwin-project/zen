@@ -1,4 +1,4 @@
-#include "zen/ui/nodes/power-menu-item-clock.h"
+#include "zen/ui/nodes/power-menu/clock.h"
 
 #include <cairo.h>
 #include <zen-common.h>
@@ -7,9 +7,9 @@
 #include "zen/server.h"
 
 static int
-zn_power_menu_item_clock_handle_second_timer(void *data)
+zn_clock_handle_second_timer(void *data)
 {
-  struct zn_power_menu_item_clock *self = data;
+  struct zn_clock *self = data;
   struct zigzag_node *zigzag_node = self->zigzag_node;
   struct zn_server *server = zn_server_get_singleton();
 
@@ -24,7 +24,7 @@ zn_power_menu_item_clock_handle_second_timer(void *data)
 }
 
 static void
-zn_power_menu_item_clock_on_click(struct zigzag_node *node, double x, double y)
+zn_clock_on_click(struct zigzag_node *node, double x, double y)
 {
   UNUSED(node);
   UNUSED(x);
@@ -32,7 +32,7 @@ zn_power_menu_item_clock_on_click(struct zigzag_node *node, double x, double y)
 }
 
 static bool
-zn_power_menu_item_clock_render(struct zigzag_node *node, cairo_t *cr)
+zn_clock_render(struct zigzag_node *node, cairo_t *cr)
 {
   time_t raw_time;
   struct tm *time_info;
@@ -52,7 +52,7 @@ zn_power_menu_item_clock_render(struct zigzag_node *node, cairo_t *cr)
 }
 
 static void
-zn_power_menu_item_clock_set_frame(
+zn_clock_set_frame(
     struct zigzag_node *node, double screen_width, double screen_height)
 {
   double menu_bar_height = 33.;
@@ -68,16 +68,16 @@ zn_power_menu_item_clock_set_frame(
 }
 
 static const struct zigzag_node_impl implementation = {
-    .on_click = zn_power_menu_item_clock_on_click,
-    .set_frame = zn_power_menu_item_clock_set_frame,
-    .render = zn_power_menu_item_clock_render,
+    .on_click = zn_clock_on_click,
+    .set_frame = zn_clock_set_frame,
+    .render = zn_clock_render,
 };
 
-struct zn_power_menu_item_clock *
-zn_power_menu_item_clock_create(
+struct zn_clock *
+zn_clock_create(
     struct zigzag_layout *zigzag_layout, struct wlr_renderer *renderer)
 {
-  struct zn_power_menu_item_clock *self;
+  struct zn_clock *self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -90,13 +90,13 @@ zn_power_menu_item_clock_create(
 
   if (zigzag_node == NULL) {
     zn_error("Failed to create a zigzag_node");
-    goto err_power_menu_item_clock;
+    goto err_clock;
   }
   self->zigzag_node = zigzag_node;
 
   struct zn_server *server = zn_server_get_singleton();
-  self->second_timer_source = wl_event_loop_add_timer(
-      server->loop, zn_power_menu_item_clock_handle_second_timer, self);
+  self->second_timer_source =
+      wl_event_loop_add_timer(server->loop, zn_clock_handle_second_timer, self);
 
   int64_t time_ms = current_realtime_clock_ms();
 
@@ -106,7 +106,7 @@ zn_power_menu_item_clock_create(
 
   return self;
 
-err_power_menu_item_clock:
+err_clock:
   free(self);
 
 err:
@@ -114,7 +114,7 @@ err:
 }
 
 void
-zn_power_menu_item_clock_destroy(struct zn_power_menu_item_clock *self)
+zn_clock_destroy(struct zn_clock *self)
 {
   wl_event_source_remove(self->second_timer_source);
   zigzag_node_destroy(self->zigzag_node);
