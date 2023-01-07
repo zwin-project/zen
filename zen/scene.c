@@ -21,6 +21,29 @@ zn_scene_handle_focused_view_destroy(struct wl_listener *listener, void *data)
   zn_scene_set_focused_view(self, NULL);
 }
 
+static void
+zn_scene_handle_display_system_changed(struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+  struct zn_scene *self =
+      zn_container_of(listener, self, display_system_changed_listener);
+  enum zn_display_system_state *state = data;
+
+  if (*state == ZN_DISPLAY_SYSTEM_SCREEN &&
+      !zn_cursor_is_visible_in_screen(self->cursor) &&
+      !wl_list_empty(&self->screen_layout->screen_list)) {
+    struct zn_screen *screen =
+        zn_container_of(self->screen_layout->screen_list.next, screen, link);
+    if (screen->current_board) {
+      double width, height;
+      zn_screen_get_effective_size(screen, &width, &height);
+      zn_cursor_move(
+          self->cursor, screen->current_board, width / 2, height / 2);
+      self->cursor->grab->impl->rebase(self->cursor->grab);
+    }
+  }
+}
+
 static struct zn_board *
 zn_scene_create_new_board(struct zn_scene *self)
 {
@@ -191,6 +214,11 @@ zn_scene_create(void)
       zn_scene_handle_focused_view_destroy;
   wl_list_init(&self->focused_view_destroy_listener.link);
 
+  self->display_system_changed_listener.notify =
+      zn_scene_handle_display_system_changed;
+  wl_signal_add(&server->events.display_system_changed,
+      &self->display_system_changed_listener);
+
   wl_list_init(&self->board_list);
   wl_list_init(&self->view_list);
   wl_signal_init(&self->events.new_board);
@@ -226,6 +254,7 @@ zn_scene_destroy(struct zn_scene *self)
 {
   wl_list_remove(&self->focused_view_destroy_listener.link);
   wl_list_remove(&self->events.new_board.listener_list);
+  wl_list_remove(&self->display_system_changed_listener.link);
   wl_list_remove(&self->view_list);
   if (self->wallpaper != NULL) wlr_texture_destroy(self->wallpaper);
   zn_screen_layout_destroy(self->screen_layout);

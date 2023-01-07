@@ -99,6 +99,17 @@ zn_cursor_handle_surface_destroy(struct wl_listener *listener, void *data)
   zn_cursor_commit_appearance(self);
 }
 
+bool
+zn_cursor_is_visible_in_screen(struct zn_cursor *self)
+{
+  struct zn_board *board = self->board;
+
+  if (!board) return false;
+  if (!board->screen) return false;
+
+  return board == board->screen->current_board;
+}
+
 void
 zn_cursor_get_fbox(struct zn_cursor *self, struct wlr_fbox *fbox)
 {

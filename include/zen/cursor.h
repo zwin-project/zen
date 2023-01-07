@@ -68,6 +68,8 @@ struct zn_cursor {
   uint32_t appearance_damage;
 };
 
+bool zn_cursor_is_visible_in_screen(struct zn_cursor *self);
+
 void zn_cursor_get_fbox(struct zn_cursor *self, struct wlr_fbox *fbox);
 
 void zn_cursor_damage(struct zn_cursor *self);

@@ -20,6 +20,7 @@ struct zn_scene {
   struct zn_view *focused_view;  // nullable
 
   struct wl_listener focused_view_destroy_listener;
+  struct wl_listener display_system_changed_listener;
 
   struct {
     struct wl_signal new_board;  // (struct zn_board*)
