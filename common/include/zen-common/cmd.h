@@ -2,4 +2,4 @@
 
 #include <sys/types.h>
 
-pid_t launch_command(char *command);
+pid_t zn_launch_command(char *command);

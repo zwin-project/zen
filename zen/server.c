@@ -273,7 +273,7 @@ zn_server_create(struct wl_display *display)
   if (self->config->space_default_app ||
       strlen(self->config->space_default_app) == 0) {
     self->default_space_app_pid =
-        launch_command(self->config->space_default_app);
+        zn_launch_command(self->config->space_default_app);
     if (self->default_space_app_pid < 0) {
       zn_error("Failed to launch default space app");
       goto err_data_device_manager;
