@@ -101,13 +101,11 @@ zn_server_run(struct zn_server *self)
     return EXIT_FAILURE;
   }
 
-  if (self->config->space_default_app ||
-      strlen(self->config->space_default_app) == 0) {
-    self->default_space_app_pid =
-        zn_launch_command(self->config->space_default_app);
-    if (self->default_space_app_pid < 0) {
-      zn_error("Failed to launch default space app");
-    }
+  self->default_space_app_pid =
+      zn_launch_command(self->config->space_default_app);
+  if (self->default_space_app_pid < 0) {
+    zn_error("Failed to launch default space app");
+    return EXIT_FAILURE;
   }
 
   if (!self->exitted) {
