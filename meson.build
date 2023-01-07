@@ -150,9 +150,6 @@ else
   cdata.set_quoted('DEFAULT_WALLPAPER', '')
 endif
 
-# TODO: Add an item for the font file in config
-cdata.set_quoted('DEFAULT_SYSTEM_FONT', '/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf')
-
 configure_file(
   output: 'constants.h',
   configuration: cdata,
