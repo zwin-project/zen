@@ -4,7 +4,8 @@
 #include <zigzag.h>
 
 #include "zen/screen/output.h"
-#include "zen/ui/nodes/power-button.h"
+
+struct zn_power_button;
 
 struct zn_menu_bar {
   struct zigzag_node *zigzag_node;
