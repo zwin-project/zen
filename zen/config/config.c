@@ -61,23 +61,14 @@ zn_config_create(struct toml_table_t *config_table)
   }
 
   toml_table_t *space = toml_table_in(config_table, "space");
-  if (space == NULL) {
-    zn_error("table 'space' is not found, but it required");
-    goto err_free;
-  }
-  toml_datum_t default_app = toml_string_in(space, "default_app");
-  if (default_app.ok) {
-    free(self->space_default_app);
-    self->space_default_app = strdup(default_app.u.s);
-  } else {
-    zn_error("Please specify space default_app");
-    goto err_free;
+  if (space != NULL) {
+    toml_datum_t default_app = toml_string_in(space, "default_app");
+    if (default_app.ok && strlen(default_app.u.s) != 0) {
+      self->space_default_app = strdup(default_app.u.s);
+    }
   }
 
   return self;
-
-err_free:
-  free(self);
 
 err:
   return NULL;
