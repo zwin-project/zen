@@ -36,9 +36,9 @@ _zen_srcs = [
   'ui/zigzag-layout.c',
   'ui/nodes/menu-bar.c',
   'ui/nodes/power-button.c',
-  'ui/nodes/power-menu.c',
-  'ui/nodes/power-menu-item-clock.c',
-  'ui/nodes/power-menu-item-logout.c',
+  'ui/nodes/power-menu/power-menu.c',
+  'ui/nodes/power-menu/clock.c',
+  'ui/nodes/power-menu/logout.c',
   'ui/nodes/vr-modal/headset-status.c',
   'ui/nodes/vr-modal/vr-modal.c',
 
