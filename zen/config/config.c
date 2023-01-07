@@ -76,9 +76,7 @@ err:
 void
 zn_config_destroy(struct zn_config *self)
 {
-  if (self->space_default_app) {
-    free(self->space_default_app);
-  }
+  free(self->space_default_app);
   free(self->wallpaper_filepath);
   free(self);
 }
