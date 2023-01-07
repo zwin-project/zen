@@ -1,5 +1,6 @@
 #include "zen/ui/zigzag-layout.h"
 
+#include <fontconfig/fontconfig.h>
 #include <time.h>
 #include <wlr/render/wlr_renderer.h>
 #include <zen-common.h>
@@ -53,8 +54,17 @@ zn_zigzag_layout_create(struct zn_screen *screen, struct wlr_renderer *renderer)
   double screen_width, screen_height;
   zn_screen_get_effective_size(screen, &screen_width, &screen_height);
 
+  FcConfig *config = NULL;
+  char *font_path = zn_fontconfig_get_font_path(&config, "Ubuntu");
+  if (!font_path) {
+    zn_error("Failed to get font path");
+  }
+
   struct zigzag_layout *zigzag_layout = zigzag_layout_create(
-      &implementation, screen_width, screen_height, DEFAULT_SYSTEM_FONT, self);
+      &implementation, screen_width, screen_height, font_path, self);
+
+  free(font_path);
+  zn_fontconfig_fini(config);
 
   if (zigzag_layout == NULL) {
     zn_error("Failed to create a zigzag_layout");

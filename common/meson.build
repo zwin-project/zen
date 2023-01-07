@@ -2,6 +2,7 @@ _zen_common_inc = include_directories('include')
 
 _zen_common_srcs = [
   'cmd.c',
+  'font.c',
   'log.c',
   'signal.c',
   'terminate.c',
@@ -11,6 +12,7 @@ _zen_common_srcs = [
 
 _zen_common_deps = [
   cglm_dep,
+  fontconfig_dep,
   wayland_server_dep.partial_dependency(includes: true),
 ]
 
