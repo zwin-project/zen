@@ -5,13 +5,13 @@
 
 #include "zen/screen/output.h"
 
-struct zn_vr_modal {
+struct zn_headset_status {
   struct zigzag_node *zigzag_node;
 
   struct wl_listener peer_list_changed_listener;
 };
 
-struct zn_vr_modal *zn_vr_modal_create(
+struct zn_headset_status *zn_headset_status_create(
     struct zigzag_layout *zigzag_layout, struct wlr_renderer *renderer);
 
-void zn_vr_modal_destroy(struct zn_vr_modal *self);
+void zn_headset_status_destroy(struct zn_headset_status *self);

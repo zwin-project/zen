@@ -39,7 +39,8 @@ _zen_srcs = [
   'ui/nodes/power-menu.c',
   'ui/nodes/power-menu-item-clock.c',
   'ui/nodes/power-menu-item-logout.c',
-  'ui/nodes/vr-modal.c',
+  'ui/nodes/vr-modal/headset-status.c',
+  'ui/nodes/vr-modal/vr-modal.c',
 
   'wlr/box.c',
 ]
