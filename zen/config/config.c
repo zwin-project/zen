@@ -8,13 +8,14 @@
 
 #define BOARD_INITIAL_COUNT_MAX 5
 #define BOARD_INITIAL_COUNT_DEFAULT 0
+#define SPACE_DEFAULT_APP_DEFAULT "zennist"
 
 static void
 zn_config_set_default(struct zn_config *self)
 {
-  self->space_default_app = NULL;
-  // It is freed in zen_config_destroy so DEFAULT_WALLPAPER
+  // It is freed in zen_config_destroy so default value
   // should not be passed directly.
+  self->space_default_app = strdup(SPACE_DEFAULT_APP_DEFAULT);
   self->wallpaper_filepath = strdup(DEFAULT_WALLPAPER);
   self->board_initial_count = BOARD_INITIAL_COUNT_DEFAULT;
 }
@@ -60,14 +61,23 @@ zn_config_create(struct toml_table_t *config_table)
   }
 
   toml_table_t *space = toml_table_in(config_table, "space");
-  if (space != NULL) {
-    toml_datum_t default_app = toml_string_in(space, "default_app");
-    if (default_app.ok) {
-      self->space_default_app = strdup(default_app.u.s);
-    }
+  if (space == NULL) {
+    zn_error("table 'space' is not found, but it required");
+    goto err_free;
+  }
+  toml_datum_t default_app = toml_string_in(space, "default_app");
+  if (default_app.ok) {
+    free(self->space_default_app);
+    self->space_default_app = strdup(default_app.u.s);
+  } else {
+    zn_error("Please specify space default_app");
+    goto err_free;
   }
 
   return self;
+
+err_free:
+  free(self);
 
 err:
   return NULL;
