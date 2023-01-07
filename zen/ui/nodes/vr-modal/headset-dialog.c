@@ -23,6 +23,7 @@ zn_vr_modal_item_headset_dialog_handle_peer_list_changed(
   struct zn_vr_modal_item_headset_dialog *self =
       zn_container_of(listener, self, peer_list_changed_listener);
   struct zn_server *server = zn_server_get_singleton();
+  zigzag_node_update_frame(self->zigzag_node);
   zigzag_node_update_texture(self->zigzag_node, server->renderer);
 }
 

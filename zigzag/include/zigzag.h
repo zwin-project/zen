@@ -78,6 +78,8 @@ cairo_surface_t *zigzag_node_render_cairo_surface(struct zigzag_node *self,
 void zigzag_node_update_texture(
     struct zigzag_node *self, struct wlr_renderer *renderer);
 
+void zigzag_node_update_frame(struct zigzag_node *self);
+
 bool zigzag_node_contains_point(struct zigzag_node *self, double x, double y);
 
 void zigzag_node_show_texture_with_matrix(struct zigzag_node *self,
