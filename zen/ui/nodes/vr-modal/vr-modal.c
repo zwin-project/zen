@@ -8,7 +8,7 @@
 
 #include "zen/screen/output.h"
 #include "zen/server.h"
-#include "zen/ui/nodes/vr-modal/headset-status.h"
+#include "zen/ui/nodes/vr-modal/headset-dialog.h"
 
 #define BG_ALPHA 0.7
 #define ICON_WIDTH 140.0
@@ -110,13 +110,13 @@ zn_vr_modal_create(
   }
   self->zigzag_node = zigzag_node;
 
-  self->headset_status = zn_headset_status_create(zigzag_layout, renderer);
-  if (self->headset_status == NULL) {
-    zn_error("Failed to create zn_headset_status");
+  self->headset_dialog = zn_headset_dialog_create(zigzag_layout, renderer);
+  if (self->headset_dialog == NULL) {
+    zn_error("Failed to create zn_headset_dialog");
     goto err_zigzag_node;
   }
   wl_list_insert(
-      &self->zigzag_node->node_list, &self->headset_status->zigzag_node->link);
+      &self->zigzag_node->node_list, &self->headset_dialog->zigzag_node->link);
 
   return self;
 
@@ -133,7 +133,7 @@ err:
 void
 zn_vr_modal_destroy(struct zn_vr_modal *self)
 {
-  zn_headset_status_destroy(self->headset_status);
+  zn_headset_dialog_destroy(self->headset_dialog);
   zigzag_node_destroy(self->zigzag_node);
   free(self);
 }

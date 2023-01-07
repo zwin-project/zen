@@ -1,4 +1,4 @@
-#include "zen/ui/nodes/vr-modal/headset-status.h"
+#include "zen/ui/nodes/vr-modal/headset-dialog.h"
 
 #include <cairo.h>
 #include <math.h>
@@ -16,18 +16,18 @@
 #define ICON_HEIGHT 80.0
 
 static void
-zn_headset_status_handle_peer_list_changed(
+zn_headset_dialog_handle_peer_list_changed(
     struct wl_listener *listener, void *data)
 {
   UNUSED(data);
-  struct zn_headset_status *self =
+  struct zn_headset_dialog *self =
       zn_container_of(listener, self, peer_list_changed_listener);
   struct zn_server *server = zn_server_get_singleton();
   zigzag_node_update_texture(self->zigzag_node, server->renderer);
 }
 
 static void
-zn_headset_status_on_click(struct zigzag_node *node, double x, double y)
+zn_headset_dialog_on_click(struct zigzag_node *node, double x, double y)
 {
   UNUSED(node);
   UNUSED(x);
@@ -35,7 +35,7 @@ zn_headset_status_on_click(struct zigzag_node *node, double x, double y)
 }
 
 static void
-zn_headset_status_render_headset_status(cairo_t *cr, struct zn_peer *peer,
+zn_headset_dialog_render_headset_dialog(cairo_t *cr, struct zn_peer *peer,
     double center_x, double center_y, int index)
 {
   cairo_save(cr);
@@ -78,7 +78,7 @@ zn_headset_status_render_headset_status(cairo_t *cr, struct zn_peer *peer,
 }
 
 static bool
-zn_headset_status_render(struct zigzag_node *node, cairo_t *cr)
+zn_headset_dialog_render(struct zigzag_node *node, cairo_t *cr)
 {
   cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
   zigzag_cairo_draw_rounded_rectangle(
@@ -104,7 +104,7 @@ zn_headset_status_render(struct zigzag_node *node, cairo_t *cr)
     int i = 0;
     struct zn_peer *peer_iter;
     wl_list_for_each (peer_iter, &remote->peer_list, link) {
-      zn_headset_status_render_headset_status(
+      zn_headset_dialog_render_headset_dialog(
           cr, peer_iter, node->frame.width / 2, 10 + 30 * (i + 1), i);
       ++i;
     }
@@ -114,7 +114,7 @@ zn_headset_status_render(struct zigzag_node *node, cairo_t *cr)
 }
 
 static void
-zn_headset_status_set_frame(
+zn_headset_dialog_set_frame(
     struct zigzag_node *node, double screen_width, double screen_height)
 {
   struct zn_server *server = zn_server_get_singleton();
@@ -129,16 +129,16 @@ zn_headset_status_set_frame(
 }
 
 static const struct zigzag_node_impl implementation = {
-    .on_click = zn_headset_status_on_click,
-    .set_frame = zn_headset_status_set_frame,
-    .render = zn_headset_status_render,
+    .on_click = zn_headset_dialog_on_click,
+    .set_frame = zn_headset_dialog_set_frame,
+    .render = zn_headset_dialog_render,
 };
 
-struct zn_headset_status *
-zn_headset_status_create(
+struct zn_headset_dialog *
+zn_headset_dialog_create(
     struct zigzag_layout *zigzag_layout, struct wlr_renderer *renderer)
 {
-  struct zn_headset_status *self;
+  struct zn_headset_dialog *self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -151,19 +151,19 @@ zn_headset_status_create(
 
   if (zigzag_node == NULL) {
     zn_error("Failed to create a zigzag_node");
-    goto err_headset_status;
+    goto err_headset_dialog;
   }
   self->zigzag_node = zigzag_node;
 
   struct zn_server *server = zn_server_get_singleton();
   self->peer_list_changed_listener.notify =
-      zn_headset_status_handle_peer_list_changed;
+      zn_headset_dialog_handle_peer_list_changed;
   wl_signal_add(&server->remote->events.peer_list_changed,
       &self->peer_list_changed_listener);
 
   return self;
 
-err_headset_status:
+err_headset_dialog:
   free(self);
 
 err:
@@ -171,7 +171,7 @@ err:
 }
 
 void
-zn_headset_status_destroy(struct zn_headset_status *self)
+zn_headset_dialog_destroy(struct zn_headset_dialog *self)
 {
   wl_list_remove(&self->peer_list_changed_listener.link);
   zigzag_node_destroy(self->zigzag_node);
