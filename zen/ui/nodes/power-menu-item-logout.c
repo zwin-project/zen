@@ -70,7 +70,7 @@ zn_power_menu_item_logout_create(
   }
 
   struct zigzag_node *zigzag_node =
-      zigzag_node_create(&implementation, zigzag_layout, renderer, false, self);
+      zigzag_node_create(&implementation, zigzag_layout, renderer, true, self);
 
   if (zigzag_node == NULL) {
     zn_error("Failed to create a zigzag_node");
