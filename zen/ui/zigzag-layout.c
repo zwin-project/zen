@@ -31,7 +31,7 @@ static void
 zn_zigzag_layout_on_damage(struct zigzag_node *node)
 {
   struct zn_zigzag_layout *self = node->layout->user_data;
-  zn_screen_damage(self->screen, &node->frame);
+  zn_screen_damage_force(self->screen, &node->frame);
 }
 
 static const struct zigzag_layout_impl implementation = {

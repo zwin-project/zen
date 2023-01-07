@@ -22,12 +22,18 @@ zn_screen_handle_current_board_destroy(struct wl_listener *listener, void *data)
 }
 
 void
+zn_screen_damage_force(struct zn_screen *self, struct wlr_fbox *box)
+{
+  self->implementation->damage(self->user_data, box);
+}
+
+void
 zn_screen_damage(struct zn_screen *self, struct wlr_fbox *box)
 {
   struct zn_server *server = zn_server_get_singleton();
   if (server->display_system != ZN_DISPLAY_SYSTEM_SCREEN) return;
 
-  self->implementation->damage(self->user_data, box);
+  zn_screen_damage_force(self, box);
 }
 
 void
