@@ -73,7 +73,8 @@ zn_power_menu_create(struct zigzag_layout *zigzag_layout,
   }
   self->zigzag_node = zigzag_node;
 
-  struct zn_clock *clock = zn_clock_create(zigzag_layout, renderer);
+  struct zn_power_menu_item_clock *clock =
+      zn_power_menu_item_clock_create(zigzag_layout, renderer);
   if (clock == NULL) {
     zn_error("Failed to create the clock");
     goto err_zigzag_node;
@@ -82,7 +83,8 @@ zn_power_menu_create(struct zigzag_layout *zigzag_layout,
 
   wl_list_insert(&self->zigzag_node->node_list, &clock->zigzag_node->link);
 
-  struct zn_logout *logout = zn_logout_create(zigzag_layout, renderer);
+  struct zn_power_menu_item_logout *logout =
+      zn_power_menu_item_logout_create(zigzag_layout, renderer);
   if (logout == NULL) {
     zn_error("Failed to create the logout");
     goto err_item_clock;
@@ -94,7 +96,7 @@ zn_power_menu_create(struct zigzag_layout *zigzag_layout,
   return self;
 
 err_item_clock:
-  zn_clock_destroy(self->item_clock);
+  zn_power_menu_item_clock_destroy(self->item_clock);
 
 err_zigzag_node:
   zigzag_node_destroy(self->zigzag_node);
@@ -109,8 +111,8 @@ err:
 void
 zn_power_menu_destroy(struct zn_power_menu *self)
 {
-  zn_logout_destroy(self->item_logout);
-  zn_clock_destroy(self->item_clock);
+  zn_power_menu_item_logout_destroy(self->item_logout);
+  zn_power_menu_item_clock_destroy(self->item_clock);
   zigzag_node_destroy(self->zigzag_node);
   free(self);
 }

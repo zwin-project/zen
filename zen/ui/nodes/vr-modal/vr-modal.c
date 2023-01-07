@@ -110,9 +110,10 @@ zn_vr_modal_create(
   }
   self->zigzag_node = zigzag_node;
 
-  self->headset_dialog = zn_headset_dialog_create(zigzag_layout, renderer);
+  self->headset_dialog =
+      zn_vr_modal_item_headset_dialog_create(zigzag_layout, renderer);
   if (self->headset_dialog == NULL) {
-    zn_error("Failed to create zn_headset_dialog");
+    zn_error("Failed to create zn_vr_modal_item_headset_dialog");
     goto err_zigzag_node;
   }
   wl_list_insert(
@@ -133,7 +134,7 @@ err:
 void
 zn_vr_modal_destroy(struct zn_vr_modal *self)
 {
-  zn_headset_dialog_destroy(self->headset_dialog);
+  zn_vr_modal_item_headset_dialog_destroy(self->headset_dialog);
   zigzag_node_destroy(self->zigzag_node);
   free(self);
 }
