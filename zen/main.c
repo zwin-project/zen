@@ -100,8 +100,8 @@ on_signal_child(int signal_number, void *data)
       zn_terminate(EXIT_SUCCESS);
     }
     if (pid == server->default_space_app_pid) {
-      zn_debug("Default space app exited");
-      zn_terminate(EXIT_SUCCESS);
+      zn_error("Default space app exited");
+      zn_terminate(EXIT_FAILURE);
     }
   }
 
