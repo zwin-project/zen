@@ -16,6 +16,17 @@
 #define ICON_HEIGHT 80.0
 
 static void
+zn_headset_dialog_handle_new_session_listener(
+    struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+  struct zn_headset_dialog *self =
+      zn_container_of(listener, self, new_session_listener);
+  struct zn_server *server = zn_server_get_singleton();
+  zigzag_node_update_texture(self->zigzag_node, server->renderer);
+}
+
+static void
 zn_headset_dialog_handle_peer_list_changed(
     struct wl_listener *listener, void *data)
 {
@@ -161,6 +172,11 @@ zn_headset_dialog_create(
   wl_signal_add(&server->remote->events.peer_list_changed,
       &self->peer_list_changed_listener);
 
+  self->new_session_listener.notify =
+      zn_headset_dialog_handle_new_session_listener;
+  wl_signal_add(
+      &server->remote->events.new_session, &self->new_session_listener);
+
   return self;
 
 err_headset_dialog:
@@ -173,6 +189,7 @@ err:
 void
 zn_headset_dialog_destroy(struct zn_headset_dialog *self)
 {
+  wl_list_remove(&self->new_session_listener.link);
   wl_list_remove(&self->peer_list_changed_listener.link);
   zigzag_node_destroy(self->zigzag_node);
   free(self);

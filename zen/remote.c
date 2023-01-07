@@ -19,19 +19,17 @@ zn_remote_handle_new_peer(struct wl_listener *listener, void *data)
   }
 
   wl_list_insert(&self->peer_list, &peer->link);
+  wl_signal_emit(&self->events.peer_list_changed, NULL);
 
   {  // FIXME: Do this when user clicks "Connect" button
     struct znr_session *session =
         znr_remote_create_session(self->znr_remote, peer->znr_remote_peer);
     if (session == NULL) return;
 
-    // if you process this block after clicking "Connect" button,
-    // you should emit `peer_list_changed` after setting session to zn_peer
     zn_peer_set_session(peer, session);
     zna_system_set_current_session(server->appearance_system, session);
+    wl_signal_emit(&self->events.new_session, NULL);
   }
-
-  wl_signal_emit(&self->events.peer_list_changed, NULL);
 }
 
 struct zn_remote *
@@ -56,6 +54,7 @@ zn_remote_create(struct wl_display *display)
 
   wl_list_init(&self->peer_list);
   wl_signal_init(&self->events.peer_list_changed);
+  wl_signal_init(&self->events.new_session);
 
   return self;
 
