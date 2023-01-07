@@ -110,26 +110,6 @@ on_signal_child(int signal_number, void *data)
   return 1;
 }
 
-static pid_t
-launch_startup_command(char *command)
-{
-  pid_t pid = -1;
-
-  pid = fork();
-  if (pid == -1) {
-    zn_error("Failed to fork startup command process: %s", strerror(errno));
-    goto err;
-  } else if (pid == 0) {
-    execl("/bin/sh", "/bin/sh", "-c", command, NULL);
-    fprintf(stderr, "Failed to execute startup command (%s): %s\n", command,
-        strerror(errno));
-    _exit(EXIT_FAILURE);
-  }
-
-err:
-  return pid;
-}
-
 int
 main(int argc, char *argv[])
 {
@@ -219,7 +199,7 @@ main(int argc, char *argv[])
   }
 
   if (startup_command) {
-    startup_command_pid = launch_startup_command(startup_command);
+    startup_command_pid = zn_launch_command(startup_command);
     if (startup_command_pid < 0) goto err_server;
   }
 

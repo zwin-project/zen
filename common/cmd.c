@@ -8,7 +8,7 @@
 #include "zen-common.h"
 
 pid_t
-launch_command(char *command)
+zn_launch_command(char *command)
 {
   pid_t pid = -1;
 
