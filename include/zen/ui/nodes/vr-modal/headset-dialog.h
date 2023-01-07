@@ -5,14 +5,15 @@
 
 #include "zen/screen/output.h"
 
-struct zn_headset_dialog {
+struct zn_vr_modal_item_headset_dialog {
   struct zigzag_node *zigzag_node;
 
   struct wl_listener peer_list_changed_listener;
   struct wl_listener new_session_listener;
 };
 
-struct zn_headset_dialog *zn_headset_dialog_create(
+struct zn_vr_modal_item_headset_dialog *zn_vr_modal_item_headset_dialog_create(
     struct zigzag_layout *zigzag_layout, struct wlr_renderer *renderer);
 
-void zn_headset_dialog_destroy(struct zn_headset_dialog *self);
+void zn_vr_modal_item_headset_dialog_destroy(
+    struct zn_vr_modal_item_headset_dialog *self);

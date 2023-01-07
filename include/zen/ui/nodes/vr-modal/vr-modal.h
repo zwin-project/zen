@@ -5,11 +5,11 @@
 
 #include "zen/screen/output.h"
 
-struct zn_headset_dialog;
+struct zn_vr_modal_item_headset_dialog;
 
 struct zn_vr_modal {
   struct zigzag_node *zigzag_node;
-  struct zn_headset_dialog *headset_dialog;
+  struct zn_vr_modal_item_headset_dialog *headset_dialog;
 };
 
 struct zn_vr_modal *zn_vr_modal_create(

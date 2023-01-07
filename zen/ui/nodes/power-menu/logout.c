@@ -7,7 +7,7 @@
 #include "zen/server.h"
 
 static void
-zn_logout_on_click(struct zigzag_node *self, double x, double y)
+zn_power_menu_item_logout_on_click(struct zigzag_node *self, double x, double y)
 {
   UNUSED(self);
   UNUSED(x);
@@ -16,7 +16,7 @@ zn_logout_on_click(struct zigzag_node *self, double x, double y)
 }
 
 static bool
-zn_logout_render(struct zigzag_node *node, cairo_t *cr)
+zn_power_menu_item_logout_render(struct zigzag_node *node, cairo_t *cr)
 {
   double gray_line_margin = 10.;
   cairo_set_source_rgba(cr, 0., 0., 0., 0.12);
@@ -33,7 +33,7 @@ zn_logout_render(struct zigzag_node *node, cairo_t *cr)
 }
 
 static void
-zn_logout_set_frame(
+zn_power_menu_item_logout_set_frame(
     struct zigzag_node *node, double screen_width, double screen_height)
 {
   double menu_bar_height = 33.;
@@ -41,27 +41,27 @@ zn_logout_set_frame(
   double bubble_height = 70.;
   double bubble_width = 110.;
   double clock_text_height = 33.;
-  double logout_text_height = 33.;
+  double power_menu_item_logout_text_height = 33.;
 
   node->frame.x = screen_width - bubble_width - space_right;
   node->frame.y =
       screen_height - bubble_height - menu_bar_height + clock_text_height;
 
   node->frame.width = bubble_width;
-  node->frame.height = logout_text_height;
+  node->frame.height = power_menu_item_logout_text_height;
 }
 
 static const struct zigzag_node_impl implementation = {
-    .on_click = zn_logout_on_click,
-    .set_frame = zn_logout_set_frame,
-    .render = zn_logout_render,
+    .on_click = zn_power_menu_item_logout_on_click,
+    .set_frame = zn_power_menu_item_logout_set_frame,
+    .render = zn_power_menu_item_logout_render,
 };
 
-struct zn_logout *
-zn_logout_create(
+struct zn_power_menu_item_logout *
+zn_power_menu_item_logout_create(
     struct zigzag_layout *zigzag_layout, struct wlr_renderer *renderer)
 {
-  struct zn_logout *self;
+  struct zn_power_menu_item_logout *self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -74,13 +74,13 @@ zn_logout_create(
 
   if (zigzag_node == NULL) {
     zn_error("Failed to create a zigzag_node");
-    goto err_logout;
+    goto err_power_menu_item_logout;
   }
   self->zigzag_node = zigzag_node;
 
   return self;
 
-err_logout:
+err_power_menu_item_logout:
   free(self);
 
 err:
@@ -88,7 +88,7 @@ err:
 }
 
 void
-zn_logout_destroy(struct zn_logout *self)
+zn_power_menu_item_logout_destroy(struct zn_power_menu_item_logout *self)
 {
   zigzag_node_destroy(self->zigzag_node);
   free(self);
