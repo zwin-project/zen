@@ -133,6 +133,7 @@ err:
 void
 zn_vr_modal_destroy(struct zn_vr_modal *self)
 {
+  zn_headset_status_destroy(self->headset_status);
   zigzag_node_destroy(self->zigzag_node);
   free(self);
 }
