@@ -4,8 +4,8 @@
 #include <wlr/render/wlr_renderer.h>
 #include <zigzag.h>
 
-#include "zen/ui/nodes/power-menu-item-clock.h"
-#include "zen/ui/nodes/power-menu-item-logout.h"
+struct zn_power_menu_item_clock;
+struct zn_power_menu_item_logout;
 
 struct zn_power_menu {
   struct zigzag_node *zigzag_node;

@@ -6,6 +6,7 @@
 
 #include "zen/server.h"
 #include "zen/ui/nodes/power-menu-item-clock.h"
+#include "zen/ui/nodes/power-menu-item-logout.h"
 
 static void
 zn_power_menu_on_click(struct zigzag_node *self, double x, double y)
