@@ -9,7 +9,6 @@ struct zn_remote {
 
   struct {
     struct wl_signal peer_list_changed;  // (NULL)
-    struct wl_signal new_session;        // (NULL)
   } events;
 
   struct wl_listener new_peer_listener;
