@@ -53,6 +53,7 @@ zna_gl_program_apply_commit(struct zna_gl_program *self, bool only_damaged)
       znr_gl_program_attach_shader(self->znr_gl_program, shader->znr_gl_shader);
     }
     znr_gl_program_link(self->znr_gl_program);
+    self->zgnr_gl_program->current.should_link = false;
   }
 }
 
