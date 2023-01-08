@@ -55,6 +55,7 @@ zn_peer_create(struct znr_remote_peer *znr_remote_peer)
     goto err;
   }
 
+  self->wired = znr_remote_peer->wired;
   self->host = strdup(znr_remote_peer->host);
   if (!self->host) {
     zn_error("Failed to duplicate host name");

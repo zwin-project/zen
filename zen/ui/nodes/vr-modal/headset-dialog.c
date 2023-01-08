@@ -58,8 +58,8 @@ zn_vr_modal_item_headset_dialog_render_headset_dialog(cairo_t *cr,
       ZIGZAG_ANCHOR_CENTER, ZIGZAG_ANCHOR_CENTER);
 
   cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.5);
-  zigzag_cairo_draw_text(cr, peer->host, center_x, center_y,
-      ZIGZAG_ANCHOR_CENTER, ZIGZAG_ANCHOR_CENTER);
+  zigzag_cairo_draw_text(cr, peer->wired ? "Wired" : peer->host, center_x,
+      center_y, ZIGZAG_ANCHOR_CENTER, ZIGZAG_ANCHOR_CENTER);
 
   char *connection_status;
   if (peer->session) {
