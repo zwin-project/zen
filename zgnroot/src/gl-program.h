@@ -8,6 +8,7 @@ struct zgnr_gl_program_impl {
   struct {
     struct wl_list program_shader_list;  // zgnr_program_shader::link
     bool should_link;
+    bool damaged;
   } pending;
 
   struct wl_resource *resource;  // nonnull

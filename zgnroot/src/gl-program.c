@@ -41,6 +41,7 @@ zgnr_gl_program_protocol_attach_shader(struct wl_client *client,
 
   wl_list_insert(
       &self->pending.program_shader_list, &program_shader->base.link);
+  self->pending.damaged = true;
 }
 
 static void
@@ -51,6 +52,7 @@ zgnr_gl_program_protocol_link(
   struct zgnr_gl_program_impl *self = wl_resource_get_user_data(resource);
 
   self->pending.should_link = true;
+  self->pending.damaged = true;
 }
 
 static const struct zgn_gl_program_interface implementation = {
@@ -68,17 +70,19 @@ zgnr_gl_program_commit(struct zgnr_gl_program_impl *self)
     return;
   }
 
+  if (self->pending.damaged == false) return;
+
   wl_list_insert_list(&self->base.current.program_shader_list,
       &self->pending.program_shader_list);
   wl_list_init(&self->pending.program_shader_list);
 
-  self->base.current.should_link = self->pending.should_link;
-
   if (self->pending.should_link) {
+    self->base.current.should_link = true;
     self->base.current.linked = true;
   }
 
   self->pending.should_link = false;
+  self->pending.damaged = false;
 }
 
 struct zgnr_gl_program_impl *
