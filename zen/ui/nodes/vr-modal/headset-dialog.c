@@ -92,7 +92,7 @@ zn_vr_modal_item_headset_dialog_render(struct zigzag_node *node, cairo_t *cr)
 
   cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.5);
   cairo_set_font_size(cr, 13);
-  zigzag_cairo_draw_text(cr, "Headset", node->frame.width / 2, 10,
+  zigzag_cairo_draw_text(cr, "Headset", node->frame.width / 2, 15,
       ZIGZAG_ANCHOR_CENTER, ZIGZAG_ANCHOR_TOP);
 
   struct zn_server *server = zn_server_get_singleton();
@@ -100,14 +100,14 @@ zn_vr_modal_item_headset_dialog_render(struct zigzag_node *node, cairo_t *cr)
   if (wl_list_empty(&remote->peer_list)) {
     cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
     cairo_set_font_size(cr, 14);
-    zigzag_cairo_draw_text(cr, "No headset detected", node->frame.width / 2, 40,
-        ZIGZAG_ANCHOR_CENTER, ZIGZAG_ANCHOR_CENTER);
+    zigzag_cairo_draw_text(cr, "No headset detected", node->frame.width / 2, 16,
+        ZIGZAG_ANCHOR_CENTER, ZIGZAG_ANCHOR_TOP);
   } else {
-    int i = 0;
+    int i = 1;
     struct zn_peer *peer_iter;
     wl_list_for_each (peer_iter, &remote->peer_list, link) {
       zn_vr_modal_item_headset_dialog_render_headset_dialog(
-          cr, peer_iter, node->frame.width / 2, 10 + 30 * (i + 1), i);
+          cr, peer_iter, node->frame.width / 2, 16 + 30 * i, i);
       ++i;
     }
   }
@@ -127,7 +127,7 @@ zn_vr_modal_item_headset_dialog_set_frame(
   node->frame.y = screen_height / 2 + 60;
   node->frame.width = HEADSET_DIALOG_WIDTH;
   node->frame.height =
-      60 + 30 * (peer_list_length - 1 > 0 ? peer_list_length - 1 : 0);
+      70 + 30 * (peer_list_length - 1 > 0 ? peer_list_length - 1 : 0);
 }
 
 static const struct zigzag_node_impl implementation = {
