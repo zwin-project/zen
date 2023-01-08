@@ -10,6 +10,7 @@ extern "C" {
 
 struct znr_remote_peer {
   char *host;  // null-terminated ip address string
+  bool wired;
 
   struct {
     struct wl_signal destroy;  // (NULL)

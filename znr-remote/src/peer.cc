@@ -15,6 +15,7 @@ znr_remote_peer_create(std::shared_ptr<zen::remote::server::IPeer> proxy)
 
   wl_signal_init(&self->base.events.destroy);
   self->base.host = strdup(proxy->host().c_str());
+  self->base.wired = proxy->wired();
   self->proxy = proxy;
 
   return self;

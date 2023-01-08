@@ -5,6 +5,7 @@
 struct zn_peer {
   struct znr_remote_peer *znr_remote_peer;
   char *host;
+  bool wired;
 
   // nonnull when the peer has the session
   struct znr_session *session;
