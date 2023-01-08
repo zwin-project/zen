@@ -89,6 +89,9 @@ zn_seat_create(struct wl_display *display, const char *seat_name)
     goto err_wlr_seat;
   }
 
+  struct zn_server *server = zn_server_get_singleton();
+  wlr_xwayland_set_seat(server->screen_compositor->xwayland, self->wlr_seat);
+
   self->request_set_cursor_listener.notify = zn_seat_handle_request_set_cursor;
   wl_signal_add(&self->wlr_seat->events.request_set_cursor,
       &self->request_set_cursor_listener);

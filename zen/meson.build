@@ -29,6 +29,7 @@ _zen_srcs = [
   'screen/renderer.c',
   'screen/xdg-popup.c',
   'screen/xdg-toplevel.c',
+  'screen/xwayland.c',
   'screen/cursor-grab/default.c',
   'screen/cursor-grab/down.c',
   'screen/cursor-grab/move.c',
