@@ -14,6 +14,7 @@ struct zn_screen_compositor {
   struct wlr_xwayland *xwayland;
 
   struct wl_listener xdg_shell_new_surface_listener;
+  struct wl_listener xwayland_ready_listener;
   struct wl_listener xwayland_new_surface_listener;
 };
 
