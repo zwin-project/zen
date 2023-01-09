@@ -74,21 +74,20 @@ zn_vr_modal_render(struct zigzag_node *node, cairo_t *cr)
   return true;
 }
 
-static void
-zn_vr_modal_set_frame(
-    struct zigzag_node *node, double screen_width, double screen_height)
-{
-  node->frame.x = 0.;
-  node->frame.y = 0.;
-  node->frame.width = screen_width;
-  node->frame.height = screen_height;
-}
-
 static const struct zigzag_node_impl implementation = {
     .on_click = zn_vr_modal_on_click,
-    .set_frame = zn_vr_modal_set_frame,
     .render = zn_vr_modal_render,
 };
+
+static void
+zn_vr_modal_init_frame(
+    struct zigzag_node *node, double screen_width, double screen_height)
+{
+  node->pending.frame.x = 0.;
+  node->pending.frame.y = 0.;
+  node->pending.frame.width = screen_width;
+  node->pending.frame.height = screen_height;
+}
 
 struct zn_vr_modal *
 zn_vr_modal_create(
@@ -103,7 +102,7 @@ zn_vr_modal_create(
   }
 
   struct zigzag_node *zigzag_node =
-      zigzag_node_create(&implementation, zigzag_layout, renderer, false, self);
+      zigzag_node_create(&implementation, zigzag_layout, false, self);
 
   if (zigzag_node == NULL) {
     zn_error("Failed to create a zigzag_node");
@@ -111,14 +110,17 @@ zn_vr_modal_create(
   }
   self->zigzag_node = zigzag_node;
 
-  self->headset_dialog =
-      zn_vr_modal_item_headset_dialog_create(zigzag_layout, renderer);
+  self->headset_dialog = zn_vr_modal_item_headset_dialog_create(zigzag_layout);
   if (self->headset_dialog == NULL) {
     zn_error("Failed to create zn_vr_modal_item_headset_dialog");
     goto err_zigzag_node;
   }
-  wl_list_insert(
-      &self->zigzag_node->node_list, &self->headset_dialog->zigzag_node->link);
+  zigzag_node_add_child(
+      self->zigzag_node, self->headset_dialog->zigzag_node, renderer);
+
+  zn_vr_modal_init_frame(self->zigzag_node,
+      self->zigzag_node->layout->screen_width,
+      self->zigzag_node->layout->screen_height);
 
   return self;
 

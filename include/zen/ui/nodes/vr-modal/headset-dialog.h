@@ -12,7 +12,7 @@ struct zn_vr_modal_item_headset_dialog {
 };
 
 struct zn_vr_modal_item_headset_dialog *zn_vr_modal_item_headset_dialog_create(
-    struct zigzag_layout *zigzag_layout, struct wlr_renderer *renderer);
+    struct zigzag_layout *zigzag_layout);
 
 void zn_vr_modal_item_headset_dialog_destroy(
     struct zn_vr_modal_item_headset_dialog *self);

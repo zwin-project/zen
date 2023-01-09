@@ -11,6 +11,30 @@
 #include "zen/ui/nodes/vr-menu/headset.h"
 
 static void
+zn_vr_menu_update_frame(
+    struct zigzag_node *self, double screen_width, double screen_height)
+{
+  self->pending.frame.x =
+      screen_width - vr_menu_bubble_width - vr_menu_space_right;
+  self->pending.frame.width = vr_menu_bubble_width;
+
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_remote *remote = server->remote;
+  if (wl_list_empty(&remote->peer_list)) {
+    self->pending.frame.height =
+        tip_height + vr_how_to_connect_height + no_headsets_text_height +
+        vr_headsets_heading_height + vr_menu_bubble_padding_height;
+  } else {
+    self->pending.frame.height =
+        tip_height + vr_how_to_connect_height +
+        wl_list_length(&remote->peer_list) * vr_menu_headset_height +
+        vr_headsets_heading_height + vr_menu_bubble_padding_height;
+  }
+  self->pending.frame.y =
+      screen_height - self->pending.frame.height - menu_bar_height;
+}
+
+static void
 zn_vr_menu_refresh_headsets(struct zn_vr_menu *self, struct wl_list *peer_list)
 {
   struct zn_vr_menu_item_headset *headset, *tmp;
@@ -23,7 +47,8 @@ zn_vr_menu_refresh_headsets(struct zn_vr_menu *self, struct wl_list *peer_list)
   wl_list_for_each (peer_iter, peer_list, link) {
     struct zn_vr_menu_item_headset *headset = zn_vr_menu_item_headset_create(
         self->zigzag_node->layout, server->renderer, peer_iter, i);
-    wl_list_insert(&self->zigzag_node->node_list, &headset->zigzag_node->link);
+    zigzag_node_add_child(
+        self->zigzag_node, headset->zigzag_node, server->renderer);
     wl_list_insert(&self->headset_list, &headset->link);
     ++i;
   }
@@ -39,6 +64,9 @@ zn_vr_menu_handle_peer_list_changed(struct wl_listener *listener, void *data)
   struct zn_remote *remote = server->remote;
   zn_vr_menu_refresh_headsets(self, &remote->peer_list);
 
+  zn_vr_menu_update_frame(self->zigzag_node,
+      self->zigzag_node->layout->screen_width,
+      self->zigzag_node->layout->screen_height);
   zigzag_node_update_frame(self->zigzag_node);
   zigzag_node_update_texture(self->zigzag_node, server->renderer);
 }
@@ -103,37 +131,13 @@ zn_vr_menu_render(struct zigzag_node *self, cairo_t *cr)
   return true;
 }
 
-static void
-zn_vr_menu_set_frame(
-    struct zigzag_node *self, double screen_width, double screen_height)
-{
-  self->frame.x = screen_width - vr_menu_bubble_width - vr_menu_space_right;
-  self->frame.width = vr_menu_bubble_width;
-
-  struct zn_server *server = zn_server_get_singleton();
-  struct zn_remote *remote = server->remote;
-  if (wl_list_empty(&remote->peer_list)) {
-    self->frame.height = tip_height + vr_how_to_connect_height +
-                         no_headsets_text_height + vr_headsets_heading_height +
-                         vr_menu_bubble_padding_height;
-  } else {
-    self->frame.height =
-        tip_height + vr_how_to_connect_height +
-        wl_list_length(&remote->peer_list) * vr_menu_headset_height +
-        vr_headsets_heading_height + vr_menu_bubble_padding_height;
-  }
-  self->frame.y = screen_height - self->frame.height - menu_bar_height;
-}
-
 static const struct zigzag_node_impl implementation = {
     .on_click = zn_vr_menu_on_click,
-    .set_frame = zn_vr_menu_set_frame,
     .render = zn_vr_menu_render,
 };
 
 struct zn_vr_menu *
-zn_vr_menu_create(struct zigzag_layout *zigzag_layout,
-    struct wlr_renderer *renderer, double tip_x)
+zn_vr_menu_create(struct zigzag_layout *zigzag_layout, double tip_x)
 {
   struct zn_vr_menu *self;
 
@@ -145,7 +149,7 @@ zn_vr_menu_create(struct zigzag_layout *zigzag_layout,
   self->tip_x = tip_x;
 
   struct zigzag_node *zigzag_node =
-      zigzag_node_create(&implementation, zigzag_layout, renderer, false, self);
+      zigzag_node_create(&implementation, zigzag_layout, false, self);
 
   if (zigzag_node == NULL) {
     zn_error("Failed to create a zigzag_node");
@@ -159,6 +163,10 @@ zn_vr_menu_create(struct zigzag_layout *zigzag_layout,
       &self->peer_list_changed_listener);
 
   wl_list_init(&self->headset_list);
+
+  zn_vr_menu_update_frame(self->zigzag_node,
+      self->zigzag_node->layout->screen_width,
+      self->zigzag_node->layout->screen_height);
 
   return self;
 

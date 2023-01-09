@@ -55,27 +55,27 @@ zn_vr_menu_item_headset_render(struct zigzag_node *node, cairo_t *cr)
   return true;
 }
 
+static const struct zigzag_node_impl implementation = {
+    .on_click = zn_vr_menu_item_headset_on_click,
+    .render = zn_vr_menu_item_headset_render,
+};
+
 static void
-zn_vr_menu_item_headset_set_frame(
+zn_vr_menu_item_headset_init_frame(
     struct zigzag_node *node, double screen_width, double screen_height)
 {
   struct zn_vr_menu_item_headset *self = node->user_data;
-  node->frame.x = screen_width - vr_menu_bubble_width - vr_menu_space_right +
-                  (vr_menu_bubble_width - vr_menu_headset_width) / 2;
+  node->pending.frame.x = screen_width - vr_menu_bubble_width -
+                          vr_menu_space_right +
+                          (vr_menu_bubble_width - vr_menu_headset_width) / 2;
   struct zn_server *server = zn_server_get_singleton();
   struct zn_remote *remote = server->remote;
-  node->frame.y =
+  node->pending.frame.y =
       screen_height - menu_bar_height - tip_height - vr_how_to_connect_height -
       (wl_list_length(&remote->peer_list) - self->idx) * vr_menu_headset_height;
-  node->frame.width = vr_menu_headset_width;
-  node->frame.height = vr_menu_headset_height;
+  node->pending.frame.width = vr_menu_headset_width;
+  node->pending.frame.height = vr_menu_headset_height;
 }
-
-static const struct zigzag_node_impl implementation = {
-    .on_click = zn_vr_menu_item_headset_on_click,
-    .set_frame = zn_vr_menu_item_headset_set_frame,
-    .render = zn_vr_menu_item_headset_render,
-};
 
 struct zn_vr_menu_item_headset *
 zn_vr_menu_item_headset_create(struct zigzag_layout *zigzag_layout,
@@ -93,7 +93,7 @@ zn_vr_menu_item_headset_create(struct zigzag_layout *zigzag_layout,
   self->idx = idx;
 
   struct zigzag_node *zigzag_node =
-      zigzag_node_create(&implementation, zigzag_layout, renderer, true, self);
+      zigzag_node_create(&implementation, zigzag_layout, true, self);
 
   if (zigzag_node == NULL) {
     zn_error("Failed to create a zigzag_node");
@@ -101,16 +101,16 @@ zn_vr_menu_item_headset_create(struct zigzag_layout *zigzag_layout,
   }
   self->zigzag_node = zigzag_node;
 
-  self->connect_button = zn_vr_menu_headset_connect_button_create(
-      zigzag_layout, renderer, peer, idx);
+  self->connect_button =
+      zn_vr_menu_headset_connect_button_create(zigzag_layout, peer, idx);
 
   if (self->connect_button == NULL) {
     zn_error("Failed to create the connect button");
     goto err_zigzag_node;
   }
 
-  wl_list_insert(
-      &self->zigzag_node->node_list, &self->connect_button->zigzag_node->link);
+  zigzag_node_add_child(
+      self->zigzag_node, self->connect_button->zigzag_node, renderer);
 
   self->vr_icon_surface = zigzag_node_render_cairo_surface(
       zigzag_node, zn_vr_icon_render, vr_icon_width, vr_icon_height);
@@ -119,7 +119,11 @@ zn_vr_menu_item_headset_create(struct zigzag_layout *zigzag_layout,
     zn_error("Failed to load the icon");
     goto err_connect_button;
   }
+  zn_vr_menu_item_headset_init_frame(self->zigzag_node,
+      self->zigzag_node->layout->screen_width,
+      self->zigzag_node->layout->screen_height);
 
+  zigzag_node_update_frame(self->zigzag_node);
   zigzag_node_update_texture(self->zigzag_node, renderer);
 
   wl_list_init(&self->link);

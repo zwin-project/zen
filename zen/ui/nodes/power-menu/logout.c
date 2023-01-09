@@ -33,29 +33,29 @@ zn_power_menu_item_logout_render(struct zigzag_node *node, cairo_t *cr)
   return true;
 }
 
-static void
-zn_power_menu_item_logout_set_frame(
-    struct zigzag_node *node, double screen_width, double screen_height)
-{
-  node->frame.x =
-      screen_width - power_menu_bubble_width - power_menu_space_right;
-  node->frame.y = screen_height - power_menu_bubble_height - menu_bar_height +
-                  power_menu_clock_height + 5.;
-
-  node->frame.width = power_menu_bubble_width;
-  node->frame.height = power_menu_logout_height;
-}
-
 static const struct zigzag_node_impl implementation = {
     .on_click = zn_power_menu_item_logout_on_click,
-    .set_frame = zn_power_menu_item_logout_set_frame,
     .render = zn_power_menu_item_logout_render,
 };
+
+static void
+zn_power_menu_item_logout_init_frame(
+    struct zigzag_node *node, double screen_width, double screen_height)
+{
+  node->pending.frame.x =
+      screen_width - power_menu_bubble_width - power_menu_space_right;
+  node->pending.frame.y = screen_height - power_menu_bubble_height -
+                          menu_bar_height + power_menu_clock_height + 5.;
+
+  node->pending.frame.width = power_menu_bubble_width;
+  node->pending.frame.height = power_menu_logout_height;
+}
 
 struct zn_power_menu_item_logout *
 zn_power_menu_item_logout_create(
     struct zigzag_layout *zigzag_layout, struct wlr_renderer *renderer)
 {
+  UNUSED(renderer);
   struct zn_power_menu_item_logout *self;
 
   self = zalloc(sizeof *self);
@@ -65,13 +65,17 @@ zn_power_menu_item_logout_create(
   }
 
   struct zigzag_node *zigzag_node =
-      zigzag_node_create(&implementation, zigzag_layout, renderer, true, self);
+      zigzag_node_create(&implementation, zigzag_layout, true, self);
 
   if (zigzag_node == NULL) {
     zn_error("Failed to create a zigzag_node");
     goto err_power_menu_item_logout;
   }
   self->zigzag_node = zigzag_node;
+
+  zn_power_menu_item_logout_init_frame(self->zigzag_node,
+      self->zigzag_node->layout->screen_width,
+      self->zigzag_node->layout->screen_height);
 
   return self;
 

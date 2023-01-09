@@ -15,7 +15,7 @@ struct zn_vr_menu {
   struct wl_listener peer_list_changed_listener;
 };
 
-struct zn_vr_menu *zn_vr_menu_create(struct zigzag_layout *zigzag_layout,
-    struct wlr_renderer *renderer, double tip_x);
+struct zn_vr_menu *zn_vr_menu_create(
+    struct zigzag_layout *zigzag_layout, double tip_x);
 
 void zn_vr_menu_destroy(struct zn_vr_menu *self);

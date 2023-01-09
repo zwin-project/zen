@@ -56,23 +56,24 @@ zn_vr_button_render(struct zigzag_node *node, cairo_t *cr)
   return true;
 }
 
+static const struct zigzag_node_impl implementation = {
+    .on_click = zn_vr_button_on_click,
+    .render = zn_vr_button_render,
+};
+
 static void
-zn_vr_button_set_frame(
+zn_vr_button_init_frame(
     struct zigzag_node *node, double screen_width, double screen_height)
 {
   double vr_button_height = menu_bar_height - vr_button_margin_height * 2;
 
-  node->frame.x = screen_width - vr_button_width - vr_button_margin_width;
-  node->frame.y = screen_height - vr_button_height - vr_button_margin_height;
-  node->frame.width = vr_button_width;
-  node->frame.height = vr_button_height;
+  node->pending.frame.x =
+      screen_width - vr_button_width - vr_button_margin_width;
+  node->pending.frame.y =
+      screen_height - vr_button_height - vr_button_margin_height;
+  node->pending.frame.width = vr_button_width;
+  node->pending.frame.height = vr_button_height;
 }
-
-static const struct zigzag_node_impl implementation = {
-    .on_click = zn_vr_button_on_click,
-    .set_frame = zn_vr_button_set_frame,
-    .render = zn_vr_button_render,
-};
 
 struct zn_vr_button *
 zn_vr_button_create(
@@ -87,7 +88,7 @@ zn_vr_button_create(
   }
 
   struct zigzag_node *zigzag_node =
-      zigzag_node_create(&implementation, zigzag_layout, renderer, true, self);
+      zigzag_node_create(&implementation, zigzag_layout, true, self);
 
   if (zigzag_node == NULL) {
     zn_error("Failed to create a zigzag_node");
@@ -95,15 +96,15 @@ zn_vr_button_create(
   }
   self->zigzag_node = zigzag_node;
 
-  struct zn_vr_menu *vr_menu = zn_vr_menu_create(zigzag_layout, renderer,
-      zigzag_layout->screen_width - vr_button_margin_width -
-          vr_button_width / 2);
+  struct zn_vr_menu *vr_menu = zn_vr_menu_create(
+      zigzag_layout, zigzag_layout->screen_width - vr_button_margin_width -
+                         vr_button_width / 2);
   if (vr_menu == NULL) {
     zn_error("Failed to create the vr_menu");
     goto err_zigzag_node;
   }
   self->vr_menu = vr_menu;
-  wl_list_insert(&self->zigzag_node->node_list, &vr_menu->zigzag_node->link);
+  zigzag_node_add_child(self->zigzag_node, vr_menu->zigzag_node, renderer);
 
   self->vr_icon_surface = zigzag_node_render_cairo_surface(
       zigzag_node, zn_vr_icon_render, vr_icon_width, vr_icon_height);
@@ -113,6 +114,11 @@ zn_vr_button_create(
     goto err_vr_menu;
   }
 
+  zn_vr_button_init_frame(self->zigzag_node,
+      self->zigzag_node->layout->screen_width,
+      self->zigzag_node->layout->screen_height);
+
+  zigzag_node_update_frame(self->zigzag_node);
   zigzag_node_update_texture(self->zigzag_node, renderer);
 
   return self;

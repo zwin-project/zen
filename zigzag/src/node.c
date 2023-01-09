@@ -58,8 +58,7 @@ void
 zigzag_node_update_frame(struct zigzag_node *self)
 {
   self->layout->implementation->on_damage(self);
-  self->implementation->set_frame(
-      self, self->layout->screen_width, self->layout->screen_height);
+  self->frame = self->pending.frame;
   self->layout->implementation->on_damage(self);
 }
 
@@ -78,10 +77,18 @@ zigzag_node_update_texture(
   self->layout->implementation->on_damage(self);
 }
 
+void
+zigzag_node_add_child(struct zigzag_node *parent, struct zigzag_node *child,
+    struct wlr_renderer *renderer)
+{
+  zigzag_node_update_frame(child);
+  zigzag_node_update_texture(child, renderer);
+  wl_list_insert(&parent->node_list, &child->link);
+}
+
 struct zigzag_node *
 zigzag_node_create(const struct zigzag_node_impl *implementation,
-    struct zigzag_layout *layout, struct wlr_renderer *renderer, bool visible,
-    void *user_data)
+    struct zigzag_layout *layout, bool visible, void *user_data)
 {
   struct zigzag_node *self;
   self = zalloc(sizeof *self);
@@ -95,22 +102,10 @@ zigzag_node_create(const struct zigzag_node_impl *implementation,
   self->user_data = user_data;
   self->implementation = implementation;
 
-  self->implementation->set_frame(
-      self, layout->screen_width, layout->screen_height);
-
-  self->texture = zigzag_node_render_texture(self, renderer);
-  if (self->texture == NULL) {
-    zn_error("Failed to render the texture");
-    goto err_self;
-  }
-
   wl_list_init(&self->node_list);
   wl_list_init(&self->link);
 
   return self;
-
-err_self:
-  free(self);
 
 err:
   return NULL;

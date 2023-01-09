@@ -29,6 +29,9 @@ struct zigzag_layout {
   const struct zigzag_layout_impl *implementation;
 };
 
+void zigzag_layout_add_node(struct zigzag_layout *layout,
+    struct zigzag_node *node, struct wlr_renderer *renderer);
+
 struct zigzag_layout *zigzag_layout_create(
     const struct zigzag_layout_impl *implementation, double screen_width,
     double screen_height, void *user_data);
@@ -39,8 +42,6 @@ typedef bool (*zigzag_node_render_t)(struct zigzag_node *self, cairo_t *cr);
 
 struct zigzag_node_impl {
   void (*on_click)(struct zigzag_node *self, double x, double y);
-  void (*set_frame)(
-      struct zigzag_node *self, double screen_width, double screen_height);
   zigzag_node_render_t render;
 };
 
@@ -57,10 +58,15 @@ struct zigzag_node {
   struct zigzag_layout *layout;
 
   struct wlr_fbox frame;
-  struct wlr_texture *texture;  // nonnull
+  // nonnull after being inserted to layout or another node
+  struct wlr_texture *texture;
 
   struct zigzag_edge_size padding;
   struct zigzag_edge_size margin;
+
+  struct {
+    struct wlr_fbox frame;
+  } pending;
 
   void *user_data;
 
@@ -77,7 +83,7 @@ struct zigzag_node {
 
 struct zigzag_node *zigzag_node_create(
     const struct zigzag_node_impl *implementation, struct zigzag_layout *layout,
-    struct wlr_renderer *renderer, bool visible, void *user_data);
+    bool visible, void *user_data);
 
 void zigzag_node_destroy(struct zigzag_node *self);
 
@@ -86,6 +92,9 @@ cairo_surface_t *zigzag_node_render_cairo_surface(struct zigzag_node *self,
 
 void zigzag_node_update_texture(
     struct zigzag_node *self, struct wlr_renderer *renderer);
+
+void zigzag_node_add_child(struct zigzag_node *parent,
+    struct zigzag_node *child, struct wlr_renderer *renderer);
 
 void zigzag_node_update_frame(struct zigzag_node *self);
 
