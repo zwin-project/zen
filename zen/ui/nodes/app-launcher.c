@@ -12,7 +12,7 @@ zn_app_launcher_on_click(struct zigzag_node *node, double x, double y)
   UNUSED(x);
   UNUSED(y);
   struct zn_app_launcher *app_launcher = node->user_data;
-  zn_launch_command(app_launcher->data->cmd);
+  zn_launch_command(app_launcher->data->command);
 }
 
 static bool
@@ -68,7 +68,7 @@ zn_app_launcher_create(struct zigzag_layout *zigzag_layout,
   self->idx = idx;
 
   self->launcher_icon_surface =
-      cairo_image_surface_create_from_png(self->data->logo_path);
+      cairo_image_surface_create_from_png(self->data->icon_path);
   if (cairo_surface_status(self->launcher_icon_surface) !=
       CAIRO_STATUS_SUCCESS) {
     goto err_cairo_surface;
