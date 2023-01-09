@@ -4,6 +4,7 @@ _zigzag_srcs = [
   'src/cairo_util.c',
   'src/layout.c',
   'src/node.c',
+  'src/reconfigure.c',
 ]
 
 _zigzag_deps = [
