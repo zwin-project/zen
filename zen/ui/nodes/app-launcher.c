@@ -98,8 +98,7 @@ err:
 void
 zn_app_launcher_destroy(struct zn_app_launcher *self)
 {
-  // TODO: Resolve the error
-  // wl_list_remove(&self->link);
+  wl_list_remove(&self->link);
   cairo_surface_destroy(self->launcher_icon_surface);
   zigzag_node_destroy(self->zigzag_node);
   free(self);

@@ -120,10 +120,11 @@ err:
 void
 zn_menu_bar_destroy(struct zn_menu_bar *self)
 {
-  struct zn_app_launcher *registered;
-  wl_list_for_each_reverse (registered, &self->launcher_list, link) {
-    zn_app_launcher_destroy(registered);
+  struct zn_app_launcher *launcher, *tmp;
+  wl_list_for_each_reverse_safe (launcher, tmp, &self->launcher_list, link) {
+    zn_app_launcher_destroy(launcher);
   }
+
   wl_list_remove(&self->launcher_list);
   zn_power_button_destroy(self->power_button);
   zigzag_node_destroy(self->zigzag_node);
