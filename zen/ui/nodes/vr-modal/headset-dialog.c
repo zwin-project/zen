@@ -82,13 +82,12 @@ zn_vr_modal_item_headset_dialog_render_headset_dialog(cairo_t *cr,
 static bool
 zn_vr_modal_item_headset_dialog_render(struct zigzag_node *node, cairo_t *cr)
 {
-  cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
   zigzag_cairo_draw_rounded_rectangle(
       cr, 0, 0, node->frame.width, node->frame.height, 8.0);
-  cairo_stroke_preserve(cr);
-  cairo_set_line_width(cr, 1.0);
-  cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 0.0);
-  cairo_fill(cr);
+
+  zigzag_cairo_draw_node_frame(cr, node,
+      (struct zigzag_color){0.0, 0.0, 0.0, 0.0},
+      (struct zigzag_color){1.0, 1.0, 1.0, 1.0}, 1.0, 8.0);
 
   cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.5);
   cairo_set_font_size(cr, 13);
