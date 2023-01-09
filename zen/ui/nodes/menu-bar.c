@@ -9,6 +9,13 @@
 #include "zen/ui/nodes/app-launcher.h"
 #include "zen/ui/nodes/power-button.h"
 
+static const struct zn_app_launcher_data default_launchers[2] = {
+    {.logo_path = CHROME_LAUNCHER_ICON,
+        .cmd = "google-chrome-stable --enable-features=UseOzonePlatform "
+               "--ozone-platform=wayland --disable-gpu"},
+    {.logo_path = TERMINAL_LAUNCHER_ICON, .cmd = "weston-terminal"},
+};
+
 static void
 zn_menu_bar_on_click(struct zigzag_node *node, double x, double y)
 {
