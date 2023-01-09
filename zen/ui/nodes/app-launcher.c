@@ -54,7 +54,8 @@ static const struct zigzag_node_impl implementation = {
 
 struct zn_app_launcher *
 zn_app_launcher_create(struct zigzag_layout *zigzag_layout,
-    struct wlr_renderer *renderer, const struct launcher_data *data, int idx)
+    struct wlr_renderer *renderer, const struct zn_app_launcher_data *data,
+    int idx)
 {
   struct zn_app_launcher *self;
 
