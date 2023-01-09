@@ -10,10 +10,10 @@
 #include "zen/ui/nodes/power-button.h"
 
 static const struct zn_app_launcher_data default_launchers[2] = {
-    {.logo_path = CHROME_LAUNCHER_ICON,
-        .cmd = "google-chrome-stable --enable-features=UseOzonePlatform "
-               "--ozone-platform=wayland --disable-gpu"},
-    {.logo_path = TERMINAL_LAUNCHER_ICON, .cmd = "weston-terminal"},
+    {.icon_path = CHROME_LAUNCHER_ICON,
+        .command = "google-chrome-stable --enable-features=UseOzonePlatform "
+                   "--ozone-platform=wayland --disable-gpu"},
+    {.icon_path = TERMINAL_LAUNCHER_ICON, .command = "weston-terminal"},
 };
 
 static void

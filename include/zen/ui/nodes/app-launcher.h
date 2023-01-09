@@ -5,8 +5,8 @@
 #include <zigzag.h>
 
 struct zn_app_launcher_data {
-  char *logo_path;
-  char *cmd;
+  char *icon_path;
+  char *command;
 };
 
 struct zn_app_launcher {
