@@ -42,38 +42,37 @@ zn_vr_menu_headset_connect_button_render(struct zigzag_node *node, cairo_t *cr)
   return true;
 }
 
+static const struct zigzag_node_impl implementation = {
+    .on_click = zn_vr_menu_headset_connect_button_on_click,
+    .render = zn_vr_menu_headset_connect_button_render,
+};
+
 static void
-zn_vr_menu_headset_connect_button_set_frame(
+zn_vr_menu_headset_connect_button_init_frame(
     struct zigzag_node *node, double screen_width, double screen_height)
 {
   struct zn_vr_menu_headset_connect_button *self = node->user_data;
-  node->frame.x = screen_width - vr_menu_space_right -
-                  (vr_menu_bubble_width - vr_menu_headset_width) / 2 -
-                  vr_menu_headset_connect_button_margin -
-                  vr_menu_headset_connect_button_width;
+  node->pending.frame.x = screen_width - vr_menu_space_right -
+                          (vr_menu_bubble_width - vr_menu_headset_width) / 2 -
+                          vr_menu_headset_connect_button_margin -
+                          vr_menu_headset_connect_button_width;
 
   struct zn_server *server = zn_server_get_singleton();
   struct zn_remote *remote = server->remote;
 
-  node->frame.y =
+  node->pending.frame.y =
       screen_height - menu_bar_height - tip_height - vr_how_to_connect_height -
       (wl_list_length(&remote->peer_list) - self->idx) *
           vr_menu_headset_height +
       (vr_menu_headset_height - vr_menu_headset_connect_button_height) / 2;
 
-  node->frame.width = vr_menu_headset_connect_button_width;
-  node->frame.height = vr_menu_headset_connect_button_height;
+  node->pending.frame.width = vr_menu_headset_connect_button_width;
+  node->pending.frame.height = vr_menu_headset_connect_button_height;
 }
 
-static const struct zigzag_node_impl implementation = {
-    .on_click = zn_vr_menu_headset_connect_button_on_click,
-    .set_frame = zn_vr_menu_headset_connect_button_set_frame,
-    .render = zn_vr_menu_headset_connect_button_render,
-};
-
 struct zn_vr_menu_headset_connect_button *
-zn_vr_menu_headset_connect_button_create(struct zigzag_layout *zigzag_layout,
-    struct wlr_renderer *renderer, struct zn_peer *peer, int idx)
+zn_vr_menu_headset_connect_button_create(
+    struct zigzag_layout *zigzag_layout, struct zn_peer *peer, int idx)
 {
   struct zn_vr_menu_headset_connect_button *self;
 
@@ -86,13 +85,17 @@ zn_vr_menu_headset_connect_button_create(struct zigzag_layout *zigzag_layout,
   self->idx = idx;
 
   struct zigzag_node *zigzag_node =
-      zigzag_node_create(&implementation, zigzag_layout, renderer, true, self);
+      zigzag_node_create(&implementation, zigzag_layout, true, self);
 
   if (zigzag_node == NULL) {
     zn_error("Failed to create a zigzag_node");
     goto err_vr_menu_headset_connect_button;
   }
   self->zigzag_node = zigzag_node;
+
+  zn_vr_menu_headset_connect_button_init_frame(self->zigzag_node,
+      self->zigzag_node->layout->screen_width,
+      self->zigzag_node->layout->screen_height);
 
   return self;
 

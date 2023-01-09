@@ -34,28 +34,25 @@ zn_app_launcher_render(struct zigzag_node *node, cairo_t *cr)
   return true;
 }
 
-static void
-zn_app_launcher_set_frame(
-    struct zigzag_node *node, double screen_width, double screen_height)
-{
-  UNUSED(screen_width);
-  struct zn_app_launcher *app_launcher = node->user_data;
-  node->frame.x = launcher_margin_left + app_launcher->idx * launcher_width;
-  node->frame.y = screen_height - menu_bar_height;
-  node->frame.width = launcher_width;
-  node->frame.height = menu_bar_height;
-}
-
 static const struct zigzag_node_impl implementation = {
     .on_click = zn_app_launcher_on_click,
-    .set_frame = zn_app_launcher_set_frame,
     .render = zn_app_launcher_render,
 };
 
+static void
+zn_app_launcher_init_frame(struct zigzag_node *node, double screen_height)
+{
+  struct zn_app_launcher *app_launcher = node->user_data;
+  node->pending.frame.x =
+      launcher_margin_left + app_launcher->idx * launcher_width;
+  node->pending.frame.y = screen_height - menu_bar_height;
+  node->pending.frame.width = launcher_width;
+  node->pending.frame.height = menu_bar_height;
+}
+
 struct zn_app_launcher *
 zn_app_launcher_create(struct zigzag_layout *zigzag_layout,
-    struct wlr_renderer *renderer, const struct zn_app_launcher_data *data,
-    int idx)
+    const struct zn_app_launcher_data *data, int idx)
 {
   struct zn_app_launcher *self;
 
@@ -75,7 +72,7 @@ zn_app_launcher_create(struct zigzag_layout *zigzag_layout,
   }
 
   struct zigzag_node *zigzag_node =
-      zigzag_node_create(&implementation, zigzag_layout, renderer, true, self);
+      zigzag_node_create(&implementation, zigzag_layout, true, self);
 
   if (zigzag_node == NULL) {
     zn_error("Failed to create a zigzag_node");
@@ -84,6 +81,8 @@ zn_app_launcher_create(struct zigzag_layout *zigzag_layout,
   self->zigzag_node = zigzag_node;
 
   wl_list_init(&self->link);
+
+  zn_app_launcher_init_frame(self->zigzag_node, zigzag_layout->screen_height);
 
   return self;
 

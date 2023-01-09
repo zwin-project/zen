@@ -84,26 +84,25 @@ zn_power_button_render(struct zigzag_node *node, cairo_t *cr)
   return true;
 }
 
+static const struct zigzag_node_impl implementation = {
+    .on_click = zn_power_button_on_click,
+    .render = zn_power_button_render,
+};
+
 static void
-zn_power_button_set_frame(
+zn_power_button_init_frame(
     struct zigzag_node *node, double screen_width, double screen_height)
 {
   double power_button_height = menu_bar_height - power_button_margin_height * 2;
 
-  node->frame.x = screen_width - power_button_width -
-                  power_button_margin_width - vr_button_width -
-                  vr_button_margin_width;
-  node->frame.y =
+  node->pending.frame.x = screen_width - power_button_width -
+                          power_button_margin_width - vr_button_width -
+                          vr_button_margin_width;
+  node->pending.frame.y =
       screen_height - power_button_height - power_button_margin_height;
-  node->frame.width = power_button_width;
-  node->frame.height = power_button_height;
+  node->pending.frame.width = power_button_width;
+  node->pending.frame.height = power_button_height;
 }
-
-static const struct zigzag_node_impl implementation = {
-    .on_click = zn_power_button_on_click,
-    .set_frame = zn_power_button_set_frame,
-    .render = zn_power_button_render,
-};
 
 struct zn_power_button *
 zn_power_button_create(
@@ -118,7 +117,7 @@ zn_power_button_create(
   }
 
   struct zigzag_node *zigzag_node =
-      zigzag_node_create(&implementation, zigzag_layout, renderer, true, self);
+      zigzag_node_create(&implementation, zigzag_layout, true, self);
 
   if (zigzag_node == NULL) {
     zn_error("Failed to create a zigzag_node");
@@ -136,7 +135,8 @@ zn_power_button_create(
   }
   self->power_menu = power_menu;
 
-  wl_list_insert(&self->zigzag_node->node_list, &power_menu->zigzag_node->link);
+  zigzag_node_add_child(
+      self->zigzag_node, self->power_menu->zigzag_node, renderer);
 
   self->power_icon_surface = zigzag_node_render_cairo_surface(
       zigzag_node, zn_power_icon_render, power_icon_width, power_icon_height);
@@ -155,6 +155,10 @@ zn_power_button_create(
   int delay_ms = MSEC_PER_SEC - time_ms % MSEC_PER_SEC;
   if (delay_ms <= 0) delay_ms = 1;
   wl_event_source_timer_update(self->second_timer_source, delay_ms);
+
+  zn_power_button_init_frame(self->zigzag_node,
+      self->zigzag_node->layout->screen_width,
+      self->zigzag_node->layout->screen_height);
 
   return self;
 

@@ -70,7 +70,7 @@ zn_zigzag_layout_create(struct zn_screen *screen, struct wlr_renderer *renderer)
   }
   self->vr_modal = vr_modal;
 
-  wl_list_insert(&self->zigzag_layout->node_list, &vr_modal->zigzag_node->link);
+  zigzag_layout_add_node(self->zigzag_layout, vr_modal->zigzag_node, renderer);
 
   struct zn_menu_bar *menu_bar = zn_menu_bar_create(zigzag_layout, renderer);
 
@@ -80,7 +80,7 @@ zn_zigzag_layout_create(struct zn_screen *screen, struct wlr_renderer *renderer)
   }
   self->menu_bar = menu_bar;
 
-  wl_list_insert(&self->zigzag_layout->node_list, &menu_bar->zigzag_node->link);
+  zigzag_layout_add_node(self->zigzag_layout, menu_bar->zigzag_node, renderer);
 
   struct zn_server *server = zn_server_get_singleton();
   self->display_system_changed_listener.notify =

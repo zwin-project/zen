@@ -16,6 +16,16 @@
 #define ICON_HEIGHT 80.0
 
 static void
+zn_vr_modal_item_headset_dialog_update_height(struct zigzag_node *node)
+{
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_remote *remote = server->remote;
+  const int peer_list_length = wl_list_length(&remote->peer_list);
+  node->pending.frame.height =
+      70 + 30 * (peer_list_length - 1 > 0 ? peer_list_length - 1 : 0);
+}
+
+static void
 zn_vr_modal_item_headset_dialog_handle_peer_list_changed(
     struct wl_listener *listener, void *data)
 {
@@ -23,6 +33,8 @@ zn_vr_modal_item_headset_dialog_handle_peer_list_changed(
   struct zn_vr_modal_item_headset_dialog *self =
       zn_container_of(listener, self, peer_list_changed_listener);
   struct zn_server *server = zn_server_get_singleton();
+
+  zn_vr_modal_item_headset_dialog_update_height(self->zigzag_node);
   zigzag_node_update_frame(self->zigzag_node);
   zigzag_node_update_texture(self->zigzag_node, server->renderer);
 }
@@ -114,30 +126,24 @@ zn_vr_modal_item_headset_dialog_render(struct zigzag_node *node, cairo_t *cr)
   return true;
 }
 
-static void
-zn_vr_modal_item_headset_dialog_set_frame(
-    struct zigzag_node *node, double screen_width, double screen_height)
-{
-  struct zn_server *server = zn_server_get_singleton();
-  struct zn_remote *remote = server->remote;
-  const int peer_list_length = wl_list_length(&remote->peer_list);
-
-  node->frame.x = screen_width / 2 - HEADSET_DIALOG_WIDTH / 2;
-  node->frame.y = screen_height / 2 + 60;
-  node->frame.width = HEADSET_DIALOG_WIDTH;
-  node->frame.height =
-      70 + 30 * (peer_list_length - 1 > 0 ? peer_list_length - 1 : 0);
-}
-
 static const struct zigzag_node_impl implementation = {
     .on_click = zn_vr_modal_item_headset_dialog_on_click,
-    .set_frame = zn_vr_modal_item_headset_dialog_set_frame,
     .render = zn_vr_modal_item_headset_dialog_render,
 };
 
+static void
+zn_vr_modal_item_headset_dialog_init_frame(
+    struct zigzag_node *node, double screen_width, double screen_height)
+{
+  node->padding.top = node->padding.bottom = 16.0;
+  node->pending.frame.x = screen_width / 2 - HEADSET_DIALOG_WIDTH / 2;
+  node->pending.frame.y = screen_height / 2 + 60;
+  node->pending.frame.width = HEADSET_DIALOG_WIDTH;
+  zn_vr_modal_item_headset_dialog_update_height(node);
+}
+
 struct zn_vr_modal_item_headset_dialog *
-zn_vr_modal_item_headset_dialog_create(
-    struct zigzag_layout *zigzag_layout, struct wlr_renderer *renderer)
+zn_vr_modal_item_headset_dialog_create(struct zigzag_layout *zigzag_layout)
 {
   struct zn_vr_modal_item_headset_dialog *self;
 
@@ -148,7 +154,7 @@ zn_vr_modal_item_headset_dialog_create(
   }
 
   struct zigzag_node *zigzag_node =
-      zigzag_node_create(&implementation, zigzag_layout, renderer, true, self);
+      zigzag_node_create(&implementation, zigzag_layout, true, self);
 
   if (zigzag_node == NULL) {
     zn_error("Failed to create a zigzag_node");
@@ -161,6 +167,10 @@ zn_vr_modal_item_headset_dialog_create(
       zn_vr_modal_item_headset_dialog_handle_peer_list_changed;
   wl_signal_add(&server->remote->events.peer_list_changed,
       &self->peer_list_changed_listener);
+
+  zn_vr_modal_item_headset_dialog_init_frame(self->zigzag_node,
+      self->zigzag_node->layout->screen_width,
+      self->zigzag_node->layout->screen_height);
 
   return self;
 

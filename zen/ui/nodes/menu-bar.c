@@ -37,21 +37,20 @@ zn_menu_bar_render(struct zigzag_node *node, cairo_t *cr)
   return true;
 }
 
-static void
-zn_menu_bar_set_frame(
-    struct zigzag_node *node, double screen_width, double screen_height)
-{
-  node->frame.x = 0.;
-  node->frame.y = screen_height - menu_bar_height;
-  node->frame.width = screen_width;
-  node->frame.height = menu_bar_height;
-}
-
 static const struct zigzag_node_impl implementation = {
     .on_click = zn_menu_bar_on_click,
-    .set_frame = zn_menu_bar_set_frame,
     .render = zn_menu_bar_render,
 };
+
+static void
+zn_menu_bar_init_frame(
+    struct zigzag_node *node, double screen_width, double screen_height)
+{
+  node->pending.frame.x = 0.;
+  node->pending.frame.y = screen_height - menu_bar_height;
+  node->pending.frame.width = screen_width;
+  node->pending.frame.height = menu_bar_height;
+}
 
 struct zn_menu_bar *
 zn_menu_bar_create(
@@ -66,7 +65,7 @@ zn_menu_bar_create(
   }
 
   struct zigzag_node *zigzag_node =
-      zigzag_node_create(&implementation, zigzag_layout, renderer, true, self);
+      zigzag_node_create(&implementation, zigzag_layout, true, self);
 
   if (zigzag_node == NULL) {
     zn_error("Failed to create a zigzag_node");
@@ -82,8 +81,11 @@ zn_menu_bar_create(
   }
   self->power_button = power_button;
 
-  wl_list_insert(
-      &self->zigzag_node->node_list, &power_button->zigzag_node->link);
+  zigzag_node_add_child(self->zigzag_node, power_button->zigzag_node, renderer);
+
+  zn_menu_bar_init_frame(self->zigzag_node,
+      self->zigzag_node->layout->screen_width,
+      self->zigzag_node->layout->screen_height);
 
   struct zn_vr_button *vr_button = zn_vr_button_create(zigzag_layout, renderer);
   if (vr_button == NULL) {
@@ -92,19 +94,18 @@ zn_menu_bar_create(
   }
   self->vr_button = vr_button;
 
-  wl_list_insert(&self->zigzag_node->node_list, &vr_button->zigzag_node->link);
+  zigzag_node_add_child(self->zigzag_node, vr_button->zigzag_node, renderer);
 
   struct zn_app_launcher *launcher, *launcher_tmp;
   wl_list_init(&self->launcher_list);
   for (uint64_t i = 0; i < ARRAY_LENGTH(default_launchers); i++) {
-    launcher = zn_app_launcher_create(
-        zigzag_layout, renderer, &default_launchers[i], i);
+    launcher = zn_app_launcher_create(zigzag_layout, &default_launchers[i], i);
     if (launcher == NULL) {
       zn_error("Failed to create the launcher %ld", i);
       goto err_launcher_list;
     }
     wl_list_insert(&self->launcher_list, &launcher->link);
-    wl_list_insert(&self->zigzag_node->node_list, &launcher->zigzag_node->link);
+    zigzag_node_add_child(self->zigzag_node, launcher->zigzag_node, renderer);
   }
 
   return self;

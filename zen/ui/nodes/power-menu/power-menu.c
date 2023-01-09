@@ -31,22 +31,22 @@ zn_power_menu_render(struct zigzag_node *self, cairo_t *cr)
   return true;
 }
 
-static void
-zn_power_menu_set_frame(
-    struct zigzag_node *self, double screen_width, double screen_height)
-{
-  self->frame.x =
-      screen_width - power_menu_bubble_width - power_menu_space_right;
-  self->frame.y = screen_height - power_menu_bubble_height - menu_bar_height;
-  self->frame.width = power_menu_bubble_width;
-  self->frame.height = power_menu_bubble_height;
-}
-
 static const struct zigzag_node_impl implementation = {
     .on_click = zn_power_menu_on_click,
-    .set_frame = zn_power_menu_set_frame,
     .render = zn_power_menu_render,
 };
+
+static void
+zn_power_menu_init_frame(
+    struct zigzag_node *self, double screen_width, double screen_height)
+{
+  self->pending.frame.x =
+      screen_width - power_menu_bubble_width - power_menu_space_right;
+  self->pending.frame.y =
+      screen_height - power_menu_bubble_height - menu_bar_height;
+  self->pending.frame.width = power_menu_bubble_width;
+  self->pending.frame.height = power_menu_bubble_height;
+}
 
 struct zn_power_menu *
 zn_power_menu_create(struct zigzag_layout *zigzag_layout,
@@ -62,7 +62,7 @@ zn_power_menu_create(struct zigzag_layout *zigzag_layout,
   self->tip_x = tip_x;
 
   struct zigzag_node *zigzag_node =
-      zigzag_node_create(&implementation, zigzag_layout, renderer, false, self);
+      zigzag_node_create(&implementation, zigzag_layout, false, self);
 
   if (zigzag_node == NULL) {
     zn_error("Failed to create a zigzag_node");
@@ -78,7 +78,7 @@ zn_power_menu_create(struct zigzag_layout *zigzag_layout,
   }
   self->item_clock = clock;
 
-  wl_list_insert(&self->zigzag_node->node_list, &clock->zigzag_node->link);
+  zigzag_node_add_child(self->zigzag_node, clock->zigzag_node, renderer);
 
   struct zn_power_menu_item_logout *logout =
       zn_power_menu_item_logout_create(zigzag_layout, renderer);
@@ -88,7 +88,11 @@ zn_power_menu_create(struct zigzag_layout *zigzag_layout,
   }
   self->item_logout = logout;
 
-  wl_list_insert(&self->zigzag_node->node_list, &logout->zigzag_node->link);
+  zigzag_node_add_child(self->zigzag_node, logout->zigzag_node, renderer);
+
+  zn_power_menu_init_frame(self->zigzag_node,
+      self->zigzag_node->layout->screen_width,
+      self->zigzag_node->layout->screen_height);
 
   return self;
 

@@ -4,6 +4,15 @@
 #include <zen-common.h>
 #include <zigzag.h>
 
+void
+zigzag_layout_add_node(struct zigzag_layout *layout, struct zigzag_node *node,
+    struct wlr_renderer *renderer)
+{
+  zigzag_node_update_frame(node);
+  zigzag_node_update_texture(node, renderer);
+  wl_list_insert(&layout->node_list, &node->link);
+}
+
 struct zigzag_layout *
 zigzag_layout_create(const struct zigzag_layout_impl *implementation,
     double screen_width, double screen_height, void *user_data)

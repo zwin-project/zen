@@ -21,7 +21,7 @@ struct zn_app_launcher {
 };
 
 struct zn_app_launcher *zn_app_launcher_create(
-    struct zigzag_layout *zigzag_layout, struct wlr_renderer *renderer,
+    struct zigzag_layout *zigzag_layout,
     const struct zn_app_launcher_data *data, int idx);
 
 void zn_app_launcher_destroy(struct zn_app_launcher *self);
