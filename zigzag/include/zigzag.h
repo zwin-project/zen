@@ -112,6 +112,9 @@ void zigzag_node_update_texture(
 void zigzag_node_add_child(struct zigzag_node *parent,
     struct zigzag_node *child, struct wlr_renderer *renderer);
 
+void zigzag_node_child_total_size(
+    struct zigzag_node *parent, double *width, double *height);
+
 void zigzag_node_update_frame(struct zigzag_node *self);
 
 bool zigzag_node_contains_point(struct zigzag_node *self, double x, double y);
