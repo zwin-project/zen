@@ -10,26 +10,6 @@ struct zigzag_reconfigure_context {
   int index;
 };
 
-static double
-zigzag_node_child_total_size(
-    struct zigzag_node *parent, enum zigzag_reconfigure_direction direction)
-{
-  double sum = 0;
-
-  struct zigzag_node *node_iter;
-  wl_list_for_each (node_iter, &parent->node_list, link) {
-    if (direction == ZIGZAG_RECONFIGURE_HORIZONTAL) {
-      sum += node_iter->frame.width + node_iter->margin.left +
-             node_iter->margin.right;
-    } else {
-      sum += node_iter->frame.height + node_iter->margin.top +
-             node_iter->margin.bottom;
-    }
-  }
-
-  return sum;
-}
-
 static void
 zigzag_node_reconfigure_start(
     struct zigzag_node *self, struct zigzag_reconfigure_context *ctx)
@@ -175,11 +155,15 @@ zigzag_node_reconfigure(struct zigzag_node *parent,
     return;
   }
 
+  double width, height;
+  zigzag_node_child_total_size(parent, &width, &height);
+
   struct zigzag_reconfigure_context ctx = {
       .direction = direction,
       .parent_node = parent,
       .child_list_length = wl_list_length(&parent->node_list),
-      .child_total_size = zigzag_node_child_total_size(parent, direction),
+      .child_total_size =
+          (direction == ZIGZAG_RECONFIGURE_HORIZONTAL) ? width : height,
       .prev_node = NULL,
       .index = 0,
   };

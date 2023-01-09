@@ -86,6 +86,22 @@ zigzag_node_add_child(struct zigzag_node *parent, struct zigzag_node *child,
   wl_list_insert(&parent->node_list, &child->link);
 }
 
+void
+zigzag_node_child_total_size(
+    struct zigzag_node *parent, double *width, double *height)
+{
+  *width = 0;
+  *height = 0;
+
+  struct zigzag_node *node_iter;
+  wl_list_for_each (node_iter, &parent->node_list, link) {
+    *width += node_iter->frame.width + node_iter->margin.left +
+              node_iter->margin.right;
+    *height += node_iter->frame.height + node_iter->margin.top +
+               node_iter->margin.bottom;
+  }
+}
+
 struct zigzag_node *
 zigzag_node_create(const struct zigzag_node_impl *implementation,
     struct zigzag_layout *layout, bool visible, void *user_data)
