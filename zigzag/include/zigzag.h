@@ -44,11 +44,23 @@ struct zigzag_node_impl {
   zigzag_node_render_t render;
 };
 
+struct zigzag_edge_size {
+  double left, right;
+  double top, bottom;
+};
+
+struct zigzag_color {
+  double r, g, b, a;
+};
+
 struct zigzag_node {
   struct zigzag_layout *layout;
 
   struct wlr_fbox frame;
   struct wlr_texture *texture;  // nonnull
+
+  struct zigzag_edge_size padding;
+  struct zigzag_edge_size margin;
 
   void *user_data;
 
@@ -87,6 +99,10 @@ void zigzag_node_show(struct zigzag_node *self);
 
 struct wlr_texture *zigzag_wlr_texture_from_cairo_surface(
     cairo_surface_t *surface, struct wlr_renderer *renderer);
+
+void zigzag_cairo_draw_node_frame(cairo_t *cr, struct zigzag_node *node,
+    struct zigzag_color background_color, struct zigzag_color border_color,
+    double border_width, double radius);
 
 void zigzag_cairo_draw_text(cairo_t *cr, char *text, double x, double y,
     enum zigzag_anchor horizontal_anchor, enum zigzag_anchor vertical_anchor);
