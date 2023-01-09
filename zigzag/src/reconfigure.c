@@ -44,7 +44,8 @@ zigzag_node_reconfigure_center(
     if (!ctx->prev_node) {
       self->pending.frame.x =
           ctx->parent_node->frame.x +
-          (ctx->parent_node->frame.width - ctx->child_total_size) / 2;
+          (ctx->parent_node->frame.width - ctx->child_total_size) / 2 +
+          self->margin.left;
     } else {
       self->pending.frame.x = ctx->prev_node->frame.x +
                               ctx->prev_node->frame.width +
@@ -54,7 +55,8 @@ zigzag_node_reconfigure_center(
     if (!ctx->prev_node) {
       self->pending.frame.y =
           ctx->parent_node->frame.y +
-          (ctx->parent_node->frame.height - ctx->child_total_size) / 2;
+          (ctx->parent_node->frame.height - ctx->child_total_size) / 2 +
+          self->margin.top;
     } else {
       self->pending.frame.y = ctx->prev_node->frame.y +
                               ctx->prev_node->frame.height +
