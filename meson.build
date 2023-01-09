@@ -102,6 +102,7 @@ zigen_protocols_req = '0.0.2'
 
 cairo_dep = dependency('cairo')
 cglm_dep = dependency('cglm')
+fontconfig_dep = dependency('fontconfig')
 gl_dep = dependency('gl')
 m_dep = cc.find_library('m')
 pixman_dep = dependency('pixman-1')
@@ -148,9 +149,6 @@ if get_option('default-wallpaper')
 else
   cdata.set_quoted('DEFAULT_WALLPAPER', '')
 endif
-
-# TODO: Add an item for the font file in config
-cdata.set_quoted('DEFAULT_SYSTEM_FONT', '/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf')
 
 configure_file(
   output: 'constants.h',

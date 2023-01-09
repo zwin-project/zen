@@ -161,11 +161,15 @@ main(int argc, char *argv[])
   zn_set_terminate_func(zn_terminate_func, NULL);
   zn_log_init(ZEN_DEBUG, zn_terminate);
   wlr_log_init(WLR_DEBUG, handle_wlr_log);
+  if (!zn_font_init()) {
+    zn_error("Failed to initialize font");
+    goto err;
+  }
 
   display = wl_display_create();
   if (display == NULL) {
     zn_error("Failed to create a wayland display");
-    goto err;
+    goto err_font;
   }
 
   loop = wl_display_get_event_loop(display);
@@ -215,6 +219,9 @@ err_signal:
     if (signal_sources[i]) wl_event_source_remove(signal_sources[i]);
 
   wl_display_destroy(display);
+
+err_font:
+  zn_font_fini();
 
 err:
   free(startup_command);
