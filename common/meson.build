@@ -2,6 +2,7 @@ _zen_common_inc = include_directories('include')
 
 _zen_common_srcs = [
   'cmd.c',
+  'font.c',
   'log.c',
   'signal.c',
   'terminate.c',
@@ -10,7 +11,9 @@ _zen_common_srcs = [
 ]
 
 _zen_common_deps = [
+  cairo_dep,
   cglm_dep,
+  fontconfig_dep,
   wayland_server_dep.partial_dependency(includes: true),
 ]
 
@@ -25,4 +28,5 @@ _zen_common_lib = static_library(
 zen_common_dep = declare_dependency(
   link_with: _zen_common_lib,
   include_directories: _zen_common_inc,
+  dependencies: _zen_common_deps,
 )

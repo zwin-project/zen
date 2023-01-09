@@ -53,8 +53,8 @@ zn_zigzag_layout_create(struct zn_screen *screen, struct wlr_renderer *renderer)
   double screen_width, screen_height;
   zn_screen_get_effective_size(screen, &screen_width, &screen_height);
 
-  struct zigzag_layout *zigzag_layout = zigzag_layout_create(
-      &implementation, screen_width, screen_height, DEFAULT_SYSTEM_FONT, self);
+  struct zigzag_layout *zigzag_layout =
+      zigzag_layout_create(&implementation, screen_width, screen_height, self);
 
   if (zigzag_layout == NULL) {
     zn_error("Failed to create a zigzag_layout");
