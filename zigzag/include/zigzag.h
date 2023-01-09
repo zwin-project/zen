@@ -40,6 +40,18 @@ void zigzag_layout_destroy(struct zigzag_layout *self);
 
 typedef bool (*zigzag_node_render_t)(struct zigzag_node *self, cairo_t *cr);
 
+enum zigzag_reconfigure_direction {
+  ZIGZAG_RECONFIGURE_HORIZONTAL,
+  ZIGZAG_RECONFIGURE_VERTICAL,
+};
+
+enum zigzag_reconfigure_type {
+  ZIGZAG_RECONFIGURE_START, /** left or top*/
+  ZIGZAG_RECONFIGURE_CENTER,
+  ZIGZAG_RECONFIGURE_END,     /** right or left*/
+  ZIGZAG_RECONFIGURE_JUSTIFY, /** space-between */
+};
+
 struct zigzag_node_impl {
   void (*on_click)(struct zigzag_node *self, double x, double y);
   zigzag_node_render_t render;
@@ -89,6 +101,10 @@ void zigzag_node_destroy(struct zigzag_node *self);
 
 cairo_surface_t *zigzag_node_render_cairo_surface(struct zigzag_node *self,
     zigzag_node_render_t render, double width, double height);
+
+void zigzag_node_reconfigure(struct zigzag_node *self,
+    enum zigzag_reconfigure_direction direction,
+    enum zigzag_reconfigure_type type);
 
 void zigzag_node_update_texture(
     struct zigzag_node *self, struct wlr_renderer *renderer);
