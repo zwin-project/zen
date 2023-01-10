@@ -9,8 +9,6 @@
 #include "zen-common.h"
 #include "zen/server.h"
 
-static pid_t startup_command_pid = -1;
-
 static zn_log_importance_t
 convert_wlr_log_importance(enum wlr_log_importance importance)
 {
@@ -95,10 +93,6 @@ on_signal_child(int signal_number, void *data)
   struct zn_server *server = zn_server_get_singleton();
 
   while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
-    if (startup_command_pid != -1 && pid == startup_command_pid) {
-      zn_debug("Startup command exited");
-      zn_terminate(EXIT_SUCCESS);
-    }
     if (pid == server->default_space_app_pid) {
       zn_error("Default space app exited");
       zn_terminate(EXIT_FAILURE);
@@ -203,7 +197,7 @@ main(int argc, char *argv[])
   }
 
   if (startup_command) {
-    startup_command_pid = zn_launch_command(startup_command);
+    pid_t startup_command_pid = zn_launch_command(startup_command);
     if (startup_command_pid < 0) goto err_server;
   }
 
