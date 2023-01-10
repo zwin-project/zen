@@ -3,9 +3,12 @@
 #include <zen-common.h>
 
 #include "zen/board.h"
+#include "zen/cursor.h"
+#include "zen/scene.h"
 #include "zen/screen-layout.h"
 #include "zen/server.h"
 #include "zen/ui/zigzag-layout.h"
+#include "zen/view.h"
 
 void
 zn_screen_handle_current_board_destroy(struct wl_listener *listener, void *data)
@@ -69,17 +72,92 @@ zn_screen_get_effective_size(
 void
 zn_screen_set_current_board(struct zn_screen *self, struct zn_board *board)
 {
+  struct zn_server *server = zn_server_get_singleton();
+
+  if (self->current_board == board) {
+    return;
+  }
+
   if (self->current_board) {
     wl_list_remove(&self->current_board_destroy_listener.link);
     wl_list_init(&self->current_board_destroy_listener.link);
   }
 
   if (board) {
+    if (!wl_list_empty(&board->view_list)) {
+      struct zn_view *view =
+          zn_container_of(board->view_list.prev, view, board_link);
+      zn_scene_set_focused_view(server->scene, view);
+    }
+
     wl_signal_add(
         &board->events.destroy, &self->current_board_destroy_listener);
   }
 
   self->current_board = board;
+
+  struct zn_cursor *cursor = server->scene->cursor;
+  if (self == board->screen) {
+    cursor->grab->impl->rebase(cursor->grab);
+  }
+
+  wl_signal_emit(&self->events.current_board_changed, board);
+
+  zn_screen_damage_whole(self);
+}
+
+void
+zn_screen_switch_to_next_board(struct zn_screen *self)
+{
+  bool found = false;
+  struct zn_board *board, *next_board = NULL;
+  wl_list_for_each (board, &self->board_list, screen_link) {
+    if (next_board == NULL) {
+      next_board = board;
+    }
+
+    if (found) {
+      next_board = board;
+      break;
+    }
+
+    if (board == self->current_board) {
+      found = true;
+    }
+  }
+
+  if (!found) {
+    return;
+  }
+
+  zn_screen_set_current_board(self, next_board);
+}
+
+void
+zn_screen_switch_to_prev_board(struct zn_screen *self)
+{
+  bool found = false;
+  struct zn_board *board, *next_board = NULL;
+  wl_list_for_each_reverse (board, &self->board_list, screen_link) {
+    if (next_board == NULL) {
+      next_board = board;
+    }
+
+    if (found) {
+      next_board = board;
+      break;
+    }
+
+    if (board == self->current_board) {
+      found = true;
+    }
+  }
+
+  if (!found) {
+    return;
+  }
+
+  zn_screen_set_current_board(self, next_board);
 }
 
 struct zn_screen *
@@ -101,6 +179,7 @@ zn_screen_create(
   wl_list_init(&self->board_list);
   self->current_board = NULL;
 
+  wl_signal_init(&self->events.current_board_changed);
   wl_signal_init(&self->events.destroy);
 
   self->current_board_destroy_listener.notify =
@@ -131,6 +210,7 @@ zn_screen_destroy(struct zn_screen *self)
   zn_zigzag_layout_destroy(self->zn_zigzag_layout);
   wl_list_remove(&self->board_list);
   wl_list_remove(&self->current_board_destroy_listener.link);
+  wl_list_remove(&self->events.current_board_changed.listener_list);
   wl_list_remove(&self->events.destroy.listener_list);
   free(self);
 }

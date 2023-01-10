@@ -264,6 +264,8 @@ zn_server_create(struct wl_display *display)
     goto err_input_manager;
   }
 
+  zn_scene_setup_keybindings(self->scene);
+
   self->new_input_listener.notify = zn_server_handle_new_input;
   wl_signal_add(
       &self->wlr_backend->events.new_input, &self->new_input_listener);
