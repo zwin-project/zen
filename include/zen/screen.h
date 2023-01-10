@@ -34,7 +34,8 @@ struct zn_screen {
   struct zn_zigzag_layout *zn_zigzag_layout;  // nonnull, owning
 
   struct {
-    struct wl_signal destroy;  // (NULL)
+    struct wl_signal current_board_changed;  // (struct zn_board *)
+    struct wl_signal destroy;                // (NULL)
   } events;
 };
 
@@ -64,6 +65,10 @@ void zn_screen_get_effective_size(
 
 void zn_screen_set_current_board(
     struct zn_screen *self, struct zn_board *board);
+
+void zn_screen_switch_to_next_board(struct zn_screen *self);
+
+void zn_screen_switch_to_prev_board(struct zn_screen *self);
 
 struct zn_screen *zn_screen_create(
     const struct zn_screen_interface *implementation, void *user_data);

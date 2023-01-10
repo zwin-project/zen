@@ -1,5 +1,6 @@
 #include "zen/scene.h"
 
+#include <linux/input.h>
 #include <zen-common.h>
 
 #include "zen/board.h"
@@ -10,6 +11,23 @@
 #include "zen/server.h"
 #include "zen/view.h"
 #include "zen/wlr/texture.h"
+
+static void
+zn_scene_handle_switch_board_binding(
+    uint32_t time_msec, uint32_t key, void *data)
+{
+  UNUSED(time_msec);
+  struct zn_scene *scene = data;
+  struct zn_screen *screen = scene->cursor->board->screen;
+
+  if (screen == NULL) return;
+
+  if (key == KEY_RIGHT) {
+    zn_screen_switch_to_next_board(screen);
+  } else if (key == KEY_LEFT) {
+    zn_screen_switch_to_prev_board(screen);
+  }
+}
 
 static void
 zn_scene_handle_focused_view_destroy(struct wl_listener *listener, void *data)
@@ -176,6 +194,19 @@ zn_scene_initialize_boards(struct zn_scene *self, int64_t board_initial_count)
     zn_scene_create_new_board(self);
   }
   zn_shell_rearrange_board(server->shell);
+}
+
+void
+zn_scene_setup_keybindings(struct zn_scene *self)
+{
+  struct zn_server *server = zn_server_get_singleton();
+  zn_input_manager_add_key_binding(server->input_manager, KEY_RIGHT,
+      WLR_MODIFIER_SHIFT | WLR_MODIFIER_LOGO,
+      zn_scene_handle_switch_board_binding, self);
+
+  zn_input_manager_add_key_binding(server->input_manager, KEY_LEFT,
+      WLR_MODIFIER_SHIFT | WLR_MODIFIER_LOGO,
+      zn_scene_handle_switch_board_binding, self);
 }
 
 struct zn_scene *

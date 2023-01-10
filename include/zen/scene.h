@@ -38,6 +38,8 @@ void zn_scene_set_focused_view(struct zn_scene *self, struct zn_view *view);
 void zn_scene_initialize_boards(
     struct zn_scene *self, int64_t board_initial_count);
 
+void zn_scene_setup_keybindings(struct zn_scene *self);
+
 struct zn_scene *zn_scene_create(void);
 
 void zn_scene_destroy_resources(struct zn_scene *self);
