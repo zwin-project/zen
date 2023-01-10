@@ -93,6 +93,7 @@ zn_vr_menu_render(struct zigzag_node *self, cairo_t *cr)
   cairo_set_source_rgba(cr, 0., 0., 0., 0.5);
   cairo_stroke(cr);
 
+  cairo_set_font_face(cr, zn_font_face_get_cairo_font_face(ZN_FONT_BOLD));
   cairo_set_source_rgb(cr, .35, .39, .51);
   zigzag_cairo_draw_text(cr, "How can I connect my headset?", padding_width,
       vr_menu_bubble_padding_height + vr_headsets_heading_height +
