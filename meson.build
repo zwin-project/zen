@@ -124,8 +124,6 @@ endif
 
 icon_files = files(
   'assets/icon/power-button.svg',
-  'assets/icon/chrome-launcher.png',
-  'assets/icon/terminal-launcher.png',
   'assets/icon/vr-blue.svg',
   'assets/icon/vr-translucent.svg',
   'assets/icon/vr-white.svg',
@@ -141,12 +139,6 @@ cdata.set_quoted('POWER_BUTTON_ICON', power_button_icon)
 cdata.set_quoted('VR_ICON_WHITE', vr_icon)
 cdata.set_quoted('VR_ICON_BLUE', vr_icon_blue)
 cdata.set_quoted('VR_ICON_TRANSLUCENT', vr_icon_translucent)
-
-chrome_launcher_icon = join_paths(get_option('prefix'), icon_install_dir, 'chrome-launcher.png')
-cdata.set_quoted('CHROME_LAUNCHER_ICON', chrome_launcher_icon)
-
-terminal_launcher_icon = join_paths(get_option('prefix'), icon_install_dir, 'terminal-launcher.png')
-cdata.set_quoted('TERMINAL_LAUNCHER_ICON', terminal_launcher_icon)
 
 if get_option('default-wallpaper')
   wallpaper_files = files(

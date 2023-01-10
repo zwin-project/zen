@@ -4,6 +4,7 @@
 #include <zigzag.h>
 
 #include "zen-common.h"
+#include "zen/favorite-app.h"
 #include "zen/ui/layout-constants.h"
 
 static void
@@ -11,8 +12,8 @@ zn_app_launcher_on_click(struct zigzag_node *node, double x, double y)
 {
   UNUSED(x);
   UNUSED(y);
-  struct zn_app_launcher *app_launcher = node->user_data;
-  zn_launch_command(app_launcher->data->command);
+  struct zn_app_launcher *self = node->user_data;
+  zn_launch_command(self->app->exec);
 }
 
 static bool
@@ -51,9 +52,12 @@ zn_app_launcher_init_frame(struct zigzag_node *node, double screen_height)
 }
 
 struct zn_app_launcher *
-zn_app_launcher_create(struct zigzag_layout *zigzag_layout,
-    const struct zn_app_launcher_data *data, int idx)
+zn_app_launcher_create(
+    struct zigzag_layout *zigzag_layout, struct zn_favorite_app *app, int idx)
 {
+  zn_assert(!app->disable_2d,
+      "App launchers should not be created for disable-2d apps");
+
   struct zn_app_launcher *self;
 
   self = zalloc(sizeof *self);
@@ -61,11 +65,10 @@ zn_app_launcher_create(struct zigzag_layout *zigzag_layout,
     zn_error("Failed to allocate memory");
     goto err;
   }
-  self->data = data;
+  self->app = app;
   self->idx = idx;
 
-  self->launcher_icon_surface =
-      cairo_image_surface_create_from_png(self->data->icon_path);
+  self->launcher_icon_surface = cairo_image_surface_create_from_png(app->icon);
   if (cairo_surface_status(self->launcher_icon_surface) !=
       CAIRO_STATUS_SUCCESS) {
     goto err_cairo_surface;
