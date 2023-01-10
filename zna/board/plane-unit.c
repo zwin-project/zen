@@ -88,7 +88,7 @@ zna_board_plane_unit_create(struct zna_system *system)
   draw_args.arrays.count = 4;
 
   self->base_unit = zna_base_unit_create(system, ZNA_SHADER_BOARD_VERTEX,
-      ZNA_SHADER_BOARD_FRAGMENT, vertex_buffer, &vertex_attributes,
+      ZNA_SHADER_BOARD_FRAGMENT, vertex_buffer, &vertex_attributes, NULL,
       ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ARRAYS, draw_args);
 
   wl_array_release(&vertex_attributes);

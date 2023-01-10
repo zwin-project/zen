@@ -31,6 +31,7 @@ struct zna_base_unit {
   struct znr_rendering_unit *rendering_unit;
   struct znr_gl_base_technique *technique;
   struct znr_gl_buffer *vertex_buffer;
+  struct znr_gl_buffer *element_array_buffer;
   struct znr_gl_vertex_array *vertex_array;
   struct znr_gl_program *program;
   struct znr_gl_texture *texture0;
@@ -40,7 +41,8 @@ struct zna_base_unit {
   enum zna_shader_name vertex_shader;
   enum zna_shader_name fragment_shader;
 
-  struct zgnr_mem_storage *vertex_buffer_storage;  // nullable
+  struct zgnr_mem_storage *vertex_buffer_storage;
+  struct zgnr_mem_storage *element_array_buffer_storage;  // nullable
 
   struct wl_array vertex_attributes;  // struct zna_base_unit_vertex_attribute
 
@@ -63,6 +65,7 @@ void zna_base_unit_teardown_renderer_objects(struct zna_base_unit *self);
 struct zna_base_unit *zna_base_unit_create(struct zna_system *system,
     enum zna_shader_name vertex_shader, enum zna_shader_name fragment_shader,
     struct zgnr_mem_storage *vertex_buffer, struct wl_array *vertex_attributes,
+    struct zgnr_mem_storage *element_array_buffer /* nullable */,
     enum zgnr_gl_base_technique_draw_method draw_method,
     union zgnr_gl_base_technique_draw_args draw_args);
 

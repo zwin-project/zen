@@ -107,6 +107,14 @@ zna_base_unit_setup_renderer_objects(struct zna_base_unit *self,
   znr_gl_buffer_data(self->vertex_buffer, GL_ARRAY_BUFFER,
       self->vertex_buffer_storage, GL_STATIC_DRAW);
 
+  // element array buffer
+  if (self->element_array_buffer_storage) {
+    self->element_array_buffer =
+        znr_gl_buffer_create(dispatcher, self->system->display);
+    znr_gl_buffer_data(self->element_array_buffer, GL_ELEMENT_ARRAY_BUFFER,
+        self->element_array_buffer_storage, GL_STATIC_DRAW);
+  }
+
   // vertex array
   struct zna_base_unit_vertex_attribute *vertex_attribute;
   wl_array_for_each (vertex_attribute, &self->vertex_attributes) {
@@ -127,6 +135,15 @@ zna_base_unit_setup_renderer_objects(struct zna_base_unit *self,
       znr_gl_base_technique_draw_arrays(self->technique,
           self->draw_args.arrays.mode, self->draw_args.arrays.first,
           self->draw_args.arrays.count);
+      break;
+
+    case ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ELEMENTS:
+      if (self->element_array_buffer_storage) {
+        znr_gl_base_technique_draw_elements(self->technique,
+            self->draw_args.elements.mode, self->draw_args.elements.count,
+            self->draw_args.elements.type, self->draw_args.elements.offset,
+            self->element_array_buffer);
+      }
       break;
 
     case ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_NONE:  // fall through
@@ -157,6 +174,11 @@ zna_base_unit_teardown_renderer_objects(struct zna_base_unit *self)
   znr_gl_sampler_destroy(self->sampler0);
   self->sampler0 = NULL;
 
+  if (self->element_array_buffer) {
+    znr_gl_buffer_destroy(self->element_array_buffer);
+    self->element_array_buffer = NULL;
+  }
+
   self->has_renderer_objects = false;
   self->has_texture_data = false;
 }
@@ -165,6 +187,7 @@ struct zna_base_unit *
 zna_base_unit_create(struct zna_system *system,
     enum zna_shader_name vertex_shader, enum zna_shader_name fragment_shader,
     struct zgnr_mem_storage *vertex_buffer, struct wl_array *vertex_attributes,
+    struct zgnr_mem_storage *element_array_buffer,
     enum zgnr_gl_base_technique_draw_method draw_method,
     union zgnr_gl_base_technique_draw_args draw_args)
 {
@@ -181,8 +204,13 @@ zna_base_unit_create(struct zna_system *system,
   self->has_texture_data = false;
   self->vertex_shader = vertex_shader;
   self->fragment_shader = fragment_shader;
+
   self->vertex_buffer_storage = vertex_buffer;
   zgnr_mem_storage_ref(vertex_buffer);
+
+  self->element_array_buffer_storage = element_array_buffer;
+  if (element_array_buffer) zgnr_mem_storage_ref(element_array_buffer);
+
   wl_array_init(&self->vertex_attributes);
   wl_array_copy(&self->vertex_attributes, vertex_attributes);
   self->draw_method = draw_method;
@@ -204,6 +232,9 @@ zna_base_unit_destroy(struct zna_base_unit *self)
   if (self->program) znr_gl_program_destroy(self->program);
   if (self->texture0) znr_gl_texture_destroy(self->texture0);
   if (self->sampler0) znr_gl_sampler_destroy(self->sampler0);
+
+  if (self->element_array_buffer_storage)
+    zgnr_mem_storage_unref(self->element_array_buffer_storage);
 
   zgnr_mem_storage_unref(self->vertex_buffer_storage);
   wl_array_release(&self->vertex_attributes);

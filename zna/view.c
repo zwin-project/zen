@@ -152,7 +152,7 @@ zna_view_create(struct zn_view *zn_view, struct zna_system *system)
     draw_args.arrays.count = 4;
 
     self->base_unit = zna_base_unit_create(system, ZNA_SHADER_VIEW_VERTEX,
-        ZNA_SHADER_VIEW_FRAGMENT, vertex_buffer, &vertex_attributes,
+        ZNA_SHADER_VIEW_FRAGMENT, vertex_buffer, &vertex_attributes, NULL,
         ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ARRAYS, draw_args);
 
     wl_array_release(&vertex_attributes);

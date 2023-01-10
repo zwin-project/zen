@@ -6,7 +6,7 @@
 #include "board.frag.h"
 #include "board.vert.h"
 #include "color.frag.h"
-#include "default.vert.h"
+#include "ray.frag.h"
 #include "ray.vert.h"
 #include "system.h"
 #include "view.frag.h"
@@ -19,12 +19,6 @@ struct shader_info {
 };
 
 static const struct shader_info shader_info[ZNA_SHADER_COUNT] = {
-    [ZNA_SHADER_DEFAULT_VERTEX] =
-        {
-            .source = default_vert_source,
-            .length = sizeof(default_vert_source),
-            .type = GL_VERTEX_SHADER,
-        },
     [ZNA_SHADER_BOARD_VERTEX] =
         {
             .source = board_vert_source,
@@ -48,6 +42,12 @@ static const struct shader_info shader_info[ZNA_SHADER_COUNT] = {
             .source = ray_vert_source,
             .length = sizeof(ray_vert_source),
             .type = GL_VERTEX_SHADER,
+        },
+    [ZNA_SHADER_RAY_FRAGMENT] =
+        {
+            .source = ray_frag_source,
+            .length = sizeof(ray_frag_source),
+            .type = GL_FRAGMENT_SHADER,
         },
     [ZNA_SHADER_VIEW_VERTEX] =
         {
