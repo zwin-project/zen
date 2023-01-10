@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base-unit.h"
+#include "ray/origin-unit.h"
 #include "zen/appearance/ray.h"
 #include "zen/renderer/virtual-object.h"
 
@@ -11,7 +12,7 @@ struct zna_ray {
   // null when the current session does not exist, not null otherwise
   struct znr_virtual_object *virtual_object;
 
-  struct zna_base_unit *base_unit;  // nonnull
+  struct zna_ray_origin_unit *origin_unit;  // nonnull
 
   struct wl_listener session_created_listener;
   struct wl_listener session_destroyed_listener;
