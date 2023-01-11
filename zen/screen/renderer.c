@@ -8,6 +8,7 @@
 #include "zen/cursor.h"
 #include "zen/screen/output.h"
 #include "zen/server.h"
+#include "zen/ui/zigzag-board-layout.h"
 #include "zen/ui/zigzag-layout.h"
 #include "zen/view.h"
 
@@ -218,6 +219,9 @@ zn_screen_renderer_render(struct zn_output *output,
   }
 
   render_background(output, renderer, server->scene->wallpaper, &screen_damage);
+  render_zigzag_nodes(output, renderer,
+      &output->screen->zn_zigzag_board_layout->zigzag_layout->node_list,
+      &screen_damage);
 
   if (board && server->display_system == ZN_DISPLAY_SYSTEM_SCREEN) {
     struct zn_view *view;

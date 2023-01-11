@@ -33,6 +33,8 @@ struct zn_screen {
 
   struct zn_zigzag_layout *zn_zigzag_layout;  // nonnull, owning
 
+  struct zn_zigzag_board_layout *zn_zigzag_board_layout;
+
   struct {
     struct wl_signal current_board_changed;  // (struct zn_board *)
     struct wl_signal destroy;                // (NULL)

@@ -7,6 +7,7 @@
 #include "zen/scene.h"
 #include "zen/screen-layout.h"
 #include "zen/server.h"
+#include "zen/ui/zigzag-board-layout.h"
 #include "zen/ui/zigzag-layout.h"
 #include "zen/view.h"
 
@@ -102,6 +103,7 @@ zn_screen_set_current_board(struct zn_screen *self, struct zn_board *board)
   }
 
   wl_signal_emit(&self->events.current_board_changed, board);
+  zn_zigzag_board_layout_notify_board_changed(self->zn_zigzag_board_layout);
 
   zn_screen_damage_whole(self);
 }
@@ -191,6 +193,8 @@ zn_screen_create(
     zn_error("Failed to create the zn_zigzag_layout");
     goto err_screen;
   }
+  self->zn_zigzag_board_layout =
+      zn_zigzag_board_layout_create(self, server->renderer);
 
   return self;
 
