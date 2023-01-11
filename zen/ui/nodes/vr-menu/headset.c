@@ -42,8 +42,9 @@ zn_vr_menu_item_headset_render(struct zigzag_node *node, cairo_t *cr)
   cairo_set_source_rgba(cr, 0., 0., 0., 0.5);
   cairo_set_font_size(cr, 13);
   struct zn_peer *peer = self->peer;
-  zigzag_cairo_draw_text(cr, peer->host, icon_x + vr_icon_width + 57.5,
-      node->frame.height / 2, ZIGZAG_ANCHOR_LEFT, ZIGZAG_ANCHOR_CENTER);
+  zigzag_cairo_draw_text(cr, peer->wired ? "Wired" : peer->host,
+      icon_x + vr_icon_width + 57.5, node->frame.height / 2, ZIGZAG_ANCHOR_LEFT,
+      ZIGZAG_ANCHOR_CENTER);
 
   cairo_set_font_face(cr, zn_font_face_get_cairo_font_face(ZN_FONT_BOLD));
   cairo_set_source_rgb(cr, 0., 0., 0.);
@@ -141,6 +142,8 @@ err:
 void
 zn_vr_menu_item_headset_destroy(struct zn_vr_menu_item_headset *self)
 {
+  wl_list_remove(&self->link);
+  cairo_surface_destroy(self->vr_icon_surface);
   zn_vr_menu_headset_connect_button_destroy(self->connect_button);
   zigzag_node_destroy(self->zigzag_node);
   free(self);
