@@ -1,4 +1,3 @@
-
 #include "zen/ui/nodes/vr-menu/connect-button.h"
 
 #include <cairo.h>

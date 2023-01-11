@@ -13,8 +13,8 @@
 static void
 zn_vr_menu_refresh_headsets(struct zn_vr_menu *self, struct wl_list *peer_list)
 {
-  struct zn_vr_menu_item_headset *headset;
-  wl_list_for_each (headset, &self->headset_list, link) {
+  struct zn_vr_menu_item_headset *headset, *tmp;
+  wl_list_for_each_safe (headset, tmp, &self->headset_list, link) {
     zn_vr_menu_item_headset_destroy(headset);
   }
   struct zn_peer *peer_iter;
@@ -172,11 +172,12 @@ err:
 void
 zn_vr_menu_destroy(struct zn_vr_menu *self)
 {
-  struct zn_vr_menu_item_headset *headset;
-  wl_list_for_each (headset, &self->headset_list, link) {
+  struct zn_vr_menu_item_headset *headset, *tmp;
+  wl_list_for_each_safe (headset, tmp, &self->headset_list, link) {
     zn_vr_menu_item_headset_destroy(headset);
   }
   wl_list_remove(&self->headset_list);
+  wl_list_remove(&self->peer_list_changed_listener.link);
   zigzag_node_destroy(self->zigzag_node);
   free(self);
 }

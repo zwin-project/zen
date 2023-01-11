@@ -94,7 +94,7 @@ zn_menu_bar_create(
 
   wl_list_insert(&self->zigzag_node->node_list, &vr_button->zigzag_node->link);
 
-  struct zn_app_launcher *launcher;
+  struct zn_app_launcher *launcher, *launcher_tmp;
   wl_list_init(&self->launcher_list);
   for (uint64_t i = 0; i < ARRAY_LENGTH(default_launchers); i++) {
     launcher = zn_app_launcher_create(
@@ -110,7 +110,8 @@ zn_menu_bar_create(
   return self;
 
 err_launcher_list:
-  wl_list_for_each_reverse (launcher, &self->launcher_list, link) {
+  wl_list_for_each_reverse_safe (
+      launcher, launcher_tmp, &self->launcher_list, link) {
     zn_app_launcher_destroy(launcher);
   }
   wl_list_remove(&self->launcher_list);

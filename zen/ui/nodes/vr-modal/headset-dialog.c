@@ -47,8 +47,8 @@ zn_vr_modal_item_headset_dialog_render_headset_dialog(cairo_t *cr,
   double h = ICON_HEIGHT * 0.18;
 
   cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
-  if (!zigzag_cairo_stamp_svg_on_surface(
-          cr, VR_ICON, (center_x - w / 2) - 120, center_y - h / 2, w, h)) {
+  if (!zigzag_cairo_stamp_svg_on_surface(cr, VR_ICON_WHITE,
+          (center_x - w / 2) - 120, center_y - h / 2, w, h)) {
     return;
   }
 

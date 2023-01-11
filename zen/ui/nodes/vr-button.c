@@ -11,7 +11,6 @@
 static void
 zn_vr_button_on_click(struct zigzag_node *node, double x, double y)
 {
-  UNUSED(node);
   UNUSED(x);
   UNUSED(y);
   struct zn_vr_button *vr_button = node->user_data;

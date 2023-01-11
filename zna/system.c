@@ -29,7 +29,9 @@ zna_system_set_current_session(
     wl_list_init(&self->current_session_frame_listener.link);
     znr_session_destroy(self->current_session);
     znr_dispatcher_destroy(self->dispatcher);
+    self->dispatcher = NULL;
     znr_dispatcher_destroy(self->high_priority_dispatcher);
+    self->high_priority_dispatcher = NULL;
     self->current_session = NULL;
 
     zn_debug("The current session was destroyed");
