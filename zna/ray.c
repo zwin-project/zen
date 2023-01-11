@@ -10,6 +10,7 @@ zna_ray_commit(struct zna_ray *self)
 {
   zna_ray_origin_unit_commit(
       self->origin_unit, self->zn_ray, self->virtual_object);
+  zna_ray_tip_unit_commit(self->tip_unit, self->zn_ray, self->virtual_object);
 }
 
 /**
@@ -25,6 +26,8 @@ zna_ray_setup_renderer_objects(
 
   zna_ray_origin_unit_setup_renderer_objects(
       self->origin_unit, dispatcher, self->virtual_object);
+  zna_ray_tip_unit_setup_renderer_objects(
+      self->tip_unit, dispatcher, self->virtual_object);
 
   znr_virtual_object_commit(self->virtual_object);
 }
@@ -33,6 +36,7 @@ static void
 zna_ray_teardown_renderer_objects(struct zna_ray *self)
 {
   zna_ray_origin_unit_teardown_renderer_objects(self->origin_unit);
+  zna_ray_tip_unit_teardown_renderer_objects(self->tip_unit);
 
   if (self->virtual_object) {
     znr_virtual_object_destroy(self->virtual_object);
@@ -84,6 +88,12 @@ zna_ray_create(struct zn_ray *ray, struct zna_system *system)
     goto err_free;
   }
 
+  self->tip_unit = zna_ray_tip_unit_create(system);
+  if (self->tip_unit == NULL) {
+    zn_error("Failed to create a zna_ray_tip_unit");
+    goto err_origin_unit;
+  }
+
   self->session_created_listener.notify = zna_ray_handle_session_created;
   wl_signal_add(
       &system->events.current_session_created, &self->session_created_listener);
@@ -99,6 +109,9 @@ zna_ray_create(struct zn_ray *ray, struct zna_system *system)
 
   return self;
 
+err_origin_unit:
+  zna_ray_origin_unit_destroy(self->origin_unit);
+
 err_free:
   free(self);
 
@@ -110,6 +123,7 @@ void
 zna_ray_destroy(struct zna_ray *self)
 {
   if (self->virtual_object) znr_virtual_object_destroy(self->virtual_object);
+  zna_ray_tip_unit_destroy(self->tip_unit);
   zna_ray_origin_unit_destroy(self->origin_unit);
   wl_list_remove(&self->session_created_listener.link);
   wl_list_remove(&self->session_destroyed_listener.link);

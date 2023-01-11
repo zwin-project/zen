@@ -14,6 +14,7 @@ _zen_appearance_srcs = [
 
   'ray.c',
   'ray/origin-unit.c',
+  'ray/tip-unit.c',
   
   'virtual-object.c',
   'virtual-object/gl-base-technique.c',
