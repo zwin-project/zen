@@ -151,8 +151,6 @@ zigzag_node_reconfigure(struct zigzag_node *parent,
     enum zigzag_reconfigure_direction direction,
     enum zigzag_reconfigure_type type)
 {
-  UNUSED(type);
-
   if (!zn_assert(!wl_list_empty(&parent->node_list), "node_list is empty")) {
     return;
   }
@@ -160,7 +158,7 @@ zigzag_node_reconfigure(struct zigzag_node *parent,
   double width, height;
   zigzag_node_child_total_size(parent, &width, &height);
 
-  struct zigzag_reconfigure_context ctx = {
+  struct zigzag_reconfigure_context context = {
       .direction = direction,
       .parent_node = parent,
       .child_list_length = wl_list_length(&parent->node_list),
@@ -170,12 +168,11 @@ zigzag_node_reconfigure(struct zigzag_node *parent,
       .index = 0,
   };
 
-  UNUSED(reconfigure);
   struct zigzag_node *node_iter;
   wl_list_for_each_reverse (node_iter, &parent->node_list, link) {
-    reconfigure[type](node_iter, &ctx);
+    reconfigure[type](node_iter, &context);
     zigzag_node_update_frame(node_iter);
-    ++ctx.index;
-    ctx.prev_node = node_iter;
+    ++context.index;
+    context.prev_node = node_iter;
   }
 }
