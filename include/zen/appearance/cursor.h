@@ -5,7 +5,7 @@
 
 struct zna_cursor;
 
-enum zna_cursor_damage_frag {
+enum zna_cursor_damage_flag {
   ZNA_CURSOR_DAMAGE_GEOMETRY = 1 << 0,
   ZNA_CURSOR_DAMAGE_TEXTURE = 1 << 1,
 };

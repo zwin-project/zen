@@ -8,6 +8,7 @@
 
 #include "zen/server.h"
 #include "zen/virtual-object.h"
+#include "zns/appearance/bounded.h"
 #include "zns/ray-grab/default.h"
 #include "zns/ray-grab/move.h"
 #include "zns/seat-capsule.h"
@@ -197,6 +198,8 @@ zns_bounded_handle_mapped(struct wl_listener *listener, void *data)
   struct zn_server *server = zn_server_get_singleton();
 
   zns_seat_capsule_add_bounded(server->shell->seat_capsule, self);
+
+  zna_bounded_commit(self->appearance, ZNA_BOUNDED_DAMAGE_GEOMETRY);
 }
 
 static void
@@ -251,6 +254,11 @@ zns_bounded_create(struct zgnr_bounded *zgnr_bounded)
   wl_list_init(&self->link);
   wl_list_init(&self->seat_capsule_link);
 
+  self->appearance = zna_bounded_create(self, server->appearance_system);
+  if (self->appearance == NULL) {
+    goto err_node;
+  }
+
   self->zgnr_bounded_destroy_listener.notify =
       zns_bounded_handle_zgnr_bounded_destroy;
   wl_signal_add(
@@ -265,6 +273,9 @@ zns_bounded_create(struct zgnr_bounded *zgnr_bounded)
   wl_signal_init(&self->events.destroy);
 
   return self;
+
+err_node:
+  zns_node_destroy(self->node);
 
 err_free:
   free(self);
@@ -284,6 +295,7 @@ zns_bounded_destroy(struct zns_bounded *self)
   wl_list_remove(&self->mapped_listener.link);
   wl_list_remove(&self->zgnr_bounded_destroy_listener.link);
   wl_list_remove(&self->events.destroy.listener_list);
+  zna_bounded_destroy(self->appearance);
   zns_node_destroy(self->node);
   free(self);
 }

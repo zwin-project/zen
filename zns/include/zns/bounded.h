@@ -4,6 +4,8 @@
 
 #include "node.h"
 
+struct zna_bounded;
+
 struct zns_bounded {
   struct {
     struct wl_signal destroy;  // (NULL)
@@ -18,6 +20,8 @@ struct zns_bounded {
 
   struct wl_list link;               // zn_shell::bounded_list
   struct wl_list seat_capsule_link;  // zns_seat_capsule::bounded_list
+
+  struct zna_bounded *appearance;
 
   struct wl_listener zgnr_bounded_destroy_listener;
   struct wl_listener move_listener;
