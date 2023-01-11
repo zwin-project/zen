@@ -5,6 +5,7 @@
 #include "zen/appearance/ray.h"
 #include "zen/server.h"
 #include "zen/virtual-object.h"
+#include "zns/appearance/bounded.h"
 #include "zns/seat-capsule.h"
 #include "zns/shell.h"
 
@@ -39,6 +40,8 @@ zns_move_ray_grab_motion_relative(struct zn_ray_grab *grab_base, vec3 origin,
 
   zns_seat_capsule_move_bounded(
       seat_capsule, self->bounded, next_bounded_azimuthal, next_bounded_polar);
+
+  zna_bounded_commit(self->bounded->appearance, ZNA_BOUNDED_DAMAGE_GEOMETRY);
 
   vec3 next_tip, next_origin, next_direction;
   float next_polar, next_azimuthal, next_length;

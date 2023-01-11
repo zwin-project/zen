@@ -180,8 +180,8 @@ subdir('zgnroot')
 subdir('zigzag')
 subdir('znr-remote')
 subdir('zen')
-subdir('zna')
 subdir('zns')
+subdir('zna')
 
 find_program('weston-terminal', required: true) # used in zen.desktop
 

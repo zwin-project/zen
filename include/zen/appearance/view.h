@@ -5,7 +5,7 @@
 struct zna_view;
 struct zn_view;
 
-enum zna_view_damage_frag {
+enum zna_view_damage_flag {
   ZNA_VIEW_DAMAGE_GEOMETRY = 1 << 0,
   ZNA_VIEW_DAMAGE_TEXTURE = 1 << 1,
 };

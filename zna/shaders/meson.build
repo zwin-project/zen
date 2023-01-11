@@ -1,6 +1,8 @@
 _shader_sources = [
   'board.frag',
   'board.vert',
+  'bounded-nameplate.frag',
+  'bounded-nameplate.vert',
   'color.frag',
   'ray.vert',
   'ray.frag',

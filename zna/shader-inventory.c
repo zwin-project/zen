@@ -5,6 +5,8 @@
 
 #include "board.frag.h"
 #include "board.vert.h"
+#include "bounded-nameplate.frag.h"
+#include "bounded-nameplate.vert.h"
 #include "color.frag.h"
 #include "ray.frag.h"
 #include "ray.vert.h"
@@ -29,6 +31,18 @@ static const struct shader_info shader_info[ZNA_SHADER_COUNT] = {
         {
             .source = board_frag_source,
             .length = sizeof(board_frag_source),
+            .type = GL_FRAGMENT_SHADER,
+        },
+    [ZNA_SHADER_BOUNDED_NAMEPLATE_VERTEX] =
+        {
+            .source = bounded_nameplate_vert_source,
+            .length = sizeof(bounded_nameplate_vert_source),
+            .type = GL_VERTEX_SHADER,
+        },
+    [ZNA_SHADER_BOUNDED_NAMEPLATE_FRAGMENT] =
+        {
+            .source = bounded_nameplate_frag_source,
+            .length = sizeof(bounded_nameplate_frag_source),
             .type = GL_FRAGMENT_SHADER,
         },
     [ZNA_SHADER_COLOR_FRAGMENT] =
