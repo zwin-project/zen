@@ -1,4 +1,4 @@
-#include "zen/ui/nodes/board-selector/board-button.h"
+#include "zen/ui/nodes/board-selector/switch-button.h"
 
 #include <cairo.h>
 #include <zen-common.h>
@@ -12,27 +12,30 @@
 #include "zen/ui/nodes/board-selector/board-selector.h"
 
 static void
-zn_board_button_on_click(struct zigzag_node *node, double x, double y)
+zn_board_selector_item_switch_button_on_click(
+    struct zigzag_node *node, double x, double y)
 {
   UNUSED(x);
   UNUSED(y);
-  struct zn_board_button *self = node->user_data;
+  struct zn_board_selector_item_switch_button *self = node->user_data;
   zn_screen_set_current_board(self->parent->screen, self->board);
 }
 
 static bool
-zn_board_button_is_active(struct zn_board_button *self)
+zn_board_selector_item_switch_button_is_active(
+    struct zn_board_selector_item_switch_button *self)
 {
   return self->board == self->parent->screen->current_board;
 }
 
 static bool
-zn_board_button_render(struct zigzag_node *node, cairo_t *cr)
+zn_board_selector_item_switch_button_render(
+    struct zigzag_node *node, cairo_t *cr)
 {
-  struct zn_board_button *self = node->user_data;
+  struct zn_board_selector_item_switch_button *self = node->user_data;
 
   zigzag_cairo_draw_node_frame(cr, node,
-      zn_board_button_is_active(self)
+      zn_board_selector_item_switch_button_is_active(self)
           ? (struct zigzag_color){0.07, 0.12, 0.30, 1.0}
           : (struct zigzag_color){0.04, 0.12, 0.30, 0.3},
       (struct zigzag_color){0, 0, 0, 0}, 0, 8.);
@@ -47,43 +50,45 @@ zn_board_button_render(struct zigzag_node *node, cairo_t *cr)
 }
 
 static const struct zigzag_node_impl implementation = {
-    .on_click = zn_board_button_on_click,
-    .render = zn_board_button_render,
+    .on_click = zn_board_selector_item_switch_button_on_click,
+    .render = zn_board_selector_item_switch_button_render,
 };
 
 static void
-zn_board_button_update_frame(struct zigzag_node *node)
+zn_board_selector_item_switch_button_update_frame(struct zigzag_node *node)
 {
-  struct zn_board_button *self = node->user_data;
+  struct zn_board_selector_item_switch_button *self = node->user_data;
   node->margin.left = node->margin.right = 8.;
-  node->pending.frame.width = board_button_width;
-  node->pending.frame.height = board_button_height;
+  node->pending.frame.width = board_selector_item_switch_button_width;
+  node->pending.frame.height = board_selector_item_switch_button_height;
   node->pending.frame.y = self->parent->zigzag_node->frame.y;
 }
 
 static void
-zn_board_button_handle_board_destroy(struct wl_listener *listener, void *data)
+zn_board_selector_item_switch_button_handle_board_destroy(
+    struct wl_listener *listener, void *data)
 {
   UNUSED(data);
-  struct zn_board_button *self =
+  struct zn_board_selector_item_switch_button *self =
       zn_container_of(listener, self, board_destroy_listener);
-  zn_board_button_destroy(self);
+  zn_board_selector_item_switch_button_destroy(self);
 }
 
 void
-zn_board_button_update(
-    struct zn_board_button *self, struct wlr_renderer *renderer)
+zn_board_selector_item_switch_button_update(
+    struct zn_board_selector_item_switch_button *self,
+    struct wlr_renderer *renderer)
 {
-  zn_board_button_update_frame(self->zigzag_node);
+  zn_board_selector_item_switch_button_update_frame(self->zigzag_node);
   zigzag_node_update_frame(self->zigzag_node);
   zigzag_node_update_texture(self->zigzag_node, renderer);
 }
 
-struct zn_board_button *
-zn_board_button_create(struct zigzag_layout *zigzag_layout,
+struct zn_board_selector_item_switch_button *
+zn_board_selector_item_switch_button_create(struct zigzag_layout *zigzag_layout,
     struct zn_board *board, struct zn_board_selector *parent, uint32_t index)
 {
-  struct zn_board_button *self;
+  struct zn_board_selector_item_switch_button *self;
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -95,7 +100,7 @@ zn_board_button_create(struct zigzag_layout *zigzag_layout,
       zigzag_node_create(&implementation, zigzag_layout, true, self);
   if (self->zigzag_node == NULL) {
     zn_error("Failed to create a zigzag_node");
-    goto err_board_button;
+    goto err_board_selector_item_switch_button;
   }
 
   self->board = board;
@@ -103,14 +108,15 @@ zn_board_button_create(struct zigzag_layout *zigzag_layout,
   self->index = index;
   wl_list_init(&self->link);
 
-  self->board_destroy_listener.notify = zn_board_button_handle_board_destroy;
+  self->board_destroy_listener.notify =
+      zn_board_selector_item_switch_button_handle_board_destroy;
   wl_signal_add(&board->events.destroy, &self->board_destroy_listener);
 
-  zn_board_button_update_frame(self->zigzag_node);
+  zn_board_selector_item_switch_button_update_frame(self->zigzag_node);
 
   return self;
 
-err_board_button:
+err_board_selector_item_switch_button:
   free(self);
 
 err:
@@ -118,7 +124,8 @@ err:
 }
 
 void
-zn_board_button_destroy(struct zn_board_button *self)
+zn_board_selector_item_switch_button_destroy(
+    struct zn_board_selector_item_switch_button *self)
 {
   if (self->parent) {
     zn_board_selector_update(self->parent);
