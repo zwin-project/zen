@@ -72,7 +72,8 @@ zn_zigzag_layout_create(struct zn_screen *screen, struct wlr_renderer *renderer)
 
   zigzag_layout_add_node(self->zigzag_layout, vr_modal->zigzag_node, renderer);
 
-  struct zn_menu_bar *menu_bar = zn_menu_bar_create(zigzag_layout, renderer);
+  struct zn_menu_bar *menu_bar =
+      zn_menu_bar_create(zigzag_layout, renderer, screen);
 
   if (menu_bar == NULL) {
     zn_error("Failed to create the menu_bar");

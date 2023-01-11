@@ -137,7 +137,7 @@ zn_board_set_screen(struct zn_board *self, struct zn_screen *screen)
 
   if (screen) {
     wl_signal_add(&screen->events.destroy, &self->screen_destroy_listener);
-    wl_list_insert(&screen->board_list, &self->screen_link);
+    wl_list_insert(screen->board_list.prev, &self->screen_link);
   }
 
   self->screen = screen;

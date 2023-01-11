@@ -88,12 +88,14 @@ zn_scene_new_screen(struct zn_scene *self, struct zn_screen *screen)
         board = board_iter;
       }
       zn_board_set_screen(board_iter, screen);
+      wl_signal_emit(&self->events.board_mapped_to_screen, board_iter);
     }
   }
 
   if (wl_list_empty(&screen->board_list)) {
     board = zn_scene_create_new_board(self);
     zn_board_set_screen(board, screen);
+    wl_signal_emit(&self->events.board_mapped_to_screen, board);
   }
 
   zn_screen_set_current_board(screen, board);
@@ -253,6 +255,7 @@ zn_scene_create(void)
   wl_list_init(&self->board_list);
   wl_list_init(&self->view_list);
   wl_signal_init(&self->events.new_board);
+  wl_signal_init(&self->events.board_mapped_to_screen);
 
   return self;
 
@@ -285,6 +288,7 @@ zn_scene_destroy(struct zn_scene *self)
 {
   wl_list_remove(&self->focused_view_destroy_listener.link);
   wl_list_remove(&self->events.new_board.listener_list);
+  wl_list_remove(&self->events.board_mapped_to_screen.listener_list);
   wl_list_remove(&self->display_system_changed_listener.link);
   wl_list_remove(&self->view_list);
   if (self->wallpaper != NULL) wlr_texture_destroy(self->wallpaper);

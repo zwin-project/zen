@@ -7,6 +7,7 @@
 #include "zen/screen/output.h"
 #include "zen/ui/layout-constants.h"
 #include "zen/ui/nodes/app-launcher.h"
+#include "zen/ui/nodes/board-selector/board-selector.h"
 #include "zen/ui/nodes/power-button.h"
 #include "zen/ui/nodes/vr-button.h"
 
@@ -53,8 +54,8 @@ zn_menu_bar_init_frame(
 }
 
 struct zn_menu_bar *
-zn_menu_bar_create(
-    struct zigzag_layout *zigzag_layout, struct wlr_renderer *renderer)
+zn_menu_bar_create(struct zigzag_layout *zigzag_layout,
+    struct wlr_renderer *renderer, struct zn_screen *screen)
 {
   struct zn_menu_bar *self;
 
@@ -82,6 +83,17 @@ zn_menu_bar_create(
   self->power_button = power_button;
 
   zigzag_node_add_child(self->zigzag_node, power_button->zigzag_node, renderer);
+
+  struct zn_board_selector *board_selector =
+      zn_board_selector_create(zigzag_layout, screen);
+  if (board_selector == NULL) {
+    zn_error("Failed to create the board_selector");
+    goto err_power_button;
+  }
+  self->board_selector = board_selector;
+
+  zigzag_node_add_child(
+      self->zigzag_node, board_selector->zigzag_node, renderer);
 
   zn_menu_bar_init_frame(self->zigzag_node,
       self->zigzag_node->layout->screen_width,
@@ -120,7 +132,7 @@ err_launcher_list:
   zn_vr_button_destroy(vr_button);
 
 err_power_button:
-  zn_power_button_destroy(self->power_button);
+  zn_power_button_destroy(power_button);
 
 err_zigzag_node:
   zigzag_node_destroy(zigzag_node);
@@ -142,6 +154,7 @@ zn_menu_bar_destroy(struct zn_menu_bar *self)
 
   wl_list_remove(&self->launcher_list);
   zn_vr_button_destroy(self->vr_button);
+  zn_board_selector_destroy(self->board_selector);
   zn_power_button_destroy(self->power_button);
   zigzag_node_destroy(self->zigzag_node);
   free(self);

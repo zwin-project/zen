@@ -23,7 +23,8 @@ struct zn_scene {
   struct wl_listener display_system_changed_listener;
 
   struct {
-    struct wl_signal new_board;  // (struct zn_board*)
+    struct wl_signal new_board;               // (struct zn_board*)
+    struct wl_signal board_mapped_to_screen;  // (struct zn_board*)
   } events;
 
   struct wlr_texture *wallpaper;  // nullable
