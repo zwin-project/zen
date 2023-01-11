@@ -81,9 +81,6 @@ We cannot customize these bindings for now.
 |<mod> + <shift> + ←
 |Move to previous board
 
-|<mod> + <shift> + n
-|Create new board
-
 |<alt> + q
 |Terminate ZEN Desktop (for development convenience)
 
