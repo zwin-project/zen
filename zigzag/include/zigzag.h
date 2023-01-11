@@ -46,10 +46,11 @@ enum zigzag_reconfigure_direction {
 };
 
 enum zigzag_reconfigure_type {
-  ZIGZAG_RECONFIGURE_START, /** left or top*/
+  ZIGZAG_RECONFIGURE_START = 0, /** left or top*/
   ZIGZAG_RECONFIGURE_CENTER,
   ZIGZAG_RECONFIGURE_END,     /** right or left*/
   ZIGZAG_RECONFIGURE_JUSTIFY, /** space-between */
+  ZIGZAG_RECONFIGURE_TYPE_COUNT,
 };
 
 struct zigzag_node_impl {

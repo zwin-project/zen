@@ -138,7 +138,7 @@ zigzag_node_reconfigure_justify(
   }
 }
 
-static void (*reconfigure[])(
+static void (*reconfigure[ZIGZAG_RECONFIGURE_TYPE_COUNT])(
     struct zigzag_node *self, struct zigzag_reconfigure_context *ctx) = {
     [ZIGZAG_RECONFIGURE_START] = zigzag_node_reconfigure_start,
     [ZIGZAG_RECONFIGURE_END] = zigzag_node_reconfigure_end,
