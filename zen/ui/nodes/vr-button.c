@@ -118,9 +118,6 @@ zn_vr_button_create(
       self->zigzag_node->layout->screen_width,
       self->zigzag_node->layout->screen_height);
 
-  zigzag_node_update_frame(self->zigzag_node);
-  zigzag_node_update_texture(self->zigzag_node, renderer);
-
   return self;
 
 err_vr_menu:
