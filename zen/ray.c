@@ -73,7 +73,7 @@ zn_ray_create(void)
 {
   struct zn_ray *self;
   struct zn_server *server = zn_server_get_singleton();
-  vec3 initial_origin = {0.3f, 0.7f, 0.0f};
+  vec3 initial_origin = {0.0f, 0.8f, -0.15f};
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
