@@ -99,7 +99,7 @@ zn_vr_modal_item_headset_dialog_render(struct zigzag_node *node, cairo_t *cr)
 
   zigzag_cairo_draw_node_frame(cr, node,
       (struct zigzag_color){0.0, 0.0, 0.0, 0.0},
-      (struct zigzag_color){1.0, 1.0, 1.0, 1.0}, 1.0, 8.0);
+      (struct zigzag_color){1.0, 1.0, 1.0, 1.0}, 2.0, 8.0);
 
   cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.5);
   cairo_set_font_size(cr, 13);
