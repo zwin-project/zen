@@ -73,7 +73,9 @@ zigzag_node_update_texture(
     self->texture = original;
     return;
   }
-  wlr_texture_destroy(original);
+  if (original) {
+    wlr_texture_destroy(original);
+  }
   self->layout->implementation->on_damage(self);
 }
 
@@ -132,7 +134,9 @@ zigzag_node_destroy(struct zigzag_node *self)
 {
   wl_list_remove(&self->node_list);
   wl_list_remove(&self->link);
-  wlr_texture_destroy(self->texture);
+  if (self->texture) {
+    wlr_texture_destroy(self->texture);
+  }
   free(self);
 }
 
