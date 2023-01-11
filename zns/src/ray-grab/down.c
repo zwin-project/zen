@@ -1,12 +1,12 @@
-#include "down.h"
+#include "zns/ray-grab/down.h"
 
 #include <cglm/mat4.h>
 #include <zen-common.h>
 
-#include "node.h"
-#include "shell.h"
 #include "zen/appearance/ray.h"
 #include "zen/server.h"
+#include "zns/node.h"
+#include "zns/shell.h"
 
 static void zns_down_ray_grab_destroy(struct zns_down_ray_grab *self);
 

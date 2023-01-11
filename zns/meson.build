@@ -1,17 +1,17 @@
-_zen_shell_inc = include_directories('.')
+zen_shell_inc = include_directories('include')
 
 _zen_shell_srcs = [
-  'board.c',
-  'bounded.c',
-  'expansive.c',
-  'node.c',
-  'seat-capsule.c',
-  'shell.c',
+  'src/board.c',
+  'src/bounded.c',
+  'src/expansive.c',
+  'src/node.c',
+  'src/seat-capsule.c',
+  'src/shell.c',
 
-  'ray-grab/board-move.c',
-  'ray-grab/default.c',
-  'ray-grab/down.c',
-  'ray-grab/move.c',
+  'src/ray-grab/board-move.c',
+  'src/ray-grab/default.c',
+  'src/ray-grab/down.c',
+  'src/ray-grab/move.c',
 ]
 
 _zen_shell_deps = [
@@ -21,7 +21,7 @@ _zen_shell_deps = [
 _zen_shell_lib = static_library(
   'zen-shell',
   _zen_shell_srcs,
-  include_directories: [zen_inc, _zen_shell_inc],
+  include_directories: [zen_inc, zen_shell_inc],
   dependencies: _zen_shell_deps,
   install: false,
 )

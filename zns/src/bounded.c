@@ -1,4 +1,4 @@
-#include "bounded.h"
+#include "zns/bounded.h"
 
 #include <cglm/affine.h>
 #include <cglm/mat4.h>
@@ -6,12 +6,12 @@
 #include <zen-common.h>
 #include <zgnr/intersection.h>
 
-#include "ray-grab/default.h"
-#include "ray-grab/move.h"
-#include "seat-capsule.h"
-#include "shell.h"
 #include "zen/server.h"
 #include "zen/virtual-object.h"
+#include "zns/ray-grab/default.h"
+#include "zns/ray-grab/move.h"
+#include "zns/seat-capsule.h"
+#include "zns/shell.h"
 
 static void zns_bounded_destroy(struct zns_bounded *self);
 

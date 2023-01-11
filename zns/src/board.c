@@ -1,14 +1,14 @@
-#include "board.h"
+#include "zns/board.h"
 
 #include <cglm/quat.h>
 #include <linux/input.h>
 #include <zen-common.h>
 #include <zgnr/intersection.h>
 
-#include "ray-grab/board-move.h"
-#include "shell.h"
 #include "zen/cursor.h"
 #include "zen/server.h"
+#include "zns/ray-grab/board-move.h"
+#include "zns/shell.h"
 
 static void zns_board_destroy(struct zns_board *self);
 

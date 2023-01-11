@@ -1,19 +1,19 @@
-#include "board-move.h"
+#include "zns/ray-grab/board-move.h"
 
 #include <cglm/affine.h>
 #include <cglm/mat4.h>
 #include <cglm/vec2.h>
 #include <zen-common.h>
 
-#include "board.h"
-#include "seat-capsule.h"
-#include "shell.h"
 #include "zen/appearance/board.h"
 #include "zen/appearance/cursor.h"
 #include "zen/appearance/ray.h"
 #include "zen/cursor.h"
 #include "zen/server.h"
 #include "zen/view.h"
+#include "zns/board.h"
+#include "zns/seat-capsule.h"
+#include "zns/shell.h"
 
 static void zns_board_move_ray_grab_destroy(
     struct zns_board_move_ray_grab *self);

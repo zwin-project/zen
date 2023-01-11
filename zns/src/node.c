@@ -1,4 +1,4 @@
-#include "node.h"
+#include "zns/node.h"
 
 #include <cglm/mat4.h>
 #include <zen-common.h>

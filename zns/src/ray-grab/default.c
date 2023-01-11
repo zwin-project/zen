@@ -1,15 +1,15 @@
-#include "default.h"
+#include "zns/ray-grab/default.h"
 
 #include <cglm/vec3.h>
 #include <zen-common.h>
 #include <zigen-protocol.h>
 
-#include "bounded.h"
-#include "ray-grab/down.h"
-#include "shell.h"
 #include "zen/appearance/ray.h"
 #include "zen/server.h"
 #include "zen/virtual-object.h"
+#include "zns/bounded.h"
+#include "zns/ray-grab/down.h"
+#include "zns/shell.h"
 
 /**
  * @param bounded is nullable

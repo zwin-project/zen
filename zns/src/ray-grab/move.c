@@ -1,12 +1,12 @@
-#include "move.h"
+#include "zns/ray-grab/move.h"
 
 #include <zen-common.h>
 
-#include "seat-capsule.h"
-#include "shell.h"
 #include "zen/appearance/ray.h"
 #include "zen/server.h"
 #include "zen/virtual-object.h"
+#include "zns/seat-capsule.h"
+#include "zns/shell.h"
 
 static void zns_move_ray_grab_destroy(struct zns_move_ray_grab *self);
 
