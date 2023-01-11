@@ -4,8 +4,8 @@ precision mediump float;
 uniform mat4 zView;
 
 const vec3 global_light = vec3(0, 10, 0);
-const vec3 Ka = vec3(1.0, 0.5, 0.31);
-const vec3 Kd = vec3(1.0, 0.5, 0.31);
+const vec3 Ka = vec3(0.8, 0.8, 0.8);
+const vec3 Kd = vec3(0.8, 0.8, 0.8);
 const vec3 Ks = vec3(0.5, 0.5, 0.5);
 const float alpha = 32.0;
 

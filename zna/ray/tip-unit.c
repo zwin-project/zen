@@ -37,7 +37,7 @@ curve_ellipse(
 static float
 curve_modification(float z)
 {
-  return 3 * z;
+  return 10 * powf((z - 0.06) * 21.3, 30) + 0.03;
 }
 
 static void
@@ -47,7 +47,7 @@ curve_position(float t, vec2 zr)
   float r0 = 0.f;
   float kz = 0.5f;
   float kr = 1.f;
-  float radius = 0.01f;
+  float radius = 0.02f;
   curve_ellipse(t, z0, r0, kz, kr, radius, zr);
   zr[1] *= curve_modification(zr[0]);
 }

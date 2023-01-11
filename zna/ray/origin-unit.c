@@ -74,7 +74,7 @@ curve_ellipse(
 static float
 curve_modification(float z)
 {
-  return 0.8f - 40000.f * z * (z + 0.035) * (z - 0.02);
+  return 0.7f - 40000.f * z * (z + 0.038) * (z - 0.02);
 }
 
 static void
