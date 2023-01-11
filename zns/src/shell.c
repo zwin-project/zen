@@ -1,19 +1,19 @@
-#include "shell.h"
+#include "zns/shell.h"
 
 #include <cglm/quat.h>
 #include <float.h>
 #include <zen-common.h>
 #include <zgnr/bounded.h>
 
-#include "board.h"
-#include "bounded.h"
-#include "expansive.h"
-#include "seat-capsule.h"
 #include "zen/board.h"
 #include "zen/cursor.h"
 #include "zen/scene.h"
 #include "zen/server.h"
 #include "zen/virtual-object.h"
+#include "zns/board.h"
+#include "zns/bounded.h"
+#include "zns/expansive.h"
+#include "zns/seat-capsule.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"

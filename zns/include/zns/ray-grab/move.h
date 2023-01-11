@@ -1,7 +1,7 @@
 #pragma once
 
-#include "bounded.h"
 #include "zen/ray.h"
+#include "zns/bounded.h"
 
 struct zns_move_ray_grab {
   struct zn_ray_grab base;

@@ -1,14 +1,14 @@
-#include "seat-capsule.h"
+#include "zns/seat-capsule.h"
 
 #include <cglm/quat.h>
 #include <cglm/vec3.h>
 #include <math.h>
 #include <zen-common.h>
 
-#include "board.h"
-#include "bounded.h"
 #include "zen/appearance/board.h"
 #include "zen/virtual-object.h"
+#include "zns/board.h"
+#include "zns/bounded.h"
 
 #define INITIAL_BOARD_GAP (M_PI / 10.f)
 

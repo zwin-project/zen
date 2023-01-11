@@ -1,10 +1,10 @@
-#include "expansive.h"
+#include "zns/expansive.h"
 
 #include <zen-common.h>
 
-#include "shell.h"
 #include "zen/server.h"
 #include "zen/virtual-object.h"
+#include "zns/shell.h"
 
 static void zns_expansive_destroy(struct zns_expansive *self);
 
