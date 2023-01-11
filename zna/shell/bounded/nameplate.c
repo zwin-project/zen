@@ -7,6 +7,7 @@
 
 #include "zen/virtual-object.h"
 #include "zns/appearance/bounded.h"
+#include "zns/bounded-nameplate.h"
 
 struct zna_bounded_nameplate_vertex {
   vec3 position;
@@ -18,21 +19,14 @@ zna_bounded_nameplate_unit_commit(struct zna_bounded_nameplate_unit *self,
     struct zns_bounded *bounded, struct znr_virtual_object *znr_virtual_object,
     uint32_t damage)
 {
-  static const float width = 0.4f;
-  static const float height = 0.04f;
-
-  struct zn_virtual_object *zn_virtual_object =
-      bounded->zgnr_bounded->virtual_object->user_data;
-
   if (!self->base_unit->has_renderer_objects) return;
 
   if (damage & ZNA_BOUNDED_DAMAGE_GEOMETRY) {
-    mat4 local_model = GLM_MAT4_IDENTITY_INIT;
-    glm_mat4_mul(zn_virtual_object->model_matrix, local_model, local_model);
-    glm_translate_z(local_model, bounded->zgnr_bounded->current.half_size[2]);
-    glm_translate_y(
-        local_model, -bounded->zgnr_bounded->current.half_size[1] - 0.01);
-    glm_scale(local_model, (vec3){width, height, 1});
+    mat4 local_model;
+    zns_bounded_nameplate_get_transform(bounded->nameplate, local_model);
+
+    glm_scale(local_model, (vec3){bounded->nameplate->geometry.width,
+                               bounded->nameplate->geometry.height, 1});
 
     znr_gl_base_technique_gl_uniform_matrix(self->base_unit->technique, 0,
         "local_model", 4, 4, 1, false, local_model[0]);
