@@ -8,8 +8,11 @@
 
 #include "zen-common.h"
 
-#define CURVE_MIN_Z (0.04f)
-#define CURVE_MAX_Z (0.08f)
+/**
+ * * Origin is identical with ray's tip
+ * * -z direction is identical with ray's direction
+ */
+
 #define RESOLUTION_Z 50
 #define RESOLUTION_THETA 25
 
@@ -23,48 +26,64 @@ struct zna_ray_tip_unit_vertex {
   vec2 uv;
 };
 
-static float
-curve_function(float z)
+static void
+curve_ellipse(
+    float t, float z0, float r0, float kz, float kr, float radius, vec2 zr)
 {
-  return sqrtf(powf(0.01, 2) - 0.25 * powf(z - 0.06, 2)) * 3 * z;
+  zr[0] = z0 + radius / kz * cosf(t);
+  zr[1] = r0 + radius / kr * sinf(t);
 }
 
 static float
-z_resolution_density(float a)
+curve_modification(float z)
 {
-  if (0 <= a && a <= 0.2) {
-    return 0.25 * a;
-  } else if (0.2 <= a && a <= 0.8) {
-    return 1.5 * a - 0.25;
-  } else if (0.8 <= a && a <= 1.0) {
-    return 0.25 * a + 0.75;
-  } else {
-    return 0;
-  }
+  return 3 * z;
+}
+
+static void
+curve_position(float t, vec2 zr)
+{
+  float z0 = 0.06f;
+  float r0 = 0.f;
+  float kz = 0.5f;
+  float kr = 1.f;
+  float radius = 0.01f;
+  curve_ellipse(t, z0, r0, kz, kr, radius, zr);
+  zr[1] *= curve_modification(zr[0]);
+}
+
+static void
+curve_function(int i, vec2 zr, vec2 normal)
+{
+  vec2 zr_a, zr_b;
+  float t = M_PI * (float)i / (float)RESOLUTION_Z;
+  float t_a = M_PI * ((float)i - 0.5) / (float)RESOLUTION_Z;
+  float t_b = M_PI * ((float)i + 0.5) / (float)RESOLUTION_Z;
+
+  curve_position(t, zr);
+  curve_position(t_a, zr_a);
+  curve_position(t_b, zr_b);
+
+  float dz = zr_b[0] - zr_a[0];
+  float dr = zr_b[1] - zr_a[1];
+
+  normal[0] = dr;
+  normal[1] = -dz;
+  glm_vec2_normalize(normal);
 }
 
 static void
 construct_vertices(struct zna_ray_tip_unit_vertex *vertices)
 {
-  float dz = 1.f / (float)RESOLUTION_Z / 10.f;
-
   for (int i = 0; i <= RESOLUTION_Z; i++) {
-    float z, r, dr;
     vec2 normal_zr;  // normal in zr-plane
-    float a = (float)i / (float)RESOLUTION_Z;
-    a = z_resolution_density(a);
-    z = CURVE_MAX_Z * (1.f - a) + CURVE_MIN_Z * a;
-    r = curve_function(z);
-    dr = curve_function(z + dz) - r;
-
-    normal_zr[0] = -dr;
-    normal_zr[1] = dz;
-    glm_vec2_normalize(normal_zr);
+    vec2 position_zr;
+    curve_function(i, position_zr, normal_zr);
 
     for (int j = 0; j <= RESOLUTION_THETA; j++) {
       float theta = 2.f * M_PIf * (float)j / (float)RESOLUTION_THETA;
-      float x = r * cosf(theta);
-      float y = r * sinf(theta);
+      float x = position_zr[1] * cosf(theta);
+      float y = position_zr[1] * sinf(theta);
 
       float normal_x = normal_zr[1] * cosf(theta);
       float normal_y = normal_zr[1] * sinf(theta);
@@ -74,7 +93,7 @@ construct_vertices(struct zna_ray_tip_unit_vertex *vertices)
 
       v->position[0] = x;
       v->position[1] = y;
-      v->position[2] = z;
+      v->position[2] = position_zr[0];
 
       v->normal[0] = normal_x;
       v->normal[1] = normal_y;
