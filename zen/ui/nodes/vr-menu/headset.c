@@ -123,9 +123,6 @@ zn_vr_menu_item_headset_create(struct zigzag_layout *zigzag_layout,
       self->zigzag_node->layout->screen_width,
       self->zigzag_node->layout->screen_height);
 
-  zigzag_node_update_frame(self->zigzag_node);
-  zigzag_node_update_texture(self->zigzag_node, renderer);
-
   wl_list_init(&self->link);
 
   return self;
