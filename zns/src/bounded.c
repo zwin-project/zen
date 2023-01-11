@@ -9,6 +9,7 @@
 #include "zen/server.h"
 #include "zen/virtual-object.h"
 #include "zns/appearance/bounded.h"
+#include "zns/bounded-nameplate.h"
 #include "zns/ray-grab/default.h"
 #include "zns/ray-grab/move.h"
 #include "zns/seat-capsule.h"
@@ -254,9 +255,16 @@ zns_bounded_create(struct zgnr_bounded *zgnr_bounded)
   wl_list_init(&self->link);
   wl_list_init(&self->seat_capsule_link);
 
+  self->nameplate = zns_bounded_nameplate_create(self);
+  if (self->nameplate == NULL) {
+    zn_error("Failed to create a bounded nameplate");
+    goto err_node;
+  }
+
   self->appearance = zna_bounded_create(self, server->appearance_system);
   if (self->appearance == NULL) {
-    goto err_node;
+    zn_error("Failed to create a zna_bounded");
+    goto err_nameplate;
   }
 
   self->zgnr_bounded_destroy_listener.notify =
@@ -273,6 +281,9 @@ zns_bounded_create(struct zgnr_bounded *zgnr_bounded)
   wl_signal_init(&self->events.destroy);
 
   return self;
+
+err_nameplate:
+  zns_bounded_nameplate_destroy(self->nameplate);
 
 err_node:
   zns_node_destroy(self->node);
@@ -295,6 +306,7 @@ zns_bounded_destroy(struct zns_bounded *self)
   wl_list_remove(&self->mapped_listener.link);
   wl_list_remove(&self->zgnr_bounded_destroy_listener.link);
   wl_list_remove(&self->events.destroy.listener_list);
+  zns_bounded_nameplate_destroy(self->nameplate);
   zna_bounded_destroy(self->appearance);
   zns_node_destroy(self->node);
   free(self);

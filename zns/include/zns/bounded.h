@@ -5,6 +5,7 @@
 #include "node.h"
 
 struct zna_bounded;
+struct zns_bounded_nameplate;
 
 struct zns_bounded {
   struct {
@@ -14,6 +15,8 @@ struct zns_bounded {
   struct zgnr_bounded *zgnr_bounded;  // nonnull
 
   struct zns_node *node;
+
+  struct zns_bounded_nameplate *nameplate;
 
   float seat_capsule_azimuthal;
   float seat_capsule_polar;
