@@ -3,6 +3,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/resource.h>
 #include <wait.h>
 #include <wlr/util/log.h>
 
@@ -110,6 +111,25 @@ on_signal_child(int signal_number, void *data)
   return 1;
 }
 
+static bool
+ulimit_fd_count(void)
+{
+  struct rlimit limit;
+  int ret;
+  getrlimit(RLIMIT_NOFILE, &limit);
+
+  limit.rlim_cur = ZN_MIN(limit.rlim_max, 4096);
+
+  ret = setrlimit(RLIMIT_NOFILE, &limit);
+  if (ret == 0) {
+    zn_debug("setrlimit -  RLIMIT_NOFILE: %lu", limit.rlim_cur);
+    return true;
+  } else {
+    zn_error("Failed to set RLIMIT_NOFILE: %lu", limit.rlim_cur);
+    return false;
+  }
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -164,6 +184,10 @@ main(int argc, char *argv[])
   if (!zn_font_init()) {
     zn_error("Failed to initialize font");
     goto err;
+  }
+
+  if (!ulimit_fd_count()) {
+    goto err_font;
   }
 
   display = wl_display_create();
