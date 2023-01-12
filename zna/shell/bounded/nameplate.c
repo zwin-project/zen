@@ -14,6 +14,47 @@ struct zna_bounded_nameplate_vertex {
   vec2 uv;
 };
 
+#define NAMEPLATE_PIXEL_PER_METER 2800.f
+
+static void
+zna_bounded_nameplate_unit_update_texture(
+    struct zna_bounded_nameplate_unit *self, struct zns_bounded *bounded)
+{
+  int width = NAMEPLATE_PIXEL_PER_METER * bounded->nameplate->geometry.width;
+  int height = NAMEPLATE_PIXEL_PER_METER * bounded->nameplate->geometry.height;
+
+  cairo_surface_t *surface =
+      cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+  if (cairo_surface_status(surface) != CAIRO_STATUS_SUCCESS) {
+    zn_error("Failed to create cairo_surface");
+    goto out;
+    return;
+  }
+
+  cairo_t *cr = cairo_create(surface);
+  if (cairo_status(cr) != CAIRO_STATUS_SUCCESS) {
+    zn_error("Failed to create cairo_surface");
+    goto out_cairo;
+  }
+
+  vec3 navy = ZN_NAVY_VEC3_INIT;
+  cairo_set_source_rgba(cr, navy[0], navy[1], navy[2], 1.);
+  zn_cairo_draw_rounded_rectangle(cr, 0, 0, width, height, 5.);
+  cairo_fill_preserve(cr);
+
+  zna_base_unit_read_cairo_surface(self->base_unit, surface);
+  znr_gl_sampler_parameter_i(
+      self->base_unit->sampler0, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  znr_gl_sampler_parameter_i(
+      self->base_unit->sampler0, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+out_cairo:
+  cairo_destroy(cr);
+
+out:
+  cairo_surface_destroy(surface);
+}
+
 void
 zna_bounded_nameplate_unit_commit(struct zna_bounded_nameplate_unit *self,
     struct zns_bounded *bounded, struct znr_virtual_object *znr_virtual_object,
@@ -32,10 +73,8 @@ zna_bounded_nameplate_unit_commit(struct zna_bounded_nameplate_unit *self,
         "local_model", 4, 4, 1, false, local_model[0]);
   }
 
-  if (damage & ZNA_BOUNDED_DAMAGE_STATE) {
-    znr_gl_base_technique_gl_uniform_vector(self->base_unit->technique, 0,
-        "color", ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_FLOAT, 3, 1,
-        ZN_NAVY_VEC3);
+  if (damage & ZNA_BOUNDED_DAMAGE_NAMEPLATE_TEXTURE) {
+    zna_bounded_nameplate_unit_update_texture(self, bounded);
   }
 
   if (damage) {
@@ -71,10 +110,10 @@ zna_bounded_nameplate_unit_create(struct zna_system *system)
   }
 
   struct zna_bounded_nameplate_vertex vertices[4] = {
-      {{-0.5f, 0.f, 0.f}, {0.f, 1.f}},
-      {{+0.5f, 0.f, 0.f}, {1.f, 1.f}},
-      {{+0.5f, -1.f, 0.f}, {1.f, 0.f}},
-      {{-0.5f, -1.f, 0.f}, {0.f, 0.f}},
+      {{-0.5f, 0.f, 0.f}, {0.f, 0.f}},
+      {{+0.5f, 0.f, 0.f}, {1.f, 0.f}},
+      {{+0.5f, -1.f, 0.f}, {1.f, 1.f}},
+      {{-0.5f, -1.f, 0.f}, {0.f, 1.f}},
   };
 
   struct zgnr_mem_storage *vertex_buffer =

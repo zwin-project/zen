@@ -7,7 +7,7 @@ struct zna_bounded;
 
 enum zna_bounded_damage_flag {
   ZNA_BOUNDED_DAMAGE_GEOMETRY = 1 << 0,
-  ZNA_BOUNDED_DAMAGE_STATE = 1 << 1,
+  ZNA_BOUNDED_DAMAGE_NAMEPLATE_TEXTURE = 1 << 1,
 };
 
 void zna_bounded_commit(struct zna_bounded *self, uint32_t damage);
