@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cairo.h>
 #include <wayland-server-core.h>
 #include <wlr/render/wlr_texture.h>
 #include <zgnr/gl-base-technique.h>
@@ -50,9 +51,9 @@ struct zna_base_unit {
   union zgnr_gl_base_technique_draw_args draw_args;
 };
 
-/**
- * @param sampler_parameters array of zgnr_gl_sampler_parameter
- */
+void zna_base_unit_read_cairo_surface(
+    struct zna_base_unit *self, cairo_surface_t *surface);
+
 void zna_base_unit_read_wlr_texture(
     struct zna_base_unit *self, struct wlr_texture *texture);
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "zen-common/cairo.h"
 #include "zen-common/cmd.h"
 #include "zen-common/color.h"
 #include "zen-common/font.h"

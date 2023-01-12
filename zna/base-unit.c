@@ -1,6 +1,7 @@
 #include "base-unit.h"
 
 #include <GL/glew.h>
+#include <endian.h>
 #include <stdio.h>
 #include <wlr/render/egl.h>
 #include <wlr/render/glew.h>
@@ -8,6 +9,73 @@
 #include <zgnr/gl-sampler.h>
 
 #include "zen/server.h"
+
+struct zna_base_unit_cairo_argb {
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+  uint8_t b, g, r, a;
+#elif __BYTE_ORDER == __BIG_ENDIAN
+  uint8_t a, r, g, b;
+#endif
+};
+
+struct zna_base_unit_gl_rgba {
+  uint8_t r, g, b, a;
+};
+
+static void
+zna_base_unit_copy_cairo_argb32_to_gl_rgba32(
+    struct zna_base_unit_cairo_argb *argb, struct zna_base_unit_gl_rgba *rgba,
+    int count)
+{
+  for (int i = 0; i < count; i++) {
+    rgba->a = argb->a;
+    rgba->r = argb->r;
+    rgba->g = argb->g;
+    rgba->b = argb->b;
+    rgba++;
+    argb++;
+  }
+}
+
+void
+zna_base_unit_read_cairo_surface(
+    struct zna_base_unit *self, cairo_surface_t *surface)
+{
+  struct zgnr_mem_storage *storage;
+
+  if (!self->has_renderer_objects) return;
+
+  cairo_format_t format = cairo_image_surface_get_format(surface);
+  int width = cairo_image_surface_get_width(surface);
+  int height = cairo_image_surface_get_height(surface);
+  int stride = cairo_image_surface_get_stride(surface);
+  void *data = cairo_image_surface_get_data(surface);
+  GLenum gl_format, gl_internal_format, gl_type;
+
+  if (format == CAIRO_FORMAT_ARGB32 || format == CAIRO_FORMAT_RGB24) {
+    gl_format = GL_RGBA;
+    gl_internal_format = GL_RGBA;
+    gl_type = GL_UNSIGNED_BYTE;
+  } else {
+    zn_assert(false, "Invalid cairo format: %d", format);
+    return;
+  }
+
+  storage = zgnr_mem_storage_create(NULL, stride * height);
+  zna_base_unit_copy_cairo_argb32_to_gl_rgba32(
+      data, storage->data, width * height);
+
+  if (self->has_texture_data == false) {
+    self->has_texture_data = true;
+    znr_gl_base_technique_bind_texture(
+        self->technique, 0, "", self->texture0, GL_TEXTURE_2D, self->sampler0);
+  }
+
+  znr_gl_texture_image_2d(self->texture0, GL_TEXTURE_2D, 0, gl_internal_format,
+      width, height, 0, gl_format, gl_type, storage);
+
+  zgnr_mem_storage_unref(storage);
+}
 
 void
 zna_base_unit_read_wlr_texture(

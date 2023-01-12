@@ -1,6 +1,7 @@
 _zen_common_inc = include_directories('include')
 
 _zen_common_srcs = [
+  'cairo.c',
   'cmd.c',
   'font.c',
   'log.c',
