@@ -31,6 +31,9 @@ zalloc(size_t size)
   return calloc(1, size);
 }
 
+#define ZN_MAX(a, b) ((a) > (b) ? (a) : (b))
+#define ZN_MIN(a, b) ((a) < (b) ? (a) : (b))
+
 /** Retrieve a pointer to a containing struct */
 #define zn_container_of(ptr, sample, member) \
   (__typeof__(sample))((char *)(ptr)-offsetof(__typeof__(*sample), member))
