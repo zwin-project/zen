@@ -88,6 +88,20 @@ zgnr_bounded_protocol_ack_configure(
 }
 
 static void
+zgnr_bounded_protocol_set_title(
+    struct wl_client *client, struct wl_resource *resource, const char *title)
+{
+  UNUSED(client);
+  struct zgnr_bounded_impl *self = wl_resource_get_user_data(resource);
+  if (self == NULL) return;
+
+  free(self->pending.title);
+  self->pending.title = strdup(title);
+
+  self->pending.damage |= ZGNR_BOUNDED_DAMAGE_TITLE;
+}
+
+static void
 zgnr_bounded_protocol_set_region(struct wl_client *client,
     struct wl_resource *resource, struct wl_resource *region_resource)
 {
@@ -129,6 +143,7 @@ zgnr_bounded_protocol_move(struct wl_client *client,
 static const struct zgn_bounded_interface implementation = {
     .destroy = zgnr_bounded_protocol_destroy,
     .ack_configure = zgnr_bounded_protocol_ack_configure,
+    .set_title = zgnr_bounded_protocol_set_title,
     .set_region = zgnr_bounded_protocol_set_region,
     .move = zgnr_bounded_protocol_move,
 };
@@ -171,6 +186,13 @@ zgnr_bounded_handle_virtual_object_commit(
     self->pending.region = NULL;
   }
 
+  if (self->pending.damage & ZGNR_BOUNDED_DAMAGE_TITLE) {
+    free(self->base.current.title);
+    self->base.current.title = self->pending.title;
+    self->pending.title = strdup(self->pending.title);
+  }
+
+  self->base.current.damage |= self->pending.damage;
   self->pending.damage = 0;
 
   if (!self->mapped) {
@@ -213,6 +235,8 @@ zgnr_bounded_create(struct wl_client *client, uint32_t id,
   self->pending.region = NULL;
   self->pending.damage = 0;
   self->base.current.region = NULL;
+  self->pending.title = strdup("");
+  self->base.current.title = strdup("");
 
   self->resource = wl_resource_create(client, &zgn_bounded_interface, 1, id);
   if (self->resource == NULL) {
@@ -260,6 +284,8 @@ zgnr_bounded_destroy(struct zgnr_bounded_impl *self)
     zgnr_region_node_destroy(self->base.current.region);
   }
 
+  free(self->base.current.title);
+  free(self->pending.title);
   wl_list_remove(&self->virtual_object_destroy_listener.link);
   wl_list_remove(&self->virtual_object_commit_listener.link);
   wl_list_remove(&self->base.events.destroy.listener_list);

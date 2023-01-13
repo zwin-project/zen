@@ -233,6 +233,19 @@ zns_bounded_handle_zgnr_bounded_destroy(
   zns_bounded_destroy(self);
 }
 
+static void
+zns_bounded_handle_virtual_object_commit(
+    struct wl_listener *listener, void *data)
+{
+  UNUSED(data);
+  struct zns_bounded *self = zn_container_of(listener, self, commit_listener);
+
+  if (self->zgnr_bounded->current.damage & ZGNR_BOUNDED_DAMAGE_TITLE) {
+    self->zgnr_bounded->current.damage &= (~ZGNR_BOUNDED_DAMAGE_TITLE);
+    zna_bounded_commit(self->appearance, ZNA_BOUNDED_DAMAGE_NAMEPLATE_TEXTURE);
+  }
+}
+
 struct zns_bounded *
 zns_bounded_create(struct zgnr_bounded *zgnr_bounded)
 {
@@ -278,6 +291,10 @@ zns_bounded_create(struct zgnr_bounded *zgnr_bounded)
   self->mapped_listener.notify = zns_bounded_handle_mapped;
   wl_signal_add(&zgnr_bounded->events.mapped, &self->mapped_listener);
 
+  self->commit_listener.notify = zns_bounded_handle_virtual_object_commit;
+  wl_signal_add(
+      &zgnr_bounded->virtual_object->events.committed, &self->commit_listener);
+
   wl_signal_init(&self->events.destroy);
 
   return self;
@@ -305,6 +322,7 @@ zns_bounded_destroy(struct zns_bounded *self)
   wl_list_remove(&self->move_listener.link);
   wl_list_remove(&self->mapped_listener.link);
   wl_list_remove(&self->zgnr_bounded_destroy_listener.link);
+  wl_list_remove(&self->commit_listener.link);
   wl_list_remove(&self->events.destroy.listener_list);
   zns_bounded_nameplate_destroy(self->nameplate);
   zna_bounded_destroy(self->appearance);
