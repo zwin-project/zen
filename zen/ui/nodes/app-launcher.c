@@ -68,7 +68,7 @@ zn_app_launcher_create(struct zigzag_layout *zigzag_layout,
       cairo_image_surface_create_from_png(self->data->icon_path);
   if (cairo_surface_status(self->launcher_icon_surface) !=
       CAIRO_STATUS_SUCCESS) {
-        zn_error("Failed to create png surface: %s", app->icon);
+    zn_error("Failed to create png surface: %s", app->icon);
     goto err_cairo_surface;
   }
 
