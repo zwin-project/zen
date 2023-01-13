@@ -1,6 +1,7 @@
 #include "zns/bounded-nameplate.h"
 
 #include <cglm/affine.h>
+#include <linux/input.h>
 #include <zen-common.h>
 #include <zgnr/intersection.h>
 #include <zns/appearance/bounded.h>
@@ -8,6 +9,7 @@
 #include "zen/server.h"
 #include "zen/virtual-object.h"
 #include "zns/bounded.h"
+#include "zns/ray-grab/move.h"
 #include "zns/shell.h"
 
 static float
@@ -84,10 +86,17 @@ static bool
 zns_bounded_nameplate_node_ray_button(void *user_data, uint32_t time_msec,
     uint32_t button, enum wlr_button_state state)
 {
-  UNUSED(user_data);
   UNUSED(time_msec);
-  UNUSED(button);
-  UNUSED(state);
+  struct zns_bounded_nameplate *self = user_data;
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_seat *seat = server->input_manager->seat;
+  struct zn_ray *ray = server->scene->ray;
+
+  if (state == WLR_BUTTON_PRESSED && button == BTN_LEFT &&
+      seat->pressing_button_count == 1) {
+    zns_move_ray_grab_start(ray, self->bounded);
+  }
+
   return true;
 }
 
