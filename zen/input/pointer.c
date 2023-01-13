@@ -25,7 +25,7 @@ zn_pointer_handle_motion(struct wl_listener *listener, void *data)
     struct zn_ray *ray = server->scene->ray;
 
     ray->grab->impl->motion_relative(ray->grab, GLM_VEC3_ZERO,
-        event->delta_y * 0.001, -event->delta_x * 0.001, event->time_msec);
+        event->delta_y * 0.0003, -event->delta_x * 0.0003, event->time_msec);
   }
 }
 
