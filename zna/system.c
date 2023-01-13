@@ -1,5 +1,6 @@
 #include "system.h"
 
+#include <linux/input.h>
 #include <zen-common.h>
 #include <zwnr/gl-buffer.h>
 #include <zwnr/gl-shader.h>
@@ -15,6 +16,20 @@
 #include "virtual-object/gl-vertex-array.h"
 #include "virtual-object/rendering-unit.h"
 #include "zen/server.h"
+
+static void
+zna_system_handle_exit_immersive(uint32_t time_msec, uint32_t key, void *data)
+{
+  UNUSED(time_msec);
+  UNUSED(key);
+  struct zna_system *self = data;
+
+  if (!self->current_session) {
+    return;
+  }
+
+  wl_signal_emit(&self->current_session->events.disconnected, NULL);
+}
 
 void
 zna_system_set_current_session(
@@ -164,6 +179,14 @@ zna_system_handle_new_gl_program(struct wl_listener *listener, void *data)
   struct zwnr_gl_program *program = data;
 
   (void)zna_gl_program_create(program, self);
+}
+
+void
+zna_system_setup_keybindings(struct zna_system *self)
+{
+  struct zn_server *server = zn_server_get_singleton();
+  zn_input_manager_add_key_binding(server->input_manager, KEY_V,
+      WLR_MODIFIER_LOGO, zna_system_handle_exit_immersive, self);
 }
 
 struct zna_system *

@@ -5,6 +5,7 @@
 #include <wlr/types/wlr_output.h>
 #include <zen-common.h>
 
+#include "zen/appearance/system.h"
 #include "zen/config/config-parser.h"
 #include "zen/config/config.h"
 #include "zen/cursor.h"
@@ -265,6 +266,7 @@ zn_server_create(struct wl_display *display)
   }
 
   zn_scene_setup_keybindings(self->scene);
+  zna_system_setup_keybindings(self->appearance_system);
 
   self->new_input_listener.notify = zn_server_handle_new_input;
   wl_signal_add(
