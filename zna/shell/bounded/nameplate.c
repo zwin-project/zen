@@ -39,7 +39,7 @@ zna_bounded_nameplate_unit_update_texture(
 
   vec3 navy = ZN_NAVY_VEC3_INIT;
   cairo_set_source_rgba(cr, navy[0], navy[1], navy[2], 1.);
-  zn_cairo_draw_rounded_rectangle(cr, 0, 0, width, height, 5.);
+  zn_cairo_draw_rounded_rectangle(cr, 0, 0, width, height, 25.);
   cairo_fill(cr);
   cairo_set_font_face(cr, zn_font_face_get_cairo_font_face(ZN_FONT_REGULAR));
   cairo_set_source_rgba(cr, 1., 1., 1., 1.);

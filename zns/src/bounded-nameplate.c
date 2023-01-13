@@ -146,8 +146,8 @@ zns_bounded_nameplate_create(struct zns_bounded *bounded)
   }
 
   self->bounded = bounded;
-  self->geometry.width = 0.4;
-  self->geometry.height = 0.04;
+  self->geometry.width = 0.3;
+  self->geometry.height = 0.03;
 
   return self;
 
