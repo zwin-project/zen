@@ -29,6 +29,7 @@ struct zns_bounded {
   struct wl_listener zgnr_bounded_destroy_listener;
   struct wl_listener move_listener;
   struct wl_listener mapped_listener;
+  struct wl_listener commit_listener;
 };
 
 struct zns_bounded *zns_bounded_create(struct zgnr_bounded *zgnr_bounded);

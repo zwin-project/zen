@@ -23,6 +23,13 @@ zna_bounded_nameplate_unit_update_texture(
   int width = NAMEPLATE_PIXEL_PER_METER * bounded->nameplate->geometry.width;
   int height = NAMEPLATE_PIXEL_PER_METER * bounded->nameplate->geometry.height;
 
+  vec3 color;
+  if (bounded->nameplate->has_ray_focus) {
+    glm_vec3_copy(ZN_NAVY_HIGHLIGHTED_VEC3, color);
+  } else {
+    glm_vec3_copy(ZN_NAVY_VEC3, color);
+  }
+
   cairo_surface_t *surface =
       cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
   if (cairo_surface_status(surface) != CAIRO_STATUS_SUCCESS) {
@@ -37,22 +44,14 @@ zna_bounded_nameplate_unit_update_texture(
     goto out_cairo;
   }
 
-  vec3 color;
-
-  if (bounded->nameplate->has_ray_focus) {
-    glm_vec3_copy(ZN_NAVY_HIGHLIGHTED_VEC3, color);
-  } else {
-    glm_vec3_copy(ZN_NAVY_VEC3, color);
-  }
-
   cairo_set_source_rgba(cr, color[0], color[1], color[2], 1.);
   zn_cairo_draw_rounded_rectangle(cr, 0, 0, width, height, 25.);
   cairo_fill(cr);
   cairo_set_font_face(cr, zn_font_face_get_cairo_font_face(ZN_FONT_REGULAR));
   cairo_set_source_rgba(cr, 1., 1., 1., 1.);
   cairo_set_font_size(cr, height / 2);
-  zn_cairo_draw_text(cr, "Bounded App", 40, height / 2, ZN_CAIRO_ANCHOR_LEFT,
-      ZN_CAIRO_ANCHOR_CENTER);
+  zn_cairo_draw_text(cr, bounded->zgnr_bounded->current.title, 40, height / 2,
+      ZN_CAIRO_ANCHOR_LEFT, ZN_CAIRO_ANCHOR_CENTER);
 
   zna_base_unit_read_cairo_surface(self->base_unit, surface);
   znr_gl_sampler_parameter_i(
