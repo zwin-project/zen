@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cglm/types.h>
+#include <stdbool.h>
 
 struct zns_bounded;
 
@@ -11,6 +12,8 @@ struct zns_bounded_nameplate {
   struct zns_bounded *bounded;  // nonnull
 
   struct zns_node *node;
+
+  bool has_ray_focus;
 
   struct {
     float width;
