@@ -22,6 +22,9 @@ struct zigzag_layout {
   double screen_width;
   double screen_height;
 
+  // used by `zigzag_layout_get_text_extents`
+  cairo_surface_t *surface;
+
   struct wl_list node_list;  // zigzag_node::link
 
   void *user_data;
@@ -31,6 +34,9 @@ struct zigzag_layout {
 
 void zigzag_layout_add_node(struct zigzag_layout *layout,
     struct zigzag_node *node, struct wlr_renderer *renderer);
+
+void zigzag_layout_get_text_extents(struct zigzag_layout *self, char *utf8,
+    double font_size, cairo_text_extents_t *extents);
 
 struct zigzag_layout *zigzag_layout_create(
     const struct zigzag_layout_impl *implementation, double screen_width,
