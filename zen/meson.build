@@ -71,9 +71,9 @@ _zen_deps = [
   wlr_glew_renderer_dep,
   xkbcommon_dep,
   zen_common_dep,
-  zwnr_dep,
   zigzag_dep,
   znr_remote_dep,
+  zwnr_dep,
 ]
 
 _zen_lib = static_library(
