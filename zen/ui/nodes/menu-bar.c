@@ -102,7 +102,7 @@ zn_menu_bar_create(struct zigzag_layout *zigzag_layout,
   struct zn_vr_button *vr_button = zn_vr_button_create(zigzag_layout, renderer);
   if (vr_button == NULL) {
     zn_error("Failed to create the vr_button");
-    goto err_power_button;
+    goto err_board_selector;
   }
   self->vr_button = vr_button;
 
@@ -130,6 +130,9 @@ err_launcher_list:
   wl_list_remove(&self->launcher_list);
 
   zn_vr_button_destroy(vr_button);
+
+err_board_selector:
+  zn_board_selector_destroy(board_selector);
 
 err_power_button:
   zn_power_button_destroy(power_button);
