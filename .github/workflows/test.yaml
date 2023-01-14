@@ -23,23 +23,11 @@ jobs:
           sudo apt-get install \
             libwayland-dev libwlroots-dev libpixman-1-dev \
             libxkbcommon-dev libglu1-mesa-dev libglew-dev weston \
-            meson libfreetype-dev librsvg2-dev
+            meson libfreetype-dev librsvg2-dev libcglm-dev
 
       - uses: actions/setup-python@v1
         with:
           python-version: "3.x"
-
-      - name: Clone cglm
-        uses: actions/checkout@v2
-        with:
-          repository: recp/cglm
-          path: cglm
-
-      - name: Build cglm
-        run: |
-          meson build
-          sudo ninja -C build install
-        working-directory: ./cglm
 
       - name: Clone wlr-glew-renderer
         uses: actions/checkout@v2
@@ -74,22 +62,6 @@ jobs:
           cmake -B build -DZEN_REMOTE_GRPC_SYSROOT=$GITHUB_WORKSPACE/grpc-dev/native/Debug -GNinja
           cmake --build build
           sudo cmake --install build
-
-      - name: Clone tomlc99
-        uses: actions/checkout@v2
-        with:
-          repository: cktan/tomlc99
-          path: tomlc99
-
-      - name: Rename "libtoml.pc.sample" to "libtoml.pc"
-        run: mv libtoml.pc.sample libtoml.pc
-        working-directory: ./tomlc99
-
-      - name: Build tomlc99
-        run: |
-          sudo mkdir -p /usr/local/lib/pkgconfig
-          sudo make install
-        working-directory: ./tomlc99
 
       - name: Clone zwin
         uses: actions/checkout@v2

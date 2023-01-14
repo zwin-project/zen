@@ -106,7 +106,6 @@ fontconfig_dep = dependency('fontconfig')
 gl_dep = dependency('gl')
 m_dep = cc.find_library('m')
 pixman_dep = dependency('pixman-1')
-toml_dep = dependency('libtoml')
 wayland_protocols_dep = dependency('wayland-protocols', version: wayland_protocols_req)
 wayland_scanner_dep = dependency('wayland-scanner')
 wayland_server_dep = dependency('wayland-server', version: wayland_req)
@@ -167,6 +166,7 @@ textify = files('tools/textify.sh')[0]
 
 zen_inc = include_directories('include')
 
+subdir('3rd-party')
 subdir('protocols')
 subdir('common')
 subdir('zwnroot')
