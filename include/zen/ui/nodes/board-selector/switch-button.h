@@ -14,8 +14,9 @@ struct zn_board_selector_item_switch_button {
   uint32_t index;  // 1-indexed
 
   struct zn_board *board;
-  struct wl_list
-      link;  // zn_board_selector::board_selector_item_switch_button_list
+
+  /* zn_board_selector::board_selector_item_switch_button_list */
+  struct wl_list link;
 
   struct wl_listener board_destroy_listener;
 };
