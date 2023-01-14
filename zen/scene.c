@@ -18,7 +18,12 @@ zn_scene_handle_switch_board_binding(
 {
   UNUSED(time_msec);
   struct zn_scene *scene = data;
-  struct zn_screen *screen = scene->cursor->board->screen;
+  struct zn_screen *screen = NULL;
+  struct zn_board *board = scene->cursor->board;
+
+  if (board) {
+    screen = board->screen;
+  }
 
   if (screen == NULL) return;
 
