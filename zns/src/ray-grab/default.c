@@ -2,7 +2,7 @@
 
 #include <cglm/vec3.h>
 #include <zen-common.h>
-#include <zigen-protocol.h>
+#include <zwin-protocol.h>
 
 #include "zen/appearance/ray.h"
 #include "zen/server.h"

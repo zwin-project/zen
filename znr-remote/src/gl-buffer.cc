@@ -7,14 +7,14 @@
 
 void
 znr_gl_buffer_data(struct znr_gl_buffer *self, uint32_t target,
-    struct zgnr_mem_storage *storage, uint32_t usage)
+    struct zwnr_mem_storage *storage, uint32_t usage)
 {
   auto loop = std::make_unique<Loop>(wl_display_get_event_loop(self->display));
 
-  zgnr_mem_storage_ref(storage);
+  zwnr_mem_storage_ref(storage);
 
   auto buffer = zen::remote::server::CreateBuffer(
-      storage->data, [storage] { zgnr_mem_storage_unref(storage); },
+      storage->data, [storage] { zwnr_mem_storage_unref(storage); },
       std::move(loop));
 
   self->proxy->GlBufferData(std::move(buffer), target, storage->size, usage);

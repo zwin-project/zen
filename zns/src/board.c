@@ -3,7 +3,7 @@
 #include <cglm/quat.h>
 #include <linux/input.h>
 #include <zen-common.h>
-#include <zgnr/intersection.h>
+#include <zwnr/intersection.h>
 
 #include "zen/cursor.h"
 #include "zen/server.h"
@@ -25,7 +25,7 @@ zns_board_ray_cast(
   glm_mat4_mulv3(self->zn_board->geometry.transform, v1, 1, v1);
   glm_mat4_mulv3(self->zn_board->geometry.transform, v2, 1, v2);
 
-  return zgnr_intersection_ray_parallelogram(
+  return zwnr_intersection_ray_parallelogram(
       origin, direction, v0, v1, v2, u, v, false);
 
   // TODO: Take into account the overhanging views

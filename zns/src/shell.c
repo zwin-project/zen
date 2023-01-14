@@ -3,7 +3,7 @@
 #include <cglm/quat.h>
 #include <float.h>
 #include <zen-common.h>
-#include <zgnr/bounded.h>
+#include <zwnr/bounded.h>
 
 #include "zen/board.h"
 #include "zen/cursor.h"
@@ -141,9 +141,9 @@ zn_shell_handle_new_bounded(struct wl_listener *listener, void *data)
 {
   struct zn_shell *self = zn_container_of(listener, self, new_bounded_listener);
 
-  struct zgnr_bounded *zgnr_bounded = data;
+  struct zwnr_bounded *zwnr_bounded = data;
 
-  (void)zns_bounded_create(zgnr_bounded);
+  (void)zns_bounded_create(zwnr_bounded);
 }
 
 static void
@@ -152,9 +152,9 @@ zn_shell_handle_new_expansive(struct wl_listener *listener, void *data)
   struct zn_shell *self =
       zn_container_of(listener, self, new_expansive_listener);
 
-  struct zgnr_expansive *zgnr_expansive = data;
+  struct zwnr_expansive *zwnr_expansive = data;
 
-  (void)zns_expansive_create(zgnr_expansive);
+  (void)zns_expansive_create(zwnr_expansive);
 }
 
 static void
@@ -202,16 +202,16 @@ zn_shell_create(struct wl_display *display, struct zn_scene *scene)
     goto err;
   }
 
-  self->zgnr_shell = zgnr_shell_create(display);
-  if (self->zgnr_shell == NULL) {
-    zn_error("Failed to create zgnr_shell");
+  self->zwnr_shell = zwnr_shell_create(display);
+  if (self->zwnr_shell == NULL) {
+    zn_error("Failed to create zwnr_shell");
     goto err_free;
   }
 
   self->seat_capsule = zns_seat_capsule_create();
   if (self->seat_capsule == NULL) {
     zn_error("Failed to create a seat capsule");
-    goto err_zgnr_shell;
+    goto err_zwnr_shell;
   }
 
   self->root = zns_node_create(NULL, self, &node_implementation);
@@ -226,11 +226,11 @@ zn_shell_create(struct wl_display *display, struct zn_scene *scene)
 
   self->new_bounded_listener.notify = zn_shell_handle_new_bounded;
   wl_signal_add(
-      &self->zgnr_shell->events.new_bounded, &self->new_bounded_listener);
+      &self->zwnr_shell->events.new_bounded, &self->new_bounded_listener);
 
   self->new_expansive_listener.notify = zn_shell_handle_new_expansive;
   wl_signal_add(
-      &self->zgnr_shell->events.new_expansive, &self->new_expansive_listener);
+      &self->zwnr_shell->events.new_expansive, &self->new_expansive_listener);
 
   self->new_board_listener.notify = zn_shell_handle_new_board;
   wl_signal_add(&scene->events.new_board, &self->new_board_listener);
@@ -249,8 +249,8 @@ zn_shell_create(struct wl_display *display, struct zn_scene *scene)
 err_seat_capsule:
   zns_seat_capsule_destroy(self->seat_capsule);
 
-err_zgnr_shell:
-  zgnr_shell_destroy(self->zgnr_shell);
+err_zwnr_shell:
+  zwnr_shell_destroy(self->zwnr_shell);
 
 err_free:
   free(self);
@@ -270,6 +270,6 @@ zn_shell_destroy(struct zn_shell *self)
   wl_list_remove(&self->ray_focus_node_destroy_listener.link);
   zns_node_destroy(self->root);
   zns_seat_capsule_destroy(self->seat_capsule);
-  zgnr_shell_destroy(self->zgnr_shell);
+  zwnr_shell_destroy(self->zwnr_shell);
   free(self);
 }

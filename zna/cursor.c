@@ -4,7 +4,7 @@
 #include <cglm/affine.h>
 #include <cglm/mat4.h>
 #include <zen-common.h>
-#include <zgnr/gl-sampler.h>
+#include <zwnr/gl-sampler.h>
 
 #include "zen/board.h"
 
@@ -121,8 +121,8 @@ zna_cursor_create(struct zn_cursor *zn_cursor, struct zna_system *system)
         {0, +0, 0, 0},
     };
 
-    struct zgnr_mem_storage *vertex_buffer =
-        zgnr_mem_storage_create(vertices, sizeof(vertices));
+    struct zwnr_mem_storage *vertex_buffer =
+        zwnr_mem_storage_create(vertices, sizeof(vertices));
 
     struct wl_array vertex_attributes;
     wl_array_init(&vertex_attributes);
@@ -145,18 +145,18 @@ zna_cursor_create(struct zn_cursor *zn_cursor, struct zna_system *system)
     vertex_attribute->stride = sizeof(vertices[0]);
     vertex_attribute->offset = sizeof(float) * 2;
 
-    union zgnr_gl_base_technique_draw_args draw_args;
+    union zwnr_gl_base_technique_draw_args draw_args;
     draw_args.arrays.mode = GL_TRIANGLE_FAN;
     draw_args.arrays.first = 0;
     draw_args.arrays.count = 4;
 
     self->base_unit = zna_base_unit_create(system, ZNA_SHADER_VIEW_VERTEX,
         ZNA_SHADER_VIEW_FRAGMENT, vertex_buffer, &vertex_attributes, NULL,
-        ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ARRAYS, draw_args);
+        ZWNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ARRAYS, draw_args);
 
     wl_array_release(&vertex_attributes);
 
-    zgnr_mem_storage_unref(vertex_buffer);
+    zwnr_mem_storage_unref(vertex_buffer);
   }
 
   struct znr_session *session = self->system->current_session;

@@ -4,7 +4,7 @@
 #include <cglm/mat4.h>
 #include <cglm/quat.h>
 #include <zen-common.h>
-#include <zgnr/intersection.h>
+#include <zwnr/intersection.h>
 
 #include "zen/server.h"
 #include "zen/virtual-object.h"
@@ -24,17 +24,17 @@ zns_bounded_node_ray_cast(void *user_data, vec3 origin, vec3 direction,
   UNUSED(transform);  // must be identity matrix
   struct zns_bounded *self = user_data;
   struct zn_virtual_object *zn_virtual_object =
-      self->zgnr_bounded->virtual_object->user_data;
+      self->zwnr_bounded->virtual_object->user_data;
   float outer_distance, inner_distance, intersected_distance;
 
-  if (!self->zgnr_bounded->current.region) return false;
+  if (!self->zwnr_bounded->current.region) return false;
 
-  outer_distance = zgnr_intersection_ray_obb(origin, direction,
-      self->zgnr_bounded->current.half_size, zn_virtual_object->model_matrix);
+  outer_distance = zwnr_intersection_ray_obb(origin, direction,
+      self->zwnr_bounded->current.half_size, zn_virtual_object->model_matrix);
 
   if (outer_distance == FLT_MAX || outer_distance > *distance) return false;
 
-  inner_distance = zgnr_region_node_ray_cast(self->zgnr_bounded->current.region,
+  inner_distance = zwnr_region_node_ray_cast(self->zwnr_bounded->current.region,
       zn_virtual_object->model_matrix, origin, direction);
 
   if (inner_distance == FLT_MAX) return false;
@@ -57,7 +57,7 @@ zns_bounded_node_ray_motion(
   struct zn_server *server = zn_server_get_singleton();
 
   struct zn_virtual_object *zn_virtual_object =
-      self->zgnr_bounded->virtual_object->user_data;
+      self->zwnr_bounded->virtual_object->user_data;
 
   vec3 local_origin, local_direction, tip, local_tip;
   glm_vec3_add(origin, direction, tip);
@@ -66,7 +66,7 @@ zns_bounded_node_ray_motion(
   glm_vec3_sub(local_tip, local_origin, local_direction);
   glm_vec3_scale_as(local_direction, 1, local_direction);
 
-  zgnr_seat_ray_send_motion(server->input_manager->seat->zgnr_seat, time_msec,
+  zwnr_seat_ray_send_motion(server->input_manager->seat->zwnr_seat, time_msec,
       local_origin, local_direction);
 
   return true;
@@ -79,7 +79,7 @@ zns_bounded_node_ray_enter(void *user_data, vec3 origin, vec3 direction)
   struct zn_server *server = zn_server_get_singleton();
 
   struct zn_virtual_object *zn_virtual_object =
-      self->zgnr_bounded->virtual_object->user_data;
+      self->zwnr_bounded->virtual_object->user_data;
 
   vec3 local_origin, local_direction, tip, local_tip;
   glm_vec3_add(origin, direction, tip);
@@ -88,8 +88,8 @@ zns_bounded_node_ray_enter(void *user_data, vec3 origin, vec3 direction)
   glm_vec3_sub(local_tip, local_origin, local_direction);
   glm_vec3_scale_as(local_direction, 1, local_direction);
 
-  zgnr_seat_ray_enter(server->input_manager->seat->zgnr_seat,
-      self->zgnr_bounded->virtual_object, local_origin, local_direction);
+  zwnr_seat_ray_enter(server->input_manager->seat->zwnr_seat,
+      self->zwnr_bounded->virtual_object, local_origin, local_direction);
 
   return true;
 }
@@ -100,7 +100,7 @@ zns_bounded_node_ray_leave(void *user_data)
   UNUSED(user_data);
   struct zn_server *server = zn_server_get_singleton();
 
-  zgnr_seat_ray_clear_focus(server->input_manager->seat->zgnr_seat);
+  zwnr_seat_ray_clear_focus(server->input_manager->seat->zwnr_seat);
 
   return true;
 }
@@ -112,15 +112,15 @@ zns_bounded_node_ray_button(void *user_data, uint32_t time_msec,
   UNUSED(user_data);
   struct zn_server *server = zn_server_get_singleton();
 
-  enum zgn_ray_button_state zgn_state;
+  enum zwn_ray_button_state zwn_state;
   if (state == WLR_BUTTON_PRESSED) {
-    zgn_state = ZGN_RAY_BUTTON_STATE_PRESSED;
+    zwn_state = ZWN_RAY_BUTTON_STATE_PRESSED;
   } else {
-    zgn_state = ZGN_RAY_BUTTON_STATE_RELEASED;
+    zwn_state = ZWN_RAY_BUTTON_STATE_RELEASED;
   }
 
-  zgnr_seat_ray_send_button(
-      server->input_manager->seat->zgnr_seat, time_msec, button, zgn_state);
+  zwnr_seat_ray_send_button(
+      server->input_manager->seat->zwnr_seat, time_msec, button, zwn_state);
 
   return true;
 }
@@ -132,39 +132,39 @@ zns_bounded_node_ray_axis(void *user_data, uint32_t time_msec,
 {
   UNUSED(user_data);
   struct zn_server *server = zn_server_get_singleton();
-  enum zgn_ray_axis axis;
-  enum zgn_ray_axis_source zgn_axis_source;
+  enum zwn_ray_axis axis;
+  enum zwn_ray_axis_source zwn_axis_source;
 
   switch (orientation) {
     case WLR_AXIS_ORIENTATION_VERTICAL:
-      axis = ZGN_RAY_AXIS_VERTICAL_SCROLL;
+      axis = ZWN_RAY_AXIS_VERTICAL_SCROLL;
       break;
 
     case WLR_AXIS_ORIENTATION_HORIZONTAL:
-      axis = ZGN_RAY_AXIS_HORIZONTAL_SCROLL;
+      axis = ZWN_RAY_AXIS_HORIZONTAL_SCROLL;
       break;
   }
 
   switch (source) {
     case WLR_AXIS_SOURCE_WHEEL:
-      zgn_axis_source = ZGN_RAY_AXIS_SOURCE_WHEEL;
+      zwn_axis_source = ZWN_RAY_AXIS_SOURCE_WHEEL;
       break;
 
     case WLR_AXIS_SOURCE_FINGER:
-      zgn_axis_source = ZGN_RAY_AXIS_SOURCE_FINGER;
+      zwn_axis_source = ZWN_RAY_AXIS_SOURCE_FINGER;
       break;
 
     case WLR_AXIS_SOURCE_CONTINUOUS:
-      zgn_axis_source = ZGN_RAY_AXIS_SOURCE_CONTINUOUS;
+      zwn_axis_source = ZWN_RAY_AXIS_SOURCE_CONTINUOUS;
       break;
 
     case WLR_AXIS_SOURCE_WHEEL_TILT:
-      zgn_axis_source = ZGN_RAY_AXIS_SOURCE_WHEEL_TILT;
+      zwn_axis_source = ZWN_RAY_AXIS_SOURCE_WHEEL_TILT;
       break;
   }
 
-  zgnr_seat_ray_send_axis(server->input_manager->seat->zgnr_seat, time_msec,
-      axis, delta, delta_discrete, zgn_axis_source);
+  zwnr_seat_ray_send_axis(server->input_manager->seat->zwnr_seat, time_msec,
+      axis, delta, delta_discrete, zwn_axis_source);
 
   return true;
 }
@@ -175,7 +175,7 @@ zns_bounded_node_ray_frame(void *user_data)
   UNUSED(user_data);
   struct zn_server *server = zn_server_get_singleton();
 
-  zgnr_seat_ray_send_frame(server->input_manager->seat->zgnr_seat);
+  zwnr_seat_ray_send_frame(server->input_manager->seat->zwnr_seat);
 
   return true;
 }
@@ -208,27 +208,27 @@ zns_bounded_handle_move(struct wl_listener *listener, void *data)
 {
   struct zns_bounded *self = zn_container_of(listener, self, move_listener);
   struct zn_server *server = zn_server_get_singleton();
-  struct zgnr_seat *zgnr_seat = server->input_manager->seat->zgnr_seat;
+  struct zwnr_seat *zwnr_seat = server->input_manager->seat->zwnr_seat;
   struct zn_ray *ray = server->scene->ray;
-  struct zgnr_bounded_move_event *event = data;
+  struct zwnr_bounded_move_event *event = data;
 
   // TODO: Check that ray button is pressing
-  if (zgnr_seat->ray_state.focus_virtual_object !=
-          self->zgnr_bounded->virtual_object ||
-      zgnr_seat->ray_state.last_button_serial != event->serial)
+  if (zwnr_seat->ray_state.focus_virtual_object !=
+          self->zwnr_bounded->virtual_object ||
+      zwnr_seat->ray_state.last_button_serial != event->serial)
     return;
 
   zns_move_ray_grab_start(ray, self);
 }
 
 static void
-zns_bounded_handle_zgnr_bounded_destroy(
+zns_bounded_handle_zwnr_bounded_destroy(
     struct wl_listener *listener, void *data)
 {
   UNUSED(data);
 
   struct zns_bounded *self =
-      zn_container_of(listener, self, zgnr_bounded_destroy_listener);
+      zn_container_of(listener, self, zwnr_bounded_destroy_listener);
 
   zns_bounded_destroy(self);
 }
@@ -240,14 +240,14 @@ zns_bounded_handle_virtual_object_commit(
   UNUSED(data);
   struct zns_bounded *self = zn_container_of(listener, self, commit_listener);
 
-  if (self->zgnr_bounded->current.damage & ZGNR_BOUNDED_DAMAGE_TITLE) {
-    self->zgnr_bounded->current.damage &= (~ZGNR_BOUNDED_DAMAGE_TITLE);
+  if (self->zwnr_bounded->current.damage & ZWNR_BOUNDED_DAMAGE_TITLE) {
+    self->zwnr_bounded->current.damage &= (~ZWNR_BOUNDED_DAMAGE_TITLE);
     zna_bounded_commit(self->appearance, ZNA_BOUNDED_DAMAGE_NAMEPLATE_TEXTURE);
   }
 }
 
 struct zns_bounded *
-zns_bounded_create(struct zgnr_bounded *zgnr_bounded)
+zns_bounded_create(struct zwnr_bounded *zwnr_bounded)
 {
   struct zns_bounded *self;
   struct zn_server *server = zn_server_get_singleton();
@@ -264,7 +264,7 @@ zns_bounded_create(struct zgnr_bounded *zgnr_bounded)
     goto err_free;
   }
 
-  self->zgnr_bounded = zgnr_bounded;
+  self->zwnr_bounded = zwnr_bounded;
   wl_list_init(&self->link);
   wl_list_init(&self->seat_capsule_link);
 
@@ -280,20 +280,20 @@ zns_bounded_create(struct zgnr_bounded *zgnr_bounded)
     goto err_nameplate;
   }
 
-  self->zgnr_bounded_destroy_listener.notify =
-      zns_bounded_handle_zgnr_bounded_destroy;
+  self->zwnr_bounded_destroy_listener.notify =
+      zns_bounded_handle_zwnr_bounded_destroy;
   wl_signal_add(
-      &zgnr_bounded->events.destroy, &self->zgnr_bounded_destroy_listener);
+      &zwnr_bounded->events.destroy, &self->zwnr_bounded_destroy_listener);
 
   self->move_listener.notify = zns_bounded_handle_move;
-  wl_signal_add(&zgnr_bounded->events.move, &self->move_listener);
+  wl_signal_add(&zwnr_bounded->events.move, &self->move_listener);
 
   self->mapped_listener.notify = zns_bounded_handle_mapped;
-  wl_signal_add(&zgnr_bounded->events.mapped, &self->mapped_listener);
+  wl_signal_add(&zwnr_bounded->events.mapped, &self->mapped_listener);
 
   self->commit_listener.notify = zns_bounded_handle_virtual_object_commit;
   wl_signal_add(
-      &zgnr_bounded->virtual_object->events.committed, &self->commit_listener);
+      &zwnr_bounded->virtual_object->events.committed, &self->commit_listener);
 
   wl_signal_init(&self->events.destroy);
 
@@ -321,7 +321,7 @@ zns_bounded_destroy(struct zns_bounded *self)
   wl_list_remove(&self->seat_capsule_link);
   wl_list_remove(&self->move_listener.link);
   wl_list_remove(&self->mapped_listener.link);
-  wl_list_remove(&self->zgnr_bounded_destroy_listener.link);
+  wl_list_remove(&self->zwnr_bounded_destroy_listener.link);
   wl_list_remove(&self->commit_listener.link);
   wl_list_remove(&self->events.destroy.listener_list);
   zns_bounded_nameplate_destroy(self->nameplate);

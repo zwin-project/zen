@@ -1,6 +1,6 @@
 #pragma once
 
-#include <zgnr/gles-v32.h>
+#include <zwnr/gles-v32.h>
 
 #include "zen/appearance/system.h"
 #include "zen/renderer/dispatcher.h"
@@ -9,7 +9,7 @@ struct zna_shader_inventory;
 
 struct zna_system {
   struct wl_display *display;
-  struct zgnr_gles_v32 *gles;  // nonnull, owning
+  struct zwnr_gles_v32 *gles;  // nonnull, owning
 
   struct zna_shader_inventory *shader_inventory;  // nonnull, owning
   struct znr_session *current_session;            // nullable, owning

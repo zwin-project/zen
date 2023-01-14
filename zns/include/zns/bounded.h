@@ -1,6 +1,6 @@
 #pragma once
 
-#include <zgnr/bounded.h>
+#include <zwnr/bounded.h>
 
 #include "node.h"
 
@@ -12,7 +12,7 @@ struct zns_bounded {
     struct wl_signal destroy;  // (NULL)
   } events;
 
-  struct zgnr_bounded *zgnr_bounded;  // nonnull
+  struct zwnr_bounded *zwnr_bounded;  // nonnull
 
   struct zns_node *node;
 
@@ -26,10 +26,10 @@ struct zns_bounded {
 
   struct zna_bounded *appearance;
 
-  struct wl_listener zgnr_bounded_destroy_listener;
+  struct wl_listener zwnr_bounded_destroy_listener;
   struct wl_listener move_listener;
   struct wl_listener mapped_listener;
   struct wl_listener commit_listener;
 };
 
-struct zns_bounded *zns_bounded_create(struct zgnr_bounded *zgnr_bounded);
+struct zns_bounded *zns_bounded_create(struct zwnr_bounded *zwnr_bounded);

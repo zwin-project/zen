@@ -40,22 +40,22 @@ znr_gl_base_technique_bind_texture(struct znr_gl_base_technique *self,
 void
 znr_gl_base_technique_gl_uniform_vector(struct znr_gl_base_technique *self,
     uint32_t location, const char *name,
-    enum zgn_gl_base_technique_uniform_variable_type type, uint32_t size,
+    enum zwn_gl_base_technique_uniform_variable_type type, uint32_t size,
     uint32_t count, void *value)
 {
   std::string name_string = name ? name : "";
   switch (type) {
-    case ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_INT:
+    case ZWN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_INT:
       self->proxy->GlUniformVector(
           location, std::move(name_string), size, count, (int32_t *)value);
       break;
 
-    case ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_UINT:
+    case ZWN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_UINT:
       self->proxy->GlUniformVector(
           location, std::move(name_string), size, count, (uint32_t *)value);
       break;
 
-    case ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_FLOAT:
+    case ZWN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_FLOAT:
       self->proxy->GlUniformVector(
           location, std::move(name_string), size, count, (float *)value);
       break;

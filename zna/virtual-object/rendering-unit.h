@@ -1,12 +1,12 @@
 #pragma once
 
-#include <zgnr/rendering-unit.h>
+#include <zwnr/rendering-unit.h>
 
 #include "system.h"
 #include "zen/renderer/rendering-unit.h"
 
 struct zna_rendering_unit {
-  struct zgnr_rendering_unit *zgnr_rendering_unit;  // nonnull
+  struct zwnr_rendering_unit *zwnr_rendering_unit;  // nonnull
   struct zna_system *system;                        // nonnull
 
   /**
@@ -15,16 +15,16 @@ struct zna_rendering_unit {
    */
   struct znr_rendering_unit *znr_rendering_unit;
 
-  struct wl_listener zgnr_rendering_unit_destroy_listener;
+  struct wl_listener zwnr_rendering_unit_destroy_listener;
   struct wl_listener session_destroyed_listener;
 };
 
 /**
  * Precondition:
- *  Current session exists && the zgnr_rendering_unit has been committed
+ *  Current session exists && the zwnr_rendering_unit has been committed
  */
 void zna_rendering_unit_apply_commit(
     struct zna_rendering_unit *self, bool only_damaged);
 
 struct zna_rendering_unit *zna_rendering_unit_create(
-    struct zgnr_rendering_unit *zgnr_rendering_unit, struct zna_system *system);
+    struct zwnr_rendering_unit *zwnr_rendering_unit, struct zna_system *system);

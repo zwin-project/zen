@@ -4,7 +4,7 @@
 #include <wayland-server-core.h>
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_pointer.h>
-#include <zigen-protocol.h>
+#include <zwin-protocol.h>
 
 #define DEFAULT_RAY_LENGTH 1
 

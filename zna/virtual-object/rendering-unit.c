@@ -1,7 +1,7 @@
 #include "rendering-unit.h"
 
 #include <zen-common.h>
-#include <zgnr/virtual-object.h>
+#include <zwnr/virtual-object.h>
 
 #include "virtual-object.h"
 #include "virtual-object/gl-base-technique.h"
@@ -13,7 +13,7 @@ static struct zna_virtual_object *
 zna_rendering_unit_get_virtual_object(struct zna_rendering_unit *self)
 {
   struct zn_virtual_object *virtual_object =
-      self->zgnr_rendering_unit->virtual_object->user_data;
+      self->zwnr_rendering_unit->virtual_object->user_data;
   return virtual_object->appearance;
 }
 
@@ -43,27 +43,27 @@ zna_rendering_unit_apply_commit(
         self->system->dispatcher, virtual_object->znr_virtual_object);
   }
 
-  if (self->zgnr_rendering_unit->current.technique) {
+  if (self->zwnr_rendering_unit->current.technique) {
     struct zna_gl_base_technique *gl_base_technique =
-        self->zgnr_rendering_unit->current.technique->user_data;
+        self->zwnr_rendering_unit->current.technique->user_data;
     zna_gl_base_technique_apply_commit(gl_base_technique, only_damaged);
   }
 }
 
 static void
-zna_rendering_unit_handle_zgnr_rendering_unit_destroy(
+zna_rendering_unit_handle_zwnr_rendering_unit_destroy(
     struct wl_listener *listener, void *data)
 {
   UNUSED(data);
   struct zna_rendering_unit *self =
-      zn_container_of(listener, self, zgnr_rendering_unit_destroy_listener);
+      zn_container_of(listener, self, zwnr_rendering_unit_destroy_listener);
 
   zna_rendering_unit_destroy(self);
 }
 
 struct zna_rendering_unit *
 zna_rendering_unit_create(
-    struct zgnr_rendering_unit *zgnr_rendering_unit, struct zna_system *system)
+    struct zwnr_rendering_unit *zwnr_rendering_unit, struct zna_system *system)
 {
   struct zna_rendering_unit *self;
 
@@ -73,15 +73,15 @@ zna_rendering_unit_create(
     goto err;
   }
 
-  self->zgnr_rendering_unit = zgnr_rendering_unit;
-  zgnr_rendering_unit->user_data = self;
+  self->zwnr_rendering_unit = zwnr_rendering_unit;
+  zwnr_rendering_unit->user_data = self;
   self->system = system;
   self->znr_rendering_unit = NULL;
 
-  self->zgnr_rendering_unit_destroy_listener.notify =
-      zna_rendering_unit_handle_zgnr_rendering_unit_destroy;
-  wl_signal_add(&self->zgnr_rendering_unit->events.destroy,
-      &self->zgnr_rendering_unit_destroy_listener);
+  self->zwnr_rendering_unit_destroy_listener.notify =
+      zna_rendering_unit_handle_zwnr_rendering_unit_destroy;
+  wl_signal_add(&self->zwnr_rendering_unit->events.destroy,
+      &self->zwnr_rendering_unit_destroy_listener);
 
   self->session_destroyed_listener.notify =
       zna_rendering_unit_handle_session_destroyed;
@@ -100,6 +100,6 @@ zna_rendering_unit_destroy(struct zna_rendering_unit *self)
   if (self->znr_rendering_unit)
     znr_rendering_unit_destroy(self->znr_rendering_unit);
   wl_list_remove(&self->session_destroyed_listener.link);
-  wl_list_remove(&self->zgnr_rendering_unit_destroy_listener.link);
+  wl_list_remove(&self->zwnr_rendering_unit_destroy_listener.link);
   free(self);
 }

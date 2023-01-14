@@ -1,7 +1,7 @@
 #include "gl-program.h"
 
 #include <zen-common.h>
-#include <zgnr/program-shader.h>
+#include <zwnr/program-shader.h>
 
 #include "gl-shader.h"
 
@@ -21,11 +21,11 @@ zna_gl_program_handle_session_destroy(struct wl_listener *listener, void *data)
 }
 
 static void
-zna_gl_program_handle_zgnr_gl_program_destroy(
+zna_gl_program_handle_zwnr_gl_program_destroy(
     struct wl_listener *listener, void *data)
 {
   struct zna_gl_program *self =
-      zn_container_of(listener, self, zgnr_gl_program_destroy_listener);
+      zn_container_of(listener, self, zwnr_gl_program_destroy_listener);
   UNUSED(data);
 
   zna_gl_program_destroy(self);
@@ -34,32 +34,32 @@ zna_gl_program_handle_zgnr_gl_program_destroy(
 void
 zna_gl_program_apply_commit(struct zna_gl_program *self, bool only_damaged)
 {
-  struct zgnr_program_shader *program_shader;
+  struct zwnr_program_shader *program_shader;
 
   if (self->znr_gl_program == NULL) {
     self->znr_gl_program = znr_gl_program_create(self->system->dispatcher);
   }
 
   wl_list_for_each (program_shader,
-      &self->zgnr_gl_program->current.program_shader_list, link) {
+      &self->zwnr_gl_program->current.program_shader_list, link) {
     struct zna_gl_shader *shader = program_shader->shader->user_data;
     zna_gl_shader_apply_commit(shader, only_damaged);
   }
 
-  if (self->zgnr_gl_program->current.should_link || !only_damaged) {
+  if (self->zwnr_gl_program->current.should_link || !only_damaged) {
     wl_list_for_each (program_shader,
-        &self->zgnr_gl_program->current.program_shader_list, link) {
+        &self->zwnr_gl_program->current.program_shader_list, link) {
       struct zna_gl_shader *shader = program_shader->shader->user_data;
       znr_gl_program_attach_shader(self->znr_gl_program, shader->znr_gl_shader);
     }
     znr_gl_program_link(self->znr_gl_program);
-    self->zgnr_gl_program->current.should_link = false;
+    self->zwnr_gl_program->current.should_link = false;
   }
 }
 
 struct zna_gl_program *
 zna_gl_program_create(
-    struct zgnr_gl_program *zgnr_gl_program, struct zna_system *system)
+    struct zwnr_gl_program *zwnr_gl_program, struct zna_system *system)
 {
   struct zna_gl_program *self;
 
@@ -69,15 +69,15 @@ zna_gl_program_create(
     goto err;
   }
 
-  self->zgnr_gl_program = zgnr_gl_program;
-  zgnr_gl_program->user_data = self;
+  self->zwnr_gl_program = zwnr_gl_program;
+  zwnr_gl_program->user_data = self;
   self->system = system;
   self->znr_gl_program = NULL;
 
-  self->zgnr_gl_program_destroy_listener.notify =
-      zna_gl_program_handle_zgnr_gl_program_destroy;
-  wl_signal_add(&self->zgnr_gl_program->events.destroy,
-      &self->zgnr_gl_program_destroy_listener);
+  self->zwnr_gl_program_destroy_listener.notify =
+      zna_gl_program_handle_zwnr_gl_program_destroy;
+  wl_signal_add(&self->zwnr_gl_program->events.destroy,
+      &self->zwnr_gl_program_destroy_listener);
 
   self->session_destroy_listener.notify = zna_gl_program_handle_session_destroy;
   wl_signal_add(&self->system->events.current_session_destroyed,
@@ -93,7 +93,7 @@ static void
 zna_gl_program_destroy(struct zna_gl_program *self)
 {
   if (self->znr_gl_program) znr_gl_program_destroy(self->znr_gl_program);
-  wl_list_remove(&self->zgnr_gl_program_destroy_listener.link);
+  wl_list_remove(&self->zwnr_gl_program_destroy_listener.link);
   wl_list_remove(&self->session_destroy_listener.link);
   free(self);
 }

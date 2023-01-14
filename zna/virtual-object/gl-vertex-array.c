@@ -21,11 +21,11 @@ zna_gl_vertex_array_handle_session_destroy(
 }
 
 static void
-zna_gl_vertex_array_handle_zgnr_gl_vertex_array_destroy(
+zna_gl_vertex_array_handle_zwnr_gl_vertex_array_destroy(
     struct wl_listener *listener, void *data)
 {
   struct zna_gl_vertex_array *self =
-      zn_container_of(listener, self, zgnr_gl_vertex_array_destroy_listener);
+      zn_container_of(listener, self, zwnr_gl_vertex_array_destroy_listener);
   UNUSED(data);
 
   zna_gl_vertex_array_destroy(self);
@@ -35,7 +35,7 @@ void
 zna_gl_vertex_array_apply_commit(
     struct zna_gl_vertex_array *self, bool only_damage)
 {
-  struct zgnr_gl_vertex_attrib *vertex_attrib;
+  struct zwnr_gl_vertex_attrib *vertex_attrib;
 
   if (self->znr_gl_vertex_array == NULL) {
     self->znr_gl_vertex_array =
@@ -43,12 +43,12 @@ zna_gl_vertex_array_apply_commit(
   }
 
   wl_list_for_each (vertex_attrib,
-      &self->zgnr_gl_vertex_array->current.vertex_attrib_list, link) {
-    struct zgnr_gl_buffer *zgnr_gl_buffer =
-        zgnr_gl_vertex_attrib_get_gl_buffer(vertex_attrib);
-    if (zgnr_gl_buffer == NULL) continue;
+      &self->zwnr_gl_vertex_array->current.vertex_attrib_list, link) {
+    struct zwnr_gl_buffer *zwnr_gl_buffer =
+        zwnr_gl_vertex_attrib_get_gl_buffer(vertex_attrib);
+    if (zwnr_gl_buffer == NULL) continue;
 
-    struct zna_gl_buffer *gl_buffer = zgnr_gl_buffer->user_data;
+    struct zna_gl_buffer *gl_buffer = zwnr_gl_buffer->user_data;
     zna_gl_buffer_apply_commit(gl_buffer, only_damage);
 
     if (vertex_attrib->enable_changed || !only_damage) {
@@ -71,7 +71,7 @@ zna_gl_vertex_array_apply_commit(
 }
 
 struct zna_gl_vertex_array *
-zna_gl_vertex_array_create(struct zgnr_gl_vertex_array *zgnr_gl_vertex_array,
+zna_gl_vertex_array_create(struct zwnr_gl_vertex_array *zwnr_gl_vertex_array,
     struct zna_system *system)
 {
   struct zna_gl_vertex_array *self;
@@ -82,15 +82,15 @@ zna_gl_vertex_array_create(struct zgnr_gl_vertex_array *zgnr_gl_vertex_array,
     goto err;
   }
 
-  self->zgnr_gl_vertex_array = zgnr_gl_vertex_array;
-  zgnr_gl_vertex_array->user_data = self;
+  self->zwnr_gl_vertex_array = zwnr_gl_vertex_array;
+  zwnr_gl_vertex_array->user_data = self;
   self->system = system;
   self->znr_gl_vertex_array = NULL;
 
-  self->zgnr_gl_vertex_array_destroy_listener.notify =
-      zna_gl_vertex_array_handle_zgnr_gl_vertex_array_destroy;
-  wl_signal_add(&self->zgnr_gl_vertex_array->events.destroy,
-      &self->zgnr_gl_vertex_array_destroy_listener);
+  self->zwnr_gl_vertex_array_destroy_listener.notify =
+      zna_gl_vertex_array_handle_zwnr_gl_vertex_array_destroy;
+  wl_signal_add(&self->zwnr_gl_vertex_array->events.destroy,
+      &self->zwnr_gl_vertex_array_destroy_listener);
 
   self->session_destroy_listener.notify =
       zna_gl_vertex_array_handle_session_destroy;
@@ -109,6 +109,6 @@ zna_gl_vertex_array_destroy(struct zna_gl_vertex_array *self)
   if (self->znr_gl_vertex_array)
     znr_gl_vertex_array_destroy(self->znr_gl_vertex_array);
   wl_list_remove(&self->session_destroy_listener.link);
-  wl_list_remove(&self->zgnr_gl_vertex_array_destroy_listener.link);
+  wl_list_remove(&self->zwnr_gl_vertex_array_destroy_listener.link);
   free(self);
 }

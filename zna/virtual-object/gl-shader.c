@@ -1,7 +1,7 @@
 #include "gl-shader.h"
 
 #include <zen-common.h>
-#include <zgnr/shm.h>
+#include <zwnr/shm.h>
 
 static void zna_gl_shader_destroy(struct zna_gl_shader *self);
 
@@ -20,13 +20,13 @@ zna_gl_shader_handle_session_destroyed(struct wl_listener *listener, void *data)
 }
 
 static void
-zna_gl_shader_handle_zgnr_gl_shader_destroy(
+zna_gl_shader_handle_zwnr_gl_shader_destroy(
     struct wl_listener *listener, void *data)
 {
   UNUSED(data);
 
   struct zna_gl_shader *self =
-      zn_container_of(listener, self, zgnr_gl_shader_destroy_listener);
+      zn_container_of(listener, self, zwnr_gl_shader_destroy_listener);
 
   zna_gl_shader_destroy(self);
 }
@@ -37,19 +37,19 @@ zna_gl_shader_apply_commit(struct zna_gl_shader *self, bool only_damaged)
   UNUSED(only_damaged);
 
   if (self->znr_gl_shader == NULL) {
-    char *source = zgnr_shm_buffer_get_data(self->zgnr_gl_shader->buffer);
-    ssize_t length = zgnr_shm_buffer_get_size(self->zgnr_gl_shader->buffer);
+    char *source = zwnr_shm_buffer_get_data(self->zwnr_gl_shader->buffer);
+    ssize_t length = zwnr_shm_buffer_get_size(self->zwnr_gl_shader->buffer);
 
-    zgnr_shm_buffer_begin_access(self->zgnr_gl_shader->buffer);
+    zwnr_shm_buffer_begin_access(self->zwnr_gl_shader->buffer);
     self->znr_gl_shader = znr_gl_shader_create(
-        self->system->dispatcher, source, length, self->zgnr_gl_shader->type);
-    zgnr_shm_buffer_end_access(self->zgnr_gl_shader->buffer);
+        self->system->dispatcher, source, length, self->zwnr_gl_shader->type);
+    zwnr_shm_buffer_end_access(self->zwnr_gl_shader->buffer);
   }
 }
 
 struct zna_gl_shader *
 zna_gl_shader_create(
-    struct zgnr_gl_shader *zgnr_gl_shader, struct zna_system *system)
+    struct zwnr_gl_shader *zwnr_gl_shader, struct zna_system *system)
 {
   struct zna_gl_shader *self;
 
@@ -59,15 +59,15 @@ zna_gl_shader_create(
     goto err;
   }
 
-  self->zgnr_gl_shader = zgnr_gl_shader;
-  zgnr_gl_shader->user_data = self;
+  self->zwnr_gl_shader = zwnr_gl_shader;
+  zwnr_gl_shader->user_data = self;
   self->system = system;
   self->znr_gl_shader = NULL;
 
-  self->zgnr_gl_shader_destroy_listener.notify =
-      zna_gl_shader_handle_zgnr_gl_shader_destroy;
-  wl_signal_add(&self->zgnr_gl_shader->events.destroy,
-      &self->zgnr_gl_shader_destroy_listener);
+  self->zwnr_gl_shader_destroy_listener.notify =
+      zna_gl_shader_handle_zwnr_gl_shader_destroy;
+  wl_signal_add(&self->zwnr_gl_shader->events.destroy,
+      &self->zwnr_gl_shader_destroy_listener);
 
   self->session_destroyed_listener.notify =
       zna_gl_shader_handle_session_destroyed;
@@ -84,7 +84,7 @@ static void
 zna_gl_shader_destroy(struct zna_gl_shader *self)
 {
   if (self->znr_gl_shader) znr_gl_shader_destroy(self->znr_gl_shader);
-  wl_list_remove(&self->zgnr_gl_shader_destroy_listener.link);
+  wl_list_remove(&self->zwnr_gl_shader_destroy_listener.link);
   wl_list_remove(&self->session_destroyed_listener.link);
   free(self);
 }

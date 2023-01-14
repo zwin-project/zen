@@ -2,7 +2,7 @@
 
 #include <wayland-server.h>
 #include <wlr/types/wlr_seat.h>
-#include <zgnr/seat.h>
+#include <zwnr/seat.h>
 
 #define ZEN_DEFAULT_SEAT "seat0"
 
@@ -10,7 +10,7 @@ struct zn_input_device;
 
 struct zn_seat {
   struct wlr_seat *wlr_seat;
-  struct zgnr_seat *zgnr_seat;
+  struct zwnr_seat *zwnr_seat;
   struct wl_list devices;  // zn_input_device::link
 
   struct wl_listener request_set_cursor_listener;

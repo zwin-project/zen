@@ -1,6 +1,6 @@
 #pragma once
 
-#include <zigen-gles-v32-protocol.h>
+#include <zwin-gles-v32-protocol.h>
 
 #include "zen/renderer/dispatcher.h"
 #include "zen/renderer/gl-program.h"
@@ -31,7 +31,7 @@ void znr_gl_base_technique_bind_texture(struct znr_gl_base_technique *self,
  */
 void znr_gl_base_technique_gl_uniform_vector(struct znr_gl_base_technique *self,
     uint32_t location, const char *name,
-    enum zgn_gl_base_technique_uniform_variable_type type, uint32_t size,
+    enum zwn_gl_base_technique_uniform_variable_type type, uint32_t size,
     uint32_t count, void *value);
 
 /**

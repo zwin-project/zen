@@ -1,6 +1,6 @@
 #pragma once
 
-#include <zgnr/mem-storage.h>
+#include <zwnr/mem-storage.h>
 
 #include "zen/renderer/dispatcher.h"
 
@@ -11,7 +11,7 @@ extern "C" {
 struct znr_gl_buffer;
 
 void znr_gl_buffer_data(struct znr_gl_buffer *self, uint32_t target,
-    struct zgnr_mem_storage *storage, uint32_t usage);
+    struct zwnr_mem_storage *storage, uint32_t usage);
 
 struct znr_gl_buffer *znr_gl_buffer_create(
     struct znr_dispatcher *dispatcher, struct wl_display *display);
