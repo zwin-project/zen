@@ -17,4 +17,4 @@ jobs:
         uses: actions/checkout@v2
 
       - name: ClangFormat Check
-        run: find . -regex ".*\.\(c\|h\|cc\)" | xargs clang-format --dry-run -Werror
+        run: find . -regex ".*\.\(c\|h\|cc\)" | grep -v "3rd-party" | grep -v "subprojects" | xargs clang-format --dry-run -Werror
