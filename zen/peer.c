@@ -42,6 +42,8 @@ zn_peer_set_session(struct zn_peer *self, struct znr_session *session)
   self->session = session;
   wl_signal_add(
       &session->events.disconnected, &self->znr_session_disconnected_listener);
+
+  wl_signal_emit(&self->events.new_session, NULL);
 }
 
 struct zn_peer *
@@ -74,6 +76,7 @@ zn_peer_create(struct znr_remote_peer *znr_remote_peer)
   self->znr_remote_peer = znr_remote_peer;
 
   wl_list_init(&self->link);
+  wl_signal_init(&self->events.new_session);
 
   return self;
 
@@ -90,6 +93,7 @@ zn_peer_destroy(struct zn_peer *self)
   struct zn_server *server = zn_server_get_singleton();
 
   free(self->host);
+  wl_list_remove(&self->events.new_session.listener_list);
   wl_list_remove(&self->znr_session_disconnected_listener.link);
   wl_list_remove(&self->link);
   wl_list_remove(&self->znr_remote_peer_destroy_listener.link);
