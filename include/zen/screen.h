@@ -63,6 +63,9 @@ void zn_screen_get_screen_layout_coords(
 void zn_screen_get_effective_size(
     struct zn_screen *self, double *width, double *height);
 
+/**
+ * @param board is nonnull
+ */
 void zn_screen_set_current_board(
     struct zn_screen *self, struct zn_board *board);
 
