@@ -53,6 +53,8 @@ _zen_srcs = [
   'ui/nodes/vr-menu/headset.c',
   'ui/nodes/vr-menu/vr-menu.c',
   'ui/nodes/vr-modal/headset-dialog.c',
+  'ui/nodes/vr-modal/keybind-description.c',
+  'ui/nodes/vr-modal/textbox.c',
   'ui/nodes/vr-modal/vr-modal.c',
 ]
 

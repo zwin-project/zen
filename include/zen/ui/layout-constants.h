@@ -43,3 +43,6 @@ static const double vr_how_to_connect_height = 40;
 static const double vr_headsets_heading_height = 35;
 static const double no_headsets_text_height = 30;
 static const double vr_menu_bubble_padding_height = 10;
+
+static const double vr_modal_keybind_description_width = 280.;
+static const double vr_modal_keybind_description_height = 24.;
