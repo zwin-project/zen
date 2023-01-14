@@ -35,10 +35,10 @@ _zen_srcs = [
 
   'ui/zigzag-layout.c',
   'ui/nodes/app-launcher.c',
-  'ui/nodes/menu-bar.c',
-  'ui/nodes/power-button.c',
   'ui/nodes/board-selector/switch-button.c',
   'ui/nodes/board-selector/board-selector.c',
+  'ui/nodes/menu-bar.c',
+  'ui/nodes/power-button.c',
   'ui/nodes/power-menu/clock.c',
   'ui/nodes/power-menu/logout.c',
   'ui/nodes/power-menu/power-menu.c',
