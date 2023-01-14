@@ -19,8 +19,6 @@ zn_config_set_default(struct zn_config *self)
   self->space_default_app = strdup(SPACE_DEFAULT_APP_DEFAULT);
   self->wallpaper_filepath = strdup(DEFAULT_WALLPAPER);
   self->board_initial_count = BOARD_INITIAL_COUNT_DEFAULT;
-  self->num_favorite_apps = 0;
-  self->favorite_apps = NULL;
 }
 
 struct zn_config *
@@ -71,59 +69,58 @@ zn_config_create(struct toml_table_t *config_table)
     }
   }
 
-  toml_array_t *favorite_apps = toml_array_in(config_table, "favorite-apps");
-  if (favorite_apps != NULL) {
-    self->num_favorite_apps = toml_array_nelem(favorite_apps);
-    self->favorite_apps =
-        zalloc((sizeof *self->favorite_apps) * self->num_favorite_apps);
-    for (int i = 0; i < self->num_favorite_apps; i++) {
-      toml_table_t *favorite_app = toml_table_at(favorite_apps, i);
+  wl_array_init(&self->favorite_apps);
+  toml_array_t *favorite_app_entries =
+      toml_array_in(config_table, "favorite_apps");
+  if (favorite_app_entries != NULL) {
+    int entry_count = toml_array_nelem(favorite_app_entries);
+    for (int i = 0; i < entry_count; i++) {
+      toml_table_t *favorite_app_entry = toml_table_at(favorite_app_entries, i);
 
-      toml_datum_t name = toml_string_in(favorite_app, "name");
+      toml_datum_t exec = toml_string_in(favorite_app_entry, "exec");
+      if (!exec.ok) {
+        zn_warn(
+            "Required config key not specified: 'favorite_apps:exec'. "
+            "Skipping");
+        continue;
+      }
+
+      struct zn_favorite_app *favorite_app =
+          wl_array_add(&self->favorite_apps, sizeof(*favorite_app));
+
+      favorite_app->exec = exec.u.s;
+
+      toml_datum_t name = toml_string_in(favorite_app_entry, "name");
       if (name.ok) {
-        self->favorite_apps[i].name = name.u.s;
-      }
-
-      toml_datum_t exec = toml_string_in(favorite_app, "exec");
-      if (exec.ok && strlen(exec.u.s) != 0) {
-        self->favorite_apps[i].exec = exec.u.s;
+        favorite_app->name = name.u.s;
       } else {
-        zn_error(
-            "Required config key not specified: "
-            "favorite-apps:exec");
-        goto err_favorite_apps;
+        favorite_app->name = strdup("");
       }
 
-      toml_datum_t icon = toml_string_in(favorite_app, "icon");
-      if (icon.ok && strlen(icon.u.s) != 0) {
-        self->favorite_apps[i].icon = icon.u.s;
+      toml_datum_t icon = toml_string_in(favorite_app_entry, "icon");
+      if (icon.ok) {
+        favorite_app->icon = icon.u.s;
       } else {
-        zn_error(
-            "Required config key not specified: "
-            "favorite-apps:icon");
-        goto err_favorite_apps;
+        favorite_app->icon = strdup(UNKNOWN_APP_ICON);
       }
 
-      toml_datum_t disable_2d = toml_bool_in(favorite_app, "disable_2d");
+      toml_datum_t disable_2d = toml_bool_in(favorite_app_entry, "disable_2d");
       if (disable_2d.ok) {
-        self->favorite_apps[i].disable_2d = disable_2d.u.b;
+        favorite_app->disable_2d = disable_2d.u.b;
       } else {
-        self->favorite_apps[i].disable_2d = false;
+        favorite_app->disable_2d = false;
       }
 
-      toml_datum_t disable_3d = toml_bool_in(favorite_app, "disable_3d");
+      toml_datum_t disable_3d = toml_bool_in(favorite_app_entry, "disable_3d");
       if (disable_3d.ok) {
-        self->favorite_apps[i].disable_3d = disable_3d.u.b;
+        favorite_app->disable_3d = disable_3d.u.b;
       } else {
-        self->favorite_apps[i].disable_3d = false;
+        favorite_app->disable_3d = false;
       }
     }
-  };
+  }
 
   return self;
-
-err_favorite_apps:
-  free(self->favorite_apps);
 
 err:
   return NULL;
@@ -132,7 +129,15 @@ err:
 void
 zn_config_destroy(struct zn_config *self)
 {
-  if (self->favorite_apps != NULL) free(self->favorite_apps);
+  struct zn_favorite_app *favorite_app;
+  wl_array_for_each (favorite_app, &self->favorite_apps) {
+    free(favorite_app->exec);
+    free(favorite_app->name);
+    free(favorite_app->icon);
+  }
+
+  wl_array_release(&self->favorite_apps);
+
   free(self->space_default_app);
   free(self->wallpaper_filepath);
   free(self);

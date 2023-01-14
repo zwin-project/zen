@@ -1,3 +1,5 @@
+#pragma once
+
 struct zn_favorite_app {
   char *name;  // optional
   char *exec;  // required

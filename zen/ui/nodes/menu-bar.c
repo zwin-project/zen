@@ -53,6 +53,7 @@ zn_menu_bar_create(struct zigzag_layout *zigzag_layout,
     struct wlr_renderer *renderer, struct zn_screen *screen)
 {
   struct zn_menu_bar *self;
+  struct zn_server *server = zn_server_get_singleton();
 
   self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -103,34 +104,29 @@ zn_menu_bar_create(struct zigzag_layout *zigzag_layout,
 
   zigzag_node_add_child(self->zigzag_node, vr_button->zigzag_node, renderer);
 
-  struct zn_server *server = zn_server_get_singleton();
-
-  struct zn_app_launcher *launcher, *launcher_tmp;
   wl_list_init(&self->launcher_list);
-  for (int i = 0; i < server->config->num_favorite_apps; i++) {
-    if (server->config->favorite_apps[i].disable_2d) {
+
+  struct zn_favorite_app *favorite_app;
+  int32_t index = 0;
+  wl_array_for_each (favorite_app, &server->config->favorite_apps) {
+    if (favorite_app->disable_2d) {
       continue;
     }
-    launcher = zn_app_launcher_create(
-        zigzag_layout, &server->config->favorite_apps[i], i);
+
+    struct zn_app_launcher *launcher =
+        zn_app_launcher_create(zigzag_layout, favorite_app, index);
     if (launcher == NULL) {
-      zn_error("Failed to create the launcher %d", i);
-      goto err_launcher_list;
+      zn_warn("Failed to create the launcher: %s", favorite_app->name);
+      continue;
     }
+
     wl_list_insert(&self->launcher_list, &launcher->link);
     zigzag_node_add_child(self->zigzag_node, launcher->zigzag_node, renderer);
+
+    index++;
   }
 
   return self;
-
-err_launcher_list:
-  wl_list_for_each_reverse_safe (
-      launcher, launcher_tmp, &self->launcher_list, link) {
-    zn_app_launcher_destroy(launcher);
-  }
-  wl_list_remove(&self->launcher_list);
-
-  zn_vr_button_destroy(vr_button);
 
 err_board_selector:
   zn_board_selector_destroy(board_selector);
