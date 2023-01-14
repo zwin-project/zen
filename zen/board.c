@@ -123,6 +123,7 @@ zn_board_handle_screen_destroy(struct wl_listener *listener, void *data)
   }
 
   zn_board_set_screen(self, screen);
+  wl_signal_emit(&server->scene->events.board_mapped_to_screen, self);
 }
 
 void
