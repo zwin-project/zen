@@ -4,7 +4,7 @@
 #include <wlr/backend.h>
 #include <wlr/render/allocator.h>
 #include <wlr/render/wlr_renderer.h>
-#include <zgnr/backend.h>
+#include <zwnr/backend.h>
 
 #include "zen/appearance/system.h"
 #include "zen/config/config.h"
@@ -24,7 +24,7 @@ struct zn_server {
   struct wl_display *display;
   struct wl_event_loop *loop;
   struct wlr_backend *wlr_backend;
-  struct zgnr_backend *zgnr_backend;
+  struct zwnr_backend *zwnr_backend;
   struct wlr_renderer *renderer;
   struct wlr_allocator *allocator;
 

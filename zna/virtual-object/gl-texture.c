@@ -18,12 +18,12 @@ zna_gl_texture_handle_session_destroy(struct wl_listener *listener, void *data)
 }
 
 static void
-zna_gl_texture_handle_zgnr_gl_texture_destroy(
+zna_gl_texture_handle_zwnr_gl_texture_destroy(
     struct wl_listener *listener, void *data)
 {
   UNUSED(data);
   struct zna_gl_texture *self =
-      zn_container_of(listener, self, zgnr_gl_texture_destroy_listener);
+      zn_container_of(listener, self, zwnr_gl_texture_destroy_listener);
 
   zna_gl_texture_destroy(self);
 }
@@ -36,31 +36,31 @@ zna_gl_texture_apply_commit(struct zna_gl_texture *self, bool only_damaged)
         znr_gl_texture_create(self->system->dispatcher, self->system->display);
   }
 
-  if (self->zgnr_gl_texture->current.data_damaged || !only_damaged) {
+  if (self->zwnr_gl_texture->current.data_damaged || !only_damaged) {
     znr_gl_texture_image_2d(self->znr_gl_texture,
-        self->zgnr_gl_texture->current.target,
-        self->zgnr_gl_texture->current.level,
-        self->zgnr_gl_texture->current.internal_format,
-        self->zgnr_gl_texture->current.width,
-        self->zgnr_gl_texture->current.height,
-        self->zgnr_gl_texture->current.border,
-        self->zgnr_gl_texture->current.format,
-        self->zgnr_gl_texture->current.type,
-        self->zgnr_gl_texture->current.data);
-    self->zgnr_gl_texture->current.data_damaged = false;
+        self->zwnr_gl_texture->current.target,
+        self->zwnr_gl_texture->current.level,
+        self->zwnr_gl_texture->current.internal_format,
+        self->zwnr_gl_texture->current.width,
+        self->zwnr_gl_texture->current.height,
+        self->zwnr_gl_texture->current.border,
+        self->zwnr_gl_texture->current.format,
+        self->zwnr_gl_texture->current.type,
+        self->zwnr_gl_texture->current.data);
+    self->zwnr_gl_texture->current.data_damaged = false;
   }
 
-  if (self->zgnr_gl_texture->current.generate_mipmap_target_damaged ||
+  if (self->zwnr_gl_texture->current.generate_mipmap_target_damaged ||
       !only_damaged) {
     znr_gl_texture_generate_mipmap(self->znr_gl_texture,
-        self->zgnr_gl_texture->current.generate_mipmap_target);
-    self->zgnr_gl_texture->current.generate_mipmap_target_damaged = false;
+        self->zwnr_gl_texture->current.generate_mipmap_target);
+    self->zwnr_gl_texture->current.generate_mipmap_target_damaged = false;
   }
 }
 
 struct zna_gl_texture *
 zna_gl_texture_create(
-    struct zgnr_gl_texture *zgnr_gl_texture, struct zna_system *system)
+    struct zwnr_gl_texture *zwnr_gl_texture, struct zna_system *system)
 {
   struct zna_gl_texture *self;
 
@@ -70,15 +70,15 @@ zna_gl_texture_create(
     goto err;
   }
 
-  self->zgnr_gl_texture = zgnr_gl_texture;
-  zgnr_gl_texture->user_data = self;
+  self->zwnr_gl_texture = zwnr_gl_texture;
+  zwnr_gl_texture->user_data = self;
   self->system = system;
   self->znr_gl_texture = NULL;
 
-  self->zgnr_gl_texture_destroy_listener.notify =
-      zna_gl_texture_handle_zgnr_gl_texture_destroy;
-  wl_signal_add(&self->zgnr_gl_texture->events.destroy,
-      &self->zgnr_gl_texture_destroy_listener);
+  self->zwnr_gl_texture_destroy_listener.notify =
+      zna_gl_texture_handle_zwnr_gl_texture_destroy;
+  wl_signal_add(&self->zwnr_gl_texture->events.destroy,
+      &self->zwnr_gl_texture_destroy_listener);
 
   self->session_destroyed_listener.notify =
       zna_gl_texture_handle_session_destroy;
@@ -95,7 +95,7 @@ static void
 zna_gl_texture_destroy(struct zna_gl_texture *self)
 {
   if (self->znr_gl_texture) znr_gl_texture_destroy(self->znr_gl_texture);
-  wl_list_remove(&self->zgnr_gl_texture_destroy_listener.link);
+  wl_list_remove(&self->zwnr_gl_texture_destroy_listener.link);
   wl_list_remove(&self->session_destroyed_listener.link);
   free(self);
 }

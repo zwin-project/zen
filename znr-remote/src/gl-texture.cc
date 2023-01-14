@@ -9,14 +9,14 @@ void
 znr_gl_texture_image_2d(struct znr_gl_texture *self, uint32_t target,
     int32_t level, int32_t internal_format, uint32_t width, uint32_t height,
     int32_t border, uint32_t format, uint32_t type,
-    struct zgnr_mem_storage *storage)
+    struct zwnr_mem_storage *storage)
 {
   auto loop = std::make_unique<Loop>(wl_display_get_event_loop(self->display));
 
-  zgnr_mem_storage_ref(storage);
+  zwnr_mem_storage_ref(storage);
 
   auto buffer = zen::remote::server::CreateBuffer(
-      storage->data, [storage] { zgnr_mem_storage_unref(storage); },
+      storage->data, [storage] { zwnr_mem_storage_unref(storage); },
       std::move(loop));
 
   self->proxy->GlTexImage2D(target, level, internal_format, width, height,

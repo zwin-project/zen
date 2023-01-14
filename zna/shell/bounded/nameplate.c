@@ -50,7 +50,7 @@ zna_bounded_nameplate_unit_update_texture(
   cairo_set_font_face(cr, zn_font_face_get_cairo_font_face(ZN_FONT_REGULAR));
   cairo_set_source_rgba(cr, 1., 1., 1., 1.);
   cairo_set_font_size(cr, height / 2);
-  zn_cairo_draw_text(cr, bounded->zgnr_bounded->current.title, 40, height / 2,
+  zn_cairo_draw_text(cr, bounded->zwnr_bounded->current.title, 40, height / 2,
       ZN_CAIRO_ANCHOR_LEFT, ZN_CAIRO_ANCHOR_CENTER);
 
   zna_base_unit_read_cairo_surface(self->base_unit, surface);
@@ -127,8 +127,8 @@ zna_bounded_nameplate_unit_create(struct zna_system *system)
       {{-0.5f, -1.f, 0.f}, {0.f, 1.f}},
   };
 
-  struct zgnr_mem_storage *vertex_buffer =
-      zgnr_mem_storage_create(vertices, sizeof(vertices));
+  struct zwnr_mem_storage *vertex_buffer =
+      zwnr_mem_storage_create(vertices, sizeof(vertices));
 
   struct wl_array vertex_attributes;
   wl_array_init(&vertex_attributes);
@@ -151,7 +151,7 @@ zna_bounded_nameplate_unit_create(struct zna_system *system)
   vertex_attribute->stride = sizeof(struct zna_bounded_nameplate_vertex);
   vertex_attribute->offset = offsetof(struct zna_bounded_nameplate_vertex, uv);
 
-  union zgnr_gl_base_technique_draw_args draw_args;
+  union zwnr_gl_base_technique_draw_args draw_args;
   draw_args.arrays.mode = GL_TRIANGLE_FAN;
   draw_args.arrays.first = 0;
   draw_args.arrays.count = 4;
@@ -159,11 +159,11 @@ zna_bounded_nameplate_unit_create(struct zna_system *system)
   self->base_unit = zna_base_unit_create(system,
       ZNA_SHADER_BOUNDED_NAMEPLATE_VERTEX,
       ZNA_SHADER_BOUNDED_NAMEPLATE_FRAGMENT, vertex_buffer, &vertex_attributes,
-      NULL, ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ARRAYS, draw_args);
+      NULL, ZWNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ARRAYS, draw_args);
 
   wl_array_release(&vertex_attributes);
 
-  zgnr_mem_storage_unref(vertex_buffer);
+  zwnr_mem_storage_unref(vertex_buffer);
 
   return self;
 

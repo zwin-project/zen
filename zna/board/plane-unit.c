@@ -25,7 +25,7 @@ zna_board_plane_unit_commit(struct zna_board_plane_unit *self,
   effective_resolution[1] = height;
 
   znr_gl_base_technique_gl_uniform_vector(self->base_unit->technique, 0,
-      "effective_resolution", ZGN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_FLOAT,
+      "effective_resolution", ZWN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_FLOAT,
       2, 1, effective_resolution);
   znr_gl_base_technique_gl_uniform_matrix(self->base_unit->technique, 0,
       "local_model", 4, 4, 1, false, local_model[0]);
@@ -67,8 +67,8 @@ zna_board_plane_unit_create(struct zna_system *system)
       {-0.5, 1.f},
   };
 
-  struct zgnr_mem_storage *vertex_buffer =
-      zgnr_mem_storage_create(vertices, sizeof(vertices));
+  struct zwnr_mem_storage *vertex_buffer =
+      zwnr_mem_storage_create(vertices, sizeof(vertices));
 
   struct wl_array vertex_attributes;
   wl_array_init(&vertex_attributes);
@@ -82,18 +82,18 @@ zna_board_plane_unit_create(struct zna_system *system)
   vertex_attribute->stride = 0;
   vertex_attribute->offset = 0;
 
-  union zgnr_gl_base_technique_draw_args draw_args;
+  union zwnr_gl_base_technique_draw_args draw_args;
   draw_args.arrays.mode = GL_TRIANGLE_FAN;
   draw_args.arrays.first = 0;
   draw_args.arrays.count = 4;
 
   self->base_unit = zna_base_unit_create(system, ZNA_SHADER_BOARD_VERTEX,
       ZNA_SHADER_BOARD_FRAGMENT, vertex_buffer, &vertex_attributes, NULL,
-      ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ARRAYS, draw_args);
+      ZWNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ARRAYS, draw_args);
 
   wl_array_release(&vertex_attributes);
 
-  zgnr_mem_storage_unref(vertex_buffer);
+  zwnr_mem_storage_unref(vertex_buffer);
 
   return self;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <zgnr/shell.h>
+#include <zwnr/shell.h>
 
 #include "node.h"
 #include "ray-grab/default.h"
@@ -10,7 +10,7 @@ struct zns_bounded;
 struct zns_seat_capsule;
 
 struct zn_shell {
-  struct zgnr_shell *zgnr_shell;
+  struct zwnr_shell *zwnr_shell;
 
   struct zns_node *root;
 

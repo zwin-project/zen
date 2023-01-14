@@ -3,8 +3,8 @@
 #include <cairo.h>
 #include <wayland-server-core.h>
 #include <wlr/render/wlr_texture.h>
-#include <zgnr/gl-base-technique.h>
-#include <zgnr/mem-storage.h>
+#include <zwnr/gl-base-technique.h>
+#include <zwnr/mem-storage.h>
 
 #include "shader-inventory.h"
 #include "system.h"
@@ -42,13 +42,13 @@ struct zna_base_unit {
   enum zna_shader_name vertex_shader;
   enum zna_shader_name fragment_shader;
 
-  struct zgnr_mem_storage *vertex_buffer_storage;
-  struct zgnr_mem_storage *element_array_buffer_storage;  // nullable
+  struct zwnr_mem_storage *vertex_buffer_storage;
+  struct zwnr_mem_storage *element_array_buffer_storage;  // nullable
 
   struct wl_array vertex_attributes;  // struct zna_base_unit_vertex_attribute
 
-  enum zgnr_gl_base_technique_draw_method draw_method;
-  union zgnr_gl_base_technique_draw_args draw_args;
+  enum zwnr_gl_base_technique_draw_method draw_method;
+  union zwnr_gl_base_technique_draw_args draw_args;
 };
 
 void zna_base_unit_read_cairo_surface(
@@ -65,9 +65,9 @@ void zna_base_unit_teardown_renderer_objects(struct zna_base_unit *self);
 
 struct zna_base_unit *zna_base_unit_create(struct zna_system *system,
     enum zna_shader_name vertex_shader, enum zna_shader_name fragment_shader,
-    struct zgnr_mem_storage *vertex_buffer, struct wl_array *vertex_attributes,
-    struct zgnr_mem_storage *element_array_buffer /* nullable */,
-    enum zgnr_gl_base_technique_draw_method draw_method,
-    union zgnr_gl_base_technique_draw_args draw_args);
+    struct zwnr_mem_storage *vertex_buffer, struct wl_array *vertex_attributes,
+    struct zwnr_mem_storage *element_array_buffer /* nullable */,
+    enum zwnr_gl_base_technique_draw_method draw_method,
+    union zwnr_gl_base_technique_draw_args draw_args);
 
 void zna_base_unit_destroy(struct zna_base_unit *self);

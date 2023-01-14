@@ -8,15 +8,15 @@
 
 /**
  * Precondition:
- *  current session exists && the zgnr_virtual_object has been comitted
+ *  current session exists && the zwnr_virtual_object has been comitted
  */
 static void
 zna_virtual_object_apply_commit(
     struct zna_virtual_object *self, bool only_damaged)
 {
-  struct zgnr_rendering_unit *unit;
-  struct zgnr_virtual_object *zgnr_virtual_object =
-      self->zn_virtual_object->zgnr_virtual_object;
+  struct zwnr_rendering_unit *unit;
+  struct zwnr_virtual_object *zwnr_virtual_object =
+      self->zn_virtual_object->zwnr_virtual_object;
 
   if (self->znr_virtual_object == NULL) {
     self->znr_virtual_object =
@@ -27,7 +27,7 @@ zna_virtual_object_apply_commit(
   }
 
   wl_list_for_each (
-      unit, &zgnr_virtual_object->current.rendering_unit_list, link) {
+      unit, &zwnr_virtual_object->current.rendering_unit_list, link) {
     // Rendering units in current.rendering_unit_list has been comitted.
     zna_rendering_unit_apply_commit(unit->user_data, only_damaged);
   }
@@ -46,8 +46,8 @@ zna_virtual_object_handle_session_frame(
   struct timespec now;
   clock_gettime(CLOCK_MONOTONIC, &now);
 
-  zgnr_virtual_object_send_frame_done(
-      self->zn_virtual_object->zgnr_virtual_object, &now);
+  zwnr_virtual_object_send_frame_done(
+      self->zn_virtual_object->zwnr_virtual_object, &now);
 }
 
 static void
@@ -70,7 +70,7 @@ zna_virtual_object_handle_session_created(
   struct zna_virtual_object *self =
       zn_container_of(listener, self, session_created_listener);
 
-  if (self->zn_virtual_object->zgnr_virtual_object->committed)
+  if (self->zn_virtual_object->zwnr_virtual_object->committed)
     zna_virtual_object_apply_commit(self, false);
 }
 
@@ -131,7 +131,7 @@ zna_virtual_object_create(
   wl_signal_add(&zn_virtual_object->events.move, &self->move_listener);
 
   self->commit_listener.notify = zna_virtual_object_handle_commit;
-  wl_signal_add(&self->zn_virtual_object->zgnr_virtual_object->events.committed,
+  wl_signal_add(&self->zn_virtual_object->zwnr_virtual_object->events.committed,
       &self->commit_listener);
 
   return self;

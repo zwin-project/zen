@@ -25,7 +25,7 @@ zns_move_ray_grab_motion_relative(struct zn_ray_grab *grab_base, vec3 origin,
   struct zns_seat_capsule *seat_capsule = server->shell->seat_capsule;
   struct zns_move_ray_grab *self = zn_container_of(grab_base, self, base);
   struct zn_virtual_object *virtual_object =
-      self->bounded->zgnr_bounded->virtual_object->user_data;
+      self->bounded->zwnr_bounded->virtual_object->user_data;
 
   float next_bounded_polar = self->bounded->seat_capsule_polar + polar;
   if (next_bounded_polar < 0)
@@ -133,7 +133,7 @@ zns_move_ray_grab_create(struct zns_bounded *bounded)
 {
   struct zns_move_ray_grab *self;
   struct zn_virtual_object *zn_virtual_object =
-      bounded->zgnr_bounded->virtual_object->user_data;
+      bounded->zwnr_bounded->virtual_object->user_data;
   struct zn_server *server = zn_server_get_singleton();
 
   self = zalloc(sizeof *self);

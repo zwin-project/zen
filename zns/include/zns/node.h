@@ -3,7 +3,7 @@
 #include <cglm/vec3.h>
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_pointer.h>
-#include <zigen-protocol.h>
+#include <zwin-protocol.h>
 
 struct zns_node_interface {
   /**

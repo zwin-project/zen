@@ -1,7 +1,7 @@
 #include "zen/input/seat.h"
 
 #include <wlr/types/wlr_seat.h>
-#include <zigen-protocol.h>
+#include <zwin-protocol.h>
 
 #include "zen-common.h"
 #include "zen/cursor.h"
@@ -26,7 +26,7 @@ static void
 zn_seat_update_capabilities(struct zn_seat *self)
 {
   uint32_t wl_caps = 0;
-  uint32_t zgn_caps = 0;
+  uint32_t zwn_caps = 0;
 
   struct zn_input_device *input_device;
   wl_list_for_each (input_device, &self->devices, link) {
@@ -36,7 +36,7 @@ zn_seat_update_capabilities(struct zn_seat *self)
         break;
       case WLR_INPUT_DEVICE_POINTER:
         wl_caps |= WL_SEAT_CAPABILITY_POINTER;
-        zgn_caps |= ZGN_SEAT_CAPABILITY_RAY_DIRECTION;
+        zwn_caps |= ZWN_SEAT_CAPABILITY_RAY_DIRECTION;
         break;
       case WLR_INPUT_DEVICE_TOUCH:
         // TODO: support touch device
@@ -49,7 +49,7 @@ zn_seat_update_capabilities(struct zn_seat *self)
   }
 
   wlr_seat_set_capabilities(self->wlr_seat, wl_caps);
-  zgnr_seat_set_capabilities(self->zgnr_seat, zgn_caps);
+  zwnr_seat_set_capabilities(self->zwnr_seat, zwn_caps);
 }
 
 void
@@ -83,9 +83,9 @@ zn_seat_create(struct wl_display *display, const char *seat_name)
     goto err_free;
   }
 
-  self->zgnr_seat = zgnr_seat_create(display);
-  if (self->zgnr_seat == NULL) {
-    zn_error("Failed to creat zgnr_seat");
+  self->zwnr_seat = zwnr_seat_create(display);
+  if (self->zwnr_seat == NULL) {
+    zn_error("Failed to creat zwnr_seat");
     goto err_wlr_seat;
   }
 
@@ -115,7 +115,7 @@ zn_seat_destroy(struct zn_seat *self)
 
   wl_list_remove(&self->request_set_cursor_listener.link);
   wl_list_remove(&self->devices);
-  zgnr_seat_destroy(self->zgnr_seat);
+  zwnr_seat_destroy(self->zwnr_seat);
   wlr_seat_destroy(self->wlr_seat);
   free(self);
 }

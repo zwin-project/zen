@@ -44,7 +44,7 @@ jobs:
       - name: Clone wlr-glew-renderer
         uses: actions/checkout@v2
         with:
-          repository: zigen-project/wlr-glew-renderer
+          repository: zwin-project/wlr-glew-renderer
           path: wlr-glew-renderer
 
       - name: Build wlr-glew-renderer
@@ -52,22 +52,22 @@ jobs:
           meson build
           sudo meson install -C build --skip-subprojects
         working-directory: ./wlr-glew-renderer
-      
+
       - run: mkdir -p grpc-dev
 
       - name: Download grpc-dev
         run: |
-          curl -L https://github.com/zigen-project/grpc-dev/releases/download/0.0.1/grpc-dev-refs.heads.main-github-host.zip -o grpc-dev.zip
+          curl -L https://github.com/zwin-project/grpc-dev/releases/download/0.0.1/grpc-dev-refs.heads.main-github-host.zip -o grpc-dev.zip
           unzip grpc-dev.zip
         working-directory: ./grpc-dev
 
       - name: Clone zen-remote
         uses: actions/checkout@v2
         with:
-          repository: zigen-project/zen-remote
+          repository: zwin-project/zen-remote
           path: zen-remote
           submodules: recursive
-      
+
       - name: Build zen-remote
         working-directory: ./zen-remote
         run: |
@@ -81,7 +81,7 @@ jobs:
           repository: cktan/tomlc99
           path: tomlc99
 
-      - name: Rename "libtoml.pc.sample" to "libtoml.pc" 
+      - name: Rename "libtoml.pc.sample" to "libtoml.pc"
         run: mv libtoml.pc.sample libtoml.pc
         working-directory: ./tomlc99
 
@@ -91,15 +91,15 @@ jobs:
           sudo make install
         working-directory: ./tomlc99
 
-      - name: Clone zigen
+      - name: Clone zwin
         uses: actions/checkout@v2
         with:
-          repository: zigen-project/zigen
-          path: zigen
+          repository: zwin-project/zwin
+          path: zwin
           ref: draft
-      
-      - name: Build zigen
-        working-directory: ./zigen
+
+      - name: Build zwin
+        working-directory: ./zwin
         run: |
           meson build
           sudo ninja -C build install

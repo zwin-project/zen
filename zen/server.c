@@ -60,9 +60,9 @@ zn_server_handle_new_virtual_object(struct wl_listener *listener, void *data)
 {
   struct zn_server *self =
       zn_container_of(listener, self, new_virtual_object_listener);
-  struct zgnr_virtual_object *zgnr_virtual_object = data;
+  struct zwnr_virtual_object *zwnr_virtual_object = data;
 
-  (void)zn_virtual_object_create(zgnr_virtual_object);
+  (void)zn_virtual_object_create(zwnr_virtual_object);
 }
 
 struct zn_server *
@@ -163,16 +163,16 @@ zn_server_create(struct wl_display *display)
 
   wl_signal_init(&self->events.display_system_changed);
 
-  self->zgnr_backend = zgnr_backend_create(self->display);
-  if (self->zgnr_backend == NULL) {
-    zn_error("Failed to create a zgnr_backend");
+  self->zwnr_backend = zwnr_backend_create(self->display);
+  if (self->zwnr_backend == NULL) {
+    zn_error("Failed to create a zwnr_backend");
     goto err_config;
   }
 
   self->wlr_backend = wlr_backend_autocreate(self->display);
   if (self->wlr_backend == NULL) {
     zn_error("Failed to create a wlr_backend");
-    goto err_zgnr_backend;
+    goto err_zwnr_backend;
   }
 
   drm_fd = wlr_backend_get_drm_fd(self->wlr_backend);
@@ -276,10 +276,10 @@ zn_server_create(struct wl_display *display)
 
   self->new_virtual_object_listener.notify =
       zn_server_handle_new_virtual_object;
-  wl_signal_add(&self->zgnr_backend->events.new_virtual_object,
+  wl_signal_add(&self->zwnr_backend->events.new_virtual_object,
       &self->new_virtual_object_listener);
 
-  zgnr_backend_activate(self->zgnr_backend);
+  zwnr_backend_activate(self->zwnr_backend);
 
   return self;
 
@@ -313,8 +313,8 @@ err_renderer:
 err_wlr_backend:
   wlr_backend_destroy(self->wlr_backend);
 
-err_zgnr_backend:
-  zgnr_backend_destroy(self->zgnr_backend);
+err_zwnr_backend:
+  zwnr_backend_destroy(self->zwnr_backend);
 
 err_config:
   zn_config_destroy(self->config);
@@ -349,7 +349,7 @@ zn_server_destroy(struct zn_server *self)
   zn_screen_compositor_destroy(self->screen_compositor);
   wlr_allocator_destroy(self->allocator);
   wlr_renderer_destroy(self->renderer);
-  zgnr_backend_destroy(self->zgnr_backend);
+  zwnr_backend_destroy(self->zwnr_backend);
   zn_config_destroy(self->config);
   server_singleton = NULL;
   free(self);

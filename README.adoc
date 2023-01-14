@@ -6,15 +6,15 @@ XR Desktop Environment
 
 === Dependencies
 
-. zigen protocols +
-Please see https://github.com/zigen-project/zigen[zigen-project/zigen]
+. zwin protocols +
+Please see https://github.com/zwin-project/zwin[zwin-project/zwin]
 to build and install. +
 [yellow]#***__important__**#: Please use `draft` branch.
 . wlr-glew-renderer +
-Please see https://github.com/zigen-project/wlr-glew-renderer[zigen-project/wlr-glew-renderer]
+Please see https://github.com/zwin-project/wlr-glew-renderer[zwin-project/wlr-glew-renderer]
 to build and install.
 . zen-remote +
-Please see https://github.com/zigen-project/zen-remote[zigen-project/zen-remote]
+Please see https://github.com/zwin-project/zen-remote[zwin-project/zen-remote]
 to build and install.
 . tomlc99 +
 Please see https://github.com/cktan/tomlc99[cktan/tomlc99] to build and install. +
@@ -33,7 +33,7 @@ required packages.
 
 [source, shell]
 ----
-$ git clone https://github.com/zigen-project/zen.git
+$ git clone https://github.com/zwin-project/zen.git
 $ cd zen
 $ meson build
 $ ninja -C build install

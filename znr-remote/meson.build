@@ -21,7 +21,7 @@ _znr_remote_deps = [
   wayland_server_dep,
   zen_common_dep,
   zen_remote_server_dep,
-  zgnr_dep,
+  zwnr_dep,
 ]
 
 _znr_remote_lib = static_library(

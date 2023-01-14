@@ -181,11 +181,11 @@ zna_ray_tip_unit_create(struct zna_system *system)
   construct_vertices(vertices);
   construct_elements(elements);
 
-  struct zgnr_mem_storage *vertex_buffer =
-      zgnr_mem_storage_create(vertices, sizeof(vertices));
+  struct zwnr_mem_storage *vertex_buffer =
+      zwnr_mem_storage_create(vertices, sizeof(vertices));
 
-  struct zgnr_mem_storage *element_array_buffer =
-      zgnr_mem_storage_create(elements, sizeof(elements));
+  struct zwnr_mem_storage *element_array_buffer =
+      zwnr_mem_storage_create(elements, sizeof(elements));
 
   struct wl_array vertex_attributes;
   wl_array_init(&vertex_attributes);
@@ -208,7 +208,7 @@ zna_ray_tip_unit_create(struct zna_system *system)
   vertex_attribute->stride = sizeof(struct zna_ray_tip_unit_vertex);
   vertex_attribute->offset = offsetof(struct zna_ray_tip_unit_vertex, normal);
 
-  union zgnr_gl_base_technique_draw_args draw_args;
+  union zwnr_gl_base_technique_draw_args draw_args;
   draw_args.elements.mode = GL_TRIANGLES;
   draw_args.elements.type = GL_UNSIGNED_SHORT;
   draw_args.elements.offset = 0;
@@ -216,13 +216,13 @@ zna_ray_tip_unit_create(struct zna_system *system)
 
   self->base_unit = zna_base_unit_create(system, ZNA_SHADER_RAY_VERTEX,
       ZNA_SHADER_RAY_FRAGMENT, vertex_buffer, &vertex_attributes,
-      element_array_buffer, ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ELEMENTS,
+      element_array_buffer, ZWNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ELEMENTS,
       draw_args);
 
   wl_array_release(&vertex_attributes);
 
-  zgnr_mem_storage_unref(vertex_buffer);
-  zgnr_mem_storage_unref(element_array_buffer);
+  zwnr_mem_storage_unref(vertex_buffer);
+  zwnr_mem_storage_unref(element_array_buffer);
 
   return self;
 

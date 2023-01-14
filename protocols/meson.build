@@ -1,14 +1,14 @@
 _wayland_protocols_dir = wayland_protocols_dep.get_variable('pkgdatadir')
-_zigen_protocols_dir = zigen_protocols_dep.get_variable('pkgdatadir')
+_zwin_protocols_dir = zwin_protocols_dep.get_variable('pkgdatadir')
 _scanner_path = wayland_scanner_dep.get_variable('wayland_scanner')
 _wayland_scanner = find_program(_scanner_path)
 
 
 _protocols = {
   'xdg-shell': join_paths(_wayland_protocols_dir, 'stable/xdg-shell/xdg-shell.xml'),
-  'zigen': join_paths(_zigen_protocols_dir, 'zigen.xml'),
-  'zigen-gles-v32': join_paths(_zigen_protocols_dir, 'zigen-gles-v32.xml'),
-  'zigen-shell': join_paths(_zigen_protocols_dir, 'zigen-shell.xml'),
+  'zwin': join_paths(_zwin_protocols_dir, 'zwin.xml'),
+  'zwin-gles-v32': join_paths(_zwin_protocols_dir, 'zwin-gles-v32.xml'),
+  'zwin-shell': join_paths(_zwin_protocols_dir, 'zwin-shell.xml'),
 }
 
 # protocols[<protocol-name>][<type>]

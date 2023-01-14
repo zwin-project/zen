@@ -1,9 +1,9 @@
 #include "system.h"
 
 #include <zen-common.h>
-#include <zgnr/gl-buffer.h>
-#include <zgnr/gl-shader.h>
-#include <zgnr/rendering-unit.h>
+#include <zwnr/gl-buffer.h>
+#include <zwnr/gl-shader.h>
+#include <zwnr/rendering-unit.h>
 
 #include "shader-inventory.h"
 #include "virtual-object/gl-base-technique.h"
@@ -86,7 +86,7 @@ zna_system_handle_new_rendering_unit(struct wl_listener *listener, void *data)
 {
   struct zna_system *self =
       zn_container_of(listener, self, new_rendering_unit_listener);
-  struct zgnr_rendering_unit *unit = data;
+  struct zwnr_rendering_unit *unit = data;
 
   (void)zna_rendering_unit_create(unit, self);
 }
@@ -96,7 +96,7 @@ zna_system_handle_new_gl_buffer(struct wl_listener *listener, void *data)
 {
   struct zna_system *self =
       zn_container_of(listener, self, new_gl_buffer_listener);
-  struct zgnr_gl_buffer *gl_buffer = data;
+  struct zwnr_gl_buffer *gl_buffer = data;
 
   (void)zna_gl_buffer_create(gl_buffer, self);
 }
@@ -107,7 +107,7 @@ zna_system_handle_new_gl_base_technique(
 {
   struct zna_system *self =
       zn_container_of(listener, self, new_gl_base_technique_listener);
-  struct zgnr_gl_base_technique *gl_base_technique = data;
+  struct zwnr_gl_base_technique *gl_base_technique = data;
 
   (void)zna_gl_base_technique_create(gl_base_technique, self);
 }
@@ -117,7 +117,7 @@ zna_system_handle_new_gl_vertex_array(struct wl_listener *listener, void *data)
 {
   struct zna_system *self =
       zn_container_of(listener, self, new_gl_vertex_array_listener);
-  struct zgnr_gl_vertex_array *gl_vertex_array = data;
+  struct zwnr_gl_vertex_array *gl_vertex_array = data;
 
   (void)zna_gl_vertex_array_create(gl_vertex_array, self);
 }
@@ -128,7 +128,7 @@ zna_system_handle_new_gl_sampler(struct wl_listener *listener, void *data)
   struct zna_system *self =
       zn_container_of(listener, self, new_gl_sampler_listener);
 
-  struct zgnr_gl_sampler *gl_sampler = data;
+  struct zwnr_gl_sampler *gl_sampler = data;
 
   (void)zna_gl_sampler_create(gl_sampler, self);
 }
@@ -139,7 +139,7 @@ zna_system_handle_new_gl_shader(struct wl_listener *listener, void *data)
   struct zna_system *self =
       zn_container_of(listener, self, new_gl_shader_listener);
 
-  struct zgnr_gl_shader *shader = data;
+  struct zwnr_gl_shader *shader = data;
 
   (void)zna_gl_shader_create(shader, self);
 }
@@ -150,7 +150,7 @@ zna_system_handle_new_gl_texture(struct wl_listener *listener, void *data)
   struct zna_system *self =
       zn_container_of(listener, self, new_gl_texture_listener);
 
-  struct zgnr_gl_texture *texture = data;
+  struct zwnr_gl_texture *texture = data;
 
   (void)zna_gl_texture_create(texture, self);
 }
@@ -161,7 +161,7 @@ zna_system_handle_new_gl_program(struct wl_listener *listener, void *data)
   struct zna_system *self =
       zn_container_of(listener, self, new_gl_program_listener);
 
-  struct zgnr_gl_program *program = data;
+  struct zwnr_gl_program *program = data;
 
   (void)zna_gl_program_create(program, self);
 }
@@ -180,9 +180,9 @@ zna_system_create(struct wl_display *display)
   self->display = display;
   self->current_session = NULL;
 
-  self->gles = zgnr_gles_v32_create(self->display);
+  self->gles = zwnr_gles_v32_create(self->display);
   if (self->gles == NULL) {
-    zn_error("Failed to create zgnr_gles_v32");
+    zn_error("Failed to create zwnr_gles_v32");
     goto err_free;
   }
 
@@ -267,6 +267,6 @@ zna_system_destroy(struct zna_system *self)
   wl_list_remove(&self->new_gl_texture_listener.link);
   wl_list_remove(&self->current_session_disconnected_listener.link);
   wl_list_remove(&self->current_session_frame_listener.link);
-  zgnr_gles_v32_destroy(self->gles);
+  zwnr_gles_v32_destroy(self->gles);
   free(self);
 }

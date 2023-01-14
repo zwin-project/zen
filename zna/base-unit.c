@@ -6,7 +6,7 @@
 #include <wlr/render/egl.h>
 #include <wlr/render/glew.h>
 #include <zen-common.h>
-#include <zgnr/gl-sampler.h>
+#include <zwnr/gl-sampler.h>
 
 #include "zen/server.h"
 
@@ -41,7 +41,7 @@ void
 zna_base_unit_read_cairo_surface(
     struct zna_base_unit *self, cairo_surface_t *surface)
 {
-  struct zgnr_mem_storage *storage;
+  struct zwnr_mem_storage *storage;
 
   if (!self->has_renderer_objects) return;
 
@@ -61,7 +61,7 @@ zna_base_unit_read_cairo_surface(
     return;
   }
 
-  storage = zgnr_mem_storage_create(NULL, stride * height);
+  storage = zwnr_mem_storage_create(NULL, stride * height);
   zna_base_unit_copy_cairo_argb32_to_gl_rgba32(
       data, storage->data, width * height);
 
@@ -74,7 +74,7 @@ zna_base_unit_read_cairo_surface(
   znr_gl_texture_image_2d(self->texture0, GL_TEXTURE_2D, 0, gl_internal_format,
       width, height, 0, gl_format, gl_type, storage);
 
-  zgnr_mem_storage_unref(storage);
+  zwnr_mem_storage_unref(storage);
 }
 
 void
@@ -82,7 +82,7 @@ zna_base_unit_read_wlr_texture(
     struct zna_base_unit *self, struct wlr_texture *texture)
 {
   struct zn_server *server = zn_server_get_singleton();
-  struct zgnr_mem_storage *storage;
+  struct zwnr_mem_storage *storage;
 
   if (!self->has_renderer_objects) return;
 
@@ -91,7 +91,7 @@ zna_base_unit_read_wlr_texture(
   }
 
   storage =
-      zgnr_mem_storage_create(NULL, 32 * texture->width * texture->height);
+      zwnr_mem_storage_create(NULL, 32 * texture->width * texture->height);
 
   struct wlr_glew_texture_attribs texture_attrib;
   wlr_glew_texture_get_attribs(texture, &texture_attrib);
@@ -140,7 +140,7 @@ zna_base_unit_read_wlr_texture(
   znr_gl_texture_image_2d(self->texture0, GL_TEXTURE_2D, 0, GL_RGBA,
       texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, storage);
 
-  zgnr_mem_storage_unref(storage);
+  zwnr_mem_storage_unref(storage);
 }
 
 void
@@ -199,13 +199,13 @@ zna_base_unit_setup_renderer_objects(struct zna_base_unit *self,
   znr_gl_base_technique_bind_program(self->technique, self->program);
 
   switch (self->draw_method) {
-    case ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ARRAYS:
+    case ZWNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ARRAYS:
       znr_gl_base_technique_draw_arrays(self->technique,
           self->draw_args.arrays.mode, self->draw_args.arrays.first,
           self->draw_args.arrays.count);
       break;
 
-    case ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ELEMENTS:
+    case ZWNR_GL_BASE_TECHNIQUE_DRAW_METHOD_ELEMENTS:
       if (self->element_array_buffer_storage) {
         znr_gl_base_technique_draw_elements(self->technique,
             self->draw_args.elements.mode, self->draw_args.elements.count,
@@ -214,7 +214,7 @@ zna_base_unit_setup_renderer_objects(struct zna_base_unit *self,
       }
       break;
 
-    case ZGNR_GL_BASE_TECHNIQUE_DRAW_METHOD_NONE:  // fall through
+    case ZWNR_GL_BASE_TECHNIQUE_DRAW_METHOD_NONE:  // fall through
     default:
       break;
   }
@@ -254,10 +254,10 @@ zna_base_unit_teardown_renderer_objects(struct zna_base_unit *self)
 struct zna_base_unit *
 zna_base_unit_create(struct zna_system *system,
     enum zna_shader_name vertex_shader, enum zna_shader_name fragment_shader,
-    struct zgnr_mem_storage *vertex_buffer, struct wl_array *vertex_attributes,
-    struct zgnr_mem_storage *element_array_buffer,
-    enum zgnr_gl_base_technique_draw_method draw_method,
-    union zgnr_gl_base_technique_draw_args draw_args)
+    struct zwnr_mem_storage *vertex_buffer, struct wl_array *vertex_attributes,
+    struct zwnr_mem_storage *element_array_buffer,
+    enum zwnr_gl_base_technique_draw_method draw_method,
+    union zwnr_gl_base_technique_draw_args draw_args)
 {
   struct zna_base_unit *self;
 
@@ -274,10 +274,10 @@ zna_base_unit_create(struct zna_system *system,
   self->fragment_shader = fragment_shader;
 
   self->vertex_buffer_storage = vertex_buffer;
-  zgnr_mem_storage_ref(vertex_buffer);
+  zwnr_mem_storage_ref(vertex_buffer);
 
   self->element_array_buffer_storage = element_array_buffer;
-  if (element_array_buffer) zgnr_mem_storage_ref(element_array_buffer);
+  if (element_array_buffer) zwnr_mem_storage_ref(element_array_buffer);
 
   wl_array_init(&self->vertex_attributes);
   wl_array_copy(&self->vertex_attributes, vertex_attributes);
@@ -302,9 +302,9 @@ zna_base_unit_destroy(struct zna_base_unit *self)
   if (self->sampler0) znr_gl_sampler_destroy(self->sampler0);
 
   if (self->element_array_buffer_storage)
-    zgnr_mem_storage_unref(self->element_array_buffer_storage);
+    zwnr_mem_storage_unref(self->element_array_buffer_storage);
 
-  zgnr_mem_storage_unref(self->vertex_buffer_storage);
+  zwnr_mem_storage_unref(self->vertex_buffer_storage);
   wl_array_release(&self->vertex_attributes);
 
   free(self);

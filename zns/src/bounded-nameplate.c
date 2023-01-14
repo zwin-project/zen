@@ -3,8 +3,8 @@
 #include <cglm/affine.h>
 #include <linux/input.h>
 #include <zen-common.h>
-#include <zgnr/intersection.h>
 #include <zns/appearance/bounded.h>
+#include <zwnr/intersection.h>
 
 #include "zen/server.h"
 #include "zen/virtual-object.h"
@@ -27,7 +27,7 @@ zns_bounded_nameplate_ray_cast(struct zns_bounded_nameplate *self, vec3 origin,
   glm_mat4_mulv3(transform, v1, 1, v1);
   glm_mat4_mulv3(transform, v2, 1, v2);
 
-  return zgnr_intersection_ray_parallelogram(
+  return zwnr_intersection_ray_parallelogram(
       origin, direction, v0, v1, v2, u, v, false);
 }
 
@@ -136,11 +136,11 @@ zns_bounded_nameplate_get_transform(
     struct zns_bounded_nameplate *self, mat4 transform)
 {
   struct zn_virtual_object *virtual_object =
-      self->bounded->zgnr_bounded->virtual_object->user_data;
+      self->bounded->zwnr_bounded->virtual_object->user_data;
   glm_mat4_copy(virtual_object->model_matrix, transform);
   glm_translate_y(
-      transform, -self->bounded->zgnr_bounded->current.half_size[1] - 0.01);
-  glm_translate_z(transform, self->bounded->zgnr_bounded->current.half_size[2]);
+      transform, -self->bounded->zwnr_bounded->current.half_size[1] - 0.01);
+  glm_translate_z(transform, self->bounded->zwnr_bounded->current.half_size[2]);
 }
 
 struct zns_bounded_nameplate *

@@ -15,7 +15,7 @@
 |znr_
 |Rendering backend for immersive display system
 
-|zgnr_
-|zgnroot: thin library of zigen protocol
+|zwnr_
+|zwnroot: thin library of zwin protocol
 
 |===
