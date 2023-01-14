@@ -21,6 +21,13 @@ zn_screen_handle_current_board_destroy(struct wl_listener *listener, void *data)
   if (wl_list_length(&self->board_list) != 0) {
     board = zn_container_of(self->board_list.next, board, screen_link);
   }
+
+  // FIXME:
+  if (!zn_assert(board, "There must be at least one board")) {
+    zn_terminate(EXIT_FAILURE);
+    return;
+  }
+
   zn_screen_set_current_board(self, board);
 }
 
@@ -83,16 +90,13 @@ zn_screen_set_current_board(struct zn_screen *self, struct zn_board *board)
     wl_list_init(&self->current_board_destroy_listener.link);
   }
 
-  if (board) {
-    if (!wl_list_empty(&board->view_list)) {
-      struct zn_view *view =
-          zn_container_of(board->view_list.prev, view, board_link);
-      zn_scene_set_focused_view(server->scene, view);
-    }
-
-    wl_signal_add(
-        &board->events.destroy, &self->current_board_destroy_listener);
+  if (!wl_list_empty(&board->view_list)) {
+    struct zn_view *view =
+        zn_container_of(board->view_list.prev, view, board_link);
+    zn_scene_set_focused_view(server->scene, view);
   }
+
+  wl_signal_add(&board->events.destroy, &self->current_board_destroy_listener);
 
   self->current_board = board;
 
