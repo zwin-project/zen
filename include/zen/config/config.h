@@ -1,14 +1,15 @@
 #pragma once
 
 #include <toml.h>
-struct zn_favorite_app;
+#include <wayland-server-core.h>
+
+#include "zen/favorite-app.h"
 
 struct zn_config {
   char *space_default_app;   // nonnull, non-empty
   char *wallpaper_filepath;  // can be empty string but cannot be null
   int64_t board_initial_count;
-  int64_t num_favorite_apps;
-  struct zn_favorite_app *favorite_apps;
+  struct wl_array favorite_apps;
 };
 
 struct zn_config *zn_config_create(struct toml_table_t *config_table);

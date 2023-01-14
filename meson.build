@@ -122,23 +122,24 @@ if get_option('cui-client')
   wayland_client_dep = dependency('wayland-client', version: wayland_req)
 endif
 
-icon_files = files(
-  'assets/icon/power-button.svg',
-  'assets/icon/vr-blue.svg',
-  'assets/icon/vr-translucent.svg',
-  'assets/icon/vr-white.svg',
-)
-icon_install_dir = join_paths(datadir, 'zen')
-install_data(icon_files, install_dir: icon_install_dir)
+icons = {
+  'power-button.svg'  : 'POWER_BUTTON_ICON',
+  'unknown-app.png'   : 'UNKNOWN_APP_ICON',
+  'vr-blue.svg'       : 'VR_ICON_BLUE',
+  'vr-translucent.svg': 'VR_ICON_TRANSLUCENT',
+  'vr-white.svg'      : 'VR_ICON_WHITE',
+}
 
-power_button_icon = join_paths(get_option('prefix'), icon_install_dir, 'power-button.svg')
-vr_icon = join_paths(get_option('prefix'), icon_install_dir, 'vr-white.svg')
-vr_icon_blue = join_paths(get_option('prefix'), icon_install_dir, 'vr-blue.svg')
-vr_icon_translucent = join_paths(get_option('prefix'), icon_install_dir, 'vr-translucent.svg')
-cdata.set_quoted('POWER_BUTTON_ICON', power_button_icon)
-cdata.set_quoted('VR_ICON_WHITE', vr_icon)
-cdata.set_quoted('VR_ICON_BLUE', vr_icon_blue)
-cdata.set_quoted('VR_ICON_TRANSLUCENT', vr_icon_translucent)
+icon_install_dir = join_paths(datadir, 'zen')
+foreach filename, definition : icons
+  file = join_paths('assets', 'icon', filename)
+
+  install_data(file, install_dir: icon_install_dir)
+
+  installed_path = join_paths(get_option('prefix'), icon_install_dir, filename)
+
+  cdata.set_quoted(definition, installed_path)
+endforeach
 
 if get_option('default-wallpaper')
   wallpaper_files = files(
