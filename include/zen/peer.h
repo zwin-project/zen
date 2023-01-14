@@ -14,6 +14,10 @@ struct zn_peer {
   struct wl_listener znr_session_disconnected_listener;
 
   struct wl_list link;  // zn_remote::peer_list
+
+  struct {
+    struct wl_signal new_session;  // (NULL)
+  } events;
 };
 
 struct zn_peer *zn_peer_create(struct znr_remote_peer *znr_remote_peer);

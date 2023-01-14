@@ -86,7 +86,8 @@ zn_vr_modal_create(
   }
   self->zigzag_node = zigzag_node;
 
-  self->headset_dialog = zn_vr_modal_item_headset_dialog_create(zigzag_layout);
+  self->headset_dialog =
+      zn_vr_modal_item_headset_dialog_create(zigzag_layout, renderer);
   if (self->headset_dialog == NULL) {
     zn_error("Failed to create zn_vr_modal_item_headset_dialog");
     goto err_zigzag_node;
