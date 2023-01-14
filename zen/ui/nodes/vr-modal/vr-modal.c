@@ -9,6 +9,7 @@
 #include "zen/screen/output.h"
 #include "zen/server.h"
 #include "zen/ui/nodes/vr-modal/headset-dialog.h"
+#include "zen/ui/nodes/vr-modal/keybind-description.h"
 
 #define BG_ALPHA 0.7
 #define ICON_WIDTH 140.0
@@ -20,28 +21,6 @@ zn_vr_modal_on_click(struct zigzag_node *node, double x, double y)
   UNUSED(node);
   UNUSED(x);
   UNUSED(y);
-}
-
-static void
-zn_vr_modal_render_exit_key_description(
-    cairo_t *cr, double center_x, double center_y)
-{
-  cairo_save(cr);
-  cairo_set_font_size(cr, 14);
-
-  cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
-  zigzag_cairo_draw_text(cr, "Press    Meta    +    V    to exit VR mode",
-      center_x, center_y, ZIGZAG_ANCHOR_CENTER, ZIGZAG_ANCHOR_CENTER);
-
-  cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.3);
-  zigzag_cairo_draw_rounded_rectangle(
-      cr, center_x - 77, center_y - 8, 44, 20, 4);
-  cairo_fill(cr);
-  zigzag_cairo_draw_rounded_rectangle(
-      cr, center_x - 14, center_y - 8, 24, 20, 4);
-  cairo_fill(cr);
-
-  cairo_restore(cr);
 }
 
 static bool
@@ -67,9 +46,6 @@ zn_vr_modal_render(struct zigzag_node *node, cairo_t *cr)
   cairo_set_font_size(cr, 14);
   zigzag_cairo_draw_text(cr, "Put on your headset to start working in VR",
       center_x, center_y, ZIGZAG_ANCHOR_CENTER, ZIGZAG_ANCHOR_CENTER);
-
-  zn_vr_modal_render_exit_key_description(
-      cr, center_x, node->frame.height - 60);
 
   return true;
 }
@@ -118,11 +94,23 @@ zn_vr_modal_create(
   zigzag_node_add_child(
       self->zigzag_node, self->headset_dialog->zigzag_node, renderer);
 
+  self->keybind_description =
+      zn_vr_modal_item_keybind_description_create(zigzag_layout, renderer);
+  if (!self->keybind_description) {
+    zn_error("Failed to create zn_vr_modal_item_keybind_description");
+    goto err_headset_dialog;
+  }
+  zigzag_node_add_child(
+      self->zigzag_node, self->keybind_description->zigzag_node, renderer);
+
   zn_vr_modal_init_frame(self->zigzag_node,
       self->zigzag_node->layout->screen_width,
       self->zigzag_node->layout->screen_height);
 
   return self;
+
+err_headset_dialog:
+  zn_vr_modal_item_headset_dialog_destroy(self->headset_dialog);
 
 err_zigzag_node:
   zigzag_node_destroy(self->zigzag_node);
