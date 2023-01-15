@@ -12,7 +12,13 @@ _zen_srcs = [
   'view.c',
   'virtual-object.c',
 
+  'wlr/box.c',
   'wlr/texture.c',
+  'wlr/render/egl.c',
+  'wlr/render/pixel_format.c',
+  'wlr/render/renderer.c',
+  'wlr/render/shaders.c',
+  'wlr/render/texture.c',
 
   'config/config.c',
   'config/config-parser.c',
@@ -48,8 +54,6 @@ _zen_srcs = [
   'ui/nodes/vr-menu/vr-menu.c',
   'ui/nodes/vr-modal/headset-dialog.c',
   'ui/nodes/vr-modal/vr-modal.c',
-
-  'wlr/box.c',
 ]
 
 _zen_srcs_pub = [
@@ -60,7 +64,11 @@ _zen_srcs_pub = [
 _zen_deps = [
   cairo_dep,
   cglm_dep,
+  drm_dep,
+  egl_dep,
   ft_dep,
+  gbm_dep,
+  glew_dep,
   gl_dep,
   m_dep,
   pixman_dep,
@@ -68,7 +76,6 @@ _zen_deps = [
   toml_dep,
   wayland_server_dep,
   wlroots_dep,
-  wlr_glew_renderer_dep,
   xkbcommon_dep,
   zen_common_dep,
   zigzag_dep,

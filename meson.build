@@ -98,11 +98,21 @@ wlr_glew_renderer_req = '0.15.1.1'
 zen_remote_server_req = '0.1.0.28'
 zwin_protocols_req = '0.0.2'
 
+glew_proj = subproject(
+  'glew',
+  required: true,
+  version: '2.2.0',
+)
+
 # dependencies
 
 cairo_dep = dependency('cairo')
 cglm_dep = dependency('cglm')
+drm_dep = dependency('libdrm')
+gbm_dep = dependency('gbm')
+egl_dep = dependency('egl')
 fontconfig_dep = dependency('fontconfig')
+glew_dep = glew_proj.get_variable('glew_dep')
 gl_dep = dependency('gl')
 m_dep = cc.find_library('m')
 pixman_dep = dependency('pixman-1')
@@ -110,7 +120,6 @@ wayland_protocols_dep = dependency('wayland-protocols', version: wayland_protoco
 wayland_scanner_dep = dependency('wayland-scanner')
 wayland_server_dep = dependency('wayland-server', version: wayland_req)
 wlroots_dep = dependency('wlroots', version: wlroots_req)
-wlr_glew_renderer_dep = dependency('wlr-glew-renderer', version: wlr_glew_renderer_req)
 xkbcommon_dep = dependency('xkbcommon')
 zen_remote_server_dep = dependency('zen-remote-server', version: zen_remote_server_req)
 zwin_protocols_dep = dependency('zwin-protocols', version: zwin_protocols_req)

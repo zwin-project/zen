@@ -10,9 +10,6 @@ XR Desktop Environment
 Please see https://github.com/zwin-project/zwin[zwin-project/zwin]
 to build and install. +
 [yellow]#***__important__**#: Please use `draft` branch.
-. wlr-glew-renderer +
-Please see https://github.com/zwin-project/wlr-glew-renderer[zwin-project/wlr-glew-renderer]
-to build and install.
 . zen-remote +
 Please see https://github.com/zwin-project/zen-remote[zwin-project/zen-remote]
 to build and install.

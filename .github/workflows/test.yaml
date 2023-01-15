@@ -29,18 +29,6 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: Clone wlr-glew-renderer
-        uses: actions/checkout@v2
-        with:
-          repository: zwin-project/wlr-glew-renderer
-          path: wlr-glew-renderer
-
-      - name: Build wlr-glew-renderer
-        run: |
-          meson build
-          sudo meson install -C build --skip-subprojects
-        working-directory: ./wlr-glew-renderer
-
       - run: mkdir -p grpc-dev
 
       - name: Download grpc-dev
