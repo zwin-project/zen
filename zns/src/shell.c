@@ -214,7 +214,7 @@ zn_shell_create(struct wl_display *display, struct zn_scene *scene)
     goto err_zwnr_shell;
   }
 
-  self->root = zns_node_create(NULL, self, &node_implementation);
+  self->root = zns_node_create(NULL, self, &node_implementation, ZNS_NODE_ROOT);
   if (self->root == NULL) {
     zn_error("Failed to create zns_node");
     goto err_seat_capsule;

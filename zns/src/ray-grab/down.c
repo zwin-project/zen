@@ -10,6 +10,18 @@
 
 static void zns_down_ray_grab_destroy(struct zns_down_ray_grab *self);
 
+/**
+ * @param node is nonnull
+ */
+static void
+zns_down_ray_grab_switch_node(
+    struct zns_down_ray_grab *self, struct zns_node *node)
+{
+  wl_list_remove(&self->node_destroy_listener.link);
+  wl_signal_add(&node->events.destroy, &self->node_destroy_listener);
+  self->node = node;
+}
+
 static void
 zns_down_ray_grab_motion_relative(struct zn_ray_grab *grab_base, vec3 origin,
     float polar, float azimuthal, uint32_t time_msec)
@@ -37,6 +49,11 @@ zns_down_ray_grab_motion_relative(struct zn_ray_grab *grab_base, vec3 origin,
   mat4 identity = GLM_MAT4_IDENTITY_INIT;
   node = zns_node_ray_cast(server->shell->root, self->base.ray->origin,
       self->base.ray->direction, identity, &distance);
+
+  if (node && self->node->type == ZNS_NODE_BOARD &&
+      node->type == ZNS_NODE_BOARD) {
+    zns_down_ray_grab_switch_node(self, node);
+  }
 
   if (node == self->node) zn_ray_set_length(self->base.ray, distance);
 

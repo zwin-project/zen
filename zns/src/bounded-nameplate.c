@@ -200,7 +200,8 @@ zns_bounded_nameplate_create(struct zns_bounded *bounded)
     goto err;
   }
 
-  self->node = zns_node_create(server->shell->root, self, &node_implementation);
+  self->node = zns_node_create(server->shell->root, self, &node_implementation,
+      ZNS_NODE_BOUNDED_NAMEPLATE);
   if (self->node == NULL) {
     zn_error("Failed to create zns_node");
     goto err_free;

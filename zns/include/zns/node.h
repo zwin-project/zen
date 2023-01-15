@@ -5,6 +5,14 @@
 #include <wlr/types/wlr_pointer.h>
 #include <zwin-protocol.h>
 
+enum zns_node_type {
+  ZNS_NODE_ROOT,
+  ZNS_NODE_BOUNDED,
+  ZNS_NODE_BOUNDED_NAMEPLATE,
+  ZNS_NODE_EXPANSIVE,
+  ZNS_NODE_BOARD,
+};
+
 struct zns_node_interface {
   /**
    * @returns true if intersected
@@ -57,6 +65,7 @@ struct zns_node {
 
   void *user_data;
   const struct zns_node_interface *implementation;
+  enum zns_node_type type;
 
   struct {
     struct wl_signal destroy;  // (NULL)
@@ -95,6 +104,6 @@ void zns_node_ray_frame(struct zns_node *self);
  * @param parent can be null only for root node
  */
 struct zns_node *zns_node_create(struct zns_node *parent, void *user_data,
-    const struct zns_node_interface *implementation);
+    const struct zns_node_interface *implementation, enum zns_node_type type);
 
 void zns_node_destroy(struct zns_node *self);

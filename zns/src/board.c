@@ -197,7 +197,8 @@ zns_board_create(struct zn_board *zn_board)
   }
 
   self->zn_board = zn_board;
-  self->node = zns_node_create(server->shell->root, self, &node_implementation);
+  self->node = zns_node_create(
+      server->shell->root, self, &node_implementation, ZNS_NODE_BOARD);
   if (self->node == NULL) {
     zn_error("Failed to create zns_node");
     goto err_free;
