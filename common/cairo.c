@@ -92,3 +92,26 @@ zn_cairo_stamp_svg_on_surface(cairo_t *cr, const char *filename, double x,
   g_object_unref(handle);
   return true;
 }
+
+void
+zn_cairo_get_text_extents(char *utf8, double font_size, cairo_font_face_t *face,
+    cairo_text_extents_t *extents)
+{
+  cairo_surface_t *surface =
+      cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 0, 0);
+
+  cairo_t *cr = cairo_create(surface);
+
+  if (cairo_status(cr) != CAIRO_STATUS_SUCCESS) {
+    zn_error("Failed to create cairo_t");
+    goto out;
+  }
+
+  cairo_set_font_face(cr, face);
+  cairo_set_font_size(cr, font_size);
+  cairo_text_extents(cr, utf8, extents);
+  cairo_destroy(cr);
+
+out:
+  cairo_surface_destroy(surface);
+}

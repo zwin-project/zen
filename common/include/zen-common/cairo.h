@@ -20,3 +20,6 @@ void zn_cairo_draw_text(cairo_t *cr, char *text, double x, double y,
 
 bool zn_cairo_stamp_svg_on_surface(cairo_t *cr, const char *filename, double x,
     double y, double width, double height);
+
+void zn_cairo_get_text_extents(char *utf8, double font_size,
+    cairo_font_face_t *face, cairo_text_extents_t *extends);
