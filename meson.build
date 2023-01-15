@@ -186,8 +186,6 @@ subdir('zen')
 subdir('zns')
 subdir('zna')
 
-find_program('weston-terminal', required: true) # used in zen.desktop
-
 install_data(
   'zen.desktop',
   install_dir: join_paths(datadir, 'wayland-sessions')
