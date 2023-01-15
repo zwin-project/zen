@@ -3,7 +3,9 @@
 #include <GLES3/gl32.h>
 #include <cglm/affine.h>
 #include <cglm/types.h>
+#include <math.h>
 #include <zen-common.h>
+#include <zigzag.h>
 
 #include "zen/virtual-object.h"
 #include "zns/appearance/bounded.h"
@@ -52,6 +54,29 @@ zna_bounded_nameplate_unit_update_texture(
   cairo_set_font_size(cr, height / 2);
   zn_cairo_draw_text(cr, bounded->zwnr_bounded->current.title, 40, height / 2,
       ZN_CAIRO_ANCHOR_LEFT, ZN_CAIRO_ANCHOR_CENTER);
+
+  const struct wlr_fbox close_button_geometry = {
+      .x = NAMEPLATE_PIXEL_PER_METER *
+           bounded->nameplate->geometry.close_button.x,
+      .y = NAMEPLATE_PIXEL_PER_METER *
+           bounded->nameplate->geometry.close_button.y,
+      .width = NAMEPLATE_PIXEL_PER_METER *
+               bounded->nameplate->geometry.close_button.width,
+      .height = NAMEPLATE_PIXEL_PER_METER *
+                bounded->nameplate->geometry.close_button.height,
+  };
+
+  if (bounded->nameplate->has_close_button_focus) {
+    cairo_set_source_rgba(cr, 1., 1., 1., 0.3);
+    cairo_arc(cr, close_button_geometry.x + close_button_geometry.width / 2,
+        close_button_geometry.y + close_button_geometry.height / 2,
+        close_button_geometry.height - 8, 0, 2 * M_PI);
+    cairo_fill(cr);
+  }
+  cairo_set_source_rgba(cr, 1., 1., 1., 1.);
+  zn_cairo_stamp_svg_on_surface(cr, CLOSE_ICON, close_button_geometry.x,
+      close_button_geometry.y, close_button_geometry.width,
+      close_button_geometry.height);
 
   zna_base_unit_read_cairo_surface(self->base_unit, surface);
   znr_gl_sampler_parameter_i(

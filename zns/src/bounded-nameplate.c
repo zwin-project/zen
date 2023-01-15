@@ -2,12 +2,14 @@
 
 #include <cglm/affine.h>
 #include <linux/input.h>
+#include <signal.h>
 #include <zen-common.h>
 #include <zns/appearance/bounded.h>
 #include <zwnr/intersection.h>
 
 #include "zen/server.h"
 #include "zen/virtual-object.h"
+#include "zen/wlr/box.h"
 #include "zns/bounded.h"
 #include "zns/ray-grab/move.h"
 #include "zns/shell.h"
@@ -48,14 +50,43 @@ zns_bounded_nameplate_node_ray_cast(void *user_data, vec3 origin,
   return true;
 }
 
+static void
+zns_bounded_nameplate_check_close_button_focus(
+    struct zns_bounded_nameplate *self, vec3 origin, vec3 direction)
+{
+  vec3 v0 = {-self->geometry.width / 2.f, 0, 0};
+  vec3 v1 = {+self->geometry.width / 2.f, 0, 0};
+  vec3 v2 = {-self->geometry.width / 2.f, -self->geometry.height, 0};
+
+  mat4 transform;
+  zns_bounded_nameplate_get_transform(self, transform);
+
+  glm_mat4_mulv3(transform, v0, 1, v0);
+  glm_mat4_mulv3(transform, v1, 1, v1);
+  glm_mat4_mulv3(transform, v2, 1, v2);
+
+  float u, v;
+  zwnr_intersection_ray_parallelogram(
+      origin, direction, v0, v1, v2, &u, &v, false);
+
+  const float x = self->geometry.width * u;
+  const float y = self->geometry.height * v;
+  if (zn_wlr_fbox_contains_point(&self->geometry.close_button, x, y)) {
+    self->has_close_button_focus = true;
+  } else {
+    self->has_close_button_focus = false;
+  }
+}
+
 static bool
 zns_bounded_nameplate_node_ray_motion(
     void *user_data, vec3 origin, vec3 direction, uint32_t time_msec)
 {
-  UNUSED(user_data);
-  UNUSED(origin);
-  UNUSED(direction);
   UNUSED(time_msec);
+  struct zns_bounded_nameplate *self = user_data;
+  zns_bounded_nameplate_check_close_button_focus(self, origin, direction);
+  zna_bounded_commit(
+      self->bounded->appearance, ZNA_BOUNDED_DAMAGE_NAMEPLATE_TEXTURE);
   return true;
 }
 
@@ -67,6 +98,7 @@ zns_bounded_nameplate_node_ray_enter(
   UNUSED(direction);
   struct zns_bounded_nameplate *self = user_data;
   self->has_ray_focus = true;
+  zns_bounded_nameplate_check_close_button_focus(self, origin, direction);
   zna_bounded_commit(
       self->bounded->appearance, ZNA_BOUNDED_DAMAGE_NAMEPLATE_TEXTURE);
   return true;
@@ -77,6 +109,7 @@ zns_bounded_nameplate_node_ray_leave(void *user_data)
 {
   struct zns_bounded_nameplate *self = user_data;
   self->has_ray_focus = false;
+  self->has_close_button_focus = false;
   zna_bounded_commit(
       self->bounded->appearance, ZNA_BOUNDED_DAMAGE_NAMEPLATE_TEXTURE);
   return true;
@@ -91,6 +124,17 @@ zns_bounded_nameplate_node_ray_button(void *user_data, uint32_t time_msec,
   struct zn_server *server = zn_server_get_singleton();
   struct zn_seat *seat = server->input_manager->seat;
   struct zn_ray *ray = server->scene->ray;
+
+  if (state == WLR_BUTTON_PRESSED && self->has_close_button_focus) {
+    struct wl_client *client = wl_resource_get_client(
+        self->bounded->zwnr_bounded->virtual_object->resource);
+    pid_t pid = -1;
+    wl_client_get_credentials(client, &pid, NULL, NULL);
+    if (pid != -1) {
+      // FIXME: use SIGTERM
+      kill(pid, SIGKILL);
+    }
+  }
 
   if (state == WLR_BUTTON_PRESSED && button == BTN_LEFT &&
       seat->pressing_button_count == 1) {
@@ -165,6 +209,14 @@ zns_bounded_nameplate_create(struct zns_bounded *bounded)
   self->geometry.width = 0.3;
   self->geometry.height = 0.03;
   self->has_ray_focus = false;
+
+  const float icon_size = self->geometry.height * 0.5;
+  self->geometry.close_button = (struct wlr_fbox){
+      .x = self->geometry.width - icon_size - 0.01,
+      .y = self->geometry.height / 2 - icon_size / 2,
+      .width = icon_size,
+      .height = icon_size,
+  };
 
   return self;
 

@@ -136,6 +136,7 @@ icons = {
   'vr-blue.svg'       : 'VR_ICON_BLUE',
   'vr-translucent.svg': 'VR_ICON_TRANSLUCENT',
   'vr-white.svg'      : 'VR_ICON_WHITE',
+  'close.svg'         : 'CLOSE_ICON',
 }
 
 icon_install_dir = join_paths(datadir, 'zen')
