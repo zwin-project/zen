@@ -8,8 +8,7 @@ XR Desktop Environment
 
 . zwin protocols +
 Please see https://github.com/zwin-project/zwin[zwin-project/zwin]
-to build and install. +
-[yellow]#***__important__**#: Please use `draft` branch.
+to build and install.
 . zen-remote +
 Please see https://github.com/zwin-project/zen-remote[zwin-project/zen-remote]
 to build and install.
