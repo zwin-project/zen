@@ -2,6 +2,7 @@
 
 #include <cglm/types.h>
 #include <stdbool.h>
+#include <wlr/util/box.h>
 
 struct zns_bounded;
 
@@ -14,10 +15,13 @@ struct zns_bounded_nameplate {
   struct zns_node *node;
 
   bool has_ray_focus;
+  bool has_close_button_focus;
 
   struct {
     float width;
     float height;
+
+    struct wlr_fbox close_button;
   } geometry;
 };
 

@@ -37,6 +37,7 @@ _zen_appearance_deps = [
 _zen_appearance_lib = static_library(
   'zen-appearance',
   _zen_appearance_srcs,
+  c_args: ['-include', 'constants.h'],
   include_directories: [zen_inc, zen_shell_inc, _zen_appearance_inc],
   dependencies: _zen_appearance_deps,
   install: false,
