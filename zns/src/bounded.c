@@ -258,7 +258,8 @@ zns_bounded_create(struct zwnr_bounded *zwnr_bounded)
     goto err;
   }
 
-  self->node = zns_node_create(server->shell->root, self, &node_implementation);
+  self->node = zns_node_create(
+      server->shell->root, self, &node_implementation, ZNS_NODE_BOUNDED);
   if (self->node == NULL) {
     zn_error("Failed to create zns_node");
     goto err_free;

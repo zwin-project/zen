@@ -196,7 +196,8 @@ zns_expansive_create(struct zwnr_expansive *zwnr_expansive)
     goto err;
   }
 
-  self->node = zns_node_create(server->shell->root, self, &node_implementation);
+  self->node = zns_node_create(
+      server->shell->root, self, &node_implementation, ZNS_NODE_EXPANSIVE);
   if (self->node == NULL) {
     zn_error("Failed to create zns_node");
     goto err_free;

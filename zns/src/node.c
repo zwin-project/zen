@@ -88,7 +88,7 @@ zns_node_ray_frame(struct zns_node *self)
 
 struct zns_node *
 zns_node_create(struct zns_node *parent, void *user_data,
-    const struct zns_node_interface *implementation)
+    const struct zns_node_interface *implementation, enum zns_node_type type)
 {
   struct zns_node *self;
 
@@ -107,6 +107,7 @@ zns_node_create(struct zns_node *parent, void *user_data,
   }
   self->user_data = user_data;
   self->implementation = implementation;
+  self->type = type;
 
   wl_signal_init(&self->events.destroy);
 
