@@ -56,7 +56,6 @@ jobs:
         with:
           repository: zwin-project/zwin
           path: zwin
-          ref: draft
 
       - name: Build zwin
         working-directory: ./zwin
