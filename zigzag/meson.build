@@ -1,7 +1,7 @@
 _zigzag_inc = include_directories('include')
 
 _zigzag_srcs = [
-  'src/cairo_util.c',
+  'src/cairo-util.c',
   'src/layout.c',
   'src/node.c',
   'src/reconfigure.c',

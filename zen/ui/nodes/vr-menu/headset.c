@@ -21,7 +21,7 @@ static bool
 zn_vr_icon_render(struct zigzag_node *node, cairo_t *cr)
 {
   UNUSED(node);
-  bool result = zigzag_cairo_stamp_svg_on_surface(
+  bool result = zn_cairo_stamp_svg_on_surface(
       cr, VR_ICON_TRANSLUCENT, 0., 0., vr_icon_width, vr_icon_height);
   return result;
 }

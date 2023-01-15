@@ -23,7 +23,7 @@ zn_app_launcher_render(struct zigzag_node *node, cairo_t *cr)
   static const double padding = 6.;
   const double icon_size = menu_bar_height - 2 * padding;
 
-  if (zigzag_cairo_stamp_svg_on_surface(cr, self->app->icon,
+  if (zn_cairo_stamp_svg_on_surface(cr, self->app->icon,
           node->frame.width / 2 - icon_size / 2,
           node->frame.height / 2 - icon_size / 2, icon_size, icon_size)) {
     return true;

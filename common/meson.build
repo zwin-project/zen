@@ -22,7 +22,6 @@ _zen_common_deps = [
 _zen_common_lib = static_library(
   'zen-common',
   _zen_common_srcs,
-  c_args: ['-include', 'constants.h'],
   dependencies: _zen_common_deps,
   include_directories: _zen_common_inc,
   install: false,

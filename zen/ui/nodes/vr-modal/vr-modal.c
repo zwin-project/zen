@@ -55,7 +55,7 @@ zn_vr_modal_render(struct zigzag_node *node, cairo_t *cr)
 
   cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
 
-  if (!zigzag_cairo_stamp_svg_on_surface(cr, VR_ICON_WHITE,
+  if (!zn_cairo_stamp_svg_on_surface(cr, VR_ICON_WHITE,
           center_x - ICON_WIDTH / 2, (center_y - ICON_HEIGHT / 2) - 120,
           ICON_WIDTH, ICON_HEIGHT)) {
     return false;

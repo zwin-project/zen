@@ -42,7 +42,7 @@ static bool
 zn_power_icon_render(struct zigzag_node *node, cairo_t *cr)
 {
   UNUSED(node);
-  bool result = zigzag_cairo_stamp_svg_on_surface(
+  bool result = zn_cairo_stamp_svg_on_surface(
       cr, POWER_BUTTON_ICON, 0., 0., power_icon_width, power_icon_height);
   return result;
 }

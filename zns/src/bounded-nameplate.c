@@ -125,6 +125,7 @@ zns_bounded_nameplate_node_ray_button(void *user_data, uint32_t time_msec,
   struct zn_seat *seat = server->input_manager->seat;
   struct zn_ray *ray = server->scene->ray;
 
+  // FIXME: Trigger events when releasing button
   if (state == WLR_BUTTON_PRESSED && self->has_close_button_focus) {
     struct wl_client *client = wl_resource_get_client(
         self->bounded->zwnr_bounded->virtual_object->resource);
