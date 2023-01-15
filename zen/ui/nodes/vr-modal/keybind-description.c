@@ -11,7 +11,7 @@
 #include "zen/screen/output.h"
 #include "zen/server.h"
 #include "zen/ui/layout-constants.h"
-#include "zen/ui/nodes/vr-modal/textbox.h"
+#include "zen/ui/nodes/textbox.h"
 
 static void
 zn_vr_modal_item_keybind_description_on_click(
