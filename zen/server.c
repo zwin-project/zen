@@ -1,7 +1,6 @@
 #include "zen/server.h"
 
 #include <stdio.h>
-#include <wlr/render/glew.h>
 #include <wlr/types/wlr_output.h>
 #include <zen-common.h>
 
@@ -12,6 +11,7 @@
 #include "zen/screen-layout.h"
 #include "zen/screen/output.h"
 #include "zen/virtual-object.h"
+#include "zen/wlr/render/glew.h"
 
 static struct zn_server *server_singleton = NULL;
 

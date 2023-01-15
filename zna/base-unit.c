@@ -3,12 +3,12 @@
 #include <GL/glew.h>
 #include <endian.h>
 #include <stdio.h>
-#include <wlr/render/egl.h>
-#include <wlr/render/glew.h>
 #include <zen-common.h>
 #include <zwnr/gl-sampler.h>
 
 #include "zen/server.h"
+#include "zen/wlr/render/egl.h"
+#include "zen/wlr/render/glew.h"
 
 struct zna_base_unit_cairo_argb {
 #if __BYTE_ORDER == __LITTLE_ENDIAN
@@ -96,8 +96,8 @@ zna_base_unit_read_wlr_texture(
   struct wlr_glew_texture_attribs texture_attrib;
   wlr_glew_texture_get_attribs(texture, &texture_attrib);
 
-  struct wlr_egl *egl = wlr_glew_renderer_get_egl(server->renderer);
-  wlr_egl_make_current(egl);
+  struct zn_wlr_egl *egl = wlr_glew_renderer_get_egl(server->renderer);
+  zn_wlr_egl_make_current(egl);
 
   GLuint framebuffer;
   glGenFramebuffers(1, &framebuffer);
@@ -129,7 +129,7 @@ zna_base_unit_read_wlr_texture(
   glDeleteTextures(1, &depth_texture);
   glDeleteFramebuffers(1, &framebuffer);
 
-  wlr_egl_unset_current(egl);
+  zn_wlr_egl_unset_current(egl);
 
   if (self->has_texture_data == false) {
     self->has_texture_data = true;

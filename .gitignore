@@ -4,3 +4,6 @@
 # Other
 build/
 
+subprojects/*
+!subprojects/glew.wrap
+!subprojects/packagefiles
