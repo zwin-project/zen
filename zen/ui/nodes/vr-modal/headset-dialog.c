@@ -182,6 +182,7 @@ zn_vr_modal_item_headset_dialog_destroy(
 {
   wl_list_remove(&self->peer_list_changed_listener.link);
   zn_vr_modal_item_headset_dialog_destroy_children(self);
+  zn_textbox_destroy(self->headset_text);
   zigzag_node_destroy(self->zigzag_node);
   free(self);
 }
