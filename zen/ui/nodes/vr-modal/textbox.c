@@ -64,8 +64,8 @@ zn_textbox_create(struct zigzag_layout *zigzag_layout, char *text,
   self->frame_radius = frame_radius;
 
   cairo_text_extents_t extents;
-  zigzag_layout_get_text_extents(
-      zigzag_layout, self->text, self->font_size, &extents);
+  zn_cairo_get_text_extents(self->text, self->font_size,
+      zn_font_face_get_cairo_font_face(ZN_FONT_REGULAR), &extents);
   self->zigzag_node->pending.frame.width =
       extents.width - extents.x_bearing + 20.;
   self->zigzag_node->pending.frame.height = vr_modal_keybind_description_height;
