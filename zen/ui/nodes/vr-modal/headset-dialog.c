@@ -11,8 +11,8 @@
 #include "zen/screen/output.h"
 #include "zen/server.h"
 #include "zen/ui/layout-constants.h"
+#include "zen/ui/nodes/textbox.h"
 #include "zen/ui/nodes/vr-modal/headset.h"
-#include "zen/ui/nodes/vr-modal/textbox.h"
 
 #define ICON_WIDTH 140.0
 #define ICON_HEIGHT 80.0

@@ -1,4 +1,4 @@
-#include "zen/ui/nodes/vr-modal/textbox.h"
+#include "zen/ui/nodes/textbox.h"
 
 #include <cairo.h>
 #include <string.h>
