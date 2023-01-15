@@ -120,34 +120,3 @@ zigzag_cairo_draw_rounded_bubble(cairo_t *cr, double x, double y, double width,
   cairo_line_to(cr, x, y + radius);
   cairo_arc(cr, x + radius, y + radius, radius, M_PI, 3 * M_PI / 2);
 }
-
-bool
-zigzag_cairo_stamp_svg_on_surface(cairo_t *cr, const char *filename, double x,
-    double y, double width, double height)
-{
-  GError *error = NULL;
-  GFile *file = g_file_new_for_path(filename);
-  RsvgHandle *handle = rsvg_handle_new_from_gfile_sync(
-      file, RSVG_HANDLE_FLAGS_NONE, NULL, &error);
-  g_object_unref(file);
-  if (handle == NULL) {
-    zn_error("Failed to create the svg handler: %s", error->message);
-    g_error_free(error);
-    return false;
-  }
-
-  RsvgRectangle viewport = {
-      .x = x,
-      .y = y,
-      .width = width,
-      .height = height,
-  };
-
-  if (!rsvg_handle_render_document(handle, cr, &viewport, &error)) {
-    zn_error("Failed to render the svg: %s", error->message);
-    g_error_free(error);
-    return false;
-  }
-  g_object_unref(handle);
-  return true;
-}

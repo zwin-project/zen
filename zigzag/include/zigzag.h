@@ -139,8 +139,5 @@ void zigzag_cairo_draw_text(cairo_t *cr, char *text, double x, double y,
 void zigzag_cairo_draw_rounded_rectangle(cairo_t *cr, double x, double y,
     double width, double height, double radius);
 
-bool zigzag_cairo_stamp_svg_on_surface(cairo_t *cr, const char *filename,
-    double x, double y, double width, double height);
-
 void zigzag_cairo_draw_rounded_bubble(cairo_t *cr, double x, double y,
     double width, double height, double radius, double tip_x);

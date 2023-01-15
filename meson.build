@@ -131,12 +131,12 @@ if get_option('cui-client')
 endif
 
 icons = {
+  'close.svg'         : 'CLOSE_ICON',
   'power-button.svg'  : 'POWER_BUTTON_ICON',
   'unknown-app.png'   : 'UNKNOWN_APP_ICON',
   'vr-blue.svg'       : 'VR_ICON_BLUE',
   'vr-translucent.svg': 'VR_ICON_TRANSLUCENT',
   'vr-white.svg'      : 'VR_ICON_WHITE',
-  'close.svg'         : 'CLOSE_ICON',
 }
 
 icon_install_dir = join_paths(datadir, 'zen')
