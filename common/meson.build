@@ -15,12 +15,14 @@ _zen_common_deps = [
   cairo_dep,
   cglm_dep,
   fontconfig_dep,
+  rsvg_dep,
   wayland_server_dep.partial_dependency(includes: true),
 ]
 
 _zen_common_lib = static_library(
   'zen-common',
   _zen_common_srcs,
+  c_args: ['-include', 'constants.h'],
   dependencies: _zen_common_deps,
   include_directories: _zen_common_inc,
   install: false,

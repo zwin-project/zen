@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cairo.h>
+#include <stdbool.h>
 
 enum zn_cairo_anchor {
   ZN_CAIRO_ANCHOR_CENTER,
@@ -16,3 +17,6 @@ void zn_cairo_draw_rounded_rectangle(cairo_t *cr, double x, double y,
 void zn_cairo_draw_text(cairo_t *cr, char *text, double x, double y,
     enum zn_cairo_anchor horizontal_anchor,
     enum zn_cairo_anchor vertical_anchor);
+
+bool zn_cairo_stamp_svg_on_surface(cairo_t *cr, const char *filename, double x,
+    double y, double width, double height);
