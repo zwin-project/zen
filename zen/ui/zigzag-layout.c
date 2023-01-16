@@ -134,5 +134,9 @@ notify_click_recursive(struct wl_list *nodes, double x, double y)
 bool
 zn_zigzag_layout_notify_click(struct zn_zigzag_layout *self, double x, double y)
 {
+  struct zn_server *server = zn_server_get_singleton();
+  if (server->display_system == ZN_DISPLAY_SYSTEM_IMMERSIVE) {
+    return false;
+  }
   return notify_click_recursive(&self->zigzag_layout->node_list, x, y);
 }
