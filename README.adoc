@@ -2,7 +2,11 @@
 
 XR Desktop Environment
 
+== Try it out
+If you want to try out Zen, you should follow our installation guide: https://www.zwin.dev/getting_started/system_requirements
+
 == Build & Install
+This section is for contributors of Zen. Regular users shuold see the above guides.
 
 === Dependencies
 
