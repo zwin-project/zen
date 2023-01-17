@@ -27,6 +27,7 @@ c_args += cc.get_supported_arguments([
   '-Wcast-qual',
   '-fno-stack-protector',
   '-Wno-visibility',
+  '-Wno-strict-prototypes'
 ])
 
 glew_sources = [
