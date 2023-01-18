@@ -2,10 +2,12 @@
 
 #include <cairo.h>
 #include <zen-common.h>
-#include <zigzag.h>
 
 #include "zen/server.h"
 #include "zen/ui/layout-constants.h"
+#include "zigzag/cairo-util.h"
+#include "zigzag/layout.h"
+#include "zigzag/node.h"
 
 static int
 zn_power_menu_item_clock_handle_second_timer(void *data)

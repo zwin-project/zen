@@ -3,10 +3,11 @@
 #include <cairo.h>
 #include <string.h>
 #include <zen-common.h>
-#include <zigzag.h>
 
 #include "zen/screen/output.h"
 #include "zen/ui/layout-constants.h"
+#include "zigzag/cairo-util.h"
+#include "zigzag/node.h"
 
 static void
 zn_textbox_on_click(struct zigzag_node *node, double x, double y)

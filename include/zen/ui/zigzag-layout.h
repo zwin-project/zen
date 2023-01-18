@@ -1,10 +1,10 @@
 #pragma once
 
 #include <wlr/render/wlr_renderer.h>
-#include <zigzag.h>
 
 #include "zen/screen.h"
 #include "zen/ui/nodes/menu-bar.h"
+#include "zigzag/node.h"
 
 struct zn_vr_modal;
 

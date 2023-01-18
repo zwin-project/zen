@@ -3,13 +3,15 @@
 #include <cairo.h>
 #include <string.h>
 #include <zen-common.h>
-#include <zigzag.h>
 #include <znr-remote.h>
 
 #include "zen/screen/output.h"
 #include "zen/server.h"
 #include "zen/ui/nodes/vr-modal/headset-dialog.h"
 #include "zen/ui/nodes/vr-modal/keybind-description.h"
+#include "zigzag/cairo-util.h"
+#include "zigzag/layout.h"
+#include "zigzag/node.h"
 
 #define BG_ALPHA 0.7
 #define ICON_WIDTH 140.0

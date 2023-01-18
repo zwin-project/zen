@@ -1,5 +1,6 @@
 #include <zen-common.h>
-#include <zigzag.h>
+
+#include "zigzag/node.h"
 
 struct zigzag_reconfigure_context {
   enum zigzag_reconfigure_direction direction;

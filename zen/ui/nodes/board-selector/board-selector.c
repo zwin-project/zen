@@ -2,7 +2,6 @@
 
 #include <cairo.h>
 #include <zen-common.h>
-#include <zigzag.h>
 
 #include "zen/board.h"
 #include "zen/scene.h"
@@ -10,6 +9,8 @@
 #include "zen/server.h"
 #include "zen/ui/layout-constants.h"
 #include "zen/ui/nodes/board-selector/switch-button.h"
+#include "zigzag/layout.h"
+#include "zigzag/node.h"
 
 static void
 zn_board_selector_on_click(struct zigzag_node *node, double x, double y)

@@ -1,8 +1,12 @@
+#include "zigzag/layout.h"
+
 #include <cairo-ft.h>
 #include <stdlib.h>
 #include <wayland-server-core.h>
 #include <zen-common.h>
-#include <zigzag.h>
+
+#include "zigzag/cairo-util.h"
+#include "zigzag/node.h"
 
 void
 zigzag_layout_add_node(struct zigzag_layout *layout, struct zigzag_node *node,

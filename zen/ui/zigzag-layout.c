@@ -3,12 +3,13 @@
 #include <time.h>
 #include <wlr/render/wlr_renderer.h>
 #include <zen-common.h>
-#include <zigzag.h>
 
 #include "zen/screen.h"
 #include "zen/server.h"
 #include "zen/ui/nodes/menu-bar.h"
 #include "zen/ui/nodes/vr-modal/vr-modal.h"
+#include "zigzag/layout.h"
+#include "zigzag/node.h"
 
 static void
 zn_zigzag_layout_handle_display_system_changed(

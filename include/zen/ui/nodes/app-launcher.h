@@ -2,7 +2,8 @@
 
 #include <wayland-server-core.h>
 #include <wlr/render/wlr_renderer.h>
-#include <zigzag.h>
+
+#include "zigzag/node.h"
 
 struct zn_favorite_app;
 

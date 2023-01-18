@@ -1,11 +1,12 @@
 #include "zen/ui/nodes/app-launcher.h"
 
 #include <cairo.h>
-#include <zigzag.h>
 
 #include "zen-common.h"
 #include "zen/favorite-app.h"
 #include "zen/ui/layout-constants.h"
+#include "zigzag/layout.h"
+#include "zigzag/node.h"
 
 static void
 zn_app_launcher_on_click(struct zigzag_node *node, double x, double y)

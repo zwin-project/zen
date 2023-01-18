@@ -2,12 +2,14 @@
 
 #include <cairo.h>
 #include <zen-common.h>
-#include <zigzag.h>
 
 #include "zen/server.h"
 #include "zen/ui/layout-constants.h"
 #include "zen/ui/nodes/power-menu/clock.h"
 #include "zen/ui/nodes/power-menu/logout.h"
+#include "zigzag/cairo-util.h"
+#include "zigzag/layout.h"
+#include "zigzag/node.h"
 
 static void
 zn_power_menu_on_click(struct zigzag_node *self, double x, double y)

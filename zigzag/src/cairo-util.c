@@ -1,10 +1,12 @@
+#include "zigzag/cairo-util.h"
+
 #include <cairo.h>
 #include <drm_fourcc.h>
 #include <librsvg/rsvg.h>
 #include <wlr/render/wlr_renderer.h>
 #include <zen-common.h>
 
-#include "zigzag.h"
+#include "zigzag/node.h"
 
 struct wlr_texture *
 zigzag_wlr_texture_from_cairo_surface(
