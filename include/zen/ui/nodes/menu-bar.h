@@ -2,9 +2,9 @@
 
 #include <wayland-server-core.h>
 #include <wlr/render/wlr_renderer.h>
-#include <zigzag.h>
 
 #include "zen/screen/output.h"
+#include "zigzag/node.h"
 
 struct zn_power_button;
 struct zn_board_selector;

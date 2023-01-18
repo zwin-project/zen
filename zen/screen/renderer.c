@@ -2,7 +2,6 @@
 
 #include <wlr/types/wlr_matrix.h>
 #include <zen-common.h>
-#include <zigzag.h>
 
 #include "zen/board.h"
 #include "zen/cursor.h"
@@ -10,6 +9,7 @@
 #include "zen/server.h"
 #include "zen/ui/zigzag-layout.h"
 #include "zen/view.h"
+#include "zigzag/layout.h"
 
 static void
 scissor_output(struct zn_output *output, pixman_box32_t *rect)

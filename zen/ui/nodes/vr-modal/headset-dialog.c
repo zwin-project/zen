@@ -4,7 +4,6 @@
 #include <math.h>
 #include <string.h>
 #include <zen-common.h>
-#include <zigzag.h>
 #include <znr-remote.h>
 
 #include "zen/peer.h"
@@ -13,6 +12,9 @@
 #include "zen/ui/layout-constants.h"
 #include "zen/ui/nodes/textbox.h"
 #include "zen/ui/nodes/vr-modal/headset.h"
+#include "zigzag/cairo-util.h"
+#include "zigzag/layout.h"
+#include "zigzag/node.h"
 
 #define ICON_WIDTH 140.0
 #define ICON_HEIGHT 80.0

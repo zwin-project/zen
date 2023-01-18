@@ -2,11 +2,13 @@
 
 #include <cairo.h>
 #include <zen-common.h>
-#include <zigzag.h>
 
 #include "zen/server.h"
 #include "zen/ui/layout-constants.h"
 #include "zen/ui/nodes/vr-menu/vr-menu.h"
+#include "zigzag/cairo-util.h"
+#include "zigzag/layout.h"
+#include "zigzag/node.h"
 
 static void
 zn_vr_button_on_click(struct zigzag_node *node, double x, double y)

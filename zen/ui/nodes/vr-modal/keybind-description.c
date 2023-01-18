@@ -4,7 +4,6 @@
 #include <math.h>
 #include <string.h>
 #include <zen-common.h>
-#include <zigzag.h>
 #include <znr-remote.h>
 
 #include "zen/peer.h"
@@ -12,6 +11,8 @@
 #include "zen/server.h"
 #include "zen/ui/layout-constants.h"
 #include "zen/ui/nodes/textbox.h"
+#include "zigzag/layout.h"
+#include "zigzag/node.h"
 
 static void
 zn_vr_modal_item_keybind_description_on_click(

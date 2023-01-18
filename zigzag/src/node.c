@@ -1,8 +1,12 @@
+#include "zigzag/node.h"
+
 #include <cairo.h>
 #include <stdlib.h>
 #include <wlr/render/wlr_renderer.h>
 #include <zen-common.h>
-#include <zigzag.h>
+
+#include "zigzag/cairo-util.h"
+#include "zigzag/layout.h"
 
 cairo_surface_t *
 zigzag_node_render_cairo_surface(struct zigzag_node *self,

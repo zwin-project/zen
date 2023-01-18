@@ -3,12 +3,14 @@
 #include <cairo.h>
 #include <string.h>
 #include <zen-common.h>
-#include <zigzag.h>
 
 #include "zen/peer.h"
 #include "zen/screen/output.h"
 #include "zen/server.h"
 #include "zen/ui/layout-constants.h"
+#include "zigzag/cairo-util.h"
+#include "zigzag/layout.h"
+#include "zigzag/node.h"
 
 static void
 zn_headset_dialog_item_headset_on_click(

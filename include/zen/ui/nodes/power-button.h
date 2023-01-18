@@ -2,9 +2,9 @@
 
 #include <cairo.h>
 #include <wlr/render/wlr_renderer.h>
-#include <zigzag.h>
 
 #include "zen/ui/nodes/power-menu/power-menu.h"
+#include "zigzag/node.h"
 
 struct zn_power_button {
   struct zigzag_node *zigzag_node;

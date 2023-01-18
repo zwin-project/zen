@@ -1,9 +1,9 @@
 #pragma once
 
 #include <wlr/render/wlr_renderer.h>
-#include <zigzag.h>
 
 #include "zen/screen/output.h"
+#include "zigzag/node.h"
 
 struct zn_vr_modal_item_headset_dialog;
 struct zn_vr_modal_item_keybind_description;

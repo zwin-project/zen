@@ -2,7 +2,6 @@
 
 #include <cairo.h>
 #include <zen-common.h>
-#include <zigzag.h>
 
 #include "zen/favorite-app.h"
 #include "zen/screen/output.h"
@@ -12,6 +11,8 @@
 #include "zen/ui/nodes/board-selector/board-selector.h"
 #include "zen/ui/nodes/power-button.h"
 #include "zen/ui/nodes/vr-button.h"
+#include "zigzag/layout.h"
+#include "zigzag/node.h"
 
 static void
 zn_menu_bar_on_click(struct zigzag_node *node, double x, double y)

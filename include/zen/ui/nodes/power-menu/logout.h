@@ -1,7 +1,8 @@
 #pragma once
 
 #include <wlr/render/wlr_renderer.h>
-#include <zigzag.h>
+
+#include "zigzag/node.h"
 
 struct zn_power_menu_item_logout {
   struct zigzag_node *zigzag_node;
