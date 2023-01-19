@@ -15,6 +15,7 @@ struct zn_xdg_toplevel {
   struct wl_listener move_listener;
   struct wl_listener resize_listener;
   struct wl_listener maximize_listener;
+  struct wl_listener wlr_xdg_surface_new_popup_listener;
   struct wl_listener wlr_xdg_surface_destroy_listener;
 };
 
