@@ -55,6 +55,15 @@ zn_xdg_popup_handle_unmap(struct wl_listener *listener, void *data)
 }
 
 static void
+zn_xdg_popup_handle_new_popup(struct wl_listener *listener, void *data)
+{
+  struct zn_xdg_popup *self =
+      zn_container_of(listener, self, new_popup_listener);
+  struct wlr_xdg_popup *wlr_xdg_popup = data;
+  zn_xdg_popup_create(wlr_xdg_popup, self->toplevel);
+}
+
+static void
 zn_xdg_popup_handle_wlr_xdg_surface_destroy(
     struct wl_listener *listener, void *data)
 {
@@ -81,6 +90,9 @@ zn_xdg_popup_create(
 
   self->unmap_listener.notify = zn_xdg_popup_handle_unmap;
   wl_signal_add(&popup->base->events.unmap, &self->unmap_listener);
+
+  self->new_popup_listener.notify = zn_xdg_popup_handle_new_popup;
+  wl_signal_add(&popup->base->events.new_popup, &self->new_popup_listener);
 
   self->wlr_xdg_surface_destroy_listener.notify =
       zn_xdg_popup_handle_wlr_xdg_surface_destroy;
