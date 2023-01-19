@@ -5,6 +5,8 @@
 #include "zen/screen/xdg-toplevel.h"
 #include "zen/view-child.h"
 
+void zn_xdg_popup_destroy(struct zn_xdg_popup *self);
+
 static void
 zn_xdg_popup_impl_get_toplevel_coords(struct zn_view_child *child,
     double child_sx, double child_sy, double *toplevel_sx, double *toplevel_sy)
@@ -70,6 +72,7 @@ zn_xdg_popup_handle_wlr_xdg_surface_destroy(
   UNUSED(data);
   struct zn_xdg_popup *self =
       zn_container_of(listener, self, wlr_xdg_surface_destroy_listener);
+  zn_xdg_popup_destroy(self);
 }
 
 struct zn_xdg_popup *
@@ -103,4 +106,19 @@ zn_xdg_popup_create(
 
 err:
   return NULL;
+}
+
+void
+zn_xdg_popup_destroy(struct zn_xdg_popup *self)
+{
+  wl_list_remove(&self->map_listener.link);
+  wl_list_remove(&self->unmap_listener.link);
+  wl_list_remove(&self->new_popup_listener.link);
+  wl_list_remove(&self->wlr_xdg_surface_destroy_listener.link);
+
+  if (self->view_child) {
+    zn_view_child_destroy(self->view_child);
+  }
+
+  free(self);
 }
