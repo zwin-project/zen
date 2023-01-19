@@ -10,6 +10,7 @@ _zen_srcs = [
   'screen-layout.c',
   'server.c',
   'view.c',
+  'view-child.c',
   'virtual-object.c',
 
   'wlr/box.c',
@@ -27,6 +28,7 @@ _zen_srcs = [
   'screen/output.c',
   'screen/renderer.c',
   'screen/xdg-toplevel.c',
+  'screen/xdg-popup.c',
   'screen/cursor-grab/default.c',
   'screen/cursor-grab/down.c',
   'screen/cursor-grab/move.c',

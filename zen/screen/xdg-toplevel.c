@@ -4,6 +4,7 @@
 
 #include "zen/screen/cursor-grab/move.h"
 #include "zen/screen/cursor-grab/resize.h"
+#include "zen/screen/xdg-popup.h"
 #include "zen/server.h"
 #include "zen/view.h"
 
@@ -68,6 +69,16 @@ zn_xdg_toplevel_view_impl_schedule_configure(struct zn_view *view)
   return wlr_xdg_surface_schedule_configure(self->wlr_xdg_toplevel->base);
 }
 
+void
+zn_xdg_toplevel_view_impl_for_each_popup_surface(
+    struct zn_view *view, wlr_surface_iterator_func_t iterator, void *user_data)
+{
+  struct zn_xdg_toplevel *self = view->user_data;
+
+  wlr_xdg_surface_for_each_popup_surface(
+      self->wlr_xdg_toplevel->base, iterator, user_data);
+}
+
 static const struct zn_view_interface zn_xdg_toplevel_view_impl = {
     .get_wlr_surface_at = zn_xdg_toplevel_view_impl_get_wlr_surface_at,
     .get_window_geom = zn_xdg_toplevel_view_impl_get_window_geom,
@@ -77,6 +88,7 @@ static const struct zn_view_interface zn_xdg_toplevel_view_impl = {
     .set_maximized = zn_xdg_toplevel_view_impl_set_maximized,
     .set_activated = zn_xdg_toplevel_view_impl_set_activated,
     .schedule_configure = zn_xdg_toplevel_view_impl_schedule_configure,
+    .for_each_popup_surface = zn_xdg_toplevel_view_impl_for_each_popup_surface,
 };
 
 static void
@@ -159,6 +171,16 @@ zn_xdg_toplevel_handle_xdg_surface_destroy(
   zn_xdg_toplevel_destroy(self);
 }
 
+static void
+zn_xdg_toplevel_handle_xdg_surface_new_popup(
+    struct wl_listener *listener, void *data)
+{
+  struct zn_xdg_toplevel *self =
+      zn_container_of(listener, self, wlr_xdg_surface_new_popup_listener);
+  struct wlr_xdg_popup *wlr_xdg_popup = data;
+  zn_xdg_popup_create(wlr_xdg_popup, self);
+}
+
 struct zn_xdg_toplevel *
 zn_xdg_toplevel_create(struct wlr_xdg_toplevel *toplevel)
 {
@@ -177,6 +199,11 @@ zn_xdg_toplevel_create(struct wlr_xdg_toplevel *toplevel)
       zn_xdg_toplevel_handle_xdg_surface_destroy;
   wl_signal_add(
       &toplevel->base->events.destroy, &self->wlr_xdg_surface_destroy_listener);
+
+  self->wlr_xdg_surface_new_popup_listener.notify =
+      zn_xdg_toplevel_handle_xdg_surface_new_popup;
+  wl_signal_add(&toplevel->base->events.new_popup,
+      &self->wlr_xdg_surface_new_popup_listener);
 
   self->map_listener.notify = zn_xdg_toplevel_handle_map;
   wl_signal_add(&toplevel->base->events.map, &self->map_listener);

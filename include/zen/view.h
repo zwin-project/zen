@@ -19,6 +19,8 @@ struct zn_view_interface {
   uint32_t (*set_maximized)(struct zn_view *view, bool maximized);
   void (*set_activated)(struct zn_view *view, bool activated);
   uint32_t (*schedule_configure)(struct zn_view *view);
+  void (*for_each_popup_surface)(struct zn_view *view,
+      wlr_surface_iterator_func_t iterator, void *user_data);
 };
 
 /** lifetime of given wlr_surface must be longer than zn_view */

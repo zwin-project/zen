@@ -124,12 +124,47 @@ render_cursor(struct zn_output *output, struct zn_cursor *cursor,
   pixman_region32_fini(&render_damage);
 }
 
+typedef void (*surface_iterator_func_t)(struct zn_output *output,
+    struct wlr_surface *surface, struct wlr_renderer *renderer,
+    struct wlr_fbox *fbox, pixman_region32_t *screen_damage);
+
+struct surface_iterator_data {
+  surface_iterator_func_t iterator;
+
+  struct zn_output *output;
+  struct zn_view *view;
+  struct wlr_renderer *renderer;
+  pixman_region32_t *screen_damage;
+};
+
 void
-render_view(struct zn_output *output, struct zn_view *view,
-    struct wlr_renderer *renderer, pixman_region32_t *screen_damage)
+popup_for_each_iterator(
+    struct wlr_surface *surface, int sx, int sy, void *user_data)
 {
-  struct wlr_texture *texture = wlr_surface_get_texture(view->surface);
-  struct wlr_fbox view_fbox;
+  struct surface_iterator_data *data = user_data;
+  struct wlr_fbox surface_fbox;
+
+  {
+    struct wlr_fbox fbox;
+    zn_view_get_surface_fbox(data->view, &fbox);
+    surface_fbox = (struct wlr_fbox){
+        .x = fbox.x + sx,
+        .y = fbox.y + sy,
+        .width = surface->current.width,
+        .height = surface->current.height,
+    };
+  }
+
+  data->iterator(data->output, surface, data->renderer, &surface_fbox,
+      data->screen_damage);
+}
+
+void
+render_wlr_surface(struct zn_output *output, struct wlr_surface *surface,
+    struct wlr_renderer *renderer, struct wlr_fbox *fbox,
+    pixman_region32_t *screen_damage)
+{
+  struct wlr_texture *texture = wlr_surface_get_texture(surface);
   struct wlr_box transformed_box;
   pixman_region32_t render_damage;
   pixman_box32_t *rects;
@@ -137,9 +172,7 @@ render_view(struct zn_output *output, struct zn_view *view,
 
   if (!texture) return;
 
-  zn_view_get_surface_fbox(view, &view_fbox);
-  zn_output_box_effective_to_transformed_coords(
-      output, &view_fbox, &transformed_box);
+  zn_output_box_effective_to_transformed_coords(output, fbox, &transformed_box);
 
   pixman_region32_init(&render_damage);
   pixman_region32_union_rect(&render_damage, &render_damage, transformed_box.x,
@@ -156,6 +189,25 @@ render_view(struct zn_output *output, struct zn_view *view,
       wlr_render_texture_with_matrix(renderer, texture, matrix, 1.f);
     }
   }
+}
+
+void
+render_view(struct zn_output *output, struct zn_view *view,
+    struct wlr_renderer *renderer, pixman_region32_t *screen_damage)
+{
+  struct wlr_fbox view_fbox;
+  zn_view_get_surface_fbox(view, &view_fbox);
+  render_wlr_surface(
+      output, view->surface, renderer, &view_fbox, screen_damage);
+
+  struct surface_iterator_data data = {
+      .iterator = render_wlr_surface,
+      .output = output,
+      .view = view,
+      .renderer = renderer,
+      .screen_damage = screen_damage,
+  };
+  view->impl->for_each_popup_surface(view, popup_for_each_iterator, &data);
 }
 
 static void
