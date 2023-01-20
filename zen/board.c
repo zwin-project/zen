@@ -30,6 +30,16 @@ zn_board_is_dangling(struct zn_board *self)
   return self->screen == NULL;
 }
 
+static void
+zn_board_wlr_surface_send_frame_done_iterator(
+    struct wlr_surface *surface, int sx, int sy, void *data)
+{
+  UNUSED(sx);
+  UNUSED(sy);
+  struct timespec *when = data;
+  wlr_surface_send_frame_done(surface, when);
+}
+
 void
 zn_board_send_frame_done(struct zn_board *self, struct timespec *when)
 {
@@ -37,8 +47,9 @@ zn_board_send_frame_done(struct zn_board *self, struct timespec *when)
 
   wl_list_for_each (view, &self->view_list, board_link) {
     wlr_surface_send_frame_done(view->surface, when);
-
-    // TODO: Popups, subsurfaces?
+    view->impl->for_each_popup_surface(
+        view, zn_board_wlr_surface_send_frame_done_iterator, when);
+    // TODO: subsurfaces?
   }
 
   // TODO: client-defined cursor
