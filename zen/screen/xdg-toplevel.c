@@ -246,6 +246,7 @@ zn_xdg_toplevel_destroy(struct zn_xdg_toplevel *self)
   wl_list_remove(&self->move_listener.link);
   wl_list_remove(&self->resize_listener.link);
   wl_list_remove(&self->maximize_listener.link);
+  wl_list_remove(&self->wlr_xdg_surface_new_popup_listener.link);
   wl_list_remove(&self->wlr_xdg_surface_destroy_listener.link);
   if (self->view) zn_view_destroy(self->view);
   free(self);
