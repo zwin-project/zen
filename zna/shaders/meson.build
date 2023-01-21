@@ -8,6 +8,8 @@ _shader_sources = [
   'ray.frag',
   'view.frag',
   'view.vert',
+  'view-child.frag',
+  'view-child.vert',
 ]
 
 shaders = []
