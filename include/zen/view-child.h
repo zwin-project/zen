@@ -10,13 +10,14 @@ struct zn_view_child_interface {
       double child_sy, double *toplevel_sx, double *toplevel_sy);
 };
 
+/** Make sure that this is destroyed when its zn_view is destroyed */
 struct zn_view_child {
   void *user_data;
   struct wlr_surface *surface;  // nonnull
 
   const struct zn_view_child_interface *impl;
 
-  struct zn_view *view;
+  struct zn_view *view;  // nonnull
 
   struct {
     vec2 size;
