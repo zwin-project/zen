@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cglm/types.h>
 #include <wlr/types/wlr_surface.h>
 
 struct zn_view_child;
@@ -17,7 +18,15 @@ struct zn_view_child {
 
   struct zn_view *view;
 
+  struct {
+    vec2 size;
+    mat4 transform;  // translation and rotation only
+  } geometry;
+
   struct wl_listener commit_listener;
+
+  struct zna_view_child *_appearance;  // be private
+  uint32_t appearance_damage;
 };
 
 struct zn_view_child *zn_view_child_create(struct wlr_surface *surface,

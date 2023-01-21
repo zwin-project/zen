@@ -11,6 +11,8 @@
 #include "ray.frag.h"
 #include "ray.vert.h"
 #include "system.h"
+#include "view-child.frag.h"
+#include "view-child.vert.h"
 #include "view.frag.h"
 #include "view.vert.h"
 
@@ -73,6 +75,18 @@ static const struct shader_info shader_info[ZNA_SHADER_COUNT] = {
         {
             .source = view_frag_source,
             .length = sizeof(view_frag_source),
+            .type = GL_FRAGMENT_SHADER,
+        },
+    [ZNA_SHADER_VIEW_CHILD_VERTEX] =
+        {
+            .source = view_child_vert_source,
+            .length = sizeof(view_child_vert_source),
+            .type = GL_VERTEX_SHADER,
+        },
+    [ZNA_SHADER_VIEW_CHILD_FRAGMENT] =
+        {
+            .source = view_child_frag_source,
+            .length = sizeof(view_child_frag_source),
             .type = GL_FRAGMENT_SHADER,
         },
 };
