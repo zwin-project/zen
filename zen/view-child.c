@@ -41,7 +41,6 @@ zn_view_child_update_geometry(struct zn_view_child *self)
   if (self->view->board) {
     struct wlr_fbox view_fbox, board_local_view_geom;
 
-    // FIXME: take window geometry into account
     zn_view_child_get_surface_fbox(self, &view_fbox);
     zn_board_box_effective_to_local_geom(
         self->view->board, &view_fbox, &board_local_view_geom);

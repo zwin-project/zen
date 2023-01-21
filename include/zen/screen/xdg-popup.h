@@ -8,7 +8,7 @@ struct zn_xdg_toplevel;
 
 struct zn_xdg_popup {
   struct wlr_xdg_popup *wlr_xdg_popup;  // nonnull
-  struct zn_view_child *view_child;
+  struct zn_view_child *view_child;     // nullable
 
   struct zn_xdg_toplevel *toplevel;  // nonnull
 
