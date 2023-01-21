@@ -173,6 +173,7 @@ zn_scene_set_focused_view(struct zn_scene *self, struct zn_view *view)
   }
 
   if (self->focused_view != NULL) {
+    self->focused_view->impl->close_popups(self->focused_view);
     self->focused_view->impl->set_activated(self->focused_view, false);
     wl_list_remove(&self->focused_view_destroy_listener.link);
     wl_list_init(&self->focused_view_destroy_listener.link);

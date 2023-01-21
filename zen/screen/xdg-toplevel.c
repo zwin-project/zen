@@ -70,6 +70,17 @@ zn_xdg_toplevel_view_impl_schedule_configure(struct zn_view *view)
 }
 
 void
+zn_xdg_toplevel_view_impl_close_popups(struct zn_view *view)
+{
+  struct zn_xdg_toplevel *self = view->user_data;
+  struct wlr_xdg_popup *popup, *tmp;
+  wl_list_for_each_safe (
+      popup, tmp, &self->wlr_xdg_toplevel->base->popups, link) {
+    wlr_xdg_popup_destroy(popup->base);
+  }
+}
+
+void
 zn_xdg_toplevel_view_impl_for_each_popup_surface(
     struct zn_view *view, wlr_surface_iterator_func_t iterator, void *user_data)
 {
@@ -88,6 +99,7 @@ static const struct zn_view_interface zn_xdg_toplevel_view_impl = {
     .set_maximized = zn_xdg_toplevel_view_impl_set_maximized,
     .set_activated = zn_xdg_toplevel_view_impl_set_activated,
     .schedule_configure = zn_xdg_toplevel_view_impl_schedule_configure,
+    .close_popups = zn_xdg_toplevel_view_impl_close_popups,
     .for_each_popup_surface = zn_xdg_toplevel_view_impl_for_each_popup_surface,
 };
 
