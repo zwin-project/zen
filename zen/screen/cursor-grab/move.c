@@ -192,6 +192,8 @@ zn_move_cursor_grab_create(struct zn_cursor *cursor, struct zn_view *view)
   wl_signal_add(
       &view->board->events.destroy, &self->init_board_destroy_listener);
 
+  view->impl->close_popups(view);
+
   return self;
 }
 
