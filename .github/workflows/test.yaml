@@ -12,18 +12,25 @@ jobs:
   test-with-clang:
     runs-on: ubuntu-22.04
 
+    strategy:
+      matrix:
+        clang-version: [14, 15]
+
     env:
-      CC: clang
-      CXX: clang++
+      CC: clang-${{ matrix.clang-version }}
+      CXX: clang++-${{ matrix.clang-version }}
 
     steps:
       - name: Install dependencies
         run: |
-          sudo apt-get update &&
+          echo "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-15 main" | sudo tee -a /etc/apt/sources.list
+          echo "deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-15 main" | sudo tee -a /etc/apt/sources.list
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+          sudo apt-get update
           sudo apt-get install \
             libwayland-dev libwlroots-dev libpixman-1-dev \
             libxkbcommon-dev libglu1-mesa-dev libglew-dev \
-            meson libfreetype-dev librsvg2-dev libcglm-dev
+            meson libfreetype-dev librsvg2-dev libcglm-dev clang-15
 
       - uses: actions/setup-python@v1
         with:
