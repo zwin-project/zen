@@ -36,7 +36,7 @@ static bool
 zn_vr_button_render(struct zigzag_node *node, cairo_t *cr)
 {
   cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
-  zigzag_cairo_draw_rounded_rectangle(cr, 0., 0., node->frame.width,
+  zn_cairo_draw_rounded_rectangle(cr, 0., 0., node->frame.width,
       node->frame.height, node->frame.height / 2);
   cairo_fill_preserve(cr);
   cairo_set_line_width(cr, 0.5);
@@ -45,8 +45,8 @@ zn_vr_button_render(struct zigzag_node *node, cairo_t *cr)
 
   double padding = 15.;
   cairo_set_font_size(cr, 13);
-  zigzag_cairo_draw_text(cr, "VR", node->frame.width / 2 + 5.,
-      node->frame.height / 2, ZIGZAG_ANCHOR_LEFT, ZIGZAG_ANCHOR_CENTER);
+  zn_cairo_draw_text(cr, "VR", node->frame.width / 2 + 5.,
+      node->frame.height / 2, ZN_CAIRO_ANCHOR_LEFT, ZN_CAIRO_ANCHOR_CENTER);
 
   double icon_x = padding;
   double icon_y = (node->frame.height - vr_icon_height) / 2;

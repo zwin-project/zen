@@ -38,15 +38,15 @@ zn_headset_dialog_item_headset_render(struct zigzag_node *node, cairo_t *cr)
   sprintf(hmd, "HMD %d", self->index);
   cairo_set_font_size(cr, 14);
   cairo_set_font_face(cr, zn_font_face_get_cairo_font_face(ZN_FONT_BOLD));
-  zigzag_cairo_draw_text(cr, (char *)hmd, icon_width + 28.,
-      node->frame.height / 2, ZIGZAG_ANCHOR_CENTER, ZIGZAG_ANCHOR_CENTER);
+  zn_cairo_draw_text(cr, (char *)hmd, icon_width + 28., node->frame.height / 2,
+      ZN_CAIRO_ANCHOR_CENTER, ZN_CAIRO_ANCHOR_CENTER);
   cairo_set_font_face(cr, zn_font_face_get_cairo_font_face(ZN_FONT_REGULAR));
 
   cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.5);
   cairo_set_font_size(cr, 12);
-  zigzag_cairo_draw_text(cr, self->peer->wired ? "Wired" : self->peer->host,
-      node->frame.width / 2, node->frame.height / 2, ZIGZAG_ANCHOR_CENTER,
-      ZIGZAG_ANCHOR_CENTER);
+  zn_cairo_draw_text(cr, self->peer->wired ? "Wired" : self->peer->host,
+      node->frame.width / 2, node->frame.height / 2, ZN_CAIRO_ANCHOR_CENTER,
+      ZN_CAIRO_ANCHOR_CENTER);
 
   char *connection_status;
   if (self->peer->session) {
@@ -61,8 +61,8 @@ zn_headset_dialog_item_headset_render(struct zigzag_node *node, cairo_t *cr)
 
   cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 1.0);
   cairo_set_font_size(cr, 13);
-  zigzag_cairo_draw_text(cr, connection_status, 240., node->frame.height / 2.,
-      ZIGZAG_ANCHOR_LEFT, ZIGZAG_ANCHOR_CENTER);
+  zn_cairo_draw_text(cr, connection_status, 240., node->frame.height / 2.,
+      ZN_CAIRO_ANCHOR_LEFT, ZN_CAIRO_ANCHOR_CENTER);
   return true;
 }
 

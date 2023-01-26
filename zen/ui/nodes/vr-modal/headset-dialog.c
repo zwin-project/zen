@@ -101,7 +101,7 @@ zn_vr_modal_item_headset_dialog_on_click(
 static bool
 zn_vr_modal_item_headset_dialog_render(struct zigzag_node *node, cairo_t *cr)
 {
-  zigzag_cairo_draw_rounded_rectangle(
+  zn_cairo_draw_rounded_rectangle(
       cr, 0, 0, node->frame.width, node->frame.height, 8.0);
 
   zigzag_cairo_draw_node_frame(cr, node,

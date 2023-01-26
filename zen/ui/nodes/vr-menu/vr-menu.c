@@ -86,7 +86,7 @@ zn_vr_menu_render(struct zigzag_node *self, cairo_t *cr)
 {
   struct zn_vr_menu *vr_menu = (struct zn_vr_menu *)self->user_data;
   cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
-  zigzag_cairo_draw_rounded_bubble(cr, 0., 0., self->frame.width,
+  zn_cairo_draw_rounded_bubble(cr, 0., 0., self->frame.width,
       self->frame.height, 5., vr_menu->tip_x - self->frame.x);
   cairo_fill_preserve(cr);
   cairo_set_line_width(cr, 0.5);
@@ -102,10 +102,10 @@ zn_vr_menu_render(struct zigzag_node *self, cairo_t *cr)
   double content_height;
   if (wl_list_empty(&remote->peer_list)) {
     cairo_set_source_rgb(cr, 0., 0., 0.);
-    zigzag_cairo_draw_text(cr, "No headsets found", vr_menu_bubble_width / 2,
+    zn_cairo_draw_text(cr, "No headsets found", vr_menu_bubble_width / 2,
         vr_menu_bubble_padding_height + vr_headsets_heading_height +
             no_headsets_text_height / 2 - 5.,
-        ZIGZAG_ANCHOR_CENTER, ZIGZAG_ANCHOR_CENTER);
+        ZN_CAIRO_ANCHOR_CENTER, ZN_CAIRO_ANCHOR_CENTER);
     content_height = no_headsets_text_height;
   } else {
     content_height =
@@ -113,11 +113,11 @@ zn_vr_menu_render(struct zigzag_node *self, cairo_t *cr)
   }
 
   cairo_set_source_rgb(cr, .5, .5, .5);
-  zigzag_cairo_draw_text(cr, "Headsets", padding_width + 15,
+  zn_cairo_draw_text(cr, "Headsets", padding_width + 15,
       vr_menu_bubble_padding_height + vr_headsets_heading_height / 2,
-      ZIGZAG_ANCHOR_LEFT, ZIGZAG_ANCHOR_CENTER);
+      ZN_CAIRO_ANCHOR_LEFT, ZN_CAIRO_ANCHOR_CENTER);
 
-  zigzag_cairo_draw_rounded_rectangle(cr, padding_width, padding_height,
+  zn_cairo_draw_rounded_rectangle(cr, padding_width, padding_height,
       vr_menu_headset_width, vr_headsets_heading_height + content_height + 5.,
       5.);
   cairo_set_source_rgba(cr, 0., 0., 0., 0.5);
@@ -125,10 +125,10 @@ zn_vr_menu_render(struct zigzag_node *self, cairo_t *cr)
 
   cairo_set_font_face(cr, zn_font_face_get_cairo_font_face(ZN_FONT_BOLD));
   cairo_set_source_rgb(cr, .35, .39, .51);
-  zigzag_cairo_draw_text(cr, "How can I connect my headset?", padding_width,
+  zn_cairo_draw_text(cr, "How can I connect my headset?", padding_width,
       vr_menu_bubble_padding_height + vr_headsets_heading_height +
           content_height + vr_how_to_connect_height / 2,
-      ZIGZAG_ANCHOR_LEFT, ZIGZAG_ANCHOR_CENTER);
+      ZN_CAIRO_ANCHOR_LEFT, ZN_CAIRO_ANCHOR_CENTER);
 
   return true;
 }

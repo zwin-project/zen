@@ -43,11 +43,11 @@ zn_vr_modal_render(struct zigzag_node *node, cairo_t *cr)
   }
 
   cairo_set_font_size(cr, 32);
-  zigzag_cairo_draw_text(cr, "You're in VR", center_x, center_y - 30,
-      ZIGZAG_ANCHOR_CENTER, ZIGZAG_ANCHOR_CENTER);
+  zn_cairo_draw_text(cr, "You're in VR", center_x, center_y - 30,
+      ZN_CAIRO_ANCHOR_CENTER, ZN_CAIRO_ANCHOR_CENTER);
   cairo_set_font_size(cr, 14);
-  zigzag_cairo_draw_text(cr, "Put on your headset to start working in VR",
-      center_x, center_y, ZIGZAG_ANCHOR_CENTER, ZIGZAG_ANCHOR_CENTER);
+  zn_cairo_draw_text(cr, "Put on your headset to start working in VR", center_x,
+      center_y, ZN_CAIRO_ANCHOR_CENTER, ZN_CAIRO_ANCHOR_CENTER);
 
   return true;
 }

@@ -10,7 +10,6 @@
 #include "zen/screen.h"
 #include "zen/server.h"
 #include "zen/view.h"
-#include "zen/wlr/texture.h"
 
 static void
 zn_scene_handle_switch_board_binding(

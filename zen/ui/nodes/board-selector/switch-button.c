@@ -45,8 +45,8 @@ zn_board_selector_item_switch_button_render(
   sprintf(board_name, "Board %d", self->index);
   cairo_set_source_rgb(cr, 1, 1, 1);
   cairo_set_font_size(cr, 13.);
-  zigzag_cairo_draw_text(cr, board_name, node->frame.width / 2,
-      node->frame.height / 2, ZIGZAG_ANCHOR_CENTER, ZIGZAG_ANCHOR_CENTER);
+  zn_cairo_draw_text(cr, board_name, node->frame.width / 2,
+      node->frame.height / 2, ZN_CAIRO_ANCHOR_CENTER, ZN_CAIRO_ANCHOR_CENTER);
   return true;
 }
 

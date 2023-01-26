@@ -53,7 +53,7 @@ zigzag_node_render_texture(
   }
 
   struct wlr_texture *texture =
-      zigzag_wlr_texture_from_cairo_surface(surface, renderer);
+      zn_wlr_texture_from_cairo_surface(surface, renderer);
   cairo_surface_destroy(surface);
   return texture;
 }

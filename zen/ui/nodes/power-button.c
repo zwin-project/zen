@@ -53,7 +53,7 @@ static bool
 zn_power_button_render(struct zigzag_node *node, cairo_t *cr)
 {
   cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.7);
-  zigzag_cairo_draw_rounded_rectangle(cr, 0., 0., node->frame.width,
+  zn_cairo_draw_rounded_rectangle(cr, 0., 0., node->frame.width,
       node->frame.height, node->frame.height / 2);
   cairo_fill_preserve(cr);
   cairo_set_line_width(cr, 0.5);
@@ -72,8 +72,8 @@ zn_power_button_render(struct zigzag_node *node, cairo_t *cr)
 
   double padding = 15.;
   cairo_set_font_size(cr, 13);
-  zigzag_cairo_draw_text(cr, output, node->frame.width / 2 - 10.,
-      node->frame.height / 2, ZIGZAG_ANCHOR_CENTER, ZIGZAG_ANCHOR_CENTER);
+  zn_cairo_draw_text(cr, output, node->frame.width / 2 - 10.,
+      node->frame.height / 2, ZN_CAIRO_ANCHOR_CENTER, ZN_CAIRO_ANCHOR_CENTER);
 
   struct zn_power_button *power_button = node->user_data;
 

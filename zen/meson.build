@@ -14,7 +14,6 @@ _zen_srcs = [
   'virtual-object.c',
 
   'wlr/box.c',
-  'wlr/texture.c',
   'wlr/render/egl.c',
   'wlr/render/pixel_format.c',
   'wlr/render/renderer.c',
