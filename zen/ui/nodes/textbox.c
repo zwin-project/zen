@@ -27,8 +27,8 @@ zn_textbox_render(struct zigzag_node *node, cairo_t *cr)
   cairo_set_font_size(cr, self->font_size);
   cairo_set_source_rgba(cr, self->font_color.r, self->font_color.g,
       self->font_color.b, self->font_color.a);
-  zigzag_cairo_draw_text(cr, self->text, node->frame.width / 2,
-      node->frame.height / 2, ZIGZAG_ANCHOR_CENTER, ZIGZAG_ANCHOR_CENTER);
+  zn_cairo_draw_text(cr, self->text, node->frame.width / 2,
+      node->frame.height / 2, ZN_CAIRO_ANCHOR_CENTER, ZN_CAIRO_ANCHOR_CENTER);
 
   return true;
 }

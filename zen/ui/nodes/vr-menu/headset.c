@@ -44,15 +44,15 @@ zn_vr_menu_item_headset_render(struct zigzag_node *node, cairo_t *cr)
   cairo_set_source_rgba(cr, 0., 0., 0., 0.5);
   cairo_set_font_size(cr, 13);
   struct zn_peer *peer = self->peer;
-  zigzag_cairo_draw_text(cr, peer->wired ? "Wired" : peer->host,
-      icon_x + vr_icon_width + 57.5, node->frame.height / 2, ZIGZAG_ANCHOR_LEFT,
-      ZIGZAG_ANCHOR_CENTER);
+  zn_cairo_draw_text(cr, peer->wired ? "Wired" : peer->host,
+      icon_x + vr_icon_width + 57.5, node->frame.height / 2,
+      ZN_CAIRO_ANCHOR_LEFT, ZN_CAIRO_ANCHOR_CENTER);
 
   cairo_set_font_face(cr, zn_font_face_get_cairo_font_face(ZN_FONT_BOLD));
   cairo_set_source_rgb(cr, 0., 0., 0.);
   cairo_set_font_size(cr, 14);
-  zigzag_cairo_draw_text(cr, hmd_name, icon_x + vr_icon_width + 5.,
-      node->frame.height / 2, ZIGZAG_ANCHOR_LEFT, ZIGZAG_ANCHOR_CENTER);
+  zn_cairo_draw_text(cr, hmd_name, icon_x + vr_icon_width + 5.,
+      node->frame.height / 2, ZN_CAIRO_ANCHOR_LEFT, ZN_CAIRO_ANCHOR_CENTER);
 
   return true;
 }

@@ -29,8 +29,8 @@ zn_power_menu_item_logout_render(struct zigzag_node *node, cairo_t *cr)
 
   cairo_set_source_rgb(cr, 0., 0., 0.);
   cairo_set_font_size(cr, 13);
-  zigzag_cairo_draw_text(cr, "Log out", gray_line_margin * 2,
-      node->frame.height / 2, ZIGZAG_ANCHOR_LEFT, ZIGZAG_ANCHOR_CENTER);
+  zn_cairo_draw_text(cr, "Log out", gray_line_margin * 2,
+      node->frame.height / 2, ZN_CAIRO_ANCHOR_LEFT, ZN_CAIRO_ANCHOR_CENTER);
 
   return true;
 }

@@ -49,8 +49,8 @@ zn_power_menu_item_clock_render(struct zigzag_node *node, cairo_t *cr)
 
   cairo_set_source_rgb(cr, 0.5, 0.5, 0.5);
   cairo_set_font_size(cr, 13);
-  zigzag_cairo_draw_text(cr, output, node->frame.width / 2,
-      node->frame.height / 2, ZIGZAG_ANCHOR_CENTER, ZIGZAG_ANCHOR_CENTER);
+  zn_cairo_draw_text(cr, output, node->frame.width / 2, node->frame.height / 2,
+      ZN_CAIRO_ANCHOR_CENTER, ZN_CAIRO_ANCHOR_CENTER);
   return true;
 }
 

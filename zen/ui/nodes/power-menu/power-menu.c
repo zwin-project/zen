@@ -24,7 +24,7 @@ zn_power_menu_render(struct zigzag_node *self, cairo_t *cr)
 {
   struct zn_power_menu *power_menu = (struct zn_power_menu *)self->user_data;
   cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
-  zigzag_cairo_draw_rounded_bubble(cr, 0., 0., self->frame.width,
+  zn_cairo_draw_rounded_bubble(cr, 0., 0., self->frame.width,
       self->frame.height, 5., power_menu->tip_x - self->frame.x);
   cairo_fill_preserve(cr);
   cairo_set_line_width(cr, 0.5);
