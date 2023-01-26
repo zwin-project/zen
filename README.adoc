@@ -23,8 +23,12 @@ required packages.
 
 === Build & Install
 
+Currently, only clang is supported (clang-14 and 15 tested).
+
 [source, shell]
 ----
+$ export CC=clang
+$ export CXX=clang++
 $ git clone https://github.com/zwin-project/zen.git
 $ cd zen
 $ meson build

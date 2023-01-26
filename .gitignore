@@ -1,6 +1,8 @@
 # Editor
 .vscode/
 
+.cache
+
 # Other
 build/
 
