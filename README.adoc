@@ -1,39 +1,10 @@
 = ZEN
 
-XR Desktop Environment
+XR Desktop Environment.
 
 == Try it out
-If you want to try out Zen, you should follow https://www.zwin.dev/getting_started/system_requirements[our installation guides].
-
-== Build & Install
-This section is for contributors of Zen. Regular users shuold see the above guides.
-
-=== Dependencies
-
-. zwin protocols +
-Please see https://github.com/zwin-project/zwin[zwin-project/zwin]
-to build and install.
-. zen-remote +
-Please see https://github.com/zwin-project/zen-remote[zwin-project/zen-remote]
-to build and install.
-. Other dependencies +
-For Ubuntu, other dependencies can be installed with `apt-get`.
-See `.github/workflows/test.yaml` and `meson.build` for the list of the
-required packages.
-
-=== Build & Install
-
-Currently, only clang is supported (clang-14 and 15 tested).
-
-[source, shell]
-----
-$ export CC=clang
-$ export CXX=clang++
-$ git clone https://github.com/zwin-project/zen.git
-$ cd zen
-$ meson build
-$ ninja -C build install
-----
+If you want to try out Zen, you can follow
+https://www.zwin.dev/getting_started/system_requirements[our installation guides].
 
 == Start ZEN Desktop
 
@@ -45,7 +16,7 @@ Select `ZEN` from your display manager.
 
 [red]#***__caution__**# +
 Switching between virtual terminals may be confusing if you are not familiar
-with it. You may not be able to return to your GUI desktop except by forced
+with it. You may not be able to return to your GUI desktop unless you force a
 reboot.
 
 - Switch virtual terminal
@@ -81,3 +52,7 @@ We cannot customize these bindings for now.
 |Terminate ZEN Desktop (for development convenience)
 
 |===
+
+== Contribution
+
+See link:./doc/CONTRIBUTING.adoc[CONTRIBUTING.adoc].
