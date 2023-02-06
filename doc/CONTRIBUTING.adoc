@@ -1,0 +1,42 @@
+= Welcome to Zen developer guide
+
+Thank you for investing your time in contributing to our project!
+
+Read our https://github.com/zwin-project/.github/blob/main/CODE_OF_CONDUCT.md[Code of Conduct]
+to keep our community approachable and respectable.
+
+== Overview
+
+Zen consists of following components.
+
+1. https://github.com/zwin-project/zen[zen] (this repository) +
+Core compositor.
+
+2. https://github.com/zwin-project/zen-remote[zen-remote] +
+A library that implements the communication layer between
+the compositor running on the PC and the remote agent running on the HMD.
+
+3. https://github.com/zwin-project/zen-mirror[zen-mirror] +
+Remote agent on Meta Quest 2 / Pro.
+
+4. https://github.com/zwin-project/zennist[zennist] +
+A default space application of Zen.
+
+[source, mermaid]
+----
+graph TB
+%% Components
+  zen(zen)
+  remote(zen-remote)
+  mirror(zen-oculus-display-system)
+  zennist(zennist)
+
+%% Dependencies
+  zen    -- uses as a shared library --> remote
+  zen    -- uses as an executable    --> zennist
+  mirror -- uses as a git submodule  --> remote
+----
+
+== Build Zen from source
+
+TBD
