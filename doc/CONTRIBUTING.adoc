@@ -48,10 +48,10 @@ graph LR
 
 Zen consists primarily of the following repositories and libraries
 
-* https://wayland.freedesktop.org/[Wayland] +
+* https://wayland.freedesktop.org/[Wayland] (external library) +
 A base windowing system.
 
-* https://gitlab.freedesktop.org/wlroots/wlroots[wlroots] +
+* https://gitlab.freedesktop.org/wlroots/wlroots[wlroots] (external library) +
 A modular Wayland compositor library.
 
 * https://github.com/zwin-project/zwin[zwin] +
@@ -81,4 +81,6 @@ https://drive.google.com/file/d/1NoGWE1EHY5UVrd0lk0KV-sCUGy1w9xLJ/view?usp=shari
 
 == Build Zen from source
 
-TBD
+The first step in contributing to Zen by writing code is to build Zen from source.
+
+See link:./BUILD.adoc[BUILD.adoc].

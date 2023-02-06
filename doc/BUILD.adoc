@@ -1,0 +1,53 @@
+= Build Zen from source
+
+If this is your first time to build Zen from source,
+we recommend that you build in the order described in this guide.
+
+== Install packages
+
+See the https://www.zwin.dev/getting_started/installation#install-packages[Install package]
+section of the general installation guide.
+These packages are what we need to build Zen.
+
+== Build & Install
+
+Use clang for build.
+
+```
+$ export CC=clang
+$ export CXX=clang++
+```
+
+=== Zwin
+
+See https://github.com/zwin-project/zwin#build--install[Build & Install] in Zwin README.
+
+=== Zen Mirror
+
+See https://github.com/zwin-project/zen-mirror/blob/main/doc/BUILD.adoc[Build Zen Mirror from source].
+
+=== zen-remote
+
+Instead of cloning zen-remote again, we recommend using zen-remote in
+the zen-mirror's git submodule: +
+`zen-mirror/app/3rdParty/zen-remote`.
+
+See https://github.com/zwin-project/zen-remote#build--install[Build & Install] in zen-remote README.
+
+=== Zukou
+
+See https://github.com/zwin-project/zukou#build--install[Build & Install] in Zukou README.
+
+=== Zennist
+
+See https://github.com/zwin-project/zennist#build--install[Build & Install] in Zennist README.
+
+=== Zen
+
+At project root,
+
+[source, shell]
+----
+$ meson build
+$ ninja -C build install
+----
