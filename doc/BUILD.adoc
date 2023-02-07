@@ -7,7 +7,13 @@ we recommend that you build in the order described in this guide.
 
 See the https://www.zwin.dev/getting_started/installation#install-packages[Install package]
 section of the general installation guide.
-These packages are what we need to build Zen.
+
+In addition, developers need to install some packages.
+But we will not list them here, as it's difficult to maintain the list.
+Instead, please refer to each repository's GitHub action workflow for a list of
+required packages.
+Note also that the GitHub Action host will have some packages installed by default.
+See https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#preinstalled-software[Preinstalled software] for details.
 
 == Build & Install
 
