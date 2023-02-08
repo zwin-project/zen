@@ -1,0 +1,88 @@
+name: meson_test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-with-clang:
+    runs-on: ubuntu-22.04
+
+    strategy:
+      matrix:
+        clang-version: [14, 15]
+
+    env:
+      CC: clang-${{ matrix.clang-version }}
+      CXX: clang++-${{ matrix.clang-version }}
+
+    steps:
+      - name: Install dependencies
+        run: |
+          echo "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-15 main" | sudo tee -a /etc/apt/sources.list
+          echo "deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-15 main" | sudo tee -a /etc/apt/sources.list
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+          sudo apt-get update
+          sudo apt-get install \
+            libwayland-dev libwlroots-dev libpixman-1-dev \
+            libxkbcommon-dev libglu1-mesa-dev libglew-dev \
+            meson libfreetype-dev librsvg2-dev libcglm-dev clang-15
+
+      - uses: actions/setup-python@v1
+        with:
+          python-version: "3.x"
+
+      - run: mkdir -p grpc-dev
+
+      - name: Download grpc-dev
+        run: |
+          curl -L https://github.com/zwin-project/grpc-dev/releases/download/0.0.1/grpc-dev-refs.heads.main-github-host.zip -o grpc-dev.zip
+          unzip grpc-dev.zip
+        working-directory: ./grpc-dev
+
+      - name: Clone zen-remote
+        uses: actions/checkout@v2
+        with:
+          repository: zwin-project/zen-remote
+          path: zen-remote
+          submodules: recursive
+
+      - name: Build zen-remote
+        working-directory: ./zen-remote
+        run: |
+          cmake -B build -DZEN_REMOTE_GRPC_SYSROOT=$GITHUB_WORKSPACE/grpc-dev/native/Debug -GNinja
+          cmake --build build
+          sudo cmake --install build
+
+      - name: Clone zwin
+        uses: actions/checkout@v2
+        with:
+          repository: zwin-project/zwin
+          path: zwin
+
+      - name: Build zwin
+        working-directory: ./zwin
+        run: |
+          meson build
+          sudo ninja -C build install
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: main
+
+      - name: Build & Test
+        run: |
+          meson build
+          ninja -C build all test clang-tidy clang-format-check
+        working-directory: ./main
+
+      - uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: zen-test-log
+          path: main/build/meson-logs/

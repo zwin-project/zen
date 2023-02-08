@@ -1,0 +1,58 @@
+= ZEN
+
+XR Desktop Environment.
+
+== Try it out
+If you want to try out Zen, you can follow
+https://www.zwin.dev/getting_started/system_requirements[our installation guides].
+
+== Start ZEN Desktop
+
+=== Option 1
+
+Select `ZEN` from your display manager.
+
+=== Option 2
+
+[red]#***__caution__**# +
+Switching between virtual terminals may be confusing if you are not familiar
+with it. You may not be able to return to your GUI desktop unless you force a
+reboot.
+
+- Switch virtual terminal
+
+[source, shell]
+----
+$ sudo chvt <number>
+----
+
+- In a virtual terminal (CUI),
+
+[source, shell]
+----
+$ zen-desktop
+----
+
+// == Key bindings
+
+// We cannot customize these bindings for now.
+
+// .Key bindings
+// [%autowidth.stretch]
+// |===
+// |bindings|description
+
+// |<mod> + <shift> + →
+// |Move to next board
+
+// |<mod> + <shift> + ←
+// |Move to previous board
+
+// |<alt> + q
+// |Terminate ZEN Desktop (for development convenience)
+
+// |===
+
+== Contribution
+
+See link:./doc/CONTRIBUTING.adoc[CONTRIBUTING.adoc].

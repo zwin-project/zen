@@ -1,0 +1,24 @@
+BasedOnStyle: Google
+IndentWidth: 2
+ColumnLimit: 80
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterFunction: true
+  AfterClass: true
+  SplitEmptyRecord: false
+  SplitEmptyFunction: false
+AlwaysBreakAfterReturnType: TopLevelDefinitions
+AlignAfterOpenBracket: DontAlign
+DerivePointerAlignment: false
+PointerAlignment: Right
+ReferenceAlignment: Right
+ForEachMacros: [
+  'wl_list_for_each',
+  'wl_list_for_each_safe',
+  'wl_list_for_each_reverse',
+  'wl_list_for_each_reverse_safe',
+  'wl_array_for_each',
+  'wl_client_for_each',
+  'wl_resource_for_each',
+  'wl_resource_for_each_safe'
+]
