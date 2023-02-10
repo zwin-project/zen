@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - v0.2.0-dev
   pull_request:
     branches:
       - main
+      - v0.2.0-dev
 
 jobs:
   test-with-clang:

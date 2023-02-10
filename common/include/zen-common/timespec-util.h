@@ -8,8 +8,12 @@ extern "C" {
 #include <stdint.h>
 #include <time.h>
 
-#define NSEC_PER_SEC 1000000000
-#define MSEC_PER_SEC 1000
+enum {
+  NSEC_PER_SEC = 1000000000,
+  MSEC_PER_SEC = 1000,
+
+  NSEC_PER_MSEC = 1000000,
+};
 
 /**
  * r = a - b
@@ -49,7 +53,7 @@ timespec_to_nsec(const struct timespec *a)
 UNUSED static inline int64_t
 timespec_to_msec(const struct timespec *a)
 {
-  return (int64_t)a->tv_sec * 1000 + a->tv_nsec / 1000000;
+  return (int64_t)a->tv_sec * MSEC_PER_SEC + a->tv_nsec / NSEC_PER_MSEC;
 }
 
 /**
