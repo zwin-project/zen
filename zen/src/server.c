@@ -5,6 +5,7 @@
 
 #include "zen-common/log.h"
 #include "zen-common/util.h"
+#include "zen/backend.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 static struct zn_server *server_singleton = NULL;
@@ -56,6 +57,12 @@ zn_server_create(struct wl_display *display)
     goto err;
   }
 
+  self->backend = zn_backend_create(display);
+  if (self->backend == NULL) {
+    zn_error("Failed to create a zn_backend");
+    goto err_free;
+  }
+
   self->display = display;
   self->running = false;
   self->exit_status = EXIT_FAILURE;
@@ -64,6 +71,9 @@ zn_server_create(struct wl_display *display)
 
   return self;
 
+err_free:
+  free(self);
+
 err:
   return NULL;
 }
@@ -71,6 +81,7 @@ err:
 void
 zn_server_destroy(struct zn_server *self)
 {
+  zn_backend_destroy(self->backend);
   server_singleton = NULL;
   free(self);
 }
