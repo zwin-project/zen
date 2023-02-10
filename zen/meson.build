@@ -1,4 +1,5 @@
 _zen_srcs = [
+  'src/screen.c',
   'src/server.c',
 ]
 
