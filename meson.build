@@ -1,5 +1,5 @@
 project(
-  'zen', 'c', 'cpp',
+  'Zen Desktop', 'c', 'cpp',
   version: '0.2.0-dev',
   license: 'MIT',
   meson_version: '>= 0.58.0',
@@ -18,7 +18,7 @@ global_args = []
 global_args_maybe = [
   '-D_GNU_SOURCE',
   # '-DWLR_USE_UNSTABLE',
-  # '-DWL_HIDE_DEPRECATED',
+  '-DWL_HIDE_DEPRECATED',
   '-fvisibility=hidden',
   '-Wstrict-prototypes',
   '-Wno-gnu-zero-variadic-macro-arguments',
@@ -84,23 +84,40 @@ if cc.has_argument('-fmacro-prefix-map=/prefix/to/hide=')
 endif
 
 
+##############
+# Definition #
+##############
+
+cdata.set_quoted('ZEN_VERSION', meson.project_version())
+cdata.set_quoted('ZEN_NAME', meson.project_name())
+
+configure_file(
+  output: 'constants.h',
+  configuration: cdata,
+)
+
 ################
 # Dependencies #
 ################
+
+wayland_req = '>= 1.18.0'
+
+wayland_server_dep = dependency('wayland-server', version: wayland_req)
 
 #########
 # Build #
 #########
 
 subdir('common')
-# subdir('zen')
+subdir('zen')
 
 executable(
   'zen-desktop',
-  'zen-desktop/main.cc',
+  'zen-desktop/main.c',
   install: true,
+  c_args: ['-include', 'constants.h'],
   dependencies: [
     zen_common_dep,
-    # zen_dep,
+    zen_dep,
   ]
 )
