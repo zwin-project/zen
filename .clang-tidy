@@ -2,7 +2,9 @@ Checks: "
   -*,
   bugprone-*,
   cert-*,
+
   clang-analyzer-*,
+  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
 
   cppcoreguidelines-*,
   -cppcoreguidelines-avoid-magic-numbers,
