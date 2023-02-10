@@ -33,26 +33,6 @@ $ sudo chvt <number>
 $ zen-desktop
 ----
 
-// == Key bindings
-
-// We cannot customize these bindings for now.
-
-// .Key bindings
-// [%autowidth.stretch]
-// |===
-// |bindings|description
-
-// |<mod> + <shift> + →
-// |Move to next board
-
-// |<mod> + <shift> + ←
-// |Move to previous board
-
-// |<alt> + q
-// |Terminate ZEN Desktop (for development convenience)
-
-// |===
-
 == Contribution
 
 See link:./doc/CONTRIBUTING.adoc[CONTRIBUTING.adoc].

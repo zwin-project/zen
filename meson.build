@@ -110,6 +110,7 @@ wayland_server_dep = dependency('wayland-server', version: wayland_req)
 
 subdir('common')
 subdir('zen')
+subdir('wlr-backend')
 
 executable(
   'zen-desktop',
@@ -117,6 +118,7 @@ executable(
   install: true,
   c_args: ['-include', 'constants.h'],
   dependencies: [
+    zen_wlr_backend_dep,
     zen_common_dep,
     zen_dep,
   ]
