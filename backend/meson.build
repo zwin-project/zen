@@ -1,5 +1,6 @@
 _zen_wlr_backend_srcs = [
   'src/backend.c',
+  'src/output.c',
 ]
 
 _zen_wlr_backend_deps = [

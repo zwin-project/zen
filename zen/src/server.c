@@ -22,6 +22,11 @@ zn_server_run(struct zn_server *self)
 {
   self->running = true;
 
+  if (!zn_backend_start(self->backend)) {
+    zn_error("Failed to start zn_backend");
+    return EXIT_FAILURE;
+  }
+
   wl_display_run(self->display);
 
   if (!zn_assert(!self->running, "Not terminated with zn_server_terminate")) {

@@ -3,10 +3,12 @@
 #include <stdio.h>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
+#include <wlr/types/wlr_output.h>
 #include <wlr/util/log.h>
 
 #include "zen-common/log.h"
 #include "zen-common/util.h"
+#include "zen/backend/output.h"
 
 static struct zn_default_backend *
 zn_default_backend_get(struct zn_backend *base)
@@ -40,6 +42,18 @@ handle_wlr_log(
   zn_vlog_(importance, format, args);
 }
 
+static void
+zn_default_backend_handle_new_output(struct wl_listener *listener, void *data)
+{
+  struct zn_default_backend *self =
+      zn_container_of(listener, self, new_output_listener);
+  struct wlr_output *wlr_output = data;
+
+  struct zn_output *output = zn_output_create(wlr_output);
+
+  wl_signal_emit(&self->base.events.new_screen, output->screen);
+}
+
 bool
 zn_backend_start(struct zn_backend *base)
 {
@@ -59,7 +73,7 @@ zn_backend_create(struct wl_display *display)
     goto err;
   }
 
-  wl_signal_init(&self->base.events.view_mapped);
+  wl_signal_init(&self->base.events.new_screen);
   self->display = display;
 
   self->wlr_backend = wlr_backend_autocreate(display);
@@ -67,6 +81,10 @@ zn_backend_create(struct wl_display *display)
     zn_error("Failed to create a wlr_backend");
     goto err_free;
   }
+
+  self->new_output_listener.notify = zn_default_backend_handle_new_output;
+  wl_signal_add(
+      &self->wlr_backend->events.new_output, &self->new_output_listener);
 
   return &self->base;
 
@@ -82,7 +100,8 @@ zn_backend_destroy(struct zn_backend *base)
 {
   struct zn_default_backend *self = zn_default_backend_get(base);
 
+  wl_list_remove(&self->new_output_listener.link);
   wlr_backend_destroy(self->wlr_backend);
-  wl_list_remove(&self->base.events.view_mapped.listener_list);
+  wl_list_remove(&self->base.events.new_screen.listener_list);
   free(self);
 }
