@@ -6,7 +6,6 @@ Checks: "
 
   cppcoreguidelines-*,
   -cppcoreguidelines-avoid-magic-numbers,
-  -cppcoreguidelines-pro-type-vararg,
 
   google-*,
   misc-*,
