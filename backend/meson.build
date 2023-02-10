@@ -3,6 +3,7 @@ _zen_wlr_backend_srcs = [
 ]
 
 _zen_wlr_backend_deps = [
+  wlroots_dep,
   zen_common_dep,
 ]
 

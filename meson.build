@@ -17,7 +17,7 @@ cdata = configuration_data()
 global_args = []
 global_args_maybe = [
   '-D_GNU_SOURCE',
-  # '-DWLR_USE_UNSTABLE',
+  '-DWLR_USE_UNSTABLE',
   '-DWL_HIDE_DEPRECATED',
   '-fvisibility=hidden',
   '-Wstrict-prototypes',
@@ -101,8 +101,10 @@ configure_file(
 ################
 
 wayland_req = '>= 1.18.0'
+wlroots_req = ['>= 0.15', '< 0.16']
 
 wayland_server_dep = dependency('wayland-server', version: wayland_req)
+wlroots_dep = dependency('wlroots', version: wlroots_req)
 
 #########
 # Build #
@@ -110,7 +112,7 @@ wayland_server_dep = dependency('wayland-server', version: wayland_req)
 
 subdir('common')
 subdir('zen')
-subdir('wlr-backend')
+subdir('backend')
 
 executable(
   'zen-desktop',

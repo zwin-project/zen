@@ -8,6 +8,8 @@ struct zn_backend {
   } events;
 };
 
+bool zn_backend_start(struct zn_backend *base);
+
 struct zn_backend *zn_backend_create(struct wl_display *display);
 
 void zn_backend_destroy(struct zn_backend *base);
