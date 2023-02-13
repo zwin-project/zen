@@ -5,10 +5,14 @@ _zen_srcs = [
 
 zen_inc = include_directories('include')
 
-_zen_deps = [
+_zen_pub_deps = [
+  pixman_dep,
   wayland_server_dep,
-  zen_common_dep,
 ]
+
+_zen_deps = [
+  zen_common_dep,
+] + _zen_pub_deps
 
 _zen_lib = static_library(
   'zen-lib',
@@ -21,4 +25,5 @@ _zen_lib = static_library(
 zen_dep = declare_dependency(
   link_with: _zen_lib,
   include_directories: zen_inc,
+  dependencies: _zen_pub_deps,
 )

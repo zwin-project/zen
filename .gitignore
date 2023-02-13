@@ -5,3 +5,8 @@
 
 # Build
 build/
+
+# Subproject
+subprojects/*
+!subprojects/glew.wrap
+!subprojects/packagefiles

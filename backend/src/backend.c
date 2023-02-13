@@ -3,12 +3,14 @@
 #include <stdio.h>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
+#include <wlr/render/allocator.h>
 #include <wlr/types/wlr_output.h>
 #include <wlr/util/log.h>
 
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 #include "zen/backend/output.h"
+#include "zen/backend/wlr/render/glew.h"
 
 static struct zn_default_backend *
 zn_default_backend_get(struct zn_backend *base)
@@ -49,7 +51,26 @@ zn_default_backend_handle_new_output(struct wl_listener *listener, void *data)
       zn_container_of(listener, self, new_output_listener);
   struct wlr_output *wlr_output = data;
 
+  zn_debug("New output %p: %s (non-desktop: %d)", (void *)wlr_output,
+      wlr_output->name, wlr_output->non_desktop);
+
+  if (wlr_output->non_desktop) {
+    zn_debug("Skip non-desktop output");
+    // TODO(@Aki-7): DRM lease support
+    return;
+  }
+
+  if (!wlr_output_init_render(
+          wlr_output, self->wlr_allocator, self->wlr_renderer)) {
+    zn_abort("Failed to initialize output rendering subsystem");
+    return;
+  }
+
   struct zn_output *output = zn_output_create(wlr_output);
+  if (output == NULL) {
+    zn_abort("Failed to create a zn_output");
+    return;
+  }
 
   wl_signal_emit(&self->base.events.new_screen, output->screen);
 }
@@ -82,11 +103,41 @@ zn_backend_create(struct wl_display *display)
     goto err_free;
   }
 
+  int drm_fd = wlr_backend_get_drm_fd(self->wlr_backend);
+  if (drm_fd < 0) {
+    zn_error("Failed to get drm fd");
+    goto err_wlr_backend;
+  }
+
+  self->wlr_renderer = wlr_glew_renderer_create_with_drm_fd(drm_fd);
+  if (self->wlr_renderer == NULL) {
+    zn_error("Failed to create a wlr_glew_renderer");
+    goto err_wlr_backend;
+  }
+
+  if (!wlr_renderer_init_wl_display(self->wlr_renderer, self->display)) {
+    zn_error("Failed to initialize renderer with wl_display");
+    goto err_wlr_renderer;
+  }
+
+  self->wlr_allocator =
+      wlr_allocator_autocreate(self->wlr_backend, self->wlr_renderer);
+  if (self->wlr_allocator == NULL) {
+    zn_error("Failed to autocreate a wlr_allocator");
+    goto err_wlr_renderer;
+  }
+
   self->new_output_listener.notify = zn_default_backend_handle_new_output;
   wl_signal_add(
       &self->wlr_backend->events.new_output, &self->new_output_listener);
 
   return &self->base;
+
+err_wlr_renderer:
+  wlr_renderer_destroy(self->wlr_renderer);
+
+err_wlr_backend:
+  wlr_backend_destroy(self->wlr_backend);
 
 err_free:
   free(self);
@@ -101,6 +152,8 @@ zn_backend_destroy(struct zn_backend *base)
   struct zn_default_backend *self = zn_default_backend_get(base);
 
   wl_list_remove(&self->new_output_listener.link);
+  wlr_allocator_destroy(self->wlr_allocator);
+  wlr_renderer_destroy(self->wlr_renderer);
   wlr_backend_destroy(self->wlr_backend);
   wl_list_remove(&self->base.events.new_screen.listener_list);
   free(self);
