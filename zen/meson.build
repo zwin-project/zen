@@ -11,6 +11,7 @@ _zen_pub_deps = [
 ]
 
 _zen_deps = [
+  toml_dep,
   zen_common_dep,
 ] + _zen_pub_deps
 

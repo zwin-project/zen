@@ -124,6 +124,7 @@ wlroots_dep = dependency('wlroots', version: wlroots_req)
 # Build #
 #########
 
+subdir('3rd-party')
 subdir('common')
 subdir('zen')
 subdir('backend')
