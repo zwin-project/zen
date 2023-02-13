@@ -103,6 +103,20 @@ configure_file(
 wayland_req = '>= 1.18.0'
 wlroots_req = ['>= 0.15', '< 0.16']
 
+
+glew_proj = subproject(
+  'glew',
+  required: true,
+  version: '2.2.0',
+)
+
+
+drm_dep = dependency('libdrm')
+egl_dep = dependency('egl')
+gl_dep = dependency('gl')
+gbm_dep = dependency('gbm')
+glew_dep = glew_proj.get_variable('glew_dep')
+pixman_dep = dependency('pixman-1')
 wayland_server_dep = dependency('wayland-server', version: wayland_req)
 wlroots_dep = dependency('wlroots', version: wlroots_req)
 
