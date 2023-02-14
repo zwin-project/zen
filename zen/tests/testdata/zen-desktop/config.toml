@@ -1,0 +1,7 @@
+[test]
+
+number = 4
+
+[error]
+
+number = -1

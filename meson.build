@@ -125,6 +125,9 @@ wlroots_dep = dependency('wlroots', version: wlroots_req)
 #########
 
 subdir('3rd-party')
+if get_option('tests')
+  subdir('test-harness')
+endif
 subdir('common')
 subdir('zen')
 subdir('backend')
