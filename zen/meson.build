@@ -4,7 +4,9 @@ _zen_srcs = [
   'src/backend/pointer.c',
 
   'src/config.c',
+  'src/cursor.c',
   'src/screen.c',
+  'src/seat.c',
   'src/server.c',
 ]
 
