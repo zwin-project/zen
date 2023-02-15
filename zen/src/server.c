@@ -6,6 +6,7 @@
 #include <wlr/util/log.h>
 
 #include "backend.h"
+#include "seat.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 
@@ -99,6 +100,12 @@ zn_server_create(struct wl_display *display)
   }
   self->backend = &backend->base;
 
+  self->seat = zn_seat_create();
+  if (self->seat == NULL) {
+    zn_error("Failed to create a zn_seat");
+    goto err_backend;
+  }
+
   self->display = display;
   self->running = false;
   self->exit_status = EXIT_FAILURE;
@@ -106,6 +113,9 @@ zn_server_create(struct wl_display *display)
   server_singleton = self;
 
   return self;
+
+err_backend:
+  zn_backend_impl_destroy(zn_backend_impl_get(self->backend));
 
 err_free:
   free(self);
@@ -117,6 +127,7 @@ err:
 void
 zn_server_destroy(struct zn_server *self)
 {
+  zn_seat_destroy(self->seat);
   zn_backend_impl_destroy(zn_backend_impl_get(self->backend));
   server_singleton = NULL;
   free(self);

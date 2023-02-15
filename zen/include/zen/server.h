@@ -4,11 +4,13 @@
 #include <wayland-server-core.h>
 
 struct zn_backend;
+struct zn_seat;
 
 struct zn_server {
   struct wl_display *display;  // @nonnull, @outlive
 
   struct zn_backend *backend;  // @nonnull, @owning
+  struct zn_seat *seat;        // @nonnull, @owning
 
   bool running;
   int exit_status;
