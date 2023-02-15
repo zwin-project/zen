@@ -14,5 +14,6 @@ struct zn_default_backend {
   struct wlr_renderer *wlr_renderer;    // @nonnull, @owning
   struct wlr_allocator *wlr_allocator;  // @nonnull, @owning
 
+  struct wl_listener new_input_listener;
   struct wl_listener new_output_listener;
 };
