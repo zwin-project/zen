@@ -1,3 +1,5 @@
+#include "glew.h"
+
 #include <GL/glew.h>
 #include <assert.h>
 #include <drm_fourcc.h>
@@ -12,8 +14,7 @@
 #include <wlr/util/box.h>
 #include <wlr/util/log.h>
 
-#include "glew.h"
-#include "zen/backend/wlr/render/egl.h"
+#include "zen/wlr/render/egl.h"
 
 static const GLfloat verts[] = {
     1, 0,  // top right

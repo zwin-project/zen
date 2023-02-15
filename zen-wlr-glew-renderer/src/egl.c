@@ -14,7 +14,7 @@
 #include <wlr/util/region.h>
 #include <xf86drm.h>
 
-#include "zen/backend/wlr/render/egl.h"
+#include "zen/wlr/render/egl.h"
 
 static enum wlr_log_importance
 egl_log_importance_to_wlr(EGLint type)

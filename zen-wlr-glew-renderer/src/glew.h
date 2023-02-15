@@ -5,8 +5,8 @@
 #include <wlr/util/addon.h>
 #include <wlr/util/log.h>
 
-#include "zen/backend/wlr/render/egl.h"
-#include "zen/backend/wlr/render/glew.h"
+#include "zen/wlr/render/egl.h"
+#include "zen/wlr/render/glew.h"
 
 struct wlr_glew_pixel_format {
   uint32_t drm_format;

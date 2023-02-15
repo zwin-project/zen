@@ -6,5 +6,5 @@
 struct zn_input_device_base {
   struct wlr_input_device *wlr_input_device;  // @nonnull, @outlive
 
-  struct wl_list link;  // zn_seat::device_list
+  struct wl_list link;  // zn_backend_impl::input_device_list
 };
