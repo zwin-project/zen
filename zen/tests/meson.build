@@ -14,7 +14,7 @@ foreach path, args : _zen_unit_tests
   bin = executable(
     test_name.underscorify(),
     path,
-    dependencies: [zen_deps, zen_test_harness_dep],
+    dependencies: [_zen_deps, zen_test_harness_dep],
     include_directories: [zen_inc, zen_src_inc],
   )
 

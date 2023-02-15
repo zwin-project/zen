@@ -131,15 +131,17 @@ endif
 subdir('common')
 subdir('zen')
 subdir('backend')
+subdir('desktop')
 
 executable(
   'zen-desktop',
-  'zen-desktop/main.c',
+  'desktop/main.c',
   install: true,
   c_args: ['-include', 'constants.h'],
   dependencies: [
-    zen_wlr_backend_dep,
     zen_common_dep,
+    zen_desktop_dep,
     zen_dep,
+    zen_wlr_backend_dep,
   ]
 )
