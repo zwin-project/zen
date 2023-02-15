@@ -5,6 +5,7 @@
 #include "zen-common/log.h"
 #include "zen-common/terminate.h"
 #include "zen-common/util.h"
+#include "zen-desktop/shell.h"
 #include "zen/include/zen/server.h"
 
 static void
@@ -58,10 +59,21 @@ main(int argc UNUSED, const char *argv[] UNUSED)
   struct zn_server *server = zn_server_create(display);
   if (server == NULL) {
     zn_error("Failed to create a zn_server");
-    goto err_display;
+    goto err_signal;
+  }
+
+  struct zn_desktop_shell *shell = zn_desktop_shell_create();
+  if (shell == NULL) {
+    zn_error("Failed to create a zn_desktop_shell");
+    goto err_server;
   }
 
   exit_status = zn_server_run(server);
+
+  zn_desktop_shell_destroy(shell);
+
+err_server:
+  zn_server_destroy(server);
 
 err_signal:
   for (int i = ARRAY_LENGTH(signal_sources) - 1; i >= 0; i--) {
@@ -70,7 +82,6 @@ err_signal:
     }
   }
 
-err_display:
   wl_display_destroy(display);
 
 err:

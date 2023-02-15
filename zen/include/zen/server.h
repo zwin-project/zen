@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <wayland-server-core.h>
 
-#include "zen/backend.h"
+struct zn_backend;
 
 struct zn_server {
   struct wl_display *display;  // @nonnull, @outlive

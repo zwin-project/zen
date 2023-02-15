@@ -2,7 +2,7 @@
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_damage.h>
 
-#include "zen/screen.h"
+struct zn_screen;
 
 struct zn_output {
   struct zn_screen *screen;  // @nonnull, @owning

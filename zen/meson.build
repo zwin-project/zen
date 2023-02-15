@@ -13,7 +13,7 @@ _zen_pub_deps = [
   wayland_server_dep,
 ]
 
-zen_deps = [
+_zen_deps = [
   zen_common_dep,
 ] + _zen_pub_deps
 
@@ -22,7 +22,7 @@ _zen_lib = static_library(
   _zen_srcs,
   install: false,
   include_directories: zen_inc,
-  dependencies: zen_deps,
+  dependencies: _zen_deps,
 )
 
 zen_dep = declare_dependency(
