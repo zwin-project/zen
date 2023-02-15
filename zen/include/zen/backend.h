@@ -2,7 +2,11 @@
 
 #include <wayland-server-core.h>
 
+struct zn_seat;
+
 struct zn_backend {
+  struct zn_seat *seat;  // @nonnull, @owning
+
   struct {
     struct wl_signal new_screen;  // (struct zn_screen *)
   } events;

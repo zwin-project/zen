@@ -1,16 +1,21 @@
-#include "zen/backend/backend.h"
+#include "zen/backend/default/backend.h"
 
 #include <stdio.h>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
 #include <wlr/render/allocator.h>
+#include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_output.h>
 #include <wlr/util/log.h>
 
 #include "zen-common/log.h"
 #include "zen-common/util.h"
-#include "zen/backend/output.h"
+#include "zen/backend/default/output.h"
+#include "zen/backend/default/seat.h"
+#include "zen/backend/seat.h"
 #include "zen/backend/wlr/render/glew.h"
+
+#define DEFAULT_SEAT "seat0"
 
 static struct zn_default_backend *
 zn_default_backend_get(struct zn_backend *base)
@@ -75,6 +80,18 @@ zn_default_backend_handle_new_output(struct wl_listener *listener, void *data)
   wl_signal_emit(&self->base.events.new_screen, output->screen);
 }
 
+static void
+zn_default_backend_handle_new_input(struct wl_listener *listener, void *data)
+{
+  struct zn_default_backend *self =
+      zn_container_of(listener, self, new_input_listener);
+  struct wlr_input_device *input_device = data;
+  struct zn_default_backend_seat *seat =
+      zn_default_backend_seat_get(self->base.seat);
+
+  zn_default_backend_seat_handle_new_input(seat, input_device);
+}
+
 bool
 zn_backend_start(struct zn_backend *base)
 {
@@ -87,6 +104,7 @@ struct zn_backend *
 zn_backend_create(struct wl_display *display)
 {
   wlr_log_init(WLR_DEBUG, handle_wlr_log);
+  struct zn_default_backend_seat *seat = NULL;
 
   struct zn_default_backend *self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -127,11 +145,25 @@ zn_backend_create(struct wl_display *display)
     goto err_wlr_renderer;
   }
 
+  seat = zn_default_backend_seat_create(display, DEFAULT_SEAT);
+  if (seat == NULL) {
+    zn_error("Failed to create a zn_default_backend_seat");
+    goto err_allocator;
+  }
+  self->base.seat = &seat->base;
+
   self->new_output_listener.notify = zn_default_backend_handle_new_output;
   wl_signal_add(
       &self->wlr_backend->events.new_output, &self->new_output_listener);
 
+  self->new_input_listener.notify = zn_default_backend_handle_new_input;
+  wl_signal_add(
+      &self->wlr_backend->events.new_input, &self->new_input_listener);
+
   return &self->base;
+
+err_allocator:
+  wlr_allocator_destroy(self->wlr_allocator);
 
 err_wlr_renderer:
   wlr_renderer_destroy(self->wlr_renderer);
@@ -150,8 +182,12 @@ void
 zn_backend_destroy(struct zn_backend *base)
 {
   struct zn_default_backend *self = zn_default_backend_get(base);
+  struct zn_default_backend_seat *seat =
+      zn_default_backend_seat_get(self->base.seat);
 
+  wl_list_remove(&self->new_input_listener.link);
   wl_list_remove(&self->new_output_listener.link);
+  zn_default_backend_seat_destroy(seat);
   wlr_allocator_destroy(self->wlr_allocator);
   wlr_renderer_destroy(self->wlr_renderer);
   wlr_backend_destroy(self->wlr_backend);

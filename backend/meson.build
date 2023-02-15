@@ -1,6 +1,8 @@
 _zen_wlr_backend_srcs = [
   'src/backend.c',
   'src/output.c',
+  'src/pointer.c',
+  'src/seat.c',
 
   'src/wlr/render/egl.c',
   'src/wlr/render/pixel_format.c',
