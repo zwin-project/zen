@@ -1,3 +1,5 @@
+#pragma once
+
 #include <wayland-server-core.h>
 #include <wlr/types/wlr_output.h>
 #include <wlr/types/wlr_output_damage.h>

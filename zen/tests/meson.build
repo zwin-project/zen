@@ -15,7 +15,7 @@ foreach path, args : _zen_unit_tests
     test_name.underscorify(),
     path,
     dependencies: [_zen_deps, zen_test_harness_dep],
-    include_directories: [zen_inc, zen_src_inc],
+    include_directories: zen_private_inc,
   )
 
   test(test_name, bin, env: test_env)

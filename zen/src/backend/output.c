@@ -1,4 +1,4 @@
-#include "zen/backend/default/output.h"
+#include "output.h"
 
 #include <wayland-server-core.h>
 #include <wayland-util.h>

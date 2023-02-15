@@ -1,11 +1,13 @@
 #include "zen/server.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <wayland-server-core.h>
+#include <wlr/util/log.h>
 
+#include "backend.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
-#include "zen/backend.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 static struct zn_server *server_singleton = NULL;
@@ -22,7 +24,7 @@ zn_server_run(struct zn_server *self)
 {
   self->running = true;
 
-  if (!zn_backend_start(self->backend)) {
+  if (!zn_backend_impl_start(zn_backend_impl_get(self->backend))) {
     zn_error("Failed to start zn_backend");
     return EXIT_FAILURE;
   }
@@ -49,9 +51,37 @@ zn_server_terminate(struct zn_server *self, int exit_status)
   wl_display_terminate(self->display);
 }
 
+static void
+handle_wlr_log(
+    enum wlr_log_importance wlr_importance, const char *fmt, va_list args)
+{
+  zn_log_importance_t importance = ZEN_DEBUG;
+
+  switch (wlr_importance) {
+    case WLR_ERROR:
+      importance = ZEN_ERROR;
+      break;
+    case WLR_INFO:
+      importance = ZEN_INFO;
+      break;
+    default:
+      importance = ZEN_DEBUG;
+      break;
+  }
+
+  int len = snprintf(NULL, 0, "[wlr] %s", fmt);
+  char format[len + 1];
+  snprintf(format, len + 1, "[wlr] %s", fmt);  // NOLINT(cert-err33-c)
+
+  zn_vlog_(importance, format, args);
+}
+
 struct zn_server *
 zn_server_create(struct wl_display *display)
 {
+  wlr_log_init(WLR_DEBUG, handle_wlr_log);
+
+  struct zn_backend_impl *backend = NULL;
   if (!zn_assert(!server_singleton, "zn_server is already initialized")) {
     return NULL;
   }
@@ -62,11 +92,12 @@ zn_server_create(struct wl_display *display)
     goto err;
   }
 
-  self->backend = zn_backend_create(display);
-  if (self->backend == NULL) {
+  backend = zn_backend_impl_create(display);
+  if (backend == NULL) {
     zn_error("Failed to create a zn_backend");
     goto err_free;
   }
+  self->backend = &backend->base;
 
   self->display = display;
   self->running = false;
@@ -86,7 +117,7 @@ err:
 void
 zn_server_destroy(struct zn_server *self)
 {
-  zn_backend_destroy(self->backend);
+  zn_backend_impl_destroy(zn_backend_impl_get(self->backend));
   server_singleton = NULL;
   free(self);
 }

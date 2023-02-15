@@ -1,58 +1,55 @@
-#include "zen/backend/default/backend.h"
+#include "backend.h"
 
-#include <stdio.h>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
+#include <wlr/backend.h>
 #include <wlr/render/allocator.h>
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_output.h>
-#include <wlr/util/log.h>
 
+#include "backend/output.h"
+#include "backend/pointer.h"
 #include "zen-common/log.h"
+#include "zen-common/signal.h"
 #include "zen-common/util.h"
-#include "zen/backend/default/output.h"
-#include "zen/backend/default/seat.h"
-#include "zen/backend/seat.h"
-#include "zen/backend/wlr/render/glew.h"
+#include "zen/wlr/render/glew.h"
 
-#define DEFAULT_SEAT "seat0"
-
-static struct zn_default_backend *
-zn_default_backend_get(struct zn_backend *base)
+void
+zn_backend_impl_update_capabilities(struct zn_backend_impl *self UNUSED)
 {
-  struct zn_default_backend *self = zn_container_of(base, self, base);
-  return self;
+  // TODO(@Aki-7): implement
 }
 
 static void
-handle_wlr_log(
-    enum wlr_log_importance wlr_importance, const char *fmt, va_list args)
+zn_backend_impl_handle_new_input(
+    struct wl_listener *listener UNUSED, void *data UNUSED)
 {
-  zn_log_importance_t importance = ZEN_DEBUG;
+  struct zn_backend_impl *self =
+      zn_container_of(listener, self, new_input_listener);
+  struct wlr_input_device *input_device = data;
 
-  switch (wlr_importance) {
-    case WLR_ERROR:
-      importance = ZEN_ERROR;
+  switch (input_device->type) {
+    case WLR_INPUT_DEVICE_KEYBOARD:
       break;
-    case WLR_INFO:
-      importance = ZEN_INFO;
+    case WLR_INPUT_DEVICE_POINTER: {
+      struct zn_pointer *pointer = zn_pointer_create(self, input_device);
+      wl_list_insert(&self->input_device_list, &pointer->base.link);
       break;
-    default:
-      importance = ZEN_DEBUG;
+    }
+    case WLR_INPUT_DEVICE_TOUCH:        // fall through
+    case WLR_INPUT_DEVICE_TABLET_TOOL:  // fall through
+    case WLR_INPUT_DEVICE_TABLET_PAD:   // fall through
+    case WLR_INPUT_DEVICE_SWITCH:
       break;
   }
 
-  int len = snprintf(NULL, 0, "[wlr] %s", fmt);
-  char format[len + 1];
-  snprintf(format, len + 1, "[wlr] %s", fmt);  // NOLINT(cert-err33-c)
-
-  zn_vlog_(importance, format, args);
+  zn_backend_impl_update_capabilities(self);
 }
 
 static void
-zn_default_backend_handle_new_output(struct wl_listener *listener, void *data)
+zn_backend_impl_handle_new_output(struct wl_listener *listener, void *data)
 {
-  struct zn_default_backend *self =
+  struct zn_backend_impl *self =
       zn_container_of(listener, self, new_output_listener);
   struct wlr_output *wlr_output = data;
 
@@ -80,40 +77,32 @@ zn_default_backend_handle_new_output(struct wl_listener *listener, void *data)
   wl_signal_emit(&self->base.events.new_screen, output->screen);
 }
 
-static void
-zn_default_backend_handle_new_input(struct wl_listener *listener, void *data)
+struct zn_backend_impl *
+zn_backend_impl_get(struct zn_backend *base)
 {
-  struct zn_default_backend *self =
-      zn_container_of(listener, self, new_input_listener);
-  struct wlr_input_device *input_device = data;
-  struct zn_default_backend_seat *seat =
-      zn_default_backend_seat_get(self->base.seat);
-
-  zn_default_backend_seat_handle_new_input(seat, input_device);
+  struct zn_backend_impl *self = zn_container_of(base, self, base);
+  return self;
 }
 
 bool
-zn_backend_start(struct zn_backend *base)
+zn_backend_impl_start(struct zn_backend_impl *self)
 {
-  struct zn_default_backend *self = zn_default_backend_get(base);
-
   return wlr_backend_start(self->wlr_backend);
 }
 
-struct zn_backend *
-zn_backend_create(struct wl_display *display)
+struct zn_backend_impl *
+zn_backend_impl_create(struct wl_display *display)
 {
-  wlr_log_init(WLR_DEBUG, handle_wlr_log);
-  struct zn_default_backend_seat *seat = NULL;
-
-  struct zn_default_backend *self = zalloc(sizeof *self);
+  struct zn_backend_impl *self = zalloc(sizeof *self);
   if (self == NULL) {
     zn_error("Failed to allocate memory");
     goto err;
   }
 
-  wl_signal_init(&self->base.events.new_screen);
   self->display = display;
+  wl_signal_init(&self->base.events.new_screen);
+  wl_signal_init(&self->events.destroy);
+  wl_list_init(&self->input_device_list);
 
   self->wlr_backend = wlr_backend_autocreate(display);
   if (self->wlr_backend == NULL) {
@@ -145,25 +134,15 @@ zn_backend_create(struct wl_display *display)
     goto err_wlr_renderer;
   }
 
-  seat = zn_default_backend_seat_create(display, DEFAULT_SEAT);
-  if (seat == NULL) {
-    zn_error("Failed to create a zn_default_backend_seat");
-    goto err_allocator;
-  }
-  self->base.seat = &seat->base;
-
-  self->new_output_listener.notify = zn_default_backend_handle_new_output;
+  self->new_output_listener.notify = zn_backend_impl_handle_new_output;
   wl_signal_add(
       &self->wlr_backend->events.new_output, &self->new_output_listener);
 
-  self->new_input_listener.notify = zn_default_backend_handle_new_input;
+  self->new_input_listener.notify = zn_backend_impl_handle_new_input;
   wl_signal_add(
       &self->wlr_backend->events.new_input, &self->new_input_listener);
 
-  return &self->base;
-
-err_allocator:
-  wlr_allocator_destroy(self->wlr_allocator);
+  return self;
 
 err_wlr_renderer:
   wlr_renderer_destroy(self->wlr_renderer);
@@ -179,18 +158,17 @@ err:
 }
 
 void
-zn_backend_destroy(struct zn_backend *base)
+zn_backend_impl_destroy(struct zn_backend_impl *self)
 {
-  struct zn_default_backend *self = zn_default_backend_get(base);
-  struct zn_default_backend_seat *seat =
-      zn_default_backend_seat_get(self->base.seat);
+  zn_signal_emit_mutable(&self->events.destroy, NULL);
 
   wl_list_remove(&self->new_input_listener.link);
   wl_list_remove(&self->new_output_listener.link);
-  zn_default_backend_seat_destroy(seat);
   wlr_allocator_destroy(self->wlr_allocator);
   wlr_renderer_destroy(self->wlr_renderer);
   wlr_backend_destroy(self->wlr_backend);
+  wl_list_remove(&self->events.destroy.listener_list);
+  wl_list_remove(&self->input_device_list);
   wl_list_remove(&self->base.events.new_screen.listener_list);
   free(self);
 }

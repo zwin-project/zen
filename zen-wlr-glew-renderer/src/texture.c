@@ -11,7 +11,7 @@
 #include <wlr/util/log.h>
 
 #include "glew.h"
-#include "zen/backend/wlr/render/egl.h"
+#include "zen/wlr/render/egl.h"
 
 static const struct wlr_texture_impl texture_impl;
 

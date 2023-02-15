@@ -129,8 +129,8 @@ if get_option('tests')
   subdir('test-harness')
 endif
 subdir('common')
+subdir('zen-wlr-glew-renderer')
 subdir('zen')
-subdir('backend')
 subdir('desktop')
 
 executable(
@@ -142,6 +142,5 @@ executable(
     zen_common_dep,
     zen_desktop_dep,
     zen_dep,
-    zen_wlr_backend_dep,
   ]
 )
