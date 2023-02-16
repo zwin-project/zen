@@ -6,15 +6,11 @@
 #include "zen-common/util.h"
 #include "zen/snode.h"
 
-static struct wlr_texture *
-zn_screen_snode_get_texture(void *user_data UNUSED)
+void
+zn_screen_damage(struct zn_screen *self, struct wlr_fbox *fbox)
 {
-  return NULL;
+  self->impl->damage(self->impl_data, fbox);
 }
-
-static const struct zn_snode_interface snode_implementation = {
-    .get_texture = zn_screen_snode_get_texture,
-};
 
 void
 zn_screen_notify_frame(struct zn_screen *self, struct timespec *when)
@@ -23,7 +19,8 @@ zn_screen_notify_frame(struct zn_screen *self, struct timespec *when)
 }
 
 struct zn_screen *
-zn_screen_create(void *impl)
+zn_screen_create(
+    void *impl_data, const struct zn_screen_interface *implementation)
 {
   struct zn_screen *self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -31,12 +28,21 @@ zn_screen_create(void *impl)
     goto err;
   }
 
-  self->impl = impl;
-  self->snode_root = zn_snode_create(self, &snode_implementation);
+  self->snode_root = zn_snode_create_root(self);
+  if (self->snode_root == NULL) {
+    zn_error("Failed to create a zn_snode");
+    goto err_free;
+  }
+
+  self->impl_data = impl_data;
+  self->impl = implementation;
   wl_signal_init(&self->events.frame);
   wl_signal_init(&self->events.destroy);
 
   return self;
+
+err_free:
+  free(self);
 
 err:
   return NULL;

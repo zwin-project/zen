@@ -1,3 +1,12 @@
+subdir('mock')
+
+_zen_unit_tests_deps = [
+  zen_dep,
+  _zen_deps,
+  zen_mock_dep,
+  zen_test_harness_dep
+]
+
 _zen_unit_tests = {
   'config/config-section.c': {
     'env': {
@@ -6,6 +15,7 @@ _zen_unit_tests = {
   },
   'config/config-path.c': {},
   'snode/snode-position.c': {},
+  'snode/snode-damage.c': {},
 }
 
 foreach path, args : _zen_unit_tests
@@ -15,7 +25,7 @@ foreach path, args : _zen_unit_tests
   bin = executable(
     test_name.underscorify(),
     path,
-    dependencies: [_zen_deps, zen_test_harness_dep],
+    dependencies: _zen_unit_tests_deps,
     include_directories: zen_private_inc,
   )
 

@@ -118,6 +118,8 @@ zn_output_render(struct zn_output *self, pixman_region32_t *damage)
   pixman_region32_t screen_damage;
   int transformed_width = 0;
   int transformed_height = 0;
+  int rect_count = 0;
+  pixman_box32_t *rects = NULL;
 
   pixman_region32_init(&screen_damage);
 
@@ -131,6 +133,12 @@ zn_output_render(struct zn_output *self, pixman_region32_t *damage)
 
   if (!pixman_region32_not_empty(&screen_damage)) {
     goto screen_damage_finish;
+  }
+
+  rects = pixman_region32_rectangles(&screen_damage, &rect_count);
+  for (int i = 0; i < rect_count; i++) {
+    zn_output_scissor(self, &rects[i]);
+    wlr_renderer_clear(self->wlr_output->renderer, screen_background_color);
   }
 
   zn_output_render_snode(self, self->screen->snode_root, &screen_damage);
@@ -168,8 +176,6 @@ zn_output_handle_damage_frame(struct wl_listener *listener, void *data UNUSED)
     wlr_renderer_begin(
         renderer, self->wlr_output->width, self->wlr_output->height);
 
-    wlr_renderer_clear(renderer, screen_background_color);
-
     zn_output_render(self, &damage);
 
     wlr_renderer_end(renderer);
@@ -181,6 +187,22 @@ zn_output_handle_damage_frame(struct wl_listener *listener, void *data UNUSED)
 damage_finish:
   pixman_region32_fini(&damage);
 }
+
+static void
+zn_output_damage(void *impl_data, struct wlr_fbox *damage_fbox)
+{
+  struct zn_output *self = impl_data;
+  struct wlr_box transformed_box;
+
+  zn_output_box_effective_to_transformed_coords(
+      self, damage_fbox, &transformed_box);
+
+  wlr_output_damage_add_box(self->damage, &transformed_box);
+}
+
+const struct zn_screen_interface screen_implementation = {
+    .damage = zn_output_damage,
+};
 
 static void
 zn_output_handle_wlr_output_destroy(
@@ -203,7 +225,7 @@ zn_output_create(struct wlr_output *wlr_output)
 
   self->wlr_output = wlr_output;
 
-  self->screen = zn_screen_create(self);
+  self->screen = zn_screen_create(self, &screen_implementation);
   if (self->screen == NULL) {
     zn_error("Failed to create a zn_screen");
     goto err_free;
