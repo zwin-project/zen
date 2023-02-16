@@ -25,7 +25,7 @@ zn_server_run(struct zn_server *self)
 {
   self->running = true;
 
-  if (!zn_backend_impl_start(zn_backend_impl_get(self->backend))) {
+  if (!zn_backend_start(self->backend)) {
     zn_error("Failed to start zn_backend");
     return EXIT_FAILURE;
   }
@@ -82,7 +82,6 @@ zn_server_create(struct wl_display *display)
 {
   wlr_log_init(WLR_DEBUG, handle_wlr_log);
 
-  struct zn_backend_impl *backend = NULL;
   if (!zn_assert(!server_singleton, "zn_server is already initialized")) {
     return NULL;
   }
@@ -93,12 +92,11 @@ zn_server_create(struct wl_display *display)
     goto err;
   }
 
-  backend = zn_backend_impl_create(display);
-  if (backend == NULL) {
+  self->backend = zn_backend_create(display);
+  if (self->backend == NULL) {
     zn_error("Failed to create a zn_backend");
     goto err_free;
   }
-  self->backend = &backend->base;
 
   self->seat = zn_seat_create();
   if (self->seat == NULL) {
@@ -115,7 +113,7 @@ zn_server_create(struct wl_display *display)
   return self;
 
 err_backend:
-  zn_backend_impl_destroy(zn_backend_impl_get(self->backend));
+  zn_backend_destroy(self->backend);
 
 err_free:
   free(self);
@@ -128,7 +126,7 @@ void
 zn_server_destroy(struct zn_server *self)
 {
   zn_seat_destroy(self->seat);
-  zn_backend_impl_destroy(zn_backend_impl_get(self->backend));
+  zn_backend_destroy(self->backend);
   server_singleton = NULL;
   free(self);
 }

@@ -24,8 +24,7 @@ zn_pointer_handle_motion(struct wl_listener *listener UNUSED, void *data)
   event.unaccel_dx = wlr_event->unaccel_dx;
   event.unaccel_dy = wlr_event->unaccel_dy;
 
-  zn_cursor_impl_notify_motion(
-      zn_cursor_impl_get(server->seat->cursor), &event);
+  zn_cursor_notify_motion(server->seat->cursor, &event);
 }
 
 static void
@@ -55,7 +54,7 @@ zn_pointer_get(struct zn_input_device_base *base)
 
 struct zn_pointer *
 zn_pointer_create(
-    struct zn_backend_impl *backend, struct wlr_input_device *wlr_input_device)
+    struct zn_backend *backend, struct wlr_input_device *wlr_input_device)
 {
   struct zn_pointer *self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -90,12 +89,12 @@ err:
 void
 zn_pointer_destroy(struct zn_pointer *self)
 {
-  struct zn_backend_impl *backend = self->backend;
+  struct zn_backend *backend = self->backend;
   wl_list_remove(&self->backend_destroy_listener.link);
   wl_list_remove(&self->wlr_input_device_destroy_listener.link);
   wl_list_remove(&self->motion_listener.link);
   wl_list_remove(&self->base.link);
   free(self);
 
-  zn_backend_impl_update_capabilities(backend);
+  zn_backend_update_capabilities(backend);
 }

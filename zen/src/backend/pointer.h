@@ -4,13 +4,13 @@
 
 #include "input-device.h"
 
-struct zn_backend_impl;
+struct zn_backend;
 struct zn_seat;
 
 struct zn_pointer {
   struct zn_input_device_base base;
 
-  struct zn_backend_impl *backend;  // @nonnull, @outlive
+  struct zn_backend *backend;  // @nonnull, @outlive
 
   struct wl_listener motion_listener;
   struct wl_listener wlr_input_device_destroy_listener;
@@ -20,6 +20,6 @@ struct zn_pointer {
 struct zn_pointer *zn_pointer_get(struct zn_input_device_base *base);
 
 struct zn_pointer *zn_pointer_create(
-    struct zn_backend_impl *backend, struct wlr_input_device *wlr_input_device);
+    struct zn_backend *backend, struct wlr_input_device *wlr_input_device);
 
 void zn_pointer_destroy(struct zn_pointer *self);
