@@ -92,6 +92,8 @@ zn_server_create(struct wl_display *display)
     goto err;
   }
 
+  server_singleton = self;
+
   self->backend = zn_backend_create(display);
   if (self->backend == NULL) {
     zn_error("Failed to create a zn_backend");
@@ -107,8 +109,6 @@ zn_server_create(struct wl_display *display)
   self->display = display;
   self->running = false;
   self->exit_status = EXIT_FAILURE;
-
-  server_singleton = self;
 
   return self;
 

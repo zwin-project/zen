@@ -4,6 +4,29 @@
 
 #include "zen-common/log.h"
 #include "zen-common/util.h"
+#include "zen/screen.h"
+
+static struct wlr_texture *
+get_texture(void *user_data UNUSED)
+{
+  return NULL;
+}
+
+static const struct zn_snode_interface noop = {
+    .get_texture = get_texture,
+};
+
+static void
+zn_snode_damage_whole(struct zn_snode *self)
+{
+  struct wlr_fbox box;
+  if (!self->screen) {
+    return;
+  }
+
+  zn_snode_get_fbox(self, &box);
+  zn_screen_damage(self->screen, &box);
+}
 
 static void
 zn_snode_cache_absolute_position(struct zn_snode *self)
@@ -20,7 +43,7 @@ void
 zn_snode_set_position(
     struct zn_snode *self, struct zn_snode *parent, float x, float y)
 {
-  // TODO(@Aki-7): accumulate screen damage
+  zn_snode_damage_whole(self);
 
   if (self->parent) {
     wl_list_remove(&self->link);
@@ -39,10 +62,13 @@ zn_snode_set_position(
   }
 
   self->parent = parent;
+  self->screen = parent ? parent->screen : NULL;
   self->position[0] = x;
   self->position[1] = y;
 
   zn_snode_cache_absolute_position(self);
+
+  zn_snode_damage_whole(self);
 
   wl_signal_emit(&self->events.position_changed, NULL);
 }
@@ -75,7 +101,12 @@ zn_snode_handle_parent_position_changed(
   struct zn_snode *self =
       zn_container_of(listener, self, parent_position_changed_listener);
 
+  zn_snode_damage_whole(self);
+
   zn_snode_cache_absolute_position(self);
+  self->screen = self->parent->screen;
+
+  zn_snode_damage_whole(self);
 
   wl_signal_emit(&self->events.position_changed, NULL);
 }
@@ -106,6 +137,8 @@ zn_snode_create(
   glm_vec2_zero(self->position);
   glm_vec2_zero(self->cached_absolute_position);
 
+  self->screen = NULL;
+
   wl_list_init(&self->child_node_list);
   wl_list_init(&self->link);
 
@@ -123,6 +156,14 @@ zn_snode_create(
 
 err:
   return NULL;
+}
+
+struct zn_snode *
+zn_snode_create_root(struct zn_screen *screen)
+{
+  struct zn_snode *self = zn_snode_create(NULL, &noop);
+  self->screen = screen;
+  return self;
 }
 
 void
