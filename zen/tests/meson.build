@@ -5,6 +5,7 @@ _zen_unit_tests = {
     },
   },
   'config/config-path.c': {},
+  'snode/snode-position.c': {},
 }
 
 foreach path, args : _zen_unit_tests

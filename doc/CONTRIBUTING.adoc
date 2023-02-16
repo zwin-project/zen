@@ -89,8 +89,7 @@ See link:./BUILD.adoc[BUILD.adoc].
 
 === Comments
 
-If a struct has a pointer to another struct,
-annotate it with a comment as follows.
+If a struct has a pointer, annotate it with a comment as follows.
 
 [%autowidth]
 |===
@@ -103,12 +102,17 @@ annotate it with a comment as follows.
 |The pointer can be NULL.
 
 |@outlive
-|The pointer must outlive the struct that owns it.
+|The pointer must outlive the struct object.
 
 |@owning
-|The lifetime of the pointer is controlled by the struct that owns it.
+|The lifetime of the pointer is controlled by the struct object.
 
+|@ref
+|The lifetime of the pointer ends independently from the lifetime of the struct object.
 |===
+
+@nonnull pointers should also be annotated with @outlive or @owning, or otherwise commented. +
+@nullable pointers should also be annotated with @ref or @owning, or otherwise commented.
 
 .Example
 [source, c] 

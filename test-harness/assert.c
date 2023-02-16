@@ -64,6 +64,20 @@ assert_equal_uint_(
 }
 
 void
+assert_equal_double_(
+    const char *actual_expression, double expected, double actual)
+{
+  if (expected != actual) {
+    // NOLINTNEXTLINE(cert-err33-c)
+    fprintf(stderr, "Assertion failed: %s\n", actual_expression);
+    fprintf(stderr, "\tExpected: %f\n", expected);  // NOLINT(cert-err33-c)
+    fprintf(stderr, "\t  Actual: %f\n", actual);    // NOLINT(cert-err33-c)
+
+    exit(EXIT_FAILURE);
+  }
+}
+
+void
 assert_equal_pointer_(
     const char *actual_expression, void *expected, void *actual)
 {

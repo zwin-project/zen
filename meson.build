@@ -111,11 +111,13 @@ glew_proj = subproject(
 )
 
 
+cglm_dep = dependency('cglm')
 drm_dep = dependency('libdrm')
 egl_dep = dependency('egl')
-gl_dep = dependency('gl')
 gbm_dep = dependency('gbm')
+gl_dep = dependency('gl')
 glew_dep = glew_proj.get_variable('glew_dep')
+m_dep = cc.find_library('m')
 pixman_dep = dependency('pixman-1')
 wayland_server_dep = dependency('wayland-server', version: wayland_req)
 wlroots_dep = dependency('wlroots', version: wlroots_req)
