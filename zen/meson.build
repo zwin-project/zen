@@ -8,6 +8,7 @@ _zen_srcs = [
   'src/screen.c',
   'src/seat.c',
   'src/server.c',
+  'src/snode.c',
 ]
 
 zen_inc = include_directories('include')
@@ -17,9 +18,11 @@ zen_private_inc = [
 ]
 
 _zen_pub_deps = [
+  cglm_dep,
   pixman_dep,
   toml_dep,
   wayland_server_dep,
+  wlroots_dep,
 ]
 
 _zen_deps = [
@@ -28,7 +31,7 @@ _zen_deps = [
   gl_dep,
   gbm_dep,
   glew_dep,
-  wlroots_dep,
+  m_dep,
   zen_common_dep,
   zen_wlr_glew_renderer_dep,
 ] + _zen_pub_deps

@@ -1,5 +1,3 @@
-#include <assert.h>
-
 #include "config.c"  // NOLINT(bugprone-suspicious-include)
 #include "test-harness.h"
 

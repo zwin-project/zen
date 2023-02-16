@@ -1,0 +1,49 @@
+= Coordinates system
+
+We have roughly two coordinate systems;
+the screen coordinate system and the immersive coordinate system.
+
+== Screen coordinate system
+
+2D coordinate system used to represent points on the screen. +
+The origin of the coordinates is the upper left corner.
+ 
+To account for display rotation and scaling, it has the following detailed coordinate system.
+
+=== Effective coordinate system
+`double`
+
+A coordinate system representing a virtual screen space that
+takes into account the rotation and scaling of the display.
+For example, if a 1920x1080 display is rotated 90 degrees and
+scaled so that the size of the content is halved,
+the screen size in the effective coordinate system would be 2160x3840.
+
+=== Transformed coordinate system
+`uint32_t`
+
+A coordinate system that represents the coordinates on the display after rotation.
+Points in the effective coordinate system are mapped to pixels on the display
+by transforming them to the transformed coordinate system.
+
+For example, if a 1920x1080 display is rotated 90 degrees and
+scaled so that the size of the content is halved,
+the screen size in the transformed coordinate system would be 1080x1920.
+
+Screen damage is accumulated and calculated in this coordinate system.
+
+=== Output coordinate system
+`uint32_t`
+
+The coordinate system of the buffer output to the display.
+It is obtained by performing a rotation or flip transformation
+on the transformed coordinate system.
+The final rendering result will be this coordinate system.
+
+== Immersive coordinate system
+`float`
+
+* +Y: up
+* -Z: front
+* +X: right
+// TODO(@Aki-7)

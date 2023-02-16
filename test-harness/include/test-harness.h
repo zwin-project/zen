@@ -40,6 +40,9 @@ void assert_equal_int_(
 void assert_equal_uint_(
     const char *actual_expression, uint64_t expected, uint64_t actual);
 
+void assert_equal_double_(
+    const char *actual_expression, double expected, double actual);
+
 void assert_equal_pointer_(
     const char *actual_expression, void *expected, void *actual);
 
@@ -54,6 +57,9 @@ void assert_equal_pointer_(
 
 #define ASSERT_EQUAL_UINT(expected, actual) \
   assert_equal_int_(#actual, expected, actual)
+
+#define ASSERT_EQUAL_DOUBLE(expected, actual) \
+  assert_equal_double_(#actual, expected, actual)
 
 #define ASSERT_EQUAL_POINTER(expected, actual) \
   assert_equal_pointer_(#actual, expected, actual)
