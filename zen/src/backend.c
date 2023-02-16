@@ -15,17 +15,15 @@
 #include "zen/wlr/render/glew.h"
 
 void
-zn_backend_impl_update_capabilities(struct zn_backend_impl *self UNUSED)
+zn_backend_update_capabilities(struct zn_backend *self UNUSED)
 {
   // TODO(@Aki-7): implement
 }
 
 static void
-zn_backend_impl_handle_new_input(
-    struct wl_listener *listener UNUSED, void *data UNUSED)
+zn_backend_handle_new_input(struct wl_listener *listener, void *data)
 {
-  struct zn_backend_impl *self =
-      zn_container_of(listener, self, new_input_listener);
+  struct zn_backend *self = zn_container_of(listener, self, new_input_listener);
   struct wlr_input_device *input_device = data;
 
   switch (input_device->type) {
@@ -43,13 +41,13 @@ zn_backend_impl_handle_new_input(
       break;
   }
 
-  zn_backend_impl_update_capabilities(self);
+  zn_backend_update_capabilities(self);
 }
 
 static void
-zn_backend_impl_handle_new_output(struct wl_listener *listener, void *data)
+zn_backend_handle_new_output(struct wl_listener *listener, void *data)
 {
-  struct zn_backend_impl *self =
+  struct zn_backend *self =
       zn_container_of(listener, self, new_output_listener);
   struct wlr_output *wlr_output = data;
 
@@ -74,33 +72,26 @@ zn_backend_impl_handle_new_output(struct wl_listener *listener, void *data)
     return;
   }
 
-  wl_signal_emit(&self->base.events.new_screen, output->screen);
-}
-
-struct zn_backend_impl *
-zn_backend_impl_get(struct zn_backend *base)
-{
-  struct zn_backend_impl *self = zn_container_of(base, self, base);
-  return self;
+  wl_signal_emit(&self->events.new_screen, output->screen);
 }
 
 bool
-zn_backend_impl_start(struct zn_backend_impl *self)
+zn_backend_start(struct zn_backend *self)
 {
   return wlr_backend_start(self->wlr_backend);
 }
 
-struct zn_backend_impl *
-zn_backend_impl_create(struct wl_display *display)
+struct zn_backend *
+zn_backend_create(struct wl_display *display)
 {
-  struct zn_backend_impl *self = zalloc(sizeof *self);
+  struct zn_backend *self = zalloc(sizeof *self);
   if (self == NULL) {
     zn_error("Failed to allocate memory");
     goto err;
   }
 
   self->display = display;
-  wl_signal_init(&self->base.events.new_screen);
+  wl_signal_init(&self->events.new_screen);
   wl_signal_init(&self->events.destroy);
   wl_list_init(&self->input_device_list);
 
@@ -134,11 +125,11 @@ zn_backend_impl_create(struct wl_display *display)
     goto err_wlr_renderer;
   }
 
-  self->new_output_listener.notify = zn_backend_impl_handle_new_output;
+  self->new_output_listener.notify = zn_backend_handle_new_output;
   wl_signal_add(
       &self->wlr_backend->events.new_output, &self->new_output_listener);
 
-  self->new_input_listener.notify = zn_backend_impl_handle_new_input;
+  self->new_input_listener.notify = zn_backend_handle_new_input;
   wl_signal_add(
       &self->wlr_backend->events.new_input, &self->new_input_listener);
 
@@ -158,7 +149,7 @@ err:
 }
 
 void
-zn_backend_impl_destroy(struct zn_backend_impl *self)
+zn_backend_destroy(struct zn_backend *self)
 {
   zn_signal_emit_mutable(&self->events.destroy, NULL);
 
@@ -169,6 +160,6 @@ zn_backend_impl_destroy(struct zn_backend_impl *self)
   wlr_backend_destroy(self->wlr_backend);
   wl_list_remove(&self->events.destroy.listener_list);
   wl_list_remove(&self->input_device_list);
-  wl_list_remove(&self->base.events.new_screen.listener_list);
+  wl_list_remove(&self->events.new_screen.listener_list);
   free(self);
 }

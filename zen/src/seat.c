@@ -13,12 +13,11 @@ zn_seat_create(void)
     goto err;
   }
 
-  struct zn_cursor_impl *cursor = zn_cursor_impl_create();
-  if (cursor == NULL) {
-    zn_error("Failed to create a zn_cursor_impl");
+  self->cursor = zn_cursor_create();
+  if (self->cursor == NULL) {
+    zn_error("Failed to create a zn_cursor");
     goto err_free;
   }
-  self->cursor = &cursor->base;
 
   return self;
 
@@ -32,6 +31,6 @@ err:
 void
 zn_seat_destroy(struct zn_seat *self)
 {
-  zn_cursor_impl_destroy(zn_cursor_impl_get(self->cursor));
+  zn_cursor_destroy(self->cursor);
   free(self);
 }
