@@ -2,20 +2,44 @@
 
 #include <wayland-server-core.h>
 
+#include "zen-common/util.h"
+
+struct zn_backend;
+
+struct zn_backend_interface {
+  struct wlr_texture *(*create_wlr_texture_from_pixels)(struct zn_backend *self,
+      uint32_t format, uint32_t stride, uint32_t width, uint32_t height,
+      const void *data);
+  bool (*start)(struct zn_backend *self);
+  void (*destroy)(struct zn_backend *self);
+};
+
 struct zn_backend {
-  struct wl_display *display;  // @nonnull, @outlive
-
-  struct wlr_backend *wlr_backend;      // @nonnull, @owning
-  struct wlr_renderer *wlr_renderer;    // @nonnull, @owning
-  struct wlr_allocator *wlr_allocator;  // @nonnull, @owning
-
-  struct wl_list input_device_list;  // zn_input_device_base::link
+  const struct zn_backend_interface *impl;
 
   struct {
     struct wl_signal new_screen;  // (struct zn_screen *)
     struct wl_signal destroy;     // (NULL)
   } events;
-
-  struct wl_listener new_input_listener;
-  struct wl_listener new_output_listener;
 };
+
+UNUSED static inline bool
+zn_backend_start(struct zn_backend *self)
+{
+  return self->impl->start(self);
+}
+
+UNUSED static inline void
+zn_backend_destroy(struct zn_backend *self)
+{
+  self->impl->destroy(self);
+}
+
+UNUSED static inline struct wlr_texture *
+zn_backend_create_wlr_texture_from_pixels(struct zn_backend *self,
+    uint32_t format, uint32_t stride, uint32_t width, uint32_t height,
+    const void *data)
+{
+  return self->impl->create_wlr_texture_from_pixels(
+      self, format, stride, width, height, data);
+}

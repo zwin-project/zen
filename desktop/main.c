@@ -56,7 +56,7 @@ main(int argc UNUSED, const char *argv[] UNUSED)
     goto err_signal;
   }
 
-  struct zn_server *server = zn_server_create(display);
+  struct zn_server *server = zn_server_create(display, NULL);
   if (server == NULL) {
     zn_error("Failed to create a zn_server");
     goto err_signal;

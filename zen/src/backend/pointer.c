@@ -53,8 +53,8 @@ zn_pointer_get(struct zn_input_device_base *base)
 }
 
 struct zn_pointer *
-zn_pointer_create(
-    struct zn_backend *backend, struct wlr_input_device *wlr_input_device)
+zn_pointer_create(struct zn_default_backend *backend,
+    struct wlr_input_device *wlr_input_device)
 {
   struct zn_pointer *self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -78,7 +78,7 @@ zn_pointer_create(
 
   self->backend_destroy_listener.notify = zn_pointer_handle_backend_destroy;
   wl_signal_add(
-      &self->backend->events.destroy, &self->backend_destroy_listener);
+      &self->backend->base.events.destroy, &self->backend_destroy_listener);
 
   return self;
 
@@ -89,12 +89,12 @@ err:
 void
 zn_pointer_destroy(struct zn_pointer *self)
 {
-  struct zn_backend *backend = self->backend;
+  struct zn_default_backend *backend = self->backend;
   wl_list_remove(&self->backend_destroy_listener.link);
   wl_list_remove(&self->wlr_input_device_destroy_listener.link);
   wl_list_remove(&self->motion_listener.link);
   wl_list_remove(&self->base.link);
   free(self);
 
-  zn_backend_update_capabilities(backend);
+  zn_default_backend_update_capabilities(backend);
 }

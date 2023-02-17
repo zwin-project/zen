@@ -44,7 +44,7 @@ void assert_equal_double_(
     const char *actual_expression, double expected, double actual);
 
 void assert_equal_pointer_(
-    const char *actual_expression, void *expected, void *actual);
+    const char *actual_expression, void *expected, void *actual, bool not );
 
 #define ASSERT_EQUAL_STRING(expected, actual) \
   assert_equal_string_(#actual, expected, actual)
@@ -62,4 +62,7 @@ void assert_equal_pointer_(
   assert_equal_double_(#actual, expected, actual)
 
 #define ASSERT_EQUAL_POINTER(expected, actual) \
-  assert_equal_pointer_(#actual, expected, actual)
+  assert_equal_pointer_(#actual, expected, actual, false)
+
+#define ASSERT_NOT_EQUAL_POINTER(expected, actual) \
+  assert_equal_pointer_(#actual, expected, actual, true)

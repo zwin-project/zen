@@ -9,6 +9,7 @@
 #include "seat.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
+#include "zen/backend.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 static struct zn_server *server_singleton = NULL;
@@ -78,7 +79,7 @@ handle_wlr_log(
 }
 
 struct zn_server *
-zn_server_create(struct wl_display *display)
+zn_server_create(struct wl_display *display, struct zn_backend *backend)
 {
   wlr_log_init(WLR_DEBUG, handle_wlr_log);
 
@@ -94,7 +95,11 @@ zn_server_create(struct wl_display *display)
 
   server_singleton = self;
 
-  self->backend = zn_backend_create(display);
+  if (backend) {
+    self->backend = backend;
+  } else {
+    self->backend = zn_default_backend_create(display);
+  }
   if (self->backend == NULL) {
     zn_error("Failed to create a zn_backend");
     goto err_free;
