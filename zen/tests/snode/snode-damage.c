@@ -16,7 +16,7 @@ const struct zn_snode_interface test_impl = {
 
 TEST(general)
 {
-  struct zn_mock_output *output = zn_mock_output_create();
+  struct zn_mock_output *output = zn_mock_output_create(0, 0);
 
   struct wlr_texture texture1;
   texture1.width = 10;
@@ -60,8 +60,8 @@ TEST(general)
 
 TEST(rebase_parent)
 {
-  struct zn_mock_output *output = zn_mock_output_create();
-  struct zn_mock_output *output2 = zn_mock_output_create();
+  struct zn_mock_output *output = zn_mock_output_create(0, 0);
+  struct zn_mock_output *output2 = zn_mock_output_create(0, 0);
 
   struct wlr_texture texture;
   texture.width = 10;

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cglm/types.h>
 #include <time.h>
 #include <wayland-server-core.h>
 #include <wlr/util/box.h>
@@ -17,7 +18,10 @@ struct zn_screen {
 
   struct zn_snode *snode_root;  // @nonnull, @owning
 
+  vec2 size;  // effective coordinate
+
   struct {
+    struct wl_signal resized;  // (NULL)
     struct wl_signal frame;    // (struct timespec *)
     struct wl_signal destroy;  // (NULL)
   } events;
@@ -25,6 +29,10 @@ struct zn_screen {
 
 /// @param fbox : Effective coordinate system
 void zn_screen_damage(struct zn_screen *self, struct wlr_fbox *fbox);
+
+/// Called by the impl object
+/// @param size : effective coords
+void zn_screen_notify_resize(struct zn_screen *self, vec2 size);
 
 /// Called by the impl object
 void zn_screen_notify_frame(struct zn_screen *self, struct timespec *when);

@@ -1,8 +1,14 @@
 _zen_desktop_srcs = [
+  'src/screen-container.c',
+  'src/screen-layout.c',
   'src/shell.c',
 ]
 
 _zen_desktop_inc = include_directories('include')
+_zen_desktop_private_inc = [
+  include_directories('src'),
+  _zen_desktop_inc,
+]
 
 _zen_desktop_deps = [
   zen_common_dep,
@@ -21,3 +27,7 @@ zen_desktop_dep = declare_dependency(
   link_with: _zen_desktop_lib,
   include_directories: _zen_desktop_inc,
 )
+
+if get_option('tests')
+  subdir('tests')
+endif

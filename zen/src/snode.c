@@ -3,6 +3,7 @@
 #include <cglm/vec2.h>
 
 #include "zen-common/log.h"
+#include "zen-common/signal.h"
 #include "zen-common/util.h"
 #include "zen/screen.h"
 
@@ -169,7 +170,7 @@ zn_snode_create_root(struct zn_screen *screen)
 void
 zn_snode_destroy(struct zn_snode *self)
 {
-  wl_signal_emit(&self->events.destroy, NULL);
+  zn_signal_emit_mutable(&self->events.destroy, NULL);
 
   wl_list_remove(&self->events.destroy.listener_list);
   wl_list_remove(&self->events.position_changed.listener_list);

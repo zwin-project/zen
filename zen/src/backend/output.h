@@ -16,6 +16,7 @@ struct zn_output {
 
   struct wl_listener wlr_output_destroy_listener;
   struct wl_listener damage_frame_listener;
+  struct wl_listener mode_listener;
 };
 
 struct zn_output *zn_output_create(struct wlr_output *wlr_output);
