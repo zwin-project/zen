@@ -214,6 +214,20 @@ zn_output_handle_wlr_output_destroy(
   zn_output_destroy(self);
 }
 
+static void
+zn_output_handle_mode(struct wl_listener *listener, void *data UNUSED)
+{
+  struct zn_output *self = zn_container_of(listener, self, mode_listener);
+  vec2 size;  // effective coords
+  int width = 0;
+  int height = 0;
+  wlr_output_transformed_resolution(self->wlr_output, &width, &height);
+  size[0] = (float)width / self->wlr_output->scale;
+  size[1] = (float)height / self->wlr_output->scale;
+
+  zn_screen_notify_resize(self->screen, size);
+}
+
 struct zn_output *
 zn_output_create(struct wlr_output *wlr_output)
 {
@@ -243,12 +257,8 @@ zn_output_create(struct wlr_output *wlr_output)
     goto err_damage;
   }
 
-  wlr_output_set_mode(self->wlr_output, mode);
-  wlr_output_enable(self->wlr_output, true);
-  if (!wlr_output_commit(self->wlr_output)) {
-    zn_error("Failed to commit initial status");
-    goto err_damage;
-  }
+  self->mode_listener.notify = zn_output_handle_mode;
+  wl_signal_add(&self->wlr_output->events.mode, &self->mode_listener);
 
   self->wlr_output_destroy_listener.notify =
       zn_output_handle_wlr_output_destroy;
@@ -258,7 +268,20 @@ zn_output_create(struct wlr_output *wlr_output)
   self->damage_frame_listener.notify = zn_output_handle_damage_frame;
   wl_signal_add(&self->damage->events.frame, &self->damage_frame_listener);
 
+  // initial setup
+  wlr_output_set_mode(self->wlr_output, mode);
+  wlr_output_enable(self->wlr_output, true);
+  if (!wlr_output_commit(self->wlr_output)) {
+    zn_error("Failed to commit initial status");
+    goto err_signals;
+  }
+
   return self;
+
+err_signals:
+  wl_list_remove(&self->damage_frame_listener.link);
+  wl_list_remove(&self->wlr_output_destroy_listener.link);
+  wl_list_remove(&self->damage_frame_listener.link);
 
 err_damage:
   wlr_output_damage_destroy(self->damage);
@@ -277,6 +300,8 @@ static void
 zn_output_destroy(struct zn_output *self)
 {
   zn_screen_destroy(self->screen);
+  wl_list_remove(&self->damage_frame_listener.link);
   wl_list_remove(&self->wlr_output_destroy_listener.link);
+  wl_list_remove(&self->damage_frame_listener.link);
   free(self);
 }

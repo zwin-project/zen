@@ -30,8 +30,14 @@ zn_mock_output_damage_clear(struct zn_mock_output *self)
   pixman_region32_clear(&self->damage);
 }
 
+void
+zn_mock_output_resize(struct zn_mock_output *self, float width, float height)
+{
+  zn_screen_notify_resize(self->screen, (vec2){width, height});
+}
+
 struct zn_mock_output *
-zn_mock_output_create(void)
+zn_mock_output_create(float width, float height)
 {
   struct zn_mock_output *self = zalloc(sizeof *self);
   assert(self);
@@ -40,6 +46,8 @@ zn_mock_output_create(void)
   assert(self->screen);
 
   pixman_region32_init(&self->damage);
+
+  zn_screen_notify_resize(self->screen, (vec2){width, height});
 
   return self;
 }

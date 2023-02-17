@@ -11,7 +11,7 @@ The origin of the coordinates is the upper left corner.
 To account for display rotation and scaling, it has the following detailed coordinate system.
 
 === Effective coordinate system
-`double`
+`double or float`
 
 A coordinate system representing a virtual screen space that
 takes into account the rotation and scaling of the display.
@@ -39,6 +39,14 @@ The coordinate system of the buffer output to the display.
 It is obtained by performing a rotation or flip transformation
 on the transformed coordinate system.
 The final rendering result will be this coordinate system.
+
+=== layout coordinate system
+`double or float`
+
+This coordinate system, unlike the three systems above, is used to define the 
+relative position of screens.
+The **effective** coordinate system of each screen and the layout coordinate
+system are in a translational relationship.
 
 == Immersive coordinate system
 `float`

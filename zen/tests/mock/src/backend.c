@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <wlr/render/wlr_texture.h>
 
+#include "zen-common/signal.h"
 #include "zen-common/util.h"
 
 static void zn_mock_backend_destroy(struct zn_mock_backend *self);
@@ -54,7 +55,7 @@ zn_mock_backend_create(void)
 static void
 zn_mock_backend_destroy(struct zn_mock_backend *self)
 {
-  wl_signal_emit(&self->base.events.destroy, NULL);
+  zn_signal_emit_mutable(&self->base.events.destroy, NULL);
 
   wl_list_remove(&self->base.events.destroy.listener_list);
   wl_list_remove(&self->base.events.new_screen.listener_list);
