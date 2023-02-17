@@ -59,9 +59,9 @@ zn_cursor_create(void)
   if (xcursor) {
     struct zn_server *server = zn_server_get_singleton();
     struct wlr_xcursor_image *image = xcursor->images[0];
-    self->xcursor_texture = wlr_texture_from_pixels(
-        server->backend->wlr_renderer, DRM_FORMAT_ARGB8888, image->width * 4,
-        image->width, image->height, image->buffer);
+    self->xcursor_texture = zn_backend_create_wlr_texture_from_pixels(
+        server->backend, DRM_FORMAT_ARGB8888, image->width * 4, image->width,
+        image->height, image->buffer);
   }
 
   wl_signal_init(&self->events.motion);

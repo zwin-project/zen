@@ -7,23 +7,26 @@
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_output.h>
 
-#include "backend/output.h"
-#include "backend/pointer.h"
+#include "output.h"
+#include "pointer.h"
 #include "zen-common/log.h"
 #include "zen-common/signal.h"
 #include "zen-common/util.h"
 #include "zen/wlr/render/glew.h"
 
+static void zn_default_backend_destroy(struct zn_default_backend *self);
+
 void
-zn_backend_update_capabilities(struct zn_backend *self UNUSED)
+zn_default_backend_update_capabilities(struct zn_default_backend *self UNUSED)
 {
   // TODO(@Aki-7): implement
 }
 
 static void
-zn_backend_handle_new_input(struct wl_listener *listener, void *data)
+zn_default_backend_handle_new_input(struct wl_listener *listener, void *data)
 {
-  struct zn_backend *self = zn_container_of(listener, self, new_input_listener);
+  struct zn_default_backend *self =
+      zn_container_of(listener, self, new_input_listener);
   struct wlr_input_device *input_device = data;
 
   switch (input_device->type) {
@@ -41,13 +44,13 @@ zn_backend_handle_new_input(struct wl_listener *listener, void *data)
       break;
   }
 
-  zn_backend_update_capabilities(self);
+  zn_default_backend_update_capabilities(self);
 }
 
 static void
-zn_backend_handle_new_output(struct wl_listener *listener, void *data)
+zn_default_backend_handle_new_output(struct wl_listener *listener, void *data)
 {
-  struct zn_backend *self =
+  struct zn_default_backend *self =
       zn_container_of(listener, self, new_output_listener);
   struct wlr_output *wlr_output = data;
 
@@ -72,27 +75,53 @@ zn_backend_handle_new_output(struct wl_listener *listener, void *data)
     return;
   }
 
-  wl_signal_emit(&self->events.new_screen, output->screen);
+  wl_signal_emit(&self->base.events.new_screen, output->screen);
 }
 
-bool
-zn_backend_start(struct zn_backend *self)
+static struct wlr_texture *
+zn_default_backend_create_wlr_texture_from_pixels(struct zn_backend *base,
+    uint32_t format, uint32_t stride, uint32_t width, uint32_t height,
+    const void *data)
 {
+  struct zn_default_backend *self = zn_container_of(base, self, base);
+  return wlr_texture_from_pixels(
+      self->wlr_renderer, format, stride, width, height, data);
+}
+
+static bool
+zn_default_backend_start(struct zn_backend *base)
+{
+  struct zn_default_backend *self = zn_container_of(base, self, base);
   return wlr_backend_start(self->wlr_backend);
 }
 
-struct zn_backend *
-zn_backend_create(struct wl_display *display)
+static void
+zn_default_backend_handle_destroy(struct zn_backend *base)
 {
-  struct zn_backend *self = zalloc(sizeof *self);
+  struct zn_default_backend *self = zn_container_of(base, self, base);
+  zn_default_backend_destroy(self);
+}
+
+static const struct zn_backend_interface implementation = {
+    .create_wlr_texture_from_pixels =
+        zn_default_backend_create_wlr_texture_from_pixels,
+    .start = zn_default_backend_start,
+    .destroy = zn_default_backend_handle_destroy,
+};
+
+struct zn_backend *
+zn_default_backend_create(struct wl_display *display)
+{
+  struct zn_default_backend *self = zalloc(sizeof *self);
   if (self == NULL) {
     zn_error("Failed to allocate memory");
     goto err;
   }
 
+  wl_signal_init(&self->base.events.new_screen);
+  wl_signal_init(&self->base.events.destroy);
+  self->base.impl = &implementation;
   self->display = display;
-  wl_signal_init(&self->events.new_screen);
-  wl_signal_init(&self->events.destroy);
   wl_list_init(&self->input_device_list);
 
   self->wlr_backend = wlr_backend_autocreate(display);
@@ -125,15 +154,15 @@ zn_backend_create(struct wl_display *display)
     goto err_wlr_renderer;
   }
 
-  self->new_output_listener.notify = zn_backend_handle_new_output;
+  self->new_output_listener.notify = zn_default_backend_handle_new_output;
   wl_signal_add(
       &self->wlr_backend->events.new_output, &self->new_output_listener);
 
-  self->new_input_listener.notify = zn_backend_handle_new_input;
+  self->new_input_listener.notify = zn_default_backend_handle_new_input;
   wl_signal_add(
       &self->wlr_backend->events.new_input, &self->new_input_listener);
 
-  return self;
+  return &self->base;
 
 err_wlr_renderer:
   wlr_renderer_destroy(self->wlr_renderer);
@@ -148,18 +177,18 @@ err:
   return NULL;
 }
 
-void
-zn_backend_destroy(struct zn_backend *self)
+static void
+zn_default_backend_destroy(struct zn_default_backend *self)
 {
-  zn_signal_emit_mutable(&self->events.destroy, NULL);
+  zn_signal_emit_mutable(&self->base.events.destroy, NULL);
 
   wl_list_remove(&self->new_input_listener.link);
   wl_list_remove(&self->new_output_listener.link);
   wlr_allocator_destroy(self->wlr_allocator);
   wlr_renderer_destroy(self->wlr_renderer);
   wlr_backend_destroy(self->wlr_backend);
-  wl_list_remove(&self->events.destroy.listener_list);
+  wl_list_remove(&self->base.events.destroy.listener_list);
   wl_list_remove(&self->input_device_list);
-  wl_list_remove(&self->events.new_screen.listener_list);
+  wl_list_remove(&self->base.events.new_screen.listener_list);
   free(self);
 }

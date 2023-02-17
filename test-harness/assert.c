@@ -79,13 +79,14 @@ assert_equal_double_(
 
 void
 assert_equal_pointer_(
-    const char *actual_expression, void *expected, void *actual)
+    const char *actual_expression, void *expected, void *actual, bool not )
 {
-  if (expected != actual) {
+  if ((expected == actual) == not ) {
     // NOLINTNEXTLINE(cert-err33-c)
     fprintf(stderr, "Assertion failed: %s\n", actual_expression);
-    fprintf(stderr, "\tExpected: %p\n", expected);  // NOLINT(cert-err33-c)
-    fprintf(stderr, "\t  Actual: %p\n", actual);    // NOLINT(cert-err33-c)
+    // NOLINTNEXTLINE(cert-err33-c)
+    fprintf(stderr, "\tExpected: %s %p\n", not ? "not" : "", expected);
+    fprintf(stderr, "\t  Actual: %p\n", actual);  // NOLINT(cert-err33-c)
 
     exit(EXIT_FAILURE);
   }

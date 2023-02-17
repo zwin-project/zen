@@ -1,8 +1,4 @@
 _zen_srcs = [
-  'src/backend.c',
-  'src/backend/output.c',
-  'src/backend/pointer.c',
-
   'src/config.c',
   'src/cursor.c',
   'src/screen.c',
@@ -35,6 +31,10 @@ _zen_deps = [
   zen_common_dep,
   zen_wlr_glew_renderer_dep,
 ] + _zen_pub_deps
+
+subdir('src/backend')
+
+_zen_deps += zen_backend_dep
 
 _zen_lib = static_library(
   'zen-lib',

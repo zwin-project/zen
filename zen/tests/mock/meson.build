@@ -1,4 +1,5 @@
 _mock_srcs = [
+  'src/backend.c',
   'src/output.c',
 ]
 

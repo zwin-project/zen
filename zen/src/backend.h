@@ -2,12 +2,6 @@
 
 #include <wayland-server-core.h>
 
-#include "zen/backend.h"
+struct zn_backend;
 
-void zn_backend_update_capabilities(struct zn_backend *self);
-
-bool zn_backend_start(struct zn_backend *self);
-
-struct zn_backend *zn_backend_create(struct wl_display *display);
-
-void zn_backend_destroy(struct zn_backend *self);
+struct zn_backend *zn_default_backend_create(struct wl_display *display);
