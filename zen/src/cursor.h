@@ -2,9 +2,6 @@
 
 #include "zen/cursor.h"
 
-void zn_cursor_notify_motion(
-    struct zn_cursor *self, struct zn_cursor_motion_event *event);
-
 struct zn_cursor *zn_cursor_create(void);
 
 void zn_cursor_destroy(struct zn_cursor *self);

@@ -15,16 +15,9 @@ static void
 zn_pointer_handle_motion(struct wl_listener *listener UNUSED, void *data)
 {
   struct zn_server *server = zn_server_get_singleton();
-  struct wlr_event_pointer_motion *wlr_event = data;
-  struct zn_cursor_motion_event event;
+  struct wlr_event_pointer_motion *event = data;
 
-  event.time_msec = wlr_event->time_msec;
-  event.delta_x = wlr_event->delta_x;
-  event.delta_y = wlr_event->delta_y;
-  event.unaccel_dx = wlr_event->unaccel_dx;
-  event.unaccel_dy = wlr_event->unaccel_dy;
-
-  zn_cursor_notify_motion(server->seat->cursor, &event);
+  zn_seat_notify_motion(server->seat, event);
 }
 
 static void
