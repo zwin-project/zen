@@ -5,9 +5,11 @@
 
 #include "zen-common/log.h"
 #include "zen-common/util.h"
+#include "zen-desktop/cursor-grab/default.h"
 #include "zen-desktop/screen-container.h"
 #include "zen-desktop/screen-layout.h"
 #include "zen/backend.h"
+#include "zen/seat.h"
 #include "zen/server.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
@@ -22,6 +24,16 @@ zn_desktop_shell_handle_new_screen(struct wl_listener *listener, void *data)
   struct zn_screen_container *container = zn_screen_container_create(screen);
 
   zn_screen_layout_add(self->screen_layout, container);
+}
+
+static void
+zn_desktop_shell_handle_pointer_motion(struct wl_listener *listener, void *data)
+{
+  struct zn_desktop_shell *self =
+      zn_container_of(listener, self, pointer_motion_listener);
+  struct wlr_event_pointer_motion *event = data;
+  zn_cursor_grab_pointer_motion(
+      self->cursor_grab, event->delta_x, event->delta_y, event->time_msec);
 }
 
 struct zn_desktop_shell *
@@ -50,11 +62,26 @@ zn_desktop_shell_create(void)
     goto err_free;
   }
 
+  struct zn_cursor_default_grab *cursor_default_grab =
+      zn_cursor_default_grab_create();
+  if (cursor_default_grab == NULL) {
+    zn_error("Failed to create a cursor default grab");
+    goto err_screen_layout;
+  }
+  self->cursor_grab = &cursor_default_grab->base;
+
   self->new_screen_listener.notify = zn_desktop_shell_handle_new_screen;
   wl_signal_add(
       &server->backend->events.new_screen, &self->new_screen_listener);
 
+  self->pointer_motion_listener.notify = zn_desktop_shell_handle_pointer_motion;
+  wl_signal_add(
+      &server->seat->events.pointer_motion, &self->pointer_motion_listener);
+
   return self;
+
+err_screen_layout:
+  zn_screen_layout_destroy(self->screen_layout);
 
 err_free:
   desktop_shell_singleton = NULL;
@@ -67,7 +94,9 @@ err:
 void
 zn_desktop_shell_destroy(struct zn_desktop_shell *self)
 {
+  wl_list_remove(&self->pointer_motion_listener.link);
   wl_list_remove(&self->new_screen_listener.link);
+  zn_cursor_grab_destroy(self->cursor_grab);
   zn_screen_layout_destroy(self->screen_layout);
   desktop_shell_singleton = NULL;
   free(self);

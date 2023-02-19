@@ -26,6 +26,10 @@ zn_mock_backend_start(struct zn_backend *base UNUSED)
 }
 
 static void
+zn_mock_backend_stop(struct zn_backend *base UNUSED)
+{}
+
+static void
 zn_mock_backend_handle_destroy(struct zn_backend *base)
 {
   struct zn_mock_backend *self = zn_container_of(base, self, base);
@@ -36,6 +40,7 @@ static const struct zn_backend_interface implementation = {
     .create_wlr_texture_from_pixels =
         zn_mock_backend_create_wlr_texture_from_pixels,
     .start = zn_mock_backend_start,
+    .stop = zn_mock_backend_stop,
     .destroy = zn_mock_backend_handle_destroy,
 };
 

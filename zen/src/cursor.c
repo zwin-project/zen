@@ -55,6 +55,10 @@ zn_cursor_create(void)
     self->xcursor_texture = zn_backend_create_wlr_texture_from_pixels(
         server->backend, DRM_FORMAT_ARGB8888, image->width * 4, image->width,
         image->height, image->buffer);
+    if (self->xcursor_texture == NULL) {
+      zn_error("Failed to create xcursor texture");
+      goto err_xcursor_manager;
+    }
   }
 
   return self;

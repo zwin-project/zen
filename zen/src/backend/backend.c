@@ -84,6 +84,10 @@ zn_default_backend_create_wlr_texture_from_pixels(struct zn_backend *base,
     const void *data)
 {
   struct zn_default_backend *self = zn_container_of(base, self, base);
+  if (!zn_assert(self->wlr_backend, "zn_backend has already stopped")) {
+    return NULL;
+  }
+
   return wlr_texture_from_pixels(
       self->wlr_renderer, format, stride, width, height, data);
 }
@@ -93,6 +97,14 @@ zn_default_backend_start(struct zn_backend *base)
 {
   struct zn_default_backend *self = zn_container_of(base, self, base);
   return wlr_backend_start(self->wlr_backend);
+}
+
+static void
+zn_default_backend_stop(struct zn_backend *base)
+{
+  struct zn_default_backend *self = zn_container_of(base, self, base);
+  wlr_backend_destroy(self->wlr_backend);
+  self->wlr_backend = NULL;
 }
 
 static void
@@ -106,6 +118,7 @@ static const struct zn_backend_interface implementation = {
     .create_wlr_texture_from_pixels =
         zn_default_backend_create_wlr_texture_from_pixels,
     .start = zn_default_backend_start,
+    .stop = zn_default_backend_stop,
     .destroy = zn_default_backend_handle_destroy,
 };
 
@@ -186,7 +199,9 @@ zn_default_backend_destroy(struct zn_default_backend *self)
   wl_list_remove(&self->new_output_listener.link);
   wlr_allocator_destroy(self->wlr_allocator);
   wlr_renderer_destroy(self->wlr_renderer);
-  wlr_backend_destroy(self->wlr_backend);
+  if (self->wlr_backend) {
+    wlr_backend_destroy(self->wlr_backend);
+  }
   wl_list_remove(&self->base.events.destroy.listener_list);
   wl_list_remove(&self->input_device_list);
   wl_list_remove(&self->base.events.new_screen.listener_list);
