@@ -47,6 +47,8 @@ zn_server_terminate(struct zn_server *self, int exit_status)
     return;
   }
 
+  zn_backend_stop(self->backend);
+
   self->running = false;
   self->exit_status = exit_status;
 

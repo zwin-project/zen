@@ -302,6 +302,11 @@ zn_output_destroy(struct zn_output *self)
   zn_screen_destroy(self->screen);
   wl_list_remove(&self->damage_frame_listener.link);
   wl_list_remove(&self->wlr_output_destroy_listener.link);
-  wl_list_remove(&self->damage_frame_listener.link);
+
+  /**
+   * Uncommenting this will cause error as wlr_output_damage does not do
+   * wl_list_remove(&damage->events.frame)
+   */
+  // wl_list_remove(&self->damage_frame_listener.link);
   free(self);
 }
