@@ -1,13 +1,13 @@
 #pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include <errno.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <string.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef enum {
   ZEN_SILENT = 0,

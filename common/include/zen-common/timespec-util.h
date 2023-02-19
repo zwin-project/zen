@@ -1,12 +1,13 @@
 #pragma once
 
+#include <stdint.h>
+#include <time.h>
+
 #include "zen-common/util.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <stdint.h>
-#include <time.h>
 
 enum {
   NSEC_PER_SEC = 1000000000,

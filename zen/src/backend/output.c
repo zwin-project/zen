@@ -263,7 +263,7 @@ zn_output_create(struct wlr_output *wlr_output)
   self->wlr_output_destroy_listener.notify =
       zn_output_handle_wlr_output_destroy;
   wl_signal_add(
-      &self->wlr_output->events.destroy, &self->wlr_output_destroy_listener);
+      &self->damage->events.destroy, &self->wlr_output_destroy_listener);
 
   self->damage_frame_listener.notify = zn_output_handle_damage_frame;
   wl_signal_add(&self->damage->events.frame, &self->damage_frame_listener);

@@ -39,10 +39,9 @@ struct zn_snode {
 };
 
 /// @param parent is nullable
-/// @param x is in the parent local coords
-/// @param y is in the parent local coords
+/// @param position is in the parent local coords
 void zn_snode_set_position(
-    struct zn_snode *self, struct zn_snode *parent, float x, float y);
+    struct zn_snode *self, struct zn_snode *parent, vec2 position);
 
 /// @return value is nullable
 struct wlr_texture *zn_snode_get_texture(struct zn_snode *self);

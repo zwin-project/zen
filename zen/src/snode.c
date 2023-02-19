@@ -42,7 +42,7 @@ zn_snode_cache_absolute_position(struct zn_snode *self)
 
 void
 zn_snode_set_position(
-    struct zn_snode *self, struct zn_snode *parent, float x, float y)
+    struct zn_snode *self, struct zn_snode *parent, vec2 position)
 {
   zn_snode_damage_whole(self);
 
@@ -64,8 +64,7 @@ zn_snode_set_position(
 
   self->parent = parent;
   self->screen = parent ? parent->screen : NULL;
-  self->position[0] = x;
-  self->position[1] = y;
+  glm_vec2_copy(position, self->position);
 
   zn_snode_cache_absolute_position(self);
 
@@ -118,7 +117,7 @@ zn_snode_handle_parent_destroy(struct wl_listener *listener, void *data UNUSED)
   struct zn_snode *self =
       zn_container_of(listener, self, parent_destroy_listener);
 
-  zn_snode_set_position(self, NULL, 0, 0);
+  zn_snode_set_position(self, NULL, GLM_VEC2_ZERO);
 }
 
 struct zn_snode *

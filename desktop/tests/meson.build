@@ -7,6 +7,8 @@ _zen_desktop_unit_tests_deps = [
 ]
 
 _zen_desktop_unit_tests = {
+  'screen-layout/closest.c': {},
+  'screen-layout/get-main.c': {},
   'screen-layout/layout.c': {},
 }
 
