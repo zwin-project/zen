@@ -33,12 +33,12 @@ TEST(general)
   ASSERT_EQUAL_BOOL(
       false, zn_mock_output_damage_contains(output, 50 + 5, 100 + 5));
 
-  zn_snode_set_position(node1, root, 50, 100);
+  zn_snode_set_position(node1, root, (vec2){50, 100});
 
   ASSERT_EQUAL_BOOL(
       true, zn_mock_output_damage_contains(output, 50 + 5, 100 + 5));
 
-  zn_snode_set_position(node2, node1, 80, 10);
+  zn_snode_set_position(node2, node1, (vec2){80, 10});
 
   ASSERT_EQUAL_BOOL(true,
       zn_mock_output_damage_contains(output, 50 + 80 + 15, 100 + 10 + 15));
@@ -50,7 +50,7 @@ TEST(general)
   ASSERT_EQUAL_BOOL(false,
       zn_mock_output_damage_contains(output, 10 + 80 + 15, 20 + 10 + 15));
 
-  zn_snode_set_position(node1, root, 10, 20);
+  zn_snode_set_position(node1, root, (vec2){10, 20});
 
   ASSERT_EQUAL_BOOL(true,
       zn_mock_output_damage_contains(output, 50 + 80 + 15, 100 + 10 + 15));
@@ -75,17 +75,17 @@ TEST(rebase_parent)
   struct zn_snode *node3 = zn_snode_create(&texture, &test_impl);
   struct zn_snode *node4 = zn_snode_create(&texture, &test_impl);
 
-  zn_snode_set_position(node4, node3, 100, 100);
-  zn_snode_set_position(node3, node2, 100, 100);
-  zn_snode_set_position(node2, node1, 100, 100);
-  zn_snode_set_position(node1, root, 100, 100);
+  zn_snode_set_position(node4, node3, (vec2){100, 100});
+  zn_snode_set_position(node3, node2, (vec2){100, 100});
+  zn_snode_set_position(node2, node1, (vec2){100, 100});
+  zn_snode_set_position(node1, root, (vec2){100, 100});
 
   zn_mock_output_damage_clear(output);
 
   ASSERT_EQUAL_BOOL(false, zn_mock_output_damage_contains(output, 405, 405));
   ASSERT_EQUAL_BOOL(false, zn_mock_output_damage_contains(output, 355, 355));
 
-  zn_snode_set_position(node2, root, 150, 150);
+  zn_snode_set_position(node2, root, (vec2){150, 150});
 
   // damages of node4
   ASSERT_EQUAL_BOOL(true, zn_mock_output_damage_contains(output, 405, 405));
@@ -97,7 +97,7 @@ TEST(rebase_parent)
   zn_mock_output_damage_clear(output);
   zn_mock_output_damage_clear(output2);
 
-  zn_snode_set_position(node2, root2, 500, 500);
+  zn_snode_set_position(node2, root2, (vec2){500, 500});
 
   ASSERT_EQUAL_BOOL(true, zn_mock_output_damage_contains(output, 355, 355));
   ASSERT_EQUAL_BOOL(false, zn_mock_output_damage_contains(output, 705, 705));
@@ -109,7 +109,7 @@ TEST(rebase_parent)
    */
   zn_mock_output_damage_clear(output2);
 
-  zn_snode_set_position(node2, NULL, 500, 500);
+  zn_snode_set_position(node2, NULL, (vec2){500, 500});
 
   // damages of node4
   ASSERT_EQUAL_BOOL(true, zn_mock_output_damage_contains(output2, 705, 705));
@@ -120,7 +120,7 @@ TEST(rebase_parent)
   zn_mock_output_damage_clear(output2);
   zn_mock_output_damage_clear(output);
 
-  zn_snode_set_position(node4, node3, 300, 300);
+  zn_snode_set_position(node4, node3, (vec2){300, 300});
 
   // damages of node4
   ASSERT_EQUAL_BOOL(false, pixman_region32_not_empty(&output->damage));

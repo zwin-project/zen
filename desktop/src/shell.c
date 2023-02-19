@@ -32,8 +32,9 @@ zn_desktop_shell_handle_pointer_motion(struct wl_listener *listener, void *data)
   struct zn_desktop_shell *self =
       zn_container_of(listener, self, pointer_motion_listener);
   struct wlr_event_pointer_motion *event = data;
-  zn_cursor_grab_pointer_motion(
-      self->cursor_grab, event->delta_x, event->delta_y, event->time_msec);
+  vec2 delta = {(float)event->delta_x, (float)event->delta_y};
+
+  zn_cursor_grab_pointer_motion(self->cursor_grab, delta, event->time_msec);
 }
 
 struct zn_desktop_shell *

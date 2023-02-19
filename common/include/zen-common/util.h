@@ -1,11 +1,11 @@
 #pragma once
 
+#include <stddef.h>
+#include <stdlib.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <stddef.h>
-#include <stdlib.h>
 
 /** Visibility attribute */
 #if defined(__GNUC__) && __GNUC__ >= 4
