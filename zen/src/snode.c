@@ -8,13 +8,18 @@
 #include "zen/screen.h"
 
 static struct wlr_texture *
-get_texture(void *user_data UNUSED)
+handle_get_texture(void *user_data UNUSED)
 {
   return NULL;
 }
 
+static void
+handle_frame(void *user_data UNUSED, const struct timespec *when UNUSED)
+{}
+
 static const struct zn_snode_interface noop = {
-    .get_texture = get_texture,
+    .get_texture = handle_get_texture,
+    .frame = handle_frame,
 };
 
 static void
@@ -37,6 +42,16 @@ zn_snode_cache_absolute_position(struct zn_snode *self)
         self->cached_absolute_position);
   } else {
     glm_vec2_copy(self->position, self->cached_absolute_position);
+  }
+}
+
+void
+zn_snode_notify_frame(struct zn_snode *self, const struct timespec *when)
+{
+  self->impl->frame(self->user_data, when);
+  struct zn_snode *snode = NULL;
+  wl_list_for_each (snode, &self->child_node_list, link) {
+    zn_snode_notify_frame(snode, when);
   }
 }
 

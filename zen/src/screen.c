@@ -24,7 +24,7 @@ zn_screen_notify_resize(struct zn_screen *self, vec2 size)
 void
 zn_screen_notify_frame(struct zn_screen *self, struct timespec *when)
 {
-  wl_signal_emit(&self->events.frame, when);
+  zn_snode_notify_frame(self->snode_root, when);
 }
 
 struct zn_screen *
@@ -47,7 +47,6 @@ zn_screen_create(
   self->impl = implementation;
   glm_vec2_zero(self->size);
   wl_signal_init(&self->events.resized);
-  wl_signal_init(&self->events.frame);
   wl_signal_init(&self->events.destroy);
 
   return self;
@@ -65,7 +64,6 @@ zn_screen_destroy(struct zn_screen *self)
   zn_signal_emit_mutable(&self->events.destroy, NULL);
 
   zn_snode_destroy(self->snode_root);
-  wl_list_remove(&self->events.frame.listener_list);
   wl_list_remove(&self->events.destroy.listener_list);
   wl_list_remove(&self->events.resized.listener_list);
   free(self);

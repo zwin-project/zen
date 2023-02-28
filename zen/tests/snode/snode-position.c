@@ -8,8 +8,13 @@ test_get_texture(void *user_data UNUSED)
   return NULL;
 }
 
+static void
+test_frame(void *user_data UNUSED, const struct timespec *when UNUSED)
+{}
+
 const struct zn_snode_interface test_impl = {
     .get_texture = test_get_texture,
+    .frame = test_frame,
 };
 
 TEST(general)

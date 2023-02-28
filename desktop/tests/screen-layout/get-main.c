@@ -3,7 +3,7 @@
 #include "zen-desktop/screen-container.h"
 #include "zen-desktop/screen-layout.h"
 
-TEST(noop)
+TEST(get_main)
 {
   struct wl_display *display = wl_display_create();
   setup(display);

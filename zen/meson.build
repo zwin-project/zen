@@ -5,6 +5,7 @@ _zen_srcs = [
   'src/seat.c',
   'src/server.c',
   'src/snode.c',
+  'src/view.c',
 ]
 
 zen_inc = include_directories('include')

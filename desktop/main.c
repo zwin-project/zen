@@ -1,5 +1,8 @@
+#include <errno.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/wait.h>
 #include <wayland-server-core.h>
 
 #include "zen-common/log.h"
@@ -20,6 +23,22 @@ znd_handle_term_signal(int signal_number, void *data UNUSED)
 {
   zn_info("Caught signal %d", signal_number);
   zn_terminate(EXIT_FAILURE);
+
+  return 1;
+}
+
+static int
+znd_handle_child_signal(int signal_number UNUSED, void *data UNUSED)
+{
+  pid_t pid = 0;
+  int status = 0;
+
+  while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+  }
+
+  if (pid < 0 && errno != ECHILD) {
+    zn_error("waitpid error %s", strerror(errno));
+  }
 
   return 1;
 }
@@ -49,9 +68,10 @@ main(int argc UNUSED, const char *argv[] UNUSED)
   signal_sources[2] =
       wl_event_loop_add_signal(loop, SIGQUIT, znd_handle_term_signal, display);
   signal_sources[3] =
-      wl_event_loop_add_signal(loop, SIGCHLD, znd_handle_term_signal, display);
+      wl_event_loop_add_signal(loop, SIGCHLD, znd_handle_child_signal, display);
 
-  if (!signal_sources[0] || !signal_sources[1] || !signal_sources[2]) {
+  if (!signal_sources[0] || !signal_sources[1] || !signal_sources[2] ||
+      !signal_sources[3]) {
     zn_error("Failed to add signal handler");
     goto err_signal;
   }

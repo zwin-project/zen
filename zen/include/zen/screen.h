@@ -22,7 +22,6 @@ struct zn_screen {
 
   struct {
     struct wl_signal resized;  // (NULL)
-    struct wl_signal frame;    // (struct timespec *)
     struct wl_signal destroy;  // (NULL)
   } events;
 };

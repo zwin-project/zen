@@ -16,8 +16,15 @@ zn_cursor_get_texture(void *user_data)
   return self->xcursor_texture;
 }
 
+static void
+zn_cursor_frame(void *user_data UNUSED, const struct timespec *when UNUSED)
+{
+  // TODO(@Aki-7): send frame if the cursor surface is provided by a client
+}
+
 static const struct zn_snode_interface snode_implementation = {
     .get_texture = zn_cursor_get_texture,
+    .frame = zn_cursor_frame,
 };
 
 struct zn_cursor *
