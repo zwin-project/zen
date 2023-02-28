@@ -16,6 +16,7 @@ _zen_unit_tests = {
   'config/config-path.c': {},
   'server/construct-destroy.c': {},
   'snode/snode-position.c': {},
+  'snode/snode-frame.c': {},
   'snode/snode-damage.c': {},
 }
 

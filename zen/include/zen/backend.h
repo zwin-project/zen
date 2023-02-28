@@ -23,8 +23,9 @@ struct zn_backend {
   const struct zn_backend_interface *impl;
 
   struct {
-    struct wl_signal new_screen;  // (struct zn_screen *)
-    struct wl_signal destroy;     // (NULL)
+    struct wl_signal new_screen;   // (struct zn_screen *)
+    struct wl_signal view_mapped;  // (struct zn_view *)
+    struct wl_signal destroy;      // (NULL)
   } events;
 };
 

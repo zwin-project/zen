@@ -8,6 +8,7 @@
 struct zn_snode_interface {
   /// @return value is nullable
   struct wlr_texture *(*get_texture)(void *user_data);
+  void (*frame)(void *user_data, const struct timespec *when);
 };
 
 struct zn_screen;
@@ -37,6 +38,8 @@ struct zn_snode {
     struct wl_signal destroy;           // (NULL)
   } events;
 };
+
+void zn_snode_notify_frame(struct zn_snode *self, const struct timespec *when);
 
 /// @param parent is nullable
 /// @param position is in the parent local coords

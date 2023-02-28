@@ -13,7 +13,10 @@ Checks: "
   -cppcoreguidelines-avoid-magic-numbers,
 
   google-*,
+
   misc-*,
+  -misc-no-recursion,
+
   modernize-*,
   performance-*,
   portability-*,

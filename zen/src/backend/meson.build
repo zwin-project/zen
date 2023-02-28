@@ -1,7 +1,9 @@
 _zen_backend_srcs = [
   'backend.c',
+  'compositor.c',
   'output.c',
   'pointer.c',
+  'xwayland-surface.c',
 ]
 
 _zen_backend_lib = static_library(

@@ -7,6 +7,7 @@
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_output.h>
 
+#include "compositor.h"
 #include "output.h"
 #include "pointer.h"
 #include "zen-common/log.h"
@@ -16,10 +17,24 @@
 
 static void zn_default_backend_destroy(struct zn_default_backend *self);
 
+struct zn_default_backend *
+zn_default_backend_get(struct zn_backend *base)
+{
+  struct zn_default_backend *self = zn_container_of(base, self, base);
+  return self;
+}
+
 void
 zn_default_backend_update_capabilities(struct zn_default_backend *self UNUSED)
 {
   // TODO(@Aki-7): implement
+}
+
+void
+zn_default_backend_notify_view_mapped(
+    struct zn_default_backend *self, struct zn_view *view)
+{
+  wl_signal_emit(&self->base.events.view_mapped, view);
 }
 
 static void
@@ -132,6 +147,7 @@ zn_default_backend_create(struct wl_display *display)
   }
 
   wl_signal_init(&self->base.events.new_screen);
+  wl_signal_init(&self->base.events.view_mapped);
   wl_signal_init(&self->base.events.destroy);
   self->base.impl = &implementation;
   self->display = display;
@@ -167,6 +183,12 @@ zn_default_backend_create(struct wl_display *display)
     goto err_wlr_renderer;
   }
 
+  self->compositor = zn_compositor_create(display, self->wlr_renderer);
+  if (self->compositor == NULL) {
+    zn_error("Failed to create zn_compositor");
+    goto err_wlr_allocator;
+  }
+
   self->new_output_listener.notify = zn_default_backend_handle_new_output;
   wl_signal_add(
       &self->wlr_backend->events.new_output, &self->new_output_listener);
@@ -176,6 +198,9 @@ zn_default_backend_create(struct wl_display *display)
       &self->wlr_backend->events.new_input, &self->new_input_listener);
 
   return &self->base;
+
+err_wlr_allocator:
+  wlr_allocator_destroy(self->wlr_allocator);
 
 err_wlr_renderer:
   wlr_renderer_destroy(self->wlr_renderer);
@@ -197,13 +222,15 @@ zn_default_backend_destroy(struct zn_default_backend *self)
 
   wl_list_remove(&self->new_input_listener.link);
   wl_list_remove(&self->new_output_listener.link);
+  zn_compositor_destroy(self->compositor);
   wlr_allocator_destroy(self->wlr_allocator);
   wlr_renderer_destroy(self->wlr_renderer);
   if (self->wlr_backend) {
     wlr_backend_destroy(self->wlr_backend);
   }
-  wl_list_remove(&self->base.events.destroy.listener_list);
   wl_list_remove(&self->input_device_list);
+  wl_list_remove(&self->base.events.destroy.listener_list);
+  wl_list_remove(&self->base.events.view_mapped.listener_list);
   wl_list_remove(&self->base.events.new_screen.listener_list);
   free(self);
 }

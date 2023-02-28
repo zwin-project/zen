@@ -2,6 +2,7 @@
 
 #include "mock/output.h"
 #include "test-harness.h"
+#include "zen-common/util.h"
 #include "zen/snode.h"
 
 static struct wlr_texture *
@@ -10,8 +11,13 @@ test_get_texture(void *user_data)
   return user_data;
 }
 
+static void
+test_frame(void *user_data UNUSED, const struct timespec *when UNUSED)
+{}
+
 const struct zn_snode_interface test_impl = {
     .get_texture = test_get_texture,
+    .frame = test_frame,
 };
 
 TEST(general)

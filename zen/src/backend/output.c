@@ -65,7 +65,7 @@ zn_output_box_effective_to_transformed_coords(struct zn_output *self,
 }
 
 /// @param snode is nonnull
-static void  // NOLINTNEXTLINE(misc-no-recursion)
+static void
 zn_output_render_snode(struct zn_output *self, struct zn_snode *snode,
     pixman_region32_t *screen_damage)
 {
