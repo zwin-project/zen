@@ -45,6 +45,7 @@ zn_screen_create(
 
   self->impl_data = impl_data;
   self->impl = implementation;
+  self->user_data = NULL;
   glm_vec2_zero(self->size);
   wl_signal_init(&self->events.resized);
   wl_signal_init(&self->events.destroy);

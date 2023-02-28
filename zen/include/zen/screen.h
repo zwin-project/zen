@@ -16,6 +16,8 @@ struct zn_screen {
   void *impl_data;                         // @nullable, @outlive if exists
   const struct zn_screen_interface *impl;  // @nonnull, @outlive
 
+  void *user_data;  // @nonnull, @outlive if exists
+
   struct zn_snode *snode_root;  // @nonnull, @owning
 
   vec2 size;  // effective coordinate

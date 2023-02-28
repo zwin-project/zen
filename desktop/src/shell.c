@@ -6,8 +6,8 @@
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 #include "zen-desktop/cursor-grab/default.h"
-#include "zen-desktop/screen-container.h"
 #include "zen-desktop/screen-layout.h"
+#include "zen-desktop/screen.h"
 #include "zen/backend.h"
 #include "zen/screen.h"
 #include "zen/seat.h"
@@ -24,9 +24,9 @@ zn_desktop_shell_handle_new_screen(struct wl_listener *listener, void *data)
   struct zn_desktop_shell *self =
       zn_container_of(listener, self, new_screen_listener);
   struct zn_screen *screen = data;
-  struct zn_screen_container *container = zn_screen_container_create(screen);
+  struct zn_desktop_screen *desktop_screen = zn_desktop_screen_create(screen);
 
-  zn_screen_layout_add(self->screen_layout, container);
+  zn_screen_layout_add(self->screen_layout, desktop_screen);
 }
 
 static void
@@ -35,11 +35,12 @@ zn_desktop_shell_handle_view_mapped(struct wl_listener *listener, void *data)
   struct zn_desktop_shell *self =
       zn_container_of(listener, self, view_mapped_listener);
   struct zn_view *view = data;
-  struct zn_screen *screen =
+  struct zn_desktop_screen *desktop_screen =
       zn_screen_layout_get_main_screen(self->screen_layout);
 
-  if (screen) {
-    zn_snode_set_position(view->snode, screen->snode_root, (vec2){0, 0});
+  if (desktop_screen) {
+    zn_snode_set_position(
+        view->snode, desktop_screen->view_layer, (vec2){0, 0});
   }
 }
 

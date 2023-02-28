@@ -11,6 +11,8 @@ struct zn_snode_interface {
   void (*frame)(void *user_data, const struct timespec *when);
 };
 
+extern const struct zn_snode_interface zn_snode_noop_implementation;
+
 struct zn_screen;
 
 /// screen node

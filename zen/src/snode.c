@@ -17,7 +17,7 @@ static void
 handle_frame(void *user_data UNUSED, const struct timespec *when UNUSED)
 {}
 
-static const struct zn_snode_interface noop = {
+const struct zn_snode_interface zn_snode_noop_implementation = {
     .get_texture = handle_get_texture,
     .frame = handle_frame,
 };
@@ -193,7 +193,7 @@ err:
 struct zn_snode *
 zn_snode_create_root(struct zn_screen *screen)
 {
-  struct zn_snode *self = zn_snode_create(NULL, &noop);
+  struct zn_snode *self = zn_snode_create(NULL, &zn_snode_noop_implementation);
   self->screen = screen;
   return self;
 }
