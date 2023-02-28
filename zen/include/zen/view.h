@@ -4,9 +4,7 @@
 #include <wayland-server-core.h>
 
 struct zn_view_interface {
-  /// @return value is nullable
-  struct wlr_texture *(*get_texture)(void *impl_data);
-  void (*frame)(void *impl_dat, const struct timespec *when);
+  void (*set_activated)(void *impl_data, bool activate);
 };
 
 struct zn_view {

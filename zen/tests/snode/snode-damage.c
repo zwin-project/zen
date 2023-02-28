@@ -20,7 +20,7 @@ const struct zn_snode_interface test_impl = {
     .frame = test_frame,
 };
 
-TEST(general)
+TEST(set_position)
 {
   struct zn_mock_output *output = zn_mock_output_create(0, 0);
 
@@ -64,7 +64,7 @@ TEST(general)
       true, zn_mock_output_damage_contains(output, 10 + 80 + 15, 20 + 10 + 15));
 }
 
-TEST(rebase_parent)
+TEST(set_position_rebase_parent)
 {
   struct zn_mock_output *output = zn_mock_output_create(0, 0);
   struct zn_mock_output *output2 = zn_mock_output_create(0, 0);
@@ -131,4 +131,39 @@ TEST(rebase_parent)
   // damages of node4
   ASSERT_EQUAL_BOOL(false, pixman_region32_not_empty(&output->damage));
   ASSERT_EQUAL_BOOL(false, pixman_region32_not_empty(&output2->damage));
+}
+
+TEST(damage)
+{
+  struct zn_mock_output *output = zn_mock_output_create(0, 0);
+
+  struct wlr_texture texture;
+  texture.width = 50;
+  texture.height = 50;
+
+  struct zn_snode *root = zn_snode_create_root(output->screen);
+
+  struct zn_snode *node1 = zn_snode_create(&texture, &test_impl);
+  struct zn_snode *node2 = zn_snode_create(&texture, &test_impl);
+  struct zn_snode *node3 = zn_snode_create(&texture, &test_impl);
+  struct zn_snode *node4 = zn_snode_create(&texture, &test_impl);
+
+  zn_snode_set_position(node3, node2, (vec2){200, 100});
+  zn_snode_set_position(node2, node1, (vec2){100, 200});
+  zn_snode_set_position(node1, root, (vec2){100, 100});
+
+  zn_mock_output_damage_clear(output);
+
+  ASSERT_EQUAL_BOOL(false, zn_mock_output_damage_contains(output, 115, 135));
+  zn_snode_damage(node1, &(struct wlr_fbox){10, 30, 10, 10});
+  ASSERT_EQUAL_BOOL(true, zn_mock_output_damage_contains(output, 115, 135));
+
+  ASSERT_EQUAL_BOOL(false, zn_mock_output_damage_contains(output, 435, 425));
+  zn_snode_damage(node3, &(struct wlr_fbox){30, 20, 10, 10});
+  ASSERT_EQUAL_BOOL(true, zn_mock_output_damage_contains(output, 435, 425));
+
+  zn_mock_output_damage_clear(output);
+
+  zn_snode_damage(node4, &(struct wlr_fbox){10, 30, 10, 10});
+  ASSERT_EQUAL_BOOL(false, pixman_region32_not_empty(&output->damage));
 }

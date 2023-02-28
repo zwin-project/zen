@@ -10,6 +10,12 @@ zn_compositor_handle_new_xwayland_surface(
 {
   struct wlr_xwayland_surface *wlr_xsurface = data;
 
+  if (wlr_xsurface->override_redirect) {
+    zn_debug("skip unmanaged surface");
+    // TODO(@Aki-7): handle xwayland surface with override_redirect flag
+    return;
+  }
+
   zn_xwayland_surface_create(wlr_xsurface);
 }
 

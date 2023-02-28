@@ -39,6 +39,9 @@ struct zn_snode {
   } events;
 };
 
+/// @param damage is in the snode-local coords
+void zn_snode_damage(struct zn_snode *self, struct wlr_fbox *damage);
+
 void zn_snode_notify_frame(struct zn_snode *self, const struct timespec *when);
 
 /// @param parent is nullable
