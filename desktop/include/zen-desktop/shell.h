@@ -9,6 +9,9 @@ struct zn_desktop_shell {
 
   struct wl_listener new_screen_listener;
   struct wl_listener pointer_motion_listener;
+  struct wl_listener pointer_button_listener;
+  struct wl_listener pointer_axis_listener;
+  struct wl_listener pointer_frame_listener;
   struct wl_listener view_mapped_listener;
 };
 

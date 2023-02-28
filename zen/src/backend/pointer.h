@@ -13,6 +13,9 @@ struct zn_pointer {
   struct zn_default_backend *backend;  // @nonnull, @outlive
 
   struct wl_listener motion_listener;
+  struct wl_listener button_listener;
+  struct wl_listener axis_listener;
+  struct wl_listener frame_listener;
   struct wl_listener wlr_input_device_destroy_listener;
   struct wl_listener backend_destroy_listener;
 };

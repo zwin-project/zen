@@ -54,6 +54,23 @@ zn_cursor_default_grab_handle_motion_relative(
 }
 
 static void
+zn_cursor_default_grab_handle_button(struct zn_cursor_grab *grab UNUSED,
+    uint32_t time_msec UNUSED, uint32_t button UNUSED,
+    enum wlr_button_state state UNUSED)
+{}
+
+static void
+zn_cursor_default_grab_handle_axis(struct zn_cursor_grab *grab UNUSED,
+    uint32_t time_msec UNUSED, enum wlr_axis_source source UNUSED,
+    enum wlr_axis_orientation orientation UNUSED, double delta UNUSED,
+    int32_t delta_discrete UNUSED)
+{}
+
+static void
+zn_cursor_default_grab_handle_frame(struct zn_cursor_grab *grab UNUSED)
+{}
+
+static void
 zn_cursor_default_grab_handle_destroy(struct zn_cursor_grab *grab)
 {
   struct zn_cursor_default_grab *self = zn_cursor_default_grab_get(grab);
@@ -62,6 +79,9 @@ zn_cursor_default_grab_handle_destroy(struct zn_cursor_grab *grab)
 
 static const struct zn_cursor_grab_interface implementation = {
     .motion_relative = zn_cursor_default_grab_handle_motion_relative,
+    .button = zn_cursor_default_grab_handle_button,
+    .axis = zn_cursor_default_grab_handle_axis,
+    .frame = zn_cursor_default_grab_handle_frame,
     .destroy = zn_cursor_default_grab_handle_destroy,
 };
 
