@@ -55,6 +55,38 @@ zn_desktop_shell_handle_pointer_motion(struct wl_listener *listener, void *data)
   zn_cursor_grab_pointer_motion(self->cursor_grab, delta, event->time_msec);
 }
 
+static void
+zn_desktop_shell_handle_pointer_button(struct wl_listener *listener, void *data)
+{
+  struct zn_desktop_shell *self =
+      zn_container_of(listener, self, pointer_button_listener);
+  struct wlr_event_pointer_button *event = data;
+
+  zn_cursor_grab_pointer_button(
+      self->cursor_grab, event->time_msec, event->button, event->state);
+}
+
+static void
+zn_desktop_shell_handle_pointer_axis(struct wl_listener *listener, void *data)
+{
+  struct zn_desktop_shell *self =
+      zn_container_of(listener, self, pointer_axis_listener);
+  struct wlr_event_pointer_axis *event = data;
+
+  zn_cursor_grab_pointer_axis(self->cursor_grab, event->time_msec,
+      event->source, event->orientation, event->delta, event->delta_discrete);
+}
+
+static void
+zn_desktop_shell_handle_pointer_frame(
+    struct wl_listener *listener, void *data UNUSED)
+{
+  struct zn_desktop_shell *self =
+      zn_container_of(listener, self, pointer_frame_listener);
+
+  zn_cursor_grab_pointer_frame(self->cursor_grab);
+}
+
 struct zn_desktop_shell *
 zn_desktop_shell_get_singleton(void)
 {
@@ -97,6 +129,18 @@ zn_desktop_shell_create(void)
   wl_signal_add(
       &server->seat->events.pointer_motion, &self->pointer_motion_listener);
 
+  self->pointer_button_listener.notify = zn_desktop_shell_handle_pointer_button;
+  wl_signal_add(
+      &server->seat->events.pointer_button, &self->pointer_button_listener);
+
+  self->pointer_axis_listener.notify = zn_desktop_shell_handle_pointer_axis;
+  wl_signal_add(
+      &server->seat->events.pointer_axis, &self->pointer_axis_listener);
+
+  self->pointer_frame_listener.notify = zn_desktop_shell_handle_pointer_frame;
+  wl_signal_add(
+      &server->seat->events.pointer_frame, &self->pointer_frame_listener);
+
   self->view_mapped_listener.notify = zn_desktop_shell_handle_view_mapped;
   wl_signal_add(
       &server->backend->events.view_mapped, &self->view_mapped_listener);
@@ -118,6 +162,9 @@ void
 zn_desktop_shell_destroy(struct zn_desktop_shell *self)
 {
   wl_list_remove(&self->view_mapped_listener.link);
+  wl_list_remove(&self->pointer_frame_listener.link);
+  wl_list_remove(&self->pointer_axis_listener.link);
+  wl_list_remove(&self->pointer_button_listener.link);
   wl_list_remove(&self->pointer_motion_listener.link);
   wl_list_remove(&self->new_screen_listener.link);
   zn_cursor_grab_destroy(self->cursor_grab);
