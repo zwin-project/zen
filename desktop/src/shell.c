@@ -9,8 +9,11 @@
 #include "zen-desktop/screen-container.h"
 #include "zen-desktop/screen-layout.h"
 #include "zen/backend.h"
+#include "zen/screen.h"
 #include "zen/seat.h"
 #include "zen/server.h"
+#include "zen/snode.h"
+#include "zen/view.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 static struct zn_desktop_shell *desktop_shell_singleton = NULL;
@@ -24,6 +27,20 @@ zn_desktop_shell_handle_new_screen(struct wl_listener *listener, void *data)
   struct zn_screen_container *container = zn_screen_container_create(screen);
 
   zn_screen_layout_add(self->screen_layout, container);
+}
+
+static void
+zn_desktop_shell_handle_view_mapped(struct wl_listener *listener, void *data)
+{
+  struct zn_desktop_shell *self =
+      zn_container_of(listener, self, view_mapped_listener);
+  struct zn_view *view = data;
+  struct zn_screen *screen =
+      zn_screen_layout_get_main_screen(self->screen_layout);
+
+  if (screen) {
+    zn_snode_set_position(view->snode, screen->snode_root, (vec2){0, 0});
+  }
 }
 
 static void
@@ -79,6 +96,10 @@ zn_desktop_shell_create(void)
   wl_signal_add(
       &server->seat->events.pointer_motion, &self->pointer_motion_listener);
 
+  self->view_mapped_listener.notify = zn_desktop_shell_handle_view_mapped;
+  wl_signal_add(
+      &server->backend->events.view_mapped, &self->view_mapped_listener);
+
   return self;
 
 err_screen_layout:
@@ -95,6 +116,7 @@ err:
 void
 zn_desktop_shell_destroy(struct zn_desktop_shell *self)
 {
+  wl_list_remove(&self->view_mapped_listener.link);
   wl_list_remove(&self->pointer_motion_listener.link);
   wl_list_remove(&self->new_screen_listener.link);
   zn_cursor_grab_destroy(self->cursor_grab);

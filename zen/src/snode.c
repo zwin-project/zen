@@ -46,6 +46,23 @@ zn_snode_cache_absolute_position(struct zn_snode *self)
 }
 
 void
+zn_snode_damage(struct zn_snode *self, struct wlr_fbox *damage)
+{
+  if (!self->screen) {
+    return;
+  }
+
+  struct wlr_fbox fbox = {
+      .x = damage->x + self->cached_absolute_position[0],
+      .y = damage->y + self->cached_absolute_position[1],
+      .width = damage->width,
+      .height = damage->height,
+  };
+
+  zn_screen_damage(self->screen, &fbox);
+}
+
+void
 zn_snode_notify_frame(struct zn_snode *self, const struct timespec *when)
 {
   self->impl->frame(self->user_data, when);

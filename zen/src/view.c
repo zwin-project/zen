@@ -5,19 +5,14 @@
 #include "zen/snode.h"
 
 static struct wlr_texture *
-zn_view_get_texture(void *user_data)
+zn_view_get_texture(void *user_data UNUSED)
 {
-  struct zn_view *self = user_data;
-
-  return self->impl->get_texture(self->impl_data);
+  return NULL;
 }
 
 static void
-zn_view_handle_frame(void *user_data, const struct timespec *when)
-{
-  struct zn_view *self = user_data;
-  self->impl->frame(self->impl_data, when);
-}
+zn_view_handle_frame(void *user_data UNUSED, const struct timespec *when UNUSED)
+{}
 
 static const struct zn_snode_interface snode_implementation = {
     .get_texture = zn_view_get_texture,
@@ -27,6 +22,8 @@ static const struct zn_snode_interface snode_implementation = {
 void
 zn_view_notify_unmap(struct zn_view *self)
 {
+  zn_snode_set_position(self->snode, NULL, (vec2){0, 0});
+
   wl_signal_emit(&self->events.unmap, NULL);
 }
 
