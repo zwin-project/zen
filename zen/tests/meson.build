@@ -17,6 +17,7 @@ _zen_unit_tests = {
   'server/construct-destroy.c': {},
   'snode/snode-position.c': {},
   'snode/snode-frame.c': {},
+  'snode/snode-get-at.c': {},
   'snode/snode-damage.c': {},
 }
 

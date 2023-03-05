@@ -7,19 +7,61 @@
 #include "zen-common/util.h"
 #include "zen/screen.h"
 
-static struct wlr_texture *
-handle_get_texture(void *user_data UNUSED)
+struct wlr_texture *
+zn_snode_noop_get_texture(void *user_data UNUSED)
 {
   return NULL;
 }
 
-static void
-handle_frame(void *user_data UNUSED, const struct timespec *when UNUSED)
+void
+zn_snode_noop_frame(void *user_data UNUSED, const struct timespec *when UNUSED)
+{}
+
+bool
+zn_snode_noop_accepts_input(void *user_data UNUSED, vec2 point UNUSED)
+{
+  return false;
+}
+
+void
+zn_snode_noop_pointer_button(void *user_data UNUSED, uint32_t time_msec UNUSED,
+    uint32_t button UNUSED, enum wlr_button_state state UNUSED)
+{}
+
+void
+zn_snode_noop_pointer_enter(void *user_data UNUSED, vec2 point UNUSED)
+{}
+
+void
+zn_snode_noop_pointer_motion(
+    void *user_data UNUSED, uint32_t time_msec UNUSED, vec2 point UNUSED)
+{}
+
+void
+zn_snode_noop_pointer_leave(void *user_data UNUSED)
+{}
+
+void
+zn_snode_noop_pointer_axis(void *user_data UNUSED, uint32_t time_msec UNUSED,
+    enum wlr_axis_source source UNUSED,
+    enum wlr_axis_orientation orientation UNUSED, double delta UNUSED,
+    int32_t delta_discrete UNUSED)
+{}
+
+void
+zn_snode_noop_pointer_frame(void *user_data UNUSED)
 {}
 
 const struct zn_snode_interface zn_snode_noop_implementation = {
-    .get_texture = handle_get_texture,
-    .frame = handle_frame,
+    .get_texture = zn_snode_noop_get_texture,
+    .frame = zn_snode_noop_frame,
+    .accepts_input = zn_snode_noop_accepts_input,
+    .pointer_button = zn_snode_noop_pointer_button,
+    .pointer_enter = zn_snode_noop_pointer_enter,
+    .pointer_motion = zn_snode_noop_pointer_motion,
+    .pointer_leave = zn_snode_noop_pointer_leave,
+    .pointer_axis = zn_snode_noop_pointer_axis,
+    .pointer_frame = zn_snode_noop_pointer_frame,
 };
 
 static void
@@ -43,6 +85,29 @@ zn_snode_cache_absolute_position(struct zn_snode *self)
   } else {
     glm_vec2_copy(self->position, self->cached_absolute_position);
   }
+}
+
+struct zn_snode *
+zn_snode_get_snode_at(struct zn_snode *self, vec2 point, vec2 local_point)
+{
+  struct zn_snode *child = NULL;
+  wl_list_for_each_reverse (child, &self->child_node_list, link) {
+    vec2 child_local_point;
+    glm_vec2_sub(point, child->position, child_local_point);
+
+    struct zn_snode *result =
+        zn_snode_get_snode_at(child, child_local_point, local_point);
+    if (result) {
+      return result;
+    }
+  }
+
+  if (self->impl->accepts_input(self->user_data, point)) {
+    glm_vec2_copy(point, local_point);
+    return self;
+  }
+
+  return NULL;
 }
 
 void
@@ -88,7 +153,7 @@ zn_snode_set_position(
   }
 
   if (parent) {
-    wl_list_insert(&parent->child_node_list, &self->link);
+    wl_list_insert(parent->child_node_list.prev, &self->link);
     wl_signal_add(&parent->events.destroy, &self->parent_destroy_listener);
     wl_signal_add(&parent->events.position_changed,
         &self->parent_position_changed_listener);

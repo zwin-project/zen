@@ -25,11 +25,51 @@ zn_cursor_frame(void *user_data UNUSED, const struct timespec *when UNUSED)
 static const struct zn_snode_interface snode_implementation = {
     .get_texture = zn_cursor_get_texture,
     .frame = zn_cursor_frame,
+    .accepts_input = zn_snode_noop_accepts_input,
+    .pointer_button = zn_snode_noop_pointer_button,
+    .pointer_enter = zn_snode_noop_pointer_enter,
+    .pointer_motion = zn_snode_noop_pointer_motion,
+    .pointer_leave = zn_snode_noop_pointer_leave,
+    .pointer_axis = zn_snode_noop_pointer_axis,
+    .pointer_frame = zn_snode_noop_pointer_frame,
 };
+
+static void
+zn_cursor_handle_server_start(struct wl_listener *listener, void *data UNUSED)
+{
+  struct zn_cursor *self =
+      zn_container_of(listener, self, server_start_listener);
+  struct zn_server *server = zn_server_get_singleton();
+
+  struct wlr_xcursor *xcursor =
+      wlr_xcursor_manager_get_xcursor(self->xcursor_manager, "left_ptr", 1.0F);
+
+  if (xcursor) {
+    struct wlr_xcursor_image *image = xcursor->images[0];
+    self->xcursor_texture = zn_backend_create_wlr_texture_from_pixels(
+        server->backend, DRM_FORMAT_ARGB8888, image->width * 4, image->width,
+        image->height, image->buffer);
+  }
+
+  if (self->xcursor_texture == NULL) {
+    zn_abort("Failed to create xcursor texture");
+  }
+}
+
+static void
+zn_cursor_handle_server_end(struct wl_listener *listener, void *data UNUSED)
+{
+  struct zn_cursor *self = zn_container_of(listener, self, server_end_listener);
+  if (self->xcursor_texture) {
+    wlr_texture_destroy(self->xcursor_texture);
+  }
+}
 
 struct zn_cursor *
 zn_cursor_create(void)
 {
+  struct zn_server *server = zn_server_get_singleton();
+
   struct zn_cursor *self = zalloc(sizeof *self);
   if (self == NULL) {
     zn_error("Failed to allocate memory");
@@ -54,19 +94,12 @@ zn_cursor_create(void)
   }
 
   self->xcursor_texture = NULL;
-  struct wlr_xcursor *xcursor =
-      wlr_xcursor_manager_get_xcursor(self->xcursor_manager, "left_ptr", 1.0F);
-  if (xcursor) {
-    struct zn_server *server = zn_server_get_singleton();
-    struct wlr_xcursor_image *image = xcursor->images[0];
-    self->xcursor_texture = zn_backend_create_wlr_texture_from_pixels(
-        server->backend, DRM_FORMAT_ARGB8888, image->width * 4, image->width,
-        image->height, image->buffer);
-    if (self->xcursor_texture == NULL) {
-      zn_error("Failed to create xcursor texture");
-      goto err_xcursor_manager;
-    }
-  }
+
+  self->server_start_listener.notify = zn_cursor_handle_server_start;
+  wl_signal_add(&server->events.start, &self->server_start_listener);
+
+  self->server_end_listener.notify = zn_cursor_handle_server_end;
+  wl_signal_add(&server->events.end, &self->server_end_listener);
 
   return self;
 
@@ -86,9 +119,8 @@ err:
 void
 zn_cursor_destroy(struct zn_cursor *self)
 {
-  if (self->xcursor_texture) {
-    wlr_texture_destroy(self->xcursor_texture);
-  }
+  wl_list_remove(&self->server_start_listener.link);
+  wl_list_remove(&self->server_end_listener.link);
   wlr_xcursor_manager_destroy(self->xcursor_manager);
   zn_snode_destroy(self->snode);
   free(self);

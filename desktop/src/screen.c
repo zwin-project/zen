@@ -70,9 +70,9 @@ zn_desktop_screen_create(struct zn_screen *screen)
   }
 
   zn_snode_set_position(
-      self->cursor_layer, self->screen->snode_root, (vec2){0, 0});
-  zn_snode_set_position(
       self->view_layer, self->screen->snode_root, (vec2){0, 0});
+  zn_snode_set_position(
+      self->cursor_layer, self->screen->snode_root, (vec2){0, 0});
 
   self->screen_destroy_listener.notify =
       zn_desktop_screen_handle_screen_destroy;

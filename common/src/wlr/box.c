@@ -29,3 +29,14 @@ zn_wlr_fbox_closest_point(const struct wlr_fbox *box, double x, double y,
     *dest_y = y;
   }
 }
+
+bool
+zn_wlr_fbox_contains_point(const struct wlr_fbox *box, double x, double y)
+{
+  if (box->width <= 0 || box->height <= 0) {
+    return false;
+  }
+
+  return x >= box->x && x < box->x + box->width && y >= box->y &&
+         y < box->y + box->height;
+}

@@ -46,6 +46,9 @@ void assert_equal_double_(
 void assert_equal_pointer_(
     const char *actual_expression, void *expected, void *actual, bool not );
 
+void assert_equal_vec_(const char *actual_expression, const float *expected,
+    const float *actual, int count);
+
 #define ASSERT_EQUAL_STRING(expected, actual) \
   assert_equal_string_(#actual, expected, actual)
 
@@ -66,3 +69,6 @@ void assert_equal_pointer_(
 
 #define ASSERT_NOT_EQUAL_POINTER(expected, actual) \
   assert_equal_pointer_(#actual, expected, actual, true)
+
+#define ASSERT_EQUAL_VEC2(expected, actual) \
+  assert_equal_vec_(#actual, expected, actual, 2)

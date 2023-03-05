@@ -3,15 +3,60 @@
 #include <cglm/types.h>
 #include <wayland-server-core.h>
 #include <wlr/render/wlr_texture.h>
+#include <wlr/types/wlr_pointer.h>
 #include <wlr/util/box.h>
+
+#include "zen-common/util.h"
 
 struct zn_snode_interface {
   /// @return value is nullable
   struct wlr_texture *(*get_texture)(void *user_data);
+
   void (*frame)(void *user_data, const struct timespec *when);
+
+  /// @return true if `point` is in input region
+  /// @param point is in snode-local coords
+  bool (*accepts_input)(void *user_data, vec2 point);
+
+  void (*pointer_button)(void *user_data, uint32_t time_msec, uint32_t button,
+      enum wlr_button_state state);
+
+  void (*pointer_enter)(void *user_data, vec2 point);
+
+  void (*pointer_motion)(void *user_data, uint32_t time_msec, vec2 point);
+
+  void (*pointer_leave)(void *user_data);
+
+  void (*pointer_axis)(void *user_data, uint32_t time_msec,
+      enum wlr_axis_source source, enum wlr_axis_orientation orientation,
+      double delta, int32_t delta_discrete);
+
+  void (*pointer_frame)(void *user_data);
 };
 
 extern const struct zn_snode_interface zn_snode_noop_implementation;
+
+struct wlr_texture *zn_snode_noop_get_texture(void *user_data);
+
+void zn_snode_noop_frame(void *user_data, const struct timespec *when);
+
+bool zn_snode_noop_accepts_input(void *user_data, vec2 point);
+
+void zn_snode_noop_pointer_button(void *user_data, uint32_t time_msec,
+    uint32_t button, enum wlr_button_state state);
+
+void zn_snode_noop_pointer_enter(void *user_data, vec2 point);
+
+void zn_snode_noop_pointer_motion(
+    void *user_data, uint32_t time_msec, vec2 point);
+
+void zn_snode_noop_pointer_leave(void *user_data);
+
+void zn_snode_noop_pointer_axis(void *user_data, uint32_t time_msec,
+    enum wlr_axis_source source, enum wlr_axis_orientation orientation,
+    double delta, int32_t delta_discrete);
+
+void zn_snode_noop_pointer_frame(void *user_data);
 
 struct zn_screen;
 
@@ -40,6 +85,57 @@ struct zn_snode {
     struct wl_signal destroy;           // (NULL)
   } events;
 };
+
+UNUSED static inline void
+zn_snode_pointer_button(struct zn_snode *self, uint32_t time_msec,
+    uint32_t button, enum wlr_button_state state)
+{
+  self->impl->pointer_button(self->user_data, time_msec, button, state);
+}
+
+UNUSED static inline void
+zn_snode_pointer_enter(struct zn_snode *self, vec2 point)
+{
+  self->impl->pointer_enter(self->user_data, point);
+}
+
+UNUSED static inline void
+zn_snode_pointer_motion(struct zn_snode *self, uint32_t time_msec, vec2 point)
+{
+  self->impl->pointer_motion(self->user_data, time_msec, point);
+}
+
+UNUSED static inline void
+zn_snode_pointer_leave(struct zn_snode *self)
+{
+  self->impl->pointer_leave(self->user_data);
+}
+
+UNUSED static inline void
+zn_snode_pointer_axis(struct zn_snode *self, uint32_t time_msec,
+    enum wlr_axis_source source, enum wlr_axis_orientation orientation,
+    double delta, int32_t delta_discrete)
+{
+  self->impl->pointer_axis(
+      self->user_data, time_msec, source, orientation, delta, delta_discrete);
+}
+
+UNUSED static inline void
+zn_snode_pointer_frame(struct zn_snode *self)
+{
+  self->impl->pointer_frame(self->user_data);
+}
+
+//
+/// @param point is in snode-local coords
+/// @param[out] local_point returns the position of the `point` in a coords
+/// local to the snode of the return value. If no snode is found, the value
+/// remains unchanged.
+/// @return value is nullable
+///
+/// @remarks point and local_point can be the same one.
+struct zn_snode *zn_snode_get_snode_at(
+    struct zn_snode *self, vec2 point, vec2 local_point);
 
 /// @param damage is in the snode-local coords
 void zn_snode_damage(struct zn_snode *self, struct wlr_fbox *damage);

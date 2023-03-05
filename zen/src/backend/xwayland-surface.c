@@ -3,6 +3,7 @@
 #include "backend.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
+#include "zen/seat.h"
 #include "zen/server.h"
 #include "zen/snode.h"
 #include "zen/view.h"
@@ -24,9 +25,75 @@ zn_xwayland_surface_handle_frame(void *user_data, const struct timespec *when)
   wlr_surface_send_frame_done(self->wlr_xsurface->surface, when);
 }
 
+static bool
+zn_xwayland_surface_accepts_input(void *user_data, vec2 point)
+{
+  struct zn_xwayland_surface *self = user_data;
+  return wlr_surface_point_accepts_input(
+      self->wlr_xsurface->surface, point[0], point[1]);
+}
+
+static void
+zn_xwayland_surface_handle_pointer_button(void *user_data UNUSED,
+    uint32_t time_msec, uint32_t button, enum wlr_button_state state)
+{
+  struct zn_server *server = zn_server_get_singleton();
+  wlr_seat_pointer_send_button(
+      server->seat->wlr_seat, time_msec, button, state);
+}
+
+static void
+zn_xwayland_surface_handle_pointer_enter(void *user_data, vec2 point)
+{
+  struct zn_xwayland_surface *self = user_data;
+  struct zn_server *server = zn_server_get_singleton();
+  wlr_seat_pointer_enter(
+      server->seat->wlr_seat, self->wlr_xsurface->surface, point[0], point[1]);
+}
+
+static void
+zn_xwayland_surface_handle_pointer_motion(
+    void *user_data UNUSED, uint32_t time_msec, vec2 point)
+{
+  struct zn_server *server = zn_server_get_singleton();
+  wlr_seat_pointer_send_motion(
+      server->seat->wlr_seat, time_msec, point[0], point[1]);
+}
+
+static void
+zn_xwayland_surface_handle_pointer_leave(void *user_data UNUSED)
+{
+  struct zn_server *server = zn_server_get_singleton();
+  wlr_seat_pointer_clear_focus(server->seat->wlr_seat);
+}
+
+static void
+zn_xwayland_surface_handle_pointer_axis(void *user_data UNUSED,
+    uint32_t time_msec, enum wlr_axis_source source,
+    enum wlr_axis_orientation orientation, double delta, int32_t delta_discrete)
+{
+  struct zn_server *server = zn_server_get_singleton();
+  wlr_seat_pointer_send_axis(server->seat->wlr_seat, time_msec, orientation,
+      delta, delta_discrete, source);
+}
+
+static void
+zn_xwayland_surface_handle_pointer_frame(void *user_data UNUSED)
+{
+  struct zn_server *server = zn_server_get_singleton();
+  wlr_seat_pointer_send_frame(server->seat->wlr_seat);
+}
+
 static const struct zn_snode_interface snode_implementation = {
     .get_texture = zn_xwayland_surface_handle_get_texture,
     .frame = zn_xwayland_surface_handle_frame,
+    .accepts_input = zn_xwayland_surface_accepts_input,
+    .pointer_button = zn_xwayland_surface_handle_pointer_button,
+    .pointer_enter = zn_xwayland_surface_handle_pointer_enter,
+    .pointer_motion = zn_xwayland_surface_handle_pointer_motion,
+    .pointer_leave = zn_xwayland_surface_handle_pointer_leave,
+    .pointer_axis = zn_xwayland_surface_handle_pointer_axis,
+    .pointer_frame = zn_xwayland_surface_handle_pointer_frame,
 };
 
 static void
@@ -40,10 +107,12 @@ static const struct zn_view_interface view_implementation = {
 };
 
 static void
-zn_xwayland_surface_handle_configure(struct wl_listener *listener, void *data)
+zn_xwayland_surface_handle_configure(
+    struct wl_listener *listener, void *data UNUSED)
 {
   struct zn_xwayland_surface *self =
       zn_container_of(listener, self, surface_configure_listener);
+  struct wlr_fbox fbox;
   struct wlr_xwayland_surface_configure_event *ev = data;
 
   if (!self->wlr_xsurface->mapped) {
@@ -52,7 +121,10 @@ zn_xwayland_surface_handle_configure(struct wl_listener *listener, void *data)
     return;
   }
 
-  // TODO(@Aki-7): when mapped
+  zn_snode_get_fbox(self->view->snode, &fbox);
+
+  wlr_xwayland_surface_configure(self->wlr_xsurface, (int16_t)fbox.x,
+      (int16_t)fbox.y, ev->width, ev->height);
 }
 
 static void
@@ -62,7 +134,9 @@ zn_xwayland_surface_handle_commit(
   struct zn_xwayland_surface *self =
       zn_container_of(listener, self, surface_commit_listener);
   pixman_region32_t damage;
+
   pixman_region32_init(&damage);
+
   wlr_surface_get_effective_damage(self->wlr_xsurface->surface, &damage);
 
   pixman_box32_t *rects = NULL;

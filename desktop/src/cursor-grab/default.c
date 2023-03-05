@@ -23,8 +23,8 @@ zn_cursor_default_grab_get(struct zn_cursor_grab *grab)
 }
 
 static void
-zn_cursor_default_grab_handle_motion_relative(
-    struct zn_cursor_grab *grab UNUSED, vec2 delta, uint32_t time_msec UNUSED)
+zn_cursor_default_grab_move_relative(
+    struct zn_cursor_grab *grab UNUSED, vec2 delta)
 {
   struct zn_server *server = zn_server_get_singleton();
   struct zn_desktop_shell *shell = zn_desktop_shell_get_singleton();
@@ -49,26 +49,54 @@ zn_cursor_default_grab_handle_motion_relative(
   }
 
   zn_snode_set_position(cursor->snode, desktop_screen->cursor_layer, position);
+}
 
-  // TODO(@Aki-7) : send events to views, etc
+static void
+zn_cursor_default_grab_handle_motion_relative(
+    struct zn_cursor_grab *grab, vec2 delta, uint32_t time_msec)
+{
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_cursor *cursor = server->seat->cursor;
+
+  zn_cursor_default_grab_move_relative(grab, delta);
+
+  if (cursor->snode->screen == NULL) {
+    return;
+  }
+
+  vec2 point = GLM_VEC2_ZERO_INIT;
+  struct zn_snode *snode = zn_snode_get_snode_at(
+      cursor->snode->screen->snode_root, cursor->snode->position, point);
+
+  zn_seat_pointer_enter(server->seat, snode, point);
+
+  zn_seat_pointer_motion(server->seat, time_msec, point);
 }
 
 static void
 zn_cursor_default_grab_handle_button(struct zn_cursor_grab *grab UNUSED,
-    uint32_t time_msec UNUSED, uint32_t button UNUSED,
-    enum wlr_button_state state UNUSED)
-{}
+    uint32_t time_msec, uint32_t button, enum wlr_button_state state)
+{
+  struct zn_server *server = zn_server_get_singleton();
+  zn_seat_pointer_button(server->seat, time_msec, button, state);
+}
 
 static void
 zn_cursor_default_grab_handle_axis(struct zn_cursor_grab *grab UNUSED,
-    uint32_t time_msec UNUSED, enum wlr_axis_source source UNUSED,
-    enum wlr_axis_orientation orientation UNUSED, double delta UNUSED,
-    int32_t delta_discrete UNUSED)
-{}
+    uint32_t time_msec, enum wlr_axis_source source,
+    enum wlr_axis_orientation orientation, double delta, int32_t delta_discrete)
+{
+  struct zn_server *server = zn_server_get_singleton();
+  zn_seat_pointer_axis(
+      server->seat, time_msec, source, orientation, delta, delta_discrete);
+}
 
 static void
 zn_cursor_default_grab_handle_frame(struct zn_cursor_grab *grab UNUSED)
-{}
+{
+  struct zn_server *server = zn_server_get_singleton();
+  zn_seat_pointer_frame(server->seat);
+}
 
 static void
 zn_cursor_default_grab_handle_destroy(struct zn_cursor_grab *grab)

@@ -11,4 +11,7 @@ struct zn_cursor {
 
   // TODO(@Aki-7) hotspot, enable to change cursor texture
   struct wlr_texture *xcursor_texture;  // @nullable, @owning
+
+  struct wl_listener server_start_listener;
+  struct wl_listener server_end_listener;
 };
