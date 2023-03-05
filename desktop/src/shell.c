@@ -45,6 +45,16 @@ zn_desktop_shell_handle_view_mapped(struct wl_listener *listener, void *data)
 }
 
 static void
+zn_desktop_shell_handle_seat_capabilities(
+    struct wl_listener *listener UNUSED, void *data)
+{
+  struct zn_server *server = zn_server_get_singleton();
+  uint32_t *capabilities = data;
+
+  zn_seat_set_capabilities(server->seat, *capabilities);
+}
+
+static void
 zn_desktop_shell_handle_pointer_motion(struct wl_listener *listener, void *data)
 {
   struct zn_desktop_shell *self =
@@ -125,6 +135,11 @@ zn_desktop_shell_create(void)
   wl_signal_add(
       &server->backend->events.new_screen, &self->new_screen_listener);
 
+  self->seat_capabilities_listener.notify =
+      zn_desktop_shell_handle_seat_capabilities;
+  wl_signal_add(&server->seat->events.update_capabilities,
+      &self->seat_capabilities_listener);
+
   self->pointer_motion_listener.notify = zn_desktop_shell_handle_pointer_motion;
   wl_signal_add(
       &server->seat->events.pointer_motion, &self->pointer_motion_listener);
@@ -166,6 +181,7 @@ zn_desktop_shell_destroy(struct zn_desktop_shell *self)
   wl_list_remove(&self->pointer_axis_listener.link);
   wl_list_remove(&self->pointer_button_listener.link);
   wl_list_remove(&self->pointer_motion_listener.link);
+  wl_list_remove(&self->seat_capabilities_listener.link);
   wl_list_remove(&self->new_screen_listener.link);
   zn_cursor_grab_destroy(self->cursor_grab);
   zn_screen_layout_destroy(self->screen_layout);

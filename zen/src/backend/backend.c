@@ -10,9 +10,11 @@
 #include "compositor.h"
 #include "output.h"
 #include "pointer.h"
+#include "seat.h"
 #include "zen-common/log.h"
 #include "zen-common/signal.h"
 #include "zen-common/util.h"
+#include "zen/server.h"
 #include "zen/wlr/render/glew.h"
 
 static void zn_default_backend_destroy(struct zn_default_backend *self);
@@ -27,7 +29,27 @@ zn_default_backend_get(struct zn_backend *base)
 void
 zn_default_backend_update_capabilities(struct zn_default_backend *self UNUSED)
 {
-  // TODO(@Aki-7): implement
+  struct zn_server *server = zn_server_get_singleton();
+
+  uint32_t capabilities = 0;
+  struct zn_input_device_base *device = NULL;
+  wl_list_for_each (device, &self->input_device_list, link) {
+    switch (device->wlr_input_device->type) {
+      case WLR_INPUT_DEVICE_KEYBOARD:
+        capabilities |= WL_SEAT_CAPABILITY_KEYBOARD;
+        break;
+      case WLR_INPUT_DEVICE_POINTER:
+        capabilities |= WL_SEAT_CAPABILITY_POINTER;
+        break;
+      case WLR_INPUT_DEVICE_TOUCH:
+      case WLR_INPUT_DEVICE_TABLET_TOOL:
+      case WLR_INPUT_DEVICE_TABLET_PAD:
+      case WLR_INPUT_DEVICE_SWITCH:
+        break;
+    }
+  }
+
+  zn_seat_notify_capabilities(server->seat, capabilities);
 }
 
 void
@@ -138,7 +160,7 @@ static const struct zn_backend_interface implementation = {
 };
 
 struct zn_backend *
-zn_default_backend_create(struct wl_display *display)
+zn_default_backend_create(struct wl_display *display, struct zn_seat *zn_seat)
 {
   struct zn_default_backend *self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -188,6 +210,8 @@ zn_default_backend_create(struct wl_display *display)
     zn_error("Failed to create zn_compositor");
     goto err_wlr_allocator;
   }
+
+  wlr_xwayland_set_seat(self->compositor->xwayland, zn_seat->wlr_seat);
 
   self->new_output_listener.notify = zn_default_backend_handle_new_output;
   wl_signal_add(

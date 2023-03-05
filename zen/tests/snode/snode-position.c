@@ -2,31 +2,19 @@
 #include "zen-common/util.h"
 #include "zen/snode.h"
 
-static struct wlr_texture *
-test_get_texture(void *user_data UNUSED)
-{
-  return NULL;
-}
-
-static void
-test_frame(void *user_data UNUSED, const struct timespec *when UNUSED)
-{}
-
-const struct zn_snode_interface test_impl = {
-    .get_texture = test_get_texture,
-    .frame = test_frame,
-};
-
 TEST(general)
 {
-  struct zn_snode *root = zn_snode_create(NULL, &test_impl);
+  struct zn_snode *root = zn_snode_create(NULL, &zn_snode_noop_implementation);
 
-  struct zn_snode *node1 = zn_snode_create(NULL, &test_impl);
-  struct zn_snode *node11 = zn_snode_create(NULL, &test_impl);
-  struct zn_snode *node12 = zn_snode_create(NULL, &test_impl);
-  struct zn_snode *node121 = zn_snode_create(NULL, &test_impl);
+  struct zn_snode *node1 = zn_snode_create(NULL, &zn_snode_noop_implementation);
+  struct zn_snode *node11 =
+      zn_snode_create(NULL, &zn_snode_noop_implementation);
+  struct zn_snode *node12 =
+      zn_snode_create(NULL, &zn_snode_noop_implementation);
+  struct zn_snode *node121 =
+      zn_snode_create(NULL, &zn_snode_noop_implementation);
 
-  struct zn_snode *node2 = zn_snode_create(NULL, &test_impl);
+  struct zn_snode *node2 = zn_snode_create(NULL, &zn_snode_noop_implementation);
 
   zn_snode_set_position(node1, root, (vec2){10.5F, 20.5F});
   zn_snode_set_position(node11, node1, (vec2){-4.3F, 3.3F});
@@ -60,12 +48,12 @@ TEST(general)
 
 TEST(parent_change)
 {
-  struct zn_snode *root = zn_snode_create(NULL, &test_impl);
+  struct zn_snode *root = zn_snode_create(NULL, &zn_snode_noop_implementation);
 
-  struct zn_snode *node1 = zn_snode_create(NULL, &test_impl);
-  struct zn_snode *node2 = zn_snode_create(NULL, &test_impl);
-  struct zn_snode *node3 = zn_snode_create(NULL, &test_impl);
-  struct zn_snode *node4 = zn_snode_create(NULL, &test_impl);
+  struct zn_snode *node1 = zn_snode_create(NULL, &zn_snode_noop_implementation);
+  struct zn_snode *node2 = zn_snode_create(NULL, &zn_snode_noop_implementation);
+  struct zn_snode *node3 = zn_snode_create(NULL, &zn_snode_noop_implementation);
+  struct zn_snode *node4 = zn_snode_create(NULL, &zn_snode_noop_implementation);
 
   zn_snode_set_position(node4, node3, (vec2){4, 0.4F});
   zn_snode_set_position(node3, node2, (vec2){3, 0.3F});

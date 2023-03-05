@@ -276,6 +276,8 @@ zn_output_create(struct wlr_output *wlr_output)
     goto err_signals;
   }
 
+  wlr_output_create_global(wlr_output);
+
   return self;
 
 err_signals:

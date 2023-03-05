@@ -14,6 +14,11 @@ struct zn_server {
 
   bool running;
   int exit_status;
+
+  struct {
+    struct wl_signal start;  // (NULL)
+    struct wl_signal end;    // (NULL)
+  } events;
 };
 
 struct zn_server *zn_server_get_singleton(void);

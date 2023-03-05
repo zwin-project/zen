@@ -13,7 +13,6 @@ TEST(construct_destroy)
   struct zn_server *server = zn_server_create(display, &backend->base);
 
   ASSERT_NOT_EQUAL_POINTER(NULL, server);
-  ASSERT_NOT_EQUAL_POINTER(NULL, server->seat->cursor->xcursor_texture);
 
   zn_server_destroy(server);
 }

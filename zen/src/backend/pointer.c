@@ -6,9 +6,9 @@
 
 #include "backend.h"
 #include "cursor.h"
+#include "seat.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
-#include "zen/seat.h"
 #include "zen/server.h"
 
 static void

@@ -31,11 +31,19 @@ zn_server_run(struct zn_server *self)
     return EXIT_FAILURE;
   }
 
+  wl_signal_emit(&self->events.start, NULL);
+
+  if (!self->running) {
+    return self->exit_status;
+  }
+
   wl_display_run(self->display);
 
   if (!zn_assert(!self->running, "Not terminated with zn_server_terminate")) {
-    return EXIT_FAILURE;
+    self->exit_status = EXIT_FAILURE;
   }
+
+  wl_signal_emit(&self->events.end, NULL);
 
   return self->exit_status;
 }
@@ -96,31 +104,32 @@ zn_server_create(struct wl_display *display, struct zn_backend *backend)
   }
 
   server_singleton = self;
-
-  if (backend) {
-    self->backend = backend;
-  } else {
-    self->backend = zn_default_backend_create(display);
-  }
-  if (self->backend == NULL) {
-    zn_error("Failed to create a zn_backend");
-    goto err_free;
-  }
-
-  self->seat = zn_seat_create();
-  if (self->seat == NULL) {
-    zn_error("Failed to create a zn_seat");
-    goto err_backend;
-  }
-
+  wl_signal_init(&self->events.start);
+  wl_signal_init(&self->events.end);
   self->display = display;
   self->running = false;
   self->exit_status = EXIT_FAILURE;
 
+  self->seat = zn_seat_create(display);
+  if (self->seat == NULL) {
+    zn_error("Failed to create a zn_seat");
+    goto err_free;
+  }
+
+  if (backend) {
+    self->backend = backend;
+  } else {
+    self->backend = zn_default_backend_create(display, self->seat);
+  }
+  if (self->backend == NULL) {
+    zn_error("Failed to create a zn_backend");
+    goto err_seat;
+  }
+
   return self;
 
-err_backend:
-  zn_backend_destroy(self->backend);
+err_seat:
+  zn_seat_destroy(self->seat);
 
 err_free:
   free(self);
@@ -132,8 +141,10 @@ err:
 void
 zn_server_destroy(struct zn_server *self)
 {
-  zn_seat_destroy(self->seat);
   zn_backend_destroy(self->backend);
+  zn_seat_destroy(self->seat);
   server_singleton = NULL;
+  wl_list_remove(&self->events.start.listener_list);
+  wl_list_remove(&self->events.end.listener_list);
   free(self);
 }

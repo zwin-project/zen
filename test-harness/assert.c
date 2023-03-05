@@ -91,3 +91,34 @@ assert_equal_pointer_(
     exit(EXIT_FAILURE);
   }
 }
+
+void
+assert_equal_vec_(const char *actual_expression, const float *expected,
+    const float *actual, int count)
+{
+  bool ok = true;
+  for (int i = 0; i < count; i++) {
+    if (expected[i] != actual[i]) {
+      ok = false;
+    }
+  }
+
+  if (!ok) {
+    // NOLINTNEXTLINE(cert-err33-c)
+    fprintf(stderr, "Assertion failed: %s\n", actual_expression);
+
+    fprintf(stderr, "\tExpected: (%f", expected[0]);  // NOLINT(cert-err33-c)
+    for (int i = 1; i < count; i++) {
+      fprintf(stderr, ", %f", expected[i]);  // NOLINT(cert-err33-c)
+    }
+    fprintf(stderr, ")\n");  // NOLINT(cert-err33-c)
+
+    fprintf(stderr, "\t  Actual: (%f", actual[0]);  // NOLINT(cert-err33-c)
+    for (int i = 1; i < count; i++) {
+      fprintf(stderr, ", %f", actual[i]);  // NOLINT(cert-err33-c)
+    }
+    fprintf(stderr, ")\n");  // NOLINT(cert-err33-c)
+
+    exit(EXIT_FAILURE);
+  }
+}

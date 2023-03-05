@@ -6,12 +6,6 @@
 #include "zen-common/util.h"
 #include "zen/snode.h"
 
-static struct wlr_texture *
-test_get_texture(void *user_data UNUSED)
-{
-  return NULL;
-}
-
 static void
 test_frame(void *user_data, const struct timespec *when UNUSED)
 {
@@ -20,8 +14,15 @@ test_frame(void *user_data, const struct timespec *when UNUSED)
 }
 
 const struct zn_snode_interface test_impl = {
-    .get_texture = test_get_texture,
+    .get_texture = zn_snode_noop_get_texture,
     .frame = test_frame,
+    .accepts_input = zn_snode_noop_accepts_input,
+    .pointer_button = zn_snode_noop_pointer_button,
+    .pointer_enter = zn_snode_noop_pointer_enter,
+    .pointer_motion = zn_snode_noop_pointer_motion,
+    .pointer_leave = zn_snode_noop_pointer_leave,
+    .pointer_axis = zn_snode_noop_pointer_axis,
+    .pointer_frame = zn_snode_noop_pointer_frame,
 };
 
 TEST(frame)
