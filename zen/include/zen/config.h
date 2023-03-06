@@ -7,7 +7,7 @@
 struct zn_config_section {
   /// This must be called once in zn_config_add_section
   /// @param table is nullable
-  /// @return true if succeeded, false otherwise
+  /// @return true if successful, false otherwise
   bool (*load)(struct zn_config_section *self, toml_table_t *table);
 
   /// This must be called once when zn_config_destroy
@@ -24,7 +24,7 @@ struct zn_config {
   struct wl_array sections;  // [struct zn_config_section_info]
 };
 
-/// @returns true if succeeded, false otherwise
+/// @returns true if successful, false otherwise
 /// @param section's ownership will be moved to the zn_config
 bool zn_config_add_section(struct zn_config *self, const char *name,
     struct zn_config_section *section);

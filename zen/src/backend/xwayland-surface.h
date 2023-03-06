@@ -19,6 +19,8 @@ struct zn_xwayland_surface {
   struct wl_listener surface_configure_listener;
   struct wl_listener surface_move_listener;
   struct wl_listener surface_commit_listener;  // listen only when mapped
+
+  struct wl_listener snode_position_changed_listener;
 };
 
 struct zn_xwayland_surface *zn_xwayland_surface_create(

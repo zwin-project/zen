@@ -107,6 +107,24 @@ static const struct zn_view_interface view_implementation = {
 };
 
 static void
+zn_xwayland_surface_handle_snode_position_changed(
+    struct wl_listener *listener, void *data UNUSED)
+{
+  struct zn_xwayland_surface *self =
+      zn_container_of(listener, self, snode_position_changed_listener);
+
+  if (self->snode->screen == NULL) {
+    return;
+  }
+
+  // TODO(@Aki-7): Use layout coords instead of screen-local effective coords
+  wlr_xwayland_surface_configure(self->wlr_xsurface,
+      (int16_t)self->snode->absolute_position[0],
+      (int16_t)self->snode->absolute_position[1], self->wlr_xsurface->width,
+      self->wlr_xsurface->height);
+}
+
+static void
 zn_xwayland_surface_handle_move(struct wl_listener *listener, void *data UNUSED)
 {
   struct zn_xwayland_surface *self =
@@ -253,6 +271,11 @@ zn_xwayland_surface_create(struct wlr_xwayland_surface *wlr_xsurface)
   self->surface_commit_listener.notify = zn_xwayland_surface_handle_commit;
   wl_list_init(&self->surface_commit_listener.link);
 
+  self->snode_position_changed_listener.notify =
+      zn_xwayland_surface_handle_snode_position_changed;
+  wl_signal_add(&self->snode->events.position_changed,
+      &self->snode_position_changed_listener);
+
   return self;
 
 err_view:
@@ -268,6 +291,7 @@ err:
 static void
 zn_xwayland_surface_destroy(struct zn_xwayland_surface *self)
 {
+  wl_list_remove(&self->snode_position_changed_listener.link);
   wl_list_remove(&self->surface_commit_listener.link);
   wl_list_remove(&self->surface_move_listener.link);
   wl_list_remove(&self->surface_configure_listener.link);

@@ -23,6 +23,8 @@ struct zn_cursor_grab {
   const struct zn_cursor_grab_interface *impl;  // @nonnull, @outlive
 };
 
+void zn_cursor_grab_move_relative(vec2 delta);
+
 UNUSED static void
 zn_cursor_grab_pointer_motion(
     struct zn_cursor_grab *self, vec2 delta, uint32_t time_msec)

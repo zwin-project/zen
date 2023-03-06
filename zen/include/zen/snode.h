@@ -65,9 +65,9 @@ struct zn_snode {
   void *user_data;                        // @nullable, @outlive if exists
   const struct zn_snode_interface *impl;  // @nonnull, @outlive
 
-  struct zn_snode *parent;        // @nullable, @ref
-  vec2 position;                  // effective coords, relative to parent
-  vec2 cached_absolute_position;  // effective coords, relative to root
+  struct zn_snode *parent;  // @nullable, @ref
+  vec2 position;            // effective coords, relative to parent
+  vec2 absolute_position;   // effective coords, relative to root
 
   // When the screen is destroyed, the root snode is destroyed and
   // `position_changed` signal handler will set this NULL.

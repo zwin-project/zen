@@ -18,6 +18,8 @@ zn_desktop_screen_handle_screen_destroy(
   struct zn_desktop_screen *self =
       zn_container_of(listener, self, screen_destroy_listener);
 
+  // TODO(@Aki-7): move views and cursor if exists
+
   zn_desktop_screen_destroy(self);
 }
 
