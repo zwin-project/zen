@@ -107,6 +107,15 @@ static const struct zn_view_interface view_implementation = {
 };
 
 static void
+zn_xwayland_surface_handle_move(struct wl_listener *listener, void *data UNUSED)
+{
+  struct zn_xwayland_surface *self =
+      zn_container_of(listener, self, surface_move_listener);
+
+  zn_view_notify_move(self->view);
+}
+
+static void
 zn_xwayland_surface_handle_configure(
     struct wl_listener *listener, void *data UNUSED)
 {
@@ -237,6 +246,10 @@ zn_xwayland_surface_create(struct wlr_xwayland_surface *wlr_xsurface)
   wl_signal_add(&wlr_xsurface->events.request_configure,
       &self->surface_configure_listener);
 
+  self->surface_move_listener.notify = zn_xwayland_surface_handle_move;
+  wl_signal_add(
+      &wlr_xsurface->events.request_move, &self->surface_move_listener);
+
   self->surface_commit_listener.notify = zn_xwayland_surface_handle_commit;
   wl_list_init(&self->surface_commit_listener.link);
 
@@ -256,6 +269,7 @@ static void
 zn_xwayland_surface_destroy(struct zn_xwayland_surface *self)
 {
   wl_list_remove(&self->surface_commit_listener.link);
+  wl_list_remove(&self->surface_move_listener.link);
   wl_list_remove(&self->surface_configure_listener.link);
   wl_list_remove(&self->surface_unmap_listener.link);
   wl_list_remove(&self->surface_map_listener.link);

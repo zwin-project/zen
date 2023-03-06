@@ -15,8 +15,12 @@ struct zn_view {
 
   struct {
     struct wl_signal unmap;  // (NULL)
+    struct wl_signal move;   // (NULL)
   } events;
 };
+
+/// Called by the impl object
+void zn_view_notify_move(struct zn_view *self);
 
 /// Called by the impl object
 void zn_view_notify_unmap(struct zn_view *self);

@@ -5,6 +5,12 @@
 #include "zen/snode.h"
 
 void
+zn_view_notify_move(struct zn_view *self)
+{
+  wl_signal_emit(&self->events.move, NULL);
+}
+
+void
 zn_view_notify_unmap(struct zn_view *self)
 {
   zn_snode_set_position(self->snode, NULL, (vec2){0, 0});
@@ -31,6 +37,7 @@ zn_view_create(void *impl_data, const struct zn_view_interface *implementation)
   self->impl = implementation;
 
   wl_signal_init(&self->events.unmap);
+  wl_signal_init(&self->events.move);
 
   return self;
 
@@ -45,6 +52,7 @@ void
 zn_view_destroy(struct zn_view *self)
 {
   wl_list_remove(&self->events.unmap.listener_list);
+  wl_list_remove(&self->events.move.listener_list);
   zn_snode_destroy(self->snode);
   free(self);
 }

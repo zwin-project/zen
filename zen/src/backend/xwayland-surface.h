@@ -17,6 +17,7 @@ struct zn_xwayland_surface {
   struct wl_listener surface_map_listener;
   struct wl_listener surface_unmap_listener;
   struct wl_listener surface_configure_listener;
+  struct wl_listener surface_move_listener;
   struct wl_listener surface_commit_listener;  // listen only when mapped
 };
 
