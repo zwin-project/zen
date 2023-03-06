@@ -8,6 +8,7 @@
 #include "zen-desktop/cursor-grab/default.h"
 #include "zen-desktop/screen-layout.h"
 #include "zen-desktop/screen.h"
+#include "zen-desktop/view.h"
 #include "zen/backend.h"
 #include "zen/screen.h"
 #include "zen/seat.h"
@@ -34,7 +35,10 @@ zn_desktop_shell_handle_view_mapped(struct wl_listener *listener, void *data)
 {
   struct zn_desktop_shell *self =
       zn_container_of(listener, self, view_mapped_listener);
-  struct zn_view *view = data;
+  struct zn_view *zn_view = data;
+
+  struct zn_desktop_view *view = zn_desktop_view_create(zn_view);
+
   struct zn_desktop_screen *desktop_screen =
       zn_screen_layout_get_main_screen(self->screen_layout);
 
