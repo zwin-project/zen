@@ -77,13 +77,13 @@ zn_snode_damage_whole(struct zn_snode *self)
 }
 
 static void
-zn_snode_cache_absolute_position(struct zn_snode *self)
+zn_snode_update_absolute_position(struct zn_snode *self)
 {
   if (self->parent) {
-    glm_vec2_add(self->parent->cached_absolute_position, self->position,
-        self->cached_absolute_position);
+    glm_vec2_add(self->parent->absolute_position, self->position,
+        self->absolute_position);
   } else {
-    glm_vec2_copy(self->position, self->cached_absolute_position);
+    glm_vec2_copy(self->position, self->absolute_position);
   }
 }
 
@@ -118,8 +118,8 @@ zn_snode_damage(struct zn_snode *self, struct wlr_fbox *damage)
   }
 
   struct wlr_fbox fbox = {
-      .x = damage->x + self->cached_absolute_position[0],
-      .y = damage->y + self->cached_absolute_position[1],
+      .x = damage->x + self->absolute_position[0],
+      .y = damage->y + self->absolute_position[1],
       .width = damage->width,
       .height = damage->height,
   };
@@ -163,7 +163,7 @@ zn_snode_set_position(
   self->screen = parent ? parent->screen : NULL;
   glm_vec2_copy(position, self->position);
 
-  zn_snode_cache_absolute_position(self);
+  zn_snode_update_absolute_position(self);
 
   zn_snode_damage_whole(self);
 
@@ -180,8 +180,8 @@ void
 zn_snode_get_fbox(struct zn_snode *self, struct wlr_fbox *fbox)
 {
   struct wlr_texture *texture = self->impl->get_texture(self->user_data);
-  fbox->x = self->cached_absolute_position[0];
-  fbox->y = self->cached_absolute_position[1];
+  fbox->x = self->absolute_position[0];
+  fbox->y = self->absolute_position[1];
   if (texture) {
     fbox->width = texture->width;
     fbox->height = texture->height;
@@ -200,7 +200,7 @@ zn_snode_handle_parent_position_changed(
 
   zn_snode_damage_whole(self);
 
-  zn_snode_cache_absolute_position(self);
+  zn_snode_update_absolute_position(self);
   self->screen = self->parent->screen;
 
   zn_snode_damage_whole(self);
@@ -232,7 +232,7 @@ zn_snode_create(
 
   self->parent = NULL;
   glm_vec2_zero(self->position);
-  glm_vec2_zero(self->cached_absolute_position);
+  glm_vec2_zero(self->absolute_position);
 
   self->screen = NULL;
 

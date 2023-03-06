@@ -101,6 +101,30 @@ zn_desktop_shell_handle_pointer_frame(
   zn_cursor_grab_pointer_frame(self->cursor_grab);
 }
 
+void
+zn_desktop_shell_start_cursor_grab(
+    struct zn_desktop_shell *self, struct zn_cursor_grab *grab)
+{
+  zn_cursor_grab_destroy(self->cursor_grab);
+
+  self->cursor_grab = grab;
+}
+
+void
+zn_desktop_shell_end_cursor_grab(struct zn_desktop_shell *self)
+{
+  struct zn_cursor_default_grab *cursor_default_grab =
+      zn_cursor_default_grab_create();
+  if (cursor_default_grab == NULL) {
+    zn_abort("Failed to create a default cursor grab");
+    return;
+  }
+
+  zn_cursor_grab_destroy(self->cursor_grab);
+
+  self->cursor_grab = &cursor_default_grab->base;
+}
+
 struct zn_desktop_shell *
 zn_desktop_shell_get_singleton(void)
 {

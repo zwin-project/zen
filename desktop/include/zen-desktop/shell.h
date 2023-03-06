@@ -2,6 +2,8 @@
 
 #include <wayland-server-core.h>
 
+struct zn_cursor_grab;
+
 struct zn_desktop_shell {
   struct zn_screen_layout *screen_layout;  // @nonnull, @owning
 
@@ -15,6 +17,12 @@ struct zn_desktop_shell {
   struct wl_listener pointer_frame_listener;
   struct wl_listener view_mapped_listener;
 };
+
+/// Ownership of `grab` moves to `self`
+void zn_desktop_shell_start_cursor_grab(
+    struct zn_desktop_shell *self, struct zn_cursor_grab *grab);
+
+void zn_desktop_shell_end_cursor_grab(struct zn_desktop_shell *self);
 
 struct zn_desktop_shell *zn_desktop_shell_get_singleton(void);
 
