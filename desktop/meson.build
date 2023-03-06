@@ -2,9 +2,14 @@ _zen_desktop_srcs = [
   'src/cursor-grab.c',
   'src/cursor-grab/default.c',
   'src/cursor-grab/move.c',
+
   'src/screen.c',
   'src/screen-layout.c',
   'src/shell.c',
+
+  'src/ui/decoration.c',
+  'src/ui/header-bar.c',
+
   'src/view.c',
 ]
 
