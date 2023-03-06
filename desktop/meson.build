@@ -3,6 +3,7 @@ _zen_desktop_srcs = [
   'src/screen.c',
   'src/screen-layout.c',
   'src/shell.c',
+  'src/view.c',
 ]
 
 _zen_desktop_inc = include_directories('include')
