@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cglm/types.h>
 #include <stdbool.h>
 #include <wayland-server-core.h>
 
@@ -11,13 +12,19 @@ struct zn_view {
   void *impl_data;                       // @nullable, @outlive if exists
   const struct zn_view_interface *impl;  // @nonnull, @outlive
 
+  vec2 size;
+
   struct zn_snode *snode;  // @nonnull, @owning
 
   struct {
-    struct wl_signal unmap;  // (NULL)
-    struct wl_signal move;   // (NULL)
+    struct wl_signal resized;  // (NULL)
+    struct wl_signal unmap;    // (NULL)
+    struct wl_signal move;     // (NULL)
   } events;
 };
+
+/// Called by the impl object
+void zn_view_notify_resized(struct zn_view *self, vec2 size);
 
 /// Called by the impl object
 void zn_view_notify_move(struct zn_view *self);

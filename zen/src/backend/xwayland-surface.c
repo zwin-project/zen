@@ -183,6 +183,14 @@ zn_xwayland_surface_handle_commit(
   }
 
   pixman_region32_fini(&damage);
+
+  vec2 new_size = {(float)self->wlr_xsurface->surface->current.width,
+      (float)self->wlr_xsurface->surface->current.height};
+
+  if (self->view->size[0] != new_size[0] ||
+      self->view->size[1] != new_size[1]) {
+    zn_view_notify_resized(self->view, new_size);
+  }
 }
 
 static void
@@ -206,6 +214,9 @@ zn_xwayland_surface_handle_surface_map(
 
   wl_signal_add(&self->wlr_xsurface->surface->events.commit,
       &self->surface_commit_listener);
+
+  zn_view_notify_resized(self->view,
+      (vec2){self->wlr_xsurface->width, self->wlr_xsurface->height});
 
   zn_default_backend_notify_view_mapped(backend, self->view);
 }
