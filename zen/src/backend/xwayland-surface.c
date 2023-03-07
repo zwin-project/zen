@@ -130,7 +130,7 @@ zn_xwayland_surface_handle_move(struct wl_listener *listener, void *data UNUSED)
   struct zn_xwayland_surface *self =
       zn_container_of(listener, self, surface_move_listener);
 
-  zn_view_notify_move(self->view);
+  zn_view_notify_move_request(self->view);
 }
 
 static void

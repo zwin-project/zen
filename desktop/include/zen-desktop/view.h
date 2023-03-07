@@ -13,7 +13,7 @@ struct zn_desktop_view {
   struct zn_ui_decoration *decoration;  // @nonnull, @owning
 
   struct wl_listener zn_view_unmap_listener;
-  struct wl_listener zn_view_move_listener;
+  struct wl_listener zn_view_request_move_listener;
   struct wl_listener zn_view_resized_listener;
 
   struct {

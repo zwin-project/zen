@@ -14,9 +14,9 @@ zn_view_notify_resized(struct zn_view *self, vec2 size)
 }
 
 void
-zn_view_notify_move(struct zn_view *self)
+zn_view_notify_move_request(struct zn_view *self)
 {
-  wl_signal_emit(&self->events.move, NULL);
+  wl_signal_emit(&self->events.request_move, NULL);
 }
 
 void
@@ -47,7 +47,7 @@ zn_view_create(void *impl_data, const struct zn_view_interface *implementation)
 
   wl_signal_init(&self->events.resized);
   wl_signal_init(&self->events.unmap);
-  wl_signal_init(&self->events.move);
+  wl_signal_init(&self->events.request_move);
 
   return self;
 
@@ -63,7 +63,7 @@ zn_view_destroy(struct zn_view *self)
 {
   wl_list_remove(&self->events.resized.listener_list);
   wl_list_remove(&self->events.unmap.listener_list);
-  wl_list_remove(&self->events.move.listener_list);
+  wl_list_remove(&self->events.request_move.listener_list);
   zn_snode_destroy(self->snode);
   free(self);
 }
