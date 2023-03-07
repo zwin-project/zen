@@ -137,6 +137,8 @@ zn_snode_pointer_frame(struct zn_snode *self)
 struct zn_snode *zn_snode_get_snode_at(
     struct zn_snode *self, vec2 point, vec2 local_point);
 
+void zn_snode_damage_whole(struct zn_snode *self);
+
 /// @param damage is in the snode-local coords
 void zn_snode_damage(struct zn_snode *self, struct wlr_fbox *damage);
 

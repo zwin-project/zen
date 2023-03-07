@@ -64,7 +64,7 @@ const struct zn_snode_interface zn_snode_noop_implementation = {
     .pointer_frame = zn_snode_noop_pointer_frame,
 };
 
-static void
+void
 zn_snode_damage_whole(struct zn_snode *self)
 {
   struct wlr_fbox box;
