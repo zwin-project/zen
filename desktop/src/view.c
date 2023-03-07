@@ -29,7 +29,7 @@ zn_desktop_view_handle_zn_view_move(
     struct wl_listener *listener, void *user_data UNUSED)
 {
   struct zn_desktop_view *self =
-      zn_container_of(listener, self, zn_view_move_listener);
+      zn_container_of(listener, self, zn_view_request_move_listener);
   zn_cursor_move_grab_start(self);
 }
 
@@ -74,8 +74,10 @@ zn_desktop_view_create(struct zn_view *zn_view)
   self->zn_view_unmap_listener.notify = zn_desktop_view_handle_zn_view_unmap;
   wl_signal_add(&zn_view->events.unmap, &self->zn_view_unmap_listener);
 
-  self->zn_view_move_listener.notify = zn_desktop_view_handle_zn_view_move;
-  wl_signal_add(&zn_view->events.move, &self->zn_view_move_listener);
+  self->zn_view_request_move_listener.notify =
+      zn_desktop_view_handle_zn_view_move;
+  wl_signal_add(
+      &zn_view->events.request_move, &self->zn_view_request_move_listener);
 
   zn_snode_set_position(self->decoration->snode, self->snode, GLM_VEC2_ZERO);
 
@@ -102,7 +104,7 @@ zn_desktop_view_destroy(struct zn_desktop_view *self)
 
   zn_ui_decoration_destroy(self->decoration);
   zn_snode_destroy(self->snode);
-  wl_list_remove(&self->zn_view_move_listener.link);
+  wl_list_remove(&self->zn_view_request_move_listener.link);
   wl_list_remove(&self->zn_view_unmap_listener.link);
   wl_list_remove(&self->zn_view_resized_listener.link);
   wl_list_remove(&self->events.destroy.listener_list);

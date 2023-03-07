@@ -17,9 +17,9 @@ struct zn_view {
   struct zn_snode *snode;  // @nonnull, @owning
 
   struct {
-    struct wl_signal resized;  // (NULL)
-    struct wl_signal unmap;    // (NULL)
-    struct wl_signal move;     // (NULL)
+    struct wl_signal resized;       // (NULL)
+    struct wl_signal unmap;         // (NULL)
+    struct wl_signal request_move;  // (NULL)
   } events;
 };
 
@@ -27,7 +27,7 @@ struct zn_view {
 void zn_view_notify_resized(struct zn_view *self, vec2 size);
 
 /// Called by the impl object
-void zn_view_notify_move(struct zn_view *self);
+void zn_view_notify_move_request(struct zn_view *self);
 
 /// Called by the impl object
 void zn_view_notify_unmap(struct zn_view *self);
