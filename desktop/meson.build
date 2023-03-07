@@ -20,6 +20,8 @@ _zen_desktop_private_inc = [
 ]
 
 _zen_desktop_deps = [
+  cairo_dep,
+  rsvg_dep,
   zen_common_dep,
   zen_dep,
 ]

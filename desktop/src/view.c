@@ -13,15 +13,39 @@
 static void zn_desktop_view_destroy(struct zn_desktop_view *self);
 
 static void
+zn_desktop_view_update_decoration(struct zn_desktop_view *self)
+{
+  if (self->zn_view->decoration_mode == ZN_VIEW_DECORATION_MODE_CLIENT_SIDE) {
+    zn_snode_set_position(self->decoration->snode, NULL, GLM_VEC2_ZERO);
+
+    zn_snode_set_position(self->zn_view->snode, self->snode, GLM_VEC2_ZERO);
+  } else {
+    zn_snode_set_position(self->decoration->snode, self->snode, GLM_VEC2_ZERO);
+
+    zn_ui_decoration_set_content_size(self->decoration, self->zn_view->size);
+    zn_snode_set_position(
+        self->zn_view->snode, self->snode, self->decoration->content_offset);
+  }
+}
+
+static void
 zn_desktop_view_handle_zn_view_resized(
     struct wl_listener *listener, void *user_data UNUSED)
 {
   struct zn_desktop_view *self =
       zn_container_of(listener, self, zn_view_resized_listener);
 
-  zn_ui_decoration_set_content_size(self->decoration, self->zn_view->size);
-  zn_snode_set_position(
-      self->zn_view->snode, self->snode, self->decoration->content_offset);
+  zn_desktop_view_update_decoration(self);
+}
+
+static void
+zn_desktop_view_handle_zn_view_decoration(
+    struct wl_listener *listener, void *user_data UNUSED)
+{
+  struct zn_desktop_view *self =
+      zn_container_of(listener, self, zn_view_decoration_listener);
+
+  zn_desktop_view_update_decoration(self);
 }
 
 static void
@@ -79,11 +103,12 @@ zn_desktop_view_create(struct zn_view *zn_view)
   wl_signal_add(
       &zn_view->events.request_move, &self->zn_view_request_move_listener);
 
-  zn_snode_set_position(self->decoration->snode, self->snode, GLM_VEC2_ZERO);
+  self->zn_view_decoration_listener.notify =
+      zn_desktop_view_handle_zn_view_decoration;
+  wl_signal_add(
+      &zn_view->events.decoration, &self->zn_view_decoration_listener);
 
-  zn_ui_decoration_set_content_size(self->decoration, zn_view->size);
-  zn_snode_set_position(
-      zn_view->snode, self->snode, self->decoration->content_offset);
+  zn_desktop_view_update_decoration(self);
 
   return self;
 
@@ -104,6 +129,7 @@ zn_desktop_view_destroy(struct zn_desktop_view *self)
 
   zn_ui_decoration_destroy(self->decoration);
   zn_snode_destroy(self->snode);
+  wl_list_remove(&self->zn_view_decoration_listener.link);
   wl_list_remove(&self->zn_view_request_move_listener.link);
   wl_list_remove(&self->zn_view_unmap_listener.link);
   wl_list_remove(&self->zn_view_resized_listener.link);
