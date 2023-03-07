@@ -14,6 +14,14 @@ zn_view_notify_resized(struct zn_view *self, vec2 size)
 }
 
 void
+zn_view_notify_decoration(
+    struct zn_view *self, enum zn_view_decoration_mode mode)
+{
+  self->decoration_mode = mode;
+  wl_signal_emit(&self->events.decoration, NULL);
+}
+
+void
 zn_view_notify_move_request(struct zn_view *self)
 {
   wl_signal_emit(&self->events.request_move, NULL);
@@ -44,9 +52,11 @@ zn_view_create(void *impl_data, const struct zn_view_interface *implementation)
 
   self->impl_data = impl_data;
   self->impl = implementation;
+  self->decoration_mode = ZN_VIEW_DECORATION_MODE_SERVER_SIDE;
 
   wl_signal_init(&self->events.resized);
   wl_signal_init(&self->events.unmap);
+  wl_signal_init(&self->events.decoration);
   wl_signal_init(&self->events.request_move);
 
   return self;
@@ -63,6 +73,7 @@ zn_view_destroy(struct zn_view *self)
 {
   wl_list_remove(&self->events.resized.listener_list);
   wl_list_remove(&self->events.unmap.listener_list);
+  wl_list_remove(&self->events.decoration.listener_list);
   wl_list_remove(&self->events.request_move.listener_list);
   zn_snode_destroy(self->snode);
   free(self);
