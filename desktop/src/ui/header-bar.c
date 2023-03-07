@@ -17,11 +17,30 @@ zn_ui_header_bar_get_texture(void *user_data)
   return self->texture;
 }
 
+static bool
+zn_ui_header_accepts_input(void *user_data, const vec2 point)
+{
+  struct zn_ui_header_bar *self = user_data;
+  return 0 <= point[0] && point[0] <= self->size[0] && 0 <= point[1] &&
+         point[1] <= self->size[1];
+}
+
+static void
+zn_ui_header_pointer_button(void *user_data, uint32_t time_msec UNUSED,
+    uint32_t button UNUSED, enum wlr_button_state state)
+{
+  struct zn_ui_header_bar *self = user_data;
+
+  if (state == WLR_BUTTON_PRESSED) {
+    wl_signal_emit(&self->events.pressed, NULL);
+  }
+}
+
 static const struct zn_snode_interface snode_implementation = {
     .get_texture = zn_ui_header_bar_get_texture,
     .frame = zn_snode_noop_frame,
-    .accepts_input = zn_snode_noop_accepts_input,
-    .pointer_button = zn_snode_noop_pointer_button,
+    .accepts_input = zn_ui_header_accepts_input,
+    .pointer_button = zn_ui_header_pointer_button,
     .pointer_enter = zn_snode_noop_pointer_enter,
     .pointer_motion = zn_snode_noop_pointer_motion,
     .pointer_leave = zn_snode_noop_pointer_leave,
@@ -107,7 +126,7 @@ zn_ui_header_bar_create(void)
   }
 
   glm_vec2_copy(GLM_VEC2_ZERO, self->size);
-  wl_signal_init(&self->events.move);
+  wl_signal_init(&self->events.pressed);
 
   self->texture = NULL;
 
@@ -128,7 +147,7 @@ zn_ui_header_bar_destroy(struct zn_ui_header_bar *self)
   if (self->texture) {
     wlr_texture_destroy(self->texture);
   }
-  wl_list_remove(&self->events.move.listener_list);
+  wl_list_remove(&self->events.pressed.listener_list);
   zn_snode_destroy(self->snode);
   free(self);
 }

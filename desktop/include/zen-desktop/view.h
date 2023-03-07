@@ -16,6 +16,7 @@ struct zn_desktop_view {
   struct wl_listener zn_view_request_move_listener;
   struct wl_listener zn_view_decoration_listener;
   struct wl_listener zn_view_resized_listener;
+  struct wl_listener header_pressed_listener;
 
   struct {
     struct wl_signal destroy;
