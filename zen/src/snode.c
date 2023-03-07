@@ -18,7 +18,7 @@ zn_snode_noop_frame(void *user_data UNUSED, const struct timespec *when UNUSED)
 {}
 
 bool
-zn_snode_noop_accepts_input(void *user_data UNUSED, vec2 point UNUSED)
+zn_snode_noop_accepts_input(void *user_data UNUSED, const vec2 point UNUSED)
 {
   return false;
 }
@@ -29,12 +29,12 @@ zn_snode_noop_pointer_button(void *user_data UNUSED, uint32_t time_msec UNUSED,
 {}
 
 void
-zn_snode_noop_pointer_enter(void *user_data UNUSED, vec2 point UNUSED)
+zn_snode_noop_pointer_enter(void *user_data UNUSED, const vec2 point UNUSED)
 {}
 
 void
 zn_snode_noop_pointer_motion(
-    void *user_data UNUSED, uint32_t time_msec UNUSED, vec2 point UNUSED)
+    void *user_data UNUSED, uint32_t time_msec UNUSED, const vec2 point UNUSED)
 {}
 
 void

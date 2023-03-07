@@ -8,7 +8,7 @@
 #include "zen/snode.h"
 
 bool
-test_accepts_input(void *user_data UNUSED, vec2 point UNUSED)
+test_accepts_input(void *user_data UNUSED, const vec2 point UNUSED)
 {
   struct wlr_fbox *box = user_data;
   return zn_wlr_fbox_contains_point(box, point[0], point[1]);

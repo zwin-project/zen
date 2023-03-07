@@ -16,14 +16,14 @@ struct zn_snode_interface {
 
   /// @return true if `point` is in input region
   /// @param point is in snode-local coords
-  bool (*accepts_input)(void *user_data, vec2 point);
+  bool (*accepts_input)(void *user_data, const vec2 point);
 
   void (*pointer_button)(void *user_data, uint32_t time_msec, uint32_t button,
       enum wlr_button_state state);
 
-  void (*pointer_enter)(void *user_data, vec2 point);
+  void (*pointer_enter)(void *user_data, const vec2 point);
 
-  void (*pointer_motion)(void *user_data, uint32_t time_msec, vec2 point);
+  void (*pointer_motion)(void *user_data, uint32_t time_msec, const vec2 point);
 
   void (*pointer_leave)(void *user_data);
 
@@ -40,15 +40,15 @@ struct wlr_texture *zn_snode_noop_get_texture(void *user_data);
 
 void zn_snode_noop_frame(void *user_data, const struct timespec *when);
 
-bool zn_snode_noop_accepts_input(void *user_data, vec2 point);
+bool zn_snode_noop_accepts_input(void *user_data, const vec2 point);
 
 void zn_snode_noop_pointer_button(void *user_data, uint32_t time_msec,
     uint32_t button, enum wlr_button_state state);
 
-void zn_snode_noop_pointer_enter(void *user_data, vec2 point);
+void zn_snode_noop_pointer_enter(void *user_data, const vec2 point);
 
 void zn_snode_noop_pointer_motion(
-    void *user_data, uint32_t time_msec, vec2 point);
+    void *user_data, uint32_t time_msec, const vec2 point);
 
 void zn_snode_noop_pointer_leave(void *user_data);
 
@@ -94,13 +94,14 @@ zn_snode_pointer_button(struct zn_snode *self, uint32_t time_msec,
 }
 
 UNUSED static inline void
-zn_snode_pointer_enter(struct zn_snode *self, vec2 point)
+zn_snode_pointer_enter(struct zn_snode *self, const vec2 point)
 {
   self->impl->pointer_enter(self->user_data, point);
 }
 
 UNUSED static inline void
-zn_snode_pointer_motion(struct zn_snode *self, uint32_t time_msec, vec2 point)
+zn_snode_pointer_motion(
+    struct zn_snode *self, uint32_t time_msec, const vec2 point)
 {
   self->impl->pointer_motion(self->user_data, time_msec, point);
 }
