@@ -13,7 +13,7 @@ struct zn_ui_header_bar {
   vec2 size;
 
   struct {
-    struct wl_signal move;
+    struct wl_signal pressed;  // (NULL)
   } events;
 };
 

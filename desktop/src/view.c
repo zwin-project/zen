@@ -7,6 +7,7 @@
 #include "zen-common/util.h"
 #include "zen-desktop/cursor-grab/move.h"
 #include "zen-desktop/ui/decoration.h"
+#include "zen-desktop/ui/header-bar.h"
 #include "zen/snode.h"
 #include "zen/view.h"
 
@@ -26,6 +27,16 @@ zn_desktop_view_update_decoration(struct zn_desktop_view *self)
     zn_snode_set_position(
         self->zn_view->snode, self->snode, self->decoration->content_offset);
   }
+}
+
+static void
+zn_desktop_view_handle_header_pressed(
+    struct wl_listener *listener, void *user_data UNUSED)
+{
+  struct zn_desktop_view *self =
+      zn_container_of(listener, self, header_pressed_listener);
+
+  zn_cursor_move_grab_start(self);
 }
 
 static void
@@ -91,6 +102,10 @@ zn_desktop_view_create(struct zn_view *zn_view)
     goto err_snode;
   }
 
+  self->header_pressed_listener.notify = zn_desktop_view_handle_header_pressed;
+  wl_signal_add(&self->decoration->header_bar->events.pressed,
+      &self->header_pressed_listener);
+
   self->zn_view_resized_listener.notify =
       zn_desktop_view_handle_zn_view_resized;
   wl_signal_add(&zn_view->events.resized, &self->zn_view_resized_listener);
@@ -133,6 +148,7 @@ zn_desktop_view_destroy(struct zn_desktop_view *self)
   wl_list_remove(&self->zn_view_request_move_listener.link);
   wl_list_remove(&self->zn_view_unmap_listener.link);
   wl_list_remove(&self->zn_view_resized_listener.link);
+  wl_list_remove(&self->header_pressed_listener.link);
   wl_list_remove(&self->events.destroy.listener_list);
   free(self);
 }
