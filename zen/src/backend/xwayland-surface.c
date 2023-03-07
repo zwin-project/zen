@@ -107,6 +107,31 @@ static const struct zn_view_interface view_implementation = {
 };
 
 static void
+zn_xwayland_surface_update_view_size(struct zn_xwayland_surface *self)
+{
+  vec2 new_size = {(float)self->wlr_xsurface->surface->current.width,
+      (float)self->wlr_xsurface->surface->current.height};
+
+  if (self->view->size[0] != new_size[0] ||
+      self->view->size[1] != new_size[1]) {
+    zn_view_notify_resized(self->view, new_size);
+  }
+}
+
+static void
+zn_xwayland_surface_update_view_decoration(struct zn_xwayland_surface *self)
+{
+  enum zn_view_decoration_mode decoration_mode =
+      self->wlr_xsurface->decorations != WLR_XWAYLAND_SURFACE_DECORATIONS_ALL
+          ? ZN_VIEW_DECORATION_MODE_CLIENT_SIDE
+          : ZN_VIEW_DECORATION_MODE_SERVER_SIDE;
+
+  if (self->view->decoration_mode != decoration_mode) {
+    zn_view_notify_decoration(self->view, decoration_mode);
+  }
+}
+
+static void
 zn_xwayland_surface_handle_snode_position_changed(
     struct wl_listener *listener, void *data UNUSED)
 {
@@ -131,6 +156,16 @@ zn_xwayland_surface_handle_move(struct wl_listener *listener, void *data UNUSED)
       zn_container_of(listener, self, surface_move_listener);
 
   zn_view_notify_move_request(self->view);
+}
+
+static void
+zn_xwayland_surface_handle_set_decoration(
+    struct wl_listener *listener, void *data UNUSED)
+{
+  struct zn_xwayland_surface *self =
+      zn_container_of(listener, self, surface_set_decoration_listener);
+
+  zn_xwayland_surface_update_view_decoration(self);
 }
 
 static void
@@ -184,13 +219,7 @@ zn_xwayland_surface_handle_commit(
 
   pixman_region32_fini(&damage);
 
-  vec2 new_size = {(float)self->wlr_xsurface->surface->current.width,
-      (float)self->wlr_xsurface->surface->current.height};
-
-  if (self->view->size[0] != new_size[0] ||
-      self->view->size[1] != new_size[1]) {
-    zn_view_notify_resized(self->view, new_size);
-  }
+  zn_xwayland_surface_update_view_size(self);
 }
 
 static void
@@ -215,8 +244,9 @@ zn_xwayland_surface_handle_surface_map(
   wl_signal_add(&self->wlr_xsurface->surface->events.commit,
       &self->surface_commit_listener);
 
-  zn_view_notify_resized(self->view,
-      (vec2){self->wlr_xsurface->width, self->wlr_xsurface->height});
+  zn_xwayland_surface_update_view_size(self);
+
+  zn_xwayland_surface_update_view_decoration(self);
 
   zn_default_backend_notify_view_mapped(backend, self->view);
 }
@@ -279,6 +309,11 @@ zn_xwayland_surface_create(struct wlr_xwayland_surface *wlr_xsurface)
   wl_signal_add(
       &wlr_xsurface->events.request_move, &self->surface_move_listener);
 
+  self->surface_set_decoration_listener.notify =
+      zn_xwayland_surface_handle_set_decoration;
+  wl_signal_add(&wlr_xsurface->events.set_decorations,
+      &self->surface_set_decoration_listener);
+
   self->surface_commit_listener.notify = zn_xwayland_surface_handle_commit;
   wl_list_init(&self->surface_commit_listener.link);
 
@@ -304,6 +339,7 @@ zn_xwayland_surface_destroy(struct zn_xwayland_surface *self)
 {
   wl_list_remove(&self->snode_position_changed_listener.link);
   wl_list_remove(&self->surface_commit_listener.link);
+  wl_list_remove(&self->surface_set_decoration_listener.link);
   wl_list_remove(&self->surface_move_listener.link);
   wl_list_remove(&self->surface_configure_listener.link);
   wl_list_remove(&self->surface_unmap_listener.link);
