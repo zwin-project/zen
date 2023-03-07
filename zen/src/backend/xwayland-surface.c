@@ -26,7 +26,7 @@ zn_xwayland_surface_handle_frame(void *user_data, const struct timespec *when)
 }
 
 static bool
-zn_xwayland_surface_accepts_input(void *user_data, vec2 point)
+zn_xwayland_surface_accepts_input(void *user_data, const vec2 point)
 {
   struct zn_xwayland_surface *self = user_data;
   return wlr_surface_point_accepts_input(
@@ -43,7 +43,7 @@ zn_xwayland_surface_handle_pointer_button(void *user_data UNUSED,
 }
 
 static void
-zn_xwayland_surface_handle_pointer_enter(void *user_data, vec2 point)
+zn_xwayland_surface_handle_pointer_enter(void *user_data, const vec2 point)
 {
   struct zn_xwayland_surface *self = user_data;
   struct zn_server *server = zn_server_get_singleton();
@@ -53,7 +53,7 @@ zn_xwayland_surface_handle_pointer_enter(void *user_data, vec2 point)
 
 static void
 zn_xwayland_surface_handle_pointer_motion(
-    void *user_data UNUSED, uint32_t time_msec, vec2 point)
+    void *user_data UNUSED, uint32_t time_msec, const vec2 point)
 {
   struct zn_server *server = zn_server_get_singleton();
   wlr_seat_pointer_send_motion(
