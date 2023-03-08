@@ -9,6 +9,7 @@ _zen_wlr_glew_renderer_srcs = [
 _zen_wlr_glew_renderer_inc = include_directories('include')
 
 _zen_wlr_glew_renderer_deps = [
+  glew_dep,
   wlroots_dep,
   zen_common_dep,
 ]
