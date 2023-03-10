@@ -50,9 +50,21 @@ zn_compositor_create(struct wl_display *display, struct wlr_renderer *renderer)
     goto err_free;
   }
 
+  self->xdg_shell = wlr_xdg_shell_create(display);
+  if (self->xdg_shell == NULL) {
+    zn_error("Failed to create a xdg_shell");
+    goto err_free;
+  }
+
   self->wlr_layer_shell = wlr_layer_shell_v1_create(display);
   if (self->wlr_layer_shell == NULL) {
     zn_error("Failed to create a wlr_layer_shell");
+    goto err_free;
+  }
+
+  self->data_device_manager = wlr_data_device_manager_create(display);
+  if (self->data_device_manager == NULL) {
+    zn_error("Failed to create a wlr_data_device_manager");
     goto err_free;
   }
 
