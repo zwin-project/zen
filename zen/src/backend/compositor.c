@@ -1,5 +1,8 @@
 #include "backend/compositor.h"
 
+#include <wlr/types/wlr_layer_shell_v1.h>
+
+#include "layer-surface.h"
 #include "xwayland-surface.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
@@ -19,6 +22,15 @@ zn_compositor_handle_new_xwayland_surface(
   zn_xwayland_surface_create(wlr_xsurface);
 }
 
+static void
+zn_compositor_handle_new_layer_surface(
+    struct wl_listener *listener UNUSED, void *data)
+{
+  struct wlr_layer_surface_v1 *layer_surface = data;
+
+  zn_layer_surface_create(layer_surface);
+}
+
 struct zn_compositor *
 zn_compositor_create(struct wl_display *display, struct wlr_renderer *renderer)
 {
@@ -35,6 +47,12 @@ zn_compositor_create(struct wl_display *display, struct wlr_renderer *renderer)
   self->wlr_compositor = wlr_compositor_create(display, renderer);
   if (self->wlr_compositor == NULL) {
     zn_error("Failed to create a wlr_compositor");
+    goto err_free;
+  }
+
+  self->wlr_layer_shell = wlr_layer_shell_v1_create(display);
+  if (self->wlr_layer_shell == NULL) {
+    zn_error("Failed to create a wlr_layer_shell");
     goto err_free;
   }
 
@@ -70,6 +88,11 @@ zn_compositor_create(struct wl_display *display, struct wlr_renderer *renderer)
   wl_signal_add(&self->xwayland->events.new_surface,
       &self->new_xwayland_surface_listener);
 
+  self->new_layer_surface_listener.notify =
+      zn_compositor_handle_new_layer_surface;
+  wl_signal_add(&self->wlr_layer_shell->events.new_surface,
+      &self->new_layer_surface_listener);
+
   return self;
 
 err_free:
@@ -82,6 +105,7 @@ err:
 void
 zn_compositor_destroy(struct zn_compositor *self)
 {
+  wl_list_remove(&self->new_layer_surface_listener.link);
   wl_list_remove(&self->new_xwayland_surface_listener.link);
   wlr_xwayland_destroy(self->xwayland);
   free(self);

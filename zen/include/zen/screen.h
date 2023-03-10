@@ -20,6 +20,15 @@ struct zn_screen {
 
   struct zn_snode *snode_root;  // @nonnull, @owning
 
+  // These layers do not have a parent, the user must set a parent to show them.
+  // User must not add children to these layers.
+  struct {
+    struct zn_snode *background;  // @nonnull, @owning
+    struct zn_snode *bottom;      // @nonnull, @owning
+    struct zn_snode *top;         // @nonnull, @owning
+    struct zn_snode *overlay;     // @nonnull, @owning
+  } layers;
+
   vec2 size;  // effective coordinate
 
   struct {
