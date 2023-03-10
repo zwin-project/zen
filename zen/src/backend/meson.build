@@ -1,9 +1,13 @@
 _zen_backend_srcs = [
   'backend.c',
   'compositor.c',
+  'layer-surface.c',
   'output.c',
   'pointer.c',
   'xwayland-surface.c',
+
+  protocols_code['wlr-layer-shell-unstable-v1'],
+  protocols_server_header['wlr-layer-shell-unstable-v1'],
 ]
 
 _zen_backend_lib = static_library(

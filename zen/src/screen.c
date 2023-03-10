@@ -43,6 +43,31 @@ zn_screen_create(
     goto err_free;
   }
 
+  self->layers.background =
+      zn_snode_create(self, &zn_snode_noop_implementation);
+  if (self->layers.background == NULL) {
+    zn_error("Failed to create a zn_snode");
+    goto err_snode_root;
+  }
+
+  self->layers.bottom = zn_snode_create(self, &zn_snode_noop_implementation);
+  if (self->layers.bottom == NULL) {
+    zn_error("Failed to create a zn_snode");
+    goto err_layer_background;
+  }
+
+  self->layers.top = zn_snode_create(self, &zn_snode_noop_implementation);
+  if (self->layers.top == NULL) {
+    zn_error("Failed to create a zn_snode");
+    goto err_layer_bottom;
+  }
+
+  self->layers.overlay = zn_snode_create(self, &zn_snode_noop_implementation);
+  if (self->layers.overlay == NULL) {
+    zn_error("Failed to create a zn_snode");
+    goto err_layer_top;
+  }
+
   self->impl_data = impl_data;
   self->impl = implementation;
   self->user_data = NULL;
@@ -51,6 +76,18 @@ zn_screen_create(
   wl_signal_init(&self->events.destroy);
 
   return self;
+
+err_layer_top:
+  zn_snode_destroy(self->layers.top);
+
+err_layer_bottom:
+  zn_snode_destroy(self->layers.bottom);
+
+err_layer_background:
+  zn_snode_destroy(self->layers.background);
+
+err_snode_root:
+  zn_snode_destroy(self->snode_root);
 
 err_free:
   free(self);
@@ -64,6 +101,10 @@ zn_screen_destroy(struct zn_screen *self)
 {
   zn_signal_emit_mutable(&self->events.destroy, NULL);
 
+  zn_snode_destroy(self->layers.overlay);
+  zn_snode_destroy(self->layers.top);
+  zn_snode_destroy(self->layers.bottom);
+  zn_snode_destroy(self->layers.background);
   zn_snode_destroy(self->snode_root);
   wl_list_remove(&self->events.destroy.listener_list);
   wl_list_remove(&self->events.resized.listener_list);
