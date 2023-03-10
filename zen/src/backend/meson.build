@@ -6,7 +6,10 @@ _zen_backend_srcs = [
   'pointer.c',
   'xwayland-surface.c',
 
+  protocols_code['xdg-shell'],
   protocols_code['wlr-layer-shell-unstable-v1'],
+
+  protocols_server_header['xdg-shell'],
   protocols_server_header['wlr-layer-shell-unstable-v1'],
 ]
 
