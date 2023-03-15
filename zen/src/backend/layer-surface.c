@@ -1,9 +1,11 @@
 #include "layer-surface.h"
 
+#include <cglm/vec2.h>
 #include <zen/snode.h>
 
 #include "output.h"
 #include "screen-backend.h"
+#include "surface-snode.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 #include "zen/screen.h"
@@ -30,7 +32,7 @@ zn_layer_surface_handle_surface_map(
   wl_signal_add(&self->wlr_layer_surface->surface->events.commit,
       &self->surface_commit_listener);
 
-  zn_snode_damage_whole(self->snode);
+  zn_surface_snode_damage_whole(self->surface_snode);
 }
 
 static void
@@ -43,7 +45,7 @@ zn_layer_surface_handle_surface_unmap(
   wl_list_remove(&self->surface_commit_listener.link);
   wl_list_init(&self->surface_commit_listener.link);
 
-  zn_snode_damage_whole(self->snode);
+  zn_surface_snode_damage_whole(self->surface_snode);
 }
 
 static void
@@ -58,31 +60,9 @@ zn_layer_surface_handle_surface_commit(
   if (layer_changed) {
     zn_screen_backend_add_layer_surface(self->output->screen_backend, self,
         self->wlr_layer_surface->current.layer);
-    zn_snode_damage_whole(self->snode);
+    zn_surface_snode_damage_whole(self->surface_snode);
   } else {
-    pixman_region32_t damage;
-
-    pixman_region32_init(&damage);
-
-    wlr_surface_get_effective_damage(self->wlr_layer_surface->surface, &damage);
-
-    pixman_box32_t *rects = NULL;
-    int rect_count = 0;
-
-    rects = pixman_region32_rectangles(&damage, &rect_count);
-
-    for (int i = 0; i < rect_count; i++) {
-      struct wlr_fbox damage_fbox = {
-          .x = rects[i].x1,
-          .y = rects[i].y1,
-          .width = rects[i].x2 - rects[i].x1,
-          .height = rects[i].y2 - rects[i].y1,
-      };
-
-      zn_snode_damage(self->snode, &damage_fbox);
-    }
-
-    pixman_region32_fini(&damage);
+    zn_surface_snode_commit_damage(self->surface_snode);
   }
 }
 
@@ -97,26 +77,8 @@ zn_layer_surface_handle_output_destroy(
   wlr_layer_surface_v1_destroy(self->wlr_layer_surface);
 }
 
-struct wlr_texture *
-zn_layer_surface_get_texture(void *user_data)
-{
-  struct zn_layer_surface *self = user_data;
-  struct wlr_texture *texture =
-      wlr_surface_get_texture(self->wlr_layer_surface->surface);
-
-  return texture;
-}
-
-void
-zn_layout_surface_frame(void *user_data, const struct timespec *when)
-{
-  struct zn_layer_surface *self = user_data;
-
-  wlr_surface_send_frame_done(self->wlr_layer_surface->surface, when);
-}
-
 const struct zn_snode_interface zn_layer_surface_snode_implementation = {
-    .get_texture = zn_layer_surface_get_texture,
+    .get_texture = zn_snode_noop_get_texture,
     .frame = zn_snode_noop_frame,
     .accepts_input = zn_snode_noop_accepts_input,
     .pointer_button = zn_snode_noop_pointer_button,
@@ -147,6 +109,14 @@ zn_layer_surface_create(
     goto err_free;
   }
 
+  self->surface_snode = zn_surface_snode_create(wlr_layer_surface->surface);
+  if (self->surface_snode == NULL) {
+    zn_error("Failed to create a surface snode");
+    goto err_snode;
+  }
+
+  zn_snode_set_position(self->surface_snode->snode, self->snode, GLM_VEC2_ZERO);
+
   self->surface_destroy_listener.notify =
       zn_layer_surface_handle_surface_destroy;
   wl_signal_add(
@@ -166,6 +136,9 @@ zn_layer_surface_create(
   wl_signal_add(&output->events.destroy, &self->output_destroy_listener);
 
   return self;
+
+err_snode:
+  zn_snode_destroy(self->snode);
 
 err_free:
   free(self);

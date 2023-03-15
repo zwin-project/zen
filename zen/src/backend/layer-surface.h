@@ -2,7 +2,7 @@
 
 #include <wlr/types/wlr_layer_shell_v1.h>
 
-struct zn_snode;
+struct zn_surface_snode;
 struct zn_output;
 
 extern const struct zn_snode_interface zn_layer_surface_snode_implementation;
@@ -10,7 +10,8 @@ extern const struct zn_snode_interface zn_layer_surface_snode_implementation;
 struct zn_layer_surface {
   struct wlr_layer_surface_v1 *wlr_layer_surface;  // @nonnull, @outlive
 
-  struct zn_snode *snode;  // @nonnull, @owning
+  struct zn_snode *snode;                  // @nonnull, @owning
+  struct zn_surface_snode *surface_snode;  // @nonnull, @outlive
 
   struct zn_output *output;  // @nonnull, @outlive
 

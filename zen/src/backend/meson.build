@@ -5,6 +5,7 @@ _zen_backend_srcs = [
   'output.c',
   'pointer.c',
   'screen-backend.c',
+  'surface-snode.c',
   'xwayland-surface.c',
 ]
 

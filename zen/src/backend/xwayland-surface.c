@@ -1,101 +1,16 @@
 #include "xwayland-surface.h"
 
+#include <cglm/vec2.h>
+
 #include "backend.h"
+#include "surface-snode.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
-#include "zen/screen.h"
-#include "zen/seat.h"
 #include "zen/server.h"
 #include "zen/snode.h"
 #include "zen/view.h"
 
 static void zn_xwayland_surface_destroy(struct zn_xwayland_surface *self);
-
-static struct wlr_texture *
-zn_xwayland_surface_handle_get_texture(void *user_data)
-{
-  struct zn_xwayland_surface *self = user_data;
-  return wlr_surface_get_texture(self->wlr_xsurface->surface);
-}
-
-static void
-zn_xwayland_surface_handle_frame(void *user_data, const struct timespec *when)
-{
-  struct zn_xwayland_surface *self = user_data;
-
-  wlr_surface_send_frame_done(self->wlr_xsurface->surface, when);
-}
-
-static bool
-zn_xwayland_surface_accepts_input(void *user_data, const vec2 point)
-{
-  struct zn_xwayland_surface *self = user_data;
-  return wlr_surface_point_accepts_input(
-      self->wlr_xsurface->surface, point[0], point[1]);
-}
-
-static void
-zn_xwayland_surface_handle_pointer_button(void *user_data UNUSED,
-    uint32_t time_msec, uint32_t button, enum wlr_button_state state)
-{
-  struct zn_server *server = zn_server_get_singleton();
-  wlr_seat_pointer_send_button(
-      server->seat->wlr_seat, time_msec, button, state);
-}
-
-static void
-zn_xwayland_surface_handle_pointer_enter(void *user_data, const vec2 point)
-{
-  struct zn_xwayland_surface *self = user_data;
-  struct zn_server *server = zn_server_get_singleton();
-  wlr_seat_pointer_enter(
-      server->seat->wlr_seat, self->wlr_xsurface->surface, point[0], point[1]);
-}
-
-static void
-zn_xwayland_surface_handle_pointer_motion(
-    void *user_data UNUSED, uint32_t time_msec, const vec2 point)
-{
-  struct zn_server *server = zn_server_get_singleton();
-  wlr_seat_pointer_send_motion(
-      server->seat->wlr_seat, time_msec, point[0], point[1]);
-}
-
-static void
-zn_xwayland_surface_handle_pointer_leave(void *user_data UNUSED)
-{
-  struct zn_server *server = zn_server_get_singleton();
-  wlr_seat_pointer_clear_focus(server->seat->wlr_seat);
-}
-
-static void
-zn_xwayland_surface_handle_pointer_axis(void *user_data UNUSED,
-    uint32_t time_msec, enum wlr_axis_source source,
-    enum wlr_axis_orientation orientation, double delta, int32_t delta_discrete)
-{
-  struct zn_server *server = zn_server_get_singleton();
-  wlr_seat_pointer_send_axis(server->seat->wlr_seat, time_msec, orientation,
-      delta, delta_discrete, source);
-}
-
-static void
-zn_xwayland_surface_handle_pointer_frame(void *user_data UNUSED)
-{
-  struct zn_server *server = zn_server_get_singleton();
-  wlr_seat_pointer_send_frame(server->seat->wlr_seat);
-}
-
-static const struct zn_snode_interface snode_implementation = {
-    .get_texture = zn_xwayland_surface_handle_get_texture,
-    .frame = zn_xwayland_surface_handle_frame,
-    .accepts_input = zn_xwayland_surface_accepts_input,
-    .pointer_button = zn_xwayland_surface_handle_pointer_button,
-    .pointer_enter = zn_xwayland_surface_handle_pointer_enter,
-    .pointer_motion = zn_xwayland_surface_handle_pointer_motion,
-    .pointer_leave = zn_xwayland_surface_handle_pointer_leave,
-    .pointer_axis = zn_xwayland_surface_handle_pointer_axis,
-    .pointer_frame = zn_xwayland_surface_handle_pointer_frame,
-};
 
 static void
 zn_xwayland_surface_set_activated(void *impl_data UNUSED, bool activated UNUSED)
@@ -139,12 +54,13 @@ zn_xwayland_surface_handle_snode_position_changed(
   struct zn_xwayland_surface *self =
       zn_container_of(listener, self, snode_position_changed_listener);
 
-  if (self->snode->screen == NULL) {
+  if (self->surface_snode == NULL ||
+      self->surface_snode->snode->screen == NULL) {
     return;
   }
 
   struct wlr_fbox fbox;
-  zn_snode_get_layout_fbox(self->view->snode, &fbox);
+  zn_snode_get_layout_fbox(self->surface_snode->snode, &fbox);
 
   wlr_xwayland_surface_configure(self->wlr_xsurface, (int16_t)fbox.x,
       (int16_t)fbox.y, self->wlr_xsurface->width, self->wlr_xsurface->height);
@@ -196,29 +112,13 @@ zn_xwayland_surface_handle_commit(
 {
   struct zn_xwayland_surface *self =
       zn_container_of(listener, self, surface_commit_listener);
-  pixman_region32_t damage;
 
-  pixman_region32_init(&damage);
-
-  wlr_surface_get_effective_damage(self->wlr_xsurface->surface, &damage);
-
-  pixman_box32_t *rects = NULL;
-  int rect_count = 0;
-
-  rects = pixman_region32_rectangles(&damage, &rect_count);
-
-  for (int i = 0; i < rect_count; i++) {
-    struct wlr_fbox damage_fbox = {
-        .x = rects[i].x1,
-        .y = rects[i].y1,
-        .width = rects[i].x2 - rects[i].x1,
-        .height = rects[i].y2 - rects[i].y1,
-    };
-
-    zn_snode_damage(self->snode, &damage_fbox);
+  if (!zn_assert(self->surface_snode,
+          "Commit signal must be handled only when the view is mapped")) {
+    return;
   }
 
-  pixman_region32_fini(&damage);
+  zn_surface_snode_commit_damage(self->surface_snode);
 
   zn_xwayland_surface_update_view_size(self);
 }
@@ -245,6 +145,16 @@ zn_xwayland_surface_handle_surface_map(
   wl_signal_add(&self->wlr_xsurface->surface->events.commit,
       &self->surface_commit_listener);
 
+  self->surface_snode = zn_surface_snode_create(self->wlr_xsurface->surface);
+  if (self->surface_snode == NULL) {
+    zn_error("Failed to create a surface snode");
+    wlr_xwayland_surface_close(self->wlr_xsurface);
+    return;
+  }
+
+  zn_snode_set_position(
+      self->surface_snode->snode, self->view->snode, GLM_VEC2_ZERO);
+
   zn_xwayland_surface_update_view_size(self);
 
   zn_xwayland_surface_update_view_decoration(self);
@@ -261,6 +171,8 @@ zn_xwayland_surface_handle_surface_unmap(
 
   wl_list_remove(&self->surface_commit_listener.link);
   wl_list_init(&self->surface_commit_listener.link);
+
+  self->surface_snode = NULL;
 
   zn_view_notify_unmap(self->view);
 }
@@ -282,13 +194,7 @@ zn_xwayland_surface_create(struct wlr_xwayland_surface *wlr_xsurface)
     goto err_free;
   }
 
-  self->snode = zn_snode_create(self, &snode_implementation);
-  if (self->snode == NULL) {
-    zn_error("Failed to create a zn_snode");
-    goto err_view;
-  }
-
-  zn_snode_set_position(self->snode, self->view->snode, (vec2){0, 0});
+  self->surface_snode = NULL;
 
   self->surface_destroy_listener.notify =
       zn_xwayland_surface_handle_surface_destroy;
@@ -320,13 +226,10 @@ zn_xwayland_surface_create(struct wlr_xwayland_surface *wlr_xsurface)
 
   self->snode_position_changed_listener.notify =
       zn_xwayland_surface_handle_snode_position_changed;
-  wl_signal_add(&self->snode->events.position_changed,
+  wl_signal_add(&self->view->snode->events.position_changed,
       &self->snode_position_changed_listener);
 
   return self;
-
-err_view:
-  zn_view_destroy(self->view);
 
 err_free:
   free(self);
@@ -346,7 +249,6 @@ zn_xwayland_surface_destroy(struct zn_xwayland_surface *self)
   wl_list_remove(&self->surface_unmap_listener.link);
   wl_list_remove(&self->surface_map_listener.link);
   wl_list_remove(&self->surface_destroy_listener.link);
-  zn_snode_destroy(self->snode);
   zn_view_destroy(self->view);
   free(self);
 }
