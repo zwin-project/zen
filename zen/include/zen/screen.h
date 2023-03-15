@@ -32,11 +32,17 @@ struct zn_screen {
 
   vec2 size;  // effective coordinate
 
+  vec2 layout_position;  // layout coordinate
+
   struct {
-    struct wl_signal resized;  // (NULL)
-    struct wl_signal destroy;  // (NULL)
+    struct wl_signal resized;                  // (NULL)
+    struct wl_signal destroy;                  // (NULL)
+    struct wl_signal layout_position_changed;  // (NULL)
   } events;
 };
+
+void zn_screen_set_layout_position(
+    struct zn_screen *self, vec2 layout_position);
 
 /// @param fbox : Effective coordinate system
 void zn_screen_damage(struct zn_screen *self, struct wlr_fbox *fbox);

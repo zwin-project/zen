@@ -191,6 +191,17 @@ zn_snode_get_fbox(struct zn_snode *self, struct wlr_fbox *fbox)
   }
 }
 
+void
+zn_snode_get_layout_fbox(struct zn_snode *self, struct wlr_fbox *fbox)
+{
+  zn_snode_get_fbox(self, fbox);
+
+  if (self->screen) {
+    fbox->x += self->screen->layout_position[0];
+    fbox->y += self->screen->layout_position[1];
+  }
+}
+
 static void
 zn_snode_handle_parent_position_changed(
     struct wl_listener *listener, void *data UNUSED)

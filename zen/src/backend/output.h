@@ -19,6 +19,7 @@ struct zn_output {
   struct wl_listener wlr_output_destroy_listener;
   struct wl_listener damage_frame_listener;
   struct wl_listener mode_listener;
+  struct wl_listener screen_layout_position_listener;
 
   struct {
     struct wl_signal destroy;  // (NULL)
