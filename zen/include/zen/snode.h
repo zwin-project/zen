@@ -157,6 +157,9 @@ struct wlr_texture *zn_snode_get_texture(struct zn_snode *self);
 /// coordinate system.
 void zn_snode_get_fbox(struct zn_snode *self, struct wlr_fbox *fbox);
 
+/// @param fbox returns the box of `self` in the layout coordinate system.
+void zn_snode_get_layout_fbox(struct zn_snode *self, struct wlr_fbox *fbox);
+
 struct zn_snode *zn_snode_create(
     void *user_data, const struct zn_snode_interface *implementation);
 

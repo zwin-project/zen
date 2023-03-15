@@ -31,8 +31,8 @@ zn_screen_layout_get_closest_position(struct zn_screen_layout *self,
 
     // layout coords
     struct wlr_fbox screen_fbox = {
-        .x = desktop_screen_iter->position[0],
-        .y = desktop_screen_iter->position[1],
+        .x = desktop_screen_iter->screen->layout_position[0],
+        .y = desktop_screen_iter->screen->layout_position[1],
         .width = desktop_screen_iter->screen->size[0],
         .height = desktop_screen_iter->screen->size[1],
     };
@@ -46,7 +46,7 @@ zn_screen_layout_get_closest_position(struct zn_screen_layout *self,
     if (current_closest_distance < closest_distance) {
       closest_distance = current_closest_distance;
       glm_vec2_sub((vec2){(float)current_closest_x, (float)current_closest_y},
-          desktop_screen_iter->position, position_out);
+          desktop_screen_iter->screen->layout_position, position_out);
       *desktop_screen_out = desktop_screen_iter;
     }
   }
@@ -70,12 +70,11 @@ void
 zn_screen_layout_reposition(struct zn_screen_layout *self)
 {
   // TODO(@Aki-7): it's a naive implementation
-  float x = 0;
+  vec2 position = GLM_VEC2_ZERO_INIT;
   struct zn_desktop_screen *desktop_screen = NULL;
   wl_list_for_each (desktop_screen, &self->desktop_screen_list, link) {
-    desktop_screen->position[0] = x;
-    desktop_screen->position[1] = 0;
-    x += desktop_screen->screen->size[0];
+    zn_desktop_screen_set_position(desktop_screen, position);
+    position[0] += desktop_screen->screen->size[0];
   }
 }
 

@@ -3,6 +3,7 @@
 #include "backend.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
+#include "zen/screen.h"
 #include "zen/seat.h"
 #include "zen/server.h"
 #include "zen/snode.h"
@@ -142,11 +143,11 @@ zn_xwayland_surface_handle_snode_position_changed(
     return;
   }
 
-  // TODO(@Aki-7): Use layout coords instead of screen-local effective coords
-  wlr_xwayland_surface_configure(self->wlr_xsurface,
-      (int16_t)self->snode->absolute_position[0],
-      (int16_t)self->snode->absolute_position[1], self->wlr_xsurface->width,
-      self->wlr_xsurface->height);
+  struct wlr_fbox fbox;
+  zn_snode_get_layout_fbox(self->view->snode, &fbox);
+
+  wlr_xwayland_surface_configure(self->wlr_xsurface, (int16_t)fbox.x,
+      (int16_t)fbox.y, self->wlr_xsurface->width, self->wlr_xsurface->height);
 }
 
 static void
@@ -183,7 +184,7 @@ zn_xwayland_surface_handle_configure(
     return;
   }
 
-  zn_snode_get_fbox(self->view->snode, &fbox);
+  zn_snode_get_layout_fbox(self->view->snode, &fbox);
 
   wlr_xwayland_surface_configure(self->wlr_xsurface, (int16_t)fbox.x,
       (int16_t)fbox.y, ev->width, ev->height);

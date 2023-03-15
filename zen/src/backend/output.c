@@ -11,11 +11,14 @@
 #include <wlr/types/wlr_matrix.h>
 #include <wlr/types/wlr_output_damage.h>
 
+#include "backend.h"
+#include "compositor.h"
 #include "screen-backend.h"
 #include "zen-common/log.h"
 #include "zen-common/signal.h"
 #include "zen-common/util.h"
 #include "zen/screen.h"
+#include "zen/server.h"
 #include "zen/snode.h"
 
 static void zn_output_destroy(struct zn_output *self);
@@ -237,6 +240,21 @@ zn_output_handle_mode(struct wl_listener *listener, void *data UNUSED)
   zn_screen_notify_resize(self->screen, size);
 }
 
+static void
+zn_output_handle_screen_layout_position(
+    struct wl_listener *listener, void *data UNUSED)
+{
+  struct zn_output *self =
+      zn_container_of(listener, self, screen_layout_position_listener);
+
+  struct zn_screen *screen = self->screen;
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_default_backend *backend = zn_default_backend_get(server->backend);
+
+  wlr_output_layout_move(backend->compositor->output_layout, self->wlr_output,
+      (int)screen->layout_position[0], (int)screen->layout_position[1]);
+}
+
 struct zn_output *
 zn_output_get(struct wlr_output *wlr_output)
 {
@@ -298,6 +316,11 @@ zn_output_create(struct wlr_output *wlr_output)
   self->damage_frame_listener.notify = zn_output_handle_damage_frame;
   wl_signal_add(&self->damage->events.frame, &self->damage_frame_listener);
 
+  self->screen_layout_position_listener.notify =
+      zn_output_handle_screen_layout_position;
+  wl_signal_add(&self->screen->events.layout_position_changed,
+      &self->screen_layout_position_listener);
+
   // initial setup
   wlr_output_set_mode(self->wlr_output, mode);
   wlr_output_enable(self->wlr_output, true);
@@ -311,6 +334,7 @@ zn_output_create(struct wlr_output *wlr_output)
   return self;
 
 err_signals:
+  wl_list_remove(&self->screen_layout_position_listener.link);
   wl_list_remove(&self->damage_frame_listener.link);
   wl_list_remove(&self->wlr_output_destroy_listener.link);
   wl_list_remove(&self->damage_frame_listener.link);
@@ -337,6 +361,7 @@ zn_output_destroy(struct zn_output *self)
   zn_signal_emit_mutable(&self->events.destroy, NULL);
 
   zn_screen_destroy(self->screen);
+  wl_list_remove(&self->screen_layout_position_listener.link);
   wl_list_remove(&self->events.destroy.listener_list);
   wl_list_remove(&self->damage_frame_listener.link);
   wl_list_remove(&self->wlr_output_destroy_listener.link);

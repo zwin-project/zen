@@ -33,10 +33,16 @@ zn_desktop_screen_handle_screen_resize(
 }
 
 void
+zn_desktop_screen_set_position(struct zn_desktop_screen *self, vec2 position)
+{
+  zn_screen_set_layout_position(self->screen, position);
+}
+
+void
 zn_desktop_screen_effective_to_layout_coords(
     struct zn_desktop_screen *self, vec2 effective, vec2 layout)
 {
-  glm_vec2_add(self->position, effective, layout);
+  glm_vec2_add(self->screen->layout_position, effective, layout);
 }
 
 struct zn_desktop_screen *
@@ -54,7 +60,6 @@ zn_desktop_screen_create(struct zn_screen *screen)
     goto err;
   }
 
-  glm_vec2_zero(self->position);
   wl_list_init(&self->link);
   self->screen = screen;
   screen->user_data = self;
