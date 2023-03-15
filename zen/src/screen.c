@@ -37,37 +37,6 @@ zn_screen_create(
     goto err;
   }
 
-  self->snode_root = zn_snode_create_root(self);
-  if (self->snode_root == NULL) {
-    zn_error("Failed to create a zn_snode");
-    goto err_free;
-  }
-
-  self->layers.background =
-      zn_snode_create(self, &zn_snode_noop_implementation);
-  if (self->layers.background == NULL) {
-    zn_error("Failed to create a zn_snode");
-    goto err_snode_root;
-  }
-
-  self->layers.bottom = zn_snode_create(self, &zn_snode_noop_implementation);
-  if (self->layers.bottom == NULL) {
-    zn_error("Failed to create a zn_snode");
-    goto err_layer_background;
-  }
-
-  self->layers.top = zn_snode_create(self, &zn_snode_noop_implementation);
-  if (self->layers.top == NULL) {
-    zn_error("Failed to create a zn_snode");
-    goto err_layer_bottom;
-  }
-
-  self->layers.overlay = zn_snode_create(self, &zn_snode_noop_implementation);
-  if (self->layers.overlay == NULL) {
-    zn_error("Failed to create a zn_snode");
-    goto err_layer_top;
-  }
-
   self->impl_data = impl_data;
   self->impl = implementation;
   self->user_data = NULL;
@@ -75,16 +44,21 @@ zn_screen_create(
   wl_signal_init(&self->events.resized);
   wl_signal_init(&self->events.destroy);
 
+  self->snode_root = zn_snode_create_root(self);
+  if (self->snode_root == NULL) {
+    zn_error("Failed to create a zn_snode");
+    goto err_free;
+  }
+
+  for (int i = 0; i < 4; i++) {  // for each enum zwlr_layer_shell_v1_layer
+    self->layers[i] = self->impl->get_layer(self->impl_data, i);
+    if (self->layers[i] == NULL) {
+      zn_error("Failed to get screen layer node (%d)", i);
+      goto err_snode_root;
+    }
+  }
+
   return self;
-
-err_layer_top:
-  zn_snode_destroy(self->layers.top);
-
-err_layer_bottom:
-  zn_snode_destroy(self->layers.bottom);
-
-err_layer_background:
-  zn_snode_destroy(self->layers.background);
 
 err_snode_root:
   zn_snode_destroy(self->snode_root);
@@ -101,10 +75,6 @@ zn_screen_destroy(struct zn_screen *self)
 {
   zn_signal_emit_mutable(&self->events.destroy, NULL);
 
-  zn_snode_destroy(self->layers.overlay);
-  zn_snode_destroy(self->layers.top);
-  zn_snode_destroy(self->layers.bottom);
-  zn_snode_destroy(self->layers.background);
   zn_snode_destroy(self->snode_root);
   wl_list_remove(&self->events.destroy.listener_list);
   wl_list_remove(&self->events.resized.listener_list);

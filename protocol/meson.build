@@ -11,6 +11,8 @@ protocols = {
   'wlr-layer-shell-unstable-v1': 'wlr-layer-shell-unstable-v1.xml',
 }
 
+wlroots_srcs = []
+
 protocols_code = {}
 protocols_server_header = {}
 protocols_client_header = {}
@@ -22,12 +24,16 @@ foreach name, path : protocols
 		command: [wayland_scanner, 'private-code', '@INPUT@', '@OUTPUT@'],
 	)
 
+	wlroots_srcs += code
+
 	server_header = custom_target(
 		name.underscorify() + '_server_h',
 		input: path,
 		output: '@BASENAME@-protocol.h',
 		command: [wayland_scanner, 'server-header', '@INPUT@', '@OUTPUT@'],
 	)
+
+	wlroots_srcs += server_header
 
 	client_header = custom_target(
 		name.underscorify() + '_client_h',

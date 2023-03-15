@@ -71,10 +71,16 @@ zn_desktop_screen_create(struct zn_screen *screen)
     goto err_cursor_layer;
   }
 
-  zn_snode_set_position(
-      self->view_layer, self->screen->snode_root, (vec2){0, 0});
-  zn_snode_set_position(
-      self->cursor_layer, self->screen->snode_root, (vec2){0, 0});
+  zn_snode_set_position(screen->layers[ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND],
+      screen->snode_root, GLM_VEC2_ZERO);
+  zn_snode_set_position(screen->layers[ZWLR_LAYER_SHELL_V1_LAYER_BOTTOM],
+      screen->snode_root, GLM_VEC2_ZERO);
+  zn_snode_set_position(self->view_layer, screen->snode_root, GLM_VEC2_ZERO);
+  zn_snode_set_position(screen->layers[ZWLR_LAYER_SHELL_V1_LAYER_TOP],
+      screen->snode_root, GLM_VEC2_ZERO);
+  zn_snode_set_position(screen->layers[ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY],
+      screen->snode_root, GLM_VEC2_ZERO);
+  zn_snode_set_position(self->cursor_layer, screen->snode_root, GLM_VEC2_ZERO);
 
   self->screen_destroy_listener.notify =
       zn_desktop_screen_handle_screen_destroy;
