@@ -7,6 +7,8 @@
 struct zn_mock_output {
   struct zn_screen *screen;
   pixman_region32_t damage;
+
+  struct zn_snode *layers[4];
 };
 
 bool zn_mock_output_damage_contains(struct zn_mock_output *self, int x, int y);
