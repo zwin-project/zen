@@ -124,7 +124,12 @@ rsvg_dep = dependency('librsvg-2.0')
 wayland_protocols_dep = dependency('wayland-protocols', version: wayland_protocols_req)
 wayland_scanner_dep = dependency('wayland-scanner', native: true)
 wayland_server_dep = dependency('wayland-server', version: wayland_req)
-wlroots_dep = dependency('wlroots', version: wlroots_req)
+
+subdir('protocol')
+wlroots_dep = declare_dependency(
+  dependencies: dependency('wlroots', version: wlroots_req),
+  sources: wlroots_srcs,
+)
 
 #########
 # Build #
@@ -136,7 +141,6 @@ if get_option('tests')
 endif
 subdir('common')
 subdir('zen-wlr-glew-renderer')
-subdir('protocol')
 subdir('zen')
 subdir('desktop')
 

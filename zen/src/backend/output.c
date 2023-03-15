@@ -11,6 +11,7 @@
 #include <wlr/types/wlr_matrix.h>
 #include <wlr/types/wlr_output_damage.h>
 
+#include "screen-backend.h"
 #include "zen-common/log.h"
 #include "zen-common/signal.h"
 #include "zen-common/util.h"
@@ -200,8 +201,16 @@ zn_output_damage(void *impl_data, struct wlr_fbox *damage_fbox)
   wlr_output_damage_add_box(self->damage, &transformed_box);
 }
 
+static struct zn_snode *
+zn_output_get_layer(void *impl_data, enum zwlr_layer_shell_v1_layer layer)
+{
+  struct zn_output *self = impl_data;
+  return zn_screen_backend_get_layer(self->screen_backend, layer);
+}
+
 const struct zn_screen_interface screen_implementation = {
     .damage = zn_output_damage,
+    .get_layer = zn_output_get_layer,
 };
 
 static void
@@ -229,6 +238,18 @@ zn_output_handle_mode(struct wl_listener *listener, void *data UNUSED)
 }
 
 struct zn_output *
+zn_output_get(struct wlr_output *wlr_output)
+{
+  return wlr_output->data;
+}
+
+struct zn_output *
+zn_output_from_screen(struct zn_screen *screen)
+{
+  return screen->impl_data;
+}
+
+struct zn_output *
 zn_output_create(struct wlr_output *wlr_output)
 {
   struct zn_output *self = zalloc(sizeof *self);
@@ -238,11 +259,18 @@ zn_output_create(struct wlr_output *wlr_output)
   }
 
   self->wlr_output = wlr_output;
+  wlr_output->data = self;
+
+  self->screen_backend = zn_screen_backend_create(self);
+  if (self->screen_backend == NULL) {
+    zn_error("Failed to create a zn_screen_backend");
+    goto err_free;
+  }
 
   self->screen = zn_screen_create(self, &screen_implementation);
   if (self->screen == NULL) {
     zn_error("Failed to create a zn_screen");
-    goto err_free;
+    goto err_screen_backend;
   }
 
   self->damage = wlr_output_damage_create(wlr_output);
@@ -256,6 +284,8 @@ zn_output_create(struct wlr_output *wlr_output)
     zn_error("Output %p doesn't support modes", (void *)wlr_output);
     goto err_damage;
   }
+
+  wl_signal_init(&self->events.destroy);
 
   self->mode_listener.notify = zn_output_handle_mode;
   wl_signal_add(&self->wlr_output->events.mode, &self->mode_listener);
@@ -291,6 +321,9 @@ err_damage:
 err_screen:
   zn_screen_destroy(self->screen);
 
+err_screen_backend:
+  zn_screen_backend_destroy(self->screen_backend);
+
 err_free:
   free(self);
 
@@ -301,7 +334,10 @@ err:
 static void
 zn_output_destroy(struct zn_output *self)
 {
+  zn_signal_emit_mutable(&self->events.destroy, NULL);
+
   zn_screen_destroy(self->screen);
+  wl_list_remove(&self->events.destroy.listener_list);
   wl_list_remove(&self->damage_frame_listener.link);
   wl_list_remove(&self->wlr_output_destroy_listener.link);
 
@@ -310,5 +346,7 @@ zn_output_destroy(struct zn_output *self)
    * wl_list_remove(&damage->events.frame)
    */
   // wl_list_remove(&self->damage_frame_listener.link);
+
+  zn_screen_backend_destroy(self->screen_backend);
   free(self);
 }

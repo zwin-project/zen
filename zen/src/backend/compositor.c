@@ -3,9 +3,13 @@
 #include <wlr/types/wlr_layer_shell_v1.h>
 
 #include "layer-surface.h"
+#include "output.h"
+#include "screen-backend.h"
 #include "xwayland-surface.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
+#include "zen/seat.h"
+#include "zen/server.h"
 
 static void
 zn_compositor_handle_new_xwayland_surface(
@@ -26,9 +30,36 @@ static void
 zn_compositor_handle_new_layer_surface(
     struct wl_listener *listener UNUSED, void *data)
 {
-  struct wlr_layer_surface_v1 *layer_surface = data;
+  struct wlr_layer_surface_v1 *wlr_layer_surface = data;
+  struct zn_output *output = NULL;
+  struct zn_server *server = zn_server_get_singleton();
 
-  zn_layer_surface_create(layer_surface);
+  if (wlr_layer_surface->output) {
+    output = zn_output_get(wlr_layer_surface->output);
+  } else {
+    struct zn_screen *screen = zn_seat_get_focused_screen(server->seat);
+    if (screen) {
+      output = zn_output_from_screen(screen);
+    }
+  }
+
+  if (output == NULL) {
+    zn_warn("No output to auto-assign layer surface '%s' to",
+        wlr_layer_surface->namespace);
+    wlr_layer_surface_v1_destroy(wlr_layer_surface);
+    return;
+  }
+
+  struct zn_layer_surface *layer_surface =
+      zn_layer_surface_create(wlr_layer_surface, output);
+  if (layer_surface == NULL) {
+    zn_warn("Failed to create a layer surface");
+    wlr_layer_surface_v1_destroy(wlr_layer_surface);
+    return;
+  }
+
+  zn_screen_backend_add_layer_surface(
+      output->screen_backend, layer_surface, wlr_layer_surface->current.layer);
 }
 
 struct zn_compositor *
@@ -68,6 +99,19 @@ zn_compositor_create(struct wl_display *display, struct wlr_renderer *renderer)
     goto err_free;
   }
 
+  self->output_layout = wlr_output_layout_create();
+  if (self->output_layout == NULL) {
+    zn_error("Failed to create a wlr_output_layout");
+    goto err_free;
+  }
+
+  self->xdg_output_manager =
+      wlr_xdg_output_manager_v1_create(display, self->output_layout);
+  if (self->xdg_output_manager == NULL) {
+    zn_error("Failed to create a wlr_xdg_output_manager");
+    goto err_output_layout;
+  }
+
   for (int i = 0; i <= 32; i++) {
     sprintf(socket_name_candidate, "wayland-%d", i);  // NOLINT(cert-err33-c)
     if (wl_display_add_socket(display, socket_name_candidate) >= 0) {
@@ -78,7 +122,7 @@ zn_compositor_create(struct wl_display *display, struct wlr_renderer *renderer)
 
   if (socket == NULL) {
     zn_error("Failed to open a wayland socket");
-    goto err_free;
+    goto err_output_layout;
   }
 
   setenv("WAYLAND_DISPLAY", socket, true);
@@ -89,7 +133,7 @@ zn_compositor_create(struct wl_display *display, struct wlr_renderer *renderer)
   self->xwayland = wlr_xwayland_create(display, self->wlr_compositor, true);
   if (self->xwayland == NULL) {
     zn_error("Failed to create a wlr_xwayland");
-    goto err_free;
+    goto err_output_layout;
   }
 
   setenv("DISPLAY", self->xwayland->display_name, true);
@@ -107,6 +151,9 @@ zn_compositor_create(struct wl_display *display, struct wlr_renderer *renderer)
 
   return self;
 
+err_output_layout:
+  wlr_output_layout_destroy(self->output_layout);
+
 err_free:
   free(self);
 
@@ -120,5 +167,6 @@ zn_compositor_destroy(struct zn_compositor *self)
   wl_list_remove(&self->new_layer_surface_listener.link);
   wl_list_remove(&self->new_xwayland_surface_listener.link);
   wlr_xwayland_destroy(self->xwayland);
+  wlr_output_layout_destroy(self->output_layout);
   free(self);
 }

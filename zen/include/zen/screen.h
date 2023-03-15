@@ -3,6 +3,7 @@
 #include <cglm/types.h>
 #include <time.h>
 #include <wayland-server-core.h>
+#include <wlr/types/wlr_layer_shell_v1.h>
 #include <wlr/util/box.h>
 
 struct zn_snode;
@@ -10,6 +11,9 @@ struct zn_snode;
 struct zn_screen_interface {
   /// @param damage_fbox : Effective coordinate system
   void (*damage)(void *impl_data, struct wlr_fbox *damage_fbox);
+
+  struct zn_snode *(*get_layer)(
+      void *impl_data, enum zwlr_layer_shell_v1_layer layer);
 };
 
 struct zn_screen {
@@ -20,14 +24,11 @@ struct zn_screen {
 
   struct zn_snode *snode_root;  // @nonnull, @owning
 
-  // These layers do not have a parent, the user must set a parent to show them.
-  // User must not add children to these layers.
-  struct {
-    struct zn_snode *background;  // @nonnull, @owning
-    struct zn_snode *bottom;      // @nonnull, @owning
-    struct zn_snode *top;         // @nonnull, @owning
-    struct zn_snode *overlay;     // @nonnull, @owning
-  } layers;
+  // These layers do not have a parent at first, user must set a parent to show
+  // them. User must not add children to these layers.
+  // Index is corresponding to enum zwlr_layer_shell_v1_layer
+  // 0: background, 1: button, 2: top, 3: overlay
+  struct zn_snode *layers[4];  // each snode is @nonnull, @outlive
 
   vec2 size;  // effective coordinate
 

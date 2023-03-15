@@ -112,6 +112,10 @@ zn_default_backend_handle_new_output(struct wl_listener *listener, void *data)
     return;
   }
 
+  // TODO(@Aki-7): Set appropriate layout position
+  wlr_output_layout_add(
+      self->compositor->output_layout, output->wlr_output, 0, 0);
+
   wl_signal_emit(&self->base.events.new_screen, output->screen);
 }
 

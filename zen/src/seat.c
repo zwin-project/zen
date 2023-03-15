@@ -18,6 +18,24 @@ zn_seat_handle_cursor_focus_destroy(
   zn_seat_pointer_enter(self, NULL, GLM_VEC2_ZERO);
 }
 
+struct zn_screen *
+zn_seat_get_focused_screen(struct zn_seat *self)
+{
+  struct zn_screen *focus_screen = NULL;
+
+  // TODO(@Aki-7): Respect keyboard focus
+
+  if (self->pointer_state.focus) {
+    focus_screen = self->pointer_state.focus->screen;
+  }
+
+  if (!focus_screen) {
+    focus_screen = self->cursor->snode->screen;
+  }
+
+  return focus_screen;
+}
+
 void
 zn_seat_set_capabilities(struct zn_seat *self, uint32_t capabilities)
 {

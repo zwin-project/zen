@@ -4,13 +4,8 @@ _zen_backend_srcs = [
   'layer-surface.c',
   'output.c',
   'pointer.c',
+  'screen-backend.c',
   'xwayland-surface.c',
-
-  protocols_code['xdg-shell'],
-  protocols_code['wlr-layer-shell-unstable-v1'],
-
-  protocols_server_header['xdg-shell'],
-  protocols_server_header['wlr-layer-shell-unstable-v1'],
 ]
 
 _zen_backend_lib = static_library(

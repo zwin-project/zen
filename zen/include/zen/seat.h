@@ -30,6 +30,9 @@ struct zn_seat {
   } events;
 };
 
+/// @return value can be NULL
+struct zn_screen *zn_seat_get_focused_screen(struct zn_seat *self);
+
 /// @param capabilities is a bitfield of enum wl_seat_capability
 void zn_seat_set_capabilities(struct zn_seat *self, uint32_t capabilities);
 
