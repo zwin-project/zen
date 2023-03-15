@@ -4,6 +4,7 @@
 
 #include "zen-common/log.h"
 #include "zen-common/util.h"
+#include "zen-desktop/cursor-grab/down.h"
 #include "zen/cursor.h"
 #include "zen/screen.h"
 #include "zen/seat.h"
@@ -46,6 +47,11 @@ zn_cursor_default_grab_handle_button(struct zn_cursor_grab *grab UNUSED,
     uint32_t time_msec, uint32_t button, enum wlr_button_state state)
 {
   struct zn_server *server = zn_server_get_singleton();
+
+  if (state == WLR_BUTTON_PRESSED) {
+    zn_cursor_down_grab_start();
+  }
+
   zn_seat_pointer_button(server->seat, time_msec, button, state);
 }
 

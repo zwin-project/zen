@@ -15,6 +15,7 @@ struct zn_seat {
 
   struct {
     struct zn_snode *focus;  // @nullable, @ref
+    int button_count;
   } pointer_state;
 
   struct wl_listener cursor_focus_destroy_listener;

@@ -118,6 +118,12 @@ void
 zn_seat_notify_pointer_button(
     struct zn_seat *self, struct wlr_event_pointer_button *event)
 {
+  if (event->state == WLR_BUTTON_PRESSED) {
+    self->pointer_state.button_count++;
+  } else {
+    self->pointer_state.button_count--;
+  }
+
   wl_signal_emit(&self->events.pointer_button, event);
 }
 
@@ -162,6 +168,7 @@ zn_seat_create(struct wl_display *display)
   }
 
   self->pointer_state.focus = NULL;
+  self->pointer_state.button_count = 0;
 
   wl_signal_init(&self->events.pointer_motion);
   wl_signal_init(&self->events.pointer_button);

@@ -1,6 +1,7 @@
 _zen_desktop_srcs = [
   'src/cursor-grab.c',
   'src/cursor-grab/default.c',
+  'src/cursor-grab/down.c',
   'src/cursor-grab/move.c',
 
   'src/screen.c',
