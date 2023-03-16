@@ -4,7 +4,8 @@
 #include <zen-common/log.h>
 #include <zen-common/util.h>
 
-#include "zen-desktop/ui/header-bar.h"
+#include "zen-desktop/ui/decoration/edge.h"
+#include "zen-desktop/ui/decoration/header-bar.h"
 #include "zen/snode.h"
 
 #define HEADER_HEIGHT 30
@@ -16,6 +17,9 @@ zn_ui_decoration_set_content_size(struct zn_ui_decoration *self, vec2 size)
 
   glm_vec2_copy(size, self->content_size);
   glm_vec2_copy((vec2){0, HEADER_HEIGHT}, self->content_offset);
+
+  zn_ui_decoration_edge_set_size(
+      self->edge, (vec2){size[0], size[1] + HEADER_HEIGHT});
 }
 
 struct zn_ui_decoration *
@@ -42,9 +46,19 @@ zn_ui_decoration_create(void)
     goto err_snode;
   }
 
+  self->edge = zn_ui_decoration_edge_create();
+  if (self->edge == NULL) {
+    zn_error("Failed to create a zn_ui_decoration_edge");
+    goto err_header_bar;
+  }
+
   zn_snode_set_position(self->header_bar->snode, self->snode, GLM_VEC2_ZERO);
+  zn_snode_set_position(self->edge->snode, self->snode, GLM_VEC2_ZERO);
 
   return self;
+
+err_header_bar:
+  zn_ui_header_bar_destroy(self->header_bar);
 
 err_snode:
   zn_snode_destroy(self->snode);
@@ -59,6 +73,7 @@ err:
 void
 zn_ui_decoration_destroy(struct zn_ui_decoration *self)
 {
+  zn_ui_decoration_edge_destroy(self->edge);
   zn_ui_header_bar_destroy(self->header_bar);
   zn_snode_destroy(self->snode);
   free(self);

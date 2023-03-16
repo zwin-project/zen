@@ -9,7 +9,11 @@
 #include "zen-desktop/cursor-grab/move.h"
 #include "zen-desktop/cursor-grab/resize.h"
 #include "zen-desktop/ui/decoration.h"
-#include "zen-desktop/ui/header-bar.h"
+#include "zen-desktop/ui/decoration/edge.h"
+#include "zen-desktop/ui/decoration/header-bar.h"
+#include "zen/cursor.h"
+#include "zen/seat.h"
+#include "zen/server.h"
 #include "zen/snode.h"
 #include "zen/view.h"
 
@@ -68,6 +72,26 @@ zn_desktop_view_handle_header_pressed(
       zn_container_of(listener, self, header_pressed_listener);
 
   zn_cursor_move_grab_start(self);
+}
+
+static void
+zn_desktop_view_handle_edge_hover(
+    struct wl_listener *listener UNUSED, void *data)
+{
+  struct zn_ui_decoration_edge_hover_event *event = data;
+  struct zn_server *server = zn_server_get_singleton();
+
+  zn_cursor_set_xcursor_edges(server->seat->cursor, event->edges);
+}
+
+static void
+zn_desktop_view_handle_edge_pressed(struct wl_listener *listener, void *data)
+{
+  struct zn_desktop_view *self =
+      zn_container_of(listener, self, edge_pressed_listener);
+  struct zn_ui_decoration_edge_pressed_event *event = data;
+
+  zn_cursor_resize_grab_start(self, event->edges);
 }
 
 static void
@@ -170,6 +194,14 @@ zn_desktop_view_create(struct zn_view *zn_view)
   wl_signal_add(&self->decoration->header_bar->events.pressed,
       &self->header_pressed_listener);
 
+  self->edge_hover_listener.notify = zn_desktop_view_handle_edge_hover;
+  wl_signal_add(
+      &self->decoration->edge->events.hover, &self->edge_hover_listener);
+
+  self->edge_pressed_listener.notify = zn_desktop_view_handle_edge_pressed;
+  wl_signal_add(
+      &self->decoration->edge->events.pressed, &self->edge_pressed_listener);
+
   self->zn_view_resized_listener.notify =
       zn_desktop_view_handle_zn_view_resized;
   wl_signal_add(&zn_view->events.resized, &self->zn_view_resized_listener);
@@ -218,6 +250,8 @@ zn_desktop_view_destroy(struct zn_desktop_view *self)
   wl_list_remove(&self->zn_view_move_request_listener.link);
   wl_list_remove(&self->zn_view_unmap_listener.link);
   wl_list_remove(&self->zn_view_resized_listener.link);
+  wl_list_remove(&self->edge_pressed_listener.link);
+  wl_list_remove(&self->edge_hover_listener.link);
   wl_list_remove(&self->header_pressed_listener.link);
   wl_list_remove(&self->events.destroy.listener_list);
   free(self);
