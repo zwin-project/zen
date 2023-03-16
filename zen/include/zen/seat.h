@@ -18,7 +18,10 @@ struct zn_seat {
     int button_count;
   } pointer_state;
 
+  struct zn_snode *focus;  // @nullable @ref
+
   struct wl_listener cursor_focus_destroy_listener;
+  struct wl_listener focus_destroy_listener;
 
   struct {
     struct wl_signal pointer_motion;  // (struct wlr_event_pointer_motion *)
@@ -36,6 +39,9 @@ struct zn_screen *zn_seat_get_focused_screen(struct zn_seat *self);
 
 /// @param capabilities is a bitfield of enum wl_seat_capability
 void zn_seat_set_capabilities(struct zn_seat *self, uint32_t capabilities);
+
+/// @param snode is nullable
+void zn_seat_set_focus(struct zn_seat *self, struct zn_snode *snode);
 
 void zn_seat_pointer_button(struct zn_seat *self, uint32_t time_msec,
     uint32_t button, enum wlr_button_state state);

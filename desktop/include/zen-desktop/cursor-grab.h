@@ -10,6 +10,7 @@ struct zn_cursor_grab;
 struct zn_cursor_grab_interface {
   void (*motion_relative)(
       struct zn_cursor_grab *grab, vec2 delta, uint32_t time_msec);
+  void (*rebase)(struct zn_cursor_grab *grab);
   void (*button)(struct zn_cursor_grab *grab, uint32_t time_msec,
       uint32_t button, enum wlr_button_state state);
   void (*axis)(struct zn_cursor_grab *grab, uint32_t time_msec,
@@ -30,6 +31,12 @@ zn_cursor_grab_pointer_motion(
     struct zn_cursor_grab *self, vec2 delta, uint32_t time_msec)
 {
   self->impl->motion_relative(self, delta, time_msec);
+}
+
+UNUSED static void
+zn_cursor_grab_pointer_rebase(struct zn_cursor_grab *self)
+{
+  self->impl->rebase(self);
 }
 
 UNUSED static void

@@ -4,8 +4,10 @@
 #include <stdbool.h>
 #include <wayland-server-core.h>
 
+#include "zen-common/util.h"
+
 struct zn_view_interface {
-  void (*set_activated)(void *impl_data, bool activate);
+  void (*set_focus)(void *impl_data, bool focused);
 };
 
 enum zn_view_decoration_mode {
@@ -18,6 +20,8 @@ struct zn_view {
   const struct zn_view_interface *impl;  // @nonnull, @outlive
 
   vec2 size;
+
+  bool has_focus;
 
   /// TODO(@Aki-7): The decoration mode is determined by the zen component.
   /// Considering Wayland apps, the user should be able to declare a preferred
@@ -33,6 +37,8 @@ struct zn_view {
     struct wl_signal request_move;  // (NULL)
   } events;
 };
+
+void zn_view_set_focus(struct zn_view *self, bool focused);
 
 /// Called by the impl object
 void zn_view_notify_resized(struct zn_view *self, vec2 size);

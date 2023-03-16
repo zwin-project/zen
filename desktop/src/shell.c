@@ -123,6 +123,8 @@ zn_desktop_shell_end_cursor_grab(struct zn_desktop_shell *self)
   zn_cursor_grab_destroy(self->cursor_grab);
 
   self->cursor_grab = &cursor_default_grab->base;
+
+  zn_cursor_grab_pointer_rebase(self->cursor_grab);
 }
 
 struct zn_desktop_shell *

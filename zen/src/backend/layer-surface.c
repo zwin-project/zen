@@ -87,6 +87,7 @@ const struct zn_snode_interface zn_layer_surface_snode_implementation = {
     .pointer_leave = zn_snode_noop_pointer_leave,
     .pointer_axis = zn_snode_noop_pointer_axis,
     .pointer_frame = zn_snode_noop_pointer_frame,
+    .on_focus = zn_snode_noop_on_focus,
 };
 
 struct zn_layer_surface *

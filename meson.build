@@ -124,6 +124,7 @@ rsvg_dep = dependency('librsvg-2.0')
 wayland_protocols_dep = dependency('wayland-protocols', version: wayland_protocols_req)
 wayland_scanner_dep = dependency('wayland-scanner', native: true)
 wayland_server_dep = dependency('wayland-server', version: wayland_req)
+xkbcommon_dep = dependency('xkbcommon')
 
 subdir('protocol')
 wlroots_dep = declare_dependency(
