@@ -1,6 +1,7 @@
 _zen_backend_srcs = [
   'backend.c',
   'compositor.c',
+  'keyboard.c',
   'layer-surface.c',
   'output.c',
   'pointer.c',

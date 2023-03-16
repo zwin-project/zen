@@ -11,6 +11,8 @@
 #include "zen-common/util.h"
 #include "zen/server.h"
 
+static void zn_pointer_destroy(struct zn_pointer *self);
+
 static void
 zn_pointer_handle_motion(struct wl_listener *listener UNUSED, void *data)
 {
@@ -55,15 +57,6 @@ zn_pointer_handle_wlr_input_device_destroy(
   zn_pointer_destroy(self);
 }
 
-static void
-zn_pointer_handle_backend_destroy(
-    struct wl_listener *listener, void *data UNUSED)
-{
-  struct zn_pointer *self =
-      zn_container_of(listener, self, backend_destroy_listener);
-  zn_pointer_destroy(self);
-}
-
 struct zn_pointer *
 zn_pointer_get(struct zn_input_device_base *base)
 {
@@ -72,16 +65,13 @@ zn_pointer_get(struct zn_input_device_base *base)
 }
 
 struct zn_pointer *
-zn_pointer_create(struct zn_default_backend *backend,
-    struct wlr_input_device *wlr_input_device)
+zn_pointer_create(struct wlr_input_device *wlr_input_device)
 {
   struct zn_pointer *self = zalloc(sizeof *self);
   if (self == NULL) {
     zn_error("Failed to allocate memory");
     goto err;
   }
-
-  self->backend = backend;
 
   self->base.wlr_input_device = wlr_input_device;
   wl_list_init(&self->base.link);
@@ -107,21 +97,15 @@ zn_pointer_create(struct zn_default_backend *backend,
   wl_signal_add(&self->base.wlr_input_device->events.destroy,
       &self->wlr_input_device_destroy_listener);
 
-  self->backend_destroy_listener.notify = zn_pointer_handle_backend_destroy;
-  wl_signal_add(
-      &self->backend->base.events.destroy, &self->backend_destroy_listener);
-
   return self;
 
 err:
   return NULL;
 }
 
-void
+static void
 zn_pointer_destroy(struct zn_pointer *self)
 {
-  struct zn_default_backend *backend = self->backend;
-  wl_list_remove(&self->backend_destroy_listener.link);
   wl_list_remove(&self->wlr_input_device_destroy_listener.link);
   wl_list_remove(&self->frame_listener.link);
   wl_list_remove(&self->axis_listener.link);
@@ -130,5 +114,7 @@ zn_pointer_destroy(struct zn_pointer *self)
   wl_list_remove(&self->base.link);
   free(self);
 
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_default_backend *backend = zn_default_backend_get(server->backend);
   zn_default_backend_update_capabilities(backend);
 }

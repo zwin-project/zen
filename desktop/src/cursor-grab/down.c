@@ -49,6 +49,10 @@ zn_cursor_down_grab_handle_motion_relative(
 }
 
 static void
+zn_cursor_down_grab_handle_rebase(struct zn_cursor_grab *grab UNUSED)
+{}
+
+static void
 zn_cursor_down_grab_handle_button(struct zn_cursor_grab *grab UNUSED,
     uint32_t time_msec, uint32_t button, enum wlr_button_state state)
 {
@@ -88,6 +92,7 @@ zn_cursor_down_grab_handle_destroy(struct zn_cursor_grab *grab)
 
 static const struct zn_cursor_grab_interface implementation = {
     .motion_relative = zn_cursor_down_grab_handle_motion_relative,
+    .rebase = zn_cursor_down_grab_handle_rebase,
     .button = zn_cursor_down_grab_handle_button,
     .axis = zn_cursor_down_grab_handle_axis,
     .frame = zn_cursor_down_grab_handle_frame,

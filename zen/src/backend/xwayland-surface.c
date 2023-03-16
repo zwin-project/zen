@@ -6,6 +6,7 @@
 #include "surface-snode.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
+#include "zen/seat.h"
 #include "zen/server.h"
 #include "zen/snode.h"
 #include "zen/view.h"
@@ -13,13 +14,27 @@
 static void zn_xwayland_surface_destroy(struct zn_xwayland_surface *self);
 
 static void
-zn_xwayland_surface_set_activated(void *impl_data UNUSED, bool activated UNUSED)
+zn_xwayland_surface_set_focus(void *impl_data, bool focused)
 {
-  // TODO(@Aki-7): implement or remove this
+  struct zn_xwayland_surface *self = impl_data;
+  struct zn_server *server = zn_server_get_singleton();
+  struct wlr_keyboard *keyboard = wlr_seat_get_keyboard(server->seat->wlr_seat);
+
+  if (keyboard) {
+    wlr_seat_keyboard_enter(server->seat->wlr_seat, self->wlr_xsurface->surface,
+        keyboard->keycodes, keyboard->num_keycodes, &keyboard->modifiers);
+  } else {
+    wlr_seat_keyboard_enter(
+        server->seat->wlr_seat, self->wlr_xsurface->surface, NULL, 0, NULL);
+  }
+
+  wlr_xwayland_surface_activate(self->wlr_xsurface, focused);
+
+  wlr_xwayland_surface_restack(self->wlr_xsurface, NULL, XCB_STACK_MODE_ABOVE);
 }
 
 static const struct zn_view_interface view_implementation = {
-    .set_activated = zn_xwayland_surface_set_activated,
+    .set_focus = zn_xwayland_surface_set_focus,
 };
 
 static void

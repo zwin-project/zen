@@ -8,6 +8,7 @@
 #include <wlr/types/wlr_output.h>
 
 #include "compositor.h"
+#include "keyboard.h"
 #include "output.h"
 #include "pointer.h"
 #include "seat.h"
@@ -67,11 +68,22 @@ zn_default_backend_handle_new_input(struct wl_listener *listener, void *data)
   struct wlr_input_device *input_device = data;
 
   switch (input_device->type) {
-    case WLR_INPUT_DEVICE_KEYBOARD:
+    case WLR_INPUT_DEVICE_KEYBOARD: {
+      struct zn_keyboard *keyboard = zn_keyboard_create(input_device);
+      if (keyboard == NULL) {
+        zn_warn("Failed to create a keyboard object");
+      } else {
+        wl_list_insert(&self->input_device_list, &keyboard->base.link);
+      }
       break;
+    }
     case WLR_INPUT_DEVICE_POINTER: {
-      struct zn_pointer *pointer = zn_pointer_create(self, input_device);
-      wl_list_insert(&self->input_device_list, &pointer->base.link);
+      struct zn_pointer *pointer = zn_pointer_create(input_device);
+      if (pointer == NULL) {
+        zn_warn("Failed to create a pointer object");
+      } else {
+        wl_list_insert(&self->input_device_list, &pointer->base.link);
+      }
       break;
     }
     case WLR_INPUT_DEVICE_TOUCH:        // fall through

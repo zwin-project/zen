@@ -7,6 +7,46 @@
 #include "zen-common/util.h"
 #include "zen/screen.h"
 
+bool
+zn_snode_is_focusable(struct zn_snode *self)
+{
+  return (self->flags & ZN_SNODE_FLAG_FOCUSABLE) == ZN_SNODE_FLAG_FOCUSABLE;
+}
+
+struct zn_snode *
+zn_snode_get_focusable_parent(struct zn_snode *self)
+{
+  for (struct zn_snode *node = self; node; node = node->parent) {
+    if (zn_snode_is_focusable(node)) {
+      return node;
+    }
+  }
+
+  return NULL;
+}
+
+void
+zn_snode_focus(struct zn_snode *self)
+{
+  struct zn_snode *node = zn_snode_get_focusable_parent(self);
+  if (node == NULL) {
+    return;
+  }
+
+  node->impl->on_focus(node->user_data, true);
+}
+
+void
+zn_snode_unfocus(struct zn_snode *self)
+{
+  struct zn_snode *node = zn_snode_get_focusable_parent(self);
+  if (node == NULL) {
+    return;
+  }
+
+  node->impl->on_focus(node->user_data, false);
+}
+
 struct wlr_texture *
 zn_snode_noop_get_texture(void *user_data UNUSED)
 {
@@ -52,6 +92,10 @@ void
 zn_snode_noop_pointer_frame(void *user_data UNUSED)
 {}
 
+void
+zn_snode_noop_on_focus(void *user_data UNUSED, bool focused UNUSED)
+{}
+
 const struct zn_snode_interface zn_snode_noop_implementation = {
     .get_texture = zn_snode_noop_get_texture,
     .frame = zn_snode_noop_frame,
@@ -62,6 +106,7 @@ const struct zn_snode_interface zn_snode_noop_implementation = {
     .pointer_leave = zn_snode_noop_pointer_leave,
     .pointer_axis = zn_snode_noop_pointer_axis,
     .pointer_frame = zn_snode_noop_pointer_frame,
+    .on_focus = zn_snode_noop_on_focus,
 };
 
 void
@@ -125,6 +170,16 @@ zn_snode_damage(struct zn_snode *self, struct wlr_fbox *damage)
   };
 
   zn_screen_damage(self->screen, &fbox);
+}
+
+void
+zn_snode_move_front(struct zn_snode *self)
+{
+  if (self->parent == NULL) {
+    return;
+  }
+
+  zn_snode_set_position(self, self->parent, self->position);
 }
 
 void
@@ -240,6 +295,7 @@ zn_snode_create(
 
   self->user_data = user_data;
   self->impl = implementation;
+  self->flags = 0;
 
   self->parent = NULL;
   glm_vec2_zero(self->position);
@@ -264,6 +320,19 @@ zn_snode_create(
 
 err:
   return NULL;
+}
+
+struct zn_snode *
+zn_snode_create_focusable(
+    void *user_data, const struct zn_snode_interface *implementation)
+{
+  struct zn_snode *self = zn_snode_create(user_data, implementation);
+
+  if (self) {
+    self->flags |= ZN_SNODE_FLAG_FOCUSABLE;
+  }
+
+  return self;
 }
 
 struct zn_snode *

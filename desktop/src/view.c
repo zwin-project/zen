@@ -14,6 +14,35 @@
 static void zn_desktop_view_destroy(struct zn_desktop_view *self);
 
 static void
+zn_desktop_view_on_focus(void *user_data, bool focused)
+{
+  struct zn_desktop_view *self = user_data;
+
+  if (self->zn_view->has_focus == focused) {
+    return;
+  }
+
+  zn_view_set_focus(self->zn_view, focused);
+
+  if (focused) {
+    zn_snode_move_front(self->snode);
+  }
+}
+
+const struct zn_snode_interface snode_implementation = {
+    .get_texture = zn_snode_noop_get_texture,
+    .frame = zn_snode_noop_frame,
+    .accepts_input = zn_snode_noop_accepts_input,
+    .pointer_button = zn_snode_noop_pointer_button,
+    .pointer_enter = zn_snode_noop_pointer_enter,
+    .pointer_motion = zn_snode_noop_pointer_motion,
+    .pointer_leave = zn_snode_noop_pointer_leave,
+    .pointer_axis = zn_snode_noop_pointer_axis,
+    .pointer_frame = zn_snode_noop_pointer_frame,
+    .on_focus = zn_desktop_view_on_focus,
+};
+
+static void
 zn_desktop_view_update_decoration(struct zn_desktop_view *self)
 {
   if (self->zn_view->decoration_mode == ZN_VIEW_DECORATION_MODE_CLIENT_SIDE) {
@@ -90,7 +119,7 @@ zn_desktop_view_create(struct zn_view *zn_view)
   self->zn_view = zn_view;
   wl_signal_init(&self->events.destroy);
 
-  self->snode = zn_snode_create(self, &zn_snode_noop_implementation);
+  self->snode = zn_snode_create_focusable(self, &snode_implementation);
   if (self->snode == NULL) {
     zn_error("Failed to create a zn_snode");
     goto err_free;

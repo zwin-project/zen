@@ -31,6 +31,7 @@ _zen_deps = [
   m_dep,
   zen_common_dep,
   zen_wlr_glew_renderer_dep,
+  xkbcommon_dep,
 ] + _zen_pub_deps
 
 subdir('src/backend')

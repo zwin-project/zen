@@ -91,6 +91,7 @@ static const struct zn_snode_interface implementation = {
     .pointer_leave = zn_surface_snode_pointer_leave,
     .pointer_axis = zn_surface_snode_pointer_axis,
     .pointer_frame = zn_surface_snode_pointer_frame,
+    .on_focus = zn_snode_noop_on_focus,
 };
 
 void

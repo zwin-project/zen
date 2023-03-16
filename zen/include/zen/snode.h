@@ -8,6 +8,10 @@
 
 #include "zen-common/util.h"
 
+enum zn_snode_flag {
+  ZN_SNODE_FLAG_FOCUSABLE = 1 << 0,
+};
+
 struct zn_snode_interface {
   /// @return value is nullable
   struct wlr_texture *(*get_texture)(void *user_data);
@@ -32,6 +36,9 @@ struct zn_snode_interface {
       double delta, int32_t delta_discrete);
 
   void (*pointer_frame)(void *user_data);
+
+  /// Only snode with ZN_SNODE_FLAG_FOCUSABLE flag will receive this event.
+  void (*on_focus)(void *user_data, bool focused);
 };
 
 extern const struct zn_snode_interface zn_snode_noop_implementation;
@@ -58,6 +65,8 @@ void zn_snode_noop_pointer_axis(void *user_data, uint32_t time_msec,
 
 void zn_snode_noop_pointer_frame(void *user_data);
 
+void zn_snode_noop_on_focus(void *user_data, bool focused);
+
 struct zn_screen;
 
 /// screen node
@@ -68,6 +77,8 @@ struct zn_snode {
   struct zn_snode *parent;  // @nullable, @ref
   vec2 position;            // effective coords, relative to parent
   vec2 absolute_position;   // effective coords, relative to root
+
+  uint32_t flags;  // a bitfield of enum zn_snode_flag
 
   // When the screen is destroyed, the root snode is destroyed and
   // `position_changed` signal handler will set this NULL.
@@ -127,6 +138,15 @@ zn_snode_pointer_frame(struct zn_snode *self)
   self->impl->pointer_frame(self->user_data);
 }
 
+void zn_snode_focus(struct zn_snode *self);
+
+void zn_snode_unfocus(struct zn_snode *self);
+
+bool zn_snode_is_focusable(struct zn_snode *self);
+
+/// @return value is nullable. If `self` is focusable, return `self`.
+struct zn_snode *zn_snode_get_focusable_parent(struct zn_snode *self);
+
 //
 /// @param point is in snode-local coords
 /// @param[out] local_point returns the position of the `point` in a coords
@@ -142,6 +162,8 @@ void zn_snode_damage_whole(struct zn_snode *self);
 
 /// @param damage is in the snode-local coords
 void zn_snode_damage(struct zn_snode *self, struct wlr_fbox *damage);
+
+void zn_snode_move_front(struct zn_snode *self);
 
 void zn_snode_notify_frame(struct zn_snode *self, const struct timespec *when);
 
@@ -161,6 +183,9 @@ void zn_snode_get_fbox(struct zn_snode *self, struct wlr_fbox *fbox);
 void zn_snode_get_layout_fbox(struct zn_snode *self, struct wlr_fbox *fbox);
 
 struct zn_snode *zn_snode_create(
+    void *user_data, const struct zn_snode_interface *implementation);
+
+struct zn_snode *zn_snode_create_focusable(
     void *user_data, const struct zn_snode_interface *implementation);
 
 struct zn_snode *zn_snode_create_root(struct zn_screen *screen);

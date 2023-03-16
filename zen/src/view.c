@@ -7,6 +7,17 @@
 #include "zen/snode.h"
 
 void
+zn_view_set_focus(struct zn_view *self, bool focused)
+{
+  if (self->has_focus == focused) {
+    return;
+  }
+
+  self->has_focus = focused;
+  self->impl->set_focus(self->impl_data, focused);
+}
+
+void
 zn_view_notify_resized(struct zn_view *self, vec2 size)
 {
   glm_vec2_copy(size, self->size);
@@ -43,6 +54,8 @@ zn_view_create(void *impl_data, const struct zn_view_interface *implementation)
     zn_error("Failed to allocate memory");
     goto err;
   }
+
+  self->has_focus = false;
 
   self->snode = zn_snode_create(self, &zn_snode_noop_implementation);
   if (self->snode == NULL) {

@@ -18,6 +18,15 @@ zn_seat_handle_cursor_focus_destroy(
   zn_seat_pointer_enter(self, NULL, GLM_VEC2_ZERO);
 }
 
+static void
+zn_seat_handle_focus_destroy(struct wl_listener *listener, void *data UNUSED)
+{
+  struct zn_seat *self =
+      zn_container_of(listener, self, focus_destroy_listener);
+
+  zn_seat_set_focus(self, NULL);
+}
+
 struct zn_screen *
 zn_seat_get_focused_screen(struct zn_seat *self)
 {
@@ -40,6 +49,32 @@ void
 zn_seat_set_capabilities(struct zn_seat *self, uint32_t capabilities)
 {
   wlr_seat_set_capabilities(self->wlr_seat, capabilities);
+}
+
+void
+zn_seat_set_focus(struct zn_seat *self, struct zn_snode *snode)
+{
+  if (!zn_assert(snode == NULL || zn_snode_is_focusable(snode),
+          "zn_seat_set_focus: snode must be NULL or focusable")) {
+    return;
+  }
+
+  if (self->focus == snode) {
+    return;
+  }
+
+  if (self->focus) {
+    wl_list_remove(&self->focus_destroy_listener.link);
+    wl_list_init(&self->focus_destroy_listener.link);
+    zn_snode_unfocus(self->focus);
+  }
+
+  self->focus = snode;
+
+  if (snode) {
+    wl_signal_add(&snode->events.destroy, &self->focus_destroy_listener);
+    zn_snode_focus(snode);
+  }
 }
 
 void
@@ -180,6 +215,9 @@ zn_seat_create(struct wl_display *display)
       zn_seat_handle_cursor_focus_destroy;
   wl_list_init(&self->cursor_focus_destroy_listener.link);
 
+  self->focus_destroy_listener.notify = zn_seat_handle_focus_destroy;
+  wl_list_init(&self->focus_destroy_listener.link);
+
   return self;
 
 err_seat:
@@ -196,6 +234,7 @@ void
 zn_seat_destroy(struct zn_seat *self)
 {
   wl_list_remove(&self->cursor_focus_destroy_listener.link);
+  wl_list_remove(&self->focus_destroy_listener.link);
   wl_list_remove(&self->events.update_capabilities.listener_list);
   wl_list_remove(&self->events.pointer_frame.listener_list);
   wl_list_remove(&self->events.pointer_axis.listener_list);
