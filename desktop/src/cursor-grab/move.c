@@ -145,6 +145,8 @@ zn_cursor_move_grab_start(struct zn_desktop_view *view)
   /// TODO(@Aki-7): set cursor, close popups, validation
   zn_seat_pointer_enter(server->seat, NULL, GLM_VEC2_ZERO);
 
+  zn_cursor_set_xcursor(server->seat->cursor, "grabbing");
+
   zn_desktop_shell_start_cursor_grab(shell, &self->base);
 
   return true;

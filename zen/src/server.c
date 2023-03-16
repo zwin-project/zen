@@ -43,7 +43,11 @@ zn_server_run(struct zn_server *self)
     self->exit_status = EXIT_FAILURE;
   }
 
+  wl_display_destroy_clients(self->display);
+
   wl_signal_emit(&self->events.end, NULL);
+
+  zn_backend_stop(self->backend);
 
   return self->exit_status;
 }
@@ -54,8 +58,6 @@ zn_server_terminate(struct zn_server *self, int exit_status)
   if (!self->running) {
     return;
   }
-
-  zn_backend_stop(self->backend);
 
   self->running = false;
   self->exit_status = exit_status;
