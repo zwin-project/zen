@@ -12,8 +12,11 @@ struct zn_desktop_view {
   struct zn_snode *snode;               // @nonnull, @owning
   struct zn_ui_decoration *decoration;  // @nonnull, @owning
 
+  uint32_t resize_edges;  // a bitfield of enum wlr_edges
+
   struct wl_listener zn_view_unmap_listener;
-  struct wl_listener zn_view_request_move_listener;
+  struct wl_listener zn_view_move_request_listener;
+  struct wl_listener zn_view_resize_request_listener;
   struct wl_listener zn_view_decoration_listener;
   struct wl_listener zn_view_resized_listener;
   struct wl_listener header_pressed_listener;

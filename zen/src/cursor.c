@@ -102,6 +102,56 @@ zn_cursor_set_xcursor_default(struct zn_cursor *self)
   return zn_cursor_set_xcursor(self, "left_ptr");
 }
 
+bool
+zn_cursor_set_xcursor_edges(struct zn_cursor *self, uint32_t edges)
+{
+  bool ok = false;
+
+  const char *xcursor_name[] = {
+      [WLR_EDGE_TOP] = "top_side",
+      [WLR_EDGE_BOTTOM] = "bottom_side",
+      [WLR_EDGE_LEFT] = "left_side",
+      [WLR_EDGE_RIGHT] = "right_side",
+      [WLR_EDGE_TOP | WLR_EDGE_LEFT] = "top_left_corner",
+      [WLR_EDGE_TOP | WLR_EDGE_RIGHT] = "top_right_corner",
+      [WLR_EDGE_BOTTOM | WLR_EDGE_LEFT] = "bottom_left_corner",
+      [WLR_EDGE_BOTTOM | WLR_EDGE_RIGHT] = "bottom_right_corner",
+  };
+
+  const char *xcursor_name_fallback[] = {
+      [WLR_EDGE_TOP] = "n-resize",
+      [WLR_EDGE_BOTTOM] = "s-resize",
+      [WLR_EDGE_LEFT] = "w-resize",
+      [WLR_EDGE_RIGHT] = "e-resize",
+      [WLR_EDGE_TOP | WLR_EDGE_LEFT] = "nw-resize",
+      [WLR_EDGE_TOP | WLR_EDGE_RIGHT] = "ne-resize",
+      [WLR_EDGE_BOTTOM | WLR_EDGE_LEFT] = "sw-resize",
+      [WLR_EDGE_BOTTOM | WLR_EDGE_RIGHT] = "se-resize",
+  };
+
+  ok = zn_cursor_set_xcursor(self, xcursor_name[edges]);
+
+  if (!ok) {
+    ok = zn_cursor_set_xcursor(self, xcursor_name_fallback[edges]);
+  }
+
+  return ok;
+}
+
+bool
+zn_cursor_set_xcursor_grabbing(struct zn_cursor *self)
+{
+  const char *candidates[] = {"grabbing", "closedhand", "hand2"};
+
+  for (uint i = 0; i < ARRAY_LENGTH(candidates); i++) {
+    if (zn_cursor_set_xcursor(self, candidates[i])) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 static void
 zn_cursor_handle_image_surface_destroy(
     struct wl_listener *listener, void *data UNUSED)

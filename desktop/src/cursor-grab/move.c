@@ -111,7 +111,7 @@ zn_cursor_move_grab_create(struct zn_desktop_view *view)
   self->base.impl = &implementation;
   self->view = view;
 
-  glm_vec2_sub(view->snode->position, cursor->snode->position,
+  glm_vec2_sub(view->snode->absolute_position, cursor->snode->absolute_position,
       self->initial_view_cursor_position);
 
   self->view_destroy_listener.notify = zn_cursor_move_grab_handle_view_destroy;
@@ -142,10 +142,10 @@ zn_cursor_move_grab_start(struct zn_desktop_view *view)
     goto err;
   }
 
-  /// TODO(@Aki-7): set cursor, close popups, validation
+  /// TODO(@Aki-7): close popups
   zn_seat_pointer_enter(server->seat, NULL, GLM_VEC2_ZERO);
 
-  zn_cursor_set_xcursor(server->seat->cursor, "grabbing");
+  zn_cursor_set_xcursor_grabbing(server->seat->cursor);
 
   zn_desktop_shell_start_cursor_grab(shell, &self->base);
 
