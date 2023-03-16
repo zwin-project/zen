@@ -22,6 +22,7 @@ struct zn_seat {
 
   struct wl_listener cursor_focus_destroy_listener;
   struct wl_listener focus_destroy_listener;
+  struct wl_listener set_cursor_listener;
 
   struct {
     struct wl_signal pointer_motion;  // (struct wlr_event_pointer_motion *)

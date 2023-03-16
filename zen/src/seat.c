@@ -27,6 +27,28 @@ zn_seat_handle_focus_destroy(struct wl_listener *listener, void *data UNUSED)
   zn_seat_set_focus(self, NULL);
 }
 
+static void
+zn_seat_handle_set_cursor(struct wl_listener *listener, void *data)
+{
+  struct zn_seat *self = zn_container_of(listener, self, set_cursor_listener);
+  struct wlr_seat_pointer_request_set_cursor_event *event = data;
+  struct wlr_surface *focused_surface =
+      self->wlr_seat->pointer_state.focused_surface;
+  struct wl_client *focused_client = NULL;
+
+  if (focused_surface != NULL) {
+    focused_client = wl_resource_get_client(focused_surface->resource);
+  }
+
+  if (focused_client == NULL || event->seat_client->client != focused_client) {
+    zn_debug("Denying request to set cursor from unfocused client");
+    return;
+  }
+
+  zn_cursor_set_surface(
+      self->cursor, event->surface, event->hotspot_x, event->hotspot_y, true);
+}
+
 struct zn_screen *
 zn_seat_get_focused_screen(struct zn_seat *self)
 {
@@ -99,6 +121,8 @@ zn_seat_pointer_enter(struct zn_seat *self, struct zn_snode *snode, vec2 point)
     zn_snode_pointer_leave(self->pointer_state.focus);
     wl_list_remove(&self->cursor_focus_destroy_listener.link);
     wl_list_init(&self->cursor_focus_destroy_listener.link);
+
+    zn_cursor_set_xcursor_default(self->cursor);
   }
 
   self->pointer_state.focus = snode;
@@ -218,6 +242,10 @@ zn_seat_create(struct wl_display *display)
   self->focus_destroy_listener.notify = zn_seat_handle_focus_destroy;
   wl_list_init(&self->focus_destroy_listener.link);
 
+  self->set_cursor_listener.notify = zn_seat_handle_set_cursor;
+  wl_signal_add(
+      &self->wlr_seat->events.request_set_cursor, &self->set_cursor_listener);
+
   return self;
 
 err_seat:
@@ -235,6 +263,7 @@ zn_seat_destroy(struct zn_seat *self)
 {
   wl_list_remove(&self->cursor_focus_destroy_listener.link);
   wl_list_remove(&self->focus_destroy_listener.link);
+  wl_list_remove(&self->set_cursor_listener.link);
   wl_list_remove(&self->events.update_capabilities.listener_list);
   wl_list_remove(&self->events.pointer_frame.listener_list);
   wl_list_remove(&self->events.pointer_axis.listener_list);
