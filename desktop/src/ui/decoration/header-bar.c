@@ -1,4 +1,4 @@
-#include "zen-desktop/ui/header-bar.h"
+#include "zen-desktop/ui/decoration/header-bar.h"
 
 #include <cairo.h>
 #include <cglm/vec2.h>
