@@ -15,10 +15,11 @@ _zen_unit_tests = {
   },
   'config/config-path.c': {},
   'server/construct-destroy.c': {},
-  'snode/snode-position.c': {},
+  'snode/snode-damage.c': {},
+  'snode/snode-focus.c': {},
   'snode/snode-frame.c': {},
   'snode/snode-get-at.c': {},
-  'snode/snode-damage.c': {},
+  'snode/snode-position.c': {},
 }
 
 foreach path, args : _zen_unit_tests
