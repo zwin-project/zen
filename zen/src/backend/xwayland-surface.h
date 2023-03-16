@@ -20,10 +20,10 @@ struct zn_xwayland_surface {
   struct wl_listener surface_map_listener;
   struct wl_listener surface_unmap_listener;
   struct wl_listener surface_configure_listener;
-  struct wl_listener surface_move_listener;
+  struct wl_listener surface_move_request_listener;
+  struct wl_listener surface_resize_request_listener;
   struct wl_listener surface_set_decoration_listener;
   struct wl_listener surface_commit_listener;  // listen only when mapped
-
   struct wl_listener snode_position_changed_listener;
 };
 

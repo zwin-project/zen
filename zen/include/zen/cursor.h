@@ -22,3 +22,8 @@ struct zn_cursor {
 bool zn_cursor_set_xcursor(struct zn_cursor *self, const char *name);
 
 bool zn_cursor_set_xcursor_default(struct zn_cursor *self);
+
+/// @param edges is a bitfield of enum wlr_edges
+bool zn_cursor_set_xcursor_edges(struct zn_cursor *self, uint32_t edges);
+
+bool zn_cursor_set_xcursor_grabbing(struct zn_cursor *self);

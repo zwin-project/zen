@@ -33,8 +33,26 @@ zn_xwayland_surface_set_focus(void *impl_data, bool focused)
   wlr_xwayland_surface_restack(self->wlr_xsurface, NULL, XCB_STACK_MODE_ABOVE);
 }
 
+static void
+zn_xwayland_surface_configure_size(void *impl_data, vec2 size)
+{
+  struct zn_xwayland_surface *self = impl_data;
+
+  if (self->surface_snode == NULL ||
+      self->surface_snode->snode->screen == NULL) {
+    return;
+  }
+
+  struct wlr_fbox fbox;
+  zn_snode_get_layout_fbox(self->surface_snode->snode, &fbox);
+
+  wlr_xwayland_surface_configure(self->wlr_xsurface, (int16_t)fbox.x,
+      (int16_t)fbox.y, (uint16_t)size[0], (uint16_t)size[1]);
+}
+
 static const struct zn_view_interface view_implementation = {
     .set_focus = zn_xwayland_surface_set_focus,
+    .configure_size = zn_xwayland_surface_configure_size,
 };
 
 static void
@@ -82,12 +100,28 @@ zn_xwayland_surface_handle_snode_position_changed(
 }
 
 static void
-zn_xwayland_surface_handle_move(struct wl_listener *listener, void *data UNUSED)
+zn_xwayland_surface_handle_move_request(
+    struct wl_listener *listener, void *data UNUSED)
 {
   struct zn_xwayland_surface *self =
-      zn_container_of(listener, self, surface_move_listener);
+      zn_container_of(listener, self, surface_move_request_listener);
 
   zn_view_notify_move_request(self->view);
+}
+
+static void
+zn_xwayland_surface_handle_resize_request(
+    struct wl_listener *listener, void *data)
+{
+  struct zn_xwayland_surface *self =
+      zn_container_of(listener, self, surface_resize_request_listener);
+
+  struct wlr_xwayland_resize_event *wlr_event = data;
+  struct zn_view_resize_event event;
+
+  event.edges = wlr_event->edges;
+
+  zn_view_notify_resize_request(self->view, &event);
 }
 
 static void
@@ -227,9 +261,15 @@ zn_xwayland_surface_create(struct wlr_xwayland_surface *wlr_xsurface)
   wl_signal_add(&wlr_xsurface->events.request_configure,
       &self->surface_configure_listener);
 
-  self->surface_move_listener.notify = zn_xwayland_surface_handle_move;
+  self->surface_move_request_listener.notify =
+      zn_xwayland_surface_handle_move_request;
   wl_signal_add(
-      &wlr_xsurface->events.request_move, &self->surface_move_listener);
+      &wlr_xsurface->events.request_move, &self->surface_move_request_listener);
+
+  self->surface_resize_request_listener.notify =
+      zn_xwayland_surface_handle_resize_request;
+  wl_signal_add(&wlr_xsurface->events.request_resize,
+      &self->surface_resize_request_listener);
 
   self->surface_set_decoration_listener.notify =
       zn_xwayland_surface_handle_set_decoration;
@@ -259,7 +299,8 @@ zn_xwayland_surface_destroy(struct zn_xwayland_surface *self)
   wl_list_remove(&self->snode_position_changed_listener.link);
   wl_list_remove(&self->surface_commit_listener.link);
   wl_list_remove(&self->surface_set_decoration_listener.link);
-  wl_list_remove(&self->surface_move_listener.link);
+  wl_list_remove(&self->surface_resize_request_listener.link);
+  wl_list_remove(&self->surface_move_request_listener.link);
   wl_list_remove(&self->surface_configure_listener.link);
   wl_list_remove(&self->surface_unmap_listener.link);
   wl_list_remove(&self->surface_map_listener.link);
