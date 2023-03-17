@@ -62,12 +62,25 @@ zn_compositor_handle_new_layer_surface(
       output->screen_backend, layer_surface, wlr_layer_surface->current.layer);
 }
 
+static void
+zn_compositor_handle_server_end(struct wl_listener *listener, void *data UNUSED)
+{
+  struct zn_compositor *self =
+      zn_container_of(listener, self, server_end_listener);
+
+  if (self->xwayland) {
+    wlr_xwayland_destroy(self->xwayland);
+    self->xwayland = NULL;
+  }
+}
+
 struct zn_compositor *
 zn_compositor_create(struct wl_display *display, struct wlr_renderer *renderer)
 {
   char socket_name_candidate[16];
   const char *socket = NULL;
   const char *xdg = NULL;
+  struct zn_server *server = zn_server_get_singleton();
 
   struct zn_compositor *self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -149,6 +162,9 @@ zn_compositor_create(struct wl_display *display, struct wlr_renderer *renderer)
   wl_signal_add(&self->wlr_layer_shell->events.new_surface,
       &self->new_layer_surface_listener);
 
+  self->server_end_listener.notify = zn_compositor_handle_server_end;
+  wl_signal_add(&server->events.end, &self->server_end_listener);
+
   return self;
 
 err_output_layout:
@@ -164,9 +180,12 @@ err:
 void
 zn_compositor_destroy(struct zn_compositor *self)
 {
+  wl_list_remove(&self->server_end_listener.link);
   wl_list_remove(&self->new_layer_surface_listener.link);
   wl_list_remove(&self->new_xwayland_surface_listener.link);
-  wlr_xwayland_destroy(self->xwayland);
+  if (self->xwayland) {
+    wlr_xwayland_destroy(self->xwayland);
+  }
   wlr_output_layout_destroy(self->output_layout);
   free(self);
 }
