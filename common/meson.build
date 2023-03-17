@@ -1,4 +1,5 @@
 _zen_common_srcs = [
+  'src/cairo/rounded.c',
   'src/log.c',
   'src/signal.c',
   'src/terminate.c',
@@ -8,6 +9,7 @@ _zen_common_srcs = [
 _zen_common_inc = include_directories('include')
 
 _zen_common_deps = [
+  cairo_dep,
 ]
 
 _zen_common_lib = static_library(

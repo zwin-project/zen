@@ -6,6 +6,7 @@
 #include <zen-common/log.h>
 #include <zen-common/util.h>
 
+#include "zen-desktop/theme.h"
 #include "zen/backend.h"
 #include "zen/server.h"
 #include "zen/snode.h"
@@ -50,9 +51,10 @@ static const struct zn_snode_interface snode_implementation = {
 };
 
 static void
-zn_ui_header_bar_render(struct zn_ui_header_bar *self, cairo_t *cr)
+zn_ui_header_bar_render(
+    struct zn_ui_header_bar *self, cairo_t *cr, struct zn_theme *theme)
 {
-  float r = 5.F;
+  float r = theme->frame_radius;
   float w = self->size[0];
   float h = self->size[1];
   cairo_set_source_rgba(cr, 0.8, 0.8, 0.8, 1.0);
@@ -72,6 +74,7 @@ void
 zn_ui_header_bar_set_size(struct zn_ui_header_bar *self, vec2 size)
 {
   struct zn_server *server = zn_server_get_singleton();
+  struct zn_theme *theme = zn_theme_get();
 
   glm_vec2_copy(size, self->size);
 
@@ -88,7 +91,7 @@ zn_ui_header_bar_set_size(struct zn_ui_header_bar *self, vec2 size)
     goto out_cairo;
   }
 
-  zn_ui_header_bar_render(self, cr);
+  zn_ui_header_bar_render(self, cr, theme);
 
   if (self->texture) {
     zn_snode_damage_whole(self->snode);

@@ -8,6 +8,7 @@
 #include "zen-desktop/cursor-grab/default.h"
 #include "zen-desktop/screen-layout.h"
 #include "zen-desktop/screen.h"
+#include "zen-desktop/theme.h"
 #include "zen-desktop/view.h"
 #include "zen/backend.h"
 #include "zen/screen.h"
@@ -147,10 +148,16 @@ zn_desktop_shell_create(void)
 
   desktop_shell_singleton = self;
 
+  self->theme = zn_theme_create();
+  if (self->theme == NULL) {
+    zn_error("Failed to create theme");
+    goto err_free;
+  }
+
   self->screen_layout = zn_screen_layout_create();
   if (self->screen_layout == NULL) {
     zn_error("Failed to create a zn_screen_layout");
-    goto err_free;
+    goto err_theme;
   }
 
   struct zn_cursor_default_grab *cursor_default_grab =
@@ -195,6 +202,9 @@ zn_desktop_shell_create(void)
 err_screen_layout:
   zn_screen_layout_destroy(self->screen_layout);
 
+err_theme:
+  zn_theme_destroy(self->theme);
+
 err_free:
   desktop_shell_singleton = NULL;
   free(self);
@@ -215,6 +225,7 @@ zn_desktop_shell_destroy(struct zn_desktop_shell *self)
   wl_list_remove(&self->new_screen_listener.link);
   zn_cursor_grab_destroy(self->cursor_grab);
   zn_screen_layout_destroy(self->screen_layout);
+  zn_theme_destroy(self->theme);
   desktop_shell_singleton = NULL;
   free(self);
 }
