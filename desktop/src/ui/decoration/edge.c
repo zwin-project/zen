@@ -10,7 +10,7 @@
 
 #define EDGE_WIDTH 8.F
 
-bool
+static bool
 zn_ui_decoration_edge_accepts_input(void *user_data, const vec2 point)
 {
   struct zn_ui_decoration_edge *self = user_data;
@@ -36,7 +36,7 @@ zn_ui_decoration_edge_accepts_input(void *user_data, const vec2 point)
   return zn_wlr_fbox_contains_point(&edge_box, point[0], point[1]);
 }
 
-void
+static void
 zn_ui_decoration_edge_pointer_motion(
     void *user_data, uint32_t time_msec UNUSED, const vec2 point)
 {
@@ -66,7 +66,7 @@ zn_ui_decoration_edge_pointer_motion(
   }
 }
 
-void
+static void
 zn_ui_decoration_edge_pointer_button(void *user_data UNUSED,
     uint32_t time_msec UNUSED, uint32_t button UNUSED,
     enum wlr_button_state state UNUSED)
@@ -80,7 +80,7 @@ zn_ui_decoration_edge_pointer_button(void *user_data UNUSED,
   }
 }
 
-const struct zn_snode_interface implementation = {
+static const struct zn_snode_interface implementation = {
     .get_texture = zn_snode_noop_get_texture,
     .frame = zn_snode_noop_frame,
     .accepts_input = zn_ui_decoration_edge_accepts_input,
