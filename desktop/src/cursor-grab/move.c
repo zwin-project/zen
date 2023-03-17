@@ -75,6 +75,9 @@ zn_cursor_move_grab_handle_frame(struct zn_cursor_grab *grab UNUSED)
 static void
 zn_cursor_move_grab_handle_destroy(struct zn_cursor_grab *grab)
 {
+  struct zn_server *server = zn_server_get_singleton();
+  zn_cursor_set_xcursor_default(server->seat->cursor);
+
   struct zn_cursor_move_grab *self = zn_cursor_move_grab_get(grab);
   zn_cursor_move_grab_destroy(self);
 }
