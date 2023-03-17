@@ -19,10 +19,11 @@ struct zn_compositor {
   // TODO(@Aki-7): Use this appropriately #388
   struct wlr_output_layout *output_layout;  // @nonnull, @owning
 
-  struct wlr_xwayland *xwayland;  // @nonnull, @owning
+  struct wlr_xwayland *xwayland;  // @nullable, @owning
 
   struct wl_listener new_xwayland_surface_listener;
   struct wl_listener new_layer_surface_listener;
+  struct wl_listener server_end_listener;
 };
 
 struct zn_compositor *zn_compositor_create(
