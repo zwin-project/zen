@@ -1,5 +1,6 @@
 _zen_common_srcs = [
   'src/cairo/rounded.c',
+  'src/color.c',
   'src/log.c',
   'src/signal.c',
   'src/terminate.c',
@@ -8,8 +9,14 @@ _zen_common_srcs = [
 
 _zen_common_inc = include_directories('include')
 
+_zen_common_private_inc = [
+  include_directories('src'),
+  _zen_common_inc,
+]
+
 _zen_common_deps = [
   cairo_dep,
+  cglm_dep,
 ]
 
 _zen_common_lib = static_library(
@@ -24,3 +31,7 @@ zen_common_dep = declare_dependency(
   link_with: _zen_common_lib,
   include_directories: _zen_common_inc,
 )
+
+if get_option('tests')
+  subdir('tests')
+endif

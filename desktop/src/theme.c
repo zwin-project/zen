@@ -304,6 +304,11 @@ zn_theme_create(void)
   self->frame_radius = 8.F;
   self->shadow_blur = 35;
   self->header_bar_height = 30;
+  zn_color_init(&self->active_header_color, 0x04, 0x0d, 0x29, 0xff);
+  zn_color_init(&self->active_header_reflection_color, 0x11, 0x1f, 0x4d, 0xff);
+  zn_color_init(&self->inactive_header_color, 0x59, 0x63, 0x83, 0xff);
+  zn_color_init(
+      &self->inactive_header_reflection_color, 0x87, 0x8e, 0xa5, 0xff);
 
   self->shadow_surface =
       zn_theme_create_shadow_surface(self->frame_radius, self->shadow_blur);

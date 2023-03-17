@@ -11,6 +11,12 @@
 #include "zen/snode.h"
 
 void
+zn_ui_decoration_set_focus(struct zn_ui_decoration *self, bool focused)
+{
+  zn_ui_header_bar_set_focus(self->header_bar, focused);
+}
+
+void
 zn_ui_decoration_set_content_size(struct zn_ui_decoration *self, vec2 size)
 {
   struct zn_theme *theme = zn_theme_get();

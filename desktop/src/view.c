@@ -33,6 +33,8 @@ zn_desktop_view_on_focus(void *user_data, bool focused)
   if (focused) {
     zn_snode_move_front(self->snode);
   }
+
+  zn_ui_decoration_set_focus(self->decoration, focused);
 }
 
 const struct zn_snode_interface snode_implementation = {
@@ -243,8 +245,8 @@ zn_desktop_view_destroy(struct zn_desktop_view *self)
 {
   zn_signal_emit_mutable(&self->events.destroy, NULL);
 
-  zn_ui_decoration_destroy(self->decoration);
   zn_snode_destroy(self->snode);
+  zn_ui_decoration_destroy(self->decoration);
   wl_list_remove(&self->zn_view_decoration_listener.link);
   wl_list_remove(&self->zn_view_resize_request_listener.link);
   wl_list_remove(&self->zn_view_move_request_listener.link);
