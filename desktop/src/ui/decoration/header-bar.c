@@ -57,7 +57,13 @@ zn_ui_header_bar_render(
   float r = theme->frame_radius;
   float w = self->size[0];
   float h = self->size[1];
-  cairo_set_source_rgba(cr, 0.8, 0.8, 0.8, 1.0);
+  float reflection_offset = 1.5F;
+
+  if (self->focused) {
+    zn_color_set_cairo_source(&theme->active_header_reflection_color, cr);
+  } else {
+    zn_color_set_cairo_source(&theme->inactive_header_reflection_color, cr);
+  }
 
   cairo_move_to(cr, 0, h);
   cairo_line_to(cr, 0, r);
@@ -68,18 +74,32 @@ zn_ui_header_bar_render(
   cairo_line_to(cr, 0, h);
 
   cairo_fill(cr);
+
+  if (self->focused) {
+    zn_color_set_cairo_source(&theme->active_header_color, cr);
+  } else {
+    zn_color_set_cairo_source(&theme->inactive_header_color, cr);
+  }
+
+  cairo_move_to(cr, 0, h);
+  cairo_line_to(cr, 0, r + reflection_offset);
+  cairo_arc(cr, r, r + reflection_offset, r, -M_PI, -M_PI_2);
+  cairo_line_to(cr, w - r, reflection_offset);
+  cairo_arc(cr, w - r, r + reflection_offset, r, -M_PI_2, 0);
+  cairo_line_to(cr, w, h);
+  cairo_line_to(cr, 0, h);
+
+  cairo_fill(cr);
 }
 
-void
-zn_ui_header_bar_set_size(struct zn_ui_header_bar *self, vec2 size)
+static void
+zn_ui_header_bar_update_texture(struct zn_ui_header_bar *self)
 {
   struct zn_server *server = zn_server_get_singleton();
   struct zn_theme *theme = zn_theme_get();
 
-  glm_vec2_copy(size, self->size);
-
   cairo_surface_t *surface = cairo_image_surface_create(
-      CAIRO_FORMAT_ARGB32, (int)size[0], (int)size[1]);
+      CAIRO_FORMAT_ARGB32, (int)self->size[0], (int)self->size[1]);
   if (cairo_surface_status(surface) != CAIRO_STATUS_SUCCESS) {
     zn_abort("Failed to create a cairo surface");
     goto out;
@@ -114,6 +134,22 @@ out:
   cairo_surface_destroy(surface);
 }
 
+void
+zn_ui_header_bar_set_size(struct zn_ui_header_bar *self, vec2 size)
+{
+  glm_vec2_copy(size, self->size);
+
+  zn_ui_header_bar_update_texture(self);
+}
+
+void
+zn_ui_header_bar_set_focus(struct zn_ui_header_bar *self, bool focused)
+{
+  self->focused = focused;
+
+  zn_ui_header_bar_update_texture(self);
+}
+
 struct zn_ui_header_bar *
 zn_ui_header_bar_create(void)
 {
@@ -133,6 +169,7 @@ zn_ui_header_bar_create(void)
   wl_signal_init(&self->events.pressed);
 
   self->texture = NULL;
+  self->focused = false;
 
   return self;
 

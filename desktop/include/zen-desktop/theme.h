@@ -3,10 +3,17 @@
 #include <cairo.h>
 #include <wlr/util/box.h>
 
+#include "zen-common/color.h"
+
 struct zn_theme {
   float frame_radius;
   int32_t shadow_blur;
   int32_t header_bar_height;
+
+  struct zn_color active_header_color;
+  struct zn_color active_header_reflection_color;
+  struct zn_color inactive_header_color;
+  struct zn_color inactive_header_reflection_color;
 
   cairo_surface_t *shadow_surface;  // @nonnull, @owning
 };

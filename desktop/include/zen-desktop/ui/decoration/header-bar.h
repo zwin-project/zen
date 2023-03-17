@@ -11,6 +11,7 @@ struct zn_ui_header_bar {
   struct wlr_texture *texture;  // @nullable, @owning
 
   vec2 size;
+  bool focused;
 
   struct {
     struct wl_signal pressed;  // (NULL)
@@ -18,6 +19,8 @@ struct zn_ui_header_bar {
 };
 
 void zn_ui_header_bar_set_size(struct zn_ui_header_bar *self, vec2 size);
+
+void zn_ui_header_bar_set_focus(struct zn_ui_header_bar *self, bool focused);
 
 struct zn_ui_header_bar *zn_ui_header_bar_create(void);
 
