@@ -4,11 +4,14 @@
 #include <wayland-server-core.h>
 
 struct zn_snode;
+struct zn_ui_close_button;
 
 struct zn_ui_header_bar {
   struct zn_snode *snode;  // @nonnull, @owning
 
   struct wlr_texture *texture;  // @nullable, @owning
+
+  struct zn_ui_close_button *close_button;  // @nonnull, @owning
 
   vec2 size;
   bool focused;

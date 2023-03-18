@@ -2,6 +2,7 @@
 
 #include "zen-desktop/theme/color.h"
 #include "zen-desktop/theme/drop-shadow.h"
+#include "zen-desktop/theme/icon.h"
 
 struct zn_theme {
   struct {
@@ -15,6 +16,12 @@ struct zn_theme {
 
   struct {
     struct {
+      struct zn_icon close;
+    } header_bar;
+  } icon;
+
+  struct {
+    struct {
       float corner;
     } header_bar;
   } radius;
@@ -22,6 +29,7 @@ struct zn_theme {
   struct {
     struct {
       float height;
+      float close_button;
     } header_bar;
   } size;
 
