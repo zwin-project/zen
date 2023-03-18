@@ -9,6 +9,8 @@ project(
 cc = meson.get_compiler('c')
 cxx = meson.get_compiler('cpp')
 cdata = configuration_data()
+datadir = get_option('datadir')
+prefix = get_option('prefix')
 
 ####################
 # Global arguments #
@@ -84,9 +86,24 @@ if cc.has_argument('-fmacro-prefix-map=/prefix/to/hide=')
 endif
 
 
-##############
-# Definition #
-##############
+########
+# Data #
+########
+
+icons = {
+  'close.svg' : 'ZEN_CLOSE_ICON',
+}
+
+icon_install_dir = datadir / 'zen' / 'icons'
+foreach filename, definition : icons
+  file = 'assets' / 'icons' / filename
+
+  install_data(file, install_dir: icon_install_dir)
+
+  installed_path = prefix / icon_install_dir / filename
+
+  cdata.set_quoted(definition, installed_path)
+endforeach
 
 cdata.set_quoted('ZEN_VERSION', meson.project_version())
 cdata.set_quoted('ZEN_NAME', meson.project_name())
@@ -128,7 +145,10 @@ xkbcommon_dep = dependency('xkbcommon')
 
 subdir('protocol')
 wlroots_dep = declare_dependency(
-  dependencies: dependency('wlroots', version: wlroots_req),
+  dependencies: [
+    dependency('wlroots', version: wlroots_req),
+    wayland_server_dep
+  ],
   sources: wlroots_srcs,
 )
 

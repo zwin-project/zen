@@ -8,11 +8,12 @@
 
 #include "zen-desktop/shell.h"
 #include "zen-desktop/theme.h"
+#include "zen-desktop/ui/decoration/close-button.h"
 #include "zen/backend.h"
 #include "zen/server.h"
 #include "zen/snode.h"
 
-struct wlr_texture *
+static struct wlr_texture *
 zn_ui_header_bar_get_texture(void *user_data)
 {
   struct zn_ui_header_bar *self = user_data;
@@ -138,9 +139,19 @@ out:
 void
 zn_ui_header_bar_set_size(struct zn_ui_header_bar *self, vec2 size)
 {
+  struct zn_theme *theme = zn_desktop_shell_get_theme();
+
   glm_vec2_copy(size, self->size);
 
   zn_ui_header_bar_update_texture(self);
+
+  float button_size = theme->size.header_bar.close_button;
+
+  zn_ui_close_button_set_size(self->close_button, button_size);
+
+  zn_snode_set_position(self->close_button->snode, self->snode,
+      (vec2){size[0] - button_size * 1.5F - theme->radius.header_bar.corner,
+          (size[1] - button_size) / 2});
 }
 
 void
@@ -160,19 +171,27 @@ zn_ui_header_bar_create(void)
     goto err;
   }
 
+  glm_vec2_copy(GLM_VEC2_ZERO, self->size);
+  wl_signal_init(&self->events.pressed);
+  self->texture = NULL;
+  self->focused = false;
+
   self->snode = zn_snode_create(self, &snode_implementation);
   if (self->snode == NULL) {
     zn_error("Failed to create a snode");
     goto err_free;
   }
 
-  glm_vec2_copy(GLM_VEC2_ZERO, self->size);
-  wl_signal_init(&self->events.pressed);
-
-  self->texture = NULL;
-  self->focused = false;
+  self->close_button = zn_ui_close_button_create();
+  if (self->close_button == NULL) {
+    zn_error("Failed to create a close button");
+    goto err_snode;
+  }
 
   return self;
+
+err_snode:
+  zn_snode_destroy(self->snode);
 
 err_free:
   free(self);
@@ -189,6 +208,8 @@ zn_ui_header_bar_destroy(struct zn_ui_header_bar *self)
   if (self->texture) {
     wlr_texture_destroy(self->texture);
   }
+
+  zn_ui_close_button_destroy(self->close_button);
   wl_list_remove(&self->events.pressed.listener_list);
   zn_snode_destroy(self->snode);
   free(self);

@@ -17,9 +17,12 @@ zn_theme_create(void)
   zn_color_init(&self->color.header_bar.active_reflection, 0x111f4dff);
   zn_color_init(&self->color.header_bar.inactive_reflection, 0x878ea5ff);
 
+  zn_icon_init(&self->icon.header_bar.close, ZEN_CLOSE_ICON);
+
   self->radius.header_bar.corner = 8.F;
 
   self->size.header_bar.height = 30.F;
+  self->size.header_bar.close_button = 20.F;
 
   zn_drop_shadow_init(
       &self->shadow.view, 35.F, 0.45F, self->radius.header_bar.corner);
@@ -37,6 +40,8 @@ zn_theme_destroy(struct zn_theme *self)
   zn_color_fini(&self->color.header_bar.inactive);
   zn_color_fini(&self->color.header_bar.active_reflection);
   zn_color_fini(&self->color.header_bar.inactive_reflection);
+
+  zn_icon_fini(&self->icon.header_bar.close);
 
   zn_drop_shadow_fini(&self->shadow.view);
 

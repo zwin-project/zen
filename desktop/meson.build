@@ -12,6 +12,7 @@ _zen_desktop_srcs = [
   'src/shell.c',
 
   'src/ui/decoration.c',
+  'src/ui/decoration/close-button.c',
   'src/ui/decoration/edge.c',
   'src/ui/decoration/header-bar.c',
   'src/ui/decoration/shadow.c',
