@@ -1,6 +1,5 @@
 _zen_common_srcs = [
   'src/cairo/rounded.c',
-  'src/color.c',
   'src/log.c',
   'src/signal.c',
   'src/terminate.c',
@@ -31,7 +30,3 @@ zen_common_dep = declare_dependency(
   link_with: _zen_common_lib,
   include_directories: _zen_common_inc,
 )
-
-if get_option('tests')
-  subdir('tests')
-endif

@@ -27,6 +27,8 @@ void zn_desktop_shell_start_cursor_grab(
 
 void zn_desktop_shell_end_cursor_grab(struct zn_desktop_shell *self);
 
+struct zn_theme *zn_desktop_shell_get_theme(void);
+
 struct zn_desktop_shell *zn_desktop_shell_get_singleton(void);
 
 struct zn_desktop_shell *zn_desktop_shell_create(void);

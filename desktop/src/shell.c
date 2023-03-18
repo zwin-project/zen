@@ -128,6 +128,12 @@ zn_desktop_shell_end_cursor_grab(struct zn_desktop_shell *self)
   zn_cursor_grab_pointer_rebase(self->cursor_grab);
 }
 
+struct zn_theme *
+zn_desktop_shell_get_theme(void)
+{
+  return zn_desktop_shell_get_singleton()->theme;
+}
+
 struct zn_desktop_shell *
 zn_desktop_shell_get_singleton(void)
 {

@@ -3,8 +3,8 @@
 
 TEST(rgb_to_hsl)
 {
-  vec3 rgb;
-  vec3 hsl;
+  vec3 rgb = GLM_VEC3_ZERO_INIT;
+  vec3 hsl = GLM_VEC3_ZERO_INIT;
 
   rgb[0] = (float)0xa2 / 0xff;
   rgb[1] = (float)0x3a / 0xff;
@@ -23,8 +23,8 @@ TEST(rgb_to_hsl)
 
 TEST(hsl_to_rgb)
 {
-  vec3 rgb;
-  vec3 hsl;
+  vec3 rgb = GLM_VEC3_ZERO_INIT;
+  vec3 hsl = GLM_VEC3_ZERO_INIT;
 
   hsl[0] = (float)325 / 360;
   hsl[1] = (float)80 / 100;
@@ -44,8 +44,8 @@ TEST(hsl_to_rgb)
 void
 check(vec3 hsl)
 {
-  vec3 rgb;
-  vec3 hsl_check;
+  vec3 rgb = GLM_VEC3_ZERO_INIT;
+  vec3 hsl_check = GLM_VEC3_ZERO_INIT;
   hsl_to_rgb(hsl, rgb);
   rgb_to_hsl(rgb, hsl_check);
 
