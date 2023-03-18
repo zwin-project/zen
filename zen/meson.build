@@ -34,7 +34,7 @@ _zen_deps = [
   xkbcommon_dep,
 ] + _zen_pub_deps
 
-subdir('src/backend')
+subdir('src/backend/screen')
 
 _zen_deps += zen_backend_dep
 

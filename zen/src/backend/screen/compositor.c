@@ -1,4 +1,4 @@
-#include "backend/compositor.h"
+#include "compositor.h"
 
 #include <wlr/types/wlr_layer_shell_v1.h>
 
