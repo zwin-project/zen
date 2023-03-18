@@ -16,6 +16,7 @@ zn_theme_create(void)
   zn_color_init(&self->color.header_bar.inactive, 0x596383ff);
   zn_color_init(&self->color.header_bar.active_reflection, 0x111f4dff);
   zn_color_init(&self->color.header_bar.inactive_reflection, 0x878ea5ff);
+  zn_color_init(&self->color.header_bar.close_button.hover, 0x596383ff);
 
   zn_icon_init(&self->icon.header_bar.close, ZEN_CLOSE_ICON);
 

@@ -1,6 +1,8 @@
 subdir('theme')
 
 _zen_desktop_srcs = [
+  'src/animation.c',
+
   'src/cursor-grab.c',
   'src/cursor-grab/default.c',
   'src/cursor-grab/down.c',

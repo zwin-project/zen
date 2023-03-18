@@ -11,6 +11,9 @@ struct zn_theme {
       struct zn_color inactive;
       struct zn_color active_reflection;
       struct zn_color inactive_reflection;
+      struct {
+        struct zn_color hover;
+      } close_button;
     } header_bar;
   } color;
 

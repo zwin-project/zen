@@ -24,6 +24,12 @@ zn_view_configure_size(struct zn_view *self, vec2 size)
 }
 
 void
+zn_view_close(struct zn_view *self)
+{
+  self->impl->close(self->impl_data);
+}
+
+void
 zn_view_notify_resized(struct zn_view *self, vec2 size)
 {
   struct zn_view_resized_event event;

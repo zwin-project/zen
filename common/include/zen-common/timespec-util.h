@@ -34,6 +34,19 @@ timespec_sub(
 }
 
 /**
+ * a - b
+ *
+ * \return milliseconds
+ */
+UNUSED static inline int64_t
+timespec_sub_to_msec(struct timespec *a, struct timespec *b)
+{
+  int64_t sec = (int64_t)a->tv_sec - (int64_t)b->tv_sec;
+  int64_t nsec = (int64_t)a->tv_nsec - (int64_t)b->tv_nsec;
+  return sec * MSEC_PER_SEC + nsec / NSEC_PER_MSEC;
+}
+
+/**
  * Convert timespec to nanoseconds
  *
  * \param a timespec
