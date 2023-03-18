@@ -1,4 +1,4 @@
-#include "backend.h"
+#include "default-backend.h"
 
 #include <wayland-server-core.h>
 #include <wayland-util.h>
@@ -7,10 +7,10 @@
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_output.h>
 
-#include "compositor.h"
-#include "keyboard.h"
-#include "output.h"
-#include "pointer.h"
+#include "screen/compositor.h"
+#include "screen/keyboard.h"
+#include "screen/output.h"
+#include "screen/pointer.h"
 #include "seat.h"
 #include "zen-common/log.h"
 #include "zen-common/signal.h"

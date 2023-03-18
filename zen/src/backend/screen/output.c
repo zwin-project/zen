@@ -11,8 +11,8 @@
 #include <wlr/types/wlr_matrix.h>
 #include <wlr/types/wlr_output_damage.h>
 
-#include "backend.h"
 #include "compositor.h"
+#include "default-backend.h"
 #include "layer-shell.h"
 #include "zen-common/log.h"
 #include "zen-common/signal.h"

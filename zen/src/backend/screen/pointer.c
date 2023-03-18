@@ -4,8 +4,8 @@
 #include <wayland-util.h>
 #include <wlr/types/wlr_pointer.h>
 
-#include "backend.h"
 #include "cursor.h"
+#include "default-backend.h"
 #include "seat.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"

@@ -2,7 +2,7 @@
 
 #include <cglm/vec2.h>
 
-#include "backend.h"
+#include "default-backend.h"
 #include "surface-snode.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"

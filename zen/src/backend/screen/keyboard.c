@@ -2,7 +2,7 @@
 
 #include <wlr/types/wlr_keyboard.h>
 
-#include "backend.h"
+#include "default-backend.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 #include "zen/seat.h"

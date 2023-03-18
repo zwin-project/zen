@@ -1,13 +1,14 @@
 _zen_backend_srcs = [
-  'backend.c',
-  'compositor.c',
-  'keyboard.c',
-  'layer-shell.c',
-  'layer-surface.c',
-  'output.c',
-  'pointer.c',
-  'surface-snode.c',
-  'xwayland-surface.c',
+  'default-backend.c',
+
+  'screen/compositor.c',
+  'screen/keyboard.c',
+  'screen/layer-shell.c',
+  'screen/layer-surface.c',
+  'screen/output.c',
+  'screen/pointer.c',
+  'screen/surface-snode.c',
+  'screen/xwayland-surface.c',
 ]
 
 _zen_backend_lib = static_library(
