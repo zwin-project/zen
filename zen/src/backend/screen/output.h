@@ -5,11 +5,11 @@
 #include <wlr/types/wlr_output_damage.h>
 
 struct zn_screen;
-struct zn_screen_backend;
+struct zn_layer_shell;
 
 struct zn_output {
-  struct zn_screen *screen;                  // @nonnull, @owning
-  struct zn_screen_backend *screen_backend;  // @nonnull, @owning
+  struct zn_screen *screen;            // @nonnull, @owning
+  struct zn_layer_shell *layer_shell;  // @nonnull, @owning
 
   struct wlr_output *wlr_output;  // @nonnull, @outlive
 

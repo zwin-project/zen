@@ -1,4 +1,4 @@
-#include "screen-backend.h"
+#include "layer-shell.h"
 
 #include <cglm/vec2.h>
 
@@ -147,7 +147,7 @@ calculate_surface_box(
 }
 
 static void
-zn_screen_backend_arrange_layer(struct zn_screen_backend *self,
+zn_layer_shell_arrange_layer(struct zn_layer_shell *self,
     enum zwlr_layer_shell_v1_layer layer, struct wlr_box *usable_area,
     bool exclusive)
 {
@@ -198,7 +198,7 @@ zn_screen_backend_arrange_layer(struct zn_screen_backend *self,
 }
 
 static void
-zn_screen_backend_arrange_layers(struct zn_screen_backend *self)
+zn_layer_shell_arrange_layers(struct zn_layer_shell *self)
 {
   struct wlr_box usable_area = {0};
   wlr_output_effective_resolution(
@@ -206,41 +206,41 @@ zn_screen_backend_arrange_layers(struct zn_screen_backend *self)
 
   // Arrange exclusive surfaces from top to bottom
   for (int i = 3; i >= 0; i--) {
-    zn_screen_backend_arrange_layer(self, i, &usable_area, true);
+    zn_layer_shell_arrange_layer(self, i, &usable_area, true);
   }
 
   // TODO(@Aki-7): Notify screen the usable area change
 
   // Arrange non-exclusive surfaces from top to bottom
   for (int i = 3; i >= 0; i--) {
-    zn_screen_backend_arrange_layer(self, i, &usable_area, false);
+    zn_layer_shell_arrange_layer(self, i, &usable_area, false);
   }
 
   // TODO(@Aki-7): Configure keyboard interactivity
 }
 
 void
-zn_screen_backend_add_layer_surface(struct zn_screen_backend *self,
+zn_layer_shell_add_layer_surface(struct zn_layer_shell *self,
     struct zn_layer_surface *layer_surface,
     enum zwlr_layer_shell_v1_layer layer)
 {
   zn_snode_set_position(
       layer_surface->snode, self->layers[layer], GLM_VEC2_ZERO);
 
-  zn_screen_backend_arrange_layers(self);
+  zn_layer_shell_arrange_layers(self);
 }
 
 struct zn_snode *
-zn_screen_backend_get_layer(
-    struct zn_screen_backend *self, enum zwlr_layer_shell_v1_layer layer)
+zn_layer_shell_get_layer(
+    struct zn_layer_shell *self, enum zwlr_layer_shell_v1_layer layer)
 {
   return self->layers[layer];
 }
 
-struct zn_screen_backend *
-zn_screen_backend_create(struct zn_output *output)
+struct zn_layer_shell *
+zn_layer_shell_create(struct zn_output *output)
 {
-  struct zn_screen_backend *self = zalloc(sizeof *self);
+  struct zn_layer_shell *self = zalloc(sizeof *self);
   if (self == NULL) {
     zn_error("Failed to allocate memory");
     goto err;
@@ -272,7 +272,7 @@ err:
 }
 
 void
-zn_screen_backend_destroy(struct zn_screen_backend *self)
+zn_layer_shell_destroy(struct zn_layer_shell *self)
 {
   for (int i = 0; i < 4; i++) {
     zn_snode_destroy(self->layers[i]);

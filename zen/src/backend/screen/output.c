@@ -13,7 +13,7 @@
 
 #include "backend.h"
 #include "compositor.h"
-#include "screen-backend.h"
+#include "layer-shell.h"
 #include "zen-common/log.h"
 #include "zen-common/signal.h"
 #include "zen-common/util.h"
@@ -208,7 +208,7 @@ static struct zn_snode *
 zn_output_get_layer(void *impl_data, enum zwlr_layer_shell_v1_layer layer)
 {
   struct zn_output *self = impl_data;
-  return zn_screen_backend_get_layer(self->screen_backend, layer);
+  return zn_layer_shell_get_layer(self->layer_shell, layer);
 }
 
 const struct zn_screen_interface screen_implementation = {
@@ -279,16 +279,16 @@ zn_output_create(struct wlr_output *wlr_output)
   self->wlr_output = wlr_output;
   wlr_output->data = self;
 
-  self->screen_backend = zn_screen_backend_create(self);
-  if (self->screen_backend == NULL) {
-    zn_error("Failed to create a zn_screen_backend");
+  self->layer_shell = zn_layer_shell_create(self);
+  if (self->layer_shell == NULL) {
+    zn_error("Failed to create a zn_layer_shell");
     goto err_free;
   }
 
   self->screen = zn_screen_create(self, &screen_implementation);
   if (self->screen == NULL) {
     zn_error("Failed to create a zn_screen");
-    goto err_screen_backend;
+    goto err_layer_shell;
   }
 
   self->damage = wlr_output_damage_create(wlr_output);
@@ -345,8 +345,8 @@ err_damage:
 err_screen:
   zn_screen_destroy(self->screen);
 
-err_screen_backend:
-  zn_screen_backend_destroy(self->screen_backend);
+err_layer_shell:
+  zn_layer_shell_destroy(self->layer_shell);
 
 err_free:
   free(self);
@@ -372,6 +372,6 @@ zn_output_destroy(struct zn_output *self)
    */
   // wl_list_remove(&self->damage_frame_listener.link);
 
-  zn_screen_backend_destroy(self->screen_backend);
+  zn_layer_shell_destroy(self->layer_shell);
   free(self);
 }

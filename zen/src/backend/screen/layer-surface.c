@@ -3,8 +3,8 @@
 #include <cglm/vec2.h>
 #include <zen/snode.h>
 
+#include "layer-shell.h"
 #include "output.h"
-#include "screen-backend.h"
 #include "surface-snode.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
@@ -58,7 +58,7 @@ zn_layer_surface_handle_surface_commit(
   bool layer_changed = self->layer != self->wlr_layer_surface->current.layer;
 
   if (layer_changed) {
-    zn_screen_backend_add_layer_surface(self->output->screen_backend, self,
+    zn_layer_shell_add_layer_surface(self->output->layer_shell, self,
         self->wlr_layer_surface->current.layer);
     zn_surface_snode_damage_whole(self->surface_snode);
   } else {

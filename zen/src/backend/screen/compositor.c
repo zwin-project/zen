@@ -2,9 +2,9 @@
 
 #include <wlr/types/wlr_layer_shell_v1.h>
 
+#include "layer-shell.h"
 #include "layer-surface.h"
 #include "output.h"
-#include "screen-backend.h"
 #include "xwayland-surface.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
@@ -58,8 +58,8 @@ zn_compositor_handle_new_layer_surface(
     return;
   }
 
-  zn_screen_backend_add_layer_surface(
-      output->screen_backend, layer_surface, wlr_layer_surface->current.layer);
+  zn_layer_shell_add_layer_surface(
+      output->layer_shell, layer_surface, wlr_layer_surface->current.layer);
 }
 
 static void
