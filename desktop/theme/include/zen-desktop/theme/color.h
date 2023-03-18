@@ -14,9 +14,6 @@ void zn_color_set_lightness(struct zn_color *self, float lightness);
 
 void zn_color_set_cairo_source(struct zn_color *self, cairo_t *cr);
 
-void zn_color_init(
-    struct zn_color *self, uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+void zn_color_init(struct zn_color *self, uint32_t rgba);
 
-struct zn_color *zn_color_create(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
-
-void zn_color_destroy(struct zn_color *self);
+void zn_color_fini(struct zn_color *self);

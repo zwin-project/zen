@@ -1,3 +1,5 @@
+subdir('theme')
+
 _zen_desktop_srcs = [
   'src/cursor-grab.c',
   'src/cursor-grab/default.c',
@@ -8,7 +10,6 @@ _zen_desktop_srcs = [
   'src/screen.c',
   'src/screen-layout.c',
   'src/shell.c',
-  'src/theme.c',
 
   'src/ui/decoration.c',
   'src/ui/decoration/edge.c',
@@ -29,6 +30,7 @@ _zen_desktop_deps = [
   rsvg_dep,
   zen_common_dep,
   zen_dep,
+  zen_desktop_theme_dep,
 ]
 
 _zen_desktop_lib = static_library(

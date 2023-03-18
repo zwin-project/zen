@@ -5,6 +5,7 @@
 #include "cairo.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
+#include "zen-desktop/shell.h"
 #include "zen-desktop/theme.h"
 #include "zen/backend.h"
 #include "zen/server.h"
@@ -35,10 +36,10 @@ zn_ui_decoration_shadow_set_size(
     struct zn_ui_decoration_shadow *self, vec2 size)
 {
   struct zn_server *server = zn_server_get_singleton();
-  struct zn_theme *theme = zn_theme_get();
+  struct zn_theme *theme = zn_desktop_shell_get_theme();
 
-  vec2 outer_box = {size[0] + (float)(2 * theme->shadow_blur),
-      size[1] + (float)(2 * theme->shadow_blur)};
+  vec2 outer_box = {size[0] + 2 * theme->shadow.view.blur,
+      size[1] + 2 * theme->shadow.view.blur};
 
   cairo_surface_t *surface = cairo_image_surface_create(
       CAIRO_FORMAT_ARGB32, (int)outer_box[0], (int)outer_box[1]);
@@ -54,13 +55,13 @@ zn_ui_decoration_shadow_set_size(
   }
 
   struct wlr_fbox box = {
-      .x = theme->shadow_blur,
-      .y = theme->shadow_blur,
+      .x = theme->shadow.view.blur,
+      .y = theme->shadow.view.blur,
       .width = size[0],
       .height = size[1],
   };
 
-  zn_theme_cairo_drop_shadow(theme, cr, &box);
+  zn_drop_shadow_render(&theme->shadow.view, cr, &box);
 
   if (self->texture) {
     zn_snode_damage_whole(self->image_snode);
@@ -104,9 +105,9 @@ zn_ui_decoration_shadow_create(void)
     goto err_snode;
   }
 
-  struct zn_theme *theme = zn_theme_get();
+  struct zn_theme *theme = zn_desktop_shell_get_theme();
   zn_snode_set_position(self->image_snode, self->snode,
-      (vec2){-(float)theme->shadow_blur, -(float)theme->shadow_blur});
+      (vec2){-theme->shadow.view.blur, -theme->shadow.view.blur});
 
   return self;
 

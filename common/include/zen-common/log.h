@@ -63,6 +63,16 @@ bool zn_assert_(bool condition, const char *format, ...) ATTRIB_PRINTF(2, 3);
   zn_assert_(cond, "[zen] [%s:%d] %s: " fmt, __FILE__, __LINE__, __func__, \
       ##__VA_ARGS__)
 
+#define zn_warn_once(fmt, ...)                                                \
+  {                                                                           \
+    static bool warned = false;                                               \
+    if (warned == false) {                                                    \
+      zn_log_(                                                                \
+          ZEN_WARN, "[zen] [%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__); \
+      warned = true;                                                          \
+    }                                                                         \
+  }
+
 #ifdef __cplusplus
 }
 #endif

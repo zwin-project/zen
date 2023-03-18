@@ -1,4 +1,4 @@
-#include "zen-common/color.h"
+#include "zen-desktop/theme/color.h"
 
 #include <cglm/vec3.h>
 
@@ -101,33 +101,14 @@ zn_color_set_cairo_source(struct zn_color *self, cairo_t *cr)
 }
 
 void
-zn_color_init(struct zn_color *self, uint8_t r, uint8_t g, uint8_t b, uint8_t a)
+zn_color_init(struct zn_color *self, uint32_t rgba)
 {
-  self->rgba[0] = (float)r / 0xff;
-  self->rgba[1] = (float)g / 0xff;
-  self->rgba[2] = (float)b / 0xff;
-  self->rgba[3] = (float)a / 0xff;
-}
-
-struct zn_color *
-zn_color_create(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
-{
-  struct zn_color *self = zalloc(sizeof *self);
-  if (self == NULL) {
-    zn_error("Failed to allocate memory");
-    goto err;
-  }
-
-  zn_color_init(self, r, g, b, a);
-
-  return self;
-
-err:
-  return NULL;
+  self->rgba[0] = (float)(rgba >> 24) / 0xff;
+  self->rgba[1] = (float)((rgba >> 16) & 0xff) / 0xff;
+  self->rgba[2] = (float)((rgba >> 8) & 0xff) / 0xff;
+  self->rgba[3] = (float)(rgba & 0xff) / 0xff;
 }
 
 void
-zn_color_destroy(struct zn_color *self)
-{
-  free(self);
-}
+zn_color_fini(struct zn_color *self UNUSED)
+{}

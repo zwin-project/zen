@@ -6,6 +6,7 @@
 #include <zen-common/log.h>
 #include <zen-common/util.h>
 
+#include "zen-desktop/shell.h"
 #include "zen-desktop/theme.h"
 #include "zen/backend.h"
 #include "zen/server.h"
@@ -51,18 +52,19 @@ static const struct zn_snode_interface snode_implementation = {
 };
 
 static void
-zn_ui_header_bar_render(
-    struct zn_ui_header_bar *self, cairo_t *cr, struct zn_theme *theme)
+zn_ui_header_bar_render(struct zn_ui_header_bar *self, cairo_t *cr)
 {
-  float r = theme->frame_radius;
+  struct zn_theme *theme = zn_desktop_shell_get_theme();
+
+  float r = theme->radius.header_bar.corner;
   float w = self->size[0];
   float h = self->size[1];
   float reflection_offset = 1.5F;
 
   if (self->focused) {
-    zn_color_set_cairo_source(&theme->active_header_reflection_color, cr);
+    zn_color_set_cairo_source(&theme->color.header_bar.active_reflection, cr);
   } else {
-    zn_color_set_cairo_source(&theme->inactive_header_reflection_color, cr);
+    zn_color_set_cairo_source(&theme->color.header_bar.inactive_reflection, cr);
   }
 
   cairo_move_to(cr, 0, h);
@@ -76,9 +78,9 @@ zn_ui_header_bar_render(
   cairo_fill(cr);
 
   if (self->focused) {
-    zn_color_set_cairo_source(&theme->active_header_color, cr);
+    zn_color_set_cairo_source(&theme->color.header_bar.active, cr);
   } else {
-    zn_color_set_cairo_source(&theme->inactive_header_color, cr);
+    zn_color_set_cairo_source(&theme->color.header_bar.inactive, cr);
   }
 
   cairo_move_to(cr, 0, h);
@@ -96,7 +98,6 @@ static void
 zn_ui_header_bar_update_texture(struct zn_ui_header_bar *self)
 {
   struct zn_server *server = zn_server_get_singleton();
-  struct zn_theme *theme = zn_theme_get();
 
   cairo_surface_t *surface = cairo_image_surface_create(
       CAIRO_FORMAT_ARGB32, (int)self->size[0], (int)self->size[1]);
@@ -111,7 +112,7 @@ zn_ui_header_bar_update_texture(struct zn_ui_header_bar *self)
     goto out_cairo;
   }
 
-  zn_ui_header_bar_render(self, cr, theme);
+  zn_ui_header_bar_render(self, cr);
 
   if (self->texture) {
     zn_snode_damage_whole(self->snode);

@@ -4,6 +4,7 @@
 #include <zen-common/log.h>
 #include <zen-common/util.h>
 
+#include "zen-desktop/shell.h"
 #include "zen-desktop/theme.h"
 #include "zen-desktop/ui/decoration/edge.h"
 #include "zen-desktop/ui/decoration/header-bar.h"
@@ -19,20 +20,19 @@ zn_ui_decoration_set_focus(struct zn_ui_decoration *self, bool focused)
 void
 zn_ui_decoration_set_content_size(struct zn_ui_decoration *self, vec2 size)
 {
-  struct zn_theme *theme = zn_theme_get();
+  struct zn_theme *theme = zn_desktop_shell_get_theme();
+  float header_height = theme->size.header_bar.height;
 
-  zn_ui_header_bar_set_size(
-      self->header_bar, (vec2){size[0], (float)theme->header_bar_height});
+  zn_ui_header_bar_set_size(self->header_bar, (vec2){size[0], header_height});
 
   glm_vec2_copy(size, self->content_size);
-  glm_vec2_copy(
-      (vec2){0, (float)theme->header_bar_height}, self->content_offset);
+  glm_vec2_copy((vec2){0, header_height}, self->content_offset);
 
   zn_ui_decoration_edge_set_size(
-      self->edge, (vec2){size[0], size[1] + (float)theme->header_bar_height});
+      self->edge, (vec2){size[0], size[1] + header_height});
 
   zn_ui_decoration_shadow_set_size(
-      self->shadow, (vec2){size[0], size[1] + (float)theme->header_bar_height});
+      self->shadow, (vec2){size[0], size[1] + header_height});
 }
 
 struct zn_ui_decoration *
