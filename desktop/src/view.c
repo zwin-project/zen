@@ -9,6 +9,7 @@
 #include "zen-desktop/cursor-grab/move.h"
 #include "zen-desktop/cursor-grab/resize.h"
 #include "zen-desktop/ui/decoration.h"
+#include "zen-desktop/ui/decoration/close-button.h"
 #include "zen-desktop/ui/decoration/edge.h"
 #include "zen-desktop/ui/decoration/header-bar.h"
 #include "zen/cursor.h"
@@ -94,6 +95,16 @@ zn_desktop_view_handle_edge_pressed(struct wl_listener *listener, void *data)
   struct zn_ui_decoration_edge_pressed_event *event = data;
 
   zn_cursor_resize_grab_start(self, event->edges);
+}
+
+static void
+zn_desktop_view_handle_close_button_clicked(
+    struct wl_listener *listener, void *data UNUSED)
+{
+  struct zn_desktop_view *self =
+      zn_container_of(listener, self, close_button_clicked_listener);
+
+  zn_view_close(self->zn_view);
 }
 
 static void
@@ -204,6 +215,11 @@ zn_desktop_view_create(struct zn_view *zn_view)
   wl_signal_add(
       &self->decoration->edge->events.pressed, &self->edge_pressed_listener);
 
+  self->close_button_clicked_listener.notify =
+      zn_desktop_view_handle_close_button_clicked;
+  wl_signal_add(&self->decoration->header_bar->close_button->events.clicked,
+      &self->close_button_clicked_listener);
+
   self->zn_view_resized_listener.notify =
       zn_desktop_view_handle_zn_view_resized;
   wl_signal_add(&zn_view->events.resized, &self->zn_view_resized_listener);
@@ -252,6 +268,7 @@ zn_desktop_view_destroy(struct zn_desktop_view *self)
   wl_list_remove(&self->zn_view_move_request_listener.link);
   wl_list_remove(&self->zn_view_unmap_listener.link);
   wl_list_remove(&self->zn_view_resized_listener.link);
+  wl_list_remove(&self->close_button_clicked_listener.link);
   wl_list_remove(&self->edge_pressed_listener.link);
   wl_list_remove(&self->edge_hover_listener.link);
   wl_list_remove(&self->header_pressed_listener.link);

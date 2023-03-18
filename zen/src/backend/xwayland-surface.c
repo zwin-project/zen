@@ -50,9 +50,18 @@ zn_xwayland_surface_configure_size(void *impl_data, vec2 size)
       (int16_t)fbox.y, (uint16_t)size[0], (uint16_t)size[1]);
 }
 
+static void
+zn_xwayland_surface_close(void *impl_data)
+{
+  struct zn_xwayland_surface *self = impl_data;
+
+  wlr_xwayland_surface_close(self->wlr_xsurface);
+}
+
 static const struct zn_view_interface view_implementation = {
     .set_focus = zn_xwayland_surface_set_focus,
     .configure_size = zn_xwayland_surface_configure_size,
+    .close = zn_xwayland_surface_close,
 };
 
 static void

@@ -83,6 +83,10 @@ zn_cursor_set_xcursor(struct zn_cursor *self, const char *name)
     return false;
   }
 
+  if (self->xcursor_texture) {
+    wlr_texture_destroy(self->xcursor_texture);
+  }
+
   struct wlr_xcursor_image *image = xcursor->images[0];
   self->xcursor_texture = zn_backend_create_wlr_texture_from_pixels(
       server->backend, DRM_FORMAT_ARGB8888, image->width * 4, image->width,
@@ -181,6 +185,7 @@ zn_cursor_handle_server_end(struct wl_listener *listener, void *data UNUSED)
   struct zn_cursor *self = zn_container_of(listener, self, server_end_listener);
   if (self->xcursor_texture) {
     wlr_texture_destroy(self->xcursor_texture);
+    self->xcursor_texture = NULL;
   }
 }
 

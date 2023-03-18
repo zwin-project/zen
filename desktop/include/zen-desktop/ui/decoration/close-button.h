@@ -9,7 +9,15 @@ struct zn_ui_close_button {
 
   struct wlr_texture *texture;  // @nullable, @owning
 
+  struct zn_animation *hover_animation;  // @nonnull, @owning
+
+  vec2 cursor_position;
+
+  bool pressing;
+
   float size;
+
+  struct wl_listener hover_animation_listener;
 
   struct {
     struct wl_signal clicked;  // (NULL)

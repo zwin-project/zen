@@ -22,6 +22,7 @@ struct zn_desktop_view {
   struct wl_listener header_pressed_listener;
   struct wl_listener edge_hover_listener;
   struct wl_listener edge_pressed_listener;
+  struct wl_listener close_button_clicked_listener;
 
   struct {
     struct wl_signal destroy;

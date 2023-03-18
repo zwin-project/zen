@@ -9,6 +9,7 @@
 struct zn_view_interface {
   void (*set_focus)(void *impl_data, bool focused);
   void (*configure_size)(void *impl_data, vec2 size);
+  void (*close)(void *impl_data);
 };
 
 enum zn_view_decoration_mode {
@@ -51,6 +52,8 @@ struct zn_view {
 void zn_view_set_focus(struct zn_view *self, bool focused);
 
 void zn_view_configure_size(struct zn_view *self, vec2 size);
+
+void zn_view_close(struct zn_view *self);
 
 /// Called by the impl object
 void zn_view_notify_resized(struct zn_view *self, vec2 size);
