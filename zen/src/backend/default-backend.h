@@ -4,6 +4,7 @@
 
 struct zn_compositor;
 struct zn_view;
+struct zn_xr;
 
 struct zn_default_backend {
   struct zn_backend base;
@@ -18,10 +19,13 @@ struct zn_default_backend {
 
   struct zn_compositor *compositor;  // @nonnull, @owning
 
+  struct zn_xr *xr;  // @nonnull, @owing
+
   struct wl_list input_device_list;  // zn_input_device_base::link
 
   struct wl_listener new_input_listener;
   struct wl_listener new_output_listener;
+  struct wl_listener new_xr_system_listener;
 };
 
 struct zn_default_backend *zn_default_backend_get(struct zn_backend *base);

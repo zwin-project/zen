@@ -7,6 +7,7 @@
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_output.h>
 
+#include "immersive/xr.h"
 #include "screen/compositor.h"
 #include "screen/keyboard.h"
 #include "screen/output.h"
@@ -17,6 +18,7 @@
 #include "zen-common/util.h"
 #include "zen/server.h"
 #include "zen/wlr/render/glew.h"
+#include "zen/xr-system.h"
 
 static void zn_default_backend_destroy(struct zn_default_backend *self);
 
@@ -130,6 +132,17 @@ zn_default_backend_handle_new_output(struct wl_listener *listener, void *data)
   wl_signal_emit(&self->base.events.new_screen, output->screen);
 }
 
+static void
+zn_default_backend_handle_new_xr_system(
+    struct wl_listener *listener, void *data)
+{
+  struct zn_default_backend *self =
+      zn_container_of(listener, self, new_xr_system_listener);
+  struct zn_xr_system *xr_system = data;
+
+  wl_signal_emit(&self->base.events.new_xr_system, xr_system);
+}
+
 static struct wlr_texture *
 zn_default_backend_create_wlr_texture_from_pixels(struct zn_backend *base,
     uint32_t format, uint32_t stride, uint32_t width, uint32_t height,
@@ -186,6 +199,7 @@ zn_default_backend_create(struct wl_display *display, struct zn_seat *zn_seat)
   wl_signal_init(&self->base.events.new_screen);
   wl_signal_init(&self->base.events.view_mapped);
   wl_signal_init(&self->base.events.destroy);
+  wl_signal_init(&self->base.events.new_xr_system);
   self->base.impl = &implementation;
   self->display = display;
   wl_list_init(&self->input_device_list);
@@ -226,6 +240,12 @@ zn_default_backend_create(struct wl_display *display, struct zn_seat *zn_seat)
     goto err_wlr_allocator;
   }
 
+  self->xr = zn_xr_create(display);
+  if (self->xr == NULL) {
+    zn_error("Failed to create a xr instance");
+    goto err_compositor;
+  }
+
   wlr_xwayland_set_seat(self->compositor->xwayland, zn_seat->wlr_seat);
 
   self->new_output_listener.notify = zn_default_backend_handle_new_output;
@@ -236,7 +256,13 @@ zn_default_backend_create(struct wl_display *display, struct zn_seat *zn_seat)
   wl_signal_add(
       &self->wlr_backend->events.new_input, &self->new_input_listener);
 
+  self->new_xr_system_listener.notify = zn_default_backend_handle_new_xr_system;
+  wl_signal_add(&self->xr->events.new_system, &self->new_xr_system_listener);
+
   return &self->base;
+
+err_compositor:
+  zn_compositor_destroy(self->compositor);
 
 err_wlr_allocator:
   wlr_allocator_destroy(self->wlr_allocator);
@@ -259,8 +285,10 @@ zn_default_backend_destroy(struct zn_default_backend *self)
 {
   zn_signal_emit_mutable(&self->base.events.destroy, NULL);
 
+  wl_list_remove(&self->new_xr_system_listener.link);
   wl_list_remove(&self->new_input_listener.link);
   wl_list_remove(&self->new_output_listener.link);
+  zn_xr_destroy(self->xr);
   zn_compositor_destroy(self->compositor);
   wlr_allocator_destroy(self->wlr_allocator);
   wlr_renderer_destroy(self->wlr_renderer);
@@ -268,6 +296,7 @@ zn_default_backend_destroy(struct zn_default_backend *self)
     wlr_backend_destroy(self->wlr_backend);
   }
   wl_list_remove(&self->input_device_list);
+  wl_list_remove(&self->base.events.new_xr_system.listener_list);
   wl_list_remove(&self->base.events.destroy.listener_list);
   wl_list_remove(&self->base.events.view_mapped.listener_list);
   wl_list_remove(&self->base.events.new_screen.listener_list);

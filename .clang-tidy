@@ -12,6 +12,8 @@ Checks: "
 
   cppcoreguidelines-*,
   -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-pro-type-vararg,
+  -cppcoreguidelines-macro-usage,
 
   google-*,
 
@@ -19,6 +21,9 @@ Checks: "
   -misc-no-recursion,
 
   modernize-*,
+  -modernize-use-nodiscard,
+  -modernize-use-trailing-return-type,
+
   performance-*,
   portability-*,
 
@@ -28,5 +33,8 @@ Checks: "
 
   *-cloexec-*,
 "
+CheckOptions:
+- key:    'cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor'
+  value:  'true'
 WarningsAsErrors: '*'
 FormatStyle: file
