@@ -1,8 +1,8 @@
 #pragma once
 
-#include "common.h"
+#include "zen-common/cpp-util.h"
 
-namespace zen::xr {
+namespace zen::backend::immersive::remote {
 
 class Loop : public zen::remote::ILoop
 {
@@ -19,4 +19,4 @@ class Loop : public zen::remote::ILoop
   wl_event_loop *wl_loop_;  // @nonnull, @outlive
 };
 
-}  // namespace zen::xr
+}  // namespace zen::backend::immersive::remote

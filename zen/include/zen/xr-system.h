@@ -7,10 +7,6 @@ extern "C" {
 #endif
 
 struct zn_xr_system {
-  void *impl_data;
-
-  uint64_t handle;
-
   struct {
     struct wl_signal destroy;
   } events;

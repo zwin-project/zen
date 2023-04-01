@@ -10,6 +10,7 @@
 #include "zen-desktop/screen.h"
 #include "zen-desktop/theme.h"
 #include "zen-desktop/view.h"
+#include "zen-desktop/xr-system.h"
 #include "zen/backend.h"
 #include "zen/screen.h"
 #include "zen/seat.h"
@@ -19,6 +20,17 @@
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 static struct zn_desktop_shell *desktop_shell_singleton = NULL;
+
+static void
+zn_desktop_shell_handle_new_xr_system(
+    struct wl_listener *listener UNUSED, void *data)
+{
+  struct zn_server *server = zn_server_get_singleton();
+
+  struct zn_xr_system *zn_xr_system = data;
+
+  zn_desktop_xr_system_create(zn_xr_system, server->display);
+}
 
 static void
 zn_desktop_shell_handle_new_screen(struct wl_listener *listener, void *data)
@@ -174,6 +186,10 @@ zn_desktop_shell_create(void)
   }
   self->cursor_grab = &cursor_default_grab->base;
 
+  self->new_xr_system_listener.notify = zn_desktop_shell_handle_new_xr_system;
+  wl_signal_add(
+      &server->backend->events.new_xr_system, &self->new_xr_system_listener);
+
   self->new_screen_listener.notify = zn_desktop_shell_handle_new_screen;
   wl_signal_add(
       &server->backend->events.new_screen, &self->new_screen_listener);
@@ -229,6 +245,7 @@ zn_desktop_shell_destroy(struct zn_desktop_shell *self)
   wl_list_remove(&self->pointer_motion_listener.link);
   wl_list_remove(&self->seat_capabilities_listener.link);
   wl_list_remove(&self->new_screen_listener.link);
+  wl_list_remove(&self->new_xr_system_listener.link);
   zn_cursor_grab_destroy(self->cursor_grab);
   zn_screen_layout_destroy(self->screen_layout);
   zn_theme_destroy(self->theme);

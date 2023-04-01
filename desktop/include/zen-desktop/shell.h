@@ -12,6 +12,7 @@ struct zn_desktop_shell {
 
   struct zn_theme *theme;  // @nonnull, @owning
 
+  struct wl_listener new_xr_system_listener;
   struct wl_listener new_screen_listener;
   struct wl_listener seat_capabilities_listener;
   struct wl_listener pointer_motion_listener;

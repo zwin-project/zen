@@ -2,7 +2,7 @@
 
 #include "zen-common/terminate.h"
 
-namespace zen::xr {
+namespace zen::backend::immersive::remote {
 
 namespace {
 
@@ -74,4 +74,4 @@ Loop::Terminate()
   zn_terminate(EXIT_FAILURE);
 }
 
-}  // namespace zen::xr
+}  // namespace zen::backend::immersive::remote

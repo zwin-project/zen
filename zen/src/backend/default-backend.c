@@ -7,6 +7,7 @@
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_output.h>
 
+#include "immersive/xr-system-manager.h"
 #include "immersive/xr.h"
 #include "screen/compositor.h"
 #include "screen/keyboard.h"
@@ -257,7 +258,8 @@ zn_default_backend_create(struct wl_display *display, struct zn_seat *zn_seat)
       &self->wlr_backend->events.new_input, &self->new_input_listener);
 
   self->new_xr_system_listener.notify = zn_default_backend_handle_new_xr_system;
-  wl_signal_add(&self->xr->events.new_system, &self->new_xr_system_listener);
+  wl_signal_add(&self->xr->xr_system_manager->events.new_system,
+      &self->new_xr_system_listener);
 
   return &self->base;
 

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #ifdef __cplusplus
-extern "C" {
+#error "This header is not for C++"
 #endif
 
 /** Visibility attribute */
@@ -41,17 +41,3 @@ zalloc(size_t size)
 /** Retrieve a pointer to a containing struct */
 #define zn_container_of(ptr, sample, member) \
   (__typeof__(sample))((char *)(ptr)-offsetof(__typeof__(*(sample)), member))
-
-#ifdef __cplusplus
-
-#define DISABLE_MOVE_AND_COPY(Class)        \
-  Class(const Class &) = delete;            \
-  Class(Class &&) = delete;                 \
-  Class &operator=(const Class &) = delete; \
-  Class &operator=(Class &&) = delete
-
-#endif
-
-#ifdef __cplusplus
-}
-#endif
