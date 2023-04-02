@@ -4,6 +4,7 @@ _zen_backend_srcs = [
   'default-backend.c',
 
   'immersive/xr.c',
+  'immersive/xr-compositor.c',
 
   'screen/compositor.c',
   'screen/keyboard.c',
@@ -13,6 +14,9 @@ _zen_backend_srcs = [
   'screen/pointer.c',
   'screen/surface-snode.c',
   'screen/xwayland-surface.c',
+
+  protocols_code['zwin'],
+  protocols_server_header['zwin'],
 ]
 
 _zen_backend_deps = [

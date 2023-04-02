@@ -2,6 +2,8 @@
 
 #include <wayland-server-core.h>
 
+#include "zen-common/util.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -24,7 +26,7 @@ struct zn_xr_system_manager {
 struct zn_xr_system_manager *zn_xr_system_manager_create_remote(
     struct wl_display *display);
 
-inline void
+UNUSED static inline void
 zn_xr_system_manager_destroy(struct zn_xr_system_manager *self)
 {
   self->impl->destroy(self);

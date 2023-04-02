@@ -122,6 +122,7 @@ wayland_protocols_req = '>= 1.24'
 wlroots_req = ['>= 0.15', '< 0.16']
 zen_protocols_req = '0.1.0'
 zen_remote_server_req = '0.2.0'
+zwin_protocols_req = '0.1.0'
 
 
 glew_proj = subproject(
@@ -146,6 +147,7 @@ wayland_server_dep = dependency('wayland-server', version: wayland_req)
 xkbcommon_dep = dependency('xkbcommon')
 zen_protocols_dep = dependency('zen-protocols', version: zen_protocols_req)
 zen_remote_server_dep = dependency('zen-remote-server', version: zen_remote_server_req)
+zwin_protocols_dep = dependency('zwin-protocols', version: zwin_protocols_req)
 
 subdir('protocol')
 wlroots_dep = declare_dependency(

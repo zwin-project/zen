@@ -19,6 +19,11 @@ zn_mock_backend_create_wlr_texture_from_pixels(struct zn_backend *base UNUSED,
   return texture;
 }
 
+static void
+zn_mock_backend_set_xr_system(
+    struct zn_backend *base UNUSED, struct zn_xr_system *xr_system UNUSED)
+{}
+
 static bool
 zn_mock_backend_start(struct zn_backend *base UNUSED)
 {
@@ -39,6 +44,7 @@ zn_mock_backend_handle_destroy(struct zn_backend *base)
 static const struct zn_backend_interface implementation = {
     .create_wlr_texture_from_pixels =
         zn_mock_backend_create_wlr_texture_from_pixels,
+    .set_xr_system = zn_mock_backend_set_xr_system,
     .start = zn_mock_backend_start,
     .stop = zn_mock_backend_stop,
     .destroy = zn_mock_backend_handle_destroy,

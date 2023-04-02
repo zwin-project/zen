@@ -2,6 +2,8 @@
 
 #include <wayland-server-core.h>
 
+#include "zen-common/util.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -33,7 +35,7 @@ struct zn_xr_system {
   } events;
 };
 
-inline void
+UNUSED static inline void
 zn_xr_system_connect(struct zn_xr_system *self)
 {
   self->impl->connect(self);

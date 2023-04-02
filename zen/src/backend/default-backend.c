@@ -7,6 +7,7 @@
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_output.h>
 
+#include "immersive/xr-compositor.h"
 #include "immersive/xr-system-manager.h"
 #include "immersive/xr.h"
 #include "screen/compositor.h"
@@ -61,6 +62,25 @@ zn_default_backend_notify_view_mapped(
     struct zn_default_backend *self, struct zn_view *view)
 {
   wl_signal_emit(&self->base.events.view_mapped, view);
+}
+
+/// @param xr_system is nullable
+static void
+zn_default_backend_set_xr_system(
+    struct zn_default_backend *self, struct zn_xr_system *xr_system)
+{
+  if (self->xr_compositor) {
+    wl_list_remove(&self->xr_compositor_destroy_listener.link);
+    wl_list_init(&self->xr_compositor_destroy_listener.link);
+    zn_xr_compositor_destroy(self->xr_compositor);
+    self->xr_compositor = NULL;
+  }
+
+  if (xr_system) {
+    self->xr_compositor = zn_xr_compositor_create(self->display, xr_system);
+    wl_signal_add(&self->xr_compositor->events.destroy,
+        &self->xr_compositor_destroy_listener);
+  }
 }
 
 static void
@@ -144,6 +164,16 @@ zn_default_backend_handle_new_xr_system(
   wl_signal_emit(&self->base.events.new_xr_system, xr_system);
 }
 
+static void
+zn_default_backend_handle_xr_compositor_destroy(
+    struct wl_listener *listener, void *data UNUSED)
+{
+  struct zn_default_backend *self =
+      zn_container_of(listener, self, xr_compositor_destroy_listener);
+
+  zn_default_backend_set_xr_system(self, NULL);
+}
+
 static struct wlr_texture *
 zn_default_backend_create_wlr_texture_from_pixels(struct zn_backend *base,
     uint32_t format, uint32_t stride, uint32_t width, uint32_t height,
@@ -156,6 +186,15 @@ zn_default_backend_create_wlr_texture_from_pixels(struct zn_backend *base,
 
   return wlr_texture_from_pixels(
       self->wlr_renderer, format, stride, width, height, data);
+}
+
+static void
+zn_default_backend_handle_set_xr_system(
+    struct zn_backend *base, struct zn_xr_system *xr_system)
+{
+  struct zn_default_backend *self = zn_container_of(base, self, base);
+
+  zn_default_backend_set_xr_system(self, xr_system);
 }
 
 static bool
@@ -183,6 +222,7 @@ zn_default_backend_handle_destroy(struct zn_backend *base)
 static const struct zn_backend_interface implementation = {
     .create_wlr_texture_from_pixels =
         zn_default_backend_create_wlr_texture_from_pixels,
+    .set_xr_system = zn_default_backend_handle_set_xr_system,
     .start = zn_default_backend_start,
     .stop = zn_default_backend_stop,
     .destroy = zn_default_backend_handle_destroy,
@@ -203,6 +243,7 @@ zn_default_backend_create(struct wl_display *display, struct zn_seat *zn_seat)
   wl_signal_init(&self->base.events.new_xr_system);
   self->base.impl = &implementation;
   self->display = display;
+  self->xr_compositor = NULL;
   wl_list_init(&self->input_device_list);
 
   self->wlr_backend = wlr_backend_autocreate(display);
@@ -261,6 +302,10 @@ zn_default_backend_create(struct wl_display *display, struct zn_seat *zn_seat)
   wl_signal_add(&self->xr->xr_system_manager->events.new_system,
       &self->new_xr_system_listener);
 
+  self->xr_compositor_destroy_listener.notify =
+      zn_default_backend_handle_xr_compositor_destroy;
+  wl_list_init(&self->xr_compositor_destroy_listener.link);
+
   return &self->base;
 
 err_compositor:
@@ -287,6 +332,11 @@ zn_default_backend_destroy(struct zn_default_backend *self)
 {
   zn_signal_emit_mutable(&self->base.events.destroy, NULL);
 
+  if (self->xr_compositor) {
+    zn_xr_compositor_destroy(self->xr_compositor);
+    self->xr_compositor = NULL;
+  }
+  wl_list_remove(&self->xr_compositor_destroy_listener.link);
   wl_list_remove(&self->new_xr_system_listener.link);
   wl_list_remove(&self->new_input_listener.link);
   wl_list_remove(&self->new_output_listener.link);

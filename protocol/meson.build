@@ -1,5 +1,6 @@
 wl_protocol_dir = wayland_protocols_dep.get_variable('pkgdatadir')
 zen_protocol_dir = zen_protocols_dep.get_variable('pkgdatadir')
+zwin_protocol_dir = zwin_protocols_dep.get_variable('pkgdatadir')
 
 wayland_scanner = find_program(
 	wayland_scanner_dep.get_variable('wayland_scanner'),
@@ -10,6 +11,8 @@ protocols = {
 	'xdg-shell': wl_protocol_dir / 'stable/xdg-shell/xdg-shell.xml',
 
 	'zen-desktop': zen_protocol_dir / 'unstable/zen-desktop.xml',
+
+	'zwin': zwin_protocol_dir / 'zwin.xml',
 
   'wlr-layer-shell-unstable-v1': 'wlr-layer-shell-unstable-v1.xml',
 }

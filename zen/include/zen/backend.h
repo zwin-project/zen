@@ -5,6 +5,7 @@
 #include "zen-common/util.h"
 
 struct zn_backend;
+struct zn_xr_system;
 
 /// Within the lifetime of zn_backend, the start and stop methods can be called
 /// in this order only once each.
@@ -12,6 +13,9 @@ struct zn_backend_interface {
   struct wlr_texture *(*create_wlr_texture_from_pixels)(struct zn_backend *self,
       uint32_t format, uint32_t stride, uint32_t width, uint32_t height,
       const void *data);
+  /// @param xr_system is nullable
+  void (*set_xr_system)(
+      struct zn_backend *self, struct zn_xr_system *xr_system);
   /// Starts monitoring the connection or disconnection of input/output devices.
   bool (*start)(struct zn_backend *self);
   /// Destroy input/output devices
@@ -55,4 +59,11 @@ zn_backend_create_wlr_texture_from_pixels(struct zn_backend *self,
 {
   return self->impl->create_wlr_texture_from_pixels(
       self, format, stride, width, height, data);
+}
+
+UNUSED static inline void
+zn_backend_set_xr_system(
+    struct zn_backend *self, struct zn_xr_system *xr_system)
+{
+  self->impl->set_xr_system(self, xr_system);
 }
