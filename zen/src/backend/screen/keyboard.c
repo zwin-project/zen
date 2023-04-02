@@ -1,9 +1,13 @@
 #include "keyboard.h"
 
+#include <linux/input-event-codes.h>
+#include <linux/input.h>
+#include <stdlib.h>
 #include <wlr/types/wlr_keyboard.h>
 
 #include "default-backend.h"
 #include "zen-common/log.h"
+#include "zen-common/terminate.h"
 #include "zen-common/util.h"
 #include "zen/seat.h"
 #include "zen/server.h"
@@ -29,6 +33,14 @@ zn_keyboard_handle_keyboard_key(struct wl_listener *listener, void *user_data)
   struct zn_server *server = zn_server_get_singleton();
 
   // TODO(@Aki-7): Handle keyboard bindings
+
+  // TODO(@Aki-7): For the development convenience, fix this later
+  if (wlr_keyboard_get_modifiers(self->base.wlr_input_device->keyboard) ==
+          WLR_MODIFIER_ALT &&
+      event->keycode == KEY_Q) {
+    zn_terminate(EXIT_SUCCESS);
+    return;
+  }
 
   wlr_seat_set_keyboard(server->seat->wlr_seat, self->base.wlr_input_device);
   wlr_seat_keyboard_send_key(

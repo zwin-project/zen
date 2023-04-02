@@ -1,5 +1,6 @@
 #include "xr-system-manager.h"
 
+#include "log.h"
 #include "loop.h"
 #include "xr-system.h"
 #include "zen-common/log.h"
@@ -11,13 +12,15 @@ namespace zen::backend::immersive::remote {
 
 XrSystemManager::XrSystemManager(wl_display *display) : display_(display) {}
 
-static const struct zn_xr_system_manager_interface implementation = {
+const zn_xr_system_manager_interface XrSystemManager::c_implementation_ = {
     XrSystemManager::HandleDestroy,
 };
 
 bool
 XrSystemManager::Init()
 {
+  zen::remote::InitializeLogger(std::make_unique<LogSink>());
+
   auto loop = std::make_unique<Loop>(wl_display_get_event_loop(display_));
 
   peer_manager_ = zen::remote::server::CreatePeerManager(std::move(loop));
@@ -27,7 +30,7 @@ XrSystemManager::Init()
   }
 
   c_obj_.impl_data = this;
-  c_obj_.impl = &implementation;
+  c_obj_.impl = &c_implementation_;
   wl_signal_init(&c_obj_.events.new_system);
 
   peer_manager_->on_peer_discover.Connect(
@@ -46,11 +49,11 @@ XrSystemManager::HandleDestroy(zn_xr_system_manager *c_obj)
 }
 
 void
-XrSystemManager::RemoveXrSystem(uint64_t peer_id)
+XrSystemManager::RemoveDeadXrSystem()
 {
   auto result = std::remove_if(xr_systems_.begin(), xr_systems_.end(),
-      [peer_id](std::unique_ptr<XrSystem> &xr_system) {
-        return xr_system->peer_id() == peer_id;
+      [](std::unique_ptr<XrSystem> &xr_system) {
+        return !xr_system->is_alive();
       });
 
   xr_systems_.erase(result, xr_systems_.end());
@@ -59,9 +62,20 @@ XrSystemManager::RemoveXrSystem(uint64_t peer_id)
 void
 XrSystemManager::HandleRemotePeerDiscover(uint64_t peer_id)
 {
-  RemoveXrSystem(peer_id);
+  std::for_each(xr_systems_.begin(), xr_systems_.end(),
+      [peer_id](std::unique_ptr<XrSystem> &xr_system) {
+        if (xr_system->peer_id() == peer_id) {
+          xr_system->set_unavailable();
+        }
+      });
+  RemoveDeadXrSystem();
 
-  auto xr_system = XrSystem::New(peer_id);
+  auto peer = peer_manager_->Get(peer_id);
+
+  zn_debug(
+      "Discover a new remote peer %ld (%s)", peer_id, peer->host().c_str());
+
+  auto xr_system = XrSystem::New(peer, display_, this);
 
   auto *xr_system_c_obj = xr_system->c_obj();
 
@@ -73,7 +87,15 @@ XrSystemManager::HandleRemotePeerDiscover(uint64_t peer_id)
 void
 XrSystemManager::HandleRemotePeerLost(uint64_t peer_id)
 {
-  RemoveXrSystem(peer_id);
+  std::for_each(xr_systems_.begin(), xr_systems_.end(),
+      [peer_id](std::unique_ptr<XrSystem> &xr_system) {
+        if (xr_system->peer_id() == peer_id) {
+          xr_system->set_unavailable();
+        }
+      });
+  RemoveDeadXrSystem();
+
+  zn_debug("Lost a remote peer %ld", peer_id);
 }
 
 }  // namespace zen::backend::immersive::remote

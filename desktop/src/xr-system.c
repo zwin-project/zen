@@ -16,8 +16,12 @@ zn_desktop_xr_system_handle_destroy(struct wl_resource *resource)
 
 static void
 zn_desktop_xr_system_protocol_connect(
-    struct wl_client *client UNUSED, struct wl_resource *resource UNUSED)
-{}
+    struct wl_client *client UNUSED, struct wl_resource *resource)
+{
+  struct zn_desktop_xr_system *self = wl_resource_get_user_data(resource);
+
+  zn_xr_system_connect(self->zn_xr_system);
+}
 
 static const struct zen_xr_system_interface implementation = {
     .connect = zn_desktop_xr_system_protocol_connect,
@@ -53,6 +57,31 @@ zn_desktop_xr_system_handle_xr_system_destroy(
   zn_desktop_xr_system_destroy(self);
 }
 
+static void
+zn_desktop_xr_system_handle_session_status_changed(
+    struct wl_listener *listener, void *data UNUSED)
+{
+  struct zn_desktop_xr_system *self =
+      zn_container_of(listener, self, session_status_changed_listener);
+
+  struct wl_resource *resource = NULL;
+
+  enum zen_xr_system_status status = ZEN_XR_SYSTEM_STATUS_CONNECTED;
+
+  switch (self->zn_xr_system->status) {
+    case ZN_XR_SYSTEM_SESSION_STATUS_CONNECTED:
+      status = ZEN_XR_SYSTEM_STATUS_CONNECTED;
+      break;
+    case ZN_XR_SYSTEM_SESSION_STATUS_NOT_CONNECTED:
+      status = ZEN_XR_SYSTEM_STATUS_UNAVAILABLE;
+      break;
+  }
+
+  wl_resource_for_each (resource, &self->resource_list) {
+    zen_xr_system_send_status(resource, status);
+  }
+}
+
 struct zn_desktop_xr_system *
 zn_desktop_xr_system_create(
     struct zn_xr_system *zn_xr_system, struct wl_display *display)
@@ -78,6 +107,11 @@ zn_desktop_xr_system_create(
   wl_signal_add(
       &zn_xr_system->events.destroy, &self->zn_xr_system_destroy_listener);
 
+  self->session_status_changed_listener.notify =
+      zn_desktop_xr_system_handle_session_status_changed;
+  wl_signal_add(&zn_xr_system->events.session_status_changed,
+      &self->session_status_changed_listener);
+
   return self;
 
 err_free:
@@ -90,6 +124,7 @@ err:
 static void
 zn_desktop_xr_system_destroy(struct zn_desktop_xr_system *self)
 {
+  wl_list_remove(&self->session_status_changed_listener.link);
   wl_list_remove(&self->zn_xr_system_destroy_listener.link);
   wl_global_destroy(self->global);
   wl_list_remove(&self->resource_list);

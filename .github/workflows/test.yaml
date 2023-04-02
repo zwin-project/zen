@@ -25,14 +25,22 @@ jobs:
     steps:
       - name: Install dependencies
         run: |
-          echo "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-15 main" | sudo tee -a /etc/apt/sources.list
-          echo "deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-15 main" | sudo tee -a /etc/apt/sources.list
-          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
           sudo apt-get update
           sudo apt-get install \
             libwayland-dev libwlroots-dev libpixman-1-dev \
             libxkbcommon-dev libglu1-mesa-dev libglew-dev \
-            meson libfreetype-dev librsvg2-dev libcglm-dev clang-15
+            meson libfreetype-dev librsvg2-dev libcglm-dev
+      
+      - name: Install clang15
+        if: matrix.clang-version == 15
+        run: |
+          echo "deb http://apt.llvm.org/jammy/ llvm-toolchain-jammy-15 main" | sudo tee -a /etc/apt/sources.list
+          echo "deb-src http://apt.llvm.org/jammy/ llvm-toolchain-jammy-15 main" | sudo tee -a /etc/apt/sources.list
+          wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+          sudo apt-get update
+          sudo apt-get install clang-15 clang-format-15 clang-tidy-15
+          sudo ln -sf /usr/bin/clang-tidy-15 /usr/bin/clang-tidy
+          sudo ln -sf /usr/bin/clang-format-15 /usr/bin/clang-format
 
       - uses: actions/setup-python@v1
         with:
@@ -46,12 +54,25 @@ jobs:
           unzip grpc-dev.zip
         working-directory: ./grpc-dev
 
+      - name: Clone zen-protocols
+        uses: actions/checkout@v2
+        with:
+          repository: zwin-project/zen-protocols
+          path: zen-protocols
+
+      - name: Install zen-protocols
+        working-directory: ./zen-protocols
+        run: |
+          meson build
+          sudo ninja -C build install
+
       - name: Clone zen-remote
         uses: actions/checkout@v2
         with:
           repository: zwin-project/zen-remote
           path: zen-remote
           submodules: recursive
+          ref: 'v0.2.0'
 
       - name: Build zen-remote
         working-directory: ./zen-remote

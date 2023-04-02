@@ -5,24 +5,51 @@
 
 namespace zen::backend::immersive::remote {
 
+class XrSystemManager;
+
 class XrSystem
 {
  public:
   DISABLE_MOVE_AND_COPY(XrSystem);
   ~XrSystem();
 
-  static std::unique_ptr<XrSystem> New(uint64_t peer_id);
+  static std::unique_ptr<XrSystem> New(
+      std::shared_ptr<zen::remote::server::IPeer> peer, wl_display *display,
+      XrSystemManager *xr_system_manager);
 
   inline uint64_t peer_id() const;
 
   inline zn_xr_system *c_obj();
 
+  inline void set_unavailable();
+
+  inline bool is_alive() const;
+
  private:
-  explicit XrSystem(uint64_t peer_id);
+  XrSystem(std::shared_ptr<zen::remote::server::IPeer> peer,
+      wl_display *display, XrSystemManager *xr_system_manager);
 
   bool Init();
 
-  const uint64_t peer_id_;
+  void Connect();
+
+  static void HandleConnect(zn_xr_system *c_obj);
+
+  void HandleDisconnect();
+
+  static const zn_xr_system_interface c_implementation_;
+
+  std::shared_ptr<zen::remote::server::IPeer> peer_;  // @nonnull
+
+  wl_display *display_;  // @nonnull, @outlive
+
+  XrSystemManager *xr_system_manager_;  // @nonnull, @outlive
+
+  // Null when status is NOT_CONNECTED. Not null otherwise.
+  std::shared_ptr<zen::remote::server::ISession> session_;
+
+  // True if available to create a new session.
+  bool is_available_ = true;
 
   zn_xr_system c_obj_{};
 };
@@ -30,13 +57,26 @@ class XrSystem
 inline uint64_t
 XrSystem::peer_id() const
 {
-  return peer_id_;
+  return peer_->id();
 }
 
 inline zn_xr_system *
 XrSystem::c_obj()
 {
   return &c_obj_;
+}
+
+inline void
+XrSystem::set_unavailable()
+{
+  is_available_ = false;
+}
+
+inline bool
+XrSystem::is_alive() const
+{
+  return is_available_ ||
+         c_obj_.status == ZN_XR_SYSTEM_SESSION_STATUS_CONNECTED;
 }
 
 }  // namespace zen::backend::immersive::remote

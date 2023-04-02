@@ -121,7 +121,7 @@ wayland_req = '>= 1.18.0'
 wayland_protocols_req = '>= 1.24'
 wlroots_req = ['>= 0.15', '< 0.16']
 zen_protocols_req = '0.1.0'
-zen_remote_server_req = '0.1.1'
+zen_remote_server_req = '0.2.0'
 
 
 glew_proj = subproject(

@@ -12,6 +12,7 @@ struct zn_desktop_xr_system {
   struct wl_list resource_list;  // wl_resource::link of zen_xr_system
 
   struct wl_listener zn_xr_system_destroy_listener;
+  struct wl_listener session_status_changed_listener;
 };
 
 struct zn_desktop_xr_system *zn_desktop_xr_system_create(

@@ -13,7 +13,7 @@ class XrSystemManager
   DISABLE_MOVE_AND_COPY(XrSystemManager);
   ~XrSystemManager() = default;
 
-  static void HandleDestroy(zn_xr_system_manager *c_obj);
+  void RemoveDeadXrSystem();
 
  private:
   friend struct zn_xr_system_manager * ::zn_xr_system_manager_create_remote(
@@ -23,11 +23,13 @@ class XrSystemManager
 
   bool Init();
 
-  void RemoveXrSystem(uint64_t peer_id);
-
   void HandleRemotePeerDiscover(uint64_t peer_id);
 
   void HandleRemotePeerLost(uint64_t peer_id);
+
+  static void HandleDestroy(zn_xr_system_manager *c_obj);
+
+  static const zn_xr_system_manager_interface c_implementation_;
 
   zn_xr_system_manager c_obj_{};
 
