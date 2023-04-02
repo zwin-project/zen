@@ -1,6 +1,7 @@
 #include "xr-system.h"
 
 #include "loop.h"
+#include "xr-dispatcher.h"
 #include "xr-system-manager.h"
 #include "zen-common/log.h"
 
@@ -37,9 +38,23 @@ XrSystem::New(std::shared_ptr<zen::remote::server::IPeer> peer,
 bool
 XrSystem::Init()
 {
+  high_priority_dispatcher_ = XrDispatcher::New(session_);
+  if (!high_priority_dispatcher_) {
+    zn_error("Failed to create a remote XrDispatcher");
+    return false;
+  }
+
+  default_dispatcher_ = XrDispatcher::New(session_);
+  if (!default_dispatcher_) {
+    zn_error("Failed to create a remote XrDispatcher");
+    return false;
+  }
+
   c_obj_.impl_data = this;
   c_obj_.impl = &c_implementation_;
   c_obj_.status = ZN_XR_SYSTEM_SESSION_STATUS_NOT_CONNECTED;
+  c_obj_.high_priority_dispatcher = high_priority_dispatcher_->c_obj();
+  c_obj_.default_dispatcher = default_dispatcher_->c_obj();
   wl_signal_init(&c_obj_.events.session_status_changed);
   wl_signal_init(&c_obj_.events.destroy);
 

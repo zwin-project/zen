@@ -6,6 +6,7 @@
 namespace zen::backend::immersive::remote {
 
 class XrSystemManager;
+class XrDispatcher;
 
 class XrSystem
 {
@@ -47,6 +48,9 @@ class XrSystem
 
   // Null when status is NOT_CONNECTED. Not null otherwise.
   std::shared_ptr<zen::remote::server::ISession> session_;
+
+  std::unique_ptr<XrDispatcher> high_priority_dispatcher_;
+  std::unique_ptr<XrDispatcher> default_dispatcher_;
 
   // True if available to create a new session.
   bool is_available_ = true;

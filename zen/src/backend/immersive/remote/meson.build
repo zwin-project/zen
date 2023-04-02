@@ -1,5 +1,6 @@
 _zen_remote_immersive_backend_srcs = [
   'loop.cc',
+  'xr-dispatcher.cc',
   'xr-system.cc',
   'xr-system-manager.cc',
 ]
