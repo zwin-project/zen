@@ -54,6 +54,7 @@ zn_mock_backend_create(void)
   wl_signal_init(&self->base.events.new_screen);
   wl_signal_init(&self->base.events.view_mapped);
   wl_signal_init(&self->base.events.destroy);
+  wl_signal_init(&self->base.events.new_xr_system);
 
   return self;
 }
@@ -63,6 +64,7 @@ zn_mock_backend_destroy(struct zn_mock_backend *self)
 {
   zn_signal_emit_mutable(&self->base.events.destroy, NULL);
 
+  wl_list_remove(&self->base.events.new_xr_system.listener_list);
   wl_list_remove(&self->base.events.destroy.listener_list);
   wl_list_remove(&self->base.events.view_mapped.listener_list);
   wl_list_remove(&self->base.events.new_screen.listener_list);
