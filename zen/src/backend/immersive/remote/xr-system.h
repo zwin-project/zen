@@ -18,13 +18,15 @@ class XrSystem
       std::shared_ptr<zen::remote::server::IPeer> peer, wl_display *display,
       XrSystemManager *xr_system_manager);
 
+  void Kill();
+
   inline uint64_t peer_id() const;
 
   inline zn_xr_system *c_obj();
 
-  inline void set_unavailable();
-
   inline bool is_alive() const;
+
+  inline bool is_connected() const;
 
  private:
   XrSystem(std::shared_ptr<zen::remote::server::IPeer> peer,
@@ -46,14 +48,10 @@ class XrSystem
 
   XrSystemManager *xr_system_manager_;  // @nonnull, @outlive
 
-  // Null when status is NOT_CONNECTED. Not null otherwise.
+  // These objects are null when state is AVAILABLE or DEAD, not null otherwise.
   std::shared_ptr<zen::remote::server::ISession> session_;
-
   std::unique_ptr<XrDispatcher> high_priority_dispatcher_;
   std::unique_ptr<XrDispatcher> default_dispatcher_;
-
-  // True if available to create a new session.
-  bool is_available_ = true;
 
   zn_xr_system c_obj_{};
 };
@@ -70,17 +68,20 @@ XrSystem::c_obj()
   return &c_obj_;
 }
 
-inline void
-XrSystem::set_unavailable()
-{
-  is_available_ = false;
-}
-
 inline bool
 XrSystem::is_alive() const
 {
-  return is_available_ ||
-         c_obj_.status == ZN_XR_SYSTEM_SESSION_STATUS_CONNECTED;
+  return c_obj_.state != ZN_XR_SYSTEM_SESSION_STATE_DEAD;
+}
+
+inline bool
+XrSystem::is_connected() const
+{
+  uint32_t connected = ZN_XR_SYSTEM_SESSION_STATE_SYNCHRONIZED |
+                       ZN_XR_SYSTEM_SESSION_STATE_VISIBLE |
+                       ZN_XR_SYSTEM_SESSION_STATE_FOCUS;
+
+  return (c_obj_.state & connected) != 0;
 }
 
 }  // namespace zen::backend::immersive::remote

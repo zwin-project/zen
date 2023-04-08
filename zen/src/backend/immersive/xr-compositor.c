@@ -2,6 +2,7 @@
 
 #include <zwin-protocol.h>
 
+#include "client-virtual-object.h"
 #include "zen-common/log.h"
 #include "zen-common/signal.h"
 #include "zen-common/util.h"
@@ -14,19 +15,35 @@ zn_xr_compositor_handle_destroy(struct wl_resource *resource)
 }
 
 static void
-zn_xr_compositor_handle_xr_system_destroy(
+zn_xr_compositor_handle_xr_system_session_state_changed(
     struct wl_listener *listener, void *data UNUSED)
 {
   struct zn_xr_compositor *self =
-      zn_container_of(listener, self, xr_system_destroy_listener);
+      zn_container_of(listener, self, xr_system_session_state_changed_listener);
 
-  zn_xr_compositor_destroy(self);
+  if (!zn_xr_system_is_connected(self->xr_system)) {
+    zn_xr_compositor_destroy(self);
+  }
 }
 
 static void
-zn_xr_compositor_protocol_create_virtual_object(struct wl_client *client UNUSED,
-    struct wl_resource *resource UNUSED, uint32_t id UNUSED)
-{}
+zn_xr_compositor_protocol_create_virtual_object(
+    struct wl_client *client, struct wl_resource *resource, uint32_t id)
+{
+  struct zn_xr_compositor *self = wl_resource_get_user_data(resource);
+
+  if (!zn_assert(self->xr_system->default_dispatcher != NULL,
+          "xr system must be connected")) {
+    return;
+  }
+
+  struct zn_client_virtual_object *virtual_object =
+      zn_client_virtual_object_create(
+          client, id, self->xr_system->default_dispatcher);
+  if (virtual_object == NULL) {
+    zn_error("Failed to create zn_client_virtual_object");
+  }
+}
 
 static void
 zn_xr_compositor_protocol_create_region(struct wl_client *client UNUSED,
@@ -62,6 +79,11 @@ struct zn_xr_compositor *
 zn_xr_compositor_create(
     struct wl_display *display UNUSED, struct zn_xr_system *xr_system)
 {
+  if (!zn_assert(zn_xr_system_is_connected(xr_system),
+          "xr_system must be connected")) {
+    goto err;
+  }
+
   struct zn_xr_compositor *self = zalloc(sizeof *self);
   if (self == NULL) {
     zn_error("Failed to allocate memory");
@@ -79,9 +101,10 @@ zn_xr_compositor_create(
     goto err_free;
   }
 
-  self->xr_system_destroy_listener.notify =
-      zn_xr_compositor_handle_xr_system_destroy;
-  wl_signal_add(&xr_system->events.destroy, &self->xr_system_destroy_listener);
+  self->xr_system_session_state_changed_listener.notify =
+      zn_xr_compositor_handle_xr_system_session_state_changed;
+  wl_signal_add(&xr_system->events.session_state_changed,
+      &self->xr_system_session_state_changed_listener);
 
   return self;
 
@@ -99,7 +122,7 @@ zn_xr_compositor_destroy(struct zn_xr_compositor *self)
 
   wl_global_destroy(self->global);
   wl_list_remove(&self->resource_list);
-  wl_list_remove(&self->xr_system_destroy_listener.link);
+  wl_list_remove(&self->xr_system_session_state_changed_listener.link);
   wl_list_remove(&self->events.destroy.listener_list);
   free(self);
 }

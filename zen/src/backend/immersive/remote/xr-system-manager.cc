@@ -65,7 +65,7 @@ XrSystemManager::HandleRemotePeerDiscover(uint64_t peer_id)
   std::for_each(xr_systems_.begin(), xr_systems_.end(),
       [peer_id](std::unique_ptr<XrSystem> &xr_system) {
         if (xr_system->peer_id() == peer_id) {
-          xr_system->set_unavailable();
+          xr_system->Kill();
         }
       });
   RemoveDeadXrSystem();
@@ -89,8 +89,8 @@ XrSystemManager::HandleRemotePeerLost(uint64_t peer_id)
 {
   std::for_each(xr_systems_.begin(), xr_systems_.end(),
       [peer_id](std::unique_ptr<XrSystem> &xr_system) {
-        if (xr_system->peer_id() == peer_id) {
-          xr_system->set_unavailable();
+        if (xr_system->peer_id() == peer_id && !xr_system->is_connected()) {
+          xr_system->Kill();
         }
       });
   RemoveDeadXrSystem();

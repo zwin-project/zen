@@ -171,7 +171,9 @@ zn_default_backend_handle_xr_compositor_destroy(
   struct zn_default_backend *self =
       zn_container_of(listener, self, xr_compositor_destroy_listener);
 
-  zn_default_backend_set_xr_system(self, NULL);
+  wl_list_remove(&self->xr_compositor_destroy_listener.link);
+  wl_list_init(&self->xr_compositor_destroy_listener.link);
+  self->xr_compositor = NULL;
 }
 
 static struct wlr_texture *
@@ -195,6 +197,13 @@ zn_default_backend_handle_set_xr_system(
   struct zn_default_backend *self = zn_container_of(base, self, base);
 
   zn_default_backend_set_xr_system(self, xr_system);
+}
+
+static struct zn_xr_system *
+zn_default_backend_handle_get_xr_system(struct zn_backend *base)
+{
+  struct zn_default_backend *self = zn_container_of(base, self, base);
+  return self->xr_compositor ? self->xr_compositor->xr_system : NULL;
 }
 
 static bool
@@ -223,6 +232,7 @@ static const struct zn_backend_interface implementation = {
     .create_wlr_texture_from_pixels =
         zn_default_backend_create_wlr_texture_from_pixels,
     .set_xr_system = zn_default_backend_handle_set_xr_system,
+    .get_xr_system = zn_default_backend_handle_get_xr_system,
     .start = zn_default_backend_start,
     .stop = zn_default_backend_stop,
     .destroy = zn_default_backend_handle_destroy,

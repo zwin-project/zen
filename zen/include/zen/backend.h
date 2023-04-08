@@ -16,6 +16,8 @@ struct zn_backend_interface {
   /// @param xr_system is nullable
   void (*set_xr_system)(
       struct zn_backend *self, struct zn_xr_system *xr_system);
+  /// @return value can be NULL
+  struct zn_xr_system *(*get_xr_system)(struct zn_backend *self);
   /// Starts monitoring the connection or disconnection of input/output devices.
   bool (*start)(struct zn_backend *self);
   /// Destroy input/output devices
@@ -66,4 +68,10 @@ zn_backend_set_xr_system(
     struct zn_backend *self, struct zn_xr_system *xr_system)
 {
   self->impl->set_xr_system(self, xr_system);
+}
+
+UNUSED static inline struct zn_xr_system *
+zn_backend_get_xr_system(struct zn_backend *self)
+{
+  return self->impl->get_xr_system(self);
 }

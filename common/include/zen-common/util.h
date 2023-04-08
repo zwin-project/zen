@@ -1,10 +1,10 @@
 #pragma once
 
-#include <stddef.h>
-#include <stdlib.h>
+#include <stddef.h>  // NOLINT(modernize-deprecated-headers)
+#include <stdlib.h>  // NOLINT(modernize-deprecated-headers)
 
 #ifdef __cplusplus
-#error "This header is not for C++"
+extern "C" {
 #endif
 
 /** Visibility attribute */
@@ -32,7 +32,7 @@
 UNUSED static inline void *
 zalloc(size_t size)
 {
-  return calloc(1, size);
+  return calloc(1, size);  // NOLINT(cppcoreguidelines-*)
 }
 
 #define ZN_MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -41,3 +41,7 @@ zalloc(size_t size)
 /** Retrieve a pointer to a containing struct */
 #define zn_container_of(ptr, sample, member) \
   (__typeof__(sample))((char *)(ptr)-offsetof(__typeof__(*(sample)), member))
+
+#ifdef __cplusplus
+}
+#endif

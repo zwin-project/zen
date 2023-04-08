@@ -6,6 +6,8 @@ _zen_srcs = [
   'src/server.c',
   'src/snode.c',
   'src/view.c',
+  'src/virtual-object.c',
+  'src/xr-dispatcher.c',
 ]
 
 zen_inc = include_directories('include')

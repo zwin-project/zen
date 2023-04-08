@@ -3,6 +3,7 @@ subdir('immersive/remote')
 _zen_backend_srcs = [
   'default-backend.c',
 
+  'immersive/client-virtual-object.c',
   'immersive/xr.c',
   'immersive/xr-compositor.c',
 
