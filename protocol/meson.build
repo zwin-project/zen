@@ -13,6 +13,7 @@ protocols = {
 	'zen-desktop': zen_protocol_dir / 'unstable/zen-desktop.xml',
 
 	'zwin': zwin_protocol_dir / 'zwin.xml',
+	'zwin-gl': zwin_protocol_dir / 'zwin-gl.xml',
 
   'wlr-layer-shell-unstable-v1': 'wlr-layer-shell-unstable-v1.xml',
 }

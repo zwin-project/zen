@@ -1,5 +1,6 @@
 #include "xr.h"
 
+#include "xr-gl.h"
 #include "xr-system-manager.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
@@ -19,7 +20,16 @@ zn_xr_create(struct wl_display *display)
     goto err_free;
   }
 
+  self->xr_gl = zn_xr_gl_create(display);
+  if (self->xr_gl == NULL) {
+    zn_error("Failed to create zn_xr_gl");
+    goto err_free_system_manager;
+  }
+
   return self;
+
+err_free_system_manager:
+  zn_xr_system_manager_destroy(self->xr_system_manager);
 
 err_free:
   free(self);
@@ -31,6 +41,7 @@ err:
 void
 zn_xr_destroy(struct zn_xr *self)
 {
+  zn_xr_gl_destroy(self->xr_gl);
   zn_xr_system_manager_destroy(self->xr_system_manager);
   free(self);
 }

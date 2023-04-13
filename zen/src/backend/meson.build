@@ -6,6 +6,7 @@ _zen_backend_srcs = [
   'immersive/client-virtual-object.c',
   'immersive/xr.c',
   'immersive/xr-compositor.c',
+  'immersive/xr-gl.c',
 
   'screen/compositor.c',
   'screen/keyboard.c',
@@ -18,6 +19,8 @@ _zen_backend_srcs = [
 
   protocols_code['zwin'],
   protocols_server_header['zwin'],
+  protocols_code['zwin-gl'],
+  protocols_server_header['zwin-gl'],
 ]
 
 _zen_backend_deps = [
