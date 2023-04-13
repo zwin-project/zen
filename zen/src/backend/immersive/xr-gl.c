@@ -2,6 +2,7 @@
 
 #include <zwin-gl-protocol.h>
 
+#include "client-gl-context.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 
@@ -13,10 +14,15 @@ zn_xr_gl_protocol_destroy(
 }
 
 static void
-zn_xr_gl_protocol_create_gl_context(struct wl_client *client UNUSED,
-    struct wl_resource *resource UNUSED, uint32_t id UNUSED,
-    struct wl_resource *zwn_compositor UNUSED)
-{}
+zn_xr_gl_protocol_create_gl_context(struct wl_client *client,
+    struct wl_resource *resource UNUSED, uint32_t id,
+    struct wl_resource *zwn_compositor)
+{
+  struct zn_xr_compositor *xr_compositor =
+      wl_resource_get_user_data(zwn_compositor);
+
+  zn_client_gl_context_create(client, id, xr_compositor);
+}
 
 static const struct zwn_gl_interface implementation = {
     .destroy = zn_xr_gl_protocol_destroy,
