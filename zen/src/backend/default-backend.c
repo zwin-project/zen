@@ -7,6 +7,7 @@
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_output.h>
 
+#include "immersive/shm.h"
 #include "immersive/xr-compositor.h"
 #include "immersive/xr-system-manager.h"
 #include "immersive/xr.h"
@@ -297,6 +298,8 @@ zn_default_backend_create(struct wl_display *display, struct zn_seat *zn_seat)
     zn_error("Failed to create a xr instance");
     goto err_compositor;
   }
+
+  zn_shm_init(display);
 
   wlr_xwayland_set_seat(self->compositor->xwayland, zn_seat->wlr_seat);
 

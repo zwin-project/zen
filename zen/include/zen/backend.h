@@ -70,6 +70,7 @@ zn_backend_set_xr_system(
   self->impl->set_xr_system(self, xr_system);
 }
 
+/// @return value can be NULL
 UNUSED static inline struct zn_xr_system *
 zn_backend_get_xr_system(struct zn_backend *self)
 {

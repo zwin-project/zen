@@ -42,7 +42,7 @@ struct zn_xr_system {
 
   enum zn_xr_system_session_state state;
 
-  /// These dispatchers are null when connected, not null otherwise.
+  /// These dispatchers are not null when connected, null otherwise.
   struct zn_xr_dispatcher *high_priority_dispatcher;  // @owning
   struct zn_xr_dispatcher *default_dispatcher;        // @owning
 

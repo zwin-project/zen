@@ -6,6 +6,7 @@
 namespace zen::backend::immersive::remote {
 
 class VirtualObject;
+class GlBuffer;
 class GlRenderingUnit;
 
 class XrDispatcher
@@ -35,11 +36,18 @@ class XrDispatcher
   static void HandleDestroyGlRenderingUnit(
       zn_xr_dispatcher *c_obj, zn_gl_rendering_unit *gl_rendering_unit_c_obj);
 
+  static zn_gl_buffer *HandleGetNewGlBuffer(zn_xr_dispatcher *c_obj);
+
+  static void HandleDestroyGlBuffer(
+      zn_xr_dispatcher *c_obj, struct zn_gl_buffer *gl_buffer_c_obj);
+
   std::shared_ptr<zen::remote::server::IChannel> channel_;
 
   std::vector<std::unique_ptr<VirtualObject>> virtual_objects_;
 
   std::vector<std::unique_ptr<GlRenderingUnit>> gl_rendering_units_;
+
+  std::vector<std::unique_ptr<GlBuffer>> gl_buffers_;
 
   static const zn_xr_dispatcher_interface c_implementation_;
 

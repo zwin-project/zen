@@ -3,6 +3,7 @@
 #include <wayland-server.h>
 #include <zwin-gl-protocol.h>
 
+#include "client-gl-buffer.h"
 #include "client-gl-rendering-unit.h"
 #include "xr-compositor.h"
 #include "zen-common/log.h"
@@ -38,9 +39,11 @@ zn_client_gl_context_protocol_create_gl_rendering_unit(struct wl_client *client,
 
 /// @param resource can be inert (resource->user_data == NULL)
 static void
-zn_client_gl_context_protocol_create_gl_buffer(struct wl_client *client UNUSED,
-    struct wl_resource *resource UNUSED, uint32_t id UNUSED)
-{}
+zn_client_gl_context_protocol_create_gl_buffer(
+    struct wl_client *client, struct wl_resource *resource UNUSED, uint32_t id)
+{
+  zn_client_gl_buffer_create(client, id);
+}
 
 /// @param resource can be inert (resource->user_data == NULL)
 static void

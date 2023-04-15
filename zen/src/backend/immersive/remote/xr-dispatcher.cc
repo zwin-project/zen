@@ -2,6 +2,7 @@
 
 #include <utility>
 
+#include "gl-buffer.h"
 #include "gl-rendering-unit.h"
 #include "virtual-object.h"
 #include "zen-common/log.h"
@@ -13,6 +14,8 @@ const zn_xr_dispatcher_interface XrDispatcher::c_implementation_ = {
     XrDispatcher::HandleDestroyVirtualObject,
     XrDispatcher::HandleGetNewGlRenderingUnit,
     XrDispatcher::HandleDestroyGlRenderingUnit,
+    XrDispatcher::HandleGetNewGlBuffer,
+    XrDispatcher::HandleDestroyGlBuffer,
 };
 
 XrDispatcher::~XrDispatcher()
@@ -130,6 +133,39 @@ XrDispatcher::HandleDestroyGlRenderingUnit(
       });
 
   self->gl_rendering_units_.erase(result, self->gl_rendering_units_.end());
+}
+
+zn_gl_buffer *
+XrDispatcher::HandleGetNewGlBuffer(zn_xr_dispatcher *c_obj)
+{
+  auto *self = static_cast<XrDispatcher *>(c_obj->impl_data);
+
+  auto gl_buffer = GlBuffer::New(self->channel_);
+  if (!gl_buffer) {
+    zn_error("Failed to create a remote gl_buffer");
+    return nullptr;
+  }
+
+  auto *gl_buffer_c_obj = gl_buffer->c_obj();
+
+  self->gl_buffers_.push_back((std::move(gl_buffer)));
+
+  return gl_buffer_c_obj;
+}
+
+void
+XrDispatcher::HandleDestroyGlBuffer(
+    zn_xr_dispatcher *c_obj, struct zn_gl_buffer *gl_buffer_c_obj)
+{
+  auto *self = static_cast<XrDispatcher *>(c_obj->impl_data);
+
+  auto result =
+      std::remove_if(self->gl_buffers_.begin(), self->gl_buffers_.end(),
+          [gl_buffer_c_obj](std::unique_ptr<GlBuffer> &gl_buffer) {
+            return gl_buffer->c_obj() == gl_buffer_c_obj;
+          });
+
+  self->gl_buffers_.erase(result, self->gl_buffers_.end());
 }
 
 }  // namespace zen::backend::immersive::remote
