@@ -41,6 +41,7 @@ VirtualObject::Init(std::shared_ptr<zen::remote::server::IChannel> channel)
   if (!remote_obj_) {
     zn_error("Failed to create a remote Virtual Object");
     zn_virtual_object_destroy(c_obj_);
+    c_obj_ = nullptr;
     return false;
   }
 

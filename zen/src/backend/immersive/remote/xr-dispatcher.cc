@@ -2,6 +2,7 @@
 
 #include <utility>
 
+#include "gl-rendering-unit.h"
 #include "virtual-object.h"
 #include "zen-common/log.h"
 
@@ -10,6 +11,8 @@ namespace zen::backend::immersive::remote {
 const zn_xr_dispatcher_interface XrDispatcher::c_implementation_ = {
     XrDispatcher::HandleGetNewVirtualObject,
     XrDispatcher::HandleDestroyVirtualObject,
+    XrDispatcher::HandleGetNewGlRenderingUnit,
+    XrDispatcher::HandleDestroyGlRenderingUnit,
 };
 
 XrDispatcher::~XrDispatcher()
@@ -49,6 +52,7 @@ XrDispatcher::Init(std::shared_ptr<zen::remote::server::ISession> session)
   if (!channel_) {
     zn_error("Failed to create a remote channel");
     zn_xr_dispatcher_destroy(c_obj_);
+    c_obj_ = nullptr;
     return false;
   }
 
@@ -86,6 +90,46 @@ XrDispatcher::HandleDestroyVirtualObject(
       });
 
   self->virtual_objects_.erase(result, self->virtual_objects_.end());
+}
+
+zn_gl_rendering_unit *
+XrDispatcher::HandleGetNewGlRenderingUnit(
+    zn_xr_dispatcher *c_obj, zn_virtual_object *virtual_object_c_obj)
+{
+  auto *self = static_cast<XrDispatcher *>(c_obj->impl_data);
+
+  for (auto &virtual_object : self->virtual_objects_) {
+    if (virtual_object->c_obj() != virtual_object_c_obj) {
+      continue;
+    }
+
+    auto gl_rendering_unit =
+        GlRenderingUnit::New(self->channel_, virtual_object);
+
+    auto *gl_rendering_unit_c_obj = gl_rendering_unit->c_obj();
+
+    self->gl_rendering_units_.push_back(std::move(gl_rendering_unit));
+
+    return gl_rendering_unit_c_obj;
+  }
+
+  return nullptr;
+}
+
+void
+XrDispatcher::HandleDestroyGlRenderingUnit(
+    zn_xr_dispatcher *c_obj, zn_gl_rendering_unit *gl_rendering_unit_c_obj)
+{
+  auto *self = static_cast<XrDispatcher *>(c_obj->impl_data);
+
+  auto result = std::remove_if(self->gl_rendering_units_.begin(),
+      self->gl_rendering_units_.end(),
+      [gl_rendering_unit_c_obj](
+          std::unique_ptr<GlRenderingUnit> &gl_rendering_unit) {
+        return gl_rendering_unit->c_obj() == gl_rendering_unit_c_obj;
+      });
+
+  self->gl_rendering_units_.erase(result, self->gl_rendering_units_.end());
 }
 
 }  // namespace zen::backend::immersive::remote

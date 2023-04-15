@@ -14,6 +14,10 @@ struct zn_client_virtual_object {
 
   struct wl_listener dispatcher_destroy_listener;
   struct wl_listener zn_virtual_object_destroy_listener;
+
+  struct {
+    struct wl_signal destroy;  // (NULL)
+  } events;
 };
 
 struct zn_client_virtual_object *zn_client_virtual_object_create(

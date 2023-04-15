@@ -2,17 +2,15 @@
 
 #include <wayland-server-core.h>
 
-#include "zen-common/util.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct zn_virtual_object {
-  void *impl_data;  // @nullable, @outlive if exists
+struct zn_gl_rendering_unit {
+  void *impl_data;
 
   struct {
-    struct wl_signal destroy;
+    struct wl_signal destroy;  // (NULL)
   } events;
 };
 

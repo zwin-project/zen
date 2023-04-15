@@ -1,7 +1,7 @@
 #pragma once
 
+#include "virtual-object-private.h"
 #include "zen-common/cpp-util.h"
-#include "zen/virtual-object.h"
 
 namespace zen::backend::immersive::remote {
 
@@ -14,6 +14,7 @@ class VirtualObject
   static std::unique_ptr<VirtualObject> New(
       std::shared_ptr<zen::remote::server::IChannel> channel);
 
+  inline std::unique_ptr<zen::remote::server::IVirtualObject> &remote_obj();
   inline zn_virtual_object *c_obj();
 
  private:
@@ -30,6 +31,12 @@ inline zn_virtual_object *
 VirtualObject::c_obj()
 {
   return c_obj_;
+}
+
+inline std::unique_ptr<zen::remote::server::IVirtualObject> &
+VirtualObject::remote_obj()
+{
+  return remote_obj_;
 }
 
 }  // namespace zen::backend::immersive::remote

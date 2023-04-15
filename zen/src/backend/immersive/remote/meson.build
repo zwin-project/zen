@@ -1,4 +1,5 @@
 _zen_remote_immersive_backend_srcs = [
+  'gl-rendering-unit.cc',
   'loop.cc',
   'virtual-object.cc',
   'xr-dispatcher.cc',

@@ -3,6 +3,7 @@
 #include <wayland-server.h>
 #include <zwin-gl-protocol.h>
 
+#include "client-gl-rendering-unit.h"
 #include "xr-compositor.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
@@ -25,10 +26,15 @@ zn_client_gl_context_protocol_destroy(
 
 /// @param resource can be inert (resource->user_data == NULL)
 static void
-zn_client_gl_context_protocol_create_rendering_unit(
-    struct wl_client *client UNUSED, struct wl_resource *resource UNUSED,
-    uint32_t id UNUSED, struct wl_resource *virtual_object UNUSED)
-{}
+zn_client_gl_context_protocol_create_gl_rendering_unit(struct wl_client *client,
+    struct wl_resource *resource UNUSED, uint32_t id,
+    struct wl_resource *virtual_object_resource)
+{
+  struct zn_client_virtual_object *client_virtual_object =
+      wl_resource_get_user_data(virtual_object_resource);
+
+  zn_client_gl_rendering_unit_create(client, id, client_virtual_object);
+}
 
 /// @param resource can be inert (resource->user_data == NULL)
 static void
@@ -77,8 +83,8 @@ zn_client_gl_context_protocol_create_gl_base_technique(
 
 static const struct zwn_gl_context_interface implementation = {
     .destroy = zn_client_gl_context_protocol_destroy,
-    .create_rendering_unit =
-        zn_client_gl_context_protocol_create_rendering_unit,
+    .create_gl_rendering_unit =
+        zn_client_gl_context_protocol_create_gl_rendering_unit,
     .create_gl_buffer = zn_client_gl_context_protocol_create_gl_buffer,
     .create_gl_shader = zn_client_gl_context_protocol_create_gl_shader,
     .create_gl_program = zn_client_gl_context_protocol_create_gl_program,

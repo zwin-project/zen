@@ -1,6 +1,7 @@
 _zen_srcs = [
   'src/config.c',
   'src/cursor.c',
+  'src/gl-rendering-unit.c',
   'src/screen.c',
   'src/seat.c',
   'src/server.c',

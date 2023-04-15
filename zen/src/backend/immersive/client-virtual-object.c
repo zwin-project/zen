@@ -3,6 +3,7 @@
 #include <zwin-protocol.h>
 
 #include "zen-common/log.h"
+#include "zen-common/signal.h"
 #include "zen-common/util.h"
 #include "zen/virtual-object.h"
 #include "zen/xr-dispatcher.h"
@@ -75,6 +76,7 @@ zn_client_virtual_object_create(
   }
 
   self->dispatcher = dispatcher;
+  wl_signal_init(&self->events.destroy);
 
   self->zn_virtual_object = zn_xr_dispatcher_get_new_virtual_object(dispatcher);
   if (self->zn_virtual_object == NULL) {
@@ -119,11 +121,13 @@ err:
 static void
 zn_client_virtual_object_destroy(struct zn_client_virtual_object *self)
 {
+  zn_signal_emit_mutable(&self->events.destroy, NULL);
+
+  wl_list_remove(&self->events.destroy.listener_list);
   wl_list_remove(&self->zn_virtual_object_destroy_listener.link);
   wl_list_remove(&self->dispatcher_destroy_listener.link);
   zn_xr_dispatcher_destroy_virtual_object(
       self->dispatcher, self->zn_virtual_object);
-  wl_resource_set_implementation(
-      self->resource, &zwn_virtual_object_interface, NULL, NULL);
+  wl_resource_set_implementation(self->resource, &implementation, NULL, NULL);
   free(self);
 }
