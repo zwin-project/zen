@@ -18,6 +18,8 @@ const zn_xr_dispatcher_interface XrDispatcher::c_implementation_ = {
     XrDispatcher::HandleDestroyGlBuffer,
 };
 
+XrDispatcher::XrDispatcher(wl_display *display) : display_(display) {}
+
 XrDispatcher::~XrDispatcher()
 {
   if (c_obj_ != nullptr) {
@@ -26,9 +28,10 @@ XrDispatcher::~XrDispatcher()
 }
 
 std::unique_ptr<XrDispatcher>
-XrDispatcher::New(std::shared_ptr<zen::remote::server::ISession> session)
+XrDispatcher::New(
+    std::shared_ptr<zen::remote::server::ISession> session, wl_display *display)
 {
-  auto self = std::unique_ptr<XrDispatcher>(new XrDispatcher());
+  auto self = std::unique_ptr<XrDispatcher>(new XrDispatcher(display));
   if (!self) {
     zn_error("Failed to allocate memory");
     return nullptr;
@@ -140,7 +143,7 @@ XrDispatcher::HandleGetNewGlBuffer(zn_xr_dispatcher *c_obj)
 {
   auto *self = static_cast<XrDispatcher *>(c_obj->impl_data);
 
-  auto gl_buffer = GlBuffer::New(self->channel_);
+  auto gl_buffer = GlBuffer::New(self->channel_, self->display_);
   if (!gl_buffer) {
     zn_error("Failed to create a remote gl_buffer");
     return nullptr;

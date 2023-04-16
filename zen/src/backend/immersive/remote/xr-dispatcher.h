@@ -16,12 +16,13 @@ class XrDispatcher
   ~XrDispatcher();
 
   static std::unique_ptr<XrDispatcher> New(
-      std::shared_ptr<zen::remote::server::ISession> session);
+      std::shared_ptr<zen::remote::server::ISession> session,
+      wl_display *display);
 
   inline zn_xr_dispatcher *c_obj();
 
  private:
-  XrDispatcher() = default;
+  explicit XrDispatcher(wl_display *display);
 
   bool Init(std::shared_ptr<zen::remote::server::ISession> session);
 
@@ -40,6 +41,8 @@ class XrDispatcher
 
   static void HandleDestroyGlBuffer(
       zn_xr_dispatcher *c_obj, struct zn_gl_buffer *gl_buffer_c_obj);
+
+  wl_display *display_;  // @nonnull, @outlive
 
   std::shared_ptr<zen::remote::server::IChannel> channel_;
 

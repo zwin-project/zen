@@ -12,16 +12,24 @@ class GlBuffer
   ~GlBuffer();
 
   static std::unique_ptr<GlBuffer> New(
-      std::shared_ptr<zen::remote::server::IChannel> channel);
+      std::shared_ptr<zen::remote::server::IChannel> channel,
+      wl_display *display);
 
   inline zn_gl_buffer *c_obj() const;
 
  private:
-  GlBuffer() = default;
+  explicit GlBuffer(wl_display *display);
 
   bool Init(std::shared_ptr<zen::remote::server::IChannel> channel);
 
+  static void HandleData(struct zn_gl_buffer *c_obj, uint32_t target,
+      struct zn_lease_buffer *lease_buffer, uint32_t usage);
+
+  wl_display *display_;  // @nonnull, @outlive
+
   std::unique_ptr<zen::remote::server::IGlBuffer> remote_obj_;
+
+  static const zn_gl_buffer_interface c_implementation_;
 
   zn_gl_buffer *c_obj_ = nullptr;  // @nonnull after Init(), @owning
 };

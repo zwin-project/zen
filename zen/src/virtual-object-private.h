@@ -13,4 +13,3 @@ void zn_virtual_object_destroy(struct zn_virtual_object *self);
 #ifdef __cplusplus
 }
 #endif
-

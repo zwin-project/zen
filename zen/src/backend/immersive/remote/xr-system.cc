@@ -124,12 +124,12 @@ XrSystem::Connect()
     return;
   }
 
-  auto high_priority_dispatcher = XrDispatcher::New(new_session);
+  auto high_priority_dispatcher = XrDispatcher::New(new_session, display_);
   if (!high_priority_dispatcher) {
     zn_error("Failed to create a remote XrDispatcher");
   }
 
-  auto default_dispatcher = XrDispatcher::New(new_session);
+  auto default_dispatcher = XrDispatcher::New(new_session, display_);
   if (!default_dispatcher) {
     zn_error("Failed to create a remote XrDispatcher");
   }

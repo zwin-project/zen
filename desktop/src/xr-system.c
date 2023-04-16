@@ -70,6 +70,7 @@ zn_desktop_xr_system_handle_session_state_changed(
 
   struct wl_resource *resource = NULL;
 
+  // NOLINTNEXTLINE(clang-analyzer-deadcode.DeadStores)
   enum zen_xr_system_status status = self->status;
 
   switch (self->zn_xr_system->state) {

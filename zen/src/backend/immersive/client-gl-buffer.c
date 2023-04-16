@@ -2,10 +2,12 @@
 
 #include <zwin-gl-protocol.h>
 
+#include "shm-buffer.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 #include "zen/backend.h"
 #include "zen/gl-buffer.h"
+#include "zen/lease-buffer.h"
 #include "zen/server.h"
 #include "zen/xr-dispatcher.h"
 #include "zen/xr-system.h"
@@ -28,12 +30,43 @@ zn_client_gl_buffer_protocol_destroy(
   wl_resource_destroy(resource);
 }
 
+static void
+zn_client_gl_buffer_data_release_callback(
+    struct zn_buffer *buffer UNUSED, void *user_data)
+{
+  struct zn_shm_buffer *shm_buffer = user_data;
+
+  zn_shm_buffer_unref(shm_buffer);
+}
+
 /// @param resource can be inert (resource->user_data == NULL)
 static void
 zn_client_gl_buffer_protocol_data(struct wl_client *client UNUSED,
-    struct wl_resource *resource UNUSED, uint32_t target UNUSED,
-    struct wl_resource *data UNUSED, uint32_t usage UNUSED)
-{}
+    struct wl_resource *resource, uint32_t target,
+    struct wl_resource *data_resource, uint32_t usage)
+{
+  struct zn_client_gl_buffer *self = wl_resource_get_user_data(resource);
+
+  struct zn_shm_buffer *shm_buffer = zn_shm_buffer_get(data_resource);
+  if (!zn_assert(shm_buffer != NULL, "zn_shm_buffer not found")) {
+    return;
+  }
+
+  // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
+  struct zn_buffer *zn_buffer = shm_buffer->zn_buffer;
+
+  struct zn_lease_buffer *lease_buffer = zn_lease_buffer_create(
+      zn_buffer, zn_client_gl_buffer_data_release_callback, shm_buffer);
+  if (lease_buffer == NULL) {
+    zn_error("Failed to create lease buffer");
+    wl_client_post_no_memory(client);
+    return;
+  }
+
+  zn_shm_buffer_ref(shm_buffer);
+
+  zn_gl_buffer_data(self->zn_gl_buffer, target, lease_buffer, usage);
+}
 
 static const struct zwn_gl_buffer_interface implementation = {
     .destroy = zn_client_gl_buffer_protocol_destroy,
