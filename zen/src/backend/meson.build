@@ -3,6 +3,7 @@ subdir('immersive/remote')
 _zen_backend_srcs = [
   'default-backend.c',
 
+  'immersive/client-gl-base-technique.c',
   'immersive/client-gl-buffer.c',
   'immersive/client-gl-context.c',
   'immersive/client-gl-rendering-unit.c',

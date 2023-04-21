@@ -3,6 +3,7 @@
 #include <wayland-server.h>
 #include <zwin-gl-protocol.h>
 
+#include "client-gl-base-technique.h"
 #include "client-gl-buffer.h"
 #include "client-gl-rendering-unit.h"
 #include "xr-compositor.h"
@@ -28,9 +29,13 @@ zn_client_gl_context_protocol_destroy(
 /// @param resource can be inert (resource->user_data == NULL)
 static void
 zn_client_gl_context_protocol_create_gl_rendering_unit(struct wl_client *client,
-    struct wl_resource *resource UNUSED, uint32_t id,
+    struct wl_resource *resource, uint32_t id,
     struct wl_resource *virtual_object_resource)
 {
+  if (wl_resource_get_user_data(resource) == NULL) {
+    return;
+  }
+
   struct zn_client_virtual_object *client_virtual_object =
       wl_resource_get_user_data(virtual_object_resource);
 
@@ -79,10 +84,19 @@ zn_client_gl_context_protocol_create_gl_vertex_array(
 
 /// @param resource can be inert (resource->user_data == NULL)
 static void
-zn_client_gl_context_protocol_create_gl_base_technique(
-    struct wl_client *client UNUSED, struct wl_resource *resource UNUSED,
-    uint32_t id UNUSED, struct wl_resource *unit UNUSED)
-{}
+zn_client_gl_context_protocol_create_gl_base_technique(struct wl_client *client,
+    struct wl_resource *resource, uint32_t id,
+    struct wl_resource *rendering_unit_resource)
+{
+  if (wl_resource_get_user_data(resource) == NULL) {
+    return;
+  }
+
+  struct zn_client_gl_rendering_unit *rendering_unit =
+      wl_resource_get_user_data(rendering_unit_resource);
+
+  zn_client_gl_base_technique_create(client, id, rendering_unit);
+}
 
 static const struct zwn_gl_context_interface implementation = {
     .destroy = zn_client_gl_context_protocol_destroy,

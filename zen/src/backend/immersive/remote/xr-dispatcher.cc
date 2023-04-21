@@ -2,6 +2,7 @@
 
 #include <utility>
 
+#include "gl-base-technique.h"
 #include "gl-buffer.h"
 #include "gl-rendering-unit.h"
 #include "virtual-object.h"
@@ -14,6 +15,8 @@ const zn_xr_dispatcher_interface XrDispatcher::c_implementation_ = {
     XrDispatcher::HandleDestroyVirtualObject,
     XrDispatcher::HandleGetNewGlRenderingUnit,
     XrDispatcher::HandleDestroyGlRenderingUnit,
+    XrDispatcher::HandleGetNewGlBaseTechnique,
+    XrDispatcher::HandleDestroyGlBaseTechnique,
     XrDispatcher::HandleGetNewGlBuffer,
     XrDispatcher::HandleDestroyGlBuffer,
 };
@@ -136,6 +139,46 @@ XrDispatcher::HandleDestroyGlRenderingUnit(
       });
 
   self->gl_rendering_units_.erase(result, self->gl_rendering_units_.end());
+}
+
+zn_gl_base_technique *
+XrDispatcher::HandleGetNewGlBaseTechnique(
+    zn_xr_dispatcher *c_obj, zn_gl_rendering_unit *gl_rendering_unit_c_obj)
+{
+  auto *self = static_cast<XrDispatcher *>(c_obj->impl_data);
+
+  for (auto &rendering_unit : self->gl_rendering_units_) {
+    if (rendering_unit->c_obj() != gl_rendering_unit_c_obj) {
+      continue;
+    }
+
+    auto gl_base_technique =
+        GlBaseTechnique::New(self->channel_, rendering_unit);
+
+    auto *gl_base_technique_c_obj = gl_base_technique->c_obj();
+
+    self->gl_base_techniques_.push_back(std::move(gl_base_technique));
+
+    return gl_base_technique_c_obj;
+  }
+
+  return nullptr;
+}
+
+void
+XrDispatcher::HandleDestroyGlBaseTechnique(
+    zn_xr_dispatcher *c_obj, zn_gl_base_technique *gl_base_technique_c_obj)
+{
+  auto *self = static_cast<XrDispatcher *>(c_obj->impl_data);
+
+  auto result = std::remove_if(self->gl_base_techniques_.begin(),
+      self->gl_base_techniques_.end(),
+      [gl_base_technique_c_obj](
+          std::unique_ptr<GlBaseTechnique> &gl_base_technique) {
+        return gl_base_technique->c_obj() == gl_base_technique_c_obj;
+      });
+
+  self->gl_base_techniques_.erase(result, self->gl_base_techniques_.end());
 }
 
 zn_gl_buffer *

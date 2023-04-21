@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-struct zn_gl_rendering_unit {
+struct zn_gl_base_technique {
   void *impl_data;  // @nullable, @outlive
 
   struct {

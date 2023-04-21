@@ -14,6 +14,10 @@ struct zn_client_gl_rendering_unit {
 
   struct wl_listener virtual_object_destroy_listener;
   struct wl_listener zn_gl_rendering_unit_destroy_listener;
+
+  struct {
+    struct wl_signal destroy; // (NULL)
+  } events;
 };
 
 struct zn_client_gl_rendering_unit *zn_client_gl_rendering_unit_create(

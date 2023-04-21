@@ -2,6 +2,7 @@ _zen_srcs = [
   'src/buffer.c',
   'src/config.c',
   'src/cursor.c',
+  'src/gl-base-technique.c',
   'src/gl-buffer.c',
   'src/gl-rendering-unit.c',
   'src/lease-buffer.c',

@@ -17,6 +17,7 @@ class GlRenderingUnit
       std::shared_ptr<zen::remote::server::IChannel> channel,
       std::unique_ptr<VirtualObject> &virtual_object);
 
+  inline std::unique_ptr<zen::remote::server::IRenderingUnit> &remote_obj();
   inline zn_gl_rendering_unit *c_obj();
 
  private:
@@ -34,6 +35,12 @@ inline zn_gl_rendering_unit *
 GlRenderingUnit::c_obj()
 {
   return c_obj_;
+}
+
+inline std::unique_ptr<zen::remote::server::IRenderingUnit> &
+GlRenderingUnit::remote_obj()
+{
+  return remote_obj_;
 }
 
 }  // namespace zen::backend::immersive::remote

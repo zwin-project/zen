@@ -1,4 +1,5 @@
 _zen_remote_immersive_backend_srcs = [
+  'gl-base-technique.cc',
   'gl-buffer.cc',
   'gl-rendering-unit.cc',
   'loop.cc',

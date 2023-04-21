@@ -4,6 +4,7 @@
 
 #include "client-virtual-object.h"
 #include "zen-common/log.h"
+#include "zen-common/signal.h"
 #include "zen-common/util.h"
 #include "zen/gl-rendering-unit.h"
 #include "zen/xr-dispatcher.h"
@@ -59,15 +60,18 @@ zn_client_gl_rendering_unit_create(struct wl_client *client, uint32_t id,
   struct zn_client_gl_rendering_unit *self = zalloc(sizeof *self);
   if (self == NULL) {
     zn_error("Failed to allocate memory");
+    wl_client_post_no_memory(client);
     goto err;
   }
 
   self->virtual_object = virtual_object;
+  wl_signal_init(&self->events.destroy);
 
   self->zn_gl_rendering_unit = zn_xr_dispatcher_get_new_gl_rendering_unit(
       virtual_object->dispatcher, virtual_object->zn_virtual_object);
   if (self->zn_gl_rendering_unit == NULL) {
     zn_error("Failed to get new zn_gl_rendering_unit");
+    wl_client_post_no_memory(client);
     goto err_free;
   }
 
@@ -108,9 +112,12 @@ err:
 static void
 zn_client_gl_rendering_unit_destroy(struct zn_client_gl_rendering_unit *self)
 {
+  zn_signal_emit_mutable(&self->events.destroy, NULL);
+
   wl_resource_set_implementation(self->resource, &implementation, NULL, NULL);
   wl_list_remove(&self->virtual_object_destroy_listener.link);
   wl_list_remove(&self->zn_gl_rendering_unit_destroy_listener.link);
+  wl_list_remove(&self->events.destroy.listener_list);
   zn_xr_dispatcher_destroy_gl_rendering_unit(
       self->virtual_object->dispatcher, self->zn_gl_rendering_unit);
   free(self);
