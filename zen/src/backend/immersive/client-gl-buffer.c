@@ -36,9 +36,9 @@ zn_client_gl_buffer_protocol_data(struct wl_client *client UNUSED,
     struct wl_resource *data_resource, uint32_t usage)
 {
   struct zn_client_gl_buffer *self = zn_client_gl_buffer_get(resource);
-
   struct zn_shm_buffer *shm_buffer = zn_shm_buffer_get(data_resource);
-  if (!zn_assert(shm_buffer, "zn_shm_buffer not found")) {
+
+  if (self == NULL || shm_buffer == NULL) {
     return;
   }
 
@@ -80,6 +80,7 @@ zn_client_gl_buffer_create(struct wl_client *client, uint32_t id)
   struct zn_client_gl_buffer *self = zalloc(sizeof *self);
   if (self == NULL) {
     zn_error("Failed to allocate memory");
+    wl_client_post_no_memory(client);
     goto err;
   }
 
@@ -87,12 +88,14 @@ zn_client_gl_buffer_create(struct wl_client *client, uint32_t id)
       zn_xr_dispatcher_get_new_gl_buffer(xr_system->default_dispatcher);
   if (self->zn_gl_buffer == NULL) {
     zn_error("Failed to get new zn_gl_buffer");
+    wl_client_post_no_memory(client);
     goto err_free;
   }
 
   self->resource = wl_resource_create(client, &zwn_gl_buffer_interface, 1, id);
   if (self->resource == NULL) {
     zn_error("Failed to create a wl_resource");
+    wl_client_post_no_memory(client);
     goto err_gl_buffer;
   }
 

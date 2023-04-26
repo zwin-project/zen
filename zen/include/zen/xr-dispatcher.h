@@ -14,6 +14,7 @@ struct zn_gl_buffer;
 struct zn_gl_program;
 struct zn_gl_rendering_unit;
 struct zn_gl_shader;
+struct zn_gl_texture;
 struct zn_virtual_object;
 struct zn_xr_dispatcher;
 
@@ -46,6 +47,10 @@ struct zn_xr_dispatcher_interface {
   struct zn_gl_program *(*get_new_gl_program)(struct zn_xr_dispatcher *self);
   void (*destroy_gl_program)(
       struct zn_xr_dispatcher *self, struct zn_gl_program *gl_program);
+
+  struct zn_gl_texture *(*get_new_gl_texture)(struct zn_xr_dispatcher *self);
+  void (*destroy_gl_texture)(
+      struct zn_xr_dispatcher *self, struct zn_gl_texture *gl_texture);
 };
 
 struct zn_xr_dispatcher {
@@ -136,6 +141,19 @@ zn_xr_dispatcher_destroy_gl_program(
     struct zn_xr_dispatcher *self, struct zn_gl_program *gl_program)
 {
   self->impl->destroy_gl_program(self, gl_program);
+}
+
+UNUSED static struct zn_gl_texture *
+zn_xr_dispatcher_get_new_gl_texture(struct zn_xr_dispatcher *self)
+{
+  return self->impl->get_new_gl_texture(self);
+}
+
+UNUSED static void
+zn_xr_dispatcher_destroy_gl_texture(
+    struct zn_xr_dispatcher *self, struct zn_gl_texture *gl_texture)
+{
+  self->impl->destroy_gl_texture(self, gl_texture);
 }
 
 #ifdef __cplusplus

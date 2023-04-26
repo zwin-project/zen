@@ -8,6 +8,7 @@
 #include "client-gl-program.h"
 #include "client-gl-rendering-unit.h"
 #include "client-gl-shader.h"
+#include "client-gl-texture.h"
 #include "client-virtual-object.h"
 #include "shm-buffer.h"
 #include "xr-compositor.h"
@@ -75,9 +76,11 @@ zn_client_gl_context_protocol_create_gl_program(
 
 /// @param resource can be inert (resource->user_data == NULL)
 static void
-zn_client_gl_context_protocol_create_gl_texture(struct wl_client *client UNUSED,
-    struct wl_resource *resource UNUSED, uint32_t id UNUSED)
-{}
+zn_client_gl_context_protocol_create_gl_texture(
+    struct wl_client *client, struct wl_resource *resource UNUSED, uint32_t id)
+{
+  zn_client_gl_texture_create(client, id);
+}
 
 /// @param resource can be inert (resource->user_data == NULL)
 static void

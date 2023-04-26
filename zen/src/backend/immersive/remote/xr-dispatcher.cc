@@ -7,6 +7,7 @@
 #include "gl-program.h"
 #include "gl-rendering-unit.h"
 #include "gl-shader.h"
+#include "gl-texture.h"
 #include "virtual-object.h"
 #include "zen-common/log.h"
 #include "zen/buffer.h"
@@ -26,6 +27,8 @@ const zn_xr_dispatcher_interface XrDispatcher::c_implementation_ = {
     XrDispatcher::HandleDestroyGlShader,
     XrDispatcher::HandleGetNewGlProgram,
     XrDispatcher::HandleDestroyGlProgram,
+    XrDispatcher::HandleGetNewGlTexture,
+    XrDispatcher::HandleDestroyGlTexture,
 };
 
 XrDispatcher::XrDispatcher(wl_display *display) : display_(display) {}
@@ -295,6 +298,39 @@ XrDispatcher::HandleDestroyGlProgram(
           });
 
   self->gl_programs_.erase(result, self->gl_programs_.end());
+}
+
+zn_gl_texture *
+XrDispatcher::HandleGetNewGlTexture(struct zn_xr_dispatcher *c_obj)
+{
+  auto *self = static_cast<XrDispatcher *>(c_obj->impl_data);
+
+  auto gl_texture = GlTexture::New(self->channel_, self->display_);
+  if (!gl_texture) {
+    zn_error("Failed to create a remote gl_texture");
+    return nullptr;
+  }
+
+  auto *gl_texture_c_obj = gl_texture->c_obj();
+
+  self->gl_textures_.push_back(std::move(gl_texture));
+
+  return gl_texture_c_obj;
+}
+
+void
+XrDispatcher::HandleDestroyGlTexture(
+    struct zn_xr_dispatcher *c_obj, struct zn_gl_texture *gl_texture_c_obj)
+{
+  auto *self = static_cast<XrDispatcher *>(c_obj->impl_data);
+
+  auto result =
+      std::remove_if(self->gl_textures_.begin(), self->gl_textures_.end(),
+          [gl_texture_c_obj](std::unique_ptr<GlTexture> &gl_texture) {
+            return gl_texture->c_obj() == gl_texture_c_obj;
+          });
+
+  self->gl_textures_.erase(result, self->gl_textures_.end());
 }
 
 }  // namespace zen::backend::immersive::remote

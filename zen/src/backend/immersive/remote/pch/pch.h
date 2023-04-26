@@ -7,6 +7,7 @@
 #include <zen-remote/server/gl-buffer.h>
 #include <zen-remote/server/gl-program.h>
 #include <zen-remote/server/gl-shader.h>
+#include <zen-remote/server/gl-texture.h>
 #include <zen-remote/server/peer-manager.h>
 #include <zen-remote/server/rendering-unit.h>
 #include <zen-remote/server/session.h>
