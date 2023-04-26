@@ -5,7 +5,8 @@
 #include "zen-common/util.h"
 
 struct zn_virtual_object *
-zn_virtual_object_create(void *impl_data)
+zn_virtual_object_create(
+    void *impl_data, const struct zn_virtual_object_interface *implementation)
 {
   struct zn_virtual_object *self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -14,6 +15,7 @@ zn_virtual_object_create(void *impl_data)
   }
 
   self->impl_data = impl_data;
+  self->impl = implementation;
   wl_signal_init(&self->events.destroy);
 
   return self;

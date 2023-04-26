@@ -4,6 +4,10 @@
 
 namespace zen::backend::immersive::remote {
 
+const zn_virtual_object_interface VirtualObject::c_implementation_ = {
+    VirtualObject::HandleCommit,
+};
+
 VirtualObject::~VirtualObject()
 {
   if (c_obj_ != nullptr) {
@@ -31,7 +35,7 @@ VirtualObject::New(std::shared_ptr<zen::remote::server::IChannel> channel)
 bool
 VirtualObject::Init(std::shared_ptr<zen::remote::server::IChannel> channel)
 {
-  c_obj_ = zn_virtual_object_create(this);
+  c_obj_ = zn_virtual_object_create(this, &c_implementation_);
   if (c_obj_ == nullptr) {
     zn_error("Failed to create a zn_virtual_object");
     return false;
@@ -46,6 +50,14 @@ VirtualObject::Init(std::shared_ptr<zen::remote::server::IChannel> channel)
   }
 
   return true;
+}
+
+void
+VirtualObject::HandleCommit(zn_virtual_object *c_obj)
+{
+  auto *self = static_cast<VirtualObject *>(c_obj->impl_data);
+
+  self->remote_obj_->Commit();
 }
 
 }  // namespace zen::backend::immersive::remote

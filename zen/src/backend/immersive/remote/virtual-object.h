@@ -22,7 +22,11 @@ class VirtualObject
 
   bool Init(std::shared_ptr<zen::remote::server::IChannel> channel);
 
+  static void HandleCommit(zn_virtual_object *c_obj);
+
   std::unique_ptr<zen::remote::server::IVirtualObject> remote_obj_;
+
+  static const zn_virtual_object_interface c_implementation_;
 
   zn_virtual_object *c_obj_ = nullptr;  // @nonnull after Init(), @owning
 };

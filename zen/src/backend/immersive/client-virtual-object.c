@@ -30,8 +30,16 @@ zn_client_virtual_object_protocol_destroy(
 /// @param resource can be inert (resource->user_data == NULL)
 static void
 zn_client_virtual_object_protocol_commit(
-    struct wl_client *client UNUSED, struct wl_resource *resource UNUSED)
-{}
+    struct wl_client *client UNUSED, struct wl_resource *resource)
+{
+  struct zn_client_virtual_object *self = wl_resource_get_user_data(resource);
+
+  if (self == NULL) {
+    return;
+  }
+
+  zn_virtual_object_commit(self->zn_virtual_object);
+}
 
 /// @param resource can be inert (resource->user_data == NULL)
 static void
