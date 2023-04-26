@@ -5,6 +5,7 @@
 #include <zen-remote/server/channel.h>
 #include <zen-remote/server/gl-base-technique.h>
 #include <zen-remote/server/gl-buffer.h>
+#include <zen-remote/server/gl-shader.h>
 #include <zen-remote/server/peer-manager.h>
 #include <zen-remote/server/rendering-unit.h>
 #include <zen-remote/server/session.h>

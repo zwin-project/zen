@@ -5,8 +5,11 @@
 #include "gl-base-technique.h"
 #include "gl-buffer.h"
 #include "gl-rendering-unit.h"
+#include "gl-shader.h"
 #include "virtual-object.h"
 #include "zen-common/log.h"
+#include "zen/buffer.h"
+#include "zen/lease-buffer.h"
 
 namespace zen::backend::immersive::remote {
 
@@ -19,6 +22,8 @@ const zn_xr_dispatcher_interface XrDispatcher::c_implementation_ = {
     XrDispatcher::HandleDestroyGlBaseTechnique,
     XrDispatcher::HandleGetNewGlBuffer,
     XrDispatcher::HandleDestroyGlBuffer,
+    XrDispatcher::HandleGetNewGlShader,
+    XrDispatcher::HandleDestroyGlShader,
 };
 
 XrDispatcher::XrDispatcher(wl_display *display) : display_(display) {}
@@ -194,7 +199,7 @@ XrDispatcher::HandleGetNewGlBuffer(zn_xr_dispatcher *c_obj)
 
   auto *gl_buffer_c_obj = gl_buffer->c_obj();
 
-  self->gl_buffers_.push_back((std::move(gl_buffer)));
+  self->gl_buffers_.push_back(std::move(gl_buffer));
 
   return gl_buffer_c_obj;
 }
@@ -212,6 +217,50 @@ XrDispatcher::HandleDestroyGlBuffer(
           });
 
   self->gl_buffers_.erase(result, self->gl_buffers_.end());
+}
+
+zn_gl_shader *
+XrDispatcher::HandleGetNewGlShader(struct zn_xr_dispatcher *c_obj,
+    struct zn_lease_buffer *lease_buffer, uint32_t type)
+{
+  auto *self = static_cast<XrDispatcher *>(c_obj->impl_data);
+
+  std::string source;
+
+  {
+    ssize_t length = zn_buffer_get_size(lease_buffer->buffer);
+    auto *data = zn_buffer_begin_access(lease_buffer->buffer);
+    source = std::string(static_cast<char *>(data), length);
+    zn_buffer_end_access(lease_buffer->buffer);
+    zn_lease_buffer_release(lease_buffer);
+  }
+
+  auto gl_shader = GlShader::New(self->channel_, std::move(source), type);
+  if (!gl_shader) {
+    zn_error("Failed to create a remote gl_shader");
+    return nullptr;
+  }
+
+  auto *gl_shader_c_obj = gl_shader->c_obj();
+
+  self->gl_shaders_.push_back(std::move(gl_shader));
+
+  return gl_shader_c_obj;
+}
+
+void
+XrDispatcher::HandleDestroyGlShader(
+    struct zn_xr_dispatcher *c_obj, struct zn_gl_shader *gl_shader_c_obj)
+{
+  auto *self = static_cast<XrDispatcher *>(c_obj->impl_data);
+
+  auto result =
+      std::remove_if(self->gl_shaders_.begin(), self->gl_shaders_.end(),
+          [gl_shader_c_obj](std::unique_ptr<GlShader> &gl_shader) {
+            return gl_shader->c_obj() == gl_shader_c_obj;
+          });
+
+  self->gl_shaders_.erase(result, self->gl_shaders_.end());
 }
 
 }  // namespace zen::backend::immersive::remote

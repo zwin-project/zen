@@ -26,7 +26,9 @@ err:
 void
 zn_lease_buffer_release(struct zn_lease_buffer *self)
 {
-  self->callback(self->buffer, self->user_data);
+  if (self->callback) {
+    self->callback(self->buffer, self->user_data);
+  }
 
   free(self);
 }

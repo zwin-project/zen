@@ -6,6 +6,8 @@
 #include "client-gl-base-technique.h"
 #include "client-gl-buffer.h"
 #include "client-gl-rendering-unit.h"
+#include "client-gl-shader.h"
+#include "shm-buffer.h"
 #include "xr-compositor.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
@@ -52,10 +54,14 @@ zn_client_gl_context_protocol_create_gl_buffer(
 
 /// @param resource can be inert (resource->user_data == NULL)
 static void
-zn_client_gl_context_protocol_create_gl_shader(struct wl_client *client UNUSED,
-    struct wl_resource *resource UNUSED, uint32_t id UNUSED,
-    struct wl_resource *buffer UNUSED, uint32_t type UNUSED)
-{}
+zn_client_gl_context_protocol_create_gl_shader(struct wl_client *client,
+    struct wl_resource *resource UNUSED, uint32_t id,
+    struct wl_resource *buffer_resource, uint32_t type)
+{
+  struct zn_shm_buffer *buffer = zn_shm_buffer_get(buffer_resource);
+
+  zn_client_gl_shader_create(client, id, buffer, type);
+}
 
 /// @param resource can be inert (resource->user_data == NULL)
 static void
