@@ -8,7 +8,6 @@
 #include "zen/backend.h"
 #include "zen/buffer.h"
 #include "zen/gl-shader.h"
-#include "zen/lease-buffer.h"
 #include "zen/server.h"
 #include "zen/xr-dispatcher.h"
 #include "zen/xr-system.h"
@@ -45,18 +44,9 @@ zn_client_gl_shader_handle_zn_gl_shader_destroy(
   zn_client_gl_shader_destroy(self);
 }
 
-static void
-zn_client_gl_shader_buffer_release_callback(
-    struct zn_buffer *buffer UNUSED, void *user_data)
-{
-  struct zn_shm_buffer *shm_buffer = user_data;
-
-  zn_shm_buffer_unref(shm_buffer);
-}
-
 struct zn_client_gl_shader *
 zn_client_gl_shader_create(struct wl_client *client, uint32_t id,
-    struct zn_shm_buffer *buffer, uint32_t type)
+    struct zn_buffer *buffer, uint32_t type)
 {
   struct zn_server *server = zn_server_get_singleton();
   struct zn_xr_system *xr_system = zn_backend_get_xr_system(server->backend);
@@ -73,21 +63,10 @@ zn_client_gl_shader_create(struct wl_client *client, uint32_t id,
     goto err;
   }
 
-  struct zn_lease_buffer *lease_buffer = zn_lease_buffer_create(
-      buffer->zn_buffer, zn_client_gl_shader_buffer_release_callback, buffer);
-  if (lease_buffer == NULL) {
-    zn_error("Failed to create lease buffer");
-    wl_client_post_no_memory(client);
-    goto err_free;
-  }
-
-  zn_shm_buffer_ref(buffer);
-
   self->zn_gl_shader = zn_xr_dispatcher_get_new_gl_shader(
-      xr_system->default_dispatcher, lease_buffer, type);
+      xr_system->default_dispatcher, buffer, type);
   if (self->zn_gl_shader == NULL) {
     zn_error("Failed to get new gl_shader");
-    zn_lease_buffer_release(lease_buffer);
     wl_client_post_no_memory(client);
     goto err_free;
   }

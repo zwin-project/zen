@@ -50,8 +50,8 @@ class XrDispatcher
   static void HandleDestroyGlBuffer(
       zn_xr_dispatcher *c_obj, struct zn_gl_buffer *gl_buffer_c_obj);
 
-  static zn_gl_shader *HandleGetNewGlShader(struct zn_xr_dispatcher *c_obj,
-      struct zn_lease_buffer *buffer, uint32_t type);
+  static zn_gl_shader *HandleGetNewGlShader(
+      struct zn_xr_dispatcher *c_obj, struct zn_buffer *buffer, uint32_t type);
 
   static void HandleDestroyGlShader(
       struct zn_xr_dispatcher *c_obj, struct zn_gl_shader *gl_shader_c_obj);

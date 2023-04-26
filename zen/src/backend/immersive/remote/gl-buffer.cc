@@ -3,7 +3,6 @@
 #include "loop.h"
 #include "zen-common/log.h"
 #include "zen/buffer.h"
-#include "zen/lease-buffer.h"
 
 namespace zen::backend::immersive::remote {
 
@@ -60,26 +59,28 @@ GlBuffer::Init(std::shared_ptr<zen::remote::server::IChannel> channel)
 
 void
 GlBuffer::HandleData(struct zn_gl_buffer *c_obj, uint32_t target,
-    struct zn_lease_buffer *lease_buffer, uint32_t usage)
+    struct zn_buffer *buffer, uint32_t usage)
 {
   auto *self = static_cast<GlBuffer *>(c_obj->impl_data);
 
-  ssize_t size = zn_buffer_get_size(lease_buffer->buffer);
+  ssize_t size = zn_buffer_get_size(buffer);
 
   auto loop = std::make_unique<Loop>(wl_display_get_event_loop(self->display_));
 
-  auto buffer = zen::remote::server::CreateBuffer(
-      [lease_buffer]() { return zn_buffer_begin_access(lease_buffer->buffer); },
-      [lease_buffer]() { return zn_buffer_end_access(lease_buffer->buffer); },
-      [lease_buffer]() { zn_lease_buffer_release(lease_buffer); },
-      std::move(loop));
+  auto remote_buffer = zen::remote::server::CreateBuffer(
+      [buffer]() { return zn_buffer_begin_access(buffer); },
+      [buffer]() { return zn_buffer_end_access(buffer); },
+      [buffer]() { zn_buffer_unref(buffer); }, std::move(loop));
 
-  if (!buffer) {
+  if (!remote_buffer) {
     zn_abort("Failed to create remote buffer");
     return;
   }
 
-  self->remote_obj_->GlBufferData(std::move(buffer), target, size, usage);
+  zn_buffer_ref(buffer);
+
+  self->remote_obj_->GlBufferData(
+      std::move(remote_buffer), target, size, usage);
 }
 
 }  // namespace zen::backend::immersive::remote

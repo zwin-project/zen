@@ -8,11 +8,11 @@
 extern "C" {
 #endif
 
+struct zn_buffer;
 struct zn_gl_base_technique;
 struct zn_gl_buffer;
 struct zn_gl_rendering_unit;
 struct zn_gl_shader;
-struct zn_lease_buffer;
 struct zn_virtual_object;
 struct zn_xr_dispatcher;
 
@@ -37,8 +37,8 @@ struct zn_xr_dispatcher_interface {
   void (*destroy_gl_buffer)(
       struct zn_xr_dispatcher *self, struct zn_gl_buffer *gl_buffer);
 
-  struct zn_gl_shader *(*get_new_gl_shader)(struct zn_xr_dispatcher *self,
-      struct zn_lease_buffer *buffer, uint32_t type);
+  struct zn_gl_shader *(*get_new_gl_shader)(
+      struct zn_xr_dispatcher *self, struct zn_buffer *buffer, uint32_t type);
   void (*destroy_gl_shader)(
       struct zn_xr_dispatcher *self, struct zn_gl_shader *gl_shader);
 };
@@ -107,8 +107,8 @@ zn_xr_dispatcher_destroy_gl_buffer(
 }
 
 UNUSED static inline struct zn_gl_shader *
-zn_xr_dispatcher_get_new_gl_shader(struct zn_xr_dispatcher *self,
-    struct zn_lease_buffer *buffer, uint32_t type)
+zn_xr_dispatcher_get_new_gl_shader(
+    struct zn_xr_dispatcher *self, struct zn_buffer *buffer, uint32_t type)
 {
   return self->impl->get_new_gl_shader(self, buffer, type);
 }

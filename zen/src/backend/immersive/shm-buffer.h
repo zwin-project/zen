@@ -3,6 +3,8 @@
 #include <sys/types.h>
 #include <wayland-server-core.h>
 
+struct zn_buffer;
+
 struct zn_shm_buffer {
   struct wl_resource *resource;  // @nullable, @ref
   int refcount;
@@ -11,10 +13,6 @@ struct zn_shm_buffer {
   struct zn_shm_pool *pool;     // @nonnull, @owning(shared)
   struct zn_buffer *zn_buffer;  // @nonnull, @owning
 };
-
-void zn_shm_buffer_ref(struct zn_shm_buffer *self);
-
-void zn_shm_buffer_unref(struct zn_shm_buffer *self);
 
 struct zn_shm_buffer *zn_shm_buffer_get(struct wl_resource *resource);
 

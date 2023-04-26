@@ -85,6 +85,29 @@ init_sigbus_data_key(void)
   pthread_key_create(&zn_shm_sigbus_data_key, destroy_sigbus_data);
 }
 
+static void
+zn_shm_buffer_ref(struct zn_buffer *zn_buffer)
+{
+  struct zn_shm_buffer *self = (struct zn_shm_buffer *)(zn_buffer->impl_data);
+
+  zn_assert(self->refcount > 0, "invalid refcount status");
+
+  self->refcount++;
+}
+
+static void
+zn_shm_buffer_unref(struct zn_buffer *zn_buffer)
+{
+  struct zn_shm_buffer *self = (struct zn_shm_buffer *)(zn_buffer->impl_data);
+
+  self->refcount--;
+  zn_assert(self->refcount >= 0, "invalid refcount status");
+
+  if (self->refcount == 0) {
+    zn_shm_buffer_destroy(self);
+  }
+}
+
 static void *
 zn_shm_buffer_begin_access(struct zn_buffer *zn_buffer)
 {
@@ -172,6 +195,8 @@ zn_shm_buffer_get_size(struct zn_buffer *zn_buffer)
 }
 
 static const struct zn_buffer_interface buffer_implementation = {
+    .ref = zn_shm_buffer_ref,
+    .unref = zn_shm_buffer_unref,
     .begin_access = zn_shm_buffer_begin_access,
     .end_access = zn_shm_buffer_end_access,
     .get_size = zn_shm_buffer_get_size,
@@ -184,7 +209,7 @@ zn_shm_buffer_handle_destroy(struct wl_resource *resource)
 
   self->resource = NULL;
 
-  zn_shm_buffer_unref(self);
+  zn_shm_buffer_unref(self->zn_buffer);
 }
 
 static void
@@ -197,25 +222,6 @@ zn_shm_buffer_protocol_destroy(
 static const struct zwn_buffer_interface implementation = {
     .destroy = zn_shm_buffer_protocol_destroy,
 };
-
-void
-zn_shm_buffer_ref(struct zn_shm_buffer *self)
-{
-  zn_assert(self->refcount > 0, "invalid refcount status");
-
-  self->refcount++;
-}
-
-void
-zn_shm_buffer_unref(struct zn_shm_buffer *self)
-{
-  self->refcount--;
-  zn_assert(self->refcount >= 0, "invalid refcount status");
-
-  if (self->refcount == 0) {
-    zn_shm_buffer_destroy(self);
-  }
-}
 
 struct zn_shm_buffer *
 zn_shm_buffer_get(struct wl_resource *resource)

@@ -23,7 +23,7 @@ class GlBuffer
   bool Init(std::shared_ptr<zen::remote::server::IChannel> channel);
 
   static void HandleData(struct zn_gl_buffer *c_obj, uint32_t target,
-      struct zn_lease_buffer *lease_buffer, uint32_t usage);
+      struct zn_buffer *buffer, uint32_t usage);
 
   wl_display *display_;  // @nonnull, @outlive
 

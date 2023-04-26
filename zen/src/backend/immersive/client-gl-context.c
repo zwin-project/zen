@@ -58,9 +58,9 @@ zn_client_gl_context_protocol_create_gl_shader(struct wl_client *client,
     struct wl_resource *resource UNUSED, uint32_t id,
     struct wl_resource *buffer_resource, uint32_t type)
 {
-  struct zn_shm_buffer *buffer = zn_shm_buffer_get(buffer_resource);
+  struct zn_shm_buffer *shm_buffer = zn_shm_buffer_get(buffer_resource);
 
-  zn_client_gl_shader_create(client, id, buffer, type);
+  zn_client_gl_shader_create(client, id, shm_buffer->zn_buffer, type);
 }
 
 /// @param resource can be inert (resource->user_data == NULL)

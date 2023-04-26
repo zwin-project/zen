@@ -3,8 +3,6 @@
 #include "gl-shader-private.h"
 #include "zen-common/cpp-util.h"
 
-struct zn_lease_buffer;
-
 namespace zen::backend::immersive::remote {
 
 class GlShader

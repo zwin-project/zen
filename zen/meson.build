@@ -6,7 +6,6 @@ _zen_srcs = [
   'src/gl-buffer.c',
   'src/gl-rendering-unit.c',
   'src/gl-shader.c',
-  'src/lease-buffer.c',
   'src/screen.c',
   'src/seat.c',
   'src/server.c',

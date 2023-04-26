@@ -8,13 +8,12 @@
 extern "C" {
 #endif
 
-struct zn_lease_buffer;
+struct zn_buffer;
 struct zn_gl_buffer;
 
 struct zn_gl_buffer_interface {
-  /// @param lease_buffer will be released by the callee
   void (*data)(struct zn_gl_buffer *self, uint32_t target,
-      struct zn_lease_buffer *lease_buffer, uint32_t usage);
+      struct zn_buffer *buffer, uint32_t usage);
 };
 
 struct zn_gl_buffer {
@@ -26,12 +25,11 @@ struct zn_gl_buffer {
   } events;
 };
 
-/// @param lease_buffer will be released by the callee
 UNUSED static inline void
 zn_gl_buffer_data(struct zn_gl_buffer *self, uint32_t target,
-    struct zn_lease_buffer *lease_buffer, uint32_t usage)
+    struct zn_buffer *buffer, uint32_t usage)
 {
-  self->impl->data(self, target, lease_buffer, usage);
+  self->impl->data(self, target, buffer, usage);
 }
 
 #ifdef __cplusplus

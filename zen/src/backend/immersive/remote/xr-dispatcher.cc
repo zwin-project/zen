@@ -9,7 +9,6 @@
 #include "virtual-object.h"
 #include "zen-common/log.h"
 #include "zen/buffer.h"
-#include "zen/lease-buffer.h"
 
 namespace zen::backend::immersive::remote {
 
@@ -220,19 +219,18 @@ XrDispatcher::HandleDestroyGlBuffer(
 }
 
 zn_gl_shader *
-XrDispatcher::HandleGetNewGlShader(struct zn_xr_dispatcher *c_obj,
-    struct zn_lease_buffer *lease_buffer, uint32_t type)
+XrDispatcher::HandleGetNewGlShader(
+    struct zn_xr_dispatcher *c_obj, struct zn_buffer *buffer, uint32_t type)
 {
   auto *self = static_cast<XrDispatcher *>(c_obj->impl_data);
 
   std::string source;
 
   {
-    ssize_t length = zn_buffer_get_size(lease_buffer->buffer);
-    auto *data = zn_buffer_begin_access(lease_buffer->buffer);
+    ssize_t length = zn_buffer_get_size(buffer);
+    auto *data = zn_buffer_begin_access(buffer);
     source = std::string(static_cast<char *>(data), length);
-    zn_buffer_end_access(lease_buffer->buffer);
-    zn_lease_buffer_release(lease_buffer);
+    zn_buffer_end_access(buffer);
   }
 
   auto gl_shader = GlShader::New(self->channel_, std::move(source), type);
