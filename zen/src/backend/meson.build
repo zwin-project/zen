@@ -6,6 +6,7 @@ _zen_backend_srcs = [
   'immersive/client-gl-base-technique.c',
   'immersive/client-gl-buffer.c',
   'immersive/client-gl-context.c',
+  'immersive/client-gl-program.c',
   'immersive/client-gl-rendering-unit.c',
   'immersive/client-gl-shader.c',
   'immersive/client-virtual-object.c',

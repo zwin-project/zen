@@ -4,6 +4,7 @@
 
 #include "gl-base-technique.h"
 #include "gl-buffer.h"
+#include "gl-program.h"
 #include "gl-rendering-unit.h"
 #include "gl-shader.h"
 #include "virtual-object.h"
@@ -23,6 +24,8 @@ const zn_xr_dispatcher_interface XrDispatcher::c_implementation_ = {
     XrDispatcher::HandleDestroyGlBuffer,
     XrDispatcher::HandleGetNewGlShader,
     XrDispatcher::HandleDestroyGlShader,
+    XrDispatcher::HandleGetNewGlProgram,
+    XrDispatcher::HandleDestroyGlProgram,
 };
 
 XrDispatcher::XrDispatcher(wl_display *display) : display_(display) {}
@@ -259,6 +262,39 @@ XrDispatcher::HandleDestroyGlShader(
           });
 
   self->gl_shaders_.erase(result, self->gl_shaders_.end());
+}
+
+zn_gl_program *
+XrDispatcher::HandleGetNewGlProgram(struct zn_xr_dispatcher *c_obj)
+{
+  auto *self = static_cast<XrDispatcher *>(c_obj->impl_data);
+
+  auto gl_program = GlProgram::New(self->channel_);
+  if (!gl_program) {
+    zn_error("Failed to create a remote gl_program");
+    return nullptr;
+  }
+
+  auto *gl_program_c_obj = gl_program->c_obj();
+
+  self->gl_programs_.push_back(std::move(gl_program));
+
+  return gl_program_c_obj;
+}
+
+void
+XrDispatcher::HandleDestroyGlProgram(
+    struct zn_xr_dispatcher *c_obj, struct zn_gl_program *gl_program_c_obj)
+{
+  auto *self = static_cast<XrDispatcher *>(c_obj->impl_data);
+
+  auto result =
+      std::remove_if(self->gl_programs_.begin(), self->gl_programs_.end(),
+          [gl_program_c_obj](std::unique_ptr<GlProgram> &gl_program) {
+            return gl_program->c_obj() == gl_program_c_obj;
+          });
+
+  self->gl_programs_.erase(result, self->gl_programs_.end());
 }
 
 }  // namespace zen::backend::immersive::remote

@@ -15,6 +15,7 @@ class GlShader
       std::shared_ptr<zen::remote::server::IChannel> channel,
       std::string source, uint32_t type);
 
+  inline std::unique_ptr<zen::remote::server::IGlShader> &remote_obj();
   inline zn_gl_shader *c_obj() const;
 
  private:
@@ -27,6 +28,12 @@ class GlShader
 
   zn_gl_shader *c_obj_ = nullptr;  // @nonnull after Init(), @owning
 };
+
+inline std::unique_ptr<zen::remote::server::IGlShader> &
+GlShader::remote_obj()
+{
+  return remote_obj_;
+}
 
 inline zn_gl_shader *
 GlShader::c_obj() const

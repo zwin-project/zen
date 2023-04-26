@@ -1,7 +1,5 @@
 #include "gl-shader.h"
 
-#include <utility>
-
 #include "zen-common/log.h"
 
 namespace zen::backend::immersive::remote {
