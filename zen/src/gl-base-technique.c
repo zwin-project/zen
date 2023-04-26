@@ -4,7 +4,8 @@
 #include "zen-common/util.h"
 
 struct zn_gl_base_technique *
-zn_gl_base_technique_create(void *impl_data)
+zn_gl_base_technique_create(void *impl_data,
+    const struct zn_gl_base_technique_interface *implementation)
 {
   struct zn_gl_base_technique *self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -13,6 +14,7 @@ zn_gl_base_technique_create(void *impl_data)
   }
 
   self->impl_data = impl_data;
+  self->impl = implementation;
   wl_signal_init(&self->events.destroy);
 
   return self;

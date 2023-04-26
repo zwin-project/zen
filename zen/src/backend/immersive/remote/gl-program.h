@@ -14,6 +14,7 @@ class GlProgram
   static std::unique_ptr<GlProgram> New(
       std::shared_ptr<zen::remote::server::IChannel> channel);
 
+  inline std::unique_ptr<zen::remote::server::IGlProgram> &remote_obj();
   inline zn_gl_program *c_obj() const;
 
  private:
@@ -32,6 +33,12 @@ class GlProgram
 
   zn_gl_program *c_obj_ = nullptr;  // @nonnull after Init(), @owning
 };
+
+inline std::unique_ptr<zen::remote::server::IGlProgram> &
+GlProgram::remote_obj()
+{
+  return remote_obj_;
+}
 
 inline zn_gl_program *
 GlProgram::c_obj() const

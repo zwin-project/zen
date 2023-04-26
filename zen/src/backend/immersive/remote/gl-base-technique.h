@@ -26,7 +26,12 @@ class GlBaseTechnique
   bool Init(std::shared_ptr<zen::remote::server::IChannel> channel,
       std::unique_ptr<GlRenderingUnit> &rendering_unit);
 
+  static void HandleBindProgram(struct zn_gl_base_technique *c_obj,
+      struct zn_gl_program *gl_program_c_obj);
+
   std::unique_ptr<zen::remote::server::IGlBaseTechnique> remote_obj_;
+
+  static const zn_gl_base_technique_interface c_implementation_;
 
   zn_gl_base_technique *c_obj_ = nullptr;  // @nonnull after Init(), @owning
 };

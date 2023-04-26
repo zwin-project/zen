@@ -2,6 +2,7 @@
 
 #include <zwin-gl-protocol.h>
 
+#include "client-gl-program.h"
 #include "client-gl-rendering-unit.h"
 #include "client-virtual-object.h"
 #include "zen-common/log.h"
@@ -31,9 +32,22 @@ zn_client_gl_base_technique_protocol_destroy(
 /// @param resource can be inert (resource->user_data == NULL)
 static void
 zn_client_gl_base_technique_protocol_bind_program(
-    struct wl_client *client UNUSED, struct wl_resource *resource UNUSED,
-    struct wl_resource *program UNUSED)
-{}
+    struct wl_client *client UNUSED, struct wl_resource *resource,
+    struct wl_resource *program_resource)
+{
+  struct zn_client_gl_base_technique *self =
+      wl_resource_get_user_data(resource);
+
+  struct zn_client_gl_program *program =
+      wl_resource_get_user_data(program_resource);
+
+  if (self == NULL || program == NULL) {
+    return;
+  }
+
+  zn_gl_base_technique_bind_program(
+      self->zn_gl_base_technique, program->zn_gl_program);
+}
 
 /// @param resource can be inert (resource->user_data == NULL)
 static void
