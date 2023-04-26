@@ -14,3 +14,7 @@ struct zn_client_gl_buffer {
 
 struct zn_client_gl_buffer *zn_client_gl_buffer_create(
     struct wl_client *client, uint32_t id);
+
+/// @return value is nullable
+struct zn_client_gl_buffer *zn_client_gl_buffer_get(
+    struct wl_resource *resource);

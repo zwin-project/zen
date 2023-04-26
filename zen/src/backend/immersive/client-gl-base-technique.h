@@ -19,3 +19,7 @@ struct zn_client_gl_base_technique {
 struct zn_client_gl_base_technique *zn_client_gl_base_technique_create(
     struct wl_client *client, uint32_t id,
     struct zn_client_gl_rendering_unit *rendering_unit);
+
+/// @return value is nullable
+struct zn_client_gl_base_technique *zn_client_gl_base_technique_get(
+    struct wl_resource *resource);

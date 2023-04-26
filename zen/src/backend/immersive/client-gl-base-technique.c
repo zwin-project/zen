@@ -17,7 +17,7 @@ static void
 zn_client_gl_base_technique_handle_destroy(struct wl_resource *resource)
 {
   struct zn_client_gl_base_technique *self =
-      wl_resource_get_user_data(resource);
+      zn_client_gl_base_technique_get(resource);
 
   zn_client_gl_base_technique_destroy(self);
 }
@@ -36,10 +36,10 @@ zn_client_gl_base_technique_protocol_bind_program(
     struct wl_resource *program_resource)
 {
   struct zn_client_gl_base_technique *self =
-      wl_resource_get_user_data(resource);
+      zn_client_gl_base_technique_get(resource);
 
   struct zn_client_gl_program *program =
-      wl_resource_get_user_data(program_resource);
+      zn_client_gl_program_get(program_resource);
 
   if (self == NULL || program == NULL) {
     return;
@@ -108,6 +108,12 @@ static const struct zwn_gl_base_technique_interface implementation = {
     .draw_arrays = zn_client_gl_base_technique_protocol_draw_arrays,
     .draw_elements = zn_client_gl_base_technique_protocol_draw_elements,
 };
+
+struct zn_client_gl_base_technique *
+zn_client_gl_base_technique_get(struct wl_resource *resource)
+{
+  return wl_resource_get_user_data(resource);
+}
 
 static void
 zn_client_gl_base_technique_handle_rendering_unit_destroy(

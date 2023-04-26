@@ -8,6 +8,7 @@
 #include "client-gl-program.h"
 #include "client-gl-rendering-unit.h"
 #include "client-gl-shader.h"
+#include "client-virtual-object.h"
 #include "shm-buffer.h"
 #include "xr-compositor.h"
 #include "zen-common/log.h"
@@ -16,7 +17,7 @@
 static void
 zn_client_gl_context_handle_destroy(struct wl_resource *resource)
 {
-  struct zn_client_gl_context *self = wl_resource_get_user_data(resource);
+  struct zn_client_gl_context *self = zn_client_gl_context_get(resource);
 
   zn_client_gl_context_destroy(self);
 }
@@ -35,12 +36,12 @@ zn_client_gl_context_protocol_create_gl_rendering_unit(struct wl_client *client,
     struct wl_resource *resource, uint32_t id,
     struct wl_resource *virtual_object_resource)
 {
-  if (wl_resource_get_user_data(resource) == NULL) {
+  if (zn_client_gl_context_get(resource) == NULL) {
     return;
   }
 
   struct zn_client_virtual_object *client_virtual_object =
-      wl_resource_get_user_data(virtual_object_resource);
+      zn_client_virtual_object_get(virtual_object_resource);
 
   zn_client_gl_rendering_unit_create(client, id, client_virtual_object);
 }
@@ -97,12 +98,12 @@ zn_client_gl_context_protocol_create_gl_base_technique(struct wl_client *client,
     struct wl_resource *resource, uint32_t id,
     struct wl_resource *rendering_unit_resource)
 {
-  if (wl_resource_get_user_data(resource) == NULL) {
+  if (zn_client_gl_context_get(resource) == NULL) {
     return;
   }
 
   struct zn_client_gl_rendering_unit *rendering_unit =
-      wl_resource_get_user_data(rendering_unit_resource);
+      zn_client_gl_rendering_unit_get(rendering_unit_resource);
 
   zn_client_gl_base_technique_create(client, id, rendering_unit);
 }
@@ -121,6 +122,12 @@ static const struct zwn_gl_context_interface implementation = {
     .create_gl_base_technique =
         zn_client_gl_context_protocol_create_gl_base_technique,
 };
+
+struct zn_client_gl_context *
+zn_client_gl_context_get(struct wl_resource *resource)
+{
+  return wl_resource_get_user_data(resource);
+}
 
 static void
 zn_client_gl_context_handle_xr_compositor_destroy(

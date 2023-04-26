@@ -16,4 +16,8 @@ struct zn_client_gl_context *zn_client_gl_context_create(
     struct wl_client *client, uint32_t id,
     struct zn_xr_compositor *xr_compositor);
 
+/// @return value is nullable
+struct zn_client_gl_context *zn_client_gl_context_get(
+    struct wl_resource *resource);
+
 void zn_client_gl_context_destroy(struct zn_client_gl_context *self);

@@ -23,3 +23,6 @@ struct zn_client_gl_rendering_unit {
 struct zn_client_gl_rendering_unit *zn_client_gl_rendering_unit_create(
     struct wl_client *client, uint32_t id,
     struct zn_client_virtual_object *virtual_object);
+
+struct zn_client_gl_rendering_unit *zn_client_gl_rendering_unit_get(
+    struct wl_resource *resource);

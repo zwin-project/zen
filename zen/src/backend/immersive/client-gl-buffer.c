@@ -16,7 +16,7 @@ static void zn_client_gl_buffer_destroy(struct zn_client_gl_buffer *self);
 static void
 zn_client_gl_buffer_handle_destroy(struct wl_resource *resource)
 {
-  struct zn_client_gl_buffer *self = wl_resource_get_user_data(resource);
+  struct zn_client_gl_buffer *self = zn_client_gl_buffer_get(resource);
 
   zn_client_gl_buffer_destroy(self);
 }
@@ -35,7 +35,7 @@ zn_client_gl_buffer_protocol_data(struct wl_client *client UNUSED,
     struct wl_resource *resource, uint32_t target,
     struct wl_resource *data_resource, uint32_t usage)
 {
-  struct zn_client_gl_buffer *self = wl_resource_get_user_data(resource);
+  struct zn_client_gl_buffer *self = zn_client_gl_buffer_get(resource);
 
   struct zn_shm_buffer *shm_buffer = zn_shm_buffer_get(data_resource);
   if (!zn_assert(shm_buffer, "zn_shm_buffer not found")) {
@@ -49,6 +49,12 @@ static const struct zwn_gl_buffer_interface implementation = {
     .destroy = zn_client_gl_buffer_protocol_destroy,
     .data = zn_client_gl_buffer_protocol_data,
 };
+
+struct zn_client_gl_buffer *
+zn_client_gl_buffer_get(struct wl_resource *resource)
+{
+  return wl_resource_get_user_data(resource);
+}
 
 static void
 zn_client_gl_buffer_handle_zn_gl_buffer_destroy(

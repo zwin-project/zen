@@ -22,3 +22,6 @@ struct zn_client_virtual_object {
 
 struct zn_client_virtual_object *zn_client_virtual_object_create(
     struct wl_client *client, uint32_t id, struct zn_xr_dispatcher *dispatcher);
+
+struct zn_client_virtual_object *zn_client_virtual_object_get(
+    struct wl_resource *resource);

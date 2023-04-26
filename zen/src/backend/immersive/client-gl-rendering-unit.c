@@ -16,7 +16,7 @@ static void
 zn_client_gl_rendering_unit_handle_destroy(struct wl_resource *resource)
 {
   struct zn_client_gl_rendering_unit *self =
-      wl_resource_get_user_data(resource);
+      zn_client_gl_rendering_unit_get(resource);
 
   zn_client_gl_rendering_unit_destroy(self);
 }
@@ -32,6 +32,12 @@ zn_client_gl_rendering_unit_protocol_destroy(
 static const struct zwn_gl_rendering_unit_interface implementation = {
     .destroy = zn_client_gl_rendering_unit_protocol_destroy,
 };
+
+struct zn_client_gl_rendering_unit *
+zn_client_gl_rendering_unit_get(struct wl_resource *resource)
+{
+  return wl_resource_get_user_data(resource);
+}
 
 static void
 zn_client_gl_rendering_unit_handle_virtual_object_destroy(

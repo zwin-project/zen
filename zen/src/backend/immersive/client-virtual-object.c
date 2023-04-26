@@ -14,7 +14,8 @@ static void zn_client_virtual_object_destroy(
 static void
 zn_client_virtual_object_handle_destroy(struct wl_resource *resource)
 {
-  struct zn_client_virtual_object *self = wl_resource_get_user_data(resource);
+  struct zn_client_virtual_object *self =
+      zn_client_virtual_object_get(resource);
 
   zn_client_virtual_object_destroy(self);
 }
@@ -32,7 +33,8 @@ static void
 zn_client_virtual_object_protocol_commit(
     struct wl_client *client UNUSED, struct wl_resource *resource)
 {
-  struct zn_client_virtual_object *self = wl_resource_get_user_data(resource);
+  struct zn_client_virtual_object *self =
+      zn_client_virtual_object_get(resource);
 
   if (self == NULL) {
     return;
@@ -52,6 +54,12 @@ static const struct zwn_virtual_object_interface implementation = {
     .commit = zn_client_virtual_object_protocol_commit,
     .frame = zn_client_virtual_object_protocol_frame,
 };
+
+struct zn_client_virtual_object *
+zn_client_virtual_object_get(struct wl_resource *resource)
+{
+  return wl_resource_get_user_data(resource);
+}
 
 static void
 zn_client_virtual_object_handle_dispatcher_destroy(

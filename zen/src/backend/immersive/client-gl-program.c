@@ -16,7 +16,7 @@ static void zn_client_gl_program_destroy(struct zn_client_gl_program *self);
 static void
 zn_client_gl_program_handle_destroy(struct wl_resource *resource)
 {
-  struct zn_client_gl_program *self = wl_resource_get_user_data(resource);
+  struct zn_client_gl_program *self = zn_client_gl_program_get(resource);
 
   zn_client_gl_program_destroy(self);
 }
@@ -34,9 +34,8 @@ static void
 zn_client_gl_program_protocol_attach_shader(struct wl_client *client UNUSED,
     struct wl_resource *resource, struct wl_resource *shader_resource)
 {
-  struct zn_client_gl_program *self = wl_resource_get_user_data(resource);
-  struct zn_client_gl_shader *shader =
-      wl_resource_get_user_data(shader_resource);
+  struct zn_client_gl_program *self = zn_client_gl_program_get(resource);
+  struct zn_client_gl_shader *shader = zn_client_gl_shader_get(shader_resource);
 
   if (self == NULL || shader == NULL) {
     return;
@@ -50,7 +49,7 @@ static void
 zn_client_gl_program_protocol_link(
     struct wl_client *client UNUSED, struct wl_resource *resource)
 {
-  struct zn_client_gl_program *self = wl_resource_get_user_data(resource);
+  struct zn_client_gl_program *self = zn_client_gl_program_get(resource);
 
   if (self == NULL) {
     return;
@@ -64,6 +63,12 @@ static const struct zwn_gl_program_interface implementation = {
     .attach_shader = zn_client_gl_program_protocol_attach_shader,
     .link = zn_client_gl_program_protocol_link,
 };
+
+struct zn_client_gl_program *
+zn_client_gl_program_get(struct wl_resource *resource)
+{
+  return wl_resource_get_user_data(resource);
+}
 
 static void
 zn_client_gl_program_handle_zn_gl_program_destroy(

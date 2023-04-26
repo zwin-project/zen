@@ -15,3 +15,7 @@ struct zn_client_gl_shader {
 
 struct zn_client_gl_shader *zn_client_gl_shader_create(struct wl_client *client,
     uint32_t id, struct zn_buffer *buffer, uint32_t type);
+
+/// @return value is nullable
+struct zn_client_gl_shader *zn_client_gl_shader_get(
+    struct wl_resource *resource);

@@ -17,7 +17,7 @@ static void zn_client_gl_shader_destroy(struct zn_client_gl_shader *self);
 static void
 zn_client_gl_shader_handle_destroy(struct wl_resource *resource)
 {
-  struct zn_client_gl_shader *self = wl_resource_get_user_data(resource);
+  struct zn_client_gl_shader *self = zn_client_gl_shader_get(resource);
 
   zn_client_gl_shader_destroy(self);
 }
@@ -33,6 +33,12 @@ zn_client_gl_shader_protocol_destroy(
 static const struct zwn_gl_shader_interface implementation = {
     .destroy = zn_client_gl_shader_protocol_destroy,
 };
+
+struct zn_client_gl_shader *
+zn_client_gl_shader_get(struct wl_resource *resource)
+{
+  return wl_resource_get_user_data(resource);
+}
 
 static void
 zn_client_gl_shader_handle_zn_gl_shader_destroy(
