@@ -8,6 +8,7 @@
 #include "gl-rendering-unit.h"
 #include "gl-shader.h"
 #include "gl-texture.h"
+#include "gl-vertex-array.h"
 #include "virtual-object.h"
 #include "zen-common/log.h"
 #include "zen/buffer.h"
@@ -29,6 +30,8 @@ const zn_xr_dispatcher_interface XrDispatcher::c_implementation_ = {
     XrDispatcher::HandleDestroyGlProgram,
     XrDispatcher::HandleGetNewGlTexture,
     XrDispatcher::HandleDestroyGlTexture,
+    XrDispatcher::HandleGetNewGlVertexArray,
+    XrDispatcher::HandleDestroyGlVertexArray,
 };
 
 XrDispatcher::XrDispatcher(wl_display *display) : display_(display) {}
@@ -331,6 +334,39 @@ XrDispatcher::HandleDestroyGlTexture(
           });
 
   self->gl_textures_.erase(result, self->gl_textures_.end());
+}
+
+zn_gl_vertex_array *
+XrDispatcher::HandleGetNewGlVertexArray(struct zn_xr_dispatcher *c_obj)
+{
+  auto *self = static_cast<XrDispatcher *>(c_obj->impl_data);
+
+  auto gl_vertex_array = GlVertexArray::New(self->channel_);
+  if (!gl_vertex_array) {
+    zn_error("Failed to create a remote gl_vertex_array");
+    return nullptr;
+  }
+
+  auto *gl_vertex_array_c_obj = gl_vertex_array->c_obj();
+
+  self->gl_vertex_arrays_.push_back(std::move(gl_vertex_array));
+
+  return gl_vertex_array_c_obj;
+}
+
+void
+XrDispatcher::HandleDestroyGlVertexArray(struct zn_xr_dispatcher *c_obj,
+    struct zn_gl_vertex_array *gl_vertex_array_c_obj)
+{
+  auto *self = static_cast<XrDispatcher *>(c_obj->impl_data);
+
+  auto result = std::remove_if(self->gl_vertex_arrays_.begin(),
+      self->gl_vertex_arrays_.end(),
+      [gl_vertex_array_c_obj](std::unique_ptr<GlVertexArray> &gl_vertex_array) {
+        return gl_vertex_array->c_obj() == gl_vertex_array_c_obj;
+      });
+
+  self->gl_vertex_arrays_.erase(result, self->gl_vertex_arrays_.end());
 }
 
 }  // namespace zen::backend::immersive::remote

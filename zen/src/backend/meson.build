@@ -10,6 +10,7 @@ _zen_backend_srcs = [
   'immersive/client-gl-rendering-unit.c',
   'immersive/client-gl-shader.c',
   'immersive/client-gl-texture.c',
+  'immersive/client-gl-vertex-array.c',
   'immersive/client-virtual-object.c',
   'immersive/shm.c',
   'immersive/shm-buffer.c',

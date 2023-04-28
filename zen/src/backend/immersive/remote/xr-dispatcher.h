@@ -11,6 +11,7 @@ class GlProgram;
 class GlRenderingUnit;
 class GlShader;
 class GlTexture;
+class GlVertexArray;
 class VirtualObject;
 
 class XrDispatcher
@@ -68,6 +69,12 @@ class XrDispatcher
   static void HandleDestroyGlTexture(
       struct zn_xr_dispatcher *c_obj, struct zn_gl_texture *gl_texture_c_obj);
 
+  static zn_gl_vertex_array *HandleGetNewGlVertexArray(
+      struct zn_xr_dispatcher *c_obj);
+
+  static void HandleDestroyGlVertexArray(struct zn_xr_dispatcher *c_obj,
+      struct zn_gl_vertex_array *gl_vertex_array_c_obj);
+
   wl_display *display_;  // @nonnull, @outlive
 
   std::shared_ptr<zen::remote::server::IChannel> channel_;
@@ -85,6 +92,8 @@ class XrDispatcher
   std::vector<std::unique_ptr<GlProgram>> gl_programs_;
 
   std::vector<std::unique_ptr<GlTexture>> gl_textures_;
+
+  std::vector<std::unique_ptr<GlVertexArray>> gl_vertex_arrays_;
 
   static const zn_xr_dispatcher_interface c_implementation_;
 

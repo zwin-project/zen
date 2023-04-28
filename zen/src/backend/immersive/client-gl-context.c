@@ -9,6 +9,7 @@
 #include "client-gl-rendering-unit.h"
 #include "client-gl-shader.h"
 #include "client-gl-texture.h"
+#include "client-gl-vertex-array.h"
 #include "client-virtual-object.h"
 #include "shm-buffer.h"
 #include "xr-compositor.h"
@@ -91,9 +92,10 @@ zn_client_gl_context_protocol_create_gl_sampler(struct wl_client *client UNUSED,
 /// @param resource can be inert (resource->user_data == NULL)
 static void
 zn_client_gl_context_protocol_create_gl_vertex_array(
-    struct wl_client *client UNUSED, struct wl_resource *resource UNUSED,
-    uint32_t id UNUSED)
-{}
+    struct wl_client *client, struct wl_resource *resource UNUSED, uint32_t id)
+{
+  zn_client_gl_vertex_array_create(client, id);
+}
 
 /// @param resource can be inert (resource->user_data == NULL)
 static void
