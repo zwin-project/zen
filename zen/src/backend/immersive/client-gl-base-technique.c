@@ -1,12 +1,16 @@
 #include "client-gl-base-technique.h"
 
 #include <zwin-gl-protocol.h>
+#include <zwin-protocol.h>
 
+#include "client-gl-buffer.h"
 #include "client-gl-program.h"
 #include "client-gl-rendering-unit.h"
+#include "client-gl-vertex-array.h"
 #include "client-virtual-object.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
+#include "zen-common/wl-array.h"
 #include "zen/gl-base-technique.h"
 #include "zen/xr-dispatcher.h"
 
@@ -52,9 +56,22 @@ zn_client_gl_base_technique_protocol_bind_program(
 /// @param resource can be inert (resource->user_data == NULL)
 static void
 zn_client_gl_base_technique_protocol_bind_vertex_array(
-    struct wl_client *client UNUSED, struct wl_resource *resource UNUSED,
-    struct wl_resource *vertex_array UNUSED)
-{}
+    struct wl_client *client UNUSED, struct wl_resource *resource,
+    struct wl_resource *vertex_array_resource)
+{
+  struct zn_client_gl_base_technique *self =
+      zn_client_gl_base_technique_get(resource);
+
+  struct zn_client_gl_vertex_array *gl_vertex_array =
+      zn_client_gl_vertex_array_get(vertex_array_resource);
+
+  if (self == NULL || gl_vertex_array == NULL) {
+    return;
+  }
+
+  zn_gl_base_technique_bind_vertex_array(
+      self->zn_gl_base_technique, gl_vertex_array->zn_gl_vertex_array);
+}
 
 /// @param resource can be inert (resource->user_data == NULL)
 static void
@@ -68,10 +85,40 @@ zn_client_gl_base_technique_protocol_bind_texture(
 /// @param resource can be inert (resource->user_data == NULL)
 static void
 zn_client_gl_base_technique_protocol_uniform_vector(
-    struct wl_client *client UNUSED, struct wl_resource *resource UNUSED,
-    uint32_t location UNUSED, const char *name UNUSED, uint32_t type UNUSED,
-    uint32_t size UNUSED, uint32_t count UNUSED, struct wl_array *value UNUSED)
-{}
+    struct wl_client *client UNUSED, struct wl_resource *resource,
+    uint32_t location, const char *name, uint32_t type, uint32_t size,
+    uint32_t count, struct wl_array *value)
+{
+  struct zn_client_gl_base_technique *self =
+      zn_client_gl_base_technique_get(resource);
+
+  if (self == NULL) {
+    return;
+  }
+
+  size_t expected_size = 0;
+
+  switch ((enum zwn_gl_base_technique_uniform_variable_type)type) {
+    case ZWN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_INT:
+      expected_size = sizeof(int32_t) * size * count;
+      break;
+    case ZWN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_UINT:
+      expected_size = sizeof(uint32_t) * size * count;
+      break;
+    case ZWN_GL_BASE_TECHNIQUE_UNIFORM_VARIABLE_TYPE_FLOAT:
+      expected_size = sizeof(float) * size * count;
+      break;
+  }
+
+  if (expected_size != value->size) {
+    wl_resource_post_error(resource, ZWN_COMPOSITOR_ERROR_INVALID_WL_ARRAY_SIZE,
+        "invalid wl_array size");
+    return;
+  }
+
+  zn_gl_base_technique_uniform_vector(self->zn_gl_base_technique, location,
+      name, type, size, count, value->data);
+}
 
 /// @param resource can be inert (resource->user_data == NULL)
 static void
@@ -80,23 +127,71 @@ zn_client_gl_base_technique_protocol_uniform_matrix(
     uint32_t location UNUSED, const char *name UNUSED, uint32_t col UNUSED,
     uint32_t row UNUSED, uint32_t count UNUSED, uint32_t transpose UNUSED,
     struct wl_array *value UNUSED)
-{}
+{
+  struct zn_client_gl_base_technique *self =
+      zn_client_gl_base_technique_get(resource);
+
+  if (self == NULL) {
+    return;
+  }
+
+  size_t expected_size = sizeof(float) * col * row * count;
+
+  if (expected_size != value->size) {
+    wl_resource_post_error(resource, ZWN_COMPOSITOR_ERROR_INVALID_WL_ARRAY_SIZE,
+        "invalid wl_array size");
+    return;
+  }
+
+  zn_gl_base_technique_uniform_matrix(self->zn_gl_base_technique, location,
+      name, col, row, count, transpose, value->data);
+}
 
 /// @param resource can be inert (resource->user_data == NULL)
 static void
 zn_client_gl_base_technique_protocol_draw_arrays(
-    struct wl_client *client UNUSED, struct wl_resource *resource UNUSED,
-    uint32_t mode UNUSED, int32_t first UNUSED, uint32_t count UNUSED)
-{}
+    struct wl_client *client UNUSED, struct wl_resource *resource,
+    uint32_t mode, int32_t first, uint32_t count)
+{
+  struct zn_client_gl_base_technique *self =
+      zn_client_gl_base_technique_get(resource);
+
+  if (self == NULL) {
+    return;
+  }
+
+  zn_gl_base_technique_draw_arrays(
+      self->zn_gl_base_technique, mode, first, count);
+}
 
 /// @param resource can be inert (resource->user_data == NULL)
 static void
 zn_client_gl_base_technique_protocol_draw_elements(
-    struct wl_client *client UNUSED, struct wl_resource *resource UNUSED,
-    uint32_t mode UNUSED, uint32_t count UNUSED, uint32_t type UNUSED,
-    struct wl_array *offset UNUSED,
-    struct wl_resource *element_array_buffer UNUSED)
-{}
+    struct wl_client *client UNUSED, struct wl_resource *resource,
+    uint32_t mode, uint32_t count, uint32_t type, struct wl_array *offset_array,
+    struct wl_resource *element_array_buffer_resource)
+{
+  struct zn_client_gl_base_technique *self =
+      zn_client_gl_base_technique_get(resource);
+
+  struct zn_client_gl_buffer *element_array_buffer =
+      zn_client_gl_buffer_get(element_array_buffer_resource);
+
+  if (self == NULL || element_array_buffer_resource == NULL) {
+    return;
+  }
+
+  uint64_t offset = 0;
+
+  if (!zn_wl_array_to_uint64_t(offset_array, &offset)) {
+    wl_resource_post_error(resource, ZWN_COMPOSITOR_ERROR_INVALID_WL_ARRAY_SIZE,
+        "invalid wl_array size");
+    return;
+  }
+
+  zn_gl_base_technique_draw_elements(self->zn_gl_base_technique, mode, count,
+      type, offset, element_array_buffer->zn_gl_buffer);
+}
 
 static const struct zwn_gl_base_technique_interface implementation = {
     .destroy = zn_client_gl_base_technique_protocol_destroy,

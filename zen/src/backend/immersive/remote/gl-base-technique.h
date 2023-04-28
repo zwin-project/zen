@@ -29,6 +29,24 @@ class GlBaseTechnique
   static void HandleBindProgram(struct zn_gl_base_technique *c_obj,
       struct zn_gl_program *gl_program_c_obj);
 
+  static void HandleBindVertexArray(struct zn_gl_base_technique *c_obj,
+      struct zn_gl_vertex_array *gl_vertex_array_c_obj);
+
+  static void HandleUniformVector(struct zn_gl_base_technique *c_obj,
+      uint32_t location, const char *name, uint32_t type, uint32_t size,
+      uint32_t count, void *value);
+
+  static void HandleUniformMatrix(struct zn_gl_base_technique *c_obj,
+      uint32_t location, const char *name, uint32_t col, uint32_t row,
+      uint32_t count, bool transpose, void *value);
+
+  static void HandleDrawArrays(struct zn_gl_base_technique *c_obj,
+      uint32_t mode, int32_t first, uint32_t count);
+
+  static void HandleDrawElements(struct zn_gl_base_technique *c_obj,
+      uint32_t mode, uint32_t count, uint32_t type, uint64_t offset,
+      struct zn_gl_buffer *gl_buffer_c_obj);
+
   std::unique_ptr<zen::remote::server::IGlBaseTechnique> remote_obj_;
 
   static const zn_gl_base_technique_interface c_implementation_;
