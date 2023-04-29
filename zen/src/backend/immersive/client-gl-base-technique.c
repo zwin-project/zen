@@ -86,7 +86,7 @@ zn_client_gl_base_technique_protocol_bind_texture(
 static void
 zn_client_gl_base_technique_protocol_uniform_vector(
     struct wl_client *client UNUSED, struct wl_resource *resource,
-    uint32_t location, const char *name, uint32_t type, uint32_t size,
+    int32_t location, const char *name, uint32_t type, uint32_t size,
     uint32_t count, struct wl_array *value)
 {
   struct zn_client_gl_base_technique *self =
@@ -124,7 +124,7 @@ zn_client_gl_base_technique_protocol_uniform_vector(
 static void
 zn_client_gl_base_technique_protocol_uniform_matrix(
     struct wl_client *client UNUSED, struct wl_resource *resource UNUSED,
-    uint32_t location UNUSED, const char *name UNUSED, uint32_t col UNUSED,
+    int32_t location UNUSED, const char *name UNUSED, uint32_t col UNUSED,
     uint32_t row UNUSED, uint32_t count UNUSED, uint32_t transpose UNUSED,
     struct wl_array *value UNUSED)
 {
