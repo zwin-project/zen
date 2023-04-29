@@ -14,6 +14,7 @@ protocols = {
 
 	'zwin': zwin_protocol_dir / 'zwin.xml',
 	'zwin-gl': zwin_protocol_dir / 'zwin-gl.xml',
+	'zwin-shell': zwin_protocol_dir / 'zwin-shell.xml',
 
   'wlr-layer-shell-unstable-v1': 'wlr-layer-shell-unstable-v1.xml',
 }

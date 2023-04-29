@@ -1,5 +1,6 @@
 subdir('immersive/gl')
 subdir('immersive/remote')
+subdir('immersive/shell')
 
 _zen_backend_srcs = [
   'default-backend.c',
@@ -28,6 +29,7 @@ _zen_backend_deps = [
   _zen_deps,
   zen_gl_immersive_backend_dep,
   zen_remote_immersive_backend_dep,
+  zen_shell_immersive_backend_dep,
 ]
 
 _zen_backend_lib = static_library(
