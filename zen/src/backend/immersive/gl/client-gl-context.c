@@ -3,6 +3,9 @@
 #include <wayland-server.h>
 #include <zwin-gl-protocol.h>
 
+#include "backend/immersive/client-virtual-object.h"
+#include "backend/immersive/shm-buffer.h"
+#include "backend/immersive/xr-compositor.h"
 #include "client-gl-base-technique.h"
 #include "client-gl-buffer.h"
 #include "client-gl-program.h"
@@ -10,9 +13,6 @@
 #include "client-gl-shader.h"
 #include "client-gl-texture.h"
 #include "client-gl-vertex-array.h"
-#include "client-virtual-object.h"
-#include "shm-buffer.h"
-#include "xr-compositor.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 

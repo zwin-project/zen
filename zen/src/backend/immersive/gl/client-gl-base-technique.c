@@ -3,11 +3,11 @@
 #include <zwin-gl-protocol.h>
 #include <zwin-protocol.h>
 
+#include "backend/immersive/client-virtual-object.h"
 #include "client-gl-buffer.h"
 #include "client-gl-program.h"
 #include "client-gl-rendering-unit.h"
 #include "client-gl-vertex-array.h"
-#include "client-virtual-object.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 #include "zen-common/wl-array.h"

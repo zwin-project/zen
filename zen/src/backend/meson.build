@@ -1,23 +1,15 @@
+subdir('immersive/gl')
 subdir('immersive/remote')
 
 _zen_backend_srcs = [
   'default-backend.c',
 
-  'immersive/client-gl-base-technique.c',
-  'immersive/client-gl-buffer.c',
-  'immersive/client-gl-context.c',
-  'immersive/client-gl-program.c',
-  'immersive/client-gl-rendering-unit.c',
-  'immersive/client-gl-shader.c',
-  'immersive/client-gl-texture.c',
-  'immersive/client-gl-vertex-array.c',
   'immersive/client-virtual-object.c',
   'immersive/shm.c',
   'immersive/shm-buffer.c',
   'immersive/shm-pool.c',
   'immersive/xr.c',
   'immersive/xr-compositor.c',
-  'immersive/xr-gl.c',
 
   'screen/compositor.c',
   'screen/keyboard.c',
@@ -30,12 +22,11 @@ _zen_backend_srcs = [
 
   protocols_code['zwin'],
   protocols_server_header['zwin'],
-  protocols_code['zwin-gl'],
-  protocols_server_header['zwin-gl'],
 ]
 
 _zen_backend_deps = [
   _zen_deps,
+  zen_gl_immersive_backend_dep,
   zen_remote_immersive_backend_dep,
 ]
 

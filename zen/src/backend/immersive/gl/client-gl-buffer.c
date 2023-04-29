@@ -2,7 +2,7 @@
 
 #include <zwin-gl-protocol.h>
 
-#include "shm-buffer.h"
+#include "backend/immersive/shm-buffer.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 #include "zen/backend.h"

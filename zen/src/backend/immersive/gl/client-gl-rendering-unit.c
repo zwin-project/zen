@@ -2,7 +2,7 @@
 
 #include <zwin-gl-protocol.h>
 
-#include "client-virtual-object.h"
+#include "backend/immersive/client-virtual-object.h"
 #include "zen-common/log.h"
 #include "zen-common/signal.h"
 #include "zen-common/util.h"
