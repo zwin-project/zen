@@ -1,5 +1,6 @@
 _zen_shell_immersive_backend_srcs = [
   'xr-shell.c',
+  'bounded.c',
 
   protocols_code['zwin-shell'],
   protocols_server_header['zwin-shell'],

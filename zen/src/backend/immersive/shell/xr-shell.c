@@ -1,9 +1,13 @@
 #include "backend/immersive/xr-shell.h"
 
+#include <zwin-protocol.h>
 #include <zwin-shell-protocol.h>
 
+#include "backend/immersive/client-virtual-object.h"
+#include "bounded.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
+#include "zen/virtual-object.h"
 
 static void
 zn_xr_shell_protocol_destroy(
@@ -13,16 +17,38 @@ zn_xr_shell_protocol_destroy(
 }
 
 static void
-zn_xr_shell_protocol_get_bounded(struct wl_client *client UNUSED,
-    struct wl_resource *resource UNUSED, uint32_t id UNUSED,
-    struct wl_resource *virtual_object UNUSED,
-    struct wl_array *half_size UNUSED)
-{}
+zn_xr_shell_protocol_get_bounded(struct wl_client *client,
+    struct wl_resource *resource UNUSED, uint32_t id,
+    struct wl_resource *virtual_object_resource)
+{
+  struct zn_client_virtual_object *client_virtual_object =
+      zn_client_virtual_object_get(virtual_object_resource);
+
+  if (client_virtual_object == NULL) {
+    return;
+  }
+
+  struct zn_bounded *bounded =
+      zn_bounded_create(client, id, client_virtual_object->zn_virtual_object);
+  if (bounded == NULL) {
+    zn_error("Failed to create a zn_bounded");
+    return;
+  }
+
+  if (!zn_virtual_object_set_role(client_virtual_object->zn_virtual_object,
+          ZN_VIRTUAL_OBJECT_ROLE_BOUNDED, bounded)) {
+    wl_resource_post_error(client_virtual_object->resource,
+        ZWN_VIRTUAL_OBJECT_ERROR_ROLE,
+        "Failed assign bounded role to the virtual object (%d)",
+        wl_resource_get_id(client_virtual_object->resource));
+    wl_resource_destroy(bounded->resource);
+  }
+}
 
 static void
 zn_xr_shell_protocol_get_expansive(struct wl_client *client UNUSED,
     struct wl_resource *resource UNUSED, uint32_t id UNUSED,
-    struct wl_resource *virtual_object UNUSED)
+    struct wl_resource *virtual_object_resource UNUSED)
 {}
 
 static const struct zwn_shell_interface implementation = {

@@ -9,7 +9,7 @@ struct zn_xr_shell;
 struct zn_xr {
   struct zn_xr_system_manager *xr_system_manager;  // @nonnull, @owning
 
-  struct zn_xr_gl *xr_gl;     // @nonnull, @owning
+  struct zn_xr_gl *xr_gl;        // @nonnull, @owning
   struct zn_xr_shell *xr_shell;  // @nonnull, @owning
 };
 

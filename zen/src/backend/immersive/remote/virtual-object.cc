@@ -5,7 +5,7 @@
 namespace zen::backend::immersive::remote {
 
 const zn_virtual_object_interface VirtualObject::c_implementation_ = {
-    VirtualObject::HandleCommit,
+    VirtualObject::HandleCommitted,
 };
 
 VirtualObject::~VirtualObject()
@@ -53,7 +53,7 @@ VirtualObject::Init(std::shared_ptr<zen::remote::server::IChannel> channel)
 }
 
 void
-VirtualObject::HandleCommit(zn_virtual_object *c_obj)
+VirtualObject::HandleCommitted(zn_virtual_object *c_obj)
 {
   auto *self = static_cast<VirtualObject *>(c_obj->impl_data);
 
