@@ -4,10 +4,13 @@
 #include <zwin-protocol.h>
 #include <zwin-shell-protocol.h>
 
+#include "backend/default-backend.h"
+#include "bounded-configure.h"
 #include "zen-common/log.h"
 #include "zen-common/signal.h"
 #include "zen-common/util.h"
 #include "zen-common/wl-array.h"
+#include "zen/server.h"
 #include "zen/virtual-object.h"
 
 static void zn_bounded_destroy(struct zn_bounded *self);
@@ -25,13 +28,23 @@ zn_bounded_send_configure(void *user_data)
   if (!zn_wl_array_from_vec3(
           &half_size_array, self->scheduled_config.half_size)) {
     zn_error("Failed to convert from vec3 to wl_array");
-    wl_array_release(&half_size_array);
-    return;
+    goto out;
+  }
+
+  struct zn_bounded_configure *configure = zn_bounded_configure_create(
+      self->scheduled_config.serial, self->scheduled_config.half_size);
+  if (configure == NULL) {
+    wl_client_post_no_memory(wl_resource_get_client(self->resource));
+    zn_error("Failed to create a zn_bounded_configure");
+    goto out;
   }
 
   zwn_bounded_send_configure(
       self->resource, &half_size_array, self->scheduled_config.serial);
 
+  wl_list_insert(self->configure_list.prev, &configure->link);
+
+out:
   wl_array_release(&half_size_array);
 }
 
@@ -71,9 +84,51 @@ zn_bounded_protocol_destroy(
 
 static void
 zn_bounded_protocol_ack_configure(struct wl_client *client UNUSED,
-    struct wl_resource *resource UNUSED, struct wl_array *half_size UNUSED,
-    uint32_t serial UNUSED)
-{}
+    struct wl_resource *resource, struct wl_array *half_size_array,
+    uint32_t serial)
+{
+  struct zn_bounded *self = wl_resource_get_user_data(resource);
+  vec3 half_size;
+
+  if (!zn_wl_array_to_vec3(half_size_array, half_size)) {
+    wl_resource_post_error(resource, ZWN_COMPOSITOR_ERROR_INVALID_WL_ARRAY_SIZE,
+        "invalid wl_array size");
+    return;
+  }
+
+  bool found = false;
+  struct zn_bounded_configure *configure = NULL;
+
+  wl_list_for_each (configure, &self->configure_list, link) {
+    if (configure->serial == serial) {
+      found = true;
+      break;
+    }
+  }
+
+  if (!found) {
+    wl_resource_post_error(resource, ZWN_BOUNDED_ERROR_INVALID_SERIAL,
+        "wrong configure serial: %u", serial);
+    return;
+  }
+
+  struct zn_bounded_configure *configure_tmp = NULL;
+
+  wl_list_for_each_safe (
+      configure, configure_tmp, &self->configure_list, link) {
+    if (configure->serial == serial) {
+      break;
+    }
+
+    zn_bounded_configure_destroy(configure);
+  }
+
+  self->configured = true;
+
+  glm_vec3_copy(half_size, self->pending.half_size);
+
+  zn_bounded_configure_destroy(configure);
+}
 
 static void
 zn_bounded_protocol_set_title(struct wl_client *client UNUSED,
@@ -117,13 +172,21 @@ static void
 zn_bounded_handle_commit(struct wl_listener *listener, void *data UNUSED)
 {
   struct zn_bounded *self = zn_container_of(listener, self, commit_listener);
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_default_backend *backend = zn_default_backend_get(server->backend);
+
+  glm_vec3_copy(self->pending.half_size, self->current.half_size);
 
   if (!self->added) {
     // on the initial commit
-
     self->added = true;
     glm_vec3_zero(self->scheduled_config.half_size);
     zn_bounded_schedule_configure(self);
+  }
+
+  if (self->configured && !self->mapped) {
+    self->mapped = true;
+    zn_default_backend_notify_bounded_mapped(backend, self);
   }
 }
 
@@ -139,10 +202,15 @@ zn_bounded_create(struct wl_client *client, uint32_t id,
   }
 
   self->virtual_object = virtual_object;
-  wl_signal_init(&self->events.destroy);
+  wl_list_init(&self->configure_list);
   glm_vec3_zero(self->scheduled_config.half_size);
   self->scheduled_config.idle = NULL;
   self->added = false;
+  self->configured = false;
+  self->mapped = false;
+  glm_vec3_zero(self->pending.half_size);
+  glm_vec3_zero(self->current.half_size);
+  wl_signal_init(&self->events.destroy);
 
   self->resource = wl_resource_create(client, &zwn_bounded_interface, 1, id);
   if (self->resource == NULL) {
@@ -174,12 +242,21 @@ err:
 static void
 zn_bounded_destroy(struct zn_bounded *self)
 {
+  struct zn_bounded_configure *configure = NULL;
+  struct zn_bounded_configure *configure_tmp = NULL;
+
   zn_signal_emit_mutable(&self->events.destroy, NULL);
 
   if (self->scheduled_config.idle != NULL) {
     wl_event_source_remove(self->scheduled_config.idle);
   }
 
+  wl_list_for_each_safe (
+      configure, configure_tmp, &self->configure_list, link) {
+    zn_bounded_configure_destroy(configure);
+  }
+
+  wl_list_remove(&self->configure_list);
   wl_list_remove(&self->events.destroy.listener_list);
   wl_list_remove(&self->virtual_object_destroy_listener.link);
   wl_list_remove(&self->commit_listener.link);

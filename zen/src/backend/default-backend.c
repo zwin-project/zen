@@ -65,6 +65,13 @@ zn_default_backend_notify_view_mapped(
   wl_signal_emit(&self->base.events.view_mapped, view);
 }
 
+void
+zn_default_backend_notify_bounded_mapped(
+    struct zn_default_backend *self, struct zn_bounded *bounded)
+{
+  wl_signal_emit(&self->base.events.bounded_mapped, bounded);
+}
+
 /// @param xr_system is nullable
 static void
 zn_default_backend_set_xr_system(
@@ -250,6 +257,7 @@ zn_default_backend_create(struct wl_display *display, struct zn_seat *zn_seat)
 
   wl_signal_init(&self->base.events.new_screen);
   wl_signal_init(&self->base.events.view_mapped);
+  wl_signal_init(&self->base.events.bounded_mapped);
   wl_signal_init(&self->base.events.destroy);
   wl_signal_init(&self->base.events.new_xr_system);
   self->base.impl = &implementation;
@@ -363,6 +371,7 @@ zn_default_backend_destroy(struct zn_default_backend *self)
   wl_list_remove(&self->input_device_list);
   wl_list_remove(&self->base.events.new_xr_system.listener_list);
   wl_list_remove(&self->base.events.destroy.listener_list);
+  wl_list_remove(&self->base.events.bounded_mapped.listener_list);
   wl_list_remove(&self->base.events.view_mapped.listener_list);
   wl_list_remove(&self->base.events.new_screen.listener_list);
   free(self);

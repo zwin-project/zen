@@ -2,6 +2,7 @@
 
 #include "zen/backend.h"
 
+struct zn_bounded;
 struct zn_compositor;
 struct zn_view;
 struct zn_xr;
@@ -39,3 +40,6 @@ void zn_default_backend_update_capabilities(struct zn_default_backend *self);
 
 void zn_default_backend_notify_view_mapped(
     struct zn_default_backend *self, struct zn_view *view);
+
+void zn_default_backend_notify_bounded_mapped(
+    struct zn_default_backend *self, struct zn_bounded *bounded);
