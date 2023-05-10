@@ -9,6 +9,7 @@ _zen_srcs = [
   'src/gl-shader.c',
   'src/gl-texture.c',
   'src/gl-vertex-array.c',
+  'src/inode.c',
   'src/screen.c',
   'src/seat.c',
   'src/server.c',

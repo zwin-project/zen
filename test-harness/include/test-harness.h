@@ -26,6 +26,14 @@ struct test {
                                                                  \
   static void name##_test(void)
 
+#define FAIL_TEST(name)                                          \
+  static void name##_test(void);                                 \
+                                                                 \
+  const struct test test##name __attribute__((                   \
+      used, section("test_section"))) = {#name, name##_test, 1}; \
+                                                                 \
+  static void name##_test(void)
+
 // Assertions
 
 void assert_equal_string_(
