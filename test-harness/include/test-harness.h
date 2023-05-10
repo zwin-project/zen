@@ -80,3 +80,6 @@ void assert_equal_vec_(const char *actual_expression, const float *expected,
 
 #define ASSERT_EQUAL_VEC2(expected, actual) \
   assert_equal_vec_(#actual, expected, actual, 2)
+
+#define ASSERT_EQUAL_VEC3(expected, actual) \
+  assert_equal_vec_(#actual, expected, actual, 3)

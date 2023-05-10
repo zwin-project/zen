@@ -15,6 +15,7 @@ _zen_unit_tests = {
   },
   'config/config-path.c': {},
   'inode/inode-map.c': {},
+  'inode/inode-move.c': {},
   'server/construct-destroy.c': {},
   'snode/snode-damage.c': {},
   'snode/snode-focus.c': {},

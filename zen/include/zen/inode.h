@@ -6,6 +6,7 @@
 struct zn_inode_interface {
   void (*mapped)(void *impl_data);
   void (*unmapped)(void *impl_data);
+  void (*moved)(void *impl_data);
 };
 
 extern const struct zn_inode_interface zn_inode_noop_implementation;
@@ -15,8 +16,12 @@ struct zn_inode {
   void *impl_data;                        // @nullable, @outlive
   const struct zn_inode_interface *impl;  // @nonnull, @outlive
 
+  // local coords
   vec3 position;
   versor quaternion;
+
+  // root node local coords, affine matrix
+  mat4 transform_abs;
 
   struct zn_inode *parent;    // @nullable, @ref
   struct wl_list link;        // zn_inode::child_list

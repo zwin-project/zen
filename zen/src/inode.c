@@ -15,9 +15,14 @@ static void
 zn_inode_noop_unmapped(void *impl_data UNUSED)
 {}
 
+static void
+zn_inode_noop_moved(void *impl_data UNUSED)
+{}
+
 const struct zn_inode_interface zn_inode_noop_implementation = {
     .mapped = zn_inode_noop_mapped,
     .unmapped = zn_inode_noop_unmapped,
+    .moved = zn_inode_noop_moved,
 };
 
 static void
@@ -58,6 +63,26 @@ zn_inode_unmap(struct zn_inode *self)
   zn_inode_map_internal(self, false);
 }
 
+static void
+zn_inode_update_position_recursive(struct zn_inode *self, mat4 parent_transform)
+{
+  mat4 transform;
+  glm_quat_mat4(self->quaternion, transform);
+  transform[3][0] = self->position[0];
+  transform[3][1] = self->position[1];
+  transform[3][2] = self->position[2];
+
+  glm_mul(parent_transform, transform, self->transform_abs);
+
+  struct zn_inode *child = NULL;
+
+  wl_list_for_each (child, &self->child_list, link) {
+    zn_inode_update_position_recursive(child, self->transform_abs);
+  }
+
+  self->impl->moved(self);
+}
+
 void
 zn_inode_move(struct zn_inode *self, struct zn_inode *parent, vec3 position,
     versor quaternion)
@@ -65,22 +90,27 @@ zn_inode_move(struct zn_inode *self, struct zn_inode *parent, vec3 position,
   glm_vec3_copy(position, self->position);
   glm_quat_copy(quaternion, self->quaternion);
 
-  if (self->parent) {
-    wl_list_remove(&self->parent_destroy_listener.link);
-    wl_list_init(&self->parent_destroy_listener.link);
-    wl_list_remove(&self->link);
-    wl_list_init(&self->link);
+  if (self->parent != parent) {
+    if (self->parent) {
+      wl_list_remove(&self->parent_destroy_listener.link);
+      wl_list_init(&self->parent_destroy_listener.link);
+      wl_list_remove(&self->link);
+      wl_list_init(&self->link);
+    }
+
+    self->parent = parent;
+
+    if (self->parent) {
+      wl_signal_add(
+          &self->parent->events.destroy, &self->parent_destroy_listener);
+      wl_list_insert(&self->parent->child_list, &self->link);
+    }
+
+    zn_inode_map_internal(self, parent && parent->mapped);
   }
 
-  self->parent = parent;
-
-  if (self->parent) {
-    wl_signal_add(
-        &self->parent->events.destroy, &self->parent_destroy_listener);
-    wl_list_insert(&self->parent->child_list, &self->link);
-  }
-
-  zn_inode_map_internal(self, parent && parent->mapped);
+  zn_inode_update_position_recursive(
+      self, self->parent ? self->parent->transform_abs : GLM_MAT4_IDENTITY);
 }
 
 static void
@@ -106,6 +136,7 @@ zn_inode_create(
   self->impl = implementation;
   glm_vec3_zero(self->position);
   glm_quat_identity(self->quaternion);
+  glm_mat4_identity(self->transform_abs);
   self->parent = NULL;
   wl_list_init(&self->link);
   wl_list_init(&self->child_list);
