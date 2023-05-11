@@ -5,6 +5,10 @@
 
 namespace zen::backend::immersive::remote {
 
+const zn_gl_rendering_unit_interface GlRenderingUnit::c_implementation_ = {
+    GlRenderingUnit::HandleChangeVisibility,
+};
+
 GlRenderingUnit::~GlRenderingUnit()
 {
   if (c_obj_ != nullptr) {
@@ -34,7 +38,7 @@ bool
 GlRenderingUnit::Init(std::shared_ptr<zen::remote::server::IChannel> channel,
     std::unique_ptr<VirtualObject> &virtual_object)
 {
-  c_obj_ = zn_gl_rendering_unit_create(this);
+  c_obj_ = zn_gl_rendering_unit_create(this, &c_implementation_);
   if (c_obj_ == nullptr) {
     zn_error("Failed to create a zn_gl_rendering_unit");
     return false;
@@ -50,6 +54,15 @@ GlRenderingUnit::Init(std::shared_ptr<zen::remote::server::IChannel> channel,
   }
 
   return true;
+}
+
+void
+GlRenderingUnit::HandleChangeVisibility(
+    zn_gl_rendering_unit *c_obj, bool visible)
+{
+  auto *self = static_cast<GlRenderingUnit *>(c_obj->impl_data);
+
+  self->remote_obj_->ChangeVisibility(visible);
 }
 
 }  // namespace zen::backend::immersive::remote

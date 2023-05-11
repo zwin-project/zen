@@ -29,8 +29,24 @@ zn_client_gl_rendering_unit_protocol_destroy(
   wl_resource_destroy(resource);
 }
 
+/// @param resource can be inert (resource->user_data == NULL)
+static void
+zn_client_gl_rendering_unit_protocol_change_visibility(
+    struct wl_client *client UNUSED, struct wl_resource *resource,
+    uint32_t visible)
+{
+  struct zn_client_gl_rendering_unit *self =
+      wl_resource_get_user_data(resource);
+  if (self == NULL) {
+    return;
+  }
+
+  zn_gl_rendering_unit_change_visibility(self->zn_gl_rendering_unit, visible);
+}
+
 static const struct zwn_gl_rendering_unit_interface implementation = {
     .destroy = zn_client_gl_rendering_unit_protocol_destroy,
+    .change_visibility = zn_client_gl_rendering_unit_protocol_change_visibility,
 };
 
 struct zn_client_gl_rendering_unit *

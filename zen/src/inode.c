@@ -7,15 +7,15 @@
 #include "zen-common/signal.h"
 #include "zen-common/util.h"
 
-static void
+void
 zn_inode_noop_mapped(void *impl_data UNUSED)
 {}
 
-static void
+void
 zn_inode_noop_unmapped(void *impl_data UNUSED)
 {}
 
-static void
+void
 zn_inode_noop_moved(void *impl_data UNUSED)
 {}
 

@@ -26,7 +26,11 @@ class GlRenderingUnit
   bool Init(std::shared_ptr<zen::remote::server::IChannel> channel,
       std::unique_ptr<VirtualObject> &virtual_object);
 
+  static void HandleChangeVisibility(zn_gl_rendering_unit *c_obj, bool visible);
+
   std::unique_ptr<zen::remote::server::IRenderingUnit> remote_obj_;
+
+  static const zn_gl_rendering_unit_interface c_implementation_;
 
   zn_gl_rendering_unit *c_obj_ = nullptr;  // @nonnull after Init(), @owning
 };

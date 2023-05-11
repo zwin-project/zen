@@ -9,6 +9,12 @@ struct zn_inode_interface {
   void (*moved)(void *impl_data);
 };
 
+void zn_inode_noop_mapped(void *impl_data);
+
+void zn_inode_noop_unmapped(void *impl_data);
+
+void zn_inode_noop_moved(void *impl_data);
+
 extern const struct zn_inode_interface zn_inode_noop_implementation;
 
 /// inode is a root node when self->parent == NULL
