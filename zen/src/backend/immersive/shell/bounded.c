@@ -75,6 +75,7 @@ zn_bounded_handle_destroy(struct wl_resource *resource)
   zn_bounded_destroy(self);
 }
 
+/// @param resource can be inert (resource->user_data == NULL)
 static void
 zn_bounded_protocol_destroy(
     struct wl_client *client UNUSED, struct wl_resource *resource)
@@ -82,12 +83,17 @@ zn_bounded_protocol_destroy(
   wl_resource_destroy(resource);
 }
 
+/// @param resource can be inert (resource->user_data == NULL)
 static void
 zn_bounded_protocol_ack_configure(struct wl_client *client UNUSED,
     struct wl_resource *resource, struct wl_array *half_size_array,
     uint32_t serial)
 {
   struct zn_bounded *self = wl_resource_get_user_data(resource);
+  if (self == NULL) {
+    return;
+  }
+
   vec3 half_size;
 
   if (!zn_wl_array_to_vec3(half_size_array, half_size)) {
@@ -130,16 +136,19 @@ zn_bounded_protocol_ack_configure(struct wl_client *client UNUSED,
   zn_bounded_configure_destroy(configure);
 }
 
+/// @param resource can be inert (resource->user_data == NULL)
 static void
 zn_bounded_protocol_set_title(struct wl_client *client UNUSED,
     struct wl_resource *resource UNUSED, const char *title UNUSED)
 {}
 
+/// @param resource can be inert (resource->user_data == NULL)
 static void
 zn_bounded_protocol_set_input_region(struct wl_client *client UNUSED,
     struct wl_resource *resource UNUSED, struct wl_resource *region UNUSED)
 {}
 
+/// @param resource can be inert (resource->user_data == NULL)
 static void
 zn_bounded_protocol_move(struct wl_client *client UNUSED,
     struct wl_resource *resource UNUSED, struct wl_resource *seat UNUSED,
@@ -161,11 +170,7 @@ zn_bounded_handle_virtual_object_destroy(
   struct zn_bounded *self =
       zn_container_of(listener, self, virtual_object_destroy_listener);
 
-  wl_resource_post_error(self->resource,
-      ZWN_VIRTUAL_OBJECT_ERROR_DEFUNCT_ROLE_OBJECT,
-      "Virtual object is destroyed before its role object (zwn_bounded)");
-
-  wl_resource_destroy(self->resource);
+  zn_bounded_destroy(self);
 }
 
 static void
@@ -260,5 +265,6 @@ zn_bounded_destroy(struct zn_bounded *self)
   wl_list_remove(&self->events.destroy.listener_list);
   wl_list_remove(&self->virtual_object_destroy_listener.link);
   wl_list_remove(&self->commit_listener.link);
+  wl_resource_set_implementation(self->resource, &implementation, NULL, NULL);
   free(self);
 }

@@ -18,6 +18,7 @@ enum zn_virtual_object_role {
 
 struct zn_virtual_object_interface {
   void (*committed)(struct zn_virtual_object *self);
+  void (*change_visibility)(struct zn_virtual_object *self, bool visible);
 };
 
 struct zn_virtual_object {
@@ -39,6 +40,13 @@ struct zn_virtual_object {
 };
 
 void zn_virtual_object_commit(struct zn_virtual_object *self);
+
+UNUSED static inline void
+zn_virtual_object_change_visibility(
+    struct zn_virtual_object *self, bool visible)
+{
+  self->impl->change_visibility(self, visible);
+}
 
 /// @return true if successful, false otherwise
 bool zn_virtual_object_set_role(struct zn_virtual_object *self,

@@ -24,6 +24,8 @@ class VirtualObject
 
   static void HandleCommitted(zn_virtual_object *c_obj);
 
+  static void HandleChangeVisibility(zn_virtual_object *c_obj, bool visible);
+
   std::unique_ptr<zen::remote::server::IVirtualObject> remote_obj_;
 
   static const zn_virtual_object_interface c_implementation_;

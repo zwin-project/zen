@@ -12,11 +12,13 @@
 #include "zen-desktop/view.h"
 #include "zen-desktop/xr-system.h"
 #include "zen/backend.h"
+#include "zen/bounded.h"
 #include "zen/screen.h"
 #include "zen/seat.h"
 #include "zen/server.h"
 #include "zen/snode.h"
 #include "zen/view.h"
+#include "zen/virtual-object.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 static struct zn_desktop_shell *desktop_shell_singleton = NULL;
@@ -59,6 +61,15 @@ zn_desktop_shell_handle_view_mapped(struct wl_listener *listener, void *data)
     zn_snode_set_position(
         view->snode, desktop_screen->view_layer, (vec2){0, 0});
   }
+}
+
+static void
+zn_desktop_shell_handle_bounded_mapped(
+    struct wl_listener *listener UNUSED, void *data)
+{
+  struct zn_bounded *bounded = data;
+
+  zn_virtual_object_change_visibility(bounded->virtual_object, true);
 }
 
 static void
@@ -219,6 +230,10 @@ zn_desktop_shell_create(void)
   wl_signal_add(
       &server->backend->events.view_mapped, &self->view_mapped_listener);
 
+  self->bounded_mapped_listener.notify = zn_desktop_shell_handle_bounded_mapped;
+  wl_signal_add(
+      &server->backend->events.bounded_mapped, &self->bounded_mapped_listener);
+
   return self;
 
 err_screen_layout:
@@ -238,6 +253,7 @@ err:
 void
 zn_desktop_shell_destroy(struct zn_desktop_shell *self)
 {
+  wl_list_remove(&self->bounded_mapped_listener.link);
   wl_list_remove(&self->view_mapped_listener.link);
   wl_list_remove(&self->pointer_frame_listener.link);
   wl_list_remove(&self->pointer_axis_listener.link);

@@ -17,6 +17,12 @@ zn_client_virtual_object_handle_destroy(struct wl_resource *resource)
   struct zn_client_virtual_object *self =
       zn_client_virtual_object_get(resource);
 
+  if (self->zn_virtual_object->role_object != NULL) {
+    wl_resource_post_error(self->resource,
+        ZWN_VIRTUAL_OBJECT_ERROR_DEFUNCT_ROLE_OBJECT,
+        "Virtual object is destroyed before its role object");
+  }
+
   zn_client_virtual_object_destroy(self);
 }
 

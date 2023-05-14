@@ -6,6 +6,7 @@ namespace zen::backend::immersive::remote {
 
 const zn_virtual_object_interface VirtualObject::c_implementation_ = {
     VirtualObject::HandleCommitted,
+    VirtualObject::HandleChangeVisibility,
 };
 
 VirtualObject::~VirtualObject()
@@ -58,6 +59,14 @@ VirtualObject::HandleCommitted(zn_virtual_object *c_obj)
   auto *self = static_cast<VirtualObject *>(c_obj->impl_data);
 
   self->remote_obj_->Commit();
+}
+
+void
+VirtualObject::HandleChangeVisibility(zn_virtual_object *c_obj, bool visible)
+{
+  auto *self = static_cast<VirtualObject *>(c_obj->impl_data);
+
+  self->remote_obj_->ChangeVisibility(visible);
 }
 
 }  // namespace zen::backend::immersive::remote
