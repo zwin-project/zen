@@ -68,6 +68,7 @@ zn_mock_backend_create(void)
   wl_signal_init(&self->base.events.view_mapped);
   wl_signal_init(&self->base.events.destroy);
   wl_signal_init(&self->base.events.new_xr_system);
+  wl_signal_init(&self->base.events.bounded_mapped);
 
   return self;
 }
