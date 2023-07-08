@@ -10,6 +10,8 @@
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 #include "zen/backend.h"
+#include "zen/binding.h"
+#include "zen/config.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 static struct zn_server *server_singleton = NULL;
@@ -36,6 +38,8 @@ zn_server_run(struct zn_server *self)
   if (!self->running) {
     return self->exit_status;
   }
+
+  zn_binding_remap(self->binding);
 
   wl_display_run(self->display);
 
@@ -91,7 +95,8 @@ handle_wlr_log(
 }
 
 struct zn_server *
-zn_server_create(struct wl_display *display, struct zn_backend *backend)
+zn_server_create(struct wl_display *display, struct zn_backend *backend,
+    struct zn_config *config)
 {
   wlr_log_init(WLR_DEBUG, handle_wlr_log);
 
@@ -111,11 +116,18 @@ zn_server_create(struct wl_display *display, struct zn_backend *backend)
   self->display = display;
   self->running = false;
   self->exit_status = EXIT_FAILURE;
+  self->config = config;
+
+  self->binding = zn_binding_create();
+  if (self->binding == NULL) {
+    zn_error("Failed to create a zn_binding");
+    goto err_free;
+  }
 
   self->seat = zn_seat_create(display);
   if (self->seat == NULL) {
     zn_error("Failed to create a zn_seat");
-    goto err_free;
+    goto err_binding;
   }
 
   if (backend) {
@@ -133,6 +145,9 @@ zn_server_create(struct wl_display *display, struct zn_backend *backend)
 err_seat:
   zn_seat_destroy(self->seat);
 
+err_binding:
+  zn_binding_destroy(self->binding);
+
 err_free:
   free(self);
 
@@ -145,6 +160,7 @@ zn_server_destroy(struct zn_server *self)
 {
   zn_backend_destroy(self->backend);
   zn_seat_destroy(self->seat);
+  zn_binding_destroy(self->binding);
   server_singleton = NULL;
   wl_list_remove(&self->events.start.listener_list);
   wl_list_remove(&self->events.end.listener_list);

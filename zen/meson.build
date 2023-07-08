@@ -1,4 +1,5 @@
 _zen_srcs = [
+  'src/binding.c',
   'src/buffer.c',
   'src/config.c',
   'src/cursor.c',
