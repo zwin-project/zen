@@ -47,6 +47,8 @@ zn_desktop_xr_system_bind(
       resource, &implementation, self, zn_desktop_xr_system_handle_destroy);
 
   wl_list_insert(&self->resource_list, wl_resource_get_link(resource));
+
+  zen_xr_system_send_status(resource, self->status);
 }
 
 static void
