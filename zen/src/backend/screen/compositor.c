@@ -5,6 +5,8 @@
 #include "layer-shell.h"
 #include "layer-surface.h"
 #include "output.h"
+#include "xdg-decoration.h"
+#include "xdg-toplevel.h"
 #include "xwayland-surface.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
@@ -24,6 +26,17 @@ zn_compositor_handle_new_xwayland_surface(
   }
 
   zn_xwayland_surface_create(wlr_xsurface);
+}
+
+static void
+zn_compositor_handle_new_xdg_surface(
+    struct wl_listener *listener UNUSED, void *data)
+{
+  struct wlr_xdg_surface *xdg_surface = data;
+
+  if (xdg_surface->role == WLR_XDG_SURFACE_ROLE_TOPLEVEL) {
+    zn_xdg_toplevel_create(xdg_surface->toplevel);
+  }
 }
 
 static void
@@ -60,6 +73,26 @@ zn_compositor_handle_new_layer_surface(
 
   zn_layer_shell_add_layer_surface(
       output->layer_shell, layer_surface, wlr_layer_surface->current.layer);
+}
+
+static void
+zn_compositor_handle_new_xdg_decoration(
+    struct wl_listener *listener UNUSED, void *data)
+{
+  struct wlr_xdg_toplevel_decoration_v1 *wlr_decoration = data;
+
+  struct zn_xdg_decoration *decoration =
+      zn_xdg_decoration_create(wlr_decoration);
+  if (decoration == NULL) {
+    zn_error("Failed to create zn_xdg_decoration");
+    return;
+  }
+
+  struct zn_xdg_toplevel *toplevel =
+      zn_xdg_toplevel_from_wlr_xdg_surface(wlr_decoration->surface);
+  if (toplevel) {
+    zn_xdg_toplevel_set_decoration(toplevel, decoration);
+  }
 }
 
 static void
@@ -125,6 +158,12 @@ zn_compositor_create(struct wl_display *display, struct wlr_renderer *renderer)
     goto err_output_layout;
   }
 
+  self->xdg_decoration_manager = wlr_xdg_decoration_manager_v1_create(display);
+  if (self->xdg_decoration_manager == NULL) {
+    zn_error("Failed to create a wlr_xdg_decoration_manager_v1");
+    goto err_output_layout;
+  }
+
   for (int i = 0; i <= 32; i++) {
     sprintf(socket_name_candidate, "wayland-%d", i);  // NOLINT(cert-err33-c)
     if (wl_display_add_socket(display, socket_name_candidate) >= 0) {
@@ -157,10 +196,19 @@ zn_compositor_create(struct wl_display *display, struct wlr_renderer *renderer)
   wl_signal_add(&self->xwayland->events.new_surface,
       &self->new_xwayland_surface_listener);
 
+  self->new_xdg_surface_listener.notify = zn_compositor_handle_new_xdg_surface;
+  wl_signal_add(
+      &self->xdg_shell->events.new_surface, &self->new_xdg_surface_listener);
+
   self->new_layer_surface_listener.notify =
       zn_compositor_handle_new_layer_surface;
   wl_signal_add(&self->wlr_layer_shell->events.new_surface,
       &self->new_layer_surface_listener);
+
+  self->new_xdg_decoration_listener.notify =
+      zn_compositor_handle_new_xdg_decoration;
+  wl_signal_add(&self->xdg_decoration_manager->events.new_toplevel_decoration,
+      &self->new_xdg_decoration_listener);
 
   self->server_end_listener.notify = zn_compositor_handle_server_end;
   wl_signal_add(&server->events.end, &self->server_end_listener);
@@ -181,7 +229,9 @@ void
 zn_compositor_destroy(struct zn_compositor *self)
 {
   wl_list_remove(&self->server_end_listener.link);
+  wl_list_remove(&self->new_xdg_decoration_listener.link);
   wl_list_remove(&self->new_layer_surface_listener.link);
+  wl_list_remove(&self->new_xdg_surface_listener.link);
   wl_list_remove(&self->new_xwayland_surface_listener.link);
   if (self->xwayland) {
     wlr_xwayland_destroy(self->xwayland);

@@ -230,6 +230,7 @@ zn_xwayland_surface_handle_surface_unmap(
   wl_list_remove(&self->surface_commit_listener.link);
   wl_list_init(&self->surface_commit_listener.link);
 
+  zn_snode_set_position(self->surface_snode->snode, NULL, GLM_VEC2_ZERO);
   self->surface_snode = NULL;
 
   zn_view_notify_unmap(self->view);

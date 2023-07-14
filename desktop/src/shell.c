@@ -61,6 +61,10 @@ zn_desktop_shell_handle_view_mapped(struct wl_listener *listener, void *data)
     zn_snode_set_position(
         view->snode, desktop_screen->view_layer, (vec2){0, 0});
   }
+
+  struct zn_server *server = zn_server_get_singleton();
+
+  zn_seat_set_focus(server->seat, view->snode);
 }
 
 static void

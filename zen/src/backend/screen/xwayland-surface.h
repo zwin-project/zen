@@ -11,7 +11,7 @@ struct zn_xwayland_surface {
   struct zn_view *view;  // @nonnull, @owning
 
   // @nonnull while mapped
-  // Automatically destroyed when give wlr_surface is destroyed.
+  // Automatically destroyed when given wlr_surface is destroyed.
   struct zn_surface_snode *surface_snode;
 
   // Developer note: Reading through the wlroots source, the unmap signal is

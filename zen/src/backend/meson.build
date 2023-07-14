@@ -19,6 +19,8 @@ _zen_backend_srcs = [
   'screen/output.c',
   'screen/pointer.c',
   'screen/surface-snode.c',
+  'screen/xdg-decoration.c',
+  'screen/xdg-toplevel.c',
   'screen/xwayland-surface.c',
 
   protocols_code['zwin'],
