@@ -86,6 +86,7 @@ jobs:
         with:
           repository: zwin-project/zwin
           path: zwin
+          ref: 'v0.2.0'
 
       - name: Build zwin
         working-directory: ./zwin
