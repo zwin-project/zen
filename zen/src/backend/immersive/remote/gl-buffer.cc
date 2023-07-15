@@ -63,7 +63,7 @@ GlBuffer::HandleData(struct zn_gl_buffer *c_obj, uint32_t target,
 {
   auto *self = static_cast<GlBuffer *>(c_obj->impl_data);
 
-  ssize_t size = zn_buffer_get_size(buffer);
+  const ssize_t size = zn_buffer_get_size(buffer);
 
   auto loop = std::make_unique<Loop>(wl_display_get_event_loop(self->display_));
 

@@ -9,15 +9,15 @@
 
 #define CONFIG_SECTION_KEY "binding"
 
-#define TOKEN_SHIFT "shift"
-#define TOKEN_CTRL "ctrl"
-#define TOKEN_ALT "alt"
-#define TOKEN_LOGO "logo"
-#define TOKEN_RIGHT "right"
-#define TOKEN_LEFT "left"
-#define TOKEN_UP "up"
-#define TOKEN_DOWN "down"
-#define TOKEN_SEPARATOR '+'
+const char *const TOKEN_SHIFT = "shift";
+const char *const TOKEN_CTRL = "ctrl";
+const char *const TOKEN_ALT = "alt";
+const char *const TOKEN_LOGO = "logo";
+const char *const TOKEN_RIGHT = "right";
+const char *const TOKEN_LEFT = "left";
+const char *const TOKEN_UP = "up";
+const char *const TOKEN_DOWN = "down";
+const char TOKEN_SEPARATOR = '+';
 
 static const uint32_t ascii_to_keycode[] = {
     ['a'] = KEY_A,

@@ -61,9 +61,9 @@ zn_xr_system_connect(struct zn_xr_system *self)
 UNUSED static inline bool
 zn_xr_system_is_connected(struct zn_xr_system *self)
 {
-  uint32_t connected = ZN_XR_SYSTEM_SESSION_STATE_SYNCHRONIZED |
-                       ZN_XR_SYSTEM_SESSION_STATE_VISIBLE |
-                       ZN_XR_SYSTEM_SESSION_STATE_FOCUS;
+  const uint32_t connected = ZN_XR_SYSTEM_SESSION_STATE_SYNCHRONIZED |
+                             ZN_XR_SYSTEM_SESSION_STATE_VISIBLE |
+                             ZN_XR_SYSTEM_SESSION_STATE_FOCUS;
   return (self->state & connected) != 0;
 }
 

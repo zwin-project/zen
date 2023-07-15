@@ -77,9 +77,9 @@ XrSystem::is_alive() const
 inline bool
 XrSystem::is_connected() const
 {
-  uint32_t connected = ZN_XR_SYSTEM_SESSION_STATE_SYNCHRONIZED |
-                       ZN_XR_SYSTEM_SESSION_STATE_VISIBLE |
-                       ZN_XR_SYSTEM_SESSION_STATE_FOCUS;
+  const uint32_t connected = ZN_XR_SYSTEM_SESSION_STATE_SYNCHRONIZED |
+                             ZN_XR_SYSTEM_SESSION_STATE_VISIBLE |
+                             ZN_XR_SYSTEM_SESSION_STATE_FOCUS;
 
   return (c_obj_.state & connected) != 0;
 }

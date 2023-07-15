@@ -236,7 +236,7 @@ XrDispatcher::HandleGetNewGlShader(
   std::string source;
 
   {
-    ssize_t length = zn_buffer_get_size(buffer);
+    const ssize_t length = zn_buffer_get_size(buffer);
     auto *data = zn_buffer_begin_access(buffer);
     source = std::string(static_cast<char *>(data), length);
     zn_buffer_end_access(buffer);
