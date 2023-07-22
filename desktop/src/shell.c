@@ -1,5 +1,6 @@
 #include "zen-desktop/shell.h"
 
+#include <cglm/vec2.h>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
 
@@ -57,9 +58,17 @@ zn_desktop_shell_handle_view_mapped(struct wl_listener *listener, void *data)
   struct zn_desktop_screen *desktop_screen =
       zn_screen_layout_get_main_screen(self->screen_layout);
 
+  vec2 initial_position;
+  glm_vec2_sub(
+      desktop_screen->screen->size, view->zn_view->size, initial_position);
+  glm_vec2_scale(initial_position, 0.5F, initial_position);
+  if (initial_position[1] < 40) {
+    initial_position[1] = 40;
+  }
+
   if (desktop_screen) {
     zn_snode_set_position(
-        view->snode, desktop_screen->view_layer, (vec2){0, 0});
+        view->snode, desktop_screen->view_layer, initial_position);
   }
 
   struct zn_server *server = zn_server_get_singleton();

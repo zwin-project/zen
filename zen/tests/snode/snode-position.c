@@ -78,3 +78,86 @@ TEST(parent_change)
   ASSERT_EQUAL_DOUBLE(3 + 4, box4.x);
   ASSERT_EQUAL_DOUBLE(0.3F + 0.4F, box4.y);
 }
+
+TEST(change_position)
+{
+  struct zn_snode *root = zn_snode_create(NULL, &zn_snode_noop_implementation);
+
+  struct zn_snode *node1 = zn_snode_create(NULL, &zn_snode_noop_implementation);
+  struct zn_snode *node2 = zn_snode_create(NULL, &zn_snode_noop_implementation);
+  struct zn_snode *node3 = zn_snode_create(NULL, &zn_snode_noop_implementation);
+  struct zn_snode *node4 = zn_snode_create(NULL, &zn_snode_noop_implementation);
+
+  zn_snode_set_position(node4, node3, (vec2){4, 0.4F});
+  zn_snode_set_position(node3, node2, (vec2){3, 0.3F});
+  zn_snode_set_position(node2, node1, (vec2){2, 0.2F});
+  zn_snode_set_position(node1, root, (vec2){1, 0.1F});
+
+  struct wlr_fbox box4;
+  zn_snode_get_fbox(node4, &box4);
+
+  ASSERT_EQUAL_DOUBLE(1 + 2 + 3 + 4, box4.x);
+  ASSERT_EQUAL_DOUBLE(0.1F + 0.2F + 0.3F + 0.4F, box4.y);
+
+  zn_snode_change_position(node2, (vec2){12, 1.2F});
+  zn_snode_get_fbox(node4, &box4);
+
+  ASSERT_EQUAL_DOUBLE(1 + 12 + 3 + 4, box4.x);
+  ASSERT_EQUAL_DOUBLE(0.1F + 1.2F + 0.3F + 0.4F, box4.y);
+}
+
+TEST(set_next_to)
+{
+  struct zn_snode *root = zn_snode_create(NULL, &zn_snode_noop_implementation);
+
+  struct zn_snode *node1 = zn_snode_create(NULL, &zn_snode_noop_implementation);
+  struct zn_snode *node11 =
+      zn_snode_create(NULL, &zn_snode_noop_implementation);
+  struct zn_snode *node12 =
+      zn_snode_create(NULL, &zn_snode_noop_implementation);
+  struct zn_snode *node13 =
+      zn_snode_create(NULL, &zn_snode_noop_implementation);
+
+  zn_snode_set_position(node1, root, (vec2){1, 0.1F});
+  zn_snode_set_position(node13, node1, (vec2){4, 0.4F});
+  zn_snode_set_position(node12, node1, (vec2){3, 0.3F});
+  zn_snode_set_position(node11, node1, (vec2){2, 0.2F});
+
+  struct wlr_fbox box11;
+  zn_snode_get_fbox(node11, &box11);
+
+  ASSERT_EQUAL_DOUBLE(1 + 2, box11.x);
+  ASSERT_EQUAL_DOUBLE(0.1F + 0.2F, box11.y);
+  ASSERT_EQUAL_POINTER(&node11->link, node12->link.next);
+
+  zn_snode_place_above(node11, node13);
+  zn_snode_get_fbox(node11, &box11);
+
+  ASSERT_EQUAL_DOUBLE(1 + 2, box11.x);
+  ASSERT_EQUAL_DOUBLE(0.1F + 0.2F, box11.y);
+  ASSERT_EQUAL_POINTER(&node11->link, node13->link.next);
+
+  zn_snode_place_below(node11, node13);
+  zn_snode_get_fbox(node11, &box11);
+
+  ASSERT_EQUAL_DOUBLE(1 + 2, box11.x);
+  ASSERT_EQUAL_DOUBLE(0.1F + 0.2F, box11.y);
+  ASSERT_EQUAL_POINTER(&node11->link, node13->link.prev);
+}
+
+FAIL_TEST(set_next_to_not_sibling)
+{
+  struct zn_snode *root = zn_snode_create(NULL, &zn_snode_noop_implementation);
+
+  struct zn_snode *node1 = zn_snode_create(NULL, &zn_snode_noop_implementation);
+  struct zn_snode *node2 = zn_snode_create(NULL, &zn_snode_noop_implementation);
+  struct zn_snode *node3 = zn_snode_create(NULL, &zn_snode_noop_implementation);
+  struct zn_snode *node4 = zn_snode_create(NULL, &zn_snode_noop_implementation);
+
+  zn_snode_set_position(node4, node3, (vec2){4, 0.4F});
+  zn_snode_set_position(node3, node2, (vec2){3, 0.3F});
+  zn_snode_set_position(node2, node1, (vec2){2, 0.2F});
+  zn_snode_set_position(node1, root, (vec2){1, 0.1F});
+
+  zn_snode_place_above(node1, node3);
+}

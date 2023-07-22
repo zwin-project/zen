@@ -25,7 +25,7 @@ zn_xdg_decoration_handle_request_mode(
 
   // TODO(@Aki-7): make this configurable from the desktop component
   enum wlr_xdg_toplevel_decoration_v1_mode mode =
-      WLR_XDG_TOPLEVEL_DECORATION_V1_MODE_SERVER_SIDE;
+      WLR_XDG_TOPLEVEL_DECORATION_V1_MODE_CLIENT_SIDE;
 
   enum wlr_xdg_toplevel_decoration_v1_mode client_mode =
       self->wlr_decoration->requested_mode;

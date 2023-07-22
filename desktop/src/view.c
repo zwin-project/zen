@@ -133,7 +133,7 @@ zn_desktop_view_handle_zn_view_resized(struct wl_listener *listener, void *data)
   if (position_changed) {
     vec2 new_position;
     glm_vec2_add(self->snode->position, position_diff, new_position);
-    zn_snode_set_position(self->snode, self->snode->parent, new_position);
+    zn_snode_change_position(self->snode, new_position);
   }
 
   zn_desktop_view_update_decoration(self);

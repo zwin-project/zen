@@ -6,10 +6,15 @@ struct zn_snode;
 
 // Lifetime is identical with given wlr_surface
 struct zn_surface_snode {
-  struct zn_snode *snode;  // @nonnull, @owning
+  struct zn_snode *snode;                   // @nonnull, @owning
+  struct zn_snode *surface_node;            // @nonnull, @owning
+  struct zn_snode *subsurfaces_below_node;  // @nonnull, @owning
+  struct zn_snode *subsurfaces_above_node;  // @nonnull, @owning
 
   struct wlr_surface *surface;  // @nonnull, @outlive
 
+  struct wl_listener new_subsurface_listener;
+  struct wl_listener surface_commit_listener;
   struct wl_listener surface_destroy_listener;
 
   struct {

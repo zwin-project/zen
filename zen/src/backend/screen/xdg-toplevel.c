@@ -81,9 +81,7 @@ zn_xdg_toplevel_update_surface_position(struct zn_xdg_toplevel *self)
   struct zn_snode *snode = self->surface_snode->snode;
   vec2 position = {(float)-geometry.x, (float)-geometry.y};
 
-  if (!glm_vec2_eqv(snode->position, position)) {
-    zn_snode_set_position(snode, snode->parent, position);
-  }
+  zn_snode_change_position(snode, position);
 }
 
 static void
@@ -109,7 +107,7 @@ zn_xdg_toplevel_update_view_decoration(
       mode = ZN_VIEW_DECORATION_MODE_SERVER_SIDE;
       break;
     case WLR_XDG_TOPLEVEL_DECORATION_V1_MODE_NONE:
-      mode = ZN_VIEW_DECORATION_MODE_SERVER_SIDE;
+      mode = ZN_VIEW_DECORATION_MODE_CLIENT_SIDE;
       break;
   }
 

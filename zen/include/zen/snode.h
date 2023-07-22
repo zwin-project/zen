@@ -169,8 +169,25 @@ void zn_snode_notify_frame(struct zn_snode *self, const struct timespec *when);
 
 /// @param parent is nullable
 /// @param position is in the parent local coords
+/// The node is placed on top.
 void zn_snode_set_position(
     struct zn_snode *self, struct zn_snode *parent, vec2 position);
+
+/// @param position is in the parent local coords
+/// Only the position changes, the order of the siblings remains the same.
+void zn_snode_change_position(struct zn_snode *self, vec2 position);
+
+/// @param sibling must not be NULL
+/// self and sibling must have the same direct nonnull parent.
+/// self is placed directly above the sibling.
+/// Position doesn't change
+void zn_snode_place_above(struct zn_snode *self, struct zn_snode *sibling);
+
+/// @param sibling must not be NULL
+/// self and sibling must have the same direct nonnull parent.
+/// self is placed directly below the sibling.
+/// Position doesn't change
+void zn_snode_place_below(struct zn_snode *self, struct zn_snode *sibling);
 
 /// @return value is nullable
 struct wlr_texture *zn_snode_get_texture(struct zn_snode *self);

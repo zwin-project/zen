@@ -118,14 +118,17 @@ zn_ui_header_bar_update_texture(struct zn_ui_header_bar *self)
   if (self->texture) {
     zn_snode_damage_whole(self->snode);
     wlr_texture_destroy(self->texture);
+    self->texture = NULL;
   }
 
   unsigned char *data = cairo_image_surface_get_data(surface);
   int stride = cairo_image_surface_get_stride(surface);
   int width = cairo_image_surface_get_width(surface);
   int height = cairo_image_surface_get_height(surface);
-  self->texture = zn_backend_create_wlr_texture_from_pixels(
-      server->backend, DRM_FORMAT_ARGB8888, stride, width, height, data);
+  if (width > 0 && height > 0) {
+    self->texture = zn_backend_create_wlr_texture_from_pixels(
+        server->backend, DRM_FORMAT_ARGB8888, stride, width, height, data);
+  }
 
   zn_snode_damage_whole(self->snode);
 

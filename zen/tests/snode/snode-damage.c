@@ -171,3 +171,111 @@ TEST(damage)
   zn_snode_damage(node4, &(struct wlr_fbox){10, 30, 10, 10});
   ASSERT_EQUAL_BOOL(false, pixman_region32_not_empty(&output->damage));
 }
+
+TEST(change_position)
+{
+  struct zn_mock_output *output = zn_mock_output_create(0, 0);
+
+  struct wlr_texture texture;
+  texture.width = 50;
+  texture.height = 50;
+
+  struct zn_snode *root = zn_snode_create_root(output->screen);
+
+  struct zn_snode *node1 = zn_snode_create(&texture, &test_impl);
+  struct zn_snode *node2 = zn_snode_create(&texture, &test_impl);
+  struct zn_snode *node3 = zn_snode_create(&texture, &test_impl);
+
+  zn_snode_set_position(node3, node2, (vec2){200, 100});
+  zn_snode_set_position(node2, node1, (vec2){100, 200});
+  zn_snode_set_position(node1, root, (vec2){100, 100});
+
+  zn_mock_output_damage_clear(output);
+
+  zn_snode_change_position(node1, (vec2){-100, -100});
+
+  ASSERT_EQUAL_BOOL(true, zn_mock_output_damage_contains(output,
+                              100 + 100 + 200 + 25, 100 + 200 + 100 + 25));
+  ASSERT_EQUAL_BOOL(true,
+      zn_mock_output_damage_contains(output, 100 + 100 + 25, 100 + 200 + 25));
+  ASSERT_EQUAL_BOOL(
+      true, zn_mock_output_damage_contains(output, 100 + 25, 100 + 25));
+  ASSERT_EQUAL_BOOL(
+      false, zn_mock_output_damage_contains(output, 100 - 25, 100 - 25));
+
+  ASSERT_EQUAL_BOOL(true, zn_mock_output_damage_contains(output,
+                              -100 + 100 + 200 + 25, -100 + 200 + 100 + 25));
+  ASSERT_EQUAL_BOOL(true,
+      zn_mock_output_damage_contains(output, -100 + 100 + 25, -100 + 200 + 25));
+  ASSERT_EQUAL_BOOL(
+      true, zn_mock_output_damage_contains(output, -100 + 25, -100 + 25));
+  ASSERT_EQUAL_BOOL(
+      false, zn_mock_output_damage_contains(output, -100 - 25, -100 - 25));
+}
+
+TEST(set_next_to)
+{
+  struct zn_mock_output *output = zn_mock_output_create(0, 0);
+
+  struct wlr_texture texture;
+  texture.width = 50;
+  texture.height = 50;
+
+  struct zn_snode *root = zn_snode_create_root(output->screen);
+
+  struct zn_snode *node1 = zn_snode_create(&texture, &test_impl);
+  struct zn_snode *node11 = zn_snode_create(&texture, &test_impl);
+  struct zn_snode *node12 = zn_snode_create(&texture, &test_impl);
+
+  zn_snode_set_position(node1, root, (vec2){100, 100});
+  zn_snode_set_position(node12, node1, (vec2){100, 200});
+  zn_snode_set_position(node11, node1, (vec2){200, 100});
+
+  zn_mock_output_damage_clear(output);
+
+  zn_snode_place_below(node11, node12);
+
+  ASSERT_EQUAL_BOOL(true,
+      zn_mock_output_damage_contains(output, 100 + 200 + 25, 100 + 100 + 25));
+  ASSERT_EQUAL_BOOL(false,
+      zn_mock_output_damage_contains(output, 100 + 100 + 25, 100 + 200 + 25));
+}
+
+TEST(no_damage)
+{
+  struct zn_mock_output *output = zn_mock_output_create(0, 0);
+
+  struct wlr_texture texture;
+  texture.width = 50;
+  texture.height = 50;
+
+  struct zn_snode *root = zn_snode_create_root(output->screen);
+
+  struct zn_snode *node1 = zn_snode_create(&texture, &test_impl);
+  struct zn_snode *node11 = zn_snode_create(&texture, &test_impl);
+  struct zn_snode *node12 = zn_snode_create(&texture, &test_impl);
+
+  zn_snode_set_position(node1, root, (vec2){100, 100});
+  zn_snode_set_position(node12, node1, (vec2){100, 200});
+  zn_snode_set_position(node11, node1, (vec2){200, 100});
+
+  zn_mock_output_damage_clear(output);
+
+  ASSERT_EQUAL_BOOL(false, pixman_region32_not_empty(&output->damage));
+
+  zn_snode_set_position(node1, root, (vec2){100, 100});
+
+  ASSERT_EQUAL_BOOL(false, pixman_region32_not_empty(&output->damage));
+
+  zn_snode_change_position(node11, (vec2){200, 100});
+
+  ASSERT_EQUAL_BOOL(false, pixman_region32_not_empty(&output->damage));
+
+  zn_snode_place_above(node11, node12);
+
+  ASSERT_EQUAL_BOOL(false, pixman_region32_not_empty(&output->damage));
+
+  zn_snode_place_above(node12, node11);
+
+  ASSERT_EQUAL_BOOL(true, pixman_region32_not_empty(&output->damage));
+}

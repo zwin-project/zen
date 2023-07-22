@@ -179,7 +179,10 @@ zn_snode_move_front(struct zn_snode *self)
     return;
   }
 
-  zn_snode_set_position(self, self->parent, self->position);
+  struct zn_snode *front =
+      zn_container_of(self->parent->child_node_list.prev, front, link);
+
+  zn_snode_place_above(self, front);
 }
 
 void
@@ -196,6 +199,10 @@ void
 zn_snode_set_position(
     struct zn_snode *self, struct zn_snode *parent, vec2 position)
 {
+  if (self->parent == parent && glm_vec2_eqv(self->position, position)) {
+    return;
+  }
+
   zn_snode_damage_whole(self);
 
   if (self->parent) {
@@ -223,6 +230,71 @@ zn_snode_set_position(
   zn_snode_damage_whole(self);
 
   wl_signal_emit(&self->events.position_changed, NULL);
+}
+
+void
+zn_snode_change_position(struct zn_snode *self, vec2 position)
+{
+  if (self->parent == NULL) {
+    return;
+  }
+
+  if (glm_vec2_eqv(self->position, position)) {
+    return;
+  }
+
+  zn_snode_damage_whole(self);
+
+  glm_vec2_copy(position, self->position);
+
+  zn_snode_update_absolute_position(self);
+
+  zn_snode_damage_whole(self);
+
+  wl_signal_emit(&self->events.position_changed, NULL);
+}
+
+static void
+zn_snode_place_next_to(
+    struct zn_snode *self, struct zn_snode *sibling, bool above)
+{
+  if (!zn_assert(self->parent, "snode should have a parent")) {
+    return;
+  }
+
+  if (!zn_assert(self->parent == sibling->parent,
+          "self and sibling should have the same parent")) {
+    return;
+  }
+
+  if (self == sibling) {
+    return;
+  }
+
+  struct wl_list *link = above ? &sibling->link : sibling->link.prev;
+
+  if (&self->link == link->next) {
+    return;
+  }
+
+  wl_list_remove(&self->link);
+  wl_list_insert(link, &self->link);
+
+  zn_snode_damage_whole(self);
+
+  wl_signal_emit(&self->events.position_changed, NULL);
+}
+
+void
+zn_snode_place_above(struct zn_snode *self, struct zn_snode *sibling)
+{
+  zn_snode_place_next_to(self, sibling, true);
+}
+
+void
+zn_snode_place_below(struct zn_snode *self, struct zn_snode *sibling)
+{
+  zn_snode_place_next_to(self, sibling, false);
 }
 
 struct wlr_texture *
