@@ -1,4 +1,4 @@
-#include "zen/screen.h"
+#include "screen.h"
 
 #include <cglm/vec2.h>
 #include <wayland-server-core.h>

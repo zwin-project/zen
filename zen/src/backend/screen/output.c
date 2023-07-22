@@ -14,10 +14,10 @@
 #include "compositor.h"
 #include "default-backend.h"
 #include "layer-shell.h"
+#include "screen.h"
 #include "zen-common/log.h"
 #include "zen-common/signal.h"
 #include "zen-common/util.h"
-#include "zen/screen.h"
 #include "zen/server.h"
 #include "zen/snode.h"
 

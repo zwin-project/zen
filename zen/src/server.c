@@ -6,11 +6,11 @@
 #include <wlr/util/log.h>
 
 #include "backend.h"
+#include "binding.h"
 #include "seat.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 #include "zen/backend.h"
-#include "zen/binding.h"
 #include "zen/config.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)

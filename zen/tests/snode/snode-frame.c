@@ -2,6 +2,7 @@
 #include <wlr/render/wlr_texture.h>
 
 #include "mock/output.h"
+#include "screen.h"
 #include "test-harness.h"
 #include "zen-common/util.h"
 #include "zen/snode.h"

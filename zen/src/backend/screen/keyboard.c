@@ -5,11 +5,11 @@
 #include <stdlib.h>
 #include <wlr/types/wlr_keyboard.h>
 
+#include "binding.h"
 #include "default-backend.h"
 #include "zen-common/log.h"
 #include "zen-common/terminate.h"
 #include "zen-common/util.h"
-#include "zen/binding.h"
 #include "zen/seat.h"
 #include "zen/server.h"
 

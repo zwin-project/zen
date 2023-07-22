@@ -1,4 +1,4 @@
-#include "zen/binding.h"
+#include "binding.h"
 
 #include <assert.h>
 #include <linux/input.h>

@@ -4,12 +4,12 @@
 
 #include "default-backend.h"
 #include "surface-snode.h"
+#include "view.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 #include "zen/seat.h"
 #include "zen/server.h"
 #include "zen/snode.h"
-#include "zen/view.h"
 
 static void zn_xwayland_surface_destroy(struct zn_xwayland_surface *self);
 

@@ -4,13 +4,13 @@
 
 #include "default-backend.h"
 #include "surface-snode.h"
+#include "view.h"
 #include "xdg-decoration.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 #include "zen/seat.h"
 #include "zen/server.h"
 #include "zen/snode.h"
-#include "zen/view.h"
 
 static void zn_xdg_toplevel_destroy(struct zn_xdg_toplevel *self);
 

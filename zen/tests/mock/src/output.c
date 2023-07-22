@@ -3,8 +3,8 @@
 #include <assert.h>
 #include <wlr/util/box.h>
 
+#include "screen.h"
 #include "zen-common/util.h"
-#include "zen/screen.h"
 #include "zen/snode.h"
 
 static void
