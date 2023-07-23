@@ -15,6 +15,7 @@ _zen_srcs = [
   'src/seat.c',
   'src/server.c',
   'src/snode.c',
+  'src/snode-root.c',
   'src/view.c',
   'src/virtual-object.c',
   'src/xr-dispatcher.c',

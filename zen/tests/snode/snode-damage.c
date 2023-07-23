@@ -3,6 +3,7 @@
 #include "mock/output.h"
 #include "test-harness.h"
 #include "zen-common/util.h"
+#include "zen/snode-root.h"
 #include "zen/snode.h"
 
 static struct wlr_texture *
@@ -36,7 +37,7 @@ TEST(set_position)
   texture2.width = 20;
   texture2.height = 20;
 
-  struct zn_snode *root = zn_snode_create_root(output->screen);
+  struct zn_snode *root = output->screen->snode_root->node;
   struct zn_snode *node1 = zn_snode_create(&texture1, &test_impl);
   struct zn_snode *node2 = zn_snode_create(&texture2, &test_impl);
 
@@ -77,8 +78,8 @@ TEST(set_position_rebase_parent)
   texture.width = 10;
   texture.height = 10;
 
-  struct zn_snode *root = zn_snode_create_root(output->screen);
-  struct zn_snode *root2 = zn_snode_create_root(output2->screen);
+  struct zn_snode *root = output->screen->snode_root->node;
+  struct zn_snode *root2 = output2->screen->snode_root->node;
 
   struct zn_snode *node1 = zn_snode_create(&texture, &test_impl);
   struct zn_snode *node2 = zn_snode_create(&texture, &test_impl);
@@ -145,7 +146,7 @@ TEST(damage)
   texture.width = 50;
   texture.height = 50;
 
-  struct zn_snode *root = zn_snode_create_root(output->screen);
+  struct zn_snode *root = output->screen->snode_root->node;
 
   struct zn_snode *node1 = zn_snode_create(&texture, &test_impl);
   struct zn_snode *node2 = zn_snode_create(&texture, &test_impl);
@@ -180,7 +181,7 @@ TEST(change_position)
   texture.width = 50;
   texture.height = 50;
 
-  struct zn_snode *root = zn_snode_create_root(output->screen);
+  struct zn_snode *root = output->screen->snode_root->node;
 
   struct zn_snode *node1 = zn_snode_create(&texture, &test_impl);
   struct zn_snode *node2 = zn_snode_create(&texture, &test_impl);
@@ -221,7 +222,7 @@ TEST(set_next_to)
   texture.width = 50;
   texture.height = 50;
 
-  struct zn_snode *root = zn_snode_create_root(output->screen);
+  struct zn_snode *root = output->screen->snode_root->node;
 
   struct zn_snode *node1 = zn_snode_create(&texture, &test_impl);
   struct zn_snode *node11 = zn_snode_create(&texture, &test_impl);
@@ -249,7 +250,7 @@ TEST(no_damage)
   texture.width = 50;
   texture.height = 50;
 
-  struct zn_snode *root = zn_snode_create_root(output->screen);
+  struct zn_snode *root = output->screen->snode_root->node;
 
   struct zn_snode *node1 = zn_snode_create(&texture, &test_impl);
   struct zn_snode *node11 = zn_snode_create(&texture, &test_impl);

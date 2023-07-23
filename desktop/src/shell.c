@@ -14,6 +14,7 @@
 #include "zen-desktop/xr-system.h"
 #include "zen/backend.h"
 #include "zen/bounded.h"
+#include "zen/cursor.h"
 #include "zen/screen.h"
 #include "zen/seat.h"
 #include "zen/server.h"
@@ -44,6 +45,20 @@ zn_desktop_shell_handle_new_screen(struct wl_listener *listener, void *data)
   struct zn_desktop_screen *desktop_screen = zn_desktop_screen_create(screen);
 
   zn_screen_layout_add(self->screen_layout, desktop_screen);
+
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_cursor *cursor = server->seat->cursor;
+
+  // FIXME(@Aki-7): when it's immersive display system, the cursor should not
+  // appear on the screen
+  if (cursor->snode->root == NULL) {
+    vec2 position;
+
+    glm_vec2_divs(desktop_screen->screen->size, 2.0F, position);
+
+    zn_snode_set_position(
+        cursor->snode, desktop_screen->cursor_layer, position);
+  }
 }
 
 static void

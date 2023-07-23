@@ -6,7 +6,28 @@
 #include "zen-common/log.h"
 #include "zen-common/signal.h"
 #include "zen-common/util.h"
+#include "zen/snode-root.h"
 #include "zen/snode.h"
+
+static void
+zn_screen_snode_root_damage(void *user_data, struct wlr_fbox *fbox)
+{
+  struct zn_screen *self = user_data;
+  zn_screen_damage(self, fbox);
+}
+
+static void
+zn_screen_snode_root_layout_position(void *user_data, vec2 position)
+{
+  struct zn_screen *self = user_data;
+  glm_vec2_copy(self->layout_position, position);
+}
+
+static const struct zn_snode_root_interface
+    zn_screen_snode_root_implementation = {
+        .damage = zn_screen_snode_root_damage,
+        .layout_position = zn_screen_snode_root_layout_position,
+};
 
 void
 zn_screen_set_layout_position(struct zn_screen *self, vec2 layout_position)
@@ -32,7 +53,18 @@ zn_screen_notify_resize(struct zn_screen *self, vec2 size)
 void
 zn_screen_notify_frame(struct zn_screen *self, struct timespec *when)
 {
-  zn_snode_notify_frame(self->snode_root, when);
+  zn_snode_notify_frame(self->snode_root->node, when);
+}
+
+struct zn_screen *
+zn_screen_from_snode_root(struct zn_snode_root *snode_root)
+{
+  if (snode_root == NULL ||
+      snode_root->impl != &zn_screen_snode_root_implementation) {
+    return NULL;
+  }
+
+  return snode_root->user_data;
 }
 
 struct zn_screen *
@@ -53,7 +85,8 @@ zn_screen_create(
   wl_signal_init(&self->events.destroy);
   wl_signal_init(&self->events.layout_position_changed);
 
-  self->snode_root = zn_snode_create_root(self);
+  self->snode_root =
+      zn_snode_root_create(self, &zn_screen_snode_root_implementation);
   if (self->snode_root == NULL) {
     zn_error("Failed to create a zn_snode");
     goto err_free;
@@ -70,7 +103,7 @@ zn_screen_create(
   return self;
 
 err_snode_root:
-  zn_snode_destroy(self->snode_root);
+  zn_snode_root_destroy(self->snode_root);
 
 err_free:
   free(self);
@@ -84,7 +117,7 @@ zn_screen_destroy(struct zn_screen *self)
 {
   zn_signal_emit_mutable(&self->events.destroy, NULL);
 
-  zn_snode_destroy(self->snode_root);
+  zn_snode_root_destroy(self->snode_root);
   wl_list_remove(&self->events.layout_position_changed.listener_list);
   wl_list_remove(&self->events.destroy.listener_list);
   wl_list_remove(&self->events.resized.listener_list);

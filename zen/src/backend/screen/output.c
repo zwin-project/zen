@@ -19,6 +19,7 @@
 #include "zen-common/signal.h"
 #include "zen-common/util.h"
 #include "zen/server.h"
+#include "zen/snode-root.h"
 #include "zen/snode.h"
 
 static void zn_output_destroy(struct zn_output *self);
@@ -145,7 +146,7 @@ zn_output_render(struct zn_output *self, pixman_region32_t *damage)
     wlr_renderer_clear(self->wlr_output->renderer, screen_background_color);
   }
 
-  zn_output_render_snode(self, self->screen->snode_root, &screen_damage);
+  zn_output_render_snode(self, self->screen->snode_root->node, &screen_damage);
 
 screen_damage_finish:
   pixman_region32_fini(&screen_damage);

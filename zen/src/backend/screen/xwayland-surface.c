@@ -38,8 +38,7 @@ zn_xwayland_surface_configure_size(void *impl_data, vec2 size)
 {
   struct zn_xwayland_surface *self = impl_data;
 
-  if (self->surface_snode == NULL ||
-      self->surface_snode->snode->screen == NULL) {
+  if (self->surface_snode == NULL || self->surface_snode->snode->root == NULL) {
     return;
   }
 
@@ -96,8 +95,7 @@ zn_xwayland_surface_handle_snode_position_changed(
   struct zn_xwayland_surface *self =
       zn_container_of(listener, self, snode_position_changed_listener);
 
-  if (self->surface_snode == NULL ||
-      self->surface_snode->snode->screen == NULL) {
+  if (self->surface_snode == NULL || self->surface_snode->snode->root == NULL) {
     return;
   }
 

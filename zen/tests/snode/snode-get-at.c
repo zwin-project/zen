@@ -5,6 +5,7 @@
 #include "mock/output.h"
 #include "test-harness.h"
 #include "zen-common/wlr/box.h"
+#include "zen/snode-root.h"
 #include "zen/snode.h"
 
 bool
@@ -53,7 +54,7 @@ TEST(normal)
 {
   struct zn_mock_output *output = zn_mock_output_create(0, 0);
 
-  struct zn_snode *root = zn_snode_create_root(output->screen);
+  struct zn_snode *root = output->screen->snode_root->node;
   struct zn_snode *node1 = create_snode_with_input_region(0, 0, 900, 800);
   struct zn_snode *node2 = create_snode_with_input_region(0, 0, 300, 300);
   struct zn_snode *node3 = create_snode_with_input_region(400, -100, 200, 300);

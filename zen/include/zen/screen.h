@@ -22,7 +22,7 @@ struct zn_screen {
 
   void *user_data;  // @nonnull, @outlive if exists
 
-  struct zn_snode *snode_root;  // @nonnull, @owning
+  struct zn_snode_root *snode_root;  // @nonnull, @owning
 
   // These layers do not have a parent at first, user must set a parent to show
   // them. User must not add children to these layers.
@@ -40,6 +40,9 @@ struct zn_screen {
     struct wl_signal layout_position_changed;  // (NULL)
   } events;
 };
+
+/// @return value can be NULL
+struct zn_screen *zn_screen_from_snode_root(struct zn_snode_root *snode_root);
 
 void zn_screen_set_layout_position(
     struct zn_screen *self, vec2 layout_position);
