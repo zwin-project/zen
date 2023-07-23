@@ -5,6 +5,11 @@
 struct zn_cursor_grab;
 struct zn_theme;
 
+enum zn_desktop_shell_display_mode {
+  ZN_DESKTOP_SHELL_DISPLAY_MODE_SCREEN,
+  ZN_DESKTOP_SHELL_DISPLAY_MODE_IMMERSIVE,
+};
+
 struct zn_desktop_shell {
   struct zn_screen_layout *screen_layout;  // @nonnull, @owning
 
@@ -12,6 +17,9 @@ struct zn_desktop_shell {
 
   struct zn_theme *theme;  // @nonnull, @owning
 
+  enum zn_desktop_shell_display_mode mode;
+
+  struct wl_listener xr_system_changed_listener;
   struct wl_listener new_xr_system_listener;
   struct wl_listener new_screen_listener;
   struct wl_listener seat_capabilities_listener;

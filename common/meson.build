@@ -1,5 +1,6 @@
 _zen_common_srcs = [
   'src/cairo/rounded.c',
+  'src/delay-signal.c',
   'src/log.c',
   'src/signal.c',
   'src/terminate.c',
