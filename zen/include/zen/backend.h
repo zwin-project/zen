@@ -2,7 +2,6 @@
 
 #include <wayland-server-core.h>
 
-#include "zen-common/delay-signal.h"
 #include "zen-common/util.h"
 
 struct zn_backend;
@@ -36,12 +35,12 @@ struct zn_backend {
   const struct zn_backend_interface *impl;
 
   struct {
-    struct wl_signal new_screen;               // (struct zn_screen *)
-    struct wl_signal view_mapped;              // (struct zn_view *)
-    struct wl_signal bounded_mapped;           // (struct zn_bounded *)
-    struct wl_signal destroy;                  // (NULL)
-    struct wl_signal new_xr_system;            // (struct zn_xr_system *)
-    struct zn_delay_signal xr_system_changed;  // (NULL)
+    struct wl_signal new_screen;         // (struct zn_screen *)
+    struct wl_signal view_mapped;        // (struct zn_view *)
+    struct wl_signal bounded_mapped;     // (struct zn_bounded *)
+    struct wl_signal destroy;            // (NULL)
+    struct wl_signal new_xr_system;      // (struct zn_xr_system *)
+    struct wl_signal xr_system_changed;  // (struct zn_xr_system *)
   } events;
 };
 

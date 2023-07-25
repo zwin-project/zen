@@ -11,6 +11,7 @@
 #include "immersive/xr-compositor.h"
 #include "immersive/xr-system-manager.h"
 #include "immersive/xr.h"
+#include "inode.h"
 #include "screen/compositor.h"
 #include "screen/keyboard.h"
 #include "screen/output.h"
@@ -77,6 +78,14 @@ static void
 zn_default_backend_set_xr_system(
     struct zn_default_backend *self, struct zn_xr_system *xr_system)
 {
+  struct zn_xr_system *current_xr_system =
+      zn_backend_get_xr_system(&self->base);
+  if (current_xr_system == xr_system) {
+    return;
+  }
+
+  struct zn_server *server = zn_server_get_singleton();
+
   if (self->xr_compositor) {
     wl_list_remove(&self->xr_compositor_destroy_listener.link);
     wl_list_init(&self->xr_compositor_destroy_listener.link);
@@ -90,7 +99,26 @@ zn_default_backend_set_xr_system(
         &self->xr_compositor_destroy_listener);
   }
 
-  zn_delay_signal_schedule(&self->base.events.xr_system_changed, self->display);
+  zn_inode_set_xr_system(server->inode_root, xr_system);
+
+  zn_signal_emit_mutable(&self->base.events.xr_system_changed, xr_system);
+}
+
+static void
+zn_default_backend_handle_xr_compositor_destroy(
+    struct wl_listener *listener, void *data UNUSED)
+{
+  struct zn_default_backend *self =
+      zn_container_of(listener, self, xr_compositor_destroy_listener);
+  struct zn_server *server = zn_server_get_singleton();
+
+  wl_list_remove(&self->xr_compositor_destroy_listener.link);
+  wl_list_init(&self->xr_compositor_destroy_listener.link);
+  self->xr_compositor = NULL;
+
+  zn_inode_set_xr_system(server->inode_root, NULL);
+
+  zn_signal_emit_mutable(&self->base.events.xr_system_changed, NULL);
 }
 
 static void
@@ -174,20 +202,6 @@ zn_default_backend_handle_new_xr_system(
   wl_signal_emit(&self->base.events.new_xr_system, xr_system);
 }
 
-static void
-zn_default_backend_handle_xr_compositor_destroy(
-    struct wl_listener *listener, void *data UNUSED)
-{
-  struct zn_default_backend *self =
-      zn_container_of(listener, self, xr_compositor_destroy_listener);
-
-  wl_list_remove(&self->xr_compositor_destroy_listener.link);
-  wl_list_init(&self->xr_compositor_destroy_listener.link);
-  self->xr_compositor = NULL;
-
-  zn_delay_signal_schedule(&self->base.events.xr_system_changed, self->display);
-}
-
 static struct wlr_texture *
 zn_default_backend_create_wlr_texture_from_pixels(struct zn_backend *base,
     uint32_t format, uint32_t stride, uint32_t width, uint32_t height,
@@ -264,7 +278,7 @@ zn_default_backend_create(struct wl_display *display, struct zn_seat *zn_seat)
   wl_signal_init(&self->base.events.bounded_mapped);
   wl_signal_init(&self->base.events.destroy);
   wl_signal_init(&self->base.events.new_xr_system);
-  zn_delay_signal_init(&self->base.events.xr_system_changed);
+  wl_signal_init(&self->base.events.xr_system_changed);
   self->base.impl = &implementation;
   self->display = display;
   self->xr_compositor = NULL;
@@ -374,7 +388,7 @@ zn_default_backend_destroy(struct zn_default_backend *self)
     wlr_backend_destroy(self->wlr_backend);
   }
   wl_list_remove(&self->input_device_list);
-  zn_delay_signal_release(&self->base.events.xr_system_changed);
+  wl_list_remove(&self->base.events.xr_system_changed.listener_list);
   wl_list_remove(&self->base.events.new_xr_system.listener_list);
   wl_list_remove(&self->base.events.destroy.listener_list);
   wl_list_remove(&self->base.events.bounded_mapped.listener_list);

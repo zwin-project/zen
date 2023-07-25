@@ -1,4 +1,4 @@
-#include "zen/inode.h"
+#include "inode.h"
 
 #include <cglm/quat.h>
 #include <cglm/vec3.h>
@@ -16,12 +16,22 @@ zn_inode_noop_unmapped(void *impl_data UNUSED)
 {}
 
 void
+zn_inode_noop_activated(void *impl_data UNUSED)
+{}
+
+void
+zn_inode_noop_deactivated(void *impl_data UNUSED)
+{}
+
+void
 zn_inode_noop_moved(void *impl_data UNUSED)
 {}
 
 const struct zn_inode_interface zn_inode_noop_implementation = {
     .mapped = zn_inode_noop_mapped,
     .unmapped = zn_inode_noop_unmapped,
+    .activated = zn_inode_noop_activated,
+    .deactivated = zn_inode_noop_deactivated,
     .moved = zn_inode_noop_moved,
 };
 
@@ -34,16 +44,16 @@ zn_inode_map_internal(struct zn_inode *self, bool mapped)
 
   struct zn_inode *child = NULL;
 
+  self->mapped = mapped;
+
   wl_list_for_each (child, &self->child_list, link) {
     zn_inode_map_internal(child, mapped);
   }
 
-  self->mapped = mapped;
-
   if (self->mapped) {
-    self->impl->mapped(self);
+    self->impl->mapped(self->impl_data);
   } else {
-    self->impl->unmapped(self);
+    self->impl->unmapped(self->impl_data);
   }
 }
 
@@ -64,6 +74,43 @@ zn_inode_unmap(struct zn_inode *self)
 }
 
 static void
+zn_inode_set_xr_system_internal(
+    struct zn_inode *self, struct zn_xr_system *xr_system)
+{
+  if (self->xr_system == xr_system) {
+    return;
+  }
+
+  bool was_active = zn_inode_is_active(self);
+
+  self->xr_system = xr_system;
+
+  struct zn_inode *child = NULL;
+
+  wl_list_for_each (child, &self->child_list, link) {
+    zn_inode_set_xr_system_internal(child, xr_system);
+  }
+
+  bool is_active = zn_inode_is_active(self);
+
+  if (was_active != is_active) {
+    if (is_active) {
+      self->impl->activated(self->impl_data);
+    } else {
+      self->impl->deactivated(self->impl_data);
+    }
+  }
+}
+
+void
+zn_inode_set_xr_system(struct zn_inode *self, struct zn_xr_system *xr_system)
+{
+  zn_assert(self->parent == NULL, "self must be root");
+
+  zn_inode_set_xr_system_internal(self, xr_system);
+}
+
+static void
 zn_inode_update_position_recursive(struct zn_inode *self, mat4 parent_transform)
 {
   mat4 transform;
@@ -80,7 +127,7 @@ zn_inode_update_position_recursive(struct zn_inode *self, mat4 parent_transform)
     zn_inode_update_position_recursive(child, self->transform_abs);
   }
 
-  self->impl->moved(self);
+  self->impl->moved(self->impl_data);
 }
 
 void
@@ -106,7 +153,9 @@ zn_inode_move(struct zn_inode *self, struct zn_inode *parent, vec3 position,
       wl_list_insert(&self->parent->child_list, &self->link);
     }
 
-    zn_inode_map_internal(self, parent && parent->mapped);
+    zn_inode_set_xr_system_internal(self, parent ? parent->xr_system : NULL);
+
+    zn_inode_map_internal(self, parent ? parent->mapped : false);
   }
 
   zn_inode_update_position_recursive(
@@ -134,13 +183,14 @@ zn_inode_create(
 
   self->impl_data = impl_data;
   self->impl = implementation;
+  self->xr_system = NULL;
+  self->mapped = false;
   glm_vec3_zero(self->position);
   glm_quat_identity(self->quaternion);
   glm_mat4_identity(self->transform_abs);
   self->parent = NULL;
   wl_list_init(&self->link);
   wl_list_init(&self->child_list);
-  self->mapped = false;
   wl_signal_init(&self->events.destroy);
 
   self->parent_destroy_listener.notify = zn_inode_handle_parent_destroy;

@@ -1,8 +1,8 @@
 #include <cglm/quat.h>
 #include <cglm/vec3.h>
 
+#include "inode.h"
 #include "test-harness.h"
-#include "zen/inode.h"
 
 TEST(map)
 {
@@ -26,82 +26,82 @@ TEST(map)
 
   zn_inode_map(root);
 
-  ASSERT_EQUAL_BOOL(true, root->mapped);
-  ASSERT_EQUAL_BOOL(true, n1->mapped);
-  ASSERT_EQUAL_BOOL(true, n2->mapped);
-  ASSERT_EQUAL_BOOL(true, n3->mapped);
-  ASSERT_EQUAL_BOOL(true, n11->mapped);
-  ASSERT_EQUAL_BOOL(true, n12->mapped);
-  ASSERT_EQUAL_BOOL(true, n21->mapped);
-  ASSERT_EQUAL_BOOL(true, n211->mapped);
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(root));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n1));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n2));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n3));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n11));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n12));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n21));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n211));
 
   zn_inode_unmap(root);
 
-  ASSERT_EQUAL_BOOL(false, root->mapped);
-  ASSERT_EQUAL_BOOL(false, n1->mapped);
-  ASSERT_EQUAL_BOOL(false, n2->mapped);
-  ASSERT_EQUAL_BOOL(false, n3->mapped);
-  ASSERT_EQUAL_BOOL(false, n11->mapped);
-  ASSERT_EQUAL_BOOL(false, n12->mapped);
-  ASSERT_EQUAL_BOOL(false, n21->mapped);
-  ASSERT_EQUAL_BOOL(false, n211->mapped);
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(root));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n1));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n2));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n3));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n11));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n12));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n21));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n211));
 
   zn_inode_map(root);
 
-  ASSERT_EQUAL_BOOL(true, root->mapped);
-  ASSERT_EQUAL_BOOL(true, n1->mapped);
-  ASSERT_EQUAL_BOOL(true, n2->mapped);
-  ASSERT_EQUAL_BOOL(true, n3->mapped);
-  ASSERT_EQUAL_BOOL(true, n11->mapped);
-  ASSERT_EQUAL_BOOL(true, n12->mapped);
-  ASSERT_EQUAL_BOOL(true, n21->mapped);
-  ASSERT_EQUAL_BOOL(true, n211->mapped);
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(root));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n1));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n2));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n3));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n11));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n12));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n21));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n211));
 
   zn_inode_move(n1, NULL, GLM_VEC3_ZERO, GLM_QUAT_IDENTITY);
   zn_inode_move(n2, NULL, GLM_VEC3_ZERO, GLM_QUAT_IDENTITY);
 
-  ASSERT_EQUAL_BOOL(true, root->mapped);
-  ASSERT_EQUAL_BOOL(false, n1->mapped);
-  ASSERT_EQUAL_BOOL(false, n2->mapped);
-  ASSERT_EQUAL_BOOL(true, n3->mapped);
-  ASSERT_EQUAL_BOOL(false, n11->mapped);
-  ASSERT_EQUAL_BOOL(false, n12->mapped);
-  ASSERT_EQUAL_BOOL(false, n21->mapped);
-  ASSERT_EQUAL_BOOL(false, n211->mapped);
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(root));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n1));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n2));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n3));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n11));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n12));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n21));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n211));
 
   zn_inode_unmap(root);
   zn_inode_move(n1, root, GLM_VEC3_ZERO, GLM_QUAT_IDENTITY);
 
-  ASSERT_EQUAL_BOOL(false, root->mapped);
-  ASSERT_EQUAL_BOOL(false, n1->mapped);
-  ASSERT_EQUAL_BOOL(false, n2->mapped);
-  ASSERT_EQUAL_BOOL(false, n3->mapped);
-  ASSERT_EQUAL_BOOL(false, n11->mapped);
-  ASSERT_EQUAL_BOOL(false, n12->mapped);
-  ASSERT_EQUAL_BOOL(false, n21->mapped);
-  ASSERT_EQUAL_BOOL(false, n211->mapped);
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(root));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n1));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n2));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n3));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n11));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n12));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n21));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n211));
 
   zn_inode_map(root);
 
-  ASSERT_EQUAL_BOOL(true, root->mapped);
-  ASSERT_EQUAL_BOOL(true, n1->mapped);
-  ASSERT_EQUAL_BOOL(false, n2->mapped);
-  ASSERT_EQUAL_BOOL(true, n3->mapped);
-  ASSERT_EQUAL_BOOL(true, n11->mapped);
-  ASSERT_EQUAL_BOOL(true, n12->mapped);
-  ASSERT_EQUAL_BOOL(false, n21->mapped);
-  ASSERT_EQUAL_BOOL(false, n211->mapped);
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(root));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n1));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n2));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n3));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n11));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n12));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n21));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(n211));
 
   zn_inode_move(n2, root, GLM_VEC3_ZERO, GLM_QUAT_IDENTITY);
 
-  ASSERT_EQUAL_BOOL(true, root->mapped);
-  ASSERT_EQUAL_BOOL(true, n1->mapped);
-  ASSERT_EQUAL_BOOL(true, n2->mapped);
-  ASSERT_EQUAL_BOOL(true, n3->mapped);
-  ASSERT_EQUAL_BOOL(true, n11->mapped);
-  ASSERT_EQUAL_BOOL(true, n12->mapped);
-  ASSERT_EQUAL_BOOL(true, n21->mapped);
-  ASSERT_EQUAL_BOOL(true, n211->mapped);
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(root));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n1));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n2));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n3));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n11));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n12));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n21));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(n211));
 }
 
 FAIL_TEST(non_root_map)
@@ -124,6 +124,17 @@ FAIL_TEST(non_root_unmap)
   zn_inode_unmap(node);
 }
 
+TEST(already_mapped)
+{
+  struct zn_inode *root = zn_inode_create(NULL, &zn_inode_noop_implementation);
+  struct zn_inode *node = zn_inode_create(NULL, &zn_inode_noop_implementation);
+
+  zn_inode_move(node, root, GLM_VEC3_ZERO, GLM_QUAT_IDENTITY);
+
+  zn_inode_map(root);
+  zn_inode_map(root);  // no error
+}
+
 TEST(destroy)
 {
   struct zn_inode *root = zn_inode_create(NULL, &zn_inode_noop_implementation);
@@ -133,10 +144,10 @@ TEST(destroy)
 
   zn_inode_map(root);
 
-  ASSERT_EQUAL_BOOL(true, node->mapped);
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(node));
 
   zn_inode_destroy(root);
 
-  ASSERT_EQUAL_BOOL(false, node->mapped);
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(node));
   ASSERT_EQUAL_POINTER(NULL, node->parent);
 }

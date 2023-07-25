@@ -15,6 +15,7 @@
 #include "zen/backend.h"
 #include "zen/bounded.h"
 #include "zen/cursor.h"
+#include "zen/inode.h"
 #include "zen/screen.h"
 #include "zen/seat.h"
 #include "zen/server.h"
@@ -27,13 +28,13 @@ static struct zn_desktop_shell *desktop_shell_singleton = NULL;
 
 static void
 zn_desktop_shell_handle_xr_system_changed(
-    struct wl_listener *listener, void *data UNUSED)
+    struct wl_listener *listener, void *data)
 {
   struct zn_desktop_shell *self =
       zn_container_of(listener, self, xr_system_changed_listener);
+  struct zn_xr_system *xr_system = data;
   struct zn_server *server = zn_server_get_singleton();
 
-  struct zn_xr_system *xr_system = zn_backend_get_xr_system(server->backend);
   enum zn_desktop_shell_display_mode mode =
       xr_system ? ZN_DESKTOP_SHELL_DISPLAY_MODE_IMMERSIVE
                 : ZN_DESKTOP_SHELL_DISPLAY_MODE_SCREEN;
@@ -45,8 +46,10 @@ zn_desktop_shell_handle_xr_system_changed(
   self->mode = mode;
 
   if (self->mode == ZN_DESKTOP_SHELL_DISPLAY_MODE_SCREEN) {
+    zn_inode_unmap(server->inode_root);
     zn_info("Switch to screen display mode");
   } else {
+    zn_inode_map(server->inode_root);
     zn_info("Switch to immersive display mode");
   }
 }
@@ -255,7 +258,7 @@ zn_desktop_shell_create(void)
 
   self->xr_system_changed_listener.notify =
       zn_desktop_shell_handle_xr_system_changed;
-  zn_delay_signal_add(&server->backend->events.xr_system_changed,
+  wl_signal_add(&server->backend->events.xr_system_changed,
       &self->xr_system_changed_listener);
 
   self->new_xr_system_listener.notify = zn_desktop_shell_handle_new_xr_system;

@@ -12,6 +12,7 @@
 #include "zen-common/util.h"
 #include "zen/backend.h"
 #include "zen/config.h"
+#include "zen/inode.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 static struct zn_server *server_singleton = NULL;
@@ -130,6 +131,12 @@ zn_server_create(struct wl_display *display, struct zn_backend *backend,
     goto err_binding;
   }
 
+  self->inode_root = zn_inode_create(self, &zn_inode_noop_implementation);
+  if (self->inode_root == NULL) {
+    zn_error("Failed to create a root inode");
+    goto err_seat;
+  }
+
   if (backend) {
     self->backend = backend;
   } else {
@@ -137,13 +144,16 @@ zn_server_create(struct wl_display *display, struct zn_backend *backend,
   }
   if (self->backend == NULL) {
     zn_error("Failed to create a zn_backend");
-    goto err_seat;
+    goto err_inode_root;
   }
 
   return self;
 
 err_seat:
   zn_seat_destroy(self->seat);
+
+err_inode_root:
+  zn_inode_destroy(self->inode_root);
 
 err_binding:
   zn_binding_destroy(self->binding);
@@ -160,6 +170,7 @@ zn_server_destroy(struct zn_server *self)
 {
   zn_backend_destroy(self->backend);
   zn_seat_destroy(self->seat);
+  zn_inode_destroy(self->inode_root);
   zn_binding_destroy(self->binding);
   server_singleton = NULL;
   wl_list_remove(&self->events.start.listener_list);
