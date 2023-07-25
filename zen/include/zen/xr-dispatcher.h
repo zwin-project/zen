@@ -129,46 +129,46 @@ zn_xr_dispatcher_get_new_gl_shader(
   return self->impl->get_new_gl_shader(self, buffer, type);
 }
 
-UNUSED static void
+UNUSED static inline void
 zn_xr_dispatcher_destroy_gl_shader(
     struct zn_xr_dispatcher *self, struct zn_gl_shader *gl_shader)
 {
   self->impl->destroy_gl_shader(self, gl_shader);
 }
 
-UNUSED static struct zn_gl_program *
+UNUSED static inline struct zn_gl_program *
 zn_xr_dispatcher_get_new_gl_program(struct zn_xr_dispatcher *self)
 {
   return self->impl->get_new_gl_program(self);
 }
 
-UNUSED static void
+UNUSED static inline void
 zn_xr_dispatcher_destroy_gl_program(
     struct zn_xr_dispatcher *self, struct zn_gl_program *gl_program)
 {
   self->impl->destroy_gl_program(self, gl_program);
 }
 
-UNUSED static struct zn_gl_texture *
+UNUSED static inline struct zn_gl_texture *
 zn_xr_dispatcher_get_new_gl_texture(struct zn_xr_dispatcher *self)
 {
   return self->impl->get_new_gl_texture(self);
 }
 
-UNUSED static void
+UNUSED static inline void
 zn_xr_dispatcher_destroy_gl_texture(
     struct zn_xr_dispatcher *self, struct zn_gl_texture *gl_texture)
 {
   self->impl->destroy_gl_texture(self, gl_texture);
 }
 
-UNUSED static struct zn_gl_vertex_array *
+UNUSED static inline struct zn_gl_vertex_array *
 zn_xr_dispatcher_get_new_gl_vertex_array(struct zn_xr_dispatcher *self)
 {
   return self->impl->get_new_gl_vertex_array(self);
 }
 
-UNUSED static void
+UNUSED static inline void
 zn_xr_dispatcher_destroy_gl_vertex_array(
     struct zn_xr_dispatcher *self, struct zn_gl_vertex_array *gl_vertex_array)
 {

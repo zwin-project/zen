@@ -17,13 +17,13 @@ struct zn_snode_root {
   struct zn_snode *node;  // @nonnull, @owning
 };
 
-UNUSED static void
+UNUSED static inline void
 zn_snode_root_damage(struct zn_snode_root *self, struct wlr_fbox *fbox)
 {
   self->impl->damage(self->user_data, fbox);
 }
 
-UNUSED static void
+UNUSED static inline void
 zn_snode_root_layout_position(struct zn_snode_root *self, vec2 position)
 {
   self->impl->layout_position(self->user_data, position);
