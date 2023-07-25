@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gl-shader-private.h"
+#include "gl-shader.h"
 #include "zen-common/cpp-util.h"
 
 namespace zen::backend::immersive::remote {

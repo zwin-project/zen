@@ -1,4 +1,4 @@
-#include "loop.h"
+#include "loop.hh"
 
 #include "zen-common/terminate.h"
 

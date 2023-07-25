@@ -1,4 +1,5 @@
-#include "xr-dispatcher-private.h"
+#include "xr-dispatcher.h"
+
 #include "zen-common/log.h"
 #include "zen-common/signal.h"
 #include "zen-common/util.h"

@@ -1,4 +1,4 @@
-#include "virtual-object.h"
+#include "virtual-object.hh"
 
 #include "zen-common/log.h"
 

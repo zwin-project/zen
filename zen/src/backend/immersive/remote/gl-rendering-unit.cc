@@ -1,6 +1,6 @@
-#include "gl-rendering-unit.h"
+#include "gl-rendering-unit.hh"
 
-#include "virtual-object.h"
+#include "virtual-object.hh"
 #include "zen-common/log.h"
 
 namespace zen::backend::immersive::remote {

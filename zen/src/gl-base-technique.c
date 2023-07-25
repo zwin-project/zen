@@ -1,4 +1,5 @@
-#include "gl-base-technique-private.h"
+#include "gl-base-technique.h"
+
 #include "zen-common/log.h"
 #include "zen-common/signal.h"
 #include "zen-common/util.h"

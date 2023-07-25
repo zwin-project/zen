@@ -1,6 +1,6 @@
-#include "gl-vertex-array.h"
+#include "gl-vertex-array.hh"
 
-#include "gl-buffer.h"
+#include "gl-buffer.hh"
 #include "zen-common/log.h"
 
 namespace zen::backend::immersive::remote {

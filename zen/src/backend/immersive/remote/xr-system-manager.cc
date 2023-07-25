@@ -1,8 +1,8 @@
-#include "xr-system-manager.h"
+#include "xr-system-manager.hh"
 
-#include "log.h"
-#include "loop.h"
-#include "xr-system.h"
+#include "log.hh"
+#include "loop.hh"
+#include "xr-system.hh"
 #include "zen-common/log.h"
 
 static void zn_xr_system_manager_destroy_remote(

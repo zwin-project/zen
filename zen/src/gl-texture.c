@@ -1,4 +1,5 @@
-#include "gl-texture-private.h"
+#include "gl-texture.h"
+
 #include "zen-common/log.h"
 #include "zen-common/signal.h"
 #include "zen-common/util.h"

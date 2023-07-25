@@ -1,15 +1,15 @@
-#include "xr-dispatcher.h"
+#include "xr-dispatcher.hh"
 
 #include <utility>
 
-#include "gl-base-technique.h"
-#include "gl-buffer.h"
-#include "gl-program.h"
-#include "gl-rendering-unit.h"
-#include "gl-shader.h"
-#include "gl-texture.h"
-#include "gl-vertex-array.h"
-#include "virtual-object.h"
+#include "gl-base-technique.hh"
+#include "gl-buffer.hh"
+#include "gl-program.hh"
+#include "gl-rendering-unit.hh"
+#include "gl-shader.hh"
+#include "gl-texture.hh"
+#include "gl-vertex-array.hh"
+#include "virtual-object.hh"
 #include "zen-common/log.h"
 #include "zen/buffer.h"
 

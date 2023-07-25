@@ -1,9 +1,10 @@
 #pragma once
 
-#include <zen-common/log.h>
 #include <zen-remote/logger.h>
 
 #include <cstdio>
+
+#include "zen-common/log.h"
 
 namespace zen::backend::immersive::remote {
 

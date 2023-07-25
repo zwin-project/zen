@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gl-rendering-unit-private.h"
+#include "gl-rendering-unit.h"
 #include "zen-common/cpp-util.h"
 
 namespace zen::backend::immersive::remote {

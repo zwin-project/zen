@@ -1,9 +1,9 @@
-#include "xr-system.h"
+#include "xr-system.hh"
 
-#include "loop.h"
-#include "virtual-object.h"
-#include "xr-dispatcher.h"
-#include "xr-system-manager.h"
+#include "loop.hh"
+#include "virtual-object.hh"
+#include "xr-dispatcher.hh"
+#include "xr-system-manager.hh"
 #include "zen-common/log.h"
 #include "zen-common/signal.h"
 

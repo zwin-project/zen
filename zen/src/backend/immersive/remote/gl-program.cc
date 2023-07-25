@@ -1,6 +1,6 @@
-#include "gl-program.h"
+#include "gl-program.hh"
 
-#include "gl-shader.h"
+#include "gl-shader.hh"
 #include "zen-common/log.h"
 
 namespace zen::backend::immersive::remote {

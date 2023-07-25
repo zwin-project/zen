@@ -1,6 +1,6 @@
-#include "gl-texture.h"
+#include "gl-texture.hh"
 
-#include "loop.h"
+#include "loop.hh"
 #include "zen-common/log.h"
 #include "zen/buffer.h"
 

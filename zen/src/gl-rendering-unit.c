@@ -1,4 +1,5 @@
-#include "gl-rendering-unit-private.h"
+#include "gl-rendering-unit.h"
+
 #include "zen-common/log.h"
 #include "zen-common/signal.h"
 #include "zen-common/util.h"

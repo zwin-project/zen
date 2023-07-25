@@ -1,11 +1,11 @@
-#include "gl-base-technique.h"
+#include "gl-base-technique.hh"
 
 #include <zwin-gl-protocol.h>
 
-#include "gl-buffer.h"
-#include "gl-program.h"
-#include "gl-rendering-unit.h"
-#include "gl-vertex-array.h"
+#include "gl-buffer.hh"
+#include "gl-program.hh"
+#include "gl-rendering-unit.hh"
+#include "gl-vertex-array.hh"
 #include "zen-common/log.h"
 
 namespace zen::backend::immersive::remote {

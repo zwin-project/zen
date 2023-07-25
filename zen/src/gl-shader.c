@@ -1,4 +1,5 @@
-#include "gl-shader-private.h"
+#include "gl-shader.h"
+
 #include "zen-common/log.h"
 #include "zen-common/signal.h"
 #include "zen-common/util.h"

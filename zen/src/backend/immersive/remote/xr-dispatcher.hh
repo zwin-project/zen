@@ -1,6 +1,6 @@
 #pragma once
 
-#include "xr-dispatcher-private.h"
+#include "xr-dispatcher.h"
 #include "zen-common/cpp-util.h"
 
 namespace zen::backend::immersive::remote {

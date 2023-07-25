@@ -1,6 +1,6 @@
 #pragma once
 
-#include "virtual-object-private.h"
+#include "virtual-object.h"
 #include "zen-common/cpp-util.h"
 
 namespace zen::backend::immersive::remote {

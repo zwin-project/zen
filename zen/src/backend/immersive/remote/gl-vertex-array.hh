@@ -1,6 +1,6 @@
 #pragma once
 
-#include "gl-vertex-array-private.h"
+#include "gl-vertex-array.h"
 #include "zen-common/cpp-util.h"
 
 namespace zen::backend::immersive::remote {
