@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cairo.h>
+#include <pixman.h>
 #include <wayland-server-core.h>
 #include <wlr/render/wlr_texture.h>
 #include <zwnr/gl-base-technique.h>
@@ -55,7 +56,8 @@ void zna_base_unit_read_cairo_surface(
     struct zna_base_unit *self, cairo_surface_t *surface);
 
 void zna_base_unit_read_wlr_texture(
-    struct zna_base_unit *self, struct wlr_texture *texture);
+    struct zna_base_unit *self, struct wlr_texture *texture,
+    pixman_region32_t *damage, bool *on_partial_updates);
 
 void zna_base_unit_setup_renderer_objects(struct zna_base_unit *self,
     struct znr_dispatcher *dispatcher,
