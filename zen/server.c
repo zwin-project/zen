@@ -13,6 +13,7 @@
 #include "zen/screen/output.h"
 #include "zen/virtual-object.h"
 #include "zen/wlr/render/glew.h"
+#include "zen/view.h"
 
 static struct zn_server *server_singleton = NULL;
 
@@ -79,6 +80,7 @@ zn_server_change_display_system(
     struct zn_server *self, enum zn_display_system_state display_system)
 {
   struct zn_screen *screen;
+  struct zn_view *view;
 
   if (self->display_system == display_system) return;
 
@@ -86,6 +88,10 @@ zn_server_change_display_system(
 
   wl_list_for_each (screen, &self->scene->screen_layout->screen_list, link) {
     zn_screen_damage_whole(screen);
+  }
+
+  wl_list_for_each (view, &self->scene->view_list, link) {
+    zn_view_reset_partial_updates(view);
   }
 
   self->display_system = display_system;

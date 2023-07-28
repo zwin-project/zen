@@ -29,7 +29,7 @@ zna_cursor_commit(struct zna_cursor *self, uint32_t damage)
 
   if (damage & ZNA_CURSOR_DAMAGE_TEXTURE) {
     zna_base_unit_read_wlr_texture(
-        self->base_unit, zn_cursor_get_texture(self->zn_cursor));
+        self->base_unit, zn_cursor_get_texture(self->zn_cursor), NULL, NULL);
     znr_gl_sampler_parameter_i(
         self->base_unit->sampler0, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     znr_gl_sampler_parameter_i(
