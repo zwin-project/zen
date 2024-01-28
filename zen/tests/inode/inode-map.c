@@ -145,9 +145,18 @@ TEST(destroy)
   zn_inode_map(root);
 
   ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(node));
+}
 
-  zn_inode_destroy(root);
+FAIL_TEST(destroy_parent)
+{
+  struct zn_inode *root = zn_inode_create(NULL, &zn_inode_noop_implementation);
+  struct zn_inode *parent =
+      zn_inode_create(NULL, &zn_inode_noop_implementation);
+  struct zn_inode *node = zn_inode_create(NULL, &zn_inode_noop_implementation);
 
-  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(node));
-  ASSERT_EQUAL_POINTER(NULL, node->parent);
+  // NOLINTNEXTLINE(readability-suspicious-call-argument)
+  zn_inode_move(parent, root, GLM_VEC3_ZERO, GLM_QUAT_IDENTITY);
+  zn_inode_move(node, parent, GLM_VEC3_ZERO, GLM_QUAT_IDENTITY);
+
+  zn_inode_destroy(parent);
 }

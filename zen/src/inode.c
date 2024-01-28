@@ -139,8 +139,6 @@ zn_inode_move(struct zn_inode *self, struct zn_inode *parent, vec3 position,
 
   if (self->parent != parent) {
     if (self->parent) {
-      wl_list_remove(&self->parent_destroy_listener.link);
-      wl_list_init(&self->parent_destroy_listener.link);
       wl_list_remove(&self->link);
       wl_list_init(&self->link);
     }
@@ -148,8 +146,6 @@ zn_inode_move(struct zn_inode *self, struct zn_inode *parent, vec3 position,
     self->parent = parent;
 
     if (self->parent) {
-      wl_signal_add(
-          &self->parent->events.destroy, &self->parent_destroy_listener);
       wl_list_insert(&self->parent->child_list, &self->link);
     }
 
@@ -160,15 +156,6 @@ zn_inode_move(struct zn_inode *self, struct zn_inode *parent, vec3 position,
 
   zn_inode_update_position_recursive(
       self, self->parent ? self->parent->transform_abs : GLM_MAT4_IDENTITY);
-}
-
-static void
-zn_inode_handle_parent_destroy(struct wl_listener *listener, void *data UNUSED)
-{
-  struct zn_inode *self =
-      zn_container_of(listener, self, parent_destroy_listener);
-
-  zn_inode_move(self, NULL, self->position, self->quaternion);
 }
 
 struct zn_inode *
@@ -191,10 +178,6 @@ zn_inode_create(
   self->parent = NULL;
   wl_list_init(&self->link);
   wl_list_init(&self->child_list);
-  wl_signal_init(&self->events.destroy);
-
-  self->parent_destroy_listener.notify = zn_inode_handle_parent_destroy;
-  wl_list_init(&self->parent_destroy_listener.link);
 
   return self;
 
@@ -205,10 +188,9 @@ err:
 void
 zn_inode_destroy(struct zn_inode *self)
 {
-  zn_signal_emit_mutable(&self->events.destroy, NULL);
+  zn_assert(wl_list_empty(&self->child_list),
+      "Destroy child inodes before the parent inode");
 
-  wl_list_remove(&self->events.destroy.listener_list);
-  wl_list_remove(&self->parent_destroy_listener.link);
   wl_list_remove(&self->child_list);
   wl_list_remove(&self->link);
   free(self);

@@ -1,6 +1,6 @@
 #include "gl-rendering-unit.hh"
 
-#include "virtual-object.hh"
+#include "gl-virtual-object.hh"
 #include "zen-common/log.h"
 
 namespace zen::backend::immersive::remote {
@@ -18,7 +18,7 @@ GlRenderingUnit::~GlRenderingUnit()
 
 std::unique_ptr<GlRenderingUnit>
 GlRenderingUnit::New(std::shared_ptr<zen::remote::server::IChannel> channel,
-    std::unique_ptr<VirtualObject> &virtual_object)
+    std::unique_ptr<GlVirtualObject> &virtual_object)
 {
   auto self = std::unique_ptr<GlRenderingUnit>(new GlRenderingUnit());
   if (!self) {
@@ -36,7 +36,7 @@ GlRenderingUnit::New(std::shared_ptr<zen::remote::server::IChannel> channel,
 
 bool
 GlRenderingUnit::Init(std::shared_ptr<zen::remote::server::IChannel> channel,
-    std::unique_ptr<VirtualObject> &virtual_object)
+    std::unique_ptr<GlVirtualObject> &virtual_object)
 {
   c_obj_ = zn_gl_rendering_unit_create(this, &c_implementation_);
   if (c_obj_ == nullptr) {

@@ -7,8 +7,8 @@
 #include <wlr/types/wlr_input_device.h>
 #include <wlr/types/wlr_output.h>
 
+#include "immersive/gl-context.h"
 #include "immersive/shm.h"
-#include "immersive/xr-compositor.h"
 #include "immersive/xr-system-manager.h"
 #include "immersive/xr.h"
 #include "inode.h"
@@ -86,37 +86,39 @@ zn_default_backend_set_xr_system(
 
   struct zn_server *server = zn_server_get_singleton();
 
-  if (self->xr_compositor) {
-    wl_list_remove(&self->xr_compositor_destroy_listener.link);
-    wl_list_init(&self->xr_compositor_destroy_listener.link);
-    zn_xr_compositor_destroy(self->xr_compositor);
-    self->xr_compositor = NULL;
+  if (self->gl_context) {
+    wl_list_remove(&self->gl_context_destroy_listener.link);
+    wl_list_init(&self->gl_context_destroy_listener.link);
+    zn_gl_context_destroy(self->gl_context);
+    self->gl_context = NULL;
   }
 
   if (xr_system) {
-    self->xr_compositor = zn_xr_compositor_create(self->display, xr_system);
-    wl_signal_add(&self->xr_compositor->events.destroy,
-        &self->xr_compositor_destroy_listener);
+    self->gl_context = zn_gl_context_create(self->display, xr_system);
+    wl_signal_add(
+        &self->gl_context->events.destroy, &self->gl_context_destroy_listener);
   }
 
   zn_inode_set_xr_system(server->inode_root, xr_system);
+  zn_inode_set_xr_system(server->inode_invisible_root, xr_system);
 
   zn_signal_emit_mutable(&self->base.events.xr_system_changed, xr_system);
 }
 
 static void
-zn_default_backend_handle_xr_compositor_destroy(
+zn_default_backend_handle_gl_context_destroy(
     struct wl_listener *listener, void *data UNUSED)
 {
   struct zn_default_backend *self =
-      zn_container_of(listener, self, xr_compositor_destroy_listener);
+      zn_container_of(listener, self, gl_context_destroy_listener);
   struct zn_server *server = zn_server_get_singleton();
 
-  wl_list_remove(&self->xr_compositor_destroy_listener.link);
-  wl_list_init(&self->xr_compositor_destroy_listener.link);
-  self->xr_compositor = NULL;
+  wl_list_remove(&self->gl_context_destroy_listener.link);
+  wl_list_init(&self->gl_context_destroy_listener.link);
+  self->gl_context = NULL;
 
   zn_inode_set_xr_system(server->inode_root, NULL);
+  zn_inode_set_xr_system(server->inode_invisible_root, NULL);
 
   zn_signal_emit_mutable(&self->base.events.xr_system_changed, NULL);
 }
@@ -229,7 +231,7 @@ static struct zn_xr_system *
 zn_default_backend_handle_get_xr_system(struct zn_backend *base)
 {
   struct zn_default_backend *self = zn_container_of(base, self, base);
-  return self->xr_compositor ? self->xr_compositor->xr_system : NULL;
+  return self->gl_context ? self->gl_context->xr_system : NULL;
 }
 
 static bool
@@ -281,7 +283,7 @@ zn_default_backend_create(struct wl_display *display, struct zn_seat *zn_seat)
   wl_signal_init(&self->base.events.xr_system_changed);
   self->base.impl = &implementation;
   self->display = display;
-  self->xr_compositor = NULL;
+  self->gl_context = NULL;
   wl_list_init(&self->input_device_list);
 
   self->wlr_backend = wlr_backend_autocreate(display);
@@ -342,9 +344,9 @@ zn_default_backend_create(struct wl_display *display, struct zn_seat *zn_seat)
   wl_signal_add(&self->xr->xr_system_manager->events.new_system,
       &self->new_xr_system_listener);
 
-  self->xr_compositor_destroy_listener.notify =
-      zn_default_backend_handle_xr_compositor_destroy;
-  wl_list_init(&self->xr_compositor_destroy_listener.link);
+  self->gl_context_destroy_listener.notify =
+      zn_default_backend_handle_gl_context_destroy;
+  wl_list_init(&self->gl_context_destroy_listener.link);
 
   return &self->base;
 
@@ -372,11 +374,12 @@ zn_default_backend_destroy(struct zn_default_backend *self)
 {
   zn_signal_emit_mutable(&self->base.events.destroy, NULL);
 
-  if (self->xr_compositor) {
-    zn_xr_compositor_destroy(self->xr_compositor);
-    self->xr_compositor = NULL;
+  if (self->gl_context) {
+    zn_gl_context_destroy(self->gl_context);
+    self->gl_context = NULL;
   }
-  wl_list_remove(&self->xr_compositor_destroy_listener.link);
+
+  wl_list_remove(&self->gl_context_destroy_listener.link);
   wl_list_remove(&self->new_xr_system_listener.link);
   wl_list_remove(&self->new_input_listener.link);
   wl_list_remove(&self->new_output_listener.link);

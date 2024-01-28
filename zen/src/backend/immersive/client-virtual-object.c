@@ -6,7 +6,6 @@
 #include "zen-common/signal.h"
 #include "zen-common/util.h"
 #include "zen/virtual-object.h"
-#include "zen/xr-dispatcher.h"
 
 static void zn_client_virtual_object_destroy(
     struct zn_client_virtual_object *self);
@@ -67,29 +66,8 @@ zn_client_virtual_object_get(struct wl_resource *resource)
   return wl_resource_get_user_data(resource);
 }
 
-static void
-zn_client_virtual_object_handle_dispatcher_destroy(
-    struct wl_listener *listener, void *data UNUSED)
-{
-  struct zn_client_virtual_object *self =
-      zn_container_of(listener, self, dispatcher_destroy_listener);
-
-  zn_client_virtual_object_destroy(self);
-}
-
-static void
-zn_client_virtual_object_handle_zn_virtual_object_destroy(
-    struct wl_listener *listener, void *data UNUSED)
-{
-  struct zn_client_virtual_object *self =
-      zn_container_of(listener, self, zn_virtual_object_destroy_listener);
-
-  zn_client_virtual_object_destroy(self);
-}
-
 struct zn_client_virtual_object *
-zn_client_virtual_object_create(
-    struct wl_client *client, uint32_t id, struct zn_xr_dispatcher *dispatcher)
+zn_client_virtual_object_create(struct wl_client *client, uint32_t id)
 {
   struct zn_client_virtual_object *self = zalloc(sizeof *self);
   if (self == NULL) {
@@ -97,10 +75,9 @@ zn_client_virtual_object_create(
     goto err;
   }
 
-  self->dispatcher = dispatcher;
   wl_signal_init(&self->events.destroy);
 
-  self->zn_virtual_object = zn_xr_dispatcher_get_new_virtual_object(dispatcher);
+  self->zn_virtual_object = zn_virtual_object_create();
   if (self->zn_virtual_object == NULL) {
     zn_error("Failed to get new zn_virtual_object");
     wl_client_post_no_memory(client);
@@ -118,20 +95,10 @@ zn_client_virtual_object_create(
   wl_resource_set_implementation(self->resource, &implementation, self,
       &zn_client_virtual_object_handle_destroy);
 
-  self->zn_virtual_object_destroy_listener.notify =
-      zn_client_virtual_object_handle_zn_virtual_object_destroy;
-  wl_signal_add(&self->zn_virtual_object->events.destroy,
-      &self->zn_virtual_object_destroy_listener);
-
-  self->dispatcher_destroy_listener.notify =
-      zn_client_virtual_object_handle_dispatcher_destroy;
-  wl_signal_add(
-      &self->dispatcher->events.destroy, &self->dispatcher_destroy_listener);
-
   return self;
 
 err_zn_virtual_object:
-  zn_xr_dispatcher_destroy_virtual_object(dispatcher, self->zn_virtual_object);
+  zn_virtual_object_destroy(self->zn_virtual_object);
 
 err_free:
   free(self);
@@ -146,10 +113,7 @@ zn_client_virtual_object_destroy(struct zn_client_virtual_object *self)
   zn_signal_emit_mutable(&self->events.destroy, NULL);
 
   wl_list_remove(&self->events.destroy.listener_list);
-  wl_list_remove(&self->zn_virtual_object_destroy_listener.link);
-  wl_list_remove(&self->dispatcher_destroy_listener.link);
-  zn_xr_dispatcher_destroy_virtual_object(
-      self->dispatcher, self->zn_virtual_object);
+  zn_virtual_object_destroy(self->zn_virtual_object);
   wl_resource_set_implementation(self->resource, &implementation, NULL, NULL);
   free(self);
 }

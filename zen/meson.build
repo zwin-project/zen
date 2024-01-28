@@ -10,6 +10,7 @@ _zen_srcs = [
   'src/gl-shader.c',
   'src/gl-texture.c',
   'src/gl-vertex-array.c',
+  'src/gl-virtual-object.c',
   'src/inode.c',
   'src/screen.c',
   'src/seat.c',

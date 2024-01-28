@@ -1,13 +1,12 @@
 _zen_gl_immersive_backend_srcs = [
   'client-gl-base-technique.c',
   'client-gl-buffer.c',
-  'client-gl-context.c',
   'client-gl-program.c',
   'client-gl-rendering-unit.c',
   'client-gl-shader.c',
   'client-gl-texture.c',
   'client-gl-vertex-array.c',
-  'xr-gl.c',
+  'gl-context.c',
 
   protocols_code['zwin-gl'],
   protocols_server_header['zwin-gl'],

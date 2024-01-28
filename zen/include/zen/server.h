@@ -16,9 +16,10 @@ struct zn_server {
   struct zn_binding *binding;  // @nonnull, @owning
   struct zn_config *config;    // @nonnull, @outlive
 
-  // zn_inode_set_xr_system for this root inode is called in the backend
+  // zn_inode_set_xr_system for these root inodes is called in the backend
   // implementation
-  struct zn_inode *inode_root;  // @nonnull, @owning
+  struct zn_inode *inode_root;            // @nonnull, @owning
+  struct zn_inode *inode_invisible_root;  // @nonnull, @owning
 
   bool running;
   int exit_status;

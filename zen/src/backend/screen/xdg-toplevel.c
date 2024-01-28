@@ -182,7 +182,7 @@ zn_xdg_toplevel_handle_surface_commit(
   struct zn_xdg_toplevel *self =
       zn_container_of(listener, self, surface_commit_listener);
 
-  if (!zn_assert_(self->surface_snode,
+  if (!zn_assert(self->surface_snode,
           "Commit signal must be handled only when the view is mapped")) {
     return;
   }

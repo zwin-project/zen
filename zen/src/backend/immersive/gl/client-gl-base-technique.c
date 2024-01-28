@@ -8,10 +8,12 @@
 #include "client-gl-program.h"
 #include "client-gl-rendering-unit.h"
 #include "client-gl-vertex-array.h"
+#include "gl-virtual-object.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
 #include "zen-common/wl-array.h"
 #include "zen/gl-base-technique.h"
+#include "zen/virtual-object.h"
 #include "zen/xr-dispatcher.h"
 
 static void zn_client_gl_base_technique_destroy(
@@ -234,6 +236,13 @@ struct zn_client_gl_base_technique *
 zn_client_gl_base_technique_create(struct wl_client *client, uint32_t id,
     struct zn_client_gl_rendering_unit *rendering_unit)
 {
+  struct zn_gl_virtual_object *gl_virtual_object =
+      rendering_unit->virtual_object->zn_virtual_object->gl_virtual_object;
+  if (gl_virtual_object == NULL) {
+    zn_error("Failed to get gl_virtual_object");
+    return NULL;
+  }
+
   struct zn_client_gl_base_technique *self = zalloc(sizeof *self);
   if (self == NULL) {
     zn_error("Failed to allocate memory");
@@ -244,8 +253,7 @@ zn_client_gl_base_technique_create(struct wl_client *client, uint32_t id,
   self->rendering_unit = rendering_unit;
 
   self->zn_gl_base_technique = zn_xr_dispatcher_get_new_gl_base_technique(
-      rendering_unit->virtual_object->dispatcher,
-      rendering_unit->zn_gl_rendering_unit);
+      gl_virtual_object->dispatcher, rendering_unit->zn_gl_rendering_unit);
   if (self->zn_gl_base_technique == NULL) {
     zn_error("Failed to get new zn_gl_base_technique");
     wl_client_post_no_memory(client);
@@ -277,7 +285,7 @@ zn_client_gl_base_technique_create(struct wl_client *client, uint32_t id,
 
 err_gl_base_technique:
   zn_xr_dispatcher_destroy_gl_base_technique(
-      rendering_unit->virtual_object->dispatcher, self->zn_gl_base_technique);
+      gl_virtual_object->dispatcher, self->zn_gl_base_technique);
 
 err_free:
   free(self);
@@ -289,11 +297,16 @@ err:
 static void
 zn_client_gl_base_technique_destroy(struct zn_client_gl_base_technique *self)
 {
+  struct zn_gl_virtual_object *gl_virtual_object =
+      self->rendering_unit->virtual_object->zn_virtual_object
+          ->gl_virtual_object;
+
   wl_resource_set_implementation(self->resource, &implementation, NULL, NULL);
   wl_list_remove(&self->rendering_unit_destroy_listener.link);
   wl_list_remove(&self->zn_gl_base_technique_destroy_listener.link);
-  zn_xr_dispatcher_destroy_gl_base_technique(
-      self->rendering_unit->virtual_object->dispatcher,
-      self->zn_gl_base_technique);
+  if (gl_virtual_object) {
+    zn_xr_dispatcher_destroy_gl_base_technique(
+        gl_virtual_object->dispatcher, self->zn_gl_base_technique);
+  }
   free(self);
 }

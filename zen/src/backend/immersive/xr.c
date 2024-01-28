@@ -1,6 +1,6 @@
 #include "xr.h"
 
-#include "xr-gl.h"
+#include "xr-compositor.h"
 #include "xr-shell.h"
 #include "xr-system-manager.h"
 #include "zen-common/log.h"
@@ -21,22 +21,22 @@ zn_xr_create(struct wl_display *display)
     goto err_free;
   }
 
-  self->xr_gl = zn_xr_gl_create(display);
-  if (self->xr_gl == NULL) {
-    zn_error("Failed to create zn_xr_gl");
+  self->xr_compositor = zn_xr_compositor_create(display);
+  if (self->xr_compositor == NULL) {
+    zn_error("Failed to create zn_xr_compositor");
     goto err_free_system_manager;
   }
 
   self->xr_shell = zn_xr_shell_create(display);
   if (self->xr_shell == NULL) {
     zn_error("Failed to create zn_xr_shell");
-    goto err_xr_gl;
+    goto err_xr_compositor;
   }
 
   return self;
 
-err_xr_gl:
-  zn_xr_gl_destroy(self->xr_gl);
+err_xr_compositor:
+  zn_xr_compositor_destroy(self->xr_compositor);
 
 err_free_system_manager:
   zn_xr_system_manager_destroy(self->xr_system_manager);
@@ -52,7 +52,7 @@ void
 zn_xr_destroy(struct zn_xr *self)
 {
   zn_xr_shell_destroy(self->xr_shell);
-  zn_xr_gl_destroy(self->xr_gl);
+  zn_xr_compositor_destroy(self->xr_compositor);
   zn_xr_system_manager_destroy(self->xr_system_manager);
   free(self);
 }

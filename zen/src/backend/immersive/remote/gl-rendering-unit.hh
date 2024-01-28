@@ -5,7 +5,7 @@
 
 namespace zen::backend::immersive::remote {
 
-class VirtualObject;
+class GlVirtualObject;
 
 class GlRenderingUnit
 {
@@ -15,7 +15,7 @@ class GlRenderingUnit
 
   static std::unique_ptr<GlRenderingUnit> New(
       std::shared_ptr<zen::remote::server::IChannel> channel,
-      std::unique_ptr<VirtualObject> &virtual_object);
+      std::unique_ptr<GlVirtualObject> &virtual_object);
 
   inline std::unique_ptr<zen::remote::server::IRenderingUnit> &remote_obj();
   inline zn_gl_rendering_unit *c_obj();
@@ -24,7 +24,7 @@ class GlRenderingUnit
   GlRenderingUnit() = default;
 
   bool Init(std::shared_ptr<zen::remote::server::IChannel> channel,
-      std::unique_ptr<VirtualObject> &virtual_object);
+      std::unique_ptr<GlVirtualObject> &virtual_object);
 
   static void HandleChangeVisibility(zn_gl_rendering_unit *c_obj, bool visible);
 

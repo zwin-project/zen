@@ -46,12 +46,6 @@ struct zn_inode {
   struct zn_inode *parent;    // @nullable, @ref
   struct wl_list link;        // zn_inode::child_list
   struct wl_list child_list;  // zn_inode::link
-
-  struct wl_listener parent_destroy_listener;
-
-  struct {
-    struct wl_signal destroy;  // (NULL)
-  } events;
 };
 
 UNUSED static inline bool
@@ -63,7 +57,7 @@ zn_inode_is_mapped(struct zn_inode *self)
 UNUSED static inline bool
 zn_inode_is_active(struct zn_inode *self)
 {
-  return self->mapped && self->xr_system != NULL;
+  return self->xr_system != NULL;
 }
 
 void zn_inode_move(struct zn_inode *self, struct zn_inode *parent,
@@ -78,4 +72,5 @@ void zn_inode_map(struct zn_inode *self);
 struct zn_inode *zn_inode_create(
     void *impl_data, const struct zn_inode_interface *implementation);
 
+/// Destroy child inodes before the parent inode
 void zn_inode_destroy(struct zn_inode *self);

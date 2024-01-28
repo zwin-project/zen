@@ -12,7 +12,7 @@ class GlRenderingUnit;
 class GlShader;
 class GlTexture;
 class GlVertexArray;
-class VirtualObject;
+class GlVirtualObject;
 
 class XrDispatcher
 {
@@ -31,13 +31,14 @@ class XrDispatcher
 
   bool Init(std::shared_ptr<zen::remote::server::ISession> session);
 
-  static zn_virtual_object *HandleGetNewVirtualObject(zn_xr_dispatcher *c_obj);
+  static zn_gl_virtual_object *HandleGetNewGlVirtualObject(
+      zn_xr_dispatcher *c_obj);
 
-  static void HandleDestroyVirtualObject(
-      zn_xr_dispatcher *c_obj, zn_virtual_object *virtual_object_c_obj);
+  static void HandleDestroyGlVirtualObject(
+      zn_xr_dispatcher *c_obj, zn_gl_virtual_object *gl_virtual_object_c_obj);
 
   static zn_gl_rendering_unit *HandleGetNewGlRenderingUnit(
-      zn_xr_dispatcher *c_obj, zn_virtual_object *virtual_object_c_obj);
+      zn_xr_dispatcher *c_obj, zn_gl_virtual_object *gl_virtual_object_c_obj);
 
   static void HandleDestroyGlRenderingUnit(
       zn_xr_dispatcher *c_obj, zn_gl_rendering_unit *gl_rendering_unit_c_obj);
@@ -79,7 +80,7 @@ class XrDispatcher
 
   std::shared_ptr<zen::remote::server::IChannel> channel_;
 
-  std::vector<std::unique_ptr<VirtualObject>> virtual_objects_;
+  std::vector<std::unique_ptr<GlVirtualObject>> virtual_objects_;
 
   std::vector<std::unique_ptr<GlRenderingUnit>> gl_rendering_units_;
 

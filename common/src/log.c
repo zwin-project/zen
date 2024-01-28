@@ -121,12 +121,8 @@ zn_abort_(const char *format, ...)
 }
 
 bool
-zn_assert_(bool condition, const char *format, ...)
+zn_assert_handler_(const char *format, ...)
 {
-  if (condition) {
-    return true;
-  }
-
   va_list args;
   va_start(args, format);
   zn_vlog_(ZEN_ERROR, format, args);

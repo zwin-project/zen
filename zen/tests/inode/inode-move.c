@@ -1,8 +1,9 @@
 #include <cglm/quat.h>
 #include <cglm/vec3.h>
+#include <string.h>
 
+#include "inode.h"
 #include "test-harness.h"
-#include "zen/inode.h"
 
 TEST(general)
 {
@@ -39,4 +40,122 @@ TEST(general)
   glm_mat4_mulv3(n2->transform_abs, local, 1, global);
 
   ASSERT_EQUAL_VEC3(((vec3){80, 10, 101}), global);
+}
+
+struct test_data {
+  bool mapped;
+  bool unmapped;
+  bool activated;
+  bool deactivated;
+  bool moved;
+};
+
+static void
+mapped(void *impl_data UNUSED)
+{
+  struct test_data *data = impl_data;
+  data->mapped = true;
+}
+
+static void
+unmapped(void *impl_data UNUSED)
+{
+  struct test_data *data = impl_data;
+  data->unmapped = true;
+}
+
+static void
+activated(void *impl_data UNUSED)
+{
+  struct test_data *data = impl_data;
+  data->activated = true;
+}
+
+static void
+deactivated(void *impl_data UNUSED)
+{
+  struct test_data *data = impl_data;
+  data->deactivated = true;
+}
+
+static void
+moved(void *impl_data UNUSED)
+{
+  struct test_data *data = impl_data;
+  data->moved = true;
+}
+
+TEST(signal)
+{
+  static const struct zn_inode_interface implementation = {
+      .mapped = mapped,
+      .unmapped = unmapped,
+      .activated = activated,
+      .deactivated = deactivated,
+      .moved = moved,
+  };
+
+  struct test_data data = {0};
+
+  struct zn_xr_system *xr_system = (void *)1;
+
+  struct zn_inode *root = zn_inode_create(NULL, &zn_inode_noop_implementation);
+  struct zn_inode *root2 = zn_inode_create(NULL, &zn_inode_noop_implementation);
+  struct zn_inode *node = zn_inode_create(&data, &implementation);
+
+  zn_inode_map(root);
+  zn_inode_set_xr_system(root, xr_system);
+
+  zn_inode_move(node, root, GLM_VEC3_ZERO, GLM_QUAT_IDENTITY);
+
+  ASSERT_EQUAL_BOOL(true, data.mapped);
+  ASSERT_EQUAL_BOOL(true, data.activated);
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(node));
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_active(node));
+
+  zn_inode_move(node, root2, GLM_VEC3_ZERO, GLM_QUAT_IDENTITY);
+
+  ASSERT_EQUAL_BOOL(true, data.unmapped);
+  ASSERT_EQUAL_BOOL(true, data.deactivated);
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(node));
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_active(node));
+}
+
+TEST(map)
+{
+  struct zn_inode *root = zn_inode_create(NULL, &zn_inode_noop_implementation);
+  struct zn_inode *root2 = zn_inode_create(NULL, &zn_inode_noop_implementation);
+  struct zn_inode *node = zn_inode_create(NULL, &zn_inode_noop_implementation);
+
+  zn_inode_map(root);
+
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(node));
+
+  zn_inode_move(node, root, GLM_VEC3_ZERO, GLM_QUAT_IDENTITY);
+
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_mapped(node));
+
+  zn_inode_move(node, root2, GLM_VEC3_ZERO, GLM_QUAT_IDENTITY);
+
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_mapped(node));
+}
+
+TEST(active)
+{
+  struct zn_inode *root = zn_inode_create(NULL, &zn_inode_noop_implementation);
+  struct zn_inode *root2 = zn_inode_create(NULL, &zn_inode_noop_implementation);
+  struct zn_inode *node = zn_inode_create(NULL, &zn_inode_noop_implementation);
+  struct zn_xr_system *xr_system = (void *)1;
+
+  zn_inode_set_xr_system(root, xr_system);
+
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_active(node));
+
+  zn_inode_move(node, root, GLM_VEC3_ZERO, GLM_QUAT_IDENTITY);
+
+  ASSERT_EQUAL_BOOL(true, zn_inode_is_active(node));
+
+  zn_inode_move(node, root2, GLM_VEC3_ZERO, GLM_QUAT_IDENTITY);
+
+  ASSERT_EQUAL_BOOL(false, zn_inode_is_active(node));
 }

@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "util.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -36,7 +38,8 @@ void zn_vlog_(zn_log_importance_t verbosity, const char *format, va_list args)
 
 void zn_abort_(const char *format, ...) ATTRIB_PRINTF(1, 2);
 
-bool zn_assert_(bool condition, const char *format, ...) ATTRIB_PRINTF(2, 3);
+bool zn_assert_handler_(const char *format, ...)
+    ATTRIB_PRINTF(1, 2) CLANG_ANALYZER_NORETURN;
 
 #define zn_log(verb, fmt, ...) \
   zn_log_(verb, "[zen] [%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
@@ -60,7 +63,8 @@ bool zn_assert_(bool condition, const char *format, ...) ATTRIB_PRINTF(2, 3);
   zn_abort_("[zen] [%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 
 #define zn_assert(cond, fmt, ...) \
-  zn_assert_(cond, "[zen] [%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
+  (cond || zn_assert_handler_(    \
+               "[zen] [%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__))
 
 #define zn_warn_once(fmt, ...)                                                \
   {                                                                           \

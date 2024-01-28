@@ -4,6 +4,7 @@
 
 struct zn_bounded;
 struct zn_compositor;
+struct zn_gl_context;
 struct zn_view;
 struct zn_xr;
 
@@ -21,8 +22,8 @@ struct zn_default_backend {
   struct zn_compositor *compositor;  // @nonnull, @owning
 
   // Basically owned by zn_default_backend, but can be destroyed when given
-  // xr_system is destroyed.
-  struct zn_xr_compositor *xr_compositor;  // @nullable
+  // xr_system is disconnected or destroyed.
+  struct zn_gl_context *gl_context;  // @nullable
 
   struct zn_xr *xr;  // @nonnull, @owing
 
@@ -31,7 +32,7 @@ struct zn_default_backend {
   struct wl_listener new_input_listener;
   struct wl_listener new_output_listener;
   struct wl_listener new_xr_system_listener;
-  struct wl_listener xr_compositor_destroy_listener;
+  struct wl_listener gl_context_destroy_listener;
 };
 
 struct zn_default_backend *zn_default_backend_get(struct zn_backend *base);

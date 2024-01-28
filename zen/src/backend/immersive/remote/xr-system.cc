@@ -1,7 +1,7 @@
 #include "xr-system.hh"
 
+#include "gl-virtual-object.hh"
 #include "loop.hh"
-#include "virtual-object.hh"
 #include "xr-dispatcher.hh"
 #include "xr-system-manager.hh"
 #include "zen-common/log.h"
