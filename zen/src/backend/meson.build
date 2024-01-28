@@ -1,13 +1,37 @@
+subdir('immersive/gl')
+subdir('immersive/remote')
+subdir('immersive/shell')
+
 _zen_backend_srcs = [
-  'backend.c',
-  'compositor.c',
-  'keyboard.c',
-  'layer-surface.c',
-  'output.c',
-  'pointer.c',
-  'screen-backend.c',
-  'surface-snode.c',
-  'xwayland-surface.c',
+  'default-backend.c',
+
+  'immersive/client-virtual-object.c',
+  'immersive/shm.c',
+  'immersive/shm-buffer.c',
+  'immersive/shm-pool.c',
+  'immersive/xr.c',
+  'immersive/xr-compositor.c',
+
+  'screen/compositor.c',
+  'screen/keyboard.c',
+  'screen/layer-shell.c',
+  'screen/layer-surface.c',
+  'screen/output.c',
+  'screen/pointer.c',
+  'screen/surface-snode.c',
+  'screen/xdg-decoration.c',
+  'screen/xdg-toplevel.c',
+  'screen/xwayland-surface.c',
+
+  protocols_code['zwin'],
+  protocols_server_header['zwin'],
+]
+
+_zen_backend_deps = [
+  _zen_deps,
+  zen_gl_immersive_backend_dep,
+  zen_remote_immersive_backend_dep,
+  zen_shell_immersive_backend_dep,
 ]
 
 _zen_backend_lib = static_library(
@@ -15,7 +39,7 @@ _zen_backend_lib = static_library(
   _zen_backend_srcs,
   install: false,
   include_directories: zen_private_inc,
-  dependencies: _zen_deps,
+  dependencies: _zen_backend_deps,
 )
 
 zen_backend_dep = declare_dependency(

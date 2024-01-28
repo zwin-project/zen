@@ -22,7 +22,7 @@ struct zn_screen {
 
   void *user_data;  // @nonnull, @outlive if exists
 
-  struct zn_snode *snode_root;  // @nonnull, @owning
+  struct zn_snode_root *snode_root;  // @nonnull, @owning
 
   // These layers do not have a parent at first, user must set a parent to show
   // them. User must not add children to these layers.
@@ -41,22 +41,11 @@ struct zn_screen {
   } events;
 };
 
+/// @return value can be NULL
+struct zn_screen *zn_screen_from_snode_root(struct zn_snode_root *snode_root);
+
 void zn_screen_set_layout_position(
     struct zn_screen *self, vec2 layout_position);
 
 /// @param fbox : Effective coordinate system
 void zn_screen_damage(struct zn_screen *self, struct wlr_fbox *fbox);
-
-/// Called by the impl object
-/// @param size : effective coords
-void zn_screen_notify_resize(struct zn_screen *self, vec2 size);
-
-/// Called by the impl object
-void zn_screen_notify_frame(struct zn_screen *self, struct timespec *when);
-
-/// Called by the impl object
-struct zn_screen *zn_screen_create(
-    void *impl_data, const struct zn_screen_interface *implementation);
-
-/// Called by the impl object
-void zn_screen_destroy(struct zn_screen *self);

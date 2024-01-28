@@ -9,6 +9,7 @@
 #include "zen/screen.h"
 #include "zen/seat.h"
 #include "zen/server.h"
+#include "zen/snode-root.h"
 #include "zen/snode.h"
 
 static void zn_cursor_default_grab_destroy(struct zn_cursor_default_grab *self);
@@ -26,16 +27,17 @@ zn_cursor_default_grab_handle_motion_relative(
 {
   struct zn_server *server = zn_server_get_singleton();
   struct zn_cursor *cursor = server->seat->cursor;
+  struct zn_screen *screen = zn_screen_from_snode_root(cursor->snode->root);
 
   zn_cursor_grab_move_relative(delta);
 
-  if (cursor->snode->screen == NULL) {
+  if (screen == NULL) {
     return;
   }
 
   vec2 point = GLM_VEC2_ZERO_INIT;
   struct zn_snode *snode = zn_snode_get_snode_at(
-      cursor->snode->screen->snode_root, cursor->snode->position, point);
+      screen->snode_root->node, cursor->snode->position, point);
 
   zn_seat_pointer_enter(server->seat, snode, point);
 
@@ -48,13 +50,13 @@ zn_cursor_default_grab_handle_rebase(struct zn_cursor_grab *grab UNUSED)
   struct zn_server *server = zn_server_get_singleton();
   struct zn_cursor *cursor = server->seat->cursor;
 
-  if (cursor->snode->screen == NULL) {
+  if (cursor->snode->root == NULL) {
     return;
   }
 
   vec2 point = GLM_VEC2_ZERO_INIT;
   struct zn_snode *snode = zn_snode_get_snode_at(
-      cursor->snode->screen->snode_root, cursor->snode->position, point);
+      cursor->snode->root->node, cursor->snode->position, point);
 
   zn_seat_pointer_enter(server->seat, snode, point);
 }

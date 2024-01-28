@@ -2,8 +2,10 @@
 #include <wlr/render/wlr_texture.h>
 
 #include "mock/output.h"
+#include "screen.h"
 #include "test-harness.h"
 #include "zen-common/util.h"
+#include "zen/snode-root.h"
 #include "zen/snode.h"
 
 static void
@@ -38,7 +40,7 @@ TEST(frame)
   struct zn_snode *node3 = zn_snode_create(&counter, &test_impl);
   struct zn_snode *node4 = zn_snode_create(&counter, &test_impl);
 
-  zn_snode_set_position(node1, output->screen->snode_root, (vec2){0, 0});
+  zn_snode_set_position(node1, output->screen->snode_root->node, (vec2){0, 0});
   zn_snode_set_position(node2, node1, (vec2){0, 0});
   zn_snode_set_position(node3, node1, (vec2){0, 0});
   zn_snode_set_position(node4, node2, (vec2){0, 0});

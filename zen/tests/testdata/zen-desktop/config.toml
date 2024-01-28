@@ -5,3 +5,7 @@ number = 4
 [error]
 
 number = -1
+
+[binding]
+test1 = "alt+4"
+test2 = "logo+alt+4"

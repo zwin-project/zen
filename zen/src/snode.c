@@ -6,6 +6,7 @@
 #include "zen-common/signal.h"
 #include "zen-common/util.h"
 #include "zen/screen.h"
+#include "zen/snode-root.h"
 
 bool
 zn_snode_is_focusable(struct zn_snode *self)
@@ -113,12 +114,12 @@ void
 zn_snode_damage_whole(struct zn_snode *self)
 {
   struct wlr_fbox box;
-  if (!self->screen) {
+  if (!self->root) {
     return;
   }
 
   zn_snode_get_fbox(self, &box);
-  zn_screen_damage(self->screen, &box);
+  zn_snode_root_damage(self->root, &box);
 }
 
 static void
@@ -158,7 +159,7 @@ zn_snode_get_snode_at(struct zn_snode *self, vec2 point, vec2 local_point)
 void
 zn_snode_damage(struct zn_snode *self, struct wlr_fbox *damage)
 {
-  if (!self->screen) {
+  if (!self->root) {
     return;
   }
 
@@ -169,7 +170,7 @@ zn_snode_damage(struct zn_snode *self, struct wlr_fbox *damage)
       .height = damage->height,
   };
 
-  zn_screen_damage(self->screen, &fbox);
+  zn_snode_root_damage(self->root, &fbox);
 }
 
 void
@@ -179,7 +180,10 @@ zn_snode_move_front(struct zn_snode *self)
     return;
   }
 
-  zn_snode_set_position(self, self->parent, self->position);
+  struct zn_snode *front =
+      zn_container_of(self->parent->child_node_list.prev, front, link);
+
+  zn_snode_place_above(self, front);
 }
 
 void
@@ -196,6 +200,10 @@ void
 zn_snode_set_position(
     struct zn_snode *self, struct zn_snode *parent, vec2 position)
 {
+  if (self->parent == parent && glm_vec2_eqv(self->position, position)) {
+    return;
+  }
+
   zn_snode_damage_whole(self);
 
   if (self->parent) {
@@ -215,7 +223,7 @@ zn_snode_set_position(
   }
 
   self->parent = parent;
-  self->screen = parent ? parent->screen : NULL;
+  self->root = parent ? parent->root : NULL;
   glm_vec2_copy(position, self->position);
 
   zn_snode_update_absolute_position(self);
@@ -223,6 +231,71 @@ zn_snode_set_position(
   zn_snode_damage_whole(self);
 
   wl_signal_emit(&self->events.position_changed, NULL);
+}
+
+void
+zn_snode_change_position(struct zn_snode *self, vec2 position)
+{
+  if (self->parent == NULL) {
+    return;
+  }
+
+  if (glm_vec2_eqv(self->position, position)) {
+    return;
+  }
+
+  zn_snode_damage_whole(self);
+
+  glm_vec2_copy(position, self->position);
+
+  zn_snode_update_absolute_position(self);
+
+  zn_snode_damage_whole(self);
+
+  wl_signal_emit(&self->events.position_changed, NULL);
+}
+
+static void
+zn_snode_place_next_to(
+    struct zn_snode *self, struct zn_snode *sibling, bool above)
+{
+  if (!zn_assert(self->parent, "snode should have a parent")) {
+    return;
+  }
+
+  if (!zn_assert(self->parent == sibling->parent,
+          "self and sibling should have the same parent")) {
+    return;
+  }
+
+  if (self == sibling) {
+    return;
+  }
+
+  struct wl_list *link = above ? &sibling->link : sibling->link.prev;
+
+  if (&self->link == link->next) {
+    return;
+  }
+
+  wl_list_remove(&self->link);
+  wl_list_insert(link, &self->link);
+
+  zn_snode_damage_whole(self);
+
+  wl_signal_emit(&self->events.position_changed, NULL);
+}
+
+void
+zn_snode_place_above(struct zn_snode *self, struct zn_snode *sibling)
+{
+  zn_snode_place_next_to(self, sibling, true);
+}
+
+void
+zn_snode_place_below(struct zn_snode *self, struct zn_snode *sibling)
+{
+  zn_snode_place_next_to(self, sibling, false);
 }
 
 struct wlr_texture *
@@ -251,9 +324,12 @@ zn_snode_get_layout_fbox(struct zn_snode *self, struct wlr_fbox *fbox)
 {
   zn_snode_get_fbox(self, fbox);
 
-  if (self->screen) {
-    fbox->x += self->screen->layout_position[0];
-    fbox->y += self->screen->layout_position[1];
+  if (self->root) {
+    vec2 root_layout_position;
+    zn_snode_root_layout_position(self->root, root_layout_position);
+
+    fbox->x += root_layout_position[0];
+    fbox->y += root_layout_position[1];
   }
 }
 
@@ -267,7 +343,7 @@ zn_snode_handle_parent_position_changed(
   zn_snode_damage_whole(self);
 
   zn_snode_update_absolute_position(self);
-  self->screen = self->parent->screen;
+  self->root = self->parent->root;
 
   zn_snode_damage_whole(self);
 
@@ -301,7 +377,7 @@ zn_snode_create(
   glm_vec2_zero(self->position);
   glm_vec2_zero(self->absolute_position);
 
-  self->screen = NULL;
+  self->root = NULL;
 
   wl_list_init(&self->child_node_list);
   wl_list_init(&self->link);
@@ -332,14 +408,6 @@ zn_snode_create_focusable(
     self->flags |= ZN_SNODE_FLAG_FOCUSABLE;
   }
 
-  return self;
-}
-
-struct zn_snode *
-zn_snode_create_root(struct zn_screen *screen)
-{
-  struct zn_snode *self = zn_snode_create(NULL, &zn_snode_noop_implementation);
-  self->screen = screen;
   return self;
 }
 

@@ -8,8 +8,10 @@
 #include "zen-desktop/shell.h"
 #include "zen-desktop/view.h"
 #include "zen/cursor.h"
+#include "zen/screen.h"
 #include "zen/seat.h"
 #include "zen/server.h"
+#include "zen/snode-root.h"
 #include "zen/snode.h"
 
 static void zn_cursor_move_grab_destroy(struct zn_cursor_move_grab *self);
@@ -27,23 +29,24 @@ zn_cursor_move_grab_handle_motion_relative(
 {
   struct zn_server *server = zn_server_get_singleton();
   struct zn_cursor *cursor = server->seat->cursor;
+  struct zn_screen *screen = zn_screen_from_snode_root(cursor->snode->root);
 
   struct zn_cursor_move_grab *self = zn_cursor_move_grab_get(grab);
   vec2 new_position;
 
   zn_cursor_grab_move_relative(delta);
 
-  if (cursor->snode->screen == NULL) {
+  if (screen == NULL) {
     return;
   }
 
-  struct zn_desktop_screen *screen =
-      zn_desktop_screen_get(cursor->snode->screen);
+  struct zn_desktop_screen *desktop_screen = zn_desktop_screen_get(screen);
 
   glm_vec2_add(cursor->snode->position, self->initial_view_cursor_position,
       new_position);
 
-  zn_snode_set_position(self->view->snode, screen->view_layer, new_position);
+  zn_snode_set_position(
+      self->view->snode, desktop_screen->view_layer, new_position);
 }
 
 static void

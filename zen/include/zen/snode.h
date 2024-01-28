@@ -8,6 +8,8 @@
 
 #include "zen-common/util.h"
 
+struct zn_snode_root;
+
 enum zn_snode_flag {
   ZN_SNODE_FLAG_FOCUSABLE = 1 << 0,
 };
@@ -80,10 +82,9 @@ struct zn_snode {
 
   uint32_t flags;  // a bitfield of enum zn_snode_flag
 
-  // When the screen is destroyed, the root snode is destroyed and
-  // `position_changed` signal handler will set this NULL.
-  // For root snode, this is @outlive
-  struct zn_screen *screen;  // @nullable, @ref
+  // When the root is destroyed, `position_changed` signal handler will set this
+  // NULL.
+  struct zn_snode_root *root;  // @nullable, @ref
 
   struct wl_list child_node_list;  // zn_snode::link, sorted from back to front
   struct wl_list link;             // zn_snode::child_node_list
@@ -169,8 +170,25 @@ void zn_snode_notify_frame(struct zn_snode *self, const struct timespec *when);
 
 /// @param parent is nullable
 /// @param position is in the parent local coords
+/// The node is placed on top.
 void zn_snode_set_position(
     struct zn_snode *self, struct zn_snode *parent, vec2 position);
+
+/// @param position is in the parent local coords
+/// Only the position changes, the order of the siblings remains the same.
+void zn_snode_change_position(struct zn_snode *self, vec2 position);
+
+/// @param sibling must not be NULL
+/// self and sibling must have the same direct nonnull parent.
+/// self is placed directly above the sibling.
+/// Position doesn't change
+void zn_snode_place_above(struct zn_snode *self, struct zn_snode *sibling);
+
+/// @param sibling must not be NULL
+/// self and sibling must have the same direct nonnull parent.
+/// self is placed directly below the sibling.
+/// Position doesn't change
+void zn_snode_place_below(struct zn_snode *self, struct zn_snode *sibling);
 
 /// @return value is nullable
 struct wlr_texture *zn_snode_get_texture(struct zn_snode *self);
@@ -187,7 +205,5 @@ struct zn_snode *zn_snode_create(
 
 struct zn_snode *zn_snode_create_focusable(
     void *user_data, const struct zn_snode_interface *implementation);
-
-struct zn_snode *zn_snode_create_root(struct zn_screen *screen);
 
 void zn_snode_destroy(struct zn_snode *self);

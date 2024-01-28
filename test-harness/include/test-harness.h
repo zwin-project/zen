@@ -26,6 +26,14 @@ struct test {
                                                                  \
   static void name##_test(void)
 
+#define FAIL_TEST(name)                                          \
+  static void name##_test(void);                                 \
+                                                                 \
+  const struct test test##name __attribute__((                   \
+      used, section("test_section"))) = {#name, name##_test, 1}; \
+                                                                 \
+  static void name##_test(void)
+
 // Assertions
 
 void assert_equal_string_(
@@ -72,3 +80,6 @@ void assert_equal_vec_(const char *actual_expression, const float *expected,
 
 #define ASSERT_EQUAL_VEC2(expected, actual) \
   assert_equal_vec_(#actual, expected, actual, 2)
+
+#define ASSERT_EQUAL_VEC3(expected, actual) \
+  assert_equal_vec_(#actual, expected, actual, 3)

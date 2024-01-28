@@ -1,5 +1,6 @@
 #include "zen-desktop/shell.h"
 
+#include <cglm/vec2.h>
 #include <wayland-server-core.h>
 #include <wayland-util.h>
 
@@ -10,15 +11,59 @@
 #include "zen-desktop/screen.h"
 #include "zen-desktop/theme.h"
 #include "zen-desktop/view.h"
+#include "zen-desktop/xr-system.h"
 #include "zen/backend.h"
+#include "zen/bounded.h"
+#include "zen/cursor.h"
+#include "zen/inode.h"
 #include "zen/screen.h"
 #include "zen/seat.h"
 #include "zen/server.h"
 #include "zen/snode.h"
 #include "zen/view.h"
+#include "zen/virtual-object.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 static struct zn_desktop_shell *desktop_shell_singleton = NULL;
+
+static void
+zn_desktop_shell_handle_xr_system_changed(
+    struct wl_listener *listener, void *data)
+{
+  struct zn_desktop_shell *self =
+      zn_container_of(listener, self, xr_system_changed_listener);
+  struct zn_xr_system *xr_system = data;
+  struct zn_server *server = zn_server_get_singleton();
+
+  enum zn_desktop_shell_display_mode mode =
+      xr_system ? ZN_DESKTOP_SHELL_DISPLAY_MODE_IMMERSIVE
+                : ZN_DESKTOP_SHELL_DISPLAY_MODE_SCREEN;
+
+  if (self->mode == mode) {
+    return;
+  }
+
+  self->mode = mode;
+
+  if (self->mode == ZN_DESKTOP_SHELL_DISPLAY_MODE_SCREEN) {
+    zn_inode_unmap(server->inode_root);
+    zn_info("Switch to screen display mode");
+  } else {
+    zn_inode_map(server->inode_root);
+    zn_info("Switch to immersive display mode");
+  }
+}
+
+static void
+zn_desktop_shell_handle_new_xr_system(
+    struct wl_listener *listener UNUSED, void *data)
+{
+  struct zn_server *server = zn_server_get_singleton();
+
+  struct zn_xr_system *zn_xr_system = data;
+
+  zn_desktop_xr_system_create(zn_xr_system, server->display);
+}
 
 static void
 zn_desktop_shell_handle_new_screen(struct wl_listener *listener, void *data)
@@ -29,6 +74,20 @@ zn_desktop_shell_handle_new_screen(struct wl_listener *listener, void *data)
   struct zn_desktop_screen *desktop_screen = zn_desktop_screen_create(screen);
 
   zn_screen_layout_add(self->screen_layout, desktop_screen);
+
+  struct zn_server *server = zn_server_get_singleton();
+  struct zn_cursor *cursor = server->seat->cursor;
+
+  // FIXME(@Aki-7): when it's immersive display system, the cursor should not
+  // appear on the screen
+  if (cursor->snode->root == NULL) {
+    vec2 position;
+
+    glm_vec2_divs(desktop_screen->screen->size, 2.0F, position);
+
+    zn_snode_set_position(
+        cursor->snode, desktop_screen->cursor_layer, position);
+  }
 }
 
 static void
@@ -43,10 +102,31 @@ zn_desktop_shell_handle_view_mapped(struct wl_listener *listener, void *data)
   struct zn_desktop_screen *desktop_screen =
       zn_screen_layout_get_main_screen(self->screen_layout);
 
+  vec2 initial_position;
+  glm_vec2_sub(
+      desktop_screen->screen->size, view->zn_view->size, initial_position);
+  glm_vec2_scale(initial_position, 0.5F, initial_position);
+  if (initial_position[1] < 40) {
+    initial_position[1] = 40;
+  }
+
   if (desktop_screen) {
     zn_snode_set_position(
-        view->snode, desktop_screen->view_layer, (vec2){0, 0});
+        view->snode, desktop_screen->view_layer, initial_position);
   }
+
+  struct zn_server *server = zn_server_get_singleton();
+
+  zn_seat_set_focus(server->seat, view->snode);
+}
+
+static void
+zn_desktop_shell_handle_bounded_mapped(
+    struct wl_listener *listener UNUSED, void *data)
+{
+  struct zn_bounded *bounded = data;
+
+  zn_virtual_object_change_visibility(bounded->virtual_object, true);
 }
 
 static void
@@ -154,6 +234,8 @@ zn_desktop_shell_create(void)
 
   desktop_shell_singleton = self;
 
+  self->mode = ZN_DESKTOP_SHELL_DISPLAY_MODE_SCREEN;
+
   self->theme = zn_theme_create();
   if (self->theme == NULL) {
     zn_error("Failed to create theme");
@@ -173,6 +255,15 @@ zn_desktop_shell_create(void)
     goto err_screen_layout;
   }
   self->cursor_grab = &cursor_default_grab->base;
+
+  self->xr_system_changed_listener.notify =
+      zn_desktop_shell_handle_xr_system_changed;
+  wl_signal_add(&server->backend->events.xr_system_changed,
+      &self->xr_system_changed_listener);
+
+  self->new_xr_system_listener.notify = zn_desktop_shell_handle_new_xr_system;
+  wl_signal_add(
+      &server->backend->events.new_xr_system, &self->new_xr_system_listener);
 
   self->new_screen_listener.notify = zn_desktop_shell_handle_new_screen;
   wl_signal_add(
@@ -203,6 +294,10 @@ zn_desktop_shell_create(void)
   wl_signal_add(
       &server->backend->events.view_mapped, &self->view_mapped_listener);
 
+  self->bounded_mapped_listener.notify = zn_desktop_shell_handle_bounded_mapped;
+  wl_signal_add(
+      &server->backend->events.bounded_mapped, &self->bounded_mapped_listener);
+
   return self;
 
 err_screen_layout:
@@ -222,6 +317,7 @@ err:
 void
 zn_desktop_shell_destroy(struct zn_desktop_shell *self)
 {
+  wl_list_remove(&self->bounded_mapped_listener.link);
   wl_list_remove(&self->view_mapped_listener.link);
   wl_list_remove(&self->pointer_frame_listener.link);
   wl_list_remove(&self->pointer_axis_listener.link);
@@ -229,6 +325,8 @@ zn_desktop_shell_destroy(struct zn_desktop_shell *self)
   wl_list_remove(&self->pointer_motion_listener.link);
   wl_list_remove(&self->seat_capabilities_listener.link);
   wl_list_remove(&self->new_screen_listener.link);
+  wl_list_remove(&self->new_xr_system_listener.link);
+  wl_list_remove(&self->xr_system_changed_listener.link);
   zn_cursor_grab_destroy(self->cursor_grab);
   zn_screen_layout_destroy(self->screen_layout);
   zn_theme_destroy(self->theme);

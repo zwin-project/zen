@@ -1,7 +1,7 @@
 #pragma once
 
-#include <stddef.h>
-#include <stdlib.h>
+#include <stddef.h>  // NOLINT(modernize-deprecated-headers)
+#include <stdlib.h>  // NOLINT(modernize-deprecated-headers)
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,11 +28,19 @@ extern "C" {
 #endif
 #endif
 
+#ifndef CLANG_ANALYZER_NORETURN
+#if __has_feature(attribute_analyzer_noreturn)
+#define CLANG_ANALYZER_NORETURN __attribute__((analyzer_noreturn))
+#else
+#define CLANG_ANALYZER_NORETURN
+#endif
+#endif
+
 /** Allocate memory and set to zero */
 UNUSED static inline void *
 zalloc(size_t size)
 {
-  return calloc(1, size);
+  return calloc(1, size);  // NOLINT(cppcoreguidelines-*)
 }
 
 #define ZN_MAX(a, b) ((a) > (b) ? (a) : (b))
@@ -41,16 +49,6 @@ zalloc(size_t size)
 /** Retrieve a pointer to a containing struct */
 #define zn_container_of(ptr, sample, member) \
   (__typeof__(sample))((char *)(ptr)-offsetof(__typeof__(*(sample)), member))
-
-#ifdef __cplusplus
-
-#define DISABLE_MOVE_AND_COPY(Class)        \
-  Class(const Class &) = delete;            \
-  Class(Class &&) = delete;                 \
-  Class &operator=(const Class &) = delete; \
-  Class &operator=(Class &&) = delete
-
-#endif
 
 #ifdef __cplusplus
 }

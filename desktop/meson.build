@@ -20,6 +20,10 @@ _zen_desktop_srcs = [
   'src/ui/decoration/shadow.c',
 
   'src/view.c',
+  'src/xr-system.c',
+
+	protocols_code['zen-desktop'],
+	protocols_server_header['zen-desktop'],
 ]
 
 _zen_desktop_inc = include_directories('include')

@@ -5,6 +5,7 @@
 #include "cursor.h"
 #include "zen-common/log.h"
 #include "zen-common/util.h"
+#include "zen/screen.h"
 #include "zen/snode.h"
 
 #define DEFAULT_SEAT "seat0"
@@ -54,14 +55,16 @@ zn_seat_get_focused_screen(struct zn_seat *self)
 {
   struct zn_screen *focus_screen = NULL;
 
-  // TODO(@Aki-7): Respect keyboard focus
+  if (self->focus) {
+    focus_screen = zn_screen_from_snode_root(self->focus->root);
+  }
 
-  if (self->pointer_state.focus) {
-    focus_screen = self->pointer_state.focus->screen;
+  if (!focus_screen && self->pointer_state.focus) {
+    focus_screen = zn_screen_from_snode_root(self->pointer_state.focus->root);
   }
 
   if (!focus_screen) {
-    focus_screen = self->cursor->snode->screen;
+    focus_screen = zn_screen_from_snode_root(self->cursor->snode->root);
   }
 
   return focus_screen;

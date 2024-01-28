@@ -8,12 +8,20 @@ _zen_unit_tests_deps = [
 ]
 
 _zen_unit_tests = {
+  'binding.c': {
+    'env': {
+      'XDG_CONFIG_HOME': '@0@/testdata'.format(meson.current_source_dir()),
+    },
+  },
   'config/config-section.c': {
     'env': {
       'XDG_CONFIG_HOME': '@0@/testdata'.format(meson.current_source_dir()),
     },
   },
   'config/config-path.c': {},
+  'inode/inode-map.c': {},
+  'inode/inode-move.c': {},
+  'inode/inode-set-xr-system.c': {},
   'server/construct-destroy.c': {},
   'snode/snode-damage.c': {},
   'snode/snode-focus.c': {},

@@ -86,7 +86,7 @@ zn_view_create(void *impl_data, const struct zn_view_interface *implementation)
 
   self->impl_data = impl_data;
   self->impl = implementation;
-  self->decoration_mode = ZN_VIEW_DECORATION_MODE_SERVER_SIDE;
+  self->decoration_mode = ZN_VIEW_DECORATION_MODE_CLIENT_SIDE;
 
   wl_signal_init(&self->events.resized);
   wl_signal_init(&self->events.unmap);

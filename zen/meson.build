@@ -1,11 +1,25 @@
 _zen_srcs = [
+  'src/binding.c',
+  'src/buffer.c',
   'src/config.c',
   'src/cursor.c',
+  'src/gl-base-technique.c',
+  'src/gl-buffer.c',
+  'src/gl-program.c',
+  'src/gl-rendering-unit.c',
+  'src/gl-shader.c',
+  'src/gl-texture.c',
+  'src/gl-vertex-array.c',
+  'src/gl-virtual-object.c',
+  'src/inode.c',
   'src/screen.c',
   'src/seat.c',
   'src/server.c',
   'src/snode.c',
+  'src/snode-root.c',
   'src/view.c',
+  'src/virtual-object.c',
+  'src/xr-dispatcher.c',
 ]
 
 zen_inc = include_directories('include')

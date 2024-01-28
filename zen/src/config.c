@@ -2,7 +2,6 @@
 
 #include <pwd.h>
 #include <stdio.h>
-#include <string.h>
 #include <toml.h>
 #include <unistd.h>
 #include <wayland-util.h>
@@ -87,57 +86,22 @@ out:
 }
 
 bool
-zn_config_add_section(
-    struct zn_config *self, const char *name, struct zn_config_section *section)
+zn_config_reserve_section(struct zn_config *self, const char *section_name)
 {
-  struct zn_config_section_info *info = NULL;
-  wl_array_for_each (info, &self->sections) {
-    if (strcmp(info->name, name) == 0) {
-      zn_error("Config section %s is used by two or more modules", name);
+  const char **name = NULL;
+
+  wl_array_for_each (name, &self->reserved_sections) {
+    if (strcmp(*name, section_name) == 0) {
+      zn_warn(
+          "Section name '%s' has been reserved by another component", *name);
       return false;
     }
   }
 
-  toml_table_t *table = NULL;
-  if (self->root_table) {
-    table = toml_table_in(self->root_table, name);
-  }
-
-  if (!section->load(section, table)) {
-    zn_error("Failed to load '%s' config section", name);
-    return false;
-  }
-
-  char *name_copy = strdup(name);
-  if (name_copy == NULL) {
-    zn_error("Failed to strdup");
-    return false;
-  }
-
-  info = wl_array_add(&self->sections, sizeof(*info));
-  if (info == NULL) {
-    zn_error("Failed to allocate memory");
-    free(name_copy);
-    return false;
-  }
-
-  info->name = name_copy;
-  info->section = section;
+  name = wl_array_add(&self->reserved_sections, sizeof *name);
+  *name = section_name;
 
   return true;
-}
-
-struct zn_config_section *
-zn_config_get_section(struct zn_config *self, const char *name)
-{
-  struct zn_config_section_info *info = NULL;
-  wl_array_for_each (info, &self->sections) {
-    if (strcmp(info->name, name) == 0) {
-      return info->section;
-    }
-  }
-
-  return NULL;
 }
 
 struct zn_config *
@@ -150,7 +114,7 @@ zn_config_create(void)
   }
 
   self->root_table = get_config_toml_table();
-  wl_array_init(&self->sections);
+  wl_array_init(&self->reserved_sections);
 
   return self;
 
@@ -165,12 +129,6 @@ zn_config_destroy(struct zn_config *self)
     toml_free(self->root_table);
   }
 
-  struct zn_config_section_info *info = NULL;
-  wl_array_for_each (info, &self->sections) {
-    free(info->name);
-    info->section->destroy(info->section);
-  }
-
-  wl_array_release(&self->sections);
+  wl_array_release(&self->reserved_sections);
   free(self);
 }

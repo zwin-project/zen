@@ -30,7 +30,8 @@ zn_cursor_down_grab_handle_motion_relative(
 
   zn_cursor_grab_move_relative(delta);
 
-  if (focus == NULL || focus->screen == NULL || cursor->snode->screen == NULL) {
+  if (focus == NULL || zn_screen_from_snode_root(focus->root) == NULL ||
+      zn_screen_from_snode_root(cursor->snode->root) == NULL) {
     return;
   }
 
