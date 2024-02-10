@@ -94,7 +94,7 @@ openvr_req = '>= 1.12.5'
 wayland_protocols_req = '>= 1.24'
 wayland_req = '>= 1.18.0'
 wlroots_req = ['>= 0.15', '< 0.16']
-zen_remote_server_req = '0.1.1'
+zen_remote_server_req = '>= 0.1.1'
 zwin_protocols_req = '0.1.0'
 
 glew_proj = subproject(
