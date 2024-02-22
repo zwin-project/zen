@@ -240,6 +240,7 @@ zn_server_create(struct wl_display *display)
   setenv("WAYLAND_DISPLAY", self->socket, true);
   xdg = getenv("XDG_RUNTIME_DIR");
   zn_debug("WAYLAND_DISPLAY=%s", self->socket);
+  zn_debug("DISPLAY=%s", self->screen_compositor->xwayland->display_name);
   zn_debug("XDG_RUNTIME_DIR=%s", xdg);
 
   self->shell = zn_shell_create(self->display, self->scene);

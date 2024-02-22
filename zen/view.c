@@ -118,16 +118,19 @@ zn_view_handle_commit(struct wl_listener *listener, void *data)
   pixman_region32_fini(&damage);
 
   // FIXME: add damages of synced subsurfaces
-
   const uint32_t last_serial = self->impl->get_current_configure_serial(self);
 
-  if (self->maximize_status.changed_serial == last_serial) {
-    self->maximize_status.changed_serial = 0;
-    if (self->maximize_status.maximized) {
-      zn_view_move(self, self->board, 0, 0);
-    } else {
-      zn_view_move(self, self->board, self->maximize_status.reset_box.x,
-          self->maximize_status.reset_box.y);
+  if (self->maximize_status.maximize_status_changed) {
+    if (self->maximize_status.changed_serial == last_serial ||
+        last_serial == 0) {
+      self->maximize_status.maximize_status_changed = false;
+      self->maximize_status.changed_serial = 0;
+      if (self->maximize_status.maximized) {
+        zn_view_move(self, self->board, 0, 0);
+      } else {
+        zn_view_move(self, self->board, self->maximize_status.reset_box.x,
+            self->maximize_status.reset_box.y);
+      }
     }
   }
 
@@ -143,7 +146,7 @@ zn_view_handle_commit(struct wl_listener *listener, void *data)
     }
     zn_view_move(self, self->board, self->x + dx, self->y + dy);
 
-    if (self->resize_status.last_serial == last_serial) {
+    if (self->resize_status.last_serial == last_serial || last_serial == 0) {
       self->resize_status.resizing = false;
     }
   }
@@ -213,6 +216,10 @@ zn_view_bring_to_front(struct zn_view *self)
   wl_list_insert(self->board->view_list.prev, &self->board_link);
   zn_board_rearrange_view(self->board);
 
+  if (self->impl->restack) {
+    self->impl->restack(self, XCB_STACK_MODE_ABOVE);
+  }
+
   zn_view_damage_whole(self);
 }
 
@@ -238,6 +245,10 @@ zn_view_move(struct zn_view *self, struct zn_board *board, double x, double y)
   self->x = x;
   self->y = y;
 
+  if (self->impl->set_position) {
+    self->impl->set_position(self, x, y);
+  }
+
   self->board = board;
 
   zn_view_damage_whole(self);
@@ -249,7 +260,9 @@ void
 zn_view_set_maximized(struct zn_view *self, bool maximized)
 {
   if (!self->board || self->maximize_status.maximized == maximized) {
-    self->impl->schedule_configure(self);
+    if (self->impl->schedule_configure) {
+      self->impl->schedule_configure(self);
+    }
     return;
   }
 
@@ -266,6 +279,7 @@ zn_view_set_maximized(struct zn_view *self, bool maximized)
   self->maximize_status.changed_serial =
       self->impl->set_size(self, width, height);
   self->maximize_status.maximized = maximized;
+  self->maximize_status.maximize_status_changed = true;
 }
 
 struct zn_view *

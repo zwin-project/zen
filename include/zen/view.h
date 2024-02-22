@@ -2,6 +2,7 @@
 
 #include <cglm/types.h>
 #include <wlr/types/wlr_surface.h>
+#include <xcb/xproto.h>
 
 #include "zen/appearance/view.h"
 
@@ -17,8 +18,11 @@ struct zn_view_interface {
   uint32_t (*get_current_configure_serial)(struct zn_view *view);
   uint32_t (*set_size)(struct zn_view *view, double width, double height);
   uint32_t (*set_maximized)(struct zn_view *view, bool maximized);
+  void (*set_position)(struct zn_view *view, double x, double y);  // nulable
   void (*set_activated)(struct zn_view *view, bool activated);
-  uint32_t (*schedule_configure)(struct zn_view *view);
+  void (*restack)(
+      struct zn_view *view, enum xcb_stack_mode_t mode);  // nullable
+  uint32_t (*schedule_configure)(struct zn_view *view);   // nullable
   void (*close_popups)(struct zn_view *view);
   void (*for_each_popup_surface)(struct zn_view *view,
       wlr_surface_iterator_func_t iterator, void *user_data);
@@ -46,6 +50,7 @@ struct zn_view {
 
   struct {
     bool maximized;
+    bool maximize_status_changed;
     uint32_t changed_serial;
     struct wlr_fbox reset_box;
   } maximize_status;
