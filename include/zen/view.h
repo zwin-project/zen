@@ -28,6 +28,7 @@ struct zn_view_interface {
 struct zn_view {
   void *user_data;
   struct wlr_surface *surface;  // nonnull
+  bool surface_on_partial_updates;
 
   const struct zn_view_interface *impl;
 
@@ -86,6 +87,8 @@ void zn_view_move(
     struct zn_view *self, struct zn_board *board, double x, double y);
 
 void zn_view_set_maximized(struct zn_view *self, bool maximized);
+
+void zn_view_reset_partial_updates(struct zn_view *self);
 
 /** lifetime of given wlr_surface must be longer than zn_view */
 struct zn_view *zn_view_create(struct wlr_surface *surface,

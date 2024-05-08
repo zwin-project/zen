@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <endian.h>
 #include <stdio.h>
+#include <pixman.h>
 #include <zen-common.h>
 #include <zwnr/gl-sampler.h>
 
@@ -79,7 +80,8 @@ zna_base_unit_read_cairo_surface(
 
 void
 zna_base_unit_read_wlr_texture(
-    struct zna_base_unit *self, struct wlr_texture *texture)
+    struct zna_base_unit *self, struct wlr_texture *texture,
+    pixman_region32_t* damage, bool *on_partial_updates)
 {
   struct zn_server *server = zn_server_get_singleton();
   struct zwnr_mem_storage *storage;
@@ -89,9 +91,6 @@ zna_base_unit_read_wlr_texture(
   if (!zn_assert(wlr_texture_is_glew(texture), "glew renderer is required")) {
     return;
   }
-
-  storage =
-      zwnr_mem_storage_create(NULL, 32 * texture->width * texture->height);
 
   struct wlr_glew_texture_attribs texture_attrib;
   wlr_glew_texture_get_attribs(texture, &texture_attrib);
@@ -122,25 +121,72 @@ zna_base_unit_read_wlr_texture(
   glFramebufferTexture2D(
       GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depth_texture, 0);
 
-  glReadPixels(0, 0, texture->width, texture->height, GL_RGBA, GL_UNSIGNED_BYTE,
-      storage->data);
-
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  glDeleteTextures(1, &depth_texture);
-  glDeleteFramebuffers(1, &framebuffer);
-
-  zn_wlr_egl_unset_current(egl);
-
   if (self->has_texture_data == false) {
     self->has_texture_data = true;
     znr_gl_base_technique_bind_texture(
         self->technique, 0, "", self->texture0, GL_TEXTURE_2D, self->sampler0);
   }
 
-  znr_gl_texture_image_2d(self->texture0, GL_TEXTURE_2D, 0, GL_RGBA,
-      texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, storage);
+  bool need_to_full_load_texture = true;
 
-  zwnr_mem_storage_unref(storage);
+  if (damage != NULL) {
+    if (on_partial_updates != NULL) {
+      if (*on_partial_updates == true)
+      {
+        need_to_full_load_texture = false;
+      }
+    }
+  }
+
+  if (need_to_full_load_texture) {
+    storage =
+      zwnr_mem_storage_create(NULL, 32 * texture->width * texture->height);
+
+    glReadPixels(0, 0, texture->width, texture->height, GL_RGBA, GL_UNSIGNED_BYTE,
+        storage->data);
+
+    znr_gl_texture_image_2d(self->texture0, GL_TEXTURE_2D, 0, GL_RGBA,
+    texture->width, texture->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, storage);
+
+    
+    if (on_partial_updates != NULL) {
+      *on_partial_updates = true;
+    }
+
+    zwnr_mem_storage_unref(storage);
+  } else {
+    struct wlr_fbox damage_box;
+    pixman_box32_t *rects;
+    int rect_count;
+    rects = pixman_region32_rectangles(damage, &rect_count);
+
+    for (int i = 0; i < rect_count; ++i) {
+        damage_box.x = rects[i].x1;
+        damage_box.y = rects[i].y1;
+        damage_box.width = rects[i].x2 - rects[i].x1;
+        damage_box.height = rects[i].y2 - rects[i].y1;
+
+      storage =
+          zwnr_mem_storage_create(NULL, 32 * damage_box.width * damage_box.height);
+
+      glReadPixels(damage_box.x, damage_box.y, damage_box.width, damage_box.height,
+          GL_RGBA, GL_UNSIGNED_BYTE,
+          storage->data);
+
+      znr_gl_texture_sub_image_2d(self->texture0, GL_TEXTURE_2D, 0, damage_box.x,
+          damage_box.y, damage_box.width, damage_box.height, GL_RGBA,
+          GL_UNSIGNED_BYTE, storage);
+
+      zwnr_mem_storage_unref(storage);
+    }
+
+  }
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glDeleteTextures(1, &depth_texture);
+  glDeleteFramebuffers(1, &framebuffer);
+
+  zn_wlr_egl_unset_current(egl);
 }
 
 void

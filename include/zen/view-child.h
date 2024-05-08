@@ -14,6 +14,7 @@ struct zn_view_child_interface {
 struct zn_view_child {
   void *user_data;
   struct wlr_surface *surface;  // nonnull
+  bool surface_on_partial_updates;
 
   const struct zn_view_child_interface *impl;
 

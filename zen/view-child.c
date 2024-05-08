@@ -134,6 +134,7 @@ zn_view_child_create(struct wlr_surface *surface, struct zn_view *view,
 
   self->user_data = user_data;
   self->surface = surface;
+  self->surface_on_partial_updates = false;
   self->impl = impl;
   self->view = view;
 

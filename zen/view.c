@@ -268,6 +268,10 @@ zn_view_set_maximized(struct zn_view *self, bool maximized)
   self->maximize_status.maximized = maximized;
 }
 
+void zn_view_reset_partial_updates(struct zn_view *self){
+  self->surface_on_partial_updates = false;
+}
+
 struct zn_view *
 zn_view_create(struct wlr_surface *surface,
     const struct zn_view_interface *impl, void *user_data)
@@ -282,6 +286,7 @@ zn_view_create(struct wlr_surface *surface,
   }
 
   self->surface = surface;
+  self->surface_on_partial_updates = false;
   self->impl = impl;
   self->user_data = user_data;
 

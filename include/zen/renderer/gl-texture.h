@@ -15,6 +15,10 @@ void znr_gl_texture_image_2d(struct znr_gl_texture *self, uint32_t target,
     int32_t border, uint32_t format, uint32_t type,
     struct zwnr_mem_storage *storage);
 
+void znr_gl_texture_sub_image_2d(struct znr_gl_texture *self, uint32_t target,
+    int32_t level, int32_t xoffset, int32_t yoffset, uint32_t width, uint32_t height,
+    uint32_t format, uint32_t type, struct zwnr_mem_storage *storage);
+
 void znr_gl_texture_generate_mipmap(
     struct znr_gl_texture *self, uint32_t target);
 
