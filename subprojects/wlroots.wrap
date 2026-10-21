@@ -1,0 +1,9 @@
+[wrap-file]
+directory = wlroots-0.15.1
+source_url = https://gitlab.freedesktop.org/wlroots/wlroots/-/releases/0.15.1/downloads/wlroots-0.15.1.tar.gz
+source_filename = wlroots-0.15.1.tar.gz
+source_hash = 5b92f11a52d978919ed1306e0d54c9d59f1762b28d44f0a2da3ef3b351305373
+wrapdb_version = 0.15.1-1
+
+[provide]
+dependency_names = wlroots

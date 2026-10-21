@@ -7,5 +7,5 @@
 build/
 
 subprojects/*
-!subprojects/glew.wrap
+!subprojects/*.wrap
 !subprojects/packagefiles
