@@ -26,6 +26,7 @@ gl_2d_image_size(GLenum format, GLenum type, GLsizei width, GLsizei height)
     case GL_UNSIGNED_SHORT_4_4_4_4:
     case GL_UNSIGNED_SHORT_5_5_5_1:
       take_format_into_account = false;
+      // fallthrough
     case GL_UNSIGNED_SHORT:
     case GL_SHORT:
     case GL_HALF_FLOAT:
@@ -37,6 +38,7 @@ gl_2d_image_size(GLenum format, GLenum type, GLsizei width, GLsizei height)
     case GL_UNSIGNED_INT_5_9_9_9_REV:
     case GL_UNSIGNED_INT_24_8:
       take_format_into_account = false;
+      // fallthrough
     case GL_UNSIGNED_INT:
     case GL_INT:
     case GL_FLOAT:

@@ -38,7 +38,7 @@ zn_vr_menu_item_headset_render(struct zigzag_node *node, cairo_t *cr)
   cairo_set_source_surface(cr, self->vr_icon_surface, icon_x, icon_y);
   cairo_paint(cr);
 
-  char hmd_name[8];
+  char hmd_name[32];
   sprintf(hmd_name, "HMD %d", self->idx + 1);
 
   cairo_set_source_rgba(cr, 0., 0., 0., 0.5);

@@ -132,8 +132,8 @@ zns_bounded_node_ray_axis(void *user_data, uint32_t time_msec,
 {
   UNUSED(user_data);
   struct zn_server *server = zn_server_get_singleton();
-  enum zwn_ray_axis axis;
-  enum zwn_ray_axis_source zwn_axis_source;
+  enum zwn_ray_axis axis = ZWN_RAY_AXIS_VERTICAL_SCROLL;
+  enum zwn_ray_axis_source zwn_axis_source = ZWN_RAY_AXIS_SOURCE_WHEEL;
 
   switch (orientation) {
     case WLR_AXIS_ORIENTATION_VERTICAL:

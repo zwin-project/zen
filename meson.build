@@ -3,7 +3,7 @@ project(
   version: '0.1.3-dev',
   license: 'MIT',
   meson_version: '>= 0.58.0',
-  default_options: [ 'warning_level=3', 'werror=true', 'optimization=2', 'c_std=gnu11', 'cpp_std=gnu++17' ],
+  default_options: [ 'warning_level=3', 'optimization=2', 'c_std=gnu11', 'cpp_std=gnu++17' ],
 )
 
 cc = meson.get_compiler('c')

@@ -52,8 +52,8 @@ zwnr_intersection_ray_parallelogram(vec3 origin, vec3 direction, vec3 v0,
     vec3 v1, vec3 v2, float *u, float *v, bool test_cull)
 {
   static const float epsilon = 0.000001;
-  vec3 edge1, edge2, tvec, pvec, qvec;
-  float det, inv_det, t;
+  vec3 edge1 = {0}, edge2 = {0}, tvec = {0}, pvec = {0}, qvec = {0};
+  float det = 0.F, inv_det = 0.F, t = 0.F;
 
   glm_vec3_sub(v1, v0, edge1);
   glm_vec3_sub(v2, v0, edge2);
