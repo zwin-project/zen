@@ -1,4 +1,4 @@
 #pragma once
-#include <toml.h>
+#include <tomlc17.h>
 
-struct toml_table_t *zn_config_get_toml_table(void);
+toml_result_t zn_config_get_toml_result(void);

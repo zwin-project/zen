@@ -148,9 +148,10 @@ zn_server_create(struct wl_display *display)
 
   server_singleton = self;
 
-  struct toml_table_t *config_table = zn_config_get_toml_table();
-  self->config = zn_config_create(config_table);
-  if (config_table != NULL) toml_free(config_table);
+  toml_result_t config_result = zn_config_get_toml_result();
+  self->config =
+      zn_config_create(config_result.ok ? &config_result.toptab : NULL);
+  toml_free(config_result);
   if (self->config == NULL) {
     zn_error("Failed to create a config object");
     goto err_free;

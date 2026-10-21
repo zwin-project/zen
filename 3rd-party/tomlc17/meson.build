@@ -1,10 +1,11 @@
 _toml_inc = include_directories('include')
 
 _toml_lib = static_library(
-  'tomlc99',
-  'toml.c',
+  'tomlc17',
+  'tomlc17.c',
   install: false,
   include_directories: _toml_inc,
+  override_options: [ 'c_std=c17' ],
 )
 
 toml_dep = declare_dependency(

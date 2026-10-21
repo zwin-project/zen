@@ -1,7 +1,7 @@
 #include "zen/config/config.h"
 
 #include <string.h>
-#include <toml.h>
+#include <tomlc17.h>
 
 #include "zen-common/log.h"
 #include "zen-common/util.h"
@@ -22,7 +22,7 @@ zn_config_set_default(struct zn_config *self)
 }
 
 struct zn_config *
-zn_config_create(struct toml_table_t *config_table)
+zn_config_create(const toml_datum_t *config_table)
 {
   struct zn_config *self;
 
@@ -33,24 +33,28 @@ zn_config_create(struct toml_table_t *config_table)
   }
 
   zn_config_set_default(self);
+  wl_array_init(&self->favorite_apps);
 
   if (!config_table) {
     zn_warn("Config is empty, use the default values.");
     return self;
   }
 
-  toml_table_t *bg = toml_table_in(config_table, "wallpaper");
-  if (bg != NULL) {
-    toml_datum_t filepath = toml_string_in(bg, "filepath");
-    free(self->wallpaper_filepath);
-    self->wallpaper_filepath = filepath.u.s;
+  // Strings in toml_datum_t are owned by toml_result_t
+  toml_datum_t bg = toml_get(*config_table, "wallpaper");
+  if (bg.type == TOML_TABLE) {
+    toml_datum_t filepath = toml_get(bg, "filepath");
+    if (filepath.type == TOML_STRING) {
+      free(self->wallpaper_filepath);
+      self->wallpaper_filepath = strdup(filepath.u.s);
+    }
   }
 
-  toml_table_t *board = toml_table_in(config_table, "board");
-  if (board != NULL) {
-    toml_datum_t initial_count = toml_int_in(board, "initial_count");
-    if (initial_count.ok) {
-      self->board_initial_count = initial_count.u.i;
+  toml_datum_t board = toml_get(*config_table, "board");
+  if (board.type == TOML_TABLE) {
+    toml_datum_t initial_count = toml_get(board, "initial_count");
+    if (initial_count.type == TOML_INT64) {
+      self->board_initial_count = initial_count.u.int64;
       if (self->board_initial_count > BOARD_INITIAL_COUNT_MAX) {
         zn_warn(
             "The number of initial boards is limited to no more than %d, "
@@ -61,24 +65,27 @@ zn_config_create(struct toml_table_t *config_table)
     }
   }
 
-  toml_table_t *space = toml_table_in(config_table, "space");
-  if (space != NULL) {
-    toml_datum_t default_app = toml_string_in(space, "default_app");
-    if (default_app.ok && strlen(default_app.u.s) != 0) {
+  toml_datum_t space = toml_get(*config_table, "space");
+  if (space.type == TOML_TABLE) {
+    toml_datum_t default_app = toml_get(space, "default_app");
+    if (default_app.type == TOML_STRING && strlen(default_app.u.s) != 0) {
+      free(self->space_default_app);
       self->space_default_app = strdup(default_app.u.s);
     }
   }
 
-  wl_array_init(&self->favorite_apps);
-  toml_array_t *favorite_app_entries =
-      toml_array_in(config_table, "favorite_apps");
-  if (favorite_app_entries != NULL) {
-    int entry_count = toml_array_nelem(favorite_app_entries);
+  toml_datum_t favorite_app_entries = toml_get(*config_table, "favorite_apps");
+  if (favorite_app_entries.type == TOML_ARRAY) {
+    int entry_count = favorite_app_entries.u.arr.size;
     for (int i = 0; i < entry_count; i++) {
-      toml_table_t *favorite_app_entry = toml_table_at(favorite_app_entries, i);
+      toml_datum_t favorite_app_entry = favorite_app_entries.u.arr.elem[i];
+      if (favorite_app_entry.type != TOML_TABLE) {
+        zn_warn("Each 'favorite_apps' entry must be a table. Skipping");
+        continue;
+      }
 
-      toml_datum_t exec = toml_string_in(favorite_app_entry, "exec");
-      if (!exec.ok) {
+      toml_datum_t exec = toml_get(favorite_app_entry, "exec");
+      if (exec.type != TOML_STRING) {
         zn_warn(
             "Required config key not specified: 'favorite_apps:exec'. "
             "Skipping");
@@ -88,32 +95,32 @@ zn_config_create(struct toml_table_t *config_table)
       struct zn_favorite_app *favorite_app =
           wl_array_add(&self->favorite_apps, sizeof(*favorite_app));
 
-      favorite_app->exec = exec.u.s;
+      favorite_app->exec = strdup(exec.u.s);
 
-      toml_datum_t name = toml_string_in(favorite_app_entry, "name");
-      if (name.ok) {
-        favorite_app->name = name.u.s;
+      toml_datum_t name = toml_get(favorite_app_entry, "name");
+      if (name.type == TOML_STRING) {
+        favorite_app->name = strdup(name.u.s);
       } else {
         favorite_app->name = strdup("");
       }
 
-      toml_datum_t icon = toml_string_in(favorite_app_entry, "icon");
-      if (icon.ok) {
-        favorite_app->icon = icon.u.s;
+      toml_datum_t icon = toml_get(favorite_app_entry, "icon");
+      if (icon.type == TOML_STRING) {
+        favorite_app->icon = strdup(icon.u.s);
       } else {
         favorite_app->icon = strdup(UNKNOWN_APP_ICON);
       }
 
-      toml_datum_t disable_2d = toml_bool_in(favorite_app_entry, "disable_2d");
-      if (disable_2d.ok) {
-        favorite_app->disable_2d = disable_2d.u.b;
+      toml_datum_t disable_2d = toml_get(favorite_app_entry, "disable_2d");
+      if (disable_2d.type == TOML_BOOLEAN) {
+        favorite_app->disable_2d = disable_2d.u.boolean;
       } else {
         favorite_app->disable_2d = false;
       }
 
-      toml_datum_t disable_3d = toml_bool_in(favorite_app_entry, "disable_3d");
-      if (disable_3d.ok) {
-        favorite_app->disable_3d = disable_3d.u.b;
+      toml_datum_t disable_3d = toml_get(favorite_app_entry, "disable_3d");
+      if (disable_3d.type == TOML_BOOLEAN) {
+        favorite_app->disable_3d = disable_3d.u.boolean;
       } else {
         favorite_app->disable_3d = false;
       }

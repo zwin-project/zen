@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <toml.h>
+#include <tomlc17.h>
 #include <unistd.h>
 #include <zen-common.h>
 
@@ -33,27 +33,28 @@ get_config_filepath(void)
   return config_home;
 }
 
-struct toml_table_t *
-zn_config_get_toml_table(void)
+toml_result_t
+zn_config_get_toml_result(void)
 {
+  toml_result_t result = {0};
+
   char *config_filepath = get_config_filepath();
   if (config_filepath == NULL) {
     zn_warn("Could not find the home directory");
-    return NULL;
+    return result;
   }
 
   FILE *fp = fopen(config_filepath, "r");
   if (fp == NULL) {
     zn_warn("Failed to open %s\n", config_filepath);
     free(config_filepath);
-    return NULL;
+    return result;
   }
   free(config_filepath);
 
-  char errbuf[200];
-  toml_table_t *tbl = toml_parse_file(fp, errbuf, sizeof(errbuf));
+  result = toml_parse_file(fp);
   fclose(fp);
 
-  if (tbl == NULL) zn_warn("Failed to parse config.toml: %s\n", errbuf);
-  return tbl;
+  if (!result.ok) zn_warn("Failed to parse config.toml: %s\n", result.errmsg);
+  return result;
 }

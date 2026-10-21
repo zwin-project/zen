@@ -1,6 +1,6 @@
 #pragma once
 
-#include <toml.h>
+#include <tomlc17.h>
 #include <wayland-server-core.h>
 
 #include "zen/favorite-app.h"
@@ -12,6 +12,6 @@ struct zn_config {
   struct wl_array favorite_apps;
 };
 
-struct zn_config *zn_config_create(struct toml_table_t *config_table);
+struct zn_config *zn_config_create(const toml_datum_t *config_table);
 
 void zn_config_destroy(struct zn_config *self);

@@ -100,7 +100,7 @@ zwin_protocols_req = '0.1.0'
 glew_proj = subproject(
   'glew',
   required: true,
-  version: '2.2.0',
+  version: '2.3.1',
 )
 
 # dependencies
