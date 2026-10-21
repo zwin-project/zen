@@ -93,7 +93,6 @@ cglm_req = '>= 0.8.5'
 openvr_req = '>= 1.12.5'
 wayland_protocols_req = '>= 1.24'
 wayland_req = '>= 1.18.0'
-wlroots_req = ['>= 0.15', '< 0.16']
 zen_remote_server_req = '>= 0.1.1'
 zwin_protocols_req = '0.1.0'
 
@@ -101,10 +100,17 @@ glew_proj = subproject(
   'glew',
   required: true,
   version: '2.3.1',
+  default_options: ['default_library=static']
+)
+wlroots_proj = subproject(
+  'wlroots',
+  required: true,
+  version: '0.15.1',
+  default_options: ['examples=false', 'default_library=static', 'werror=false']
 )
 
 # dependencies
-
+# This project uses old versions of GLEW and wlroots so they should be statically linked
 cairo_dep = dependency('cairo')
 cglm_dep = dependency('cglm')
 drm_dep = dependency('libdrm')
@@ -118,7 +124,7 @@ pixman_dep = dependency('pixman-1')
 wayland_protocols_dep = dependency('wayland-protocols', version: wayland_protocols_req)
 wayland_scanner_dep = dependency('wayland-scanner')
 wayland_server_dep = dependency('wayland-server', version: wayland_req)
-wlroots_dep = dependency('wlroots', version: wlroots_req, default_options: ['examples=false'])
+wlroots_dep = wlroots_proj.get_variable('wlroots')
 xkbcommon_dep = dependency('xkbcommon')
 zen_remote_server_dep = dependency('zen-remote-server', version: zen_remote_server_req)
 zwin_protocols_dep = dependency('zwin-protocols', version: zwin_protocols_req)
