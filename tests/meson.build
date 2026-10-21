@@ -24,10 +24,10 @@ foreach key, args : _tests
   test(test_name, bin, env: test_env)
 endforeach
 
-_posix_shell_scripts = [
-  textify,
-]
+_posix_shell_scripts = {
+  'tools/textify.sh': textify,
+}
 
-foreach shell : _posix_shell_scripts
-  test('shellcheck @0@'.format(shell.full_path()), _shell_check, args: shell)
+foreach name, shell : _posix_shell_scripts
+  test('shellcheck @0@'.format(name), _shell_check, args: shell)
 endforeach
