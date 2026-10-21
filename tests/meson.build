@@ -29,5 +29,5 @@ _posix_shell_scripts = [
 ]
 
 foreach shell : _posix_shell_scripts
-  test('shellcheck @0@'.format(shell), _shell_check, args: shell)
+  test('shellcheck @0@'.format(shell.full_path()), _shell_check, args: shell)
 endforeach
