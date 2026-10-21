@@ -104,7 +104,7 @@ struct toml_datum_t {
  * These record how a datum appeared in the source document. They are set
  * by the parser and are informational for API users.
  */
-#define TOML_FLAG_INLINED                                                      \
+#define TOML_FLAG_INLINED \
   1 /**< appeared in inline form, e.g. {x = 1} or [1, 2] */
 #define TOML_FLAG_STDEXPR 2  /**< table created by a [table] header */
 #define TOML_FLAG_EXPLICIT 4 /**< table explicitly defined */
@@ -140,8 +140,8 @@ TOML_EXTERN toml_result_t toml_parse(const char *src, int len);
  *             Every parsed datum's `source` is set to this name (or NULL).
  * @return A toml_result_t structure. Must be freed with toml_free().
  */
-TOML_EXTERN toml_result_t toml_parse_named(const char *src, int len,
-                                           const char *name);
+TOML_EXTERN toml_result_t toml_parse_named(
+    const char *src, int len, const char *name);
 
 /**
  * @brief Parse a TOML document from a file pointer.
@@ -199,16 +199,17 @@ TOML_EXTERN toml_datum_t toml_get(toml_datum_t table, const char *key);
  * allowed. Maximum length is 255 bytes.
  * @return The value found, or a datum with type TOML_UNKNOWN if not found.
  */
-TOML_EXTERN toml_datum_t toml_seek(toml_datum_t table,
-                                   const char *multipart_key);
+TOML_EXTERN toml_datum_t toml_seek(
+    toml_datum_t table, const char *multipart_key);
 
 /**
  * @brief OBSOLETE: use toml_get() instead.
  * Find a key in a toml_table. Return the value of the key if found,
  * or a TOML_UNKNOWN otherwise.
  */
-static inline toml_datum_t toml_table_find(toml_datum_t table,
-                                           const char *key) {
+static inline toml_datum_t
+toml_table_find(toml_datum_t table, const char *key)
+{
   return toml_get(table, key);
 }
 
@@ -235,8 +236,8 @@ static inline toml_datum_t toml_table_find(toml_datum_t table,
  *     else:
  *         override
  */
-TOML_EXTERN toml_result_t toml_merge(const toml_result_t *r1,
-                                     const toml_result_t *r2);
+TOML_EXTERN toml_result_t toml_merge(
+    const toml_result_t *r1, const toml_result_t *r2);
 
 /**
  * @brief Compare two TOML results for equality.
@@ -257,9 +258,9 @@ typedef struct toml_option_t toml_option_t;
 struct toml_option_t {
   bool check_utf8; /**< If true, check if all characters are valid UTF-8.
                       Default: false. */
-  void *(*mem_realloc)(void *ptr,
-                       size_t size); /**< Custom realloc function (called with
-                                        size > 0). Default: realloc(). */
+  void *(*mem_realloc)(
+      void *ptr, size_t size); /**< Custom realloc function (called with
+                                  size > 0). Default: realloc(). */
   void (*mem_free)(void *ptr); /**< Custom free function. Default: free(). */
 };
 
@@ -282,4 +283,4 @@ TOML_EXTERN toml_option_t toml_default_option(void);
  */
 TOML_EXTERN void toml_set_option(toml_option_t opt);
 
-#endif // TOMLC17_H
+#endif  // TOMLC17_H

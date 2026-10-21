@@ -2,9 +2,11 @@
 
 #include <cglm/types.h>
 
-#define ZN_COLOR_VEC3_INIT(r, g, b)  \
-  {                                  \
-    r / 256.f, g / 256.f, b / 256.f, \
+#define ZN_COLOR_VEC3_INIT(r, g, b) \
+  {                                 \
+      r / 256.f,                    \
+      g / 256.f,                    \
+      b / 256.f,                    \
   }
 
 #define ZN_COLOR_VEC3(r, g, b) (vec3) ZN_COLOR_VEC3_INIT(r, g, b)

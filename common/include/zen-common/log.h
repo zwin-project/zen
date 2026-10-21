@@ -56,9 +56,9 @@ bool _zn_assert(bool condition, const char *format, ...) ATTRIB_PRINTF(2, 3);
 #define zn_abort(fmt, ...) \
   _zn_abort("[zen] [%s:%d] " fmt, __FILE__, __LINE__, ##__VA_ARGS__)
 
-#define zn_assert(cond, fmt, ...)                                          \
-  _zn_assert(cond, "[zen] [%s:%d] %s: " fmt, __FILE__, __LINE__, __func__, \
-      ##__VA_ARGS__)
+#define zn_assert(cond, fmt, ...)                                \
+  _zn_assert(cond, "[zen] [%s:%d] %s: " fmt, __FILE__, __LINE__, \
+      __func__, ##__VA_ARGS__)
 
 #ifdef __cplusplus
 }

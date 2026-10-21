@@ -16,10 +16,14 @@
 #include "zen/wlr/render/egl.h"
 
 static const GLfloat verts[] = {
-    1, 0,  // top right
-    0, 0,  // top left
-    1, 1,  // bottom right
-    0, 1,  // bottom left
+    1,
+    0,  // top right
+    0,
+    0,  // top left
+    1,
+    1,  // bottom right
+    0,
+    1,  // bottom left
 };
 
 static const struct wlr_renderer_impl renderer_impl;
@@ -258,9 +262,15 @@ glew_scissor(struct wlr_renderer *wlr_renderer, struct wlr_box *box)
 }
 
 static const float flip_180[9] = {
-    1.0f, 0.0f, 0.0f,   //
-    0.0f, -1.0f, 0.0f,  //
-    0.0f, 0.0f, 1.0f,   //
+    1.0f,
+    0.0f,
+    0.0f,  //
+    0.0f,
+    -1.0f,
+    0.0f,  //
+    0.0f,
+    0.0f,
+    1.0f,  //
 };
 
 static bool
@@ -329,10 +339,14 @@ glew_render_subtexture_with_matrix(struct wlr_renderer *wlr_renderer,
   const GLfloat x2 = (box->x + box->width) / wlr_texture->width;
   const GLfloat y2 = (box->y + box->height) / wlr_texture->height;
   const GLfloat texcoord[] = {
-      x2, y1,  // top right
-      x1, y1,  // top left
-      x2, y2,  // bottom right
-      x1, y2,  // bottom left
+      x2,
+      y1,  // top right
+      x1,
+      y1,  // top left
+      x2,
+      y2,  // bottom right
+      x1,
+      y2,  // bottom left
   };
 
   glVertexAttribPointer(shader->pos_attrib, 2, GL_FLOAT, GL_FALSE, 0, verts);

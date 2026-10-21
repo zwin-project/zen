@@ -151,7 +151,7 @@ zn_font_init(void)
   }
 
   for (enum zn_font_type font_type = 0; font_type < ZN_FONT_TYPE_COUNT;
-       font_type++) {
+      font_type++) {
     if (!zn_font_init_font_face(self, font_type, font_list[font_type])) {
       zn_error("Failed to init font face");
       goto err_library;
@@ -164,7 +164,7 @@ zn_font_init(void)
 
 err_library:
   for (enum zn_font_type font_type = 0; font_type < ZN_FONT_TYPE_COUNT;
-       font_type++) {
+      font_type++) {
     if (self->font_faces[font_type].cairo_font_face != NULL) {
       zn_font_fini_font_face(self, font_type);
     }

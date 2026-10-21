@@ -6,7 +6,7 @@
 class Loop : public zen::remote::ILoop
 {
  public:
-  Loop(wl_event_loop *wl_loop) : wl_loop_(wl_loop){};
+  Loop(wl_event_loop *wl_loop) : wl_loop_(wl_loop) {};
 
   void AddFd(zen::remote::FdSource *source) override;
 
